@@ -25,7 +25,7 @@ func Register(postings []posting.Posting) []Balance {
 	balances := make([]Balance, 0)
 	current := Balance{Quantity: decimal.Zero}
 	for _, p := range postings {
-		sameDay := p.Date == current.Date
+		sameDay := p.Date.Equal(current.Date)
 		current = Balance{Date: p.Date, Quantity: p.Quantity.Add(current.Quantity), Commodity: p.Commodity}
 		if sameDay {
 			balances = balances[:len(balances)-1]

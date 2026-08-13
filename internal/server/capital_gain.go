@@ -59,7 +59,7 @@ func computeCapitalGains(db *gorm.DB, account string, commodity config.Commodity
 			postingPairs := make([]PostingPair, 0)
 			for quantity.GreaterThan(decimal.Zero) && len(available) > 0 {
 				first := available[0]
-				q := decimal.Zero
+				var q decimal.Decimal
 
 				if first.Quantity.GreaterThan(quantity) {
 					first.AddQuantity(quantity.Neg())

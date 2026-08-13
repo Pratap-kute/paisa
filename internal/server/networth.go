@@ -46,9 +46,9 @@ func computeNetworth(db *gorm.DB, postings []posting.Posting) Networth {
 		return networth
 	}
 
-	var investment decimal.Decimal = decimal.Zero
-	var withdrawal decimal.Decimal = decimal.Zero
-	var balance decimal.Decimal = decimal.Zero
+	investment := decimal.Zero
+	withdrawal := decimal.Zero
+	balance := decimal.Zero
 
 	now := utils.EndOfToday()
 	for _, p := range postings {
@@ -132,10 +132,10 @@ func computeNetworthTimeline(db *gorm.DB, postings []posting.Posting, computeBal
 
 		}
 
-		var investment decimal.Decimal = decimal.Zero
-		var withdrawal decimal.Decimal = decimal.Zero
-		var balance decimal.Decimal = decimal.Zero
-		var balanceUnits decimal.Decimal = decimal.Zero
+		investment := decimal.Zero
+		withdrawal := decimal.Zero
+		balance := decimal.Zero
+		balanceUnits := decimal.Zero
 
 		for commodity, rs := range accumulator {
 			investment = investment.Add(rs.investment)

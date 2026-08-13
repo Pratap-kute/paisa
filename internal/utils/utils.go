@@ -33,7 +33,7 @@ func BTreeDescendFirstLessOrEqual[I btree.Item](tree *btree.BTree, item I) I {
 }
 
 func BTreeToSlice[I btree.Item](tree *btree.BTree) []I {
-	var items []I = make([]I, 0)
+	items := make([]I, 0)
 	tree.Descend(func(item btree.Item) bool {
 		items = append(items, item.(I))
 		return true
@@ -257,10 +257,7 @@ func SortedKeys[K constraints.Ordered, V any](m map[K]V) []K {
 
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func UnQuote(str string) string {
@@ -307,7 +304,7 @@ func BuildSubPath(baseDirectory string, path string) (string, error) {
 	}
 
 	if relpath == ".." || strings.HasPrefix(relpath, ".."+string(filepath.Separator)) {
-		return "", errors.New("Not allowed to refer path outside the base directory")
+		return "", errors.New("not allowed to refer path outside the base directory")
 	}
 
 	return fullpath, nil

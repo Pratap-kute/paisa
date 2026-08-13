@@ -44,7 +44,7 @@ func GetIncome(db *gorm.DB) gin.H {
 }
 
 func computeIncomeTimeline(postings []posting.Posting) []Income {
-	var incomes []Income = make([]Income, 0)
+	incomes := make([]Income, 0)
 
 	if len(postings) == 0 {
 		return incomes
@@ -53,7 +53,7 @@ func computeIncomeTimeline(postings []posting.Posting) []Income {
 	var p posting.Posting
 	end := utils.EndOfToday()
 	for start := utils.BeginningOfMonth(postings[0].Date); start.Before(end); start = start.AddDate(0, 1, 0) {
-		var currentMonthPostings []posting.Posting = make([]posting.Posting, 0)
+		currentMonthPostings := make([]posting.Posting, 0)
 		for len(postings) > 0 && (postings[0].Date.Before(utils.EndOfMonth(start)) || postings[0].Date.Equal(start)) {
 			p, postings = postings[0], postings[1:]
 			currentMonthPostings = append(currentMonthPostings, p)
@@ -66,7 +66,7 @@ func computeIncomeTimeline(postings []posting.Posting) []Income {
 }
 
 func computeTaxTimeline(postings []posting.Posting) []Tax {
-	var taxes []Tax = make([]Tax, 0)
+	taxes := make([]Tax, 0)
 
 	if len(postings) == 0 {
 		return taxes
@@ -76,7 +76,7 @@ func computeTaxTimeline(postings []posting.Posting) []Tax {
 	end := utils.EndOfToday()
 	for start := utils.BeginningOfFinancialYear(postings[0].Date); start.Before(end); start = start.AddDate(1, 0, 0) {
 		yearEnd := utils.EndOfFinancialYear(start)
-		var currentMonthPostings []posting.Posting = make([]posting.Posting, 0)
+		currentMonthPostings := make([]posting.Posting, 0)
 		for len(postings) > 0 && (postings[0].Date.Before(yearEnd) || postings[0].Date.Equal(start)) {
 			p, postings = postings[0], postings[1:]
 			currentMonthPostings = append(currentMonthPostings, p)
@@ -89,19 +89,19 @@ func computeTaxTimeline(postings []posting.Posting) []Tax {
 }
 
 func computeIncomeYearlyCard(start time.Time, taxes []posting.Posting, incomes []posting.Posting) []IncomeYearlyCard {
-	var yearlyCards []IncomeYearlyCard = make([]IncomeYearlyCard, 0)
+	yearlyCards := make([]IncomeYearlyCard, 0)
 
 	var p posting.Posting
 	end := utils.EndOfToday()
 	for start = utils.BeginningOfFinancialYear(start); start.Before(end); start = start.AddDate(1, 0, 0) {
 		yearEnd := utils.EndOfFinancialYear(start)
-		var netTax decimal.Decimal = decimal.Zero
+		netTax := decimal.Zero
 		for len(taxes) > 0 && utils.IsWithDate(taxes[0].Date, start, yearEnd) {
 			p, taxes = taxes[0], taxes[1:]
 			netTax = netTax.Add(p.Amount)
 		}
 
-		var currentYearIncomes []posting.Posting = make([]posting.Posting, 0)
+		currentYearIncomes := make([]posting.Posting, 0)
 		for len(incomes) > 0 && utils.IsWithDate(incomes[0].Date, start, yearEnd) {
 			p, incomes = incomes[0], incomes[1:]
 			currentYearIncomes = append(currentYearIncomes, p)

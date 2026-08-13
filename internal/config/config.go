@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -308,7 +307,7 @@ func LoadConfig(content []byte, cp string) error {
 
 	err = schema.Validate(configJson)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Invalid configuration\n%#v", err))
+		return fmt.Errorf("invalid configuration\n%w", err)
 	}
 
 	config = Config{}
@@ -332,7 +331,7 @@ func LoadConfig(content []byte, cp string) error {
 		location, err = time.LoadLocation(config.TimeZone)
 		if err != nil {
 			location = time.Local
-			return errors.New(fmt.Sprintf("Invalid time zone: %s\n%#v", config.TimeZone, err))
+			return fmt.Errorf("invalid time zone: %s\n%w", config.TimeZone, err)
 		}
 	}
 

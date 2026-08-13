@@ -85,7 +85,7 @@ func SyncCommodities(db *gorm.DB) error {
 		prices, err = provider.GetPrices(code, name)
 		if err != nil {
 			log.Error(err)
-			errors = append(errors, fmt.Errorf("Failed to fetch price for %s: %w", name, err))
+			errors = append(errors, fmt.Errorf("failed to fetch price for %s: %w", name, err))
 			continue
 		}
 
@@ -109,7 +109,7 @@ func SyncCII(db *gorm.DB) error {
 	ciis, err := india.GetCostInflationIndex()
 	if err != nil {
 		log.Error(err)
-		return fmt.Errorf("Failed to fetch CII: %w", err)
+		return fmt.Errorf("failed to fetch CII: %w", err)
 	}
 	cii.UpsertAll(db, ciis)
 	return nil
@@ -129,7 +129,7 @@ func SyncPortfolios(db *gorm.DB) error {
 		portfolios, err := mutualfund.GetPortfolio(commodity.Price.Code, commodity.Name)
 		if err != nil {
 			log.Error(err)
-			return fmt.Errorf("Failed to fetch portfolio for %s: %w", name, err)
+			return fmt.Errorf("failed to fetch portfolio for %s: %w", name, err)
 		}
 
 		portfolio.UpsertAll(db, commodity.Type, commodity.Price.Code, portfolios)

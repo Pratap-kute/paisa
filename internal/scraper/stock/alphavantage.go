@@ -67,7 +67,7 @@ func fetch[R any](url string, response *R) error {
 	}
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("Unexpected status code: %d, body: %s", resp.StatusCode, string(respBytes))
+		return fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(respBytes))
 	}
 
 	var errorResponse ErrorResponse
@@ -77,7 +77,7 @@ func fetch[R any](url string, response *R) error {
 	}
 
 	if errorResponse.Information != "" {
-		return fmt.Errorf("Error response: %s", errorResponse.Information)
+		return fmt.Errorf("error response: %s", errorResponse.Information)
 	}
 
 	err = json.Unmarshal(respBytes, response)
@@ -91,7 +91,7 @@ func fetch[R any](url string, response *R) error {
 func getHistory(code, commodityName string) ([]*price.Price, error) {
 	parts := strings.Split(code, ":")
 	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid code: %s", code)
+		return nil, fmt.Errorf("invalid code: %s", code)
 	}
 	apiKey, ticker, currency := parts[0], parts[1], parts[2]
 

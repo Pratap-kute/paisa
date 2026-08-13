@@ -174,18 +174,18 @@ credit_cards:
 
 func emitTransaction(file *os.File, date time.Time, payee string, from string, to string, amount any) {
 	amountString := ""
-	switch amount.(type) {
+	switch amount := amount.(type) {
 	case string:
-		amountString = amount.(string)
+		amountString = amount
 	case float64:
-		amountString = formatFloat(amount.(float64))
+		amountString = formatFloat(amount)
 	}
 
-	_, err := file.WriteString(fmt.Sprintf(`
+	_, err := fmt.Fprintf(file, `
 %s %s
     %s                                %s INR
     %s
-`, date.Format("2006/01/02"), payee, to, amountString, from))
+`, date.Format("2006/01/02"), payee, to, amountString, from)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -194,11 +194,11 @@ func emitTransaction(file *os.File, date time.Time, payee string, from string, t
 func emitCommodityBuy(file *os.File, date time.Time, commodity string, from string, to string, amount float64) float64 {
 	pc := utils.BTreeDescendFirstLessOrEqual(pricesTree[commodity], price.Price{Date: date})
 	units := amount / pc.Value.InexactFloat64()
-	_, err := file.WriteString(fmt.Sprintf(`
+	_, err := fmt.Fprintf(file, `
 %s Investment
     %s                      %s %s @    %s INR
     %s
-`, date.Format("2006/01/02"), to, formatFloat(units), commodity, formatFloat(pc.Value.InexactFloat64()), from))
+`, date.Format("2006/01/02"), to, formatFloat(units), commodity, formatFloat(pc.Value.InexactFloat64()), from)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -304,7 +304,7 @@ func emitSalary(state *GeneratorState, start time.Time) {
 		state.YearlySalary = incrementByPercentRange(state.YearlySalary, 10, 15)
 	}
 
-	var salary float64 = state.YearlySalary / 12
+	salary := state.YearlySalary / 12
 	var company string
 	if start.Year() > 2017 {
 		company = "Globex"
@@ -424,7 +424,7 @@ func generateJournalFile(cwd string) {
 	startMonth := utils.BeginningOfMonth(utils.EndOfToday())
 	endMonth := startMonth.AddDate(0, 2, 0)
 
-	_, err = ledgerFile.WriteString(`
+	_, err = fmt.Fprintf(ledgerFile, `
 = Expenses:Rent
     ; Recurring: Rent
     ; Period: 1 * ?
@@ -442,11 +442,7 @@ func generateJournalFile(cwd string) {
 = Expenses:Interest:Homeloan
     ; Recurring: EMI Interest
 
-~ Monthly from `)
-
-	_, err = ledgerFile.WriteString(fmt.Sprintf("%s to %s", startMonth.Format("2006-01-02"), endMonth.Format("2006-01-02")))
-
-	_, err = ledgerFile.WriteString(`
+~ Monthly from %s to %s
     Expenses:Rent                              15000 INR
     Expenses:Interest:Homeloan                  6000 INR
     Expenses:Food                               5000 INR
@@ -455,7 +451,7 @@ func generateJournalFile(cwd string) {
     Expenses:Clothing                           1000 INR
     Assets:Checking:SBI
 
-`)
+`, startMonth.Format("2006-01-02"), endMonth.Format("2006-01-02"))
 	if err != nil {
 		log.Fatal(err)
 	}

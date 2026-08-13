@@ -189,7 +189,7 @@ func readLedgerFile(dir string, path string) *LedgerFile {
 		log.Fatal(err)
 	}
 
-	name, err := filepath.Rel(dir, path)
+	name, _ := filepath.Rel(dir, path)
 
 	return &LedgerFile{
 		Name:    name,

@@ -49,7 +49,7 @@ type ScheduleAL struct {
 
 func GetScheduleAL(db *gorm.DB) gin.H {
 	postings := query.Init(db).Like("Assets:%", "Liabilities:%").All()
-	var scheduleALs map[string]ScheduleAL = make(map[string]ScheduleAL)
+	scheduleALs := make(map[string]ScheduleAL)
 
 	start := utils.Now().AddDate(1, 0, 0)
 

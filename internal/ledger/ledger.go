@@ -146,8 +146,7 @@ func (HLedgerCLI) ValidateFile(journalPath string) ([]LedgerFileError, string, e
 
 	for _, match := range matches {
 		lineRange := match[1]
-		var lineFrom uint64 = 1
-		var lineTo uint64 = 1
+		var lineFrom, lineTo uint64
 
 		multiline := regexp.MustCompile(`^([0-9]+)-([0-9]+):?$`)
 		if multiline.MatchString(lineRange) {
@@ -328,7 +327,7 @@ func (Beancount) Parse(journalPath string, prices []price.Price) ([]*posting.Pos
 			}
 		}
 
-		fileName, err := filepath.Rel(dir, record[FileName])
+		fileName, _ := filepath.Rel(dir, record[FileName])
 
 		payee := strings.TrimSpace(record[Payee])
 		narration := strings.TrimSpace(record[Narration])
@@ -350,7 +349,7 @@ func (Beancount) Parse(journalPath string, prices []price.Price) ([]*posting.Pos
 
 		match := locationRegex.FindStringSubmatch(strings.TrimSpace(record[Location]))
 		if len(match) == 0 {
-			return nil, fmt.Errorf("Could not parse location: %s", record[Location])
+			return nil, fmt.Errorf("could not parse location: %s", record[Location])
 		}
 
 		lineNumber, err := strconv.ParseUint(match[1], 10, 64)
@@ -479,7 +478,6 @@ func parseHLedgerPrices(output string, defaultCurrency string) ([]price.Price, e
 		if target != defaultCurrency {
 			if commodity == defaultCurrency && !value.Equal(decimal.Zero) {
 				commodity = target
-				target = defaultCurrency
 				value = decimal.NewFromInt(1).Div(value)
 			} else {
 				continue
@@ -512,7 +510,6 @@ func parseBeancountPrices(output string, defaultCurrency string) ([]price.Price,
 		if target != defaultCurrency {
 			if commodity == defaultCurrency && !value.Equal(decimal.Zero) {
 				commodity = target
-				target = defaultCurrency
 				value = decimal.NewFromInt(1).Div(value)
 			} else {
 				continue
@@ -534,7 +531,7 @@ func parseAmount(amount string) (string, decimal.Decimal, error) {
 	match := regexp.MustCompile(`^(-?[0-9.,]+(?:[Ee]-?[0-9]+)?)([^\d,.-]+|\s*"[^"]+")$|([^\d,.-]+|\s*"[^"]+"\s*)(-?[0-9.,]+(?:[Ee]-?[0-9]+)?)$`).FindStringSubmatch(amount)
 	if len(match) == 0 {
 		log.Errorf("Could not parse amount: <%s>", amount)
-		return "", decimal.Zero, fmt.Errorf("Could not parse amount: <%s>", amount)
+		return "", decimal.Zero, fmt.Errorf("could not parse amount: <%s>", amount)
 	}
 
 	if match[1] != "" {
@@ -814,7 +811,6 @@ func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map
 				forecast = true
 			}
 		}
-		break
 	}
 
 	for _, tag := range p.Tags {
@@ -825,7 +821,6 @@ func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map
 		if len(tag) == 2 && tag[0] == "Period" {
 			tagPeriod = tag[1]
 		}
-		break
 	}
 
 	dir := filepath.Dir(config.GetJournalPath())

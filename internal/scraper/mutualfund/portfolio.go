@@ -34,6 +34,9 @@ WHERE s.code = %s
 	query := fmt.Sprintf(q, schemeCode)
 
 	req, err := http.NewRequest("POST", url, strings.NewReader(query))
+	if err != nil {
+		return nil, err
+	}
 	req.Header.Add("Content-Type", "text/plain")
 	req.Header.Add("Authorization", "Basic cGxheTo=")
 	resp, err := http.DefaultClient.Do(req)

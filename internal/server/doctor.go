@@ -1,7 +1,6 @@
 package server
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -113,7 +112,7 @@ func ruleAssetRegisterNonNegative(db *gorm.DB) []error {
 	for account, ps := range lo.GroupBy(assets, func(posting posting.Posting) string { return posting.Account }) {
 		for _, balance := range accounting.Register(ps) {
 			if balance.Quantity.LessThan(decimal.NewFromFloat(0.01).Neg()) {
-				errs = append(errs, errors.New(fmt.Sprintf("<b>%s</b> account went negative (%.2f) on %s", account, balance.Quantity.InexactFloat64(), balance.Date.Format(DATE_FORMAT))))
+				errs = append(errs, fmt.Errorf("<b>%s</b> account went negative (%.2f) on %s", account, balance.Quantity.InexactFloat64(), balance.Date.Format(DATE_FORMAT)))
 				break
 			}
 		}
@@ -126,7 +125,7 @@ func ruleNonCreditAccount(db *gorm.DB) []error {
 	incomes := query.Init(db).Like("Income:%").NotLike("Income:CapitalGains:%").All()
 	for _, p := range incomes {
 		if p.Amount.GreaterThan(decimal.NewFromFloat(0.01)) {
-			errs = append(errs, errors.New(fmt.Sprintf("<b>%.4f</b> got credited to <b>%s</b> on %s", p.Amount.InexactFloat64(), p.Account, p.Date.Format(DATE_FORMAT))))
+			errs = append(errs, fmt.Errorf("<b>%.4f</b> got credited to <b>%s</b> on %s", p.Amount.InexactFloat64(), p.Account, p.Date.Format(DATE_FORMAT)))
 		}
 	}
 	return errs
@@ -137,7 +136,7 @@ func ruleNonDebitAccount(db *gorm.DB) []error {
 	incomes := query.Init(db).Like("Expenses:%").All()
 	for _, p := range incomes {
 		if p.Amount.LessThan(decimal.NewFromFloat(0.01).Neg()) {
-			errs = append(errs, errors.New(fmt.Sprintf("<b>%.4f</b> got debited from <b>%s</b> on %s", p.Amount.InexactFloat64(), p.Account, p.Date.Format(DATE_FORMAT))))
+			errs = append(errs, fmt.Errorf("<b>%.4f</b> got debited from <b>%s</b> on %s", p.Amount.InexactFloat64(), p.Account, p.Date.Format(DATE_FORMAT)))
 		}
 	}
 	return errs
@@ -151,7 +150,7 @@ func ruleExchangePriceMissing(db *gorm.DB) []error {
 		if !utils.IsCurrency(p.Commodity) {
 			externalPrice := service.GetUnitPrice(db, p.Commodity, p.Date)
 			if externalPrice.CommodityName != "" && externalPrice.CommodityName != p.Commodity {
-				errs = append(errs, errors.New(fmt.Sprintf("Exchange price from <b>%s</b> to your default currency <b>%s</b> is not specified for posting %s", p.Commodity, config.DefaultCurrency(), formatPosting(p))))
+				errs = append(errs, fmt.Errorf("exchange price from <b>%s</b> to your default currency <b>%s</b> is not specified for posting %s", p.Commodity, config.DefaultCurrency(), formatPosting(p)))
 			}
 		}
 	}
@@ -169,7 +168,7 @@ func ruleJournalPriceMismatch(db *gorm.DB) []error {
 				externalPrice.CommodityType != config.Unknown &&
 				!service.IsSellWithCapitalGains(db, p) &&
 				diff.GreaterThanOrEqual(decimal.NewFromFloat(0.0001)) {
-				errs = append(errs, errors.New(fmt.Sprintf("The price specified in your posting %s doesn't match the price <b>%.4f</b> (%s) fetched from external system", formatPosting(p), externalPrice.Value.InexactFloat64(), externalPrice.Date.Format(DATE_FORMAT))))
+				errs = append(errs, fmt.Errorf("the price specified in your posting %s doesn't match the price <b>%.4f</b> (%s) fetched from external system", formatPosting(p), externalPrice.Value.InexactFloat64(), externalPrice.Date.Format(DATE_FORMAT)))
 			}
 		}
 	}
@@ -221,7 +220,7 @@ func ruleAllocationTargetMissingAssetAccounts(db *gorm.DB) []error {
 	}
 
 	if len(ignoredAccounts) > 0 {
-		errs = append(errs, errors.New(fmt.Sprintf("The following asset accounts are not part of any asset allocation target: <b>%s</b>", strings.Join(ignoredAccounts, ", "))))
+		errs = append(errs, fmt.Errorf("the following asset accounts are not part of any asset allocation target: <b>%s</b>", strings.Join(ignoredAccounts, ", ")))
 	}
 
 	return errs

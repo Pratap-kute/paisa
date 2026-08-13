@@ -116,7 +116,7 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 
 		if needExchangePrice {
 			exchangePrice := utils.BTreeDescendFirstLessOrEqual(exchangePrice, ExchangePrice{Timestamp: timestamp})
-			value = value * exchangePrice.Close
+			value *= exchangePrice.Close
 		}
 
 		price := price.Price{Date: date, CommodityType: config.Stock, CommodityID: ticker, CommodityName: commodityName, Value: decimal.NewFromFloat(value)}

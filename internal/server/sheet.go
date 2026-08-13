@@ -65,7 +65,6 @@ func DeleteSheetBackups(file SheetFile) gin.H {
 func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 	dir := config.GetSheetDir()
 
-	filePath := filepath.Join(dir, file.Name)
 	filePath, err := utils.BuildSubPath(dir, file.Name)
 	if err != nil {
 		log.Warn(err)
@@ -121,7 +120,7 @@ func readSheetFile(dir string, path string) *SheetFile {
 		log.Fatal(err)
 	}
 
-	name, err := filepath.Rel(dir, path)
+	name, _ := filepath.Rel(dir, path)
 
 	return &SheetFile{
 		Name:    name,

@@ -31,7 +31,7 @@ func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	}
 
 	for _, goal := range config.GetConfig().Goals.Savings {
-		summaries = append(summaries, getSavingsSummary(db, assetPostings, goal))
+		summaries = append(summaries, getSavingsSummary(assetPostings, goal))
 	}
 
 	return summaries

@@ -30,7 +30,7 @@ func Lookup[I any, K any](db *gorm.DB, key K, fallback func() I) I {
 	var item I
 	var cache Cache
 
-	if lastGarbageCollectedAt == nil || time.Now().Sub(*lastGarbageCollectedAt) > 24*time.Hour {
+	if lastGarbageCollectedAt == nil || time.Since(*lastGarbageCollectedAt) > 24*time.Hour {
 		DeleteExpired(db)
 		lastGarbageCollectedAt = new(time.Time)
 		*lastGarbageCollectedAt = time.Now()

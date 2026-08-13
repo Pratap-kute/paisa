@@ -56,7 +56,7 @@ func GetAccountGain(db *gorm.DB, account string) gin.H {
 	commodities := lo.Uniq(lo.Map(postings, func(p posting.Posting, _ int) string { return p.Commodity }))
 	var portfolio_groups PortfolioAllocationGroups
 	portfolio_groups = GetAccountPortfolioAllocation(db, account)
-	if !(len(commodities) > 0 && len(portfolio_groups.Commomdities) == len(commodities)) {
+	if len(commodities) == 0 || len(portfolio_groups.Commomdities) != len(commodities) {
 		portfolio_groups = PortfolioAllocationGroups{Commomdities: []string{}, NameAndSecurityType: []PortfolioAggregate{}, SecurityType: []PortfolioAggregate{}, Rating: []PortfolioAggregate{}, Industry: []PortfolioAggregate{}}
 	}
 

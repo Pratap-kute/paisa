@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func getSavingsSummary(db *gorm.DB, ps []posting.Posting, conf config.SavingsGoal) GoalSummary {
+func getSavingsSummary(ps []posting.Posting, conf config.SavingsGoal) GoalSummary {
 	savings := accounting.FilterByGlob(ps, conf.Accounts)
 	savingsTotal := accounting.CurrentBalance(savings)
 

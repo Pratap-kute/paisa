@@ -45,7 +45,7 @@ func GetInvestment(db *gorm.DB) gin.H {
 }
 
 func computeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expenses []posting.Posting, incomes []posting.Posting) []InvestmentYearlyCard {
-	var yearlyCards []InvestmentYearlyCard = make([]InvestmentYearlyCard, 0)
+	yearlyCards := make([]InvestmentYearlyCard, 0)
 
 	if len(assets) == 0 {
 		return yearlyCards
@@ -55,14 +55,14 @@ func computeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 	end := utils.EndOfToday()
 	for start = utils.BeginningOfFinancialYear(start); start.Before(end); start = start.AddDate(1, 0, 0) {
 		yearEnd := utils.EndOfFinancialYear(start)
-		var currentYearPostings []posting.Posting = make([]posting.Posting, 0)
+		currentYearPostings := make([]posting.Posting, 0)
 		for len(assets) > 0 && utils.IsWithDate(assets[0].Date, start, yearEnd) {
 			p, assets = assets[0], assets[1:]
 			currentYearPostings = append(currentYearPostings, p)
 		}
 
-		var currentYearTaxes []posting.Posting = make([]posting.Posting, 0)
-		var currentYearExpenses []posting.Posting = make([]posting.Posting, 0)
+		currentYearTaxes := make([]posting.Posting, 0)
+		currentYearExpenses := make([]posting.Posting, 0)
 
 		for len(expenses) > 0 && utils.IsWithDate(expenses[0].Date, start, yearEnd) {
 			p, expenses = expenses[0], expenses[1:]
@@ -76,7 +76,7 @@ func computeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 		netTax := accounting.CostSum(currentYearTaxes)
 		netExpense := accounting.CostSum(currentYearExpenses)
 
-		var currentYearIncomes []posting.Posting = make([]posting.Posting, 0)
+		currentYearIncomes := make([]posting.Posting, 0)
 		for len(incomes) > 0 && utils.IsWithDate(incomes[0].Date, start, yearEnd) {
 			p, incomes = incomes[0], incomes[1:]
 			currentYearIncomes = append(currentYearIncomes, p)
@@ -100,7 +100,7 @@ func computeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 		netInvestment := accounting.CostSum(currentYearPostings)
 
 		netIncome := grossSalaryIncome.Add(grossOtherIncome).Sub(netTax)
-		var savingsRate decimal.Decimal = decimal.Zero
+		savingsRate := decimal.Zero
 		if !netIncome.Equal(decimal.Zero) {
 			savingsRate = netInvestment.Div(netIncome).Mul(decimal.NewFromInt(100))
 		}

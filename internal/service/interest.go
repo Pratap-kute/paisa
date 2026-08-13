@@ -53,19 +53,11 @@ func CapitalGainsAccount(account string) string {
 }
 
 func IsCapitalGains(p posting.Posting) bool {
-	if utils.IsParent(p.Account, "Income:CapitalGains") {
-		return true
-	}
-
-	return false
+	return utils.IsParent(p.Account, "Income:CapitalGains")
 }
 
 func IsRefund(p posting.Posting) bool {
-	if utils.IsParent(p.Account, "Income:Refund") {
-		return true
-	}
-
-	return false
+	return utils.IsParent(p.Account, "Income:Refund")
 }
 
 func IsStockSplit(db *gorm.DB, p posting.Posting) bool {
