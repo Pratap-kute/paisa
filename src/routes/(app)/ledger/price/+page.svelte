@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Toggleable from "$lib/components/Toggleable.svelte";
-  import ValueChange from "$lib/components/ValueChange.svelte";
-  import { ajax, formatCurrency, type Price } from "$lib/utils";
-  import { toast } from "$lib/toast";
+  import Toggleable from "$lib/components/ui/Toggleable.svelte";
+  import ValueChange from "$lib/components/ui/ValueChange.svelte";
+  import { ajax, formatCurrency, type Price } from "$lib/core/utils";
+  import { toast } from "$lib/core/toast";
   import _ from "lodash";
   import { onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";

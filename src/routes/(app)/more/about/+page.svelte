@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Logo from "$lib/components/Logo.svelte";
+  import Logo from "$lib/components/layout/Logo.svelte";
   const links = [
     { name: "Chat", href: "https://matrix.to/#/#paisa:matrix.org", icon: "fa-solid fa-headset" },
     { name: "Issue", href: "https://github.com/ananthakumaran/paisa/issues", icon: "fas fa-bug" },

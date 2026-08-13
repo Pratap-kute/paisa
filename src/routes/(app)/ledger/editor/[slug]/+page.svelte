@@ -6,20 +6,20 @@
     moveToEnd,
     moveToLine,
     updateContent
-  } from "$lib/editor";
+  } from "$lib/editors/editor";
   import { insertTab } from "@codemirror/commands";
-  import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/utils";
+  import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding } from "@codemirror/view";
-  import * as toast from "$lib/toast";
+  import * as toast from "$lib/core/toast";
   import type { EditorView } from "codemirror";
-  import { format } from "$lib/journal";
+  import { format } from "$lib/ledger/journal";
   import _ from "lodash";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/FileTree.svelte";
-  import FileModal from "$lib/components/FileModal.svelte";
+  import FileTree from "$lib/components/ledger/FileTree.svelte";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
 
   export let data: PageData;

@@ -3,21 +3,21 @@
   import {
     createEditor as createTemplateEditor,
     editorState as templateEditorState
-  } from "$lib/template_editor";
+  } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent
-  } from "$lib/editor";
-  import FileDropzone from "$lib/components/FileDropzone.svelte";
-  import { parse, asRows, render as renderJournal } from "$lib/spreadsheet";
+  } from "$lib/editors/editor";
+  import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
+  import { parse, asRows, render as renderJournal } from "$lib/importing/spreadsheet";
   import _ from "lodash";
   import type { EditorView } from "codemirror";
   import { onMount } from "svelte";
-  import { ajax, type ImportTemplate } from "$lib/utils";
+  import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
-  import * as toast from "$lib/toast";
-  import FileModal from "$lib/components/FileModal.svelte";
-  import Modal from "$lib/components/Modal.svelte";
+  import * as toast from "$lib/core/toast";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import Modal from "$lib/components/ui/Modal.svelte";
 
   let templates: ImportTemplate[] = [];
   let selectedTemplate: ImportTemplate;

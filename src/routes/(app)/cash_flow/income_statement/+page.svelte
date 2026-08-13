@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import _ from "lodash";
-  import { renderIncomeStatement } from "$lib/income_statement";
+  import { renderIncomeStatement } from "$lib/charts/income_statement";
   import {
     ajax,
     formatCurrency,
@@ -9,10 +9,10 @@
     restName,
     type IncomeStatement,
     firstName
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import { dateMin, year } from "../../../../store";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import { iconify } from "$lib/icon";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import { iconify } from "$lib/core/icon";
 
   let isEmpty = false;
 

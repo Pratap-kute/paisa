@@ -1,14 +1,14 @@
 <script lang="ts">
-  import COLORS from "$lib/colors";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import LevelItem from "$lib/components/LevelItem.svelte";
+  import COLORS from "$lib/core/colors";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import {
     renderMonthlyInvestmentTimeline,
     renderYearlyIncomeTimeline,
     renderYearlyTimelineOf
-  } from "$lib/income";
-  import { ajax, formatCurrency, type Legend } from "$lib/utils";
+  } from "$lib/charts/income";
+  import { ajax, formatCurrency, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

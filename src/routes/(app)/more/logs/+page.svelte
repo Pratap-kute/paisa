@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { ajax, type Log } from "$lib/utils";
+  import { ajax, type Log } from "$lib/core/utils";
   import VirtualList from "svelte-tiny-virtual-list";
   import _ from "lodash";
 

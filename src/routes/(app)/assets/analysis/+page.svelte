@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { generateColorScheme, genericBarColor } from "$lib/colors";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/portfolio";
-  import { ajax, type PortfolioAggregate } from "$lib/utils";
+  import { generateColorScheme, genericBarColor } from "$lib/core/colors";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
+  import { ajax, type PortfolioAggregate } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

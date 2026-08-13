@@ -1,7 +1,7 @@
 <script lang="ts">
-  import CreditCardCard from "$lib/components/CreditCardCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import { ajax, helpUrl, type CreditCardSummary } from "$lib/utils";
+  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

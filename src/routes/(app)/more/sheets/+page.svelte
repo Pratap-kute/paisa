@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import FileModal from "$lib/components/FileModal.svelte";
-  import { ajax } from "$lib/utils";
-  import * as toast from "$lib/toast";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import { ajax } from "$lib/core/utils";
+  import * as toast from "$lib/core/toast";
 
   let modalOpen = false;
   function openCreateModal() {

@@ -3,13 +3,13 @@
     renderAllocation,
     renderAllocationTarget,
     renderAllocationTimeline
-  } from "$lib/allocation";
-  import COLORS, { generateColorScheme } from "$lib/colors";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import Table from "$lib/components/Table.svelte";
-  import { accountName, nonZeroCurrency } from "$lib/table_formatters";
-  import { ajax, formatPercentage, rem, type Aggregate, type Legend } from "$lib/utils";
+  } from "$lib/charts/allocation";
+  import COLORS, { generateColorScheme } from "$lib/core/colors";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Table from "$lib/components/ui/Table.svelte";
+  import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
+  import { ajax, formatPercentage, rem, type Aggregate, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";

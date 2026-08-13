@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
-import { ajax } from "$lib/utils";
+import { ajax } from "$lib/core/utils";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async () => {

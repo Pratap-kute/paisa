@@ -1,4 +1,4 @@
-import { persisted } from "$lib/persisted";
+import { persisted } from "$lib/core/persisted";
 import { get, writable } from "svelte/store";
 
 export const obscure = persisted("obscure", false);

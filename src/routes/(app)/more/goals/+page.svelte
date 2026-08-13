@@ -1,12 +1,12 @@
 <script lang="ts">
   import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
-  import GoalSummaryCard from "$lib/components/GoalSummaryCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import { ajax, helpUrl, type GoalSummary } from "$lib/utils";
+  import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import { ajax, helpUrl, type GoalSummary } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  import * as toast from "$lib/toast";
+  import * as toast from "$lib/core/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
 

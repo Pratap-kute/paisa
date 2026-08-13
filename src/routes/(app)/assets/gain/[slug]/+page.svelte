@@ -1,7 +1,7 @@
 <script lang="ts">
-  import COLORS, { generateColorScheme, genericBarColor } from "$lib/colors";
-  import { renderAccountOverview, buildLegends } from "$lib/gain";
-  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/portfolio";
+  import COLORS, { generateColorScheme, genericBarColor } from "$lib/core/colors";
+  import { renderAccountOverview, buildLegends } from "$lib/charts/gain";
+  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
   import {
     ajax,
     type Posting,
@@ -13,15 +13,15 @@
     type AssetBreakdown,
     formatPercentage,
     formatFloatUptoPrecision
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount, onDestroy } from "svelte";
   import type { PageData } from "./$types";
-  import PostingCard from "$lib/components/PostingCard.svelte";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import { iconify } from "$lib/icon";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import { iconify } from "$lib/core/icon";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = [];

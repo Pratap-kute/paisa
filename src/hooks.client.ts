@@ -40,8 +40,8 @@ if (pdfjs.GlobalWorkerOptions) {
 }
 
 import Handlebars from "handlebars";
-import helpers from "$lib/template_helpers";
-import * as toast from "$lib/toast";
+import helpers from "$lib/importing/template_helpers";
+import * as toast from "$lib/core/toast";
 import _ from "lodash";
 
 Handlebars.registerHelper(

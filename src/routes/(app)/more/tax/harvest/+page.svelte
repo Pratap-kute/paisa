@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { renderHarvestables } from "$lib/harvest";
-  import { ajax } from "$lib/utils";
+  import { renderHarvestables } from "$lib/charts/harvest";
+  import { ajax } from "$lib/core/utils";
   import { onMount } from "svelte";
 
   onMount(async () => {

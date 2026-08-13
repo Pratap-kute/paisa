@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { createEditor, sheetEditorState } from "$lib/sheet";
-  import { focus, moveToLine, updateContent } from "$lib/editor";
+  import { createEditor, sheetEditorState } from "$lib/editors/sheet_editor";
+  import { focus, moveToLine, updateContent } from "$lib/editors/editor";
   import {
     ajax,
     buildDirectoryTree,
@@ -8,17 +8,17 @@
     type LedgerFile,
     type Posting,
     type SheetFile,
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding } from "@codemirror/view";
-  import * as toast from "$lib/toast";
+  import * as toast from "$lib/core/toast";
   import type { EditorView } from "codemirror";
   import _ from "lodash";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/FileTree.svelte";
-  import FileModal from "$lib/components/FileModal.svelte";
+  import FileTree from "$lib/components/ledger/FileTree.svelte";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
 
   let ledgerFiles: LedgerFile[] = [];

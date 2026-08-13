@@ -1,8 +1,8 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import { renderMonthlyRepaymentTimeline } from "$lib/repayment";
-  import { ajax, type Legend } from "$lib/utils";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import { renderMonthlyRepaymentTimeline } from "$lib/charts/repayment";
+  import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

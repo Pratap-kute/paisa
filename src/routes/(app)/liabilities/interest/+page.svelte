@@ -1,12 +1,12 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     buildLegends,
     renderOverview,
     renderPerAccountOverview
-  } from "$lib/liabilities/interest";
-  import { ajax, type Legend } from "$lib/utils";
+  } from "$lib/charts/liabilities/interest";
+  import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
   let isEmpty = false;

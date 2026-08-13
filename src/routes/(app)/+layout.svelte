@@ -2,8 +2,8 @@
   import { afterNavigate, beforeNavigate } from "$app/navigation";
   import { followCursor, delegate, hideAll } from "tippy.js";
   import _ from "lodash";
-  import Spinner from "$lib/components/Spinner.svelte";
-  import Navbar from "$lib/components/Navbar.svelte";
+  import Spinner from "$lib/components/ui/Spinner.svelte";
+  import Navbar from "$lib/components/layout/Navbar.svelte";
   import { willClearTippy, willRefresh } from "../../store";
 
   let isBurger: boolean = null;

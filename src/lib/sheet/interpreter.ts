@@ -7,12 +7,12 @@ import {
   formatCurrency,
   type Posting,
   type SheetLineResult,
-} from "$lib/utils";
+} from "../core/utils";
 import {
   buildAST as buildSearchAST,
   QueryAST,
   type TransactionPredicate,
-} from "$lib/search_query_editor";
+} from "../editors/search_query_editor";
 import { type Diagnostic } from "@codemirror/lint";
 
 const STACK_LIMIT = 1000;

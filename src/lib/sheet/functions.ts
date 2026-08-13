@@ -1,4 +1,4 @@
-import type { Posting } from "$lib/utils";
+import type { Posting } from "../core/utils";
 import _ from "lodash";
 import { assertType, type Environment, type Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import Logo from "$lib/components/Logo.svelte";
-  import { login } from "$lib/utils";
+  import Logo from "$lib/components/layout/Logo.svelte";
+  import { login } from "$lib/core/utils";
   import _ from "lodash";
   let username = "";
   let password = "";

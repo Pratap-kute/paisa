@@ -3,7 +3,7 @@
     enrichTrantionSequence,
     nextUnpaidSchedule,
     sortTrantionSequence
-  } from "$lib/transaction_sequence";
+  } from "$lib/domain/transaction_sequence";
   import {
     ajax,
     helpUrl,
@@ -11,14 +11,14 @@
     monthDays,
     type TransactionSchedule,
     type TransactionSequence
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  import RecurringCard from "$lib/components/RecurringCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
+  import RecurringCard from "$lib/components/finance/RecurringCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import type { Dayjs } from "dayjs";
-  import RecurringDay from "$lib/components/RecurringDay.svelte";
+  import RecurringDay from "$lib/components/finance/RecurringDay.svelte";
   import dayjs from "dayjs";
 
   let isEmpty = false;

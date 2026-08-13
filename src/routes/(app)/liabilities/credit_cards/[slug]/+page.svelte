@@ -1,20 +1,20 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import COLORS from "$lib/colors";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import CreditCardCard from "$lib/components/CreditCardCard.svelte";
-  import DueDate from "$lib/components/DueDate.svelte";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import TransactionCard from "$lib/components/TransactionCard.svelte";
-  import { renderYearlySpends } from "$lib/credit_cards";
-  import { iconify } from "$lib/icon";
+  import COLORS from "$lib/core/colors";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
+  import DueDate from "$lib/components/finance/DueDate.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
+  import { renderYearlySpends } from "$lib/charts/credit_cards";
+  import { iconify } from "$lib/core/icon";
   import {
     ajax,
     formatCurrency,
     formatPercentage,
     type CreditCardBill,
     type CreditCardSummary
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import { MasonryGrid } from "@egjs/svelte-grid";
   import _, { now } from "lodash";
   import { onMount } from "svelte";
