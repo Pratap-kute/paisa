@@ -62,12 +62,49 @@ for (
 
 try {
   await Deno.copyFile(
-    join(root, "tests/fixture/inr/main.ledger"),
+    join(root, "tests/fixture/browser/main.ledger"),
     join(fixture, "main.ledger"),
   );
   await Deno.copyFile(
-    join(root, "tests/fixture/inr/paisa.yaml"),
+    join(root, "tests/fixture/browser/paisa.yaml"),
     join(fixture, "paisa.yaml"),
+  );
+  // Start browser tests from the committed fixture state. This keeps visual
+  // baselines deterministic even when the optional Ledger CLI is unavailable.
+  await Deno.copyFile(
+    join(root, "tests/fixture/browser/paisa.db"),
+    join(fixture, "paisa.db"),
+  );
+  // Portfolio holdings normally come from an external provider, so journal
+  // synchronization cannot recreate them in CI. Seed a small deterministic
+  // portfolio to keep the assets-analysis browser fixture self-contained.
+  await run("sqlite3", [
+    join(fixture, "paisa.db"),
+    `DELETE FROM portfolios;
+     INSERT INTO portfolios
+       (commodity_type, parent_commodity_id, security_id, security_name,
+        security_type, security_rating, security_industry, percentage)
+     VALUES
+       ('mutualfund', '120716', 'INE001', 'Reliance Industries', 'equity', '', 'Energy', '24'),
+       ('mutualfund', '120716', 'INE002', 'HDFC Bank', 'equity', '', 'Financial Services', '22'),
+       ('mutualfund', '120716', 'INE003', 'Infosys', 'equity', '', 'Technology', '18'),
+       ('mutualfund', '120716', 'INE004', 'Bharti Airtel', 'equity', '', 'Telecommunication', '16'),
+       ('mutualfund', '120716', 'GOI2032', 'Government Bond 2032', 'debt', 'Sovereign', 'Government', '12'),
+       ('mutualfund', '120716', 'CORPAAA', 'AAA Corporate Bond', 'debt', 'AAA', 'Financial Services', '8');`,
+  ]);
+  await Deno.mkdir(join(fixture, "sheets"), { recursive: true });
+  await Deno.copyFile(
+    join(root, "tests/fixture/browser/sheets/overview.paisa"),
+    join(fixture, "sheets/overview.paisa"),
+  );
+  // Source checkouts intentionally contain only a release placeholder for the
+  // bundled Ledger binary. Let editor validation succeed in browser tests,
+  // while making synchronization fail before it can replace fixture DB rows.
+  const ledgerStub = join(fixture, "ledger");
+  await Deno.writeTextFile(
+    ledgerStub,
+    '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
+    { mode: 0o750 },
   );
   await run("go", ["build", "-o", binary, "."]);
   await run(Deno.execPath(), ["task", "build"]);
@@ -83,7 +120,10 @@ try {
       "2022-02-07",
     ],
     cwd: fixture,
-    env: { TZ: "UTC" },
+    env: {
+      TZ: "UTC",
+      PATH: `${fixture}:${Deno.env.get("PATH") ?? ""}`,
+    },
     stdout: "inherit",
     stderr: "inherit",
   }).spawn();

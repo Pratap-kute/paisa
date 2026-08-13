@@ -1,14 +1,16 @@
 <script lang="ts">
   import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
-  import GoalSummaryCard from "$lib/components/GoalSummaryCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import { ajax, helpUrl, type GoalSummary } from "$lib/utils";
+  import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import { ajax, helpUrl, type GoalSummary } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/core/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
+
+  const goalDndzone = dndzone;
 
   let isEmpty = false;
   let config: UserConfig;
@@ -108,8 +110,8 @@
 <section class="section">
   <div class="container is-fluid">
     <div
-      class="columns flex-wrap"
-      use:dndzone={{
+      class="columns is-flex-wrap-wrap"
+      use:goalDndzone={{
         items: goals,
         dropTargetStyle: {},
         flipDurationMs: 300,
@@ -124,7 +126,7 @@
         </div>
       {/each}
     </div>
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-12">
         <ZeroState item={!isEmpty}>
           <strong>Oops!</strong> You haven't configured any goals yet. Checkout the

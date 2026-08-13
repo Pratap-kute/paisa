@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { renderBreakdowns } from "$lib/schedule_al";
+  import { renderBreakdowns } from "$lib/charts/schedule_al";
   import _ from "lodash";
-  import { ajax, type ScheduleAL } from "$lib/utils";
+  import { ajax, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
 

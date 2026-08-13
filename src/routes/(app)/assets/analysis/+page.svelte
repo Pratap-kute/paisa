@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { generateColorScheme, genericBarColor } from "$lib/colors";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/portfolio";
-  import { ajax, type PortfolioAggregate } from "$lib/utils";
+  import { generateColorScheme, genericBarColor } from "$lib/core/colors";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
+  import { ajax, type PortfolioAggregate } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 
@@ -93,7 +93,7 @@
     </div>
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative" />
           <svg id="d3-portfolio-security-type" />
         </div>
@@ -103,7 +103,7 @@
 
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative" />
           <svg id="d3-portfolio-security-rating" />
         </div>
@@ -113,7 +113,7 @@
 
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <div
             id="d3-portfolio-security-industry-treemap"
             style="width: 100%; position: relative"
@@ -126,7 +126,7 @@
 
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           {#if portfolioR}
             <LegendCard legends={portfolioR.legends} clazz="ml-4" />
           {/if}

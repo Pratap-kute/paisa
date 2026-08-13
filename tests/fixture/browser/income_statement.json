@@ -1,0 +1,33 @@
+{
+  "yearly": {
+    "2021 - 22": {
+      "startingBalance": 0,
+      "endingBalance": 554121.1429928704,
+      "date": "2021-04-01T00:00:00Z",
+      "income": {
+        "Income:Salary:Acme": -120000
+      },
+      "interest": {
+        "Income:Interest:Checking": -1000
+      },
+      "equity": {},
+      "pnl": {
+        "Assets:Equity:AAPL": 27.3,
+        "Assets:Equity:ABNB": -8024.5570071296,
+        "Assets:Equity:NIFTY": 218.4
+      },
+      "liabilities": {
+        "Liabilities:CreditCard:Freedom": -6000,
+        "Liabilities:HomeLoan": -490000
+      },
+      "tax": {},
+      "expenses": {
+        "Expenses:Charges": 100,
+        "Expenses:Food": 4000,
+        "Expenses:Interest:HomeLoan": 5000,
+        "Expenses:Rent": 40000,
+        "Expenses:Shopping": 6000
+      }
+    }
+  }
+}

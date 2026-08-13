@@ -1,6 +1,6 @@
 <script lang="ts">
-  import AssetsBalance from "$lib/components/AssetsBalance.svelte";
-  import { ajax, type AssetBreakdown } from "$lib/utils";
+  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
+  import { ajax, type AssetBreakdown } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

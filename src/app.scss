@@ -30,8 +30,95 @@ $editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px -
   10.5px - 10.5px);
 
 @import "bulma/bulma.sass";
-@import "bulma-switch/src/sass/index.sass";
 @import "@cityssm/bulma-sticky-table/sticky-table";
+
+// Project-owned switch matching the former Bulma switch control.
+input.switch {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+
+  + label {
+    position: relative;
+    display: inline-flex;
+    height: $control-height;
+    align-items: center;
+    padding-left: 3.5rem;
+    padding-top: 0.2rem;
+    font-size: $size-normal;
+    line-height: $control-line-height;
+    cursor: pointer;
+
+    &::before {
+      position: absolute;
+      top: calc(50% - 0.75rem);
+      left: 0;
+      width: 3rem;
+      height: 1.5rem;
+      border-radius: $radius-rounded;
+      background: $grey-light;
+      content: "";
+      transition: background 0.15s ease;
+    }
+
+    &::after {
+      position: absolute;
+      top: calc(50% - 0.5rem);
+      left: 0.25rem;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: $white;
+      box-shadow: 0 1px 2px rgba($black, 0.25);
+      content: "";
+      transition: transform 0.15s ease;
+    }
+  }
+
+  &:checked + label::before {
+    background: var(--color, #{$link});
+  }
+
+  &:checked + label::after {
+    transform: translateX(1.625rem);
+  }
+
+  &:focus-visible + label::before {
+    outline: 2px solid $link;
+    outline-offset: 2px;
+  }
+
+  &:disabled + label {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &.is-small + label {
+    height: $control-height;
+    padding-left: 2.75rem;
+    padding-top: 0.2rem;
+    font-size: $size-small;
+
+    &::before {
+      top: calc(50% - 0.5625rem);
+      width: 2.25rem;
+      height: 1.125rem;
+    }
+
+    &::after {
+      top: calc(50% - 0.375rem);
+      left: 0.1875rem;
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
+
+  &.is-small:checked + label::after {
+    transform: translateX(1.125rem);
+  }
+}
 
 $backgroundColor: $white;
 $borderColor: none;
@@ -116,30 +203,61 @@ $footerActiveColor: #d00;
   }
 }
 
-// daisy UI color override
-.du-tabs {
-  --rounded-btn: #{$radius};
+// Small application-owned controls that Bulma does not provide.
+.boxed-tabs {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: $radius;
   background-color: $grey-lightest !important;
 
-  .du-tab {
+  .boxed-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    padding: 0 0.75rem;
+    border-radius: $radius;
     color: $grey-dark !important;
+    font-size: 0.75rem;
 
-    &.du-tab-active {
+    &.is-active {
       background-color: $white !important;
       color: $black-bis !important;
     }
   }
 }
 
-.du-menu {
+.ledger-file-tree {
+  width: 100%;
+  padding: 0;
+  list-style: none;
+
+  ul {
+    margin-left: 1rem;
+    padding-left: 0.5rem;
+  }
+
+  li {
+    list-style: none;
+  }
+
   summary:after {
     color: $link;
   }
 
   a,
   summary {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(auto, max-content) auto max-content;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
     border-radius: $radius-small;
     color: $grey-dark;
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   a:hover,
@@ -147,15 +265,240 @@ $footerActiveColor: #d00;
     background-color: $white-ter !important;
   }
 
-  a.du-active {
+  a.is-active {
     color: $link !important;
     background-color: $white !important;
     font-weight: bold;
   }
 }
 
-.du-range {
-  --range-shdw: var(--fallback-bc, oklch(var(--nc) / 1));
+.paisa-range {
+  width: 100%;
+  height: 1rem;
+  appearance: none;
+  background: transparent;
+
+  &::-webkit-slider-runnable-track {
+    height: 0.25rem;
+    border-radius: $radius-rounded;
+    background: $grey-lighter;
+  }
+
+  &::-webkit-slider-thumb {
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.375rem;
+    appearance: none;
+    border: 0;
+    border-radius: 50%;
+    background: $grey-darker;
+  }
+
+  &::-moz-range-track {
+    height: 0.25rem;
+    border-radius: $radius-rounded;
+    background: $grey-lighter;
+  }
+
+  &::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border: 0;
+    border-radius: 50%;
+    background: $grey-darker;
+  }
+}
+
+.radial-progress {
+  --value: 0;
+  --size: 5rem;
+  --thickness: 0.25rem;
+  display: inline-grid;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  place-content: center;
+  border-radius: 50%;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: conic-gradient(currentColor calc(var(--value) * 1%), transparent
+      0);
+    content: "";
+    mask: radial-gradient(
+      farthest-side,
+      transparent calc(100% - var(--thickness)),
+      #000 calc(100% - var(--thickness) + 1px)
+    );
+  }
+}
+
+// Layout primitives used only where Bulma has no equivalent helper.
+.paisa-grid {
+  display: grid;
+}
+
+.paisa-toast-container {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  right: 0;
+  display: flex;
+  width: 100%;
+  padding: 15px;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+
+  &.is-bottom {
+    top: auto;
+    bottom: 0;
+  }
+
+  &.is-center {
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification {
+    display: inline-flex;
+    width: auto;
+    padding: 1.25rem 1.5rem;
+    pointer-events: auto;
+    white-space: pre-wrap;
+  }
+}
+
+.paisa-file-dropzone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px dashed #eeeeee;
+  border-radius: 2px;
+  background: #fafafa;
+  color: #bdbdbd;
+  cursor: pointer;
+  font: inherit;
+  outline: none;
+  transition: border 0.24s ease-in-out;
+
+  &:focus-visible,
+  &.is-dragging {
+    border-color: #2196f3;
+  }
+}
+
+.dashboard-recurring-grid {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.paisa-overflow-x-auto {
+  overflow-x: auto;
+}
+
+.paisa-overflow-y-auto {
+  overflow-y: auto;
+}
+
+.paisa-overflow-hidden {
+  overflow: hidden;
+}
+
+.paisa-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paisa-nowrap {
+  white-space: nowrap;
+}
+
+.paisa-whitespace-pre {
+  white-space: pre;
+}
+
+.paisa-full-width {
+  width: 100%;
+}
+
+.paisa-screen-height {
+  height: 100vh;
+}
+
+.paisa-max-screen-height {
+  max-height: 100vh;
+}
+
+.paisa-min-width-0 {
+  min-width: 0;
+}
+
+.paisa-max-width-fit {
+  max-width: fit-content;
+}
+
+.paisa-clickable {
+  cursor: pointer;
+}
+
+@each $value in 15, 20, 30, 40 {
+  .paisa-opacity-#{$value} {
+    opacity: $value * 0.01;
+  }
+}
+
+.gap-0 {
+  gap: 0;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-5 {
+  gap: 1.25rem;
+}
+
+.paisa-p-1-5 {
+  padding: 0.375rem;
+}
+
+.paisa-negative-mb-1 {
+  margin-bottom: -0.25rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem !important;
+}
+
+.paisa-width-80 {
+  width: 20rem;
+}
+
+.paisa-max-width-200 {
+  max-width: 200px;
+}
+
+@media screen and (min-width: 769px) {
+  .paisa-is-flex-tablet {
+    display: flex;
+  }
 }
 
 .modal-background {

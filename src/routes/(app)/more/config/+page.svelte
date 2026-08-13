@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { ajax, configUpdated } from "$lib/utils";
+  import { ajax, configUpdated } from "$lib/core/utils";
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
-  import JsonSchemaForm from "$lib/components/JsonSchemaForm.svelte";
+  import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
   import _ from "lodash";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/core/toast";
   import { refresh } from "../../../../store";
-  import { sync } from "$lib/sync";
+  import { sync } from "$lib/api/sync";
 
   let lastConfig: UserConfig;
   let config: UserConfig;

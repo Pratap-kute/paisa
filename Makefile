@@ -59,7 +59,7 @@ windows:
 
 deploy:
 	fly scale count 2 --region lax --yes
-	docker build -t paisa . --file Dockerfile.demo
+	docker build -t paisa . --file packaging/docker/demo.Dockerfile
 	fly deploy -i paisa:latest --local-only
 	fly scale count 1 --region lax --yes
 
@@ -77,8 +77,8 @@ fixture/main.transactions.json:
 	pkill -f 'paisa serve -p 6500'
 
 generate-fonts:
-	deno run -A download-svgs.js
-	node generate-font.js
+	deno run -A scripts/fonts/download-svgs.js
+	node scripts/fonts/generate-font.js
 
 node2nix:
 	npm install --lockfile-version 2

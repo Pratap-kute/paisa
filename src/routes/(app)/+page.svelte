@@ -1,10 +1,10 @@
 <script lang="ts">
-  import * as cashFlow from "$lib/cash_flow";
-  import COLORS from "$lib/colors";
-  import LastNMonths from "$lib/components/LastNMonths.svelte";
-  import TransactionCard from "$lib/components/TransactionCard.svelte";
-  import * as expense from "$lib/expense/monthly";
-  import { enrichTrantionSequence, sortTrantionSequence } from "$lib/transaction_sequence";
+  import * as cashFlow from "$lib/charts/cash_flow";
+  import COLORS from "$lib/core/colors";
+  import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
+  import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
+  import * as expense from "$lib/charts/expense/monthly";
+  import { enrichTrantionSequence, sortTrantionSequence } from "$lib/domain/transaction_sequence";
   import {
     ajax,
     formatCurrency,
@@ -19,19 +19,19 @@
     now,
     type GoalSummary,
     type AssetBreakdown
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  import BudgetCard from "$lib/components/BudgetCard.svelte";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
+  import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { MasonryGrid } from "@egjs/svelte-grid";
   import { refresh } from "../../store";
-  import UpcomingCard from "$lib/components/UpcomingCard.svelte";
-  import GoalSummaryCard from "$lib/components/GoalSummaryCard.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import BalanceCard from "$lib/components/BalanceCard.svelte";
+  import UpcomingCard from "$lib/components/finance/UpcomingCard.svelte";
+  import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import BalanceCard from "$lib/components/finance/BalanceCard.svelte";
 
   let UntypedMasonryGrid = MasonryGrid as any;
 
@@ -219,7 +219,7 @@
         {/if}
 
         <div class="tile is-parent">
-          <article class="tile is-child min-w-0">
+          <article class="tile is-child paisa-min-width-0">
             <p class="subtitle">
               <a class="secondary-link has-text-grey" href="/cash_flow/monthly">Cash Flow</a>
             </p>
@@ -228,7 +228,7 @@
                 <strong>Oops!</strong> You have not made any transactions in the last 3 months.
               </ZeroState>
 
-              <LegendCard legends={cashflowLegends} clazz="mb-2 overflow-x-auto" />
+              <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
 
               <svg
                 class:is-not-visible={_.isEmpty(cashFlows)}
@@ -307,7 +307,7 @@
                   </p>
                   <div class="content box">
                     <div
-                      class="grid grid-rows-1 overflow-hidden"
+                      class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
                       style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
                     >
                       {#each transactionSequences as ts (ts)}

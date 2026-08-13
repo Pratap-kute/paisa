@@ -1,7 +1,7 @@
 <script lang="ts">
-  import CreditCardCard from "$lib/components/CreditCardCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import { ajax, helpUrl, type CreditCardSummary } from "$lib/utils";
+  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 
@@ -18,7 +18,7 @@
 
 <section class="section">
   <div class="container is-fluid">
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-12">
         <div class="credit-card-container">
           {#each creditCards as creditCard}
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-12">
         <ZeroState item={!isEmpty}>
           <strong>Oops!</strong> You haven't configured any credit cards yet. Checkout the

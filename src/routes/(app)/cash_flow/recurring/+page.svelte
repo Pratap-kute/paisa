@@ -3,7 +3,7 @@
     enrichTrantionSequence,
     nextUnpaidSchedule,
     sortTrantionSequence
-  } from "$lib/transaction_sequence";
+  } from "$lib/domain/transaction_sequence";
   import {
     ajax,
     helpUrl,
@@ -11,14 +11,14 @@
     monthDays,
     type TransactionSchedule,
     type TransactionSequence
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  import RecurringCard from "$lib/components/RecurringCard.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
+  import RecurringCard from "$lib/components/finance/RecurringCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import type { Dayjs } from "dayjs";
-  import RecurringDay from "$lib/components/RecurringDay.svelte";
+  import RecurringDay from "$lib/components/finance/RecurringDay.svelte";
   import dayjs from "dayjs";
 
   let isEmpty = false;
@@ -60,14 +60,14 @@
     <div class="columns" class:is-hidden={isEmpty}>
       <div class="column is-12">
         <div
-          class="has-text-centered grid grid-cols-7 auto-cols-[1fr] auto-rows-[1fr] weekdays-grid uppercase mb-3 is-hidden-mobile"
+          class="has-text-centered paisa-grid recurring-weekdays weekdays-grid is-uppercase mb-3 is-hidden-mobile"
         >
           {#each dayjs.weekdaysShort(true) as day}
             <div>{day}</div>
           {/each}
         </div>
         <div
-          class="grid grid-cols-1 md:grid-cols-7 gap-2 auto-cols-[1fr] auto-rows-[1fr] overflow-y-auto pb-1"
+          class="paisa-grid recurring-calendar gap-2 paisa-overflow-y-auto pb-1"
           style={isMobile() ? "" : "height: calc(100vh - 150px);"}
         >
           {#each days as day (day)}
@@ -93,3 +93,25 @@
     </div>
   </div>
 </div>
+
+<style lang="scss">
+  .recurring-weekdays,
+  .recurring-calendar {
+    grid-auto-columns: 1fr;
+    grid-auto-rows: 1fr;
+  }
+
+  .recurring-weekdays {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .recurring-calendar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media screen and (min-width: 769px) {
+    .recurring-calendar {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+  }
+</style>

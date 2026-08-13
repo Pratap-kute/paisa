@@ -1,11 +1,11 @@
 <script lang="ts">
   import _ from "lodash";
-  import { renderMonthlyFlow } from "$lib/cash_flow";
-  import { ajax, type CashFlow, type Legend } from "$lib/utils";
+  import { renderMonthlyFlow } from "$lib/charts/cash_flow";
+  import { ajax, type CashFlow, type Legend } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let legends: Legend[] = [];
   let cashFlows: CashFlow[] = [];

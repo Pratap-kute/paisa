@@ -1,5 +1,5 @@
 <script lang="ts">
-  import COLORS from "$lib/colors";
+  import COLORS from "$lib/core/colors";
   import {
     ajax,
     formatCurrency,
@@ -8,19 +8,19 @@
     type AssetBreakdown,
     type Point,
     type Posting
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import { onMount, tick, onDestroy } from "svelte";
   import ARIMAPromise from "arima/async";
-  import { forecast, renderProgress, findBreakPoints, renderInvestmentTimeline } from "$lib/goals";
-  import LevelItem from "$lib/components/LevelItem.svelte";
+  import { forecast, renderProgress, findBreakPoints, renderInvestmentTimeline } from "$lib/domain/goals";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import type { PageData } from "./$types";
-  import { iconGlyph } from "$lib/icon";
+  import { iconGlyph } from "$lib/core/icon";
   import _ from "lodash";
-  import PostingGroup from "$lib/components/PostingGroup.svelte";
-  import PostingCard from "$lib/components/PostingCard.svelte";
-  import ProgressWithBreakpoints from "$lib/components/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/components/AssetsBalance.svelte";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
+  import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
+  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
+  import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
 
   export let data: PageData;
 
@@ -139,9 +139,9 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-9">
-        <div class="columns flex-wrap">
+        <div class="columns is-flex-wrap-wrap">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="400" bind:this={svg} />
             </div>
           </div>
@@ -149,7 +149,7 @@
         <BoxLabel text="{iconGlyph(icon)} {name} progress" />
         <div class="columns">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
             </div>
           </div>

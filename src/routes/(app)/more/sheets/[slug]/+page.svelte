@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { createEditor, sheetEditorState } from "$lib/sheet";
-  import { focus, moveToLine, updateContent } from "$lib/editor";
+  import { createEditor, sheetEditorState } from "$lib/editors/sheet_editor";
+  import { focus, moveToLine, updateContent } from "$lib/editors/editor";
   import {
     ajax,
     buildDirectoryTree,
     formatFloatUptoPrecision,
     type LedgerFile,
     type Posting,
-    type SheetFile
-  } from "$lib/utils";
+    type SheetFile,
+  } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding } from "@codemirror/view";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/core/toast";
   import type { EditorView } from "codemirror";
   import _ from "lodash";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/FileTree.svelte";
-  import FileModal from "$lib/components/FileModal.svelte";
+  import FileTree from "$lib/components/ledger/FileTree.svelte";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
 
   let ledgerFiles: LedgerFile[] = [];
@@ -41,23 +41,35 @@
     };
   }
 
+  function undoEdit() {
+    undo(editor);
+  }
+
+  function redoEdit() {
+    redo(editor);
+  }
+
   const keybindings: readonly KeyBinding[] = [
     {
       key: "Ctrl-s",
       run: command(save),
-      preventDefault: true
-    }
+      preventDefault: true,
+    },
   ];
 
   let cancelled = false;
   beforeNavigate(async ({ cancel }) => {
     if ($sheetEditorState.hasUnsavedChanges) {
-      const confirmed = confirm("You have unsaved changes. Are you sure you want to leave?");
+      const confirmed = confirm(
+        "You have unsaved changes. Are you sure you want to leave?",
+      );
       if (!confirmed) {
         cancel();
         cancelled = true;
       } else {
-        $sheetEditorState = _.assign({}, $sheetEditorState, { hasUnsavedChanges: false });
+        $sheetEditorState = _.assign({}, $sheetEditorState, {
+          hasUnsavedChanges: false,
+        });
       }
     }
   });
@@ -81,16 +93,23 @@
 
   async function loadFiles(selectedFileName: string) {
     let files;
-    ({ files: ledgerFiles, accounts, commodities } = await ajax("/api/editor/files"));
+    ({
+      files: ledgerFiles,
+      accounts,
+      commodities,
+    } = await ajax("/api/editor/files"));
     ({ files, postings } = await ajax("/api/sheets/files"));
     filesMap = _.fromPairs(_.map(files, (f) => [f.name, f]));
     if (!_.isEmpty(files)) {
-      selectedFile = _.find(files, (f) => f.name == selectedFileName) || files[0];
+      selectedFile =
+        _.find(files, (f) => f.name == selectedFileName) || files[0];
     }
   }
 
   async function selectFile(file: SheetFile) {
-    const success = await navigate(`/more/sheets/${encodeURIComponent(file.name)}`);
+    const success = await navigate(
+      `/more/sheets/${encodeURIComponent(file.name)}`,
+    );
     if (success) {
       selectedFile = file;
     }
@@ -100,7 +119,7 @@
     const { file } = await ajax("/api/sheets/file", {
       method: "POST",
       body: JSON.stringify({ name: version }),
-      background: true
+      background: true,
     });
 
     updateContent(editor, file.content);
@@ -110,7 +129,7 @@
     const { file } = await ajax("/api/sheets/file/delete_backups", {
       method: "POST",
       body: JSON.stringify({ name: selectedFile.name }),
-      background: true
+      background: true,
     });
 
     selectedFile.versions = file.versions;
@@ -120,25 +139,30 @@
     const doc = editor.state.doc;
     const { saved, file, message } = await ajax("/api/sheets/save", {
       method: "POST",
-      body: JSON.stringify({ name: selectedFile.name, content: doc.toString() }),
-      background: true
+      body: JSON.stringify({
+        name: selectedFile.name,
+        content: doc.toString(),
+      }),
+      background: true,
     });
 
     if (!saved) {
       toast.toast({
         message: `Failed to save ${selectedFile.name}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
     } else {
       toast.toast({
         message: `Saved ${selectedFile.name}`,
-        type: "is-success"
+        type: "is-success",
       });
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = null;
-      $sheetEditorState = _.assign({}, $sheetEditorState, { hasUnsavedChanges: false });
+      $sheetEditorState = _.assign({}, $sheetEditorState, {
+        hasUnsavedChanges: false,
+      });
     }
   }
 
@@ -153,8 +177,8 @@
         autocomplete: {
           account: accounts,
           commodity: commodities,
-          filename: ledgerFiles.map((f) => f.name)
-        }
+          filename: ledgerFiles.map((f) => f.name),
+        },
       });
       if (lineNumber > 0) {
         moveToLine(editor, lineNumber, true);
@@ -173,20 +197,26 @@
     destinationFile = destinationFile.trim() + ".paisa";
     const { saved, message } = await ajax("/api/sheets/save", {
       method: "POST",
-      body: JSON.stringify({ name: destinationFile, content: "", operation: "create" }),
-      background: true
+      body: JSON.stringify({
+        name: destinationFile,
+        content: "",
+        operation: "create",
+      }),
+      background: true,
     });
 
     if (saved) {
       toast.toast({
         message: `Created <b><a href="/more/sheets/${encodeURIComponent(
-          destinationFile
+          destinationFile,
         )}">${destinationFile}</a></b>`,
         type: "is-success",
-        duration: 5000
+        duration: 5000,
       });
 
-      const success = await navigate(`/more/sheets/${encodeURIComponent(destinationFile)}`);
+      const success = await navigate(
+        `/more/sheets/${encodeURIComponent(destinationFile)}`,
+      );
       if (success) {
         await loadFiles(destinationFile);
       }
@@ -194,7 +224,7 @@
       toast.toast({
         message: `Failed to create ${destinationFile}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
     }
   }
@@ -208,11 +238,17 @@
   help="Filename without any extension"
 />
 
-<section class="section tab-editor max-h-screen" style="padding-bottom: 0 !important">
+<section
+  class="section tab-editor paisa-max-screen-height"
+  style="padding-bottom: 0 !important"
+>
   <div class="container is-fluid">
     <div class="columuns">
       <div class="column is-12 px-0 pt-0 mb-2">
-        <div class="box p-3 is-flex is-align-items-center overflow-x-auto" style="width: 100%">
+        <div
+          class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto"
+          style="width: 100%"
+        >
           <div class="field has-addons mb-0">
             <p class="control">
               <button
@@ -245,7 +281,7 @@
               <button
                 class="button is-small"
                 disabled={$sheetEditorState.undoDepth == 0}
-                on:click={(_e) => undo(editor)}
+                on:click={undoEdit}
               >
                 <span class="icon is-small">
                   <i class="fas fa-arrow-left" />
@@ -257,7 +293,7 @@
               <button
                 class="button is-small"
                 disabled={$sheetEditorState.redoDepth == 0}
-                on:click={(_e) => redo(editor)}
+                on:click={redoEdit}
               >
                 <span>Redo</span>
                 <span class="icon is-small">
@@ -293,7 +329,10 @@
               </div>
 
               <p class="control">
-                <button class="button is-small" on:click={(_e) => deleteBackups()}>
+                <button
+                  class="button is-small"
+                  on:click={(_e) => deleteBackups()}
+                >
                   <span class="icon is-small">
                     <i class="fas fa-trash-can" />
                   </span>
@@ -304,7 +343,9 @@
 
           {#if $sheetEditorState.errors.length > 0}
             <div class="control ml-5">
-              <a on:click={(_e) => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+              <a
+                on:click={(_e) =>
+                  moveToLine(editor, $sheetEditorState.errors[0].line_from)}
                 ><span class="ml-1 tag invertable is-danger is-light"
                   >{$sheetEditorState.errors.length} error(s) found</span
                 ></a
@@ -326,7 +367,7 @@
     </div>
     <div class="columns">
       <div class="column is-3-widescreen is-2-fullhd is-4">
-        <div class="box px-2 full-height overflow-y-auto">
+        <div class="box px-2 full-height paisa-overflow-y-auto">
           <aside class="menu">
             <FileTree
               path=""
@@ -339,7 +380,7 @@
         </div>
       </div>
       <div class="column is-9-widescreen is-10-fullhd is-8">
-        <div class="flex overflow-x-auto">
+        <div class="is-flex paisa-overflow-x-auto">
           <div
             class="box box-r-none py-0 pr-1 mb-0"
             style="min-width: min(75%,24rem); max-width: min(75%,48rem);"
@@ -362,7 +403,9 @@
                   class:underline={result.underline}
                   class:font-bold={result.bold}
                   class:text-left={result.align === "left"}
-                  class="m-0 p-0 truncate {result.error ? 'has-text-danger' : ''}"
+                  class="m-0 p-0 paisa-truncate {result.error
+                    ? 'has-text-danger'
+                    : ''}"
                   style="font-size: 0.9285714285714286rem; line-height: 1.4"
                 >
                   &nbsp;{result.result}

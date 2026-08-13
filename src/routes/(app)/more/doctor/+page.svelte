@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import COLORS from "$lib/colors";
-  import { ajax } from "$lib/utils";
-  import { renderIssues } from "$lib/doctor";
+  import COLORS from "$lib/core/colors";
+  import { ajax } from "$lib/core/utils";
+  import { renderIssues } from "$lib/charts/doctor";
 
   let issues = [];
   onMount(async () => {

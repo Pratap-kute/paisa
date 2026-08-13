@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-var -- Ambient browser globals and untyped third-party modules require declaration syntax.
 /// <reference types="@sveltejs/kit" />
 // https://github.com/oven-sh/bun/issues/5134
 /// <reference lib="dom" />
@@ -77,7 +78,7 @@ declare module "textures" {
   export default textures;
 }
 
-declare module "xlsx-populate" {
+declare module "xlsx-populate/browser/xlsx-populate.js" {
   export function fromDataAsync(
     data: ArrayBuffer,
     options: { password?: string },
@@ -101,10 +102,6 @@ declare module "d3-sankey-circular" {
 
 declare module "d3-path-arrows" {
   export function pathArrows(): any;
-}
-
-declare module "compute-cosine-similarity" {
-  export default function similarity(a: number[], b: number[]): number;
 }
 
 declare module "svelte-carousel" {

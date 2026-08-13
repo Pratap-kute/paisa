@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import FileModal from "$lib/components/FileModal.svelte";
-  import { ajax } from "$lib/utils";
-  import * as toast from "bulma-toast";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import { ajax } from "$lib/core/utils";
+  import * as toast from "$lib/core/toast";
 
   let modalOpen = false;
   function openCreateModal() {
@@ -49,7 +49,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-6 mx-auto">
-        <div class="flex items-center justify-center mt-5">
+        <div class="is-flex is-align-items-center is-justify-content-center mt-5">
           <div class="field">
             <p class="control">
               <button class="button is-medium is-link" on:click={(_e) => openCreateModal()}>

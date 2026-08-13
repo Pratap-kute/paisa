@@ -1,8 +1,8 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
-  import { buildLegends, renderOverview } from "$lib/gain";
-  import { ajax, type Legend } from "$lib/utils";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import { buildLegends, renderOverview } from "$lib/charts/gain";
+  import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 
@@ -20,7 +20,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <LegendCard {legends} clazz="ml-4" />
           <svg id="d3-gain-overview" />
         </div>

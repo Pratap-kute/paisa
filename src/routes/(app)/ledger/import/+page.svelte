@@ -3,21 +3,22 @@
   import {
     createEditor as createTemplateEditor,
     editorState as templateEditorState
-  } from "$lib/template_editor";
+  } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent
-  } from "$lib/editor";
-  import Dropzone from "svelte-file-dropzone";
-  import { parse, asRows, render as renderJournal } from "$lib/spreadsheet";
+  } from "$lib/editors/editor";
+  import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
+  import { parse, asRows, render as renderJournal } from "$lib/importing/spreadsheet";
   import _ from "lodash";
   import type { EditorView } from "codemirror";
   import { onMount } from "svelte";
-  import { ajax, type ImportTemplate } from "$lib/utils";
+  import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
-  import * as toast from "bulma-toast";
-  import FileModal from "$lib/components/FileModal.svelte";
-  import Modal from "$lib/components/Modal.svelte";
+  import * as toast from "$lib/core/toast";
+  import { ensureFileExtension } from "$lib/ledger/file";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import Modal from "$lib/components/ui/Modal.svelte";
 
   let templates: ImportTemplate[] = [];
   let selectedTemplate: ImportTemplate;
@@ -113,7 +114,6 @@
     $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
   }
 
-  let input: any;
 
   $: if (!_.isEmpty(data) && $templateEditorState.template) {
     if (
@@ -183,6 +183,7 @@
   }
 
   async function saveToFile(destinationFile: string) {
+    destinationFile = ensureFileExtension(destinationFile, ".ledger");
     const { saved, message } = await ajax("/api/editor/save", {
       method: "POST",
       body: JSON.stringify({ name: destinationFile, content: preview, operation: "overwrite" }),
@@ -249,7 +250,7 @@
   <div class="container is-fluid">
     <div class="columns mb-0">
       <div class="column is-5 py-0">
-        <div class="box p-3 mb-3 overflow-x-auto">
+        <div class="box p-3 mb-3 paisa-overflow-x-auto">
           <div class="field is-grouped mb-0">
             <p class="control">
               <span data-tippy-content="Create" data-tippy-followCursor="false">
@@ -362,16 +363,15 @@
       </div>
       <div class="column is-7 py-0">
         <div class="box p-3 mb-3">
-          <Dropzone
+          <FileDropzone
             multiple={false}
-            inputElement={input}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
             on:drop={handleFilesSelect}
           >
             Drag 'n' drop CSV, TXT, XLS, XLSX, PDF file here or click to select
-          </Dropzone>
+          </FileDropzone>
         </div>
-        <div class="is-flex justify-end mb-3 gap-4">
+        <div class="is-flex is-justify-content-flex-end mb-3 gap-4">
           <div class="field color-switch">
             <input
               id="import-reverse"

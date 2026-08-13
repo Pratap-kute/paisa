@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import Logo from "$lib/components/Logo.svelte";
-  import { login } from "$lib/utils";
+  import Logo from "$lib/components/layout/Logo.svelte";
+  import { login } from "$lib/core/utils";
   import _ from "lodash";
   let username = "";
   let password = "";
@@ -28,9 +28,9 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12 p-0">
-        <div class="flex justify-center items-center h-screen">
-          <div class="box px-5 w-80">
-            <div class="flex justify-center items-center mb-2">
+        <div class="is-flex is-justify-content-center is-align-items-center paisa-screen-height">
+          <div class="box px-5 paisa-width-80">
+            <div class="is-flex is-justify-content-center is-align-items-center mb-2">
               <div class="mt-1 mr-1"><Logo size={32} /></div>
               <div class="is-size-3">
                 <a href="https://paisa.fyi" class="is-primary-color">Paisa</a>

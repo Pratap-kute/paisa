@@ -1,29 +1,45 @@
-import { emptyDir } from "@std/fs";
+import { ensureDir } from "@std/fs";
 
-await emptyDir("coverage/deno");
-const unit = await new Deno.Command(Deno.execPath(), {
-  args: [
-    "test",
-    "--no-check",
-    "--allow-read",
-    "--allow-env",
-    "--ignore=src/lib/components",
-    "--coverage=coverage/deno",
-    "src/",
-  ],
-  stdin: "inherit",
-  stdout: "inherit",
-  stderr: "inherit",
-}).spawn().status;
-if (!unit.success) Deno.exit(unit.code);
+await ensureDir("coverage");
 
-const denoReport = await new Deno.Command(Deno.execPath(), {
-  args: ["coverage", "coverage/deno", "--lcov", "--output=coverage/deno.lcov"],
-  stdout: "inherit",
-  stderr: "inherit",
-}).spawn().status;
-if (!denoReport.success) Deno.exit(denoReport.code);
+async function runVitest(
+  config: string,
+  coverage: boolean,
+  env: Record<string, string> = {},
+) {
+  const args = [
+    "run",
+    "-A",
+    "npm:vitest@2.1.9",
+    "run",
+    "--config",
+    config,
+    "--pool=threads",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+  ];
+  if (coverage) args.push("--coverage");
+  return await new Deno.Command(Deno.execPath(), {
+    args,
+    env,
+    stdin: "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
+  }).spawn().status;
+}
 
+// Core coverage is the enforceable business-logic signal. In report-only mode
+// Vitest still produces the same report, but its threshold failure is ignored.
+const reportOnly = Deno.args.includes("--report-only");
+const core = await runVitest(
+  "vitest.core.config.ts",
+  true,
+  reportOnly ? { COVERAGE_REPORT_ONLY: "true" } : {},
+);
+if (!core.success) Deno.exit(core.code);
+
+// Component coverage is intentionally informational. It has a much broader UI
+// denominator and should not obscure whether the core logic is well tested.
 const component = await new Deno.Command(Deno.execPath(), {
   args: [
     "run",
@@ -43,21 +59,15 @@ const component = await new Deno.Command(Deno.execPath(), {
 }).spawn().status;
 if (!component.success) Deno.exit(component.code);
 
-const parts = ["coverage/deno.lcov", "coverage/component/lcov.info"];
-const merged = (await Promise.all(parts.map((path) => Deno.readTextFile(path))))
-  .join("\n");
-await Deno.writeTextFile("coverage/lcov.info", merged);
-console.log("Combined LCOV report: coverage/lcov.info");
-
 const summary = JSON.parse(
-  await Deno.readTextFile("coverage/component/coverage-summary.json"),
+  await Deno.readTextFile("coverage/core/coverage-summary.json"),
 ).total as Record<string, { pct: number }>;
 const threshold = 60;
 const failed = ["lines", "statements", "functions", "branches"].filter(
   (metric) => summary[metric].pct < threshold,
 );
 if (failed.length) {
-  const message = `Frontend coverage is below ${threshold}%: ${
+  const message = `Core frontend coverage is below ${threshold}%: ${
     failed.map((metric) => `${metric}=${summary[metric].pct}%`).join(", ")
   }`;
   if (Deno.args.includes("--report-only")) {
@@ -66,3 +76,6 @@ if (failed.length) {
     throw new Error(message);
   }
 }
+
+console.log("Core coverage report: coverage/core/index.html");
+console.log("Component coverage report: coverage/component/index.html");

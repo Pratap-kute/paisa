@@ -6,20 +6,20 @@
     moveToEnd,
     moveToLine,
     updateContent
-  } from "$lib/editor";
+  } from "$lib/editors/editor";
   import { insertTab } from "@codemirror/commands";
-  import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/utils";
+  import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding } from "@codemirror/view";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/core/toast";
   import type { EditorView } from "codemirror";
-  import { format } from "$lib/journal";
+  import { format } from "$lib/ledger/journal";
   import _ from "lodash";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/FileTree.svelte";
-  import FileModal from "$lib/components/FileModal.svelte";
+  import FileTree from "$lib/components/ledger/FileTree.svelte";
+  import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
 
   export let data: PageData;
@@ -38,6 +38,14 @@
       fn();
       return true;
     };
+  }
+
+  function undoEdit() {
+    undo(editor);
+  }
+
+  function redoEdit() {
+    redo(editor);
   }
 
   const keybindings: readonly KeyBinding[] = [
@@ -217,11 +225,11 @@
 
 <FileModal bind:open={modalOpen} on:save={(e) => createFile(e.detail)} label="Create" help="" />
 
-<section class="section tab-editor max-h-screen" style="padding-bottom: 0 !important">
+<section class="section tab-editor paisa-max-screen-height" style="padding-bottom: 0 !important">
   <div class="container is-fluid">
     <div class="columuns">
       <div class="column is-12 px-0 pt-0 mb-2">
-        <div class="box p-3 is-flex is-align-items-center overflow-x-auto" style="width: 100%">
+        <div class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto" style="width: 100%">
           <div class="field has-addons mb-0">
             <p class="control">
               <button
@@ -254,7 +262,7 @@
               <button
                 class="button is-small"
                 disabled={$editorState.undoDepth == 0}
-                on:click={(_e) => undo(editor)}
+                on:click={undoEdit}
               >
                 <span class="icon is-small">
                   <i class="fas fa-arrow-left" />
@@ -266,7 +274,7 @@
               <button
                 class="button is-small"
                 disabled={$editorState.redoDepth == 0}
-                on:click={(_e) => redo(editor)}
+                on:click={redoEdit}
               >
                 <span>Redo</span>
                 <span class="icon is-small">
@@ -333,7 +341,7 @@
     </div>
     <div class="columns">
       <div class="column is-3-widescreen is-2-fullhd is-4">
-        <div class="box px-2 full-height overflow-y-auto">
+        <div class="box px-2 full-height paisa-overflow-y-auto">
           <aside class="menu">
             <FileTree
               path=""

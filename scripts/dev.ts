@@ -8,6 +8,23 @@ const ignoredDirectories = new Set([
   "web/static",
 ]);
 
+function ensurePortAvailable(port: number, service: string) {
+  try {
+    const listener = Deno.listen({ hostname: "0.0.0.0", port });
+    listener.close();
+  } catch (error) {
+    if (!(error instanceof Deno.errors.AddrInUse)) throw error;
+    console.error(
+      `${service} port ${port} is already in use. ` +
+        "Stop the existing development server with Ctrl+C, then run make develop again.",
+    );
+    Deno.exit(1);
+  }
+}
+
+ensurePortAvailable(7500, "Backend");
+if (includeFrontend) ensurePortAvailable(5173, "Frontend");
+
 let backend: Deno.ChildProcess | undefined;
 let frontend: Deno.ChildProcess | undefined;
 const backendBinary = await Deno.makeTempFile({

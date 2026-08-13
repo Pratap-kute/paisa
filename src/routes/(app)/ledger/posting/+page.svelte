@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/colors";
-  import PostingNote from "$lib/components/PostingNote.svelte";
-  import PostingStatus from "$lib/components/PostingStatus.svelte";
-  import SearchQuery from "$lib/components/SearchQuery.svelte";
-  import { iconText } from "$lib/icon";
-  import { change } from "$lib/posting";
-  import { editorState } from "$lib/search_query_editor";
+  import { accountColorStyle } from "$lib/core/colors";
+  import PostingNote from "$lib/components/transactions/PostingNote.svelte";
+  import PostingStatus from "$lib/components/transactions/PostingStatus.svelte";
+  import SearchQuery from "$lib/components/ledger/SearchQuery.svelte";
+  import { iconText } from "$lib/core/icon";
+  import { change } from "$lib/domain/posting";
+  import { editorState } from "$lib/editors/search_query_editor";
   import {
     ajax,
     postingUrl,
@@ -16,7 +16,7 @@
     type LedgerFile,
     type Transaction,
     asTransaction
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import _ from "lodash";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
@@ -92,10 +92,10 @@
     </div>
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto" style="max-width: 98rem;">
+        <div class="box paisa-overflow-x-auto" style="max-width: 98rem;">
           <div style="width: 98rem;">
             <div
-              class="px-3 pt-1 grid grid-cols-7x gap-1 posting-row items-baseline has-text-weight-bold"
+              class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline has-text-weight-bold"
             >
               <div>Date</div>
               <div>Description</div>
@@ -115,7 +115,7 @@
             >
               <div
                 slot="item"
-                class="px-3 pt-1 grid grid-cols-7x gap-1 posting-row items-baseline is-hoverable"
+                class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline is-hoverable"
                 let:index
                 let:style
                 {style}
@@ -123,13 +123,13 @@
                 {@const p = filteredPostings[index]}
                 {@const c = change(p)}
                 <div>{p.date.format("DD MMM YYYY")}</div>
-                <div class="is-size-7 truncate" title={p.payee}>
+                <div class="is-size-7 paisa-truncate" title={p.payee}>
                   <PostingStatus posting={p} />
                   <PostingNote posting={p} />
                   <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
                 </div>
-                <div class="custom-icon truncate" title={p.account}>
-                  <div class="flex">
+                <div class="custom-icon paisa-truncate" title={p.account}>
+                  <div class="is-flex">
                     <span class="mr-1" style={accountColorStyle(firstName(p.account))}
                       >{iconText(p.account)}</span
                     >

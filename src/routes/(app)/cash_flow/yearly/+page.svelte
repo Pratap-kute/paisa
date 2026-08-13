@@ -1,16 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import _ from "lodash";
-  import { renderFlow } from "$lib/cash_flow";
-  import { ajax, depth, firstName, rem, type Graph, type Legend, type Posting } from "$lib/utils";
+  import { renderFlow } from "$lib/charts/cash_flow";
+  import { ajax, depth, firstName, rem, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, year } from "../../../../store";
   import {
     setCashflowDepthAllowed,
     cashflowExpenseDepth,
     cashflowIncomeDepth
   } from "../../../../persisted_store";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let legends: Legend[] = [];
   let graph: Record<string, Graph>, expenses: Posting[];
@@ -73,7 +73,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <ZeroState item={!isEmpty}
             ><strong>Oops!</strong> You have not made any transactions for the selected year.</ZeroState
           >

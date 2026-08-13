@@ -6,16 +6,16 @@
     isMobile,
     type Legend,
     type Networth
-  } from "$lib/utils";
-  import COLORS from "$lib/colors";
-  import { renderNetworth } from "$lib/networth";
+  } from "$lib/core/utils";
+  import COLORS from "$lib/core/colors";
+  import { renderNetworth } from "$lib/charts/networth";
   import _ from "lodash";
   import { onDestroy, onMount } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let networth = 0;
   let investment = 0;
@@ -84,7 +84,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <ZeroState item={points}>
             <strong>Oops!</strong> You have no transactions.
           </ZeroState>

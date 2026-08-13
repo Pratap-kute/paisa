@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Table from "$lib/components/Table.svelte";
+  import Table from "$lib/components/ui/Table.svelte";
   import {
     indendedLiabilityAccountName,
     nonZeroCurrency,
     nonZeroFloatChange
-  } from "$lib/table_formatters";
-  import { ajax, buildTree, type LiabilityBreakdown } from "$lib/utils";
+  } from "$lib/tables/formatters";
+  import { ajax, buildTree, type LiabilityBreakdown } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
   import type { ColumnDefinition } from "tabulator-tables";

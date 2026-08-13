@@ -1,5 +1,5 @@
 import { describe, it as test } from "@std/testing/bdd";
-import { sheetLanguage } from "./language.ts";
+import { sheetLanguage } from "./language";
 import { fileTests } from "@lezer/generator/dist/test";
 
 import { dirname, fromFileUrl, join } from "@std/path";

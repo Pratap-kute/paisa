@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- Error hooks normalize values from untyped browser and Svelte boundaries.
 import type { HandleClientError } from "@sveltejs/kit";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -40,12 +41,9 @@ if (pdfjs.GlobalWorkerOptions) {
 }
 
 import Handlebars from "handlebars";
-import helpers from "$lib/template_helpers";
-import * as toast from "bulma-toast";
+import helpers from "$lib/importing/template_helpers";
+import * as toast from "$lib/core/toast";
 import _ from "lodash";
-
-import "@formatjs/intl-numberformat/polyfill";
-import "@formatjs/intl-numberformat/locale-data/en";
 
 Handlebars.registerHelper(
   _.mapValues(helpers, (helper, name) => {
@@ -75,7 +73,12 @@ export const handleError: HandleClientError = (
   if (error instanceof Error) {
     stack = error.stack;
   }
-  return { message, stack, status, detail: (error as any)?.toString?.() ?? String(error) } as any;
+  return {
+    message,
+    stack,
+    status,
+    detail: (error as any)?.toString?.() ?? String(error),
+  } as any;
 };
 
 function formatError(error: any) {

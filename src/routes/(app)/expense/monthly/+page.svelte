@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import {
@@ -8,24 +9,24 @@
     formatCurrency,
     formatPercentage,
     type Legend
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import {
     renderMonthlyExpensesTimeline,
     renderCurrentExpensesBreakdown,
     renderCalendar
-  } from "$lib/expense/monthly";
+  } from "$lib/charts/expense/monthly";
   import { dateRange, month, setAllowedDateRange } from "../../../../store";
   import { writable } from "svelte/store";
-  import PostingCard from "$lib/components/PostingCard.svelte";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import COLORS from "$lib/colors";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
+  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import COLORS from "$lib/core/colors";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import dayjs from "dayjs";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let groups = writable([]);
-  let z: d3.ScaleOrdinal<string, string, never>,
+  let z: ScaleOrdinal<string, string, never>,
     renderer: (ps: Posting[]) => void,
     expenses: Posting[],
     grouped_expenses: Record<string, Posting[]>,
@@ -196,7 +197,7 @@
               <ZeroState item={expenses}>
                 <strong>Oops!</strong> You have no expenses.
               </ZeroState>
-              <LegendCard {legends} clazz="ml-4 overflow-x-auto" />
+              <LegendCard {legends} clazz="ml-4 paisa-overflow-x-auto" />
               <svg id="d3-monthly-expense-timeline" width="100%" height="400" />
             </div>
           </div>

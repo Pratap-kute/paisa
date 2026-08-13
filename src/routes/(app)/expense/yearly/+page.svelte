@@ -2,19 +2,19 @@
   import * as d3 from "d3";
   import { onMount } from "svelte";
   import _ from "lodash";
-  import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/utils";
+  import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import {
     renderYearlyExpensesTimeline,
     renderCurrentExpensesBreakdown,
     renderCalendar
-  } from "$lib/expense/yearly";
+  } from "$lib/charts/expense/yearly";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
-  import LevelItem from "$lib/components/LevelItem.svelte";
-  import COLORS from "$lib/colors";
-  import ZeroState from "$lib/components/ZeroState.svelte";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
-  import LegendCard from "$lib/components/LegendCard.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import COLORS from "$lib/core/colors";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let groups = writable([]);
   let z: d3.ScaleOrdinal<string, string, never>,

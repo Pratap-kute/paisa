@@ -20,7 +20,7 @@ jobs:
           go-version: "1.24.2"
       - run: |
           brew install --force --overwrite sqlite3 create-dmg
-          brew install --build-from-source --verbose ./ledger.rb
+          brew install --build-from-source --verbose ./packaging/ledger/ledger.rb
           cp "$(brew --prefix ledger)/bin/ledger" internal/binary/ledger
           deno install
           deno task build

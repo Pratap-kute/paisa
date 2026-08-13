@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { CapitalGain } from "$lib/utils";
-  import CapitalGainCard from "$lib/components/CapitalGainCard.svelte";
-  import { ajax } from "$lib/utils";
+  import type { CapitalGain } from "$lib/core/utils";
+  import CapitalGainCard from "$lib/components/finance/CapitalGainCard.svelte";
+  import { ajax } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
 

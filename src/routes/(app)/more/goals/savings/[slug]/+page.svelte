@@ -1,5 +1,5 @@
 <script lang="ts">
-  import COLORS from "$lib/colors";
+  import COLORS from "$lib/core/colors";
   import {
     ajax,
     formatCurrency,
@@ -9,7 +9,7 @@
     type Point,
     type Posting,
     type AssetBreakdown
-  } from "$lib/utils";
+  } from "$lib/core/utils";
   import { onMount, tick, onDestroy } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
@@ -19,17 +19,17 @@
     project,
     solvePMTOrNper,
     renderInvestmentTimeline
-  } from "$lib/goals";
+  } from "$lib/domain/goals";
   import _ from "lodash";
-  import LevelItem from "$lib/components/LevelItem.svelte";
+  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import type { PageData } from "./$types";
-  import PostingCard from "$lib/components/PostingCard.svelte";
-  import PostingGroup from "$lib/components/PostingGroup.svelte";
-  import { iconGlyph } from "$lib/icon";
+  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
+  import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
+  import { iconGlyph } from "$lib/core/icon";
   import dayjs from "dayjs";
-  import ProgressWithBreakpoints from "$lib/components/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/components/AssetsBalance.svelte";
-  import BoxLabel from "$lib/components/BoxLabel.svelte";
+  import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
+  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
 
   export let data: PageData;
 
@@ -76,6 +76,10 @@
       balances
     } = await ajax("/api/goals/savings/:name", null, data));
 
+    savingsTimeline = savingsTimeline || [];
+    postings = postings || [];
+    balances = balances || {};
+
     latestPostings = _.chain(postings)
       .sortBy((p) => p.date)
       .reverse()
@@ -98,7 +102,7 @@
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
       predictionsTimeline = project(targetSavings, rate, targetDateObject, pmt, savingsTotal);
-    } else if (savingsTotal < targetSavings) {
+    } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
       predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
     }
@@ -160,9 +164,9 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-9">
-        <div class="columns flex-wrap">
+        <div class="columns is-flex-wrap-wrap">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="400" bind:this={svg} />
             </div>
           </div>
@@ -170,7 +174,7 @@
         <BoxLabel text="{iconGlyph(icon)} {name} progress" />
         <div class="columns">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
             </div>
           </div>
