@@ -29,16 +29,17 @@ type Template struct {
 }
 
 func All() []Template {
-	var templates []Template
-
-	for _, t := range config.GetConfig().ImportTemplates {
-		template := Template{ID: buildID(t.Name, Custom), Name: t.Name, Content: t.Content, TemplateType: Custom}
-		templates = append(templates, template)
-	}
-
 	dirEntries, err := BuiltinTemplates.ReadDir("templates")
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	importTemplates := config.GetConfig().ImportTemplates
+	templates := make([]Template, 0, len(importTemplates)+len(dirEntries))
+
+	for _, t := range importTemplates {
+		template := Template{ID: buildID(t.Name, Custom), Name: t.Name, Content: t.Content, TemplateType: Custom}
+		templates = append(templates, template)
 	}
 	for _, f := range dirEntries {
 		name := f.Name()

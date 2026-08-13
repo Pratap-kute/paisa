@@ -34,12 +34,13 @@ func loadTransactionCache(db *gorm.DB) {
 	postings := query.Init(db).All()
 	tcache.transactions = make(map[string]Transaction)
 
-	for _, t := range Build(postings) {
-		tcache.transactions[t.ID] = t
+	built := Build(postings)
+	for i := range built {
+		tcache.transactions[built[i].ID] = built[i]
 	}
 }
 
-func GetById(db *gorm.DB, id string) (Transaction, bool) {
+func GetByID(db *gorm.DB, id string) (Transaction, bool) {
 	tcache.Do(func() { loadTransactionCache(db) })
 	t, found := tcache.transactions[id]
 	return t, found
@@ -55,7 +56,8 @@ func Build(postings []posting.Posting) []Transaction {
 		sample := ps[0]
 		var tagRecurring string
 		var tagPeriod string
-		for _, p := range ps {
+		for i := range ps {
+			p := &ps[i]
 			if p.TagRecurring != "" {
 				tagRecurring = p.TagRecurring
 			}

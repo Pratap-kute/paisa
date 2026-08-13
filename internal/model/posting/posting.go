@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	ASSETS               = "assets"
-	ASSETS_CASH          = "assets:cash"
-	INCOME               = "income"
-	INCOME_INTEREST      = "income:interest"
-	INCOME_DIVIDEND      = "income:dividend"
-	INCOME_CAPITAL_GAINS = "income:capital_gains"
-	EXPENSES             = "expenses"
-	EXPENSES_CHARGES     = "expenses:charges"
-	EXPENSES_TAXES       = "expenses:taxes"
-	LIABILITIES          = "liabilities"
+	Assets             = "assets"
+	AssetsCash         = "assets:cash"
+	Income             = "income"
+	IncomeInterest     = "income:interest"
+	IncomeDividend     = "income:dividend"
+	IncomeCapitalGains = "income:capital_gains"
+	Expenses           = "expenses"
+	ExpensesCharges    = "expenses:charges"
+	ExpensesTaxes      = "expenses:taxes"
+	Liabilities        = "liabilities"
 )
 
 type Posting struct {
@@ -39,6 +39,7 @@ type Posting struct {
 	TransactionBeginLine uint64          `json:"transaction_begin_line"`
 	TransactionEndLine   uint64          `json:"transaction_end_line"`
 	FileName             string          `json:"file_name"`
+	LineNumber           int             `json:"line_number"`
 	Forecast             bool            `json:"forecast"`
 	Note                 string          `json:"note"`
 	TransactionNote      string          `json:"transaction_note"`
@@ -133,43 +134,43 @@ func UpsertAll(db *gorm.DB, postings []*Posting) {
 func Behaviours(account string) []string {
 	var behaviours []string
 	if utils.IsParent(account, "Assets") {
-		behaviours = append(behaviours, ASSETS)
+		behaviours = append(behaviours, Assets)
 	}
 
 	if utils.IsSameOrParent(account, "Assets:Checking") {
-		behaviours = append(behaviours, ASSETS_CASH)
+		behaviours = append(behaviours, AssetsCash)
 	}
 
 	if utils.IsParent(account, "Income") {
-		behaviours = append(behaviours, INCOME)
+		behaviours = append(behaviours, Income)
 	}
 
 	if utils.IsSameOrParent(account, "Income:Interest") {
-		behaviours = append(behaviours, INCOME_INTEREST)
+		behaviours = append(behaviours, IncomeInterest)
 	}
 
 	if utils.IsSameOrParent(account, "Income:Dividend") {
-		behaviours = append(behaviours, INCOME_DIVIDEND)
+		behaviours = append(behaviours, IncomeDividend)
 	}
 
 	if utils.IsSameOrParent(account, "Income:Capital Gains") {
-		behaviours = append(behaviours, INCOME_CAPITAL_GAINS)
+		behaviours = append(behaviours, IncomeCapitalGains)
 	}
 
 	if utils.IsParent(account, "Expenses") {
-		behaviours = append(behaviours, EXPENSES)
+		behaviours = append(behaviours, Expenses)
 	}
 
 	if utils.IsSameOrParent(account, "Expenses:Charges") {
-		behaviours = append(behaviours, EXPENSES_CHARGES)
+		behaviours = append(behaviours, ExpensesCharges)
 	}
 
 	if utils.IsSameOrParent(account, "Expenses:Tax") {
-		behaviours = append(behaviours, EXPENSES_TAXES)
+		behaviours = append(behaviours, ExpensesTaxes)
 	}
 
 	if utils.IsParent(account, "Liabilities") {
-		behaviours = append(behaviours, LIABILITIES)
+		behaviours = append(behaviours, Liabilities)
 	}
 	return behaviours
 }

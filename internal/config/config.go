@@ -213,6 +213,7 @@ func (itemsUniquePropertiessCompiler) Compile(ctx jsonschema.CompilerContext, m 
 		return itemsUniquePropertiesSchema(itemsString), nil
 	}
 
+	//nolint:nilnil // jsonschema.ExtCompiler contract requires nil, nil when keyword is not present
 	return nil, nil
 }
 
@@ -235,7 +236,7 @@ func (s itemsUniquePropertiesSchema) Validate(ctx jsonschema.ValidationContext, 
 }
 
 //go:embed schema.json
-var SchemaJson string
+var SchemaJSON string
 var schema *jsonschema.Schema
 
 func init() {
@@ -243,7 +244,7 @@ func init() {
 	c.AssertFormat = true
 	c.Draft = jsonschema.Draft2020
 	c.RegisterExtension("itemsUniqueProperties", itemsUniquePropertiesMeta, itemsUniquePropertiessCompiler{})
-	err := c.AddResource("schema.json", strings.NewReader(SchemaJson))
+	err := c.AddResource("schema.json", strings.NewReader(SchemaJSON))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -270,7 +271,7 @@ func SaveConfig(content []byte) error {
 		return err
 	}
 
-	err = os.WriteFile(configPath, yamlContent, 0o644)
+	err = os.WriteFile(configPath, yamlContent, 0o600)
 	if err != nil {
 		return err
 	}
@@ -284,6 +285,7 @@ func LoadConfigFile(path string) {
 		log.Fatal(err)
 	}
 
+	//nolint:gosec // loading config from user-specified path
 	content, err := os.ReadFile(path)
 	if err != nil {
 		log.Warn("Failed to read config file: ", path)
@@ -299,13 +301,13 @@ func LoadConfigFile(path string) {
 }
 
 func LoadConfig(content []byte, cp string) error {
-	var configJson any
-	err := yaml.Unmarshal(content, &configJson)
+	var configJSON any
+	err := yaml.Unmarshal(content, &configJSON)
 	if err != nil {
 		return err
 	}
 
-	err = schema.Validate(configJson)
+	err = schema.Validate(configJSON)
 	if err != nil {
 		return fmt.Errorf("invalid configuration\n%w", err)
 	}
@@ -386,7 +388,7 @@ func GetConfigPath() string {
 
 func GetSchema() any {
 	var schemaObject any
-	err := json.Unmarshal([]byte(SchemaJson), &schemaObject)
+	err := json.Unmarshal([]byte(SchemaJSON), &schemaObject)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -406,7 +408,8 @@ func EnsureLogFilePath() (string, error) {
 		return "", err
 	}
 
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o640)
+	//nolint:gosec // opening log file in user cache directory
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		return "", err
 	}

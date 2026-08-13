@@ -65,12 +65,13 @@ func IsStockSplit(db *gorm.DB, p posting.Posting) bool {
 		return false
 	}
 
-	t, found := transaction.GetById(db, p.TransactionID)
+	t, found := transaction.GetByID(db, p.TransactionID)
 	if !found {
 		return false
 	}
 
-	for _, tp := range t.Postings {
+	for i := range t.Postings {
+		tp := &t.Postings[i]
 		if utils.IsCurrency(tp.Commodity) || tp.Account != p.Account {
 			return false
 		}
@@ -83,7 +84,7 @@ func IsSellWithCapitalGains(db *gorm.DB, p posting.Posting) bool {
 		return false
 	}
 
-	t, found := transaction.GetById(db, p.TransactionID)
+	t, found := transaction.GetByID(db, p.TransactionID)
 	if !found {
 		return false
 	}
@@ -92,7 +93,7 @@ func IsSellWithCapitalGains(db *gorm.DB, p posting.Posting) bool {
 }
 
 func IsContraPostingRefund(db *gorm.DB, p posting.Posting) bool {
-	t, found := transaction.GetById(db, p.TransactionID)
+	t, found := transaction.GetByID(db, p.TransactionID)
 	if !found {
 		return false
 	}
@@ -111,7 +112,9 @@ func IsInterestRepayment(db *gorm.DB, p posting.Posting) bool {
 		return true
 	}
 
-	for _, ip := range irepaymentCache.postings[p.Date.Unix()] {
+	repPostings := irepaymentCache.postings[p.Date.Unix()]
+	for i := range repPostings {
+		ip := &repPostings[i]
 		if ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {
@@ -129,7 +132,9 @@ func IsInterest(db *gorm.DB, p posting.Posting) bool {
 		return false
 	}
 
-	for _, ip := range icache.postings[p.Date.Unix()] {
+	intPostings := icache.postings[p.Date.Unix()]
+	for i := range intPostings {
+		ip := &intPostings[i]
 		if ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {

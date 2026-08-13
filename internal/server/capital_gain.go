@@ -49,9 +49,10 @@ func GetCapitalGains(db *gorm.DB) gin.H {
 func computeCapitalGains(db *gorm.DB, account string, commodity config.Commodity, postings []posting.Posting) CapitalGain {
 	capitalGain := CapitalGain{Account: account, TaxCategory: string(commodity.TaxCategory), FY: make(map[string]FYCapitalGain)}
 	var available []posting.Posting
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		if p.Quantity.GreaterThan(decimal.Zero) {
-			available = append(available, p)
+			available = append(available, *p)
 		} else {
 			quantity := p.Quantity.Neg()
 			totalTax := taxation.Tax{}

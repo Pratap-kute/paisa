@@ -13,7 +13,7 @@ import (
 type GoalSummary struct {
 	Type       string          `json:"type"`
 	Name       string          `json:"name"`
-	Id         string          `json:"id"`
+	ID         string          `json:"id"`
 	Icon       string          `json:"icon"`
 	Current    decimal.Decimal `json:"current"`
 	Target     decimal.Decimal `json:"target"`
@@ -22,11 +22,12 @@ type GoalSummary struct {
 }
 
 func GetGoalSummaries(db *gorm.DB) []GoalSummary {
-	summaries := []GoalSummary{}
+	goals := config.GetConfig().Goals
+	summaries := make([]GoalSummary, 0, len(goals.Retirement)+len(goals.Savings))
 	assetPostings := query.Init(db).Like("Assets:%").All()
 	assetPostings = service.PopulateMarketPrice(db, assetPostings)
 
-	for _, goal := range config.GetConfig().Goals.Retirement {
+	for _, goal := range goals.Retirement {
 		summaries = append(summaries, getRetirementSummary(db, assetPostings, goal))
 	}
 

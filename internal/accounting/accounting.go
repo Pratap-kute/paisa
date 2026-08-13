@@ -24,7 +24,8 @@ type Balance struct {
 func Register(postings []posting.Posting) []Balance {
 	balances := make([]Balance, 0)
 	current := Balance{Quantity: decimal.Zero}
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		sameDay := p.Date.Equal(current.Date)
 		current = Balance{Date: p.Date, Quantity: p.Quantity.Add(current.Quantity), Commodity: p.Commodity}
 		if sameDay {
@@ -75,10 +76,11 @@ func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posti
 
 func FIFO(postings []posting.Posting) []posting.Posting {
 	var available []posting.Posting
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		if utils.IsCurrency(p.Commodity) {
 			if p.Amount.GreaterThan(decimal.Zero) {
-				available = append(available, p)
+				available = append(available, *p)
 			} else {
 				amount := p.Amount.Neg()
 				for amount.GreaterThan(decimal.Zero) && len(available) > 0 {
@@ -95,7 +97,7 @@ func FIFO(postings []posting.Posting) []posting.Posting {
 			}
 		} else {
 			if p.Quantity.GreaterThan(decimal.Zero) {
-				available = append(available, p)
+				available = append(available, *p)
 			} else {
 				quantity := p.Quantity.Neg()
 				for quantity.GreaterThan(decimal.Zero) && len(available) > 0 {
@@ -204,9 +206,9 @@ func PopulateBalance(postings []posting.Posting) []posting.Posting {
 	SortAsc(postings)
 	accumulator := make(map[string]decimal.Decimal)
 
-	for i, p := range postings {
-		accumulator[p.Account] = accumulator[p.Account].Add(p.Quantity)
-		postings[i].Balance = accumulator[p.Account]
+	for i := range postings {
+		accumulator[postings[i].Account] = accumulator[postings[i].Account].Add(postings[i].Quantity)
+		postings[i].Balance = accumulator[postings[i].Account]
 	}
 	return postings
 }

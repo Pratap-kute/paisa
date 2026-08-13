@@ -38,8 +38,9 @@ func GetGain(db *gorm.DB) gin.H {
 		}
 		return p.Account
 	})
-	var gains []Gain
-	for _, account := range utils.SortedKeys(byAccount) {
+	keys := utils.SortedKeys(byAccount)
+	gains := make([]Gain, 0, len(keys))
+	for _, account := range keys {
 		ps := byAccount[account]
 		gains = append(gains, Gain{Account: account, XIRR: service.XIRR(db, ps), Networth: computeNetworth(db, ps), Postings: ps})
 	}
@@ -54,13 +55,12 @@ func GetAccountGain(db *gorm.DB, account string) gin.H {
 	gain := AccountGain{Account: account, XIRR: service.XIRR(db, postings), NetworthTimeline: computeNetworthTimeline(db, postings, accounting.IsLeafAccount(db, account)), Postings: postings}
 
 	commodities := lo.Uniq(lo.Map(postings, func(p posting.Posting, _ int) string { return p.Commodity }))
-	var portfolio_groups PortfolioAllocationGroups
-	portfolio_groups = GetAccountPortfolioAllocation(db, account)
-	if len(commodities) == 0 || len(portfolio_groups.Commomdities) != len(commodities) {
-		portfolio_groups = PortfolioAllocationGroups{Commomdities: []string{}, NameAndSecurityType: []PortfolioAggregate{}, SecurityType: []PortfolioAggregate{}, Rating: []PortfolioAggregate{}, Industry: []PortfolioAggregate{}}
+	portfolioGroups := GetAccountPortfolioAllocation(db, account)
+	if len(commodities) == 0 || len(portfolioGroups.Commomdities) != len(commodities) {
+		portfolioGroups = PortfolioAllocationGroups{Commomdities: []string{}, NameAndSecurityType: []PortfolioAggregate{}, SecurityType: []PortfolioAggregate{}, Rating: []PortfolioAggregate{}, Industry: []PortfolioAggregate{}}
 	}
 
 	assetBreakdown := assets.ComputeBreakdown(db, postings, false, account)
 
-	return gin.H{"gain_timeline_breakdown": gain, "portfolio_allocation": portfolio_groups, "asset_breakdown": assetBreakdown}
+	return gin.H{"gain_timeline_breakdown": gain, "portfolio_allocation": portfolioGroups, "asset_breakdown": assetBreakdown}
 }

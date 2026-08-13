@@ -30,15 +30,21 @@ var updateCmd = &cobra.Command{
 		}
 
 		if syncAll || updateCommodities {
-			model.SyncCommodities(db)
+			if err := model.SyncCommodities(db); err != nil {
+				log.Warn("Failed to sync commodities: ", err)
+			}
 		}
 
 		if syncAll || updatePortfolios {
-			model.SyncPortfolios(db)
+			if err := model.SyncPortfolios(db); err != nil {
+				log.Warn("Failed to sync portfolios: ", err)
+			}
 		}
 
 		if syncAll {
-			model.SyncCII(db)
+			if err := model.SyncCII(db); err != nil {
+				log.Warn("Failed to sync CII: ", err)
+			}
 		}
 	},
 }

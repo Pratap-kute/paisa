@@ -58,7 +58,8 @@ func computeHarvestable(db *gorm.DB, account string, commodity config.Commodity,
 
 	harvestable := Harvestable{Account: account, TaxCategory: string(commodity.TaxCategory), HarvestBreakdown: []HarvestBreakdown{}, CurrentUnitPrice: currentPrice.Value, CurrentUnitDate: currentPrice.Date}
 	cutoff := utils.Now().AddDate(0, 0, -commodity.Harvest)
-	for _, p := range available {
+	for i := range available {
+		p := &available[i]
 		harvestable.TotalUnits = harvestable.TotalUnits.Add(p.Quantity)
 		if p.Date.Before(cutoff) {
 			tax := taxation.Calculate(db, p.Quantity, commodity, p.Price(), p.Date, currentPrice.Value, currentPrice.Date)

@@ -62,13 +62,16 @@ func computeStatement(db *gorm.DB, postings []posting.Posting) map[string]Income
 		incomeStatement.Tax = make(map[string]decimal.Decimal)
 		incomeStatement.Expenses = make(map[string]decimal.Decimal)
 
-		for _, p := range grouped[fy] {
+		fyPostings := grouped[fy]
+		for i := range fyPostings {
+			p := &fyPostings[i]
 
 			category := utils.FirstName(p.Account)
 
 			switch category {
 			case "Income":
-				if service.IsCapitalGains(p) {
+				switch {
+				case service.IsCapitalGains(*p):
 					sourceAccount := service.CapitalGainsSourceAccount(p.Account)
 					r := runnings[sourceAccount]
 					if r.quantity == nil {
@@ -76,9 +79,9 @@ func computeStatement(db *gorm.DB, postings []posting.Posting) map[string]Income
 					}
 					r.amount = r.amount.Add(p.Amount)
 					runnings[sourceAccount] = r
-				} else if strings.HasPrefix(p.Account, "Income:Interest") {
+				case strings.HasPrefix(p.Account, "Income:Interest"):
 					incomeStatement.Interest[p.Account] = incomeStatement.Interest[p.Account].Add(p.Amount)
-				} else {
+				default:
 					incomeStatement.Income[p.Account] = incomeStatement.Income[p.Account].Add(p.Amount)
 				}
 			case "Equity":

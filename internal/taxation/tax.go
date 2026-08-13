@@ -7,21 +7,22 @@ import (
 	"github.com/ananthakumaran/paisa/internal/model/cii"
 	"github.com/ananthakumaran/paisa/internal/service"
 	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
 var (
-	EQUITY_GRANDFATHER_DATE, DEBT_INDEXATION_REVOCATION_DATE, CII_START_DATE time.Time
-	ONE_YEAR                                                                 = time.Hour * 24 * 365
-	THREE_YEAR                                                               = ONE_YEAR * 3
-	TWO_YEAR                                                                 = ONE_YEAR * 2
+	EquityGrandfatherDate, DebtIndexationRevocationDate, CiiStartDate time.Time
+	oneYear                                                           = time.Hour * 24 * 365
+	threeYears                                                        = oneYear * 3
+	twoYears                                                          = oneYear * 2
 )
 
 func init() {
-	EQUITY_GRANDFATHER_DATE, _ = time.ParseInLocation("2006-01-02", "2018-02-01", config.TimeZone())
-	DEBT_INDEXATION_REVOCATION_DATE, _ = time.ParseInLocation("2006-01-02", "2023-04-01", config.TimeZone())
-	CII_START_DATE, _ = time.ParseInLocation("2006-01-02", "2001-03-31", config.TimeZone())
+	EquityGrandfatherDate = lo.Must(time.ParseInLocation("2006-01-02", "2018-02-01", config.TimeZone()))
+	DebtIndexationRevocationDate = lo.Must(time.ParseInLocation("2006-01-02", "2023-04-01", config.TimeZone()))
+	CiiStartDate = lo.Must(time.ParseInLocation("2006-01-02", "2001-03-31", config.TimeZone()))
 }
 
 type Tax struct {
@@ -40,19 +41,21 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	dateDiff := sellDate.Sub(purchaseDate)
 	gain := sellPrice.Mul(quantity).Sub(purchasePrice.Mul(quantity))
 
-	if (commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65) && sellDate.Before(EQUITY_GRANDFATHER_DATE) {
+	if (commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65) && sellDate.Before(EquityGrandfatherDate) {
 		return Tax{Gain: gain, Taxable: decimal.Zero, ShortTerm: decimal.Zero, LongTerm: decimal.Zero, Slab: decimal.Zero}
 	}
 
-	if (commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65) && purchaseDate.Before(EQUITY_GRANDFATHER_DATE) {
-		purchasePrice = service.GetUnitPrice(db, commodity.Name, EQUITY_GRANDFATHER_DATE).Value
+	if (commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65) && purchaseDate.Before(EquityGrandfatherDate) {
+		purchasePrice = service.GetUnitPrice(db, commodity.Name, EquityGrandfatherDate).Value
 	}
 
-	if commodity.TaxCategory == config.Debt && purchaseDate.After(CII_START_DATE) && dateDiff > THREE_YEAR {
+	if commodity.TaxCategory == config.Debt && purchaseDate.After(CiiStartDate) && dateDiff > threeYears {
+		//nolint:gosec // CII index is always a small positive integer <= 1000
 		purchasePrice = purchasePrice.Mul(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(sellDate)))).Div(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(purchaseDate))))))
 	}
 
-	if commodity.TaxCategory == config.UnlistedEquity && purchaseDate.After(CII_START_DATE) && dateDiff > TWO_YEAR {
+	if commodity.TaxCategory == config.UnlistedEquity && purchaseDate.After(CiiStartDate) && dateDiff > twoYears {
+		//nolint:gosec // CII index is always a small positive integer <= 1000
 		purchasePrice = purchasePrice.Mul(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(sellDate)))).Div(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(purchaseDate))))))
 	}
 
@@ -62,7 +65,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	slab := decimal.Zero
 
 	if commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65 {
-		if dateDiff > ONE_YEAR {
+		if dateDiff > oneYear {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.10))
 		} else {
 			shortTerm = taxable.Mul(decimal.NewFromFloat(0.15))
@@ -70,7 +73,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.Debt {
-		if dateDiff > THREE_YEAR && purchaseDate.Before(DEBT_INDEXATION_REVOCATION_DATE) {
+		if dateDiff > threeYears && purchaseDate.Before(DebtIndexationRevocationDate) {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable
@@ -78,7 +81,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.Equity35 {
-		if dateDiff > THREE_YEAR {
+		if dateDiff > threeYears {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable
@@ -86,7 +89,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.UnlistedEquity {
-		if dateDiff > TWO_YEAR {
+		if dateDiff > twoYears {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable

@@ -18,11 +18,12 @@ func GetLogs() gin.H {
 		return gin.H{"logs": logs}
 	}
 
+	//nolint:gosec // log file path from user cache directory
 	file, err := os.Open(path)
 	if err != nil {
 		return gin.H{"logs": logs}
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	stat, err := file.Stat()
 	if err != nil {

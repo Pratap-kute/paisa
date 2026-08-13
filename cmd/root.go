@@ -55,6 +55,8 @@ func Initialize() {
 
 }
 
+const envTrue = "true"
+
 func InitLogger(desktop bool, hook log.Hook) {
 	formatter := log.TextFormatter{
 		DisableTimestamp: true,
@@ -62,7 +64,7 @@ func InitLogger(desktop bool, hook log.Hook) {
 		DisableColors:    desktop,
 		PadLevelText:     true,
 	}
-	if os.Getenv("PAISA_DEBUG") == "true" {
+	if os.Getenv("PAISA_DEBUG") == envTrue {
 		log.SetReportCaller(true)
 		log.SetLevel(log.DebugLevel)
 		formatter.CallerPrettyfier = func(f *runtime.Frame) (string, string) {
@@ -72,11 +74,11 @@ func InitLogger(desktop bool, hook log.Hook) {
 		}
 	}
 
-	if desktop && os.Getenv("PAISA_DEBUG") != "true" {
+	if desktop && os.Getenv("PAISA_DEBUG") != envTrue {
 		log.SetReportCaller(true)
 	}
 
-	if os.Getenv("PAISA_DISABLE_LOG_FILE") != "true" {
+	if os.Getenv("PAISA_DISABLE_LOG_FILE") != envTrue {
 		p, err := config.EnsureLogFilePath()
 		if err == nil {
 			rotateFileHook, err := rotatefilehook.NewRotateFileHook(rotatefilehook.RotateFileConfig{
@@ -118,16 +120,17 @@ func InitConfig() {
 
 	xdgDocumentDir := filepath.Join(xdg.UserDirs.Documents, "paisa")
 	xdgDocumentPath := filepath.Join(xdgDocumentDir, "paisa.yaml")
-	if envConfigFile := os.Getenv("PAISA_CONFIG"); envConfigFile != "" {
-		config.LoadConfigFile(envConfigFile)
-	} else if configFile != "" {
+	switch {
+	case os.Getenv("PAISA_CONFIG") != "":
+		config.LoadConfigFile(os.Getenv("PAISA_CONFIG"))
+	case configFile != "":
 		config.LoadConfigFile(configFile)
-	} else if utils.FileExists("paisa.yaml") {
+	case utils.FileExists("paisa.yaml"):
 		config.LoadConfigFile("paisa.yaml")
-	} else if utils.FileExists(xdgDocumentPath) {
+	case utils.FileExists(xdgDocumentPath):
 		config.LoadConfigFile(xdgDocumentPath)
-	} else {
-		err := os.MkdirAll(xdgDocumentDir, 0755)
+	default:
+		err := os.MkdirAll(xdgDocumentDir, 0o750)
 		if err != nil {
 			log.Fatal(err)
 		}

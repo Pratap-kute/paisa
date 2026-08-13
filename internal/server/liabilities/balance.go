@@ -34,8 +34,9 @@ func GetBalance(db *gorm.DB) gin.H {
 
 func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[string]AssetBreakdown {
 	accounts := make(map[string]bool)
-	for _, p := range postings {
-		var parts []string
+	for i := range postings {
+		p := &postings[i]
+		parts := make([]string, 0, 4)
 		for part := range strings.SplitSeq(p.Account, ":") {
 			parts = append(parts, part)
 			accounts[strings.Join(parts, ":")] = false

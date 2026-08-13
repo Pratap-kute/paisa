@@ -26,7 +26,7 @@ func getRetirementSummary(db *gorm.DB, ps []posting.Posting, conf config.Retirem
 
 	return GoalSummary{
 		Type:     "retirement",
-		Id:       "retirement-" + conf.Name,
+		ID:       "retirement-" + conf.Name,
 		Name:     conf.Name,
 		Current:  savingsTotal,
 		Target:   target,

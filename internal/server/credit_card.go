@@ -43,9 +43,10 @@ type CreditCardBill struct {
 }
 
 func GetCreditCards(db *gorm.DB) gin.H {
-	creditCards := []CreditCardSummary{}
+	ccs := config.GetConfig().CreditCards
+	creditCards := make([]CreditCardSummary, 0, len(ccs))
 
-	for _, creditCardConfig := range config.GetConfig().CreditCards {
+	for _, creditCardConfig := range ccs {
 		ps := query.Init(db).Where("account = ?", creditCardConfig.Account).All()
 		creditCards = append(creditCards, buildCreditCard(db, creditCardConfig, ps, false))
 	}
@@ -109,9 +110,8 @@ func buildCreditCard(db *gorm.DB, creditCardConfig config.CreditCard, ps []posti
 }
 
 func computeBills(db *gorm.DB, creditCardConfig config.CreditCard, ps []posting.Posting, includePostings bool) []CreditCardBill {
-	bills := []CreditCardBill{}
-
 	grouped := accounting.GroupByMonthlyBillingCycle(ps, creditCardConfig.StatementEndDay)
+	bills := make([]CreditCardBill, 0, len(grouped))
 
 	balance := decimal.Zero
 	creditsRunningBalance := decimal.Zero
@@ -144,21 +144,22 @@ func computeBills(db *gorm.DB, creditCardConfig config.CreditCard, ps []posting.
 		}
 
 		transactionIDs := map[string]bool{}
+		monthPostings := grouped[month]
 
-		for _, p := range grouped[month] {
+		for i := range monthPostings {
+			p := &monthPostings[i]
 			balance = balance.Add(p.Amount.Neg())
 
 			if p.Amount.IsPositive() {
 				creditsRunningBalance = creditsRunningBalance.Add(p.Amount)
 				bill.Credits = bill.Credits.Add(p.Amount)
 				for unpaidBill < len(bills) {
-					if bills[unpaidBill].DebitsRunningBalance.LessThanOrEqual(creditsRunningBalance) {
-						paidDate := p.Date
-						bills[unpaidBill].PaidDate = &paidDate
-						unpaidBill++
-					} else {
+					if !bills[unpaidBill].DebitsRunningBalance.LessThanOrEqual(creditsRunningBalance) {
 						break
 					}
+					paidDate := p.Date
+					bills[unpaidBill].PaidDate = &paidDate
+					unpaidBill++
 				}
 			} else {
 				bill.Debits = bill.Debits.Add(p.Amount.Neg())
@@ -166,7 +167,7 @@ func computeBills(db *gorm.DB, creditCardConfig config.CreditCard, ps []posting.
 			}
 
 			if includePostings {
-				bill.Postings = append(bill.Postings, p)
+				bill.Postings = append(bill.Postings, *p)
 				transactionIDs[p.TransactionID] = true
 			}
 
@@ -175,7 +176,7 @@ func computeBills(db *gorm.DB, creditCardConfig config.CreditCard, ps []posting.
 		bill.DebitsRunningBalance = debitsRunningBalance
 		bill.ClosingBalance = balance
 		bill.Transactions = lo.Map(lo.Keys(transactionIDs), func(id string, _ int) transaction.Transaction {
-			t, _ := transaction.GetById(db, id)
+			t, _ := transaction.GetByID(db, id)
 			return t
 		})
 		accounting.SortTransactionAsc(bill.Transactions)

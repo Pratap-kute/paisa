@@ -45,9 +45,9 @@ func GetAllocation(db *gorm.DB) gin.H {
 		return p
 	})
 	aggregates := computeAggregate(db, postings, now)
-	aggregates_timeline := computeAggregateTimeline(db, postings)
-	allocation_targets := computeAllocationTargets(db, postings)
-	return gin.H{"aggregates": aggregates, "aggregates_timeline": aggregates_timeline, "allocation_targets": allocation_targets}
+	aggregatesTimeline := computeAggregateTimeline(db, postings)
+	allocationTargets := computeAllocationTargets(db, postings)
+	return gin.H{"aggregates": aggregates, "aggregates_timeline": aggregatesTimeline, "allocation_targets": allocationTargets}
 }
 
 func computeAggregateTimeline(db *gorm.DB, postings []posting.Posting) []map[string]Aggregate {
@@ -141,7 +141,7 @@ func computeAggregate(db *gorm.DB, postings []posting.Posting, date time.Time) m
 	byAccount := lo.GroupBy(postings, func(p posting.Posting) string { return p.Account })
 	result := make(map[string]Aggregate)
 	for account, ps := range byAccount {
-		var parts []string
+		parts := make([]string, 0, 4)
 		for part := range strings.SplitSeq(account, ":") {
 			parts = append(parts, part)
 			parent := strings.Join(parts, ":")

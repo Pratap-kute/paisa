@@ -28,10 +28,10 @@ type Cashflow struct {
 
 func newtonXIRR(transactions []Transaction, initialGuess float64) (float64, bool) {
 	x := initialGuess
-	const MAX_TRIES = 100
-	const EPSILON = 1.0e-6
+	const maxTries = 100
+	const tolerance = 1.0e-6
 
-	for range MAX_TRIES {
+	for range maxTries {
 		fxs := 0.0
 		dfxs := 0.0
 		for _, tx := range transactions {
@@ -45,8 +45,8 @@ func newtonXIRR(transactions []Transaction, initialGuess float64) (float64, bool
 		if math.IsNaN(xNew) {
 			return 0, false
 		}
-		epsilon := math.Abs(xNew - x)
-		if epsilon <= EPSILON {
+		diff := math.Abs(xNew - x)
+		if diff <= tolerance {
 			return x, true
 		}
 		x = xNew

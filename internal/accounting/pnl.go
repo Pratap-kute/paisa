@@ -19,7 +19,7 @@ type PostingPair struct {
 }
 
 func balancePostings(postings []posting.Posting) []PostingPair {
-	EPSILON := decimal.NewFromFloat(0.01)
+	epsilon := decimal.NewFromFloat(0.01)
 
 	var pairs []PostingPair
 	pending := slices.Clone(postings)
@@ -28,9 +28,10 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 		pair.Posting = pending[0]
 		pending = pending[1:]
 		found := false
-		for i, p := range pending {
+		for i := range pending {
+			p := &pending[i]
 			if pair.Posting.Commodity == p.Commodity && pair.Posting.Quantity.Neg().Equal(p.Quantity) {
-				pair.CounterPosting = p
+				pair.CounterPosting = *p
 				pending = slices.Delete(pending, i, i+1)
 				pairs = append(pairs, pair)
 				found = true
@@ -39,9 +40,10 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 		}
 
 		if !found {
-			for i, p := range pending {
+			for i := range pending {
+				p := &pending[i]
 				if pair.Posting.Amount.Neg().Equal(p.Amount) {
-					pair.CounterPosting = p
+					pair.CounterPosting = *p
 					pending = slices.Delete(pending, i, i+1)
 					pairs = append(pairs, pair)
 					found = true
@@ -52,40 +54,41 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 
 		if !found {
 		RESTART:
-			for i, p := range pending {
+			for i := range pending {
+				p := &pending[i]
 				if (pair.Posting.Amount.Sign() == 1 && p.Amount.Sign() == -1) ||
 					(pair.Posting.Amount.Sign() == -1 && p.Amount.Sign() == 1) {
 
-					if pair.Posting.Amount.Abs().Equal(p.Amount.Abs()) {
-						pair.CounterPosting = p
+					switch {
+					case pair.Posting.Amount.Abs().Equal(p.Amount.Abs()):
+						pair.CounterPosting = *p
 						pending = slices.Delete(pending, i, i+1)
 						pairs = append(pairs, pair)
 						found = true
-						break
-					} else if pair.Posting.Amount.Abs().LessThan(p.Amount.Abs()) {
+					case pair.Posting.Amount.Abs().LessThan(p.Amount.Abs()):
 						counter, remaining := p.Split(pair.Posting.Amount.Neg())
 						pair.CounterPosting = counter
 						pending[i] = remaining
 						pairs = append(pairs, pair)
 						found = true
-						break
-					} else {
+					default:
 						current, remaining := pair.Posting.Split(p.Amount.Neg())
 						pair.Posting = current
-						pair.CounterPosting = p
+						pair.CounterPosting = *p
 						pending = slices.Delete(pending, i, i+1)
 						pairs = append(pairs, pair)
 
-						pair = PostingPair{}
-						pair.Posting = remaining
-						goto RESTART
+						if remaining.Amount.Abs().GreaterThan(epsilon) {
+							pair = PostingPair{Posting: remaining}
+							goto RESTART
+						}
 					}
 				}
 			}
 		}
 
-		if !found && pair.Posting.Amount.Abs().GreaterThan(EPSILON) {
-			log.Infof("No counter posting found for %v \npending: %v \npairs: %v e: %v", pair.Posting, pending, pairs, EPSILON)
+		if !found && pair.Posting.Amount.Abs().GreaterThan(epsilon) {
+			log.Infof("No counter posting found for %v \npending: %v \npairs: %v e: %v", pair.Posting, pending, pairs, epsilon)
 			break
 		}
 	}
@@ -93,11 +96,12 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 }
 
 func BuildBalancedPostings(transactions []transaction.Transaction) []BalancedPosting {
-	var balancedPostings []BalancedPosting
-	for _, t := range transactions {
-		postings := t.Postings
+	balancedPostings := make([]BalancedPosting, 0, len(transactions))
+	for i := range transactions {
+		postings := transactions[i].Postings
 		pairs := balancePostings(postings)
-		for _, pair := range pairs {
+		for j := range pairs {
+			pair := &pairs[j]
 			var from, to posting.Posting
 			if pair.Posting.Quantity.IsPositive() {
 				to = pair.Posting

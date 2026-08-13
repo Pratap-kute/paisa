@@ -35,11 +35,12 @@ func Logger(logger logrus.FieldLogger) gin.HandlerFunc {
 			entry.Error(c.Errors.ByType(gin.ErrorTypePrivate).String())
 		} else {
 			msg := fmt.Sprintf("%s %d %dms %s", c.Request.Method, statusCode, latency, path)
-			if statusCode >= http.StatusInternalServerError {
+			switch {
+			case statusCode >= http.StatusInternalServerError:
 				entry.Error(msg)
-			} else if statusCode >= http.StatusBadRequest {
+			case statusCode >= http.StatusBadRequest:
 				entry.Warn(msg)
-			} else {
+			default:
 				entry.Info(msg)
 			}
 		}

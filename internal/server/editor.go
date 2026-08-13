@@ -37,9 +37,9 @@ func GetFiles(db *gorm.DB) gin.H {
 		log.Warn("Failed to initialize journal file: ", err)
 	}
 
-	files := []*LedgerFile{}
 	dir := filepath.Dir(path)
 	paths, _ := doublestar.FilepathGlob(dir + "/**/*" + filepath.Ext(path))
+	files := make([]*LedgerFile, 0, len(paths))
 
 	for _, path = range paths {
 		files = append(files, readLedgerFileWithVersions(dir, path))
@@ -64,7 +64,8 @@ func ensureJournalFile(path string, readonly bool) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	//nolint:gosec // user requested ledger file creation
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 	if os.IsExist(err) {
 		return nil
 	}
@@ -133,6 +134,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		}
 
 		perm = fileStat.Mode().Perm()
+		//nolint:gosec // user requested ledger file read
 		existingContent, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Warn(err)
@@ -167,23 +169,24 @@ func validateFile(file LedgerFile) ([]ledger.LedgerFileError, string, error) {
 
 	tmpfile, err := os.CreateTemp(filepath.Dir(path), "paisa-tmp-")
 	if err != nil {
-		log.Fatal(err)
+		return nil, "", err
 	}
 
-	defer os.Remove(tmpfile.Name())
+	defer func() { _ = os.Remove(tmpfile.Name()) }()
 
 	if _, err := tmpfile.Write([]byte(file.Content)); err != nil {
-		log.Fatal(err)
+		return nil, "", err
 	}
 
 	if err := tmpfile.Close(); err != nil {
-		log.Fatal(err)
+		return nil, "", err
 	}
 
 	return ledger.Cli().ValidateFile(tmpfile.Name())
 }
 
 func readLedgerFile(dir string, path string) *LedgerFile {
+	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -198,6 +201,7 @@ func readLedgerFile(dir string, path string) *LedgerFile {
 }
 
 func readLedgerFileWithVersions(dir string, path string) *LedgerFile {
+	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)

@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const START_YEAR = 2014
+const StartYear = 2014
 
 type GeneratorState struct {
 	Balance       float64
@@ -43,13 +43,14 @@ db_path: '%s'
 	log.Info("Generating config file: ", configFilePath)
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	dbFilePath := filepath.Join(cwd, "paisa.db")
-	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o644)
+	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o600)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Generating journal file: ", journalFilePath)
-	_, err = os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+	//nolint:gosec // generating sample journal in current working directory
+	_, err = os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -166,7 +167,7 @@ credit_cards:
 	log.Info("Generating config file: ", configFilePath)
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	dbFilePath := filepath.Join(cwd, "paisa.db")
-	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o644)
+	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o600)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -221,6 +222,8 @@ func loadPrices(schemeCode string, commodityType config.CommodityType, commodity
 		prices, err = mutualfund.GetNav(schemeCode, commodityName)
 	case config.NPS:
 		prices, err = nps.GetNav(schemeCode, commodityName)
+	default:
+		// Other commodity types not supported in mock generator
 	}
 
 	if err != nil {
@@ -257,27 +260,30 @@ func percentRange(min int, max int) float64 {
 }
 
 func randRange(min int, max int) int {
+	//nolint:gosec // weak random is sufficient for mock data generation
 	return rand.Intn(max-min) + min
 }
 
 func taxRate(amount float64) float64 {
-	if amount < 500000 {
+	switch {
+	case amount < 500000:
 		return 0
-	} else if amount < 750000 {
+	case amount < 750000:
 		return 0.10
-	} else if amount < 1000000 {
+	case amount < 1000000:
 		return 0.15
-	} else if amount < 1250000 {
+	case amount < 1250000:
 		return 0.20
-	} else if amount < 1500000 {
+	case amount < 1500000:
 		return 0.25
+	default:
+		return 0.30
 	}
-	return 0.30
 }
 
 func emitChitFund(state *GeneratorState) {
-	start, _ := time.Parse("02-01-2006", "01-01-2016")
-	end, _ := time.Parse("02-01-2006", "01-11-2016")
+	start := lo.Must(time.Parse("02-01-2006", "01-01-2016"))
+	end := lo.Must(time.Parse("02-01-2006", "01-11-2016"))
 
 	for ; start.Before(end); start = start.AddDate(0, 1, 0) {
 		price := 10000 - ((time.November - start.Month()) * 100)
@@ -416,7 +422,8 @@ func emitInvestment(state *GeneratorState, start time.Time) {
 func generateJournalFile(cwd string) {
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	log.Info("Generating journal file: ", journalFilePath)
-	ledgerFile, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+	//nolint:gosec // generating sample journal in current working directory
+	ledgerFile, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -457,7 +464,7 @@ func generateJournalFile(cwd string) {
 	}
 
 	end := utils.EndOfToday()
-	start, err := time.Parse("02-01-2006", fmt.Sprintf("01-01-%d", START_YEAR))
+	start, err := time.Parse("02-01-2006", fmt.Sprintf("01-01-%d", StartYear))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -511,7 +518,7 @@ liability = cost_basis_negative({account =~ /^Liabilities:Homeloan/})
 total = immovable + metal + art + vehicle + bank + share + insurance + loan + cash - liability
 `
 	log.Info("Generating sheet file: ", sheetFilePath)
-	err := os.WriteFile(sheetFilePath, []byte(sheet), 0o644)
+	err := os.WriteFile(sheetFilePath, []byte(sheet), 0o600)
 	if err != nil {
 		log.Fatal(err)
 	}

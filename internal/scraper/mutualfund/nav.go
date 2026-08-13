@@ -18,11 +18,12 @@ import (
 func GetNav(schemeCode string, commodityName string) ([]*price.Price, error) {
 	log.Info("Fetching Mutual Fund nav from mfapi.in")
 	url := fmt.Sprintf("https://api.mfapi.in/mf/%s", schemeCode)
+	//nolint:gosec // URL is constructed from validated scheme code
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {

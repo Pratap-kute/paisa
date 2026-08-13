@@ -24,6 +24,8 @@ import (
 	"github.com/ananthakumaran/paisa/internal/utils"
 )
 
+const budgetTransaction = "Budget transaction"
+
 type LedgerFileError struct {
 	LineFrom uint64 `json:"line_from"`
 	LineTo   uint64 `json:"line_to"`
@@ -95,7 +97,7 @@ func (LedgerCLI) Parse(journalPath string, _prices []price.Price) ([]*posting.Po
 
 	budgetPostings, err := execLedgerCommand(journalPath, []string{"--now", strconv.Itoa(utils.Now().Year() + 3), "--budget"})
 	budgetPostings = lo.Filter(budgetPostings, func(p *posting.Posting, _ int) bool {
-		return p.Payee == "Budget transaction"
+		return p.Payee == budgetTransaction
 	})
 
 	if err != nil {
@@ -339,11 +341,12 @@ func (Beancount) Parse(journalPath string, prices []price.Price) ([]*posting.Pos
 		}
 
 		var status string
-		if record[Status] == "*" {
+		switch record[Status] {
+		case "*":
 			status = "cleared"
-		} else if record[Status] == "!" {
+		case "!":
 			status = "pending"
-		} else {
+		default:
 			status = "unmarked"
 		}
 
@@ -463,9 +466,9 @@ func parseLedgerPrices(output string, defaultCurrency string) ([]price.Price, er
 	return prices, nil
 }
 
-func parseHLedgerPrices(output string, defaultCurrency string) ([]price.Price, error) {
+func parseRegexPrices(output string, defaultCurrency string, pattern string) ([]price.Price, error) {
 	var prices []price.Price
-	re := regexp.MustCompile(`P (\d{4}-\d{2}-\d{2}) ([^\s\d.-]+|"[^"]+") ([^\n]+)\n`)
+	re := regexp.MustCompile(pattern)
 	matches := re.FindAllStringSubmatch(output, -1)
 
 	for _, match := range matches {
@@ -476,12 +479,11 @@ func parseHLedgerPrices(output string, defaultCurrency string) ([]price.Price, e
 
 		commodity := utils.UnQuote(match[2])
 		if target != defaultCurrency {
-			if commodity == defaultCurrency && !value.Equal(decimal.Zero) {
-				commodity = target
-				value = decimal.NewFromInt(1).Div(value)
-			} else {
+			if commodity != defaultCurrency || value.Equal(decimal.Zero) {
 				continue
 			}
+			commodity = target
+			value = decimal.NewFromInt(1).Div(value)
 		}
 
 		date, err := time.ParseInLocation("2006-01-02", match[1], config.TimeZone())
@@ -490,41 +492,16 @@ func parseHLedgerPrices(output string, defaultCurrency string) ([]price.Price, e
 		}
 
 		prices = append(prices, price.Price{Date: date, CommodityName: commodity, CommodityID: commodity, CommodityType: config.Unknown, Value: value})
-
 	}
 	return prices, nil
 }
 
+func parseHLedgerPrices(output string, defaultCurrency string) ([]price.Price, error) {
+	return parseRegexPrices(output, defaultCurrency, `P (\d{4}-\d{2}-\d{2}) ([^\s\d.-]+|"[^"]+") ([^\n]+)\n`)
+}
+
 func parseBeancountPrices(output string, defaultCurrency string) ([]price.Price, error) {
-	var prices []price.Price
-	re := regexp.MustCompile(`(\d{4}-\d{2}-\d{2}) price ([^ ]+)\s*([^\n]+)\n`)
-	matches := re.FindAllStringSubmatch(output, -1)
-
-	for _, match := range matches {
-		target, value, err := parseAmount(match[3])
-		if err != nil {
-			return nil, err
-		}
-
-		commodity := utils.UnQuote(match[2])
-		if target != defaultCurrency {
-			if commodity == defaultCurrency && !value.Equal(decimal.Zero) {
-				commodity = target
-				value = decimal.NewFromInt(1).Div(value)
-			} else {
-				continue
-			}
-		}
-
-		date, err := time.ParseInLocation("2006-01-02", match[1], config.TimeZone())
-		if err != nil {
-			return nil, err
-		}
-
-		prices = append(prices, price.Price{Date: date, CommodityName: commodity, CommodityID: commodity, CommodityType: config.Unknown, Value: value})
-
-	}
-	return prices, nil
+	return parseRegexPrices(output, defaultCurrency, `(\d{4}-\d{2}-\d{2}) price ([^ ]+)\s*([^\n]+)\n`)
 }
 
 func parseAmount(amount string) (string, decimal.Decimal, error) {
@@ -625,7 +602,7 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 			amount = amount.Div(decimal.NewFromInt(100000000))
 		}
 
-		if record[Payee] == "Budget transaction" {
+		if record[Payee] == budgetTransaction {
 			amount = amount.Neg()
 		}
 
@@ -634,7 +611,7 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 		var fileName string
 		var forecast bool
 
-		if record[Payee] == "Budget transaction" || record[Payee] == "Forecast transaction" {
+		if record[Payee] == budgetTransaction || record[Payee] == "Forecast transaction" {
 			transactionID = uuid.NewV5(namespace, record[Date]+":"+record[Payee]).String()
 			forecast = true
 		} else {
@@ -648,11 +625,12 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 		}
 
 		var status string
-		if record[Status] == "*" {
+		switch record[Status] {
+		case "*":
 			status = "cleared"
-		} else if record[Status] == "!" {
+		case "!":
 			status = "pending"
-		} else {
+		default:
 			status = "unmarked"
 		}
 
@@ -767,7 +745,8 @@ func execHLedgerCommand(journalPath string, prices []price.Price, flags []string
 	}
 
 	pricesTree := buildPricesTree(prices)
-	for _, t := range transactions {
+	for i := range transactions {
+		t := &transactions[i]
 		date, err := time.ParseInLocation("2006-01-02", t.Date, config.TimeZone())
 		if err != nil {
 			return nil, err
@@ -779,7 +758,7 @@ func execHLedgerCommand(journalPath string, prices []price.Price, flags []string
 				continue
 			}
 
-			ps, err := buildHLedgerPostings(p, t, pricesTree, date)
+			ps, err := buildHLedgerPostings(p, *t, pricesTree, date)
 			if err != nil {
 				return nil, err
 			}

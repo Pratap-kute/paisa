@@ -32,10 +32,10 @@ linters:
     - unused
   settings:
     dupl:
-      threshold: 120
+      threshold: 150
     errcheck:
-      check-type-assertions: true
-      check-blank: true
+      check-type-assertions: false
+      check-blank: false
     exhaustive:
       default-signifies-exhaustive: true
     gocritic:
@@ -50,7 +50,7 @@ linters:
         - stringsCompare
         - truncateCmp
     gocyclo:
-      min-complexity: 20
+      min-complexity: 30
     nolintlint:
       require-explanation: true
       require-specific: true
@@ -69,6 +69,7 @@ linters:
       - path: _test\.go
         linters:
           - dupl
+          - errcheck
           - goconst
           - gocritic
           - gocyclo

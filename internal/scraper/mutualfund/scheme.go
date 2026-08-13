@@ -14,7 +14,7 @@ func GetSchemes() ([]*scheme.Scheme, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	reader := csv.NewReader(resp.Body)
 	reader.LazyQuotes = true

@@ -118,7 +118,7 @@ func TestCalculateEquity(t *testing.T) {
 		// Seed price on 2018-02-01
 		require.NoError(t, db.Create(&price.Price{
 			CommodityName: "NIFTY50",
-			Date:          EQUITY_GRANDFATHER_DATE,
+			Date:          EquityGrandfatherDate,
 			Value:         decimal.NewFromInt(150),
 		}).Error)
 
@@ -129,8 +129,8 @@ func TestCalculateEquity(t *testing.T) {
 		sellPrice := decimal.NewFromInt(250)
 
 		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
-		assert.Equal(t, "1500", tax.Gain.String())                                                           // (250 - 100) * 10
-		assert.Equal(t, "1000", tax.Taxable.String())                                                        // (250 - 150) * 10
+		assert.Equal(t, "1500", tax.Gain.String())                                                                   // (250 - 100) * 10
+		assert.Equal(t, "1000", tax.Taxable.String())                                                                // (250 - 150) * 10
 		assert.True(t, decimal.NewFromInt(100).Equal(tax.LongTerm), "long term should be 100, got %s", tax.LongTerm) // 10% of 1000
 	})
 }

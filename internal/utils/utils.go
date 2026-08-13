@@ -13,7 +13,7 @@ import (
 
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/google/btree"
-	"github.com/onrik/gorm-logrus"
+	gorm_logrus "github.com/onrik/gorm-logrus"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -75,7 +75,10 @@ func YearHumanCutOffAt(date time.Time, cutoff time.Time) string {
 }
 
 func ParseFY(fy string) (time.Time, time.Time) {
-	start, _ := time.ParseInLocation("2006", strings.Split(fy, " ")[0], config.TimeZone())
+	start, err := time.ParseInLocation("2006", strings.Split(fy, " ")[0], config.TimeZone())
+	if err != nil {
+		return time.Time{}, time.Time{}
+	}
 	start = start.AddDate(0, int(config.GetConfig().FinancialYearStartingMonth-time.January), 0)
 	return BeginningOfFinancialYear(start), EndOfFinancialYear(start)
 }

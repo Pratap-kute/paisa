@@ -46,6 +46,7 @@ type UserAgent struct {
 var agent UserAgent
 
 func selectAgent() {
+	//nolint:gosec // weak random is sufficient for user-agent rotation
 	agent.name = UserAgents[rand.Intn(len(UserAgents))]
 }
 
@@ -140,7 +141,7 @@ func getTicker(ticker string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {

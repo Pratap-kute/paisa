@@ -23,14 +23,18 @@ import (
 )
 
 func AutoMigrate(db *gorm.DB) {
-	db.AutoMigrate(&npsModel.Scheme{})
-	db.AutoMigrate(&mutualfundModel.Scheme{})
-	db.AutoMigrate(&posting.Posting{})
-	db.AutoMigrate(&price.Price{})
-	db.AutoMigrate(&portfolio.Portfolio{})
-	db.AutoMigrate(&price.Price{})
-	db.AutoMigrate(&cii.CII{})
-	db.AutoMigrate(&cache.Cache{})
+	err := db.AutoMigrate(
+		&npsModel.Scheme{},
+		&mutualfundModel.Scheme{},
+		&posting.Posting{},
+		&price.Price{},
+		&portfolio.Portfolio{},
+		&cii.CII{},
+		&cache.Cache{},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func SyncJournal(db *gorm.DB) (string, error) {
@@ -116,7 +120,9 @@ func SyncCII(db *gorm.DB) error {
 }
 
 func SyncPortfolios(db *gorm.DB) error {
-	db.AutoMigrate(&portfolio.Portfolio{})
+	if err := db.AutoMigrate(&portfolio.Portfolio{}); err != nil {
+		return err
+	}
 	log.Info("Fetching commodities portfolio")
 	commodities := commodity.FindByType(config.MutualFund)
 	for _, commodity := range commodities {

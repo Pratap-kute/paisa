@@ -67,7 +67,7 @@ func TestComputeLiabilityBreakdown(t *testing.T) {
 	b := breakdowns["Liabilities:HomeLoan"]
 
 	assert.Equal(t, "100000", b.DrawnAmount.String())
-	assert.Equal(t, "25000", b.RepaidAmount.String())   // 20000 principal + 5000 interest expense
-	assert.Equal(t, "80000", b.BalanceAmount.String())  // 100000 - 20000 principal remaining
-	assert.Equal(t, "5000", b.InterestAmount.String())  // 80000 balance + 25000 repaid - 100000 drawn = 5000
+	assert.Equal(t, "25000", b.RepaidAmount.String())  // 20000 principal + 5000 interest expense
+	assert.Equal(t, "80000", b.BalanceAmount.String()) // 100000 - 20000 principal remaining
+	assert.Equal(t, "5000", b.InterestAmount.String()) // 80000 balance + 25000 repaid - 100000 drawn = 5000
 }

@@ -25,13 +25,14 @@ func main() {
 	linuxGpuPolicy := linux.WebviewGpuPolicyNever
 
 	if gpuPolicyConfig := os.Getenv("PAISA_GPU_POLICY"); gpuPolicyConfig != "" {
-		if gpuPolicyConfig == "always" {
+		switch gpuPolicyConfig {
+		case "always":
 			linuxGpuPolicy = linux.WebviewGpuPolicyAlways
-		} else if gpuPolicyConfig == "never" {
+		case "never":
 			linuxGpuPolicy = linux.WebviewGpuPolicyNever
-		} else if gpuPolicyConfig == "ondemand" {
+		case "ondemand":
 			linuxGpuPolicy = linux.WebviewGpuPolicyOnDemand
-		} else {
+		default:
 			log.Warnf("Unknown gpuPolicy: %s", gpuPolicyConfig)
 		}
 	}

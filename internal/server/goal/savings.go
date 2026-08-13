@@ -18,7 +18,7 @@ func getSavingsSummary(ps []posting.Posting, conf config.SavingsGoal) GoalSummar
 
 	return GoalSummary{
 		Type:       "savings",
-		Id:         "savings-" + conf.Name,
+		ID:         "savings-" + conf.Name,
 		Name:       conf.Name,
 		Current:    savingsTotal,
 		Target:     decimal.NewFromFloat(conf.Target),

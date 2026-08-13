@@ -79,11 +79,11 @@ func date(year, month, day int) time.Time {
 
 func readCSV(filename string) []Cashflow {
 	f := lo.Must(os.Open(filename))
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	csvReader := csv.NewReader(f)
 	records := lo.Must(csvReader.ReadAll())
-	cashflows := []Cashflow{}
+	cashflows := make([]Cashflow, 0, len(records))
 	for _, record := range records {
 		cashflow := Cashflow{}
 		cashflow.Date = lo.Must(time.Parse("2006-01-02", record[0]))

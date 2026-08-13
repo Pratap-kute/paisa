@@ -48,7 +48,8 @@ func buldIndex(postings []posting.Posting) index {
 		Docs:   make(map[string]map[string]int64),
 		Tokens: make(map[string]map[string]int64),
 	}
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		if idx.Docs[p.Account] == nil {
 			idx.Docs[p.Account] = make(map[string]int64)
 		}

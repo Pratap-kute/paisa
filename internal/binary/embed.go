@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var DEFAULT_PATH = []string{
+var DefaultPath = []string{
 	"/bin",
 	"/usr/bin",
 	"/usr/local/bin",
@@ -27,7 +27,7 @@ func LookPath(name string) (string, error) {
 	if err != nil {
 		// macOS doesn't set $PATH correctly for GUI apps
 		if runtime.GOOS == "darwin" {
-			for _, p := range DEFAULT_PATH {
+			for _, p := range DefaultPath {
 				path = filepath.Join(p, name)
 				_, err := os.Stat(path)
 				if err == nil {
@@ -118,15 +118,17 @@ func stage(p string, binData []byte, filemode os.FileMode) error {
 		return nil
 	}
 
+	//nolint:gosec // opening own executable to inspect timestamp
 	infile, err := os.Open(selfexe)
 	if err != nil {
 		return fmt.Errorf("unable to open executable '%s': %w", selfexe, err)
 	}
-	defer infile.Close()
+	defer func() { _ = infile.Close() }()
 
 	log.Debugf("Writing static file: '%s'", p)
 
 	_ = os.Remove(p)
+	//nolint:gosec // executable binary requires execute permission
 	err = os.WriteFile(p, binData, 0o550)
 	if err != nil {
 		return fmt.Errorf("unable to copy to '%s': %w", p, err)

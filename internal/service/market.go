@@ -114,9 +114,9 @@ func GetAllPrices(db *gorm.DB, commodity string) []price.Price {
 		pmap[price.Date.String()] = price
 	}
 
-	prices := []price.Price{}
 	keys := lo.Keys(pmap)
 	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+	prices := make([]price.Price, 0, len(keys))
 	for _, key := range keys {
 		prices = append(prices, pmap[key])
 	}

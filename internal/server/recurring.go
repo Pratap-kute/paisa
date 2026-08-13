@@ -38,7 +38,7 @@ func ComputeRecurringTransactions(postings []posting.Posting) []TransactionSeque
 		return t.TagRecurring
 	})
 
-	transaction_sequences := lo.MapToSlice(transactionsGrouped, func(key string, ts []transaction.Transaction) TransactionSequence {
+	transactionSequences := lo.MapToSlice(transactionsGrouped, func(key string, ts []transaction.Transaction) TransactionSequence {
 		sort.SliceStable(ts, func(i, j int) bool {
 			return ts[i].Date.After(ts[j].Date)
 		})
@@ -61,11 +61,11 @@ func ComputeRecurringTransactions(postings []posting.Posting) []TransactionSeque
 		return TransactionSequence{Transactions: ts, Key: key, Interval: interval, Period: period}
 	})
 
-	sort.SliceStable(transaction_sequences, func(i, j int) bool {
-		return len(transaction_sequences[i].Transactions) > len(transaction_sequences[j].Transactions)
+	sort.SliceStable(transactionSequences, func(i, j int) bool {
+		return len(transactionSequences[i].Transactions) > len(transactionSequences[j].Transactions)
 	})
 
-	return lo.Filter(transaction_sequences, func(ts TransactionSequence, _ int) bool {
+	return lo.Filter(transactionSequences, func(ts TransactionSequence, _ int) bool {
 		return len(ts.Transactions) > 1 && ts.Interval > 0
 	})
 }

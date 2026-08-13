@@ -44,13 +44,14 @@ func doGetBalance(db *gorm.DB, pattern string, rollup bool) gin.H {
 
 func ComputeBreakdowns(db *gorm.DB, postings []posting.Posting, rollup bool) map[string]AssetBreakdown {
 	accounts := make(map[string]bool)
-	for _, p := range postings {
-		if service.IsCapitalGains(p) {
+	for i := range postings {
+		p := &postings[i]
+		if service.IsCapitalGains(*p) {
 			continue
 		}
 
 		if rollup {
-			var parts []string
+			parts := make([]string, 0, 4)
 			for part := range strings.SplitSeq(p.Account, ":") {
 				parts = append(parts, part)
 				accounts[strings.Join(parts, ":")] = false

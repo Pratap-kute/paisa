@@ -94,15 +94,17 @@ func computeHierarchyGraph(postings []posting.Posting) Graph {
 
 	transactions := transaction.Build(postings)
 
-	for _, p := range postings {
-		addNode(&nodeID, &nodes, p.Account)
+	for i := range postings {
+		addNode(&nodeID, &nodes, postings[i].Account)
 	}
 
-	for _, t := range transactions {
+	for i := range transactions {
+		t := &transactions[i]
 		from := lo.Filter(t.Postings, func(p posting.Posting, _ int) bool { return p.Amount.LessThan(decimal.Zero) })
 		to := lo.Filter(t.Postings, func(p posting.Posting, _ int) bool { return p.Amount.GreaterThan(decimal.Zero) })
 
-		for _, f := range from {
+		for j := range from {
+			f := &from[j]
 			for f.Amount.Abs().GreaterThan(decimal.NewFromFloat(0.1)) && len(to) > 0 {
 				top := to[0]
 				if top.Amount.GreaterThan(f.Amount.Neg()) {

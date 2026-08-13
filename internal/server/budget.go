@@ -68,7 +68,7 @@ func computeBudet(db *gorm.DB, forecastPostings, expensesPostings []posting.Post
 
 		for start := start; start.Before(end) || start.Equal(end); start = start.AddDate(0, 1, 0) {
 			month := start.Format("2006-01")
-			var accountBudgets []AccountBudget
+			accountBudgets := make([]AccountBudget, 0, len(accounts))
 
 			forecastsByMonth := forecasts[month]
 			date := lo.Must(time.ParseInLocation("2006-01", month, config.TimeZone()))

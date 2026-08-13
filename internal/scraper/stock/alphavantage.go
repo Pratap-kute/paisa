@@ -56,10 +56,12 @@ func (p AlphaVantageExchangePrice) Less(o btree.Item) bool {
 }
 
 func fetch[R any](url string, response *R) error {
+	//nolint:gosec // generic fetch helper for AlphaVantage endpoints
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {

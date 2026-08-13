@@ -17,7 +17,11 @@ import (
 	"gorm.io/gorm"
 )
 
-const EXTENSION = ".paisa"
+const (
+	Extension   = ".paisa"
+	opCreate    = "create"
+	opOverwrite = "overwrite"
+)
 
 type SheetFile struct {
 	Name      string   `json:"name"`
@@ -28,9 +32,9 @@ type SheetFile struct {
 
 func GetSheets(db *gorm.DB) gin.H {
 	dir := config.GetSheetDir()
-	paths, _ := doublestar.FilepathGlob(dir + "/**/*" + EXTENSION)
+	paths, _ := doublestar.FilepathGlob(dir + "/**/*" + Extension)
 
-	files := []*SheetFile{}
+	files := make([]*SheetFile, 0, len(paths))
 	for _, path := range paths {
 		files = append(files, readSheetFileWithVersions(dir, path))
 	}
@@ -80,18 +84,19 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 	}
 
 	fileStat, err := os.Stat(filePath)
-	if err != nil && file.Operation != "overwrite" && file.Operation != "create" {
+	if err != nil && file.Operation != opOverwrite && file.Operation != opCreate {
 		log.Warn(err)
 		return gin.H{"saved": false, "message": "File does not exist"}
 	}
 
 	var perm os.FileMode = 0o644
 	if err == nil {
-		if file.Operation == "create" {
+		if file.Operation == opCreate {
 			return gin.H{"saved": false, "message": "File already exists"}
 		}
 
 		perm = fileStat.Mode().Perm()
+		//nolint:gosec // user requested sheet file read
 		existingContent, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Warn(err)
@@ -115,6 +120,7 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 }
 
 func readSheetFile(dir string, path string) *SheetFile {
+	//nolint:gosec // user requested sheet file read
 	content, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -129,6 +135,7 @@ func readSheetFile(dir string, path string) *SheetFile {
 }
 
 func readSheetFileWithVersions(dir string, path string) *SheetFile {
+	//nolint:gosec // user requested sheet file read
 	content, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)

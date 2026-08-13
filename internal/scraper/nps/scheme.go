@@ -15,7 +15,7 @@ func GetSchemes() ([]*scheme.Scheme, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -23,8 +23,8 @@ func GetSchemes() ([]*scheme.Scheme, error) {
 	}
 
 	type Scheme struct {
-		Id      string
-		Name    string
+		ID      string `json:"id"`
+		Name    string `json:"name"`
 		PFMName string `json:"pfm_name"`
 	}
 	type Result struct {
@@ -39,7 +39,7 @@ func GetSchemes() ([]*scheme.Scheme, error) {
 
 	var schemes []*scheme.Scheme
 	for _, s := range result.Data {
-		scheme := scheme.Scheme{PFMName: s.PFMName, SchemeID: s.Id, SchemeName: s.Name}
+		scheme := scheme.Scheme{PFMName: s.PFMName, SchemeID: s.ID, SchemeName: s.Name}
 		schemes = append(schemes, &scheme)
 
 	}
