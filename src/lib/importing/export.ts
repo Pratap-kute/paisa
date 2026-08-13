@@ -22,5 +22,9 @@ export function download(balancedPostings: BalancedPosting[]) {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   downloadLink.href = window.URL.createObjectURL(blob);
   downloadLink.download = "paisa-transactions.csv";
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
   downloadLink.click();
+  downloadLink.remove();
+  window.setTimeout(() => window.URL.revokeObjectURL(downloadLink.href), 0);
 }

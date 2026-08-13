@@ -16,6 +16,7 @@
   import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
   import * as toast from "$lib/core/toast";
+  import { ensureFileExtension } from "$lib/ledger/file";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
 
@@ -182,6 +183,7 @@
   }
 
   async function saveToFile(destinationFile: string) {
+    destinationFile = ensureFileExtension(destinationFile, ".ledger");
     const { saved, message } = await ajax("/api/editor/save", {
       method: "POST",
       body: JSON.stringify({ name: destinationFile, content: preview, operation: "overwrite" }),

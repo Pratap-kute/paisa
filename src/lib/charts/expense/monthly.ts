@@ -448,7 +448,7 @@ export function renderCurrentExpensesBreakdown(
 ) {
   const id = "#d3-current-month-breakdown";
   const BAR_HEIGHT = rem(20);
-  const TEXT_WIDTH = rem(135);
+  const LABEL_GAP = rem(8);
   const svg = d3.select(id),
     margin = { top: 0, right: rem(160), bottom: rem(20), left: rem(100) },
     width = document.getElementById(id.substring(1)).parentElement.clientWidth -
@@ -578,12 +578,12 @@ export function renderCurrentExpensesBreakdown(
         (enter) =>
           enter
             .append("text")
-            .attr("text-anchor", "end")
+            .attr("text-anchor", "start")
             .attr("dominant-baseline", "middle")
             .attr("y", function (d) {
               return y(d.category) + y.bandwidth() / 2;
             })
-            .attr("x", width + TEXT_WIDTH)
+            .attr("x", width + LABEL_GAP)
             .style("white-space", "pre")
             .style("font-size", "0.928rem")
             .style("font-weight", "bold")
