@@ -15,6 +15,7 @@ import {
   skipTicks,
   tooltip,
 } from "../../core/utils";
+import { svgRectSpan } from "../svg";
 
 const areaKeys = ["gain", "loss"];
 const colors = [COLORS.gain, COLORS.loss];
@@ -332,10 +333,10 @@ export function renderOverview(gains: Interest[]) {
     })
     .attr("stroke-opacity", (d) => (_.includes(areaKeys, d.key) ? 0.0 : 0.4))
     .attr("fill-opacity", (d) => (_.includes(areaKeys, d.key) ? 1 : 0.6))
-    .attr("x", (d) => x(d[0][0]))
+    .attr("x", (d) => svgRectSpan(x(d[0][0]), x(d[0][1])).x)
     .attr("y", (d: any) => y2(d[0].data.i))
     .attr("height", y2.bandwidth())
-    .attr("width", (d) => x(d[0][1]) - x(d[0][0]));
+    .attr("width", (d) => svgRectSpan(x(d[0][0]), x(d[0][1])).width);
 
   const paddingTop = (y1.range()[1] - y1.bandwidth() * 2) / 2;
   g.append("g")
