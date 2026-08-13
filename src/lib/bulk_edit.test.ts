@@ -1,31 +1,38 @@
-import { describe, expect, test } from "bun:test";
-import fs from "fs";
+import { describe, it as test } from "@std/testing/bdd";
+import { expect } from "@std/expect";
 
-import { applyChanges } from "./bulk_edit";
-import type { LedgerFile } from "./utils";
+import { applyChanges } from "./bulk_edit.ts";
+import type { LedgerFile } from "./utils.ts";
 import _ from "lodash";
 
 describe("bulk_editor", () => {
-  const before = fs.readFileSync("fixture/main.ledger");
-  const transactions = JSON.parse(fs.readFileSync("fixture/main.transactions.json").toString());
-  fs.readdirSync("fixture/bulk_edit").forEach((dir) => {
+  const before = Deno.readTextFileSync("fixture/main.ledger");
+  const transactions = JSON.parse(
+    Deno.readTextFileSync("fixture/main.transactions.json"),
+  );
+  Array.from(Deno.readDirSync("fixture/bulk_edit")).forEach(({ name: dir }) => {
     test(dir, () => {
-      const files = fs.readdirSync(`fixture/bulk_edit/${dir}`);
+      const files = Array.from(
+        Deno.readDirSync(`fixture/bulk_edit/${dir}`),
+        ({ name }) => name,
+      );
       for (const file of files) {
         const [name, extension] = file.split(".");
         if (extension === "ledger") {
           const args = JSON.parse(
-            fs.readFileSync(`fixture/bulk_edit/${dir}/${name}.json`).toString()
+            Deno.readTextFileSync(`fixture/bulk_edit/${dir}/${name}.json`),
           );
-          const after = fs.readFileSync(`fixture/bulk_edit/${dir}/${name}.ledger`).toString();
+          const after = Deno.readTextFileSync(
+            `fixture/bulk_edit/${dir}/${name}.ledger`,
+          );
           const ledgerFile: LedgerFile = {
             type: "file",
             name: "main.ledger",
-            content: before.toString(),
-            versions: []
+            content: before,
+            versions: [],
           };
           const {
-            newFiles: [newLedgerFile]
+            newFiles: [newLedgerFile],
           } = applyChanges([ledgerFile], transactions, dir, args);
           expect(_.trim(newLedgerFile.content)).toBe(_.trim(after.toString()));
         }

@@ -1,13 +1,15 @@
-import { describe, expect, test } from "bun:test";
-import { format } from "./journal";
-import fs from "fs";
+import { describe, it as test } from "@std/testing/bdd";
+import { expect } from "@std/expect";
+import { format } from "./journal.ts";
 
 function readFixture(name: string) {
-  return fs.readFileSync(`fixture/${name}`).toString();
+  return Deno.readTextFileSync(`fixture/${name}`);
 }
 
 describe("journal", () => {
   test("format", () => {
-    expect(format(readFixture("unformatted.ledger"))).toBe(readFixture("formatted.ledger"));
+    expect(format(readFixture("unformatted.ledger"))).toBe(
+      readFixture("formatted.ledger"),
+    );
   });
 });

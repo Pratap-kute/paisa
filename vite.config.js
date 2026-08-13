@@ -3,27 +3,42 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 /** @type {import('vite').UserConfig} */
 const config = {
+  cacheDir: "node_modules/.vite",
+  css: {
+    preprocessorOptions: {
+      sass: {
+        api: "modern-compiler",
+      },
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
   build: {
-    target: 'es2021'
+    target: "es2021",
   },
   plugins: [
     sveltekit(),
-    nodePolyfills({
-      globals: {
-        Buffer: true
-      }
-    })
+    // xlsx-populate uses Buffer when the lazy-loaded import route is opened.
+    nodePolyfills({ include: ["buffer"], globals: { Buffer: true } }),
   ],
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:7500"
-      }
+        target: "http://localhost:7500",
+      },
     },
     fs: {
-      allow: ["./fonts"]
-    }
-  }
+      allow: ["./fonts"],
+    },
+  },
+  preview: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:7500",
+      },
+    },
+  },
 };
 
 export default config;

@@ -1,21 +1,26 @@
-.PHONY: docs
+.PHONY: docs clean
 .PHONY: fixture/main.transactions.json
 
+clean:
+	deno task clean
+
 develop:
-	./node_modules/.bin/concurrently --names "GO,JS" -c "auto" "make serve" "npm run dev"
+	@if [ ! -f web/static/index.html ]; then deno task build; fi
+	deno task develop
 
 serve:
-	./node_modules/.bin/nodemon --signal SIGTERM --delay 2000ms --watch '.' --ext go,json --exec 'go run . serve || exit 1'
+	deno task serve
 
 debug:
-	./node_modules/.bin/concurrently --names "GO,JS" -c "auto" "make serve-now" "npm run dev"
+	@if [ ! -f web/static/index.html ]; then deno task build; fi
+	deno task debug
 
 serve-now:
-	./node_modules/.bin/nodemon --signal SIGTERM --delay 2000ms --watch '.' --ext go,json --exec 'TZ=UTC go run . serve --now 2022-02-07 || exit 1'
+	deno task serve:now
 
 
 watch:
-	npm run "build:watch"
+	deno task build:watch
 docs:
 	mkdocs serve -a 0.0.0.0:8000
 
@@ -26,24 +31,24 @@ publish:
 	nix develop --command bash -c 'mkdocs build'
 
 parser:
-	npm run parser-build-debug
+	deno task parser-build-debug
 
 lint:
-	./node_modules/.bin/prettier --check src
-	npm run check
+	deno task lint
+	deno task check
 	test -z $$(gofmt -l .)
 
 regen:
 	go build
-	unset PAISA_CONFIG && REGENERATE=true TZ=UTC bun test tests
+	unset PAISA_CONFIG && REGENERATE=true TZ=UTC deno task test:integration
 
 jstest:
-	bun test --preload ./src/happydom.ts src
+	deno task test:unit
 	go build
-	unset PAISA_CONFIG && TZ=UTC bun test tests
+	unset PAISA_CONFIG && TZ=UTC deno task test:integration
 
 jsbuild:
-	npm run build
+	deno task build
 
 test: jsbuild jstest
 	go test ./...
@@ -59,7 +64,7 @@ deploy:
 	fly scale count 1 --region lax --yes
 
 install:
-	npm run build
+	deno task build
 	go build
 	go install
 
@@ -72,7 +77,7 @@ fixture/main.transactions.json:
 	pkill -f 'paisa serve -p 6500'
 
 generate-fonts:
-	bun download-svgs.js
+	deno run -A download-svgs.js
 	node generate-font.js
 
 node2nix:

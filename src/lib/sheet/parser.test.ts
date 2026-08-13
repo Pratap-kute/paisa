@@ -1,23 +1,27 @@
-import { describe, test } from "bun:test";
-import { sheetLanguage } from "./language";
+import { describe, it as test } from "@std/testing/bdd";
+import { sheetLanguage } from "./language.ts";
 import { fileTests } from "@lezer/generator/dist/test";
 
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
-const caseDir = path.dirname(fileURLToPath(import.meta.url));
+import { dirname, fromFileUrl, join } from "@std/path";
+const caseDir = dirname(fromFileUrl(import.meta.url));
 
 const parser = sheetLanguage.parser.configure({
   strict: false,
-  dialect: "comment"
+  dialect: "comment",
 });
 
-for (const file of fs.readdirSync(caseDir)) {
+for (const { name: file } of Deno.readDirSync(caseDir)) {
   if (!/\.txt$/.test(file)) continue;
 
   const name = /^[^.]*/.exec(file)[0];
   describe(name, () => {
-    for (const { name, run } of fileTests(fs.readFileSync(path.join(caseDir, file), "utf8"), file))
+    for (
+      const { name, run } of fileTests(
+        Deno.readTextFileSync(join(caseDir, file)),
+        file,
+      )
+    ) {
       test(name, () => run(parser));
+    }
   });
 }
