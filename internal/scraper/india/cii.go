@@ -1,10 +1,9 @@
 package india
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
-
-	"encoding/json"
 
 	"github.com/ananthakumaran/paisa/internal/model/cii"
 	log "github.com/sirupsen/logrus"

@@ -17,7 +17,6 @@ func GetAllProviders() []price.PriceProvider {
 		&nps.PriceProvider{},
 		&metal.PriceProvider{},
 	}
-
 }
 
 func GetProviderByCode(code string) price.PriceProvider {

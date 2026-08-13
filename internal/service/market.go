@@ -89,7 +89,6 @@ func GetUnitPrice(db *gorm.DB, commodity string, date time.Time) price.Price {
 		log.Fatal("Price not found ", commodity)
 	}
 	return utils.BTreeDescendFirstLessOrEqual(pt, price.Price{Date: date})
-
 }
 
 func GetAllPrices(db *gorm.DB, commodity string) []price.Price {

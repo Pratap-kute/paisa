@@ -24,7 +24,7 @@ func GetPrices(db *gorm.DB) gin.H {
 		log.Fatal(result.Error)
 	}
 
-	var prices = make(map[string][]price.Price)
+	prices := make(map[string][]price.Price)
 	for _, commodity := range commodities {
 		prices[commodity] = service.GetAllPrices(db, commodity)
 	}
@@ -49,7 +49,6 @@ func GetPriceProviders(db *gorm.DB) gin.H {
 			}
 		}),
 	}
-
 }
 
 func ClearPriceCache(db *gorm.DB) gin.H {

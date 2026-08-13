@@ -3,10 +3,11 @@ package metal
 import (
 	"encoding/json"
 	"fmt"
-	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/ananthakumaran/paisa/internal/model/price"
@@ -14,8 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type PriceProvider struct {
-}
+type PriceProvider struct{}
 
 func (p *PriceProvider) Code() string {
 	return "com-purifiedbytes-metal"

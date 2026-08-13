@@ -120,7 +120,6 @@ func IsInterestRepayment(db *gorm.DB, p posting.Posting) bool {
 	}
 
 	for _, ip := range irepaymentCache.postings[p.Date.Unix()] {
-
 		if ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {
@@ -139,7 +138,6 @@ func IsInterest(db *gorm.DB, p posting.Posting) bool {
 	}
 
 	for _, ip := range icache.postings[p.Date.Unix()] {
-
 		if ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {

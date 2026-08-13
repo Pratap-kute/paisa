@@ -3,12 +3,12 @@ package ledger
 import (
 	"bytes"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"strings"
-
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -16,8 +16,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-
-	"encoding/json"
 
 	"github.com/ananthakumaran/paisa/internal/binary"
 	"github.com/ananthakumaran/paisa/internal/config"
@@ -39,9 +37,11 @@ type Ledger interface {
 	Prices(jornalPath string) ([]price.Price, error)
 }
 
-type LedgerCLI struct{}
-type HLedgerCLI struct{}
-type Beancount struct{}
+type (
+	LedgerCLI  struct{}
+	HLedgerCLI struct{}
+	Beancount  struct{}
+)
 
 func Cli() Ledger {
 	if config.GetConfig().LedgerCli == "hledger" {
@@ -89,7 +89,6 @@ func (LedgerCLI) Parse(journalPath string, _prices []price.Price) ([]*posting.Po
 	var postings []*posting.Posting
 
 	postings, err := execLedgerCommand(journalPath, []string{})
-
 	if err != nil {
 		return nil, err
 	}
@@ -177,13 +176,11 @@ func (HLedgerCLI) Parse(journalPath string, prices []price.Price) ([]*posting.Po
 
 	timeRange := fmt.Sprintf("%d..%d", utils.Now().Year()-3, utils.Now().Year()+3)
 	budgetPostings, err := execHLedgerCommand(journalPath, prices, []string{"--ignore-assertions", "--forecast=" + timeRange, "tag:_generated-transaction"})
-
 	if err != nil {
 		return nil, err
 	}
 
 	return append(postings, budgetPostings...), nil
-
 }
 
 func (HLedgerCLI) Prices(journalPath string) ([]price.Price, error) {
@@ -383,7 +380,8 @@ func (Beancount) Parse(journalPath string, prices []price.Price) ([]*posting.Pos
 			TagRecurring:  strings.TrimSpace(record[TagRecurring]),
 			TagPeriod:     strings.TrimSpace(record[TagPeriod]),
 			Forecast:      false,
-			FileName:      fileName}
+			FileName:      fileName,
+		}
 		postings = append(postings, &posting)
 
 	}
@@ -546,7 +544,6 @@ func parseAmount(amount string) (string, decimal.Decimal, error) {
 	}
 	value, err := decimal.NewFromString(strings.ReplaceAll(match[4], ",", ""))
 	return utils.UnQuote(strings.Trim(match[3], " ")), value, err
-
 }
 
 func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, error) {
@@ -704,7 +701,8 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 			Forecast:             forecast,
 			FileName:             fileName,
 			Note:                 note,
-			TransactionNote:      transactionNote}
+			TransactionNote:      transactionNote,
+		}
 		postings = append(postings, &posting)
 
 	}
@@ -893,7 +891,8 @@ func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map
 			Forecast:             forecast,
 			FileName:             fileName,
 			Note:                 p.Comment,
-			TransactionNote:      t.Comment}
+			TransactionNote:      t.Comment,
+		}
 		postings = append(postings, &posting)
 	}
 

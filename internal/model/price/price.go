@@ -48,7 +48,6 @@ func UpsertAllByTypeNameAndID(db *gorm.DB, commodityType config.CommodityType, c
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +68,6 @@ func UpsertAllByType(db *gorm.DB, commodityType config.CommodityType, prices []P
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}

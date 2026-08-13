@@ -31,7 +31,7 @@ func TestEnsureJournalFileDoesNotCreateInReadonlyMode(t *testing.T) {
 func TestEnsureJournalFilePreservesExistingContent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "main.ledger")
 	const content = "existing journal\n"
-	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
 

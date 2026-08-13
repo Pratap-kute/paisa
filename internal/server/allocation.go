@@ -134,7 +134,7 @@ func computeAllocationTarget(db *gorm.DB, postings []posting.Posting, allocation
 	postings = accounting.FilterByGlob(postings, allocationTargetConfig.Accounts)
 	aggregates := computeAggregate(db, postings, date)
 	currentTotal := accounting.CurrentBalance(postings)
-	return AllocationTarget{Name: allocationTargetConfig.Name, Target: decimal.NewFromFloat(allocationTargetConfig.Target), Current: (currentTotal.Div(total)).Mul(decimal.NewFromInt(100)), Aggregates: aggregates}
+	return AllocationTarget{Name: allocationTargetConfig.Name, Target: decimal.NewFromFloat(allocationTargetConfig.Target), Current: currentTotal.Div(total).Mul(decimal.NewFromInt(100)), Aggregates: aggregates}
 }
 
 func computeAggregate(db *gorm.DB, postings []posting.Posting, date time.Time) map[string]Aggregate {

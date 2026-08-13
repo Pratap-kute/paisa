@@ -1,11 +1,10 @@
 package server
 
 import (
+	"os"
 	"path/filepath"
 	"sort"
 	"time"
-
-	"os"
 
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/ananthakumaran/paisa/internal/query"
@@ -75,7 +74,7 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 
 	backupPath := filePath + ".backup." + time.Now().Format("2006-01-02-15-04-05.000")
 
-	err = os.MkdirAll(filepath.Dir(filePath), 0700)
+	err = os.MkdirAll(filepath.Dir(filePath), 0o700)
 	if err != nil {
 		log.Warn(err)
 		return gin.H{"saved": false, "message": "Failed to create directory"}
@@ -87,7 +86,7 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 		return gin.H{"saved": false, "message": "File does not exist"}
 	}
 
-	var perm os.FileMode = 0644
+	var perm os.FileMode = 0o644
 	if err == nil {
 		if file.Operation == "create" {
 			return gin.H{"saved": false, "message": "File already exists"}

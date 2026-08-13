@@ -83,7 +83,6 @@ func SyncCommodities(db *gorm.DB) error {
 
 		provider := scraper.GetProviderByCode(commodity.Price.Provider)
 		prices, err = provider.GetPrices(code, name)
-
 		if err != nil {
 			log.Error(err)
 			errors = append(errors, fmt.Errorf("Failed to fetch price for %s: %w", name, err))
@@ -128,7 +127,6 @@ func SyncPortfolios(db *gorm.DB) error {
 		name := commodity.Name
 		log.Info("Fetching portfolio for ", name)
 		portfolios, err := mutualfund.GetPortfolio(commodity.Price.Code, commodity.Name)
-
 		if err != nil {
 			log.Error(err)
 			return fmt.Errorf("Failed to fetch portfolio for %s: %w", name, err)

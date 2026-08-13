@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"math"
 	"regexp"
-	"sync"
-
 	"strings"
+	"sync"
 
 	"github.com/ananthakumaran/paisa/internal/model/posting"
 	"github.com/ananthakumaran/paisa/internal/query"

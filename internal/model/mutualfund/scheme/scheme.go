@@ -38,7 +38,6 @@ func UpsertAll(db *gorm.DB, schemes []*Scheme) {
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -26,7 +26,6 @@ func UpsertAll(db *gorm.DB, ciis []*CII) {
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}

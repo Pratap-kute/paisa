@@ -66,7 +66,7 @@ func LedgerBinaryPath() (string, error) {
 	}
 
 	path = filepath.Join(binDir, binaryPath)
-	err = stage(path, ledgerBinary, 0750)
+	err = stage(path, ledgerBinary, 0o750)
 	if err != nil {
 		log.Error(err)
 		return "", err
@@ -127,7 +127,7 @@ func stage(p string, binData []byte, filemode os.FileMode) error {
 	log.Debugf("Writing static file: '%s'", p)
 
 	_ = os.Remove(p)
-	err = os.WriteFile(p, binData, 0550)
+	err = os.WriteFile(p, binData, 0o550)
 	if err != nil {
 		return fmt.Errorf("unable to copy to '%s': %w", p, err)
 	}

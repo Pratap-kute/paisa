@@ -34,7 +34,6 @@ func UpsertAll(db *gorm.DB, commodityType config.CommodityType, parentCommodityI
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -3,14 +3,11 @@ package generator
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"os"
 	"path/filepath"
-
-	"time"
-
 	"strings"
-
-	"math/rand"
+	"time"
 
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/ananthakumaran/paisa/internal/model/price"
@@ -46,13 +43,13 @@ db_path: '%s'
 	log.Info("Generating config file: ", configFilePath)
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	dbFilePath := filepath.Join(cwd, "paisa.db")
-	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0644)
+	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Info("Generating journal file: ", journalFilePath)
-	_, err = os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	_, err = os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -169,7 +166,7 @@ credit_cards:
 	log.Info("Generating config file: ", configFilePath)
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	dbFilePath := filepath.Join(cwd, "paisa.db")
-	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0644)
+	err := os.WriteFile(configFilePath, []byte(fmt.Sprintf(config, filepath.Base(journalFilePath), filepath.Base(dbFilePath))), 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -329,7 +326,6 @@ func emitSalary(state *GeneratorState, start time.Time) {
 	emitCommodityBuy(state.Ledger, start, "NPS_HDFC_E", salaryAccount, "Assets:Debt:NPS:HDFC:E", nps*0.75)
 	emitCommodityBuy(state.Ledger, start, "NPS_HDFC_C", salaryAccount, "Assets:Equity:NPS:HDFC:C", nps*0.15)
 	emitCommodityBuy(state.Ledger, start, "NPS_HDFC_G", salaryAccount, "Assets:Equity:NPS:HDFC:G", nps*0.10)
-
 }
 
 func emitExpense(state *GeneratorState, start time.Time) {
@@ -385,6 +381,7 @@ func emitExpense(state *GeneratorState, start time.Time) {
 	emit("Pay Credit Card Bill", "Liabilities:CreditCard:Freedom", -state.CreditBalance, 1.0)
 	state.CreditBalance = 0
 }
+
 func emitInvestment(state *GeneratorState, start time.Time) {
 	if start.Month() == time.April {
 		epfInterest := state.EPFBalance * 0.08
@@ -419,7 +416,7 @@ func emitInvestment(state *GeneratorState, start time.Time) {
 func generateJournalFile(cwd string) {
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	log.Info("Generating journal file: ", journalFilePath)
-	ledgerFile, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	ledgerFile, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -518,7 +515,7 @@ liability = cost_basis_negative({account =~ /^Liabilities:Homeloan/})
 total = immovable + metal + art + vehicle + bank + share + insurance + loan + cash - liability
 `
 	log.Info("Generating sheet file: ", sheetFilePath)
-	err := os.WriteFile(sheetFilePath, []byte(sheet), 0644)
+	err := os.WriteFile(sheetFilePath, []byte(sheet), 0o644)
 	if err != nil {
 		log.Fatal(err)
 	}

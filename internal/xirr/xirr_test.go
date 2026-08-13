@@ -83,7 +83,7 @@ func readCSV(filename string) []Cashflow {
 
 	csvReader := csv.NewReader(f)
 	records := lo.Must(csvReader.ReadAll())
-	var cashflows = []Cashflow{}
+	cashflows := []Cashflow{}
 	for _, record := range records {
 		cashflow := Cashflow{}
 		cashflow.Date = lo.Must(time.Parse("2006-01-02", record[0]))
@@ -96,11 +96,11 @@ func readCSV(filename string) []Cashflow {
 func TestXIRR(t *testing.T) {
 	// Example from Microsoft Excel documentation:
 	cashflows := []Cashflow{
-		{Date: date(2008, 01, 01), Amount: -10000.00},
-		{Date: date(2008, 03, 01), Amount: 2750.00},
+		{Date: date(2008, 0o1, 0o1), Amount: -10000.00},
+		{Date: date(2008, 0o3, 0o1), Amount: 2750.00},
 		{Date: date(2008, 10, 30), Amount: 4250.00},
-		{Date: date(2009, 02, 15), Amount: 3250.00},
-		{Date: date(2009, 04, 01), Amount: 2750.00},
+		{Date: date(2009, 0o2, 15), Amount: 3250.00},
+		{Date: date(2009, 0o4, 0o1), Amount: 2750.00},
 	}
 	assert.Equal(t, decimal.NewFromFloat(37.34), XIRR(cashflows))
 
@@ -121,5 +121,4 @@ func TestXIRR(t *testing.T) {
 			assert.Equal(t, expected, XIRR(cashflows))
 		})
 	}
-
 }

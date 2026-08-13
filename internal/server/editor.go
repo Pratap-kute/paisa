@@ -1,11 +1,10 @@
 package server
 
 import (
+	"os"
 	"path/filepath"
 	"sort"
 	"time"
-
-	"os"
 
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/ananthakumaran/paisa/internal/ledger"
@@ -62,10 +61,10 @@ func ensureJournalFile(path string, readonly bool) error {
 		return err
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
 	if os.IsExist(err) {
 		return nil
 	}
@@ -115,7 +114,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 
 	backupPath := filePath + ".backup." + time.Now().Format("2006-01-02-15-04-05.000")
 
-	err = os.MkdirAll(filepath.Dir(filePath), 0700)
+	err = os.MkdirAll(filepath.Dir(filePath), 0o700)
 	if err != nil {
 		log.Warn(err)
 		return gin.H{"errors": errors, "saved": false, "message": "Failed to create directory"}
@@ -127,7 +126,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		return gin.H{"errors": errors, "saved": false, "message": "File does not exist"}
 	}
 
-	var perm os.FileMode = 0644
+	var perm os.FileMode = 0o644
 	if err == nil {
 		if file.Operation == "create" {
 			return gin.H{"errors": errors, "saved": false, "message": "File already exists"}

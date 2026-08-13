@@ -173,8 +173,7 @@ func searchTicker(apiKey, ticker string) (*SearchResponse, error) {
 	return &response, nil
 }
 
-type AlphaVantagePriceProvider struct {
-}
+type AlphaVantagePriceProvider struct{}
 
 func (p *AlphaVantagePriceProvider) Code() string {
 	return "co-alphavantage"
@@ -214,7 +213,6 @@ func (p *AlphaVantagePriceProvider) AutoComplete(db *gorm.DB, field string, filt
 			ID:    strings.Join([]string{apiKey, match.Symbol, match.Currency}, ":"),
 		}
 	})
-
 }
 
 func (p *AlphaVantagePriceProvider) ClearCache(db *gorm.DB) {

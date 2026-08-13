@@ -80,7 +80,7 @@ type ExchangePrice struct {
 }
 
 func (p ExchangePrice) Less(o btree.Item) bool {
-	return p.Timestamp < (o.(ExchangePrice).Timestamp)
+	return p.Timestamp < o.(ExchangePrice).Timestamp
 }
 
 func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
@@ -156,8 +156,7 @@ func getTicker(ticker string) (*Response, error) {
 	return &response, nil
 }
 
-type YahooPriceProvider struct {
-}
+type YahooPriceProvider struct{}
 
 func (p *YahooPriceProvider) Code() string {
 	return "com-yahoo"

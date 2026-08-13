@@ -1,10 +1,9 @@
 package nps
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
-
-	"encoding/json"
 
 	"github.com/ananthakumaran/paisa/internal/model/nps/scheme"
 	log "github.com/sirupsen/logrus"

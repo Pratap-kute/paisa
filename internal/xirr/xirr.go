@@ -35,8 +35,8 @@ func newtonXIRR(transactions []Transaction, initialGuess float64) (float64, bool
 		fxs := 0.0
 		dfxs := 0.0
 		for _, tx := range transactions {
-			fx := tx.Amount / (math.Pow(1.0+x, tx.Years))
-			dfx := (-tx.Years * tx.Amount) / (math.Pow(1.0+x, tx.Years+1))
+			fx := tx.Amount / math.Pow(1.0+x, tx.Years)
+			dfx := (-tx.Years * tx.Amount) / math.Pow(1.0+x, tx.Years+1)
 			fxs += fx
 			dfxs += dfx
 		}

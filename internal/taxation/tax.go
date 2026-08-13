@@ -11,10 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-var EQUITY_GRANDFATHER_DATE, DEBT_INDEXATION_REVOCATION_DATE, CII_START_DATE time.Time
-var ONE_YEAR = time.Hour * 24 * 365
-var THREE_YEAR = ONE_YEAR * 3
-var TWO_YEAR = ONE_YEAR * 2
+var (
+	EQUITY_GRANDFATHER_DATE, DEBT_INDEXATION_REVOCATION_DATE, CII_START_DATE time.Time
+	ONE_YEAR                                                                 = time.Hour * 24 * 365
+	THREE_YEAR                                                               = ONE_YEAR * 3
+	TWO_YEAR                                                                 = ONE_YEAR * 2
+)
 
 func init() {
 	EQUITY_GRANDFATHER_DATE, _ = time.ParseInLocation("2006-01-02", "2018-02-01", config.TimeZone())
@@ -35,7 +37,6 @@ func Add(a, b Tax) Tax {
 }
 
 func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity, purchasePrice decimal.Decimal, purchaseDate time.Time, sellPrice decimal.Decimal, sellDate time.Time) Tax {
-
 	dateDiff := sellDate.Sub(purchaseDate)
 	gain := sellPrice.Mul(quantity).Sub(purchasePrice.Mul(quantity))
 
@@ -66,7 +67,6 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 		} else {
 			shortTerm = taxable.Mul(decimal.NewFromFloat(0.15))
 		}
-
 	}
 
 	if commodity.TaxCategory == config.Debt {

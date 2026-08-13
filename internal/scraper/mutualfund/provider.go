@@ -7,8 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type PriceProvider struct {
-}
+type PriceProvider struct{}
 
 func (p *PriceProvider) Code() string {
 	return "in-mfapi"

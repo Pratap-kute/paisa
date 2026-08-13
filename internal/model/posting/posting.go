@@ -125,7 +125,6 @@ func UpsertAll(db *gorm.DB, postings []*Posting) {
 
 		return nil
 	})
-
 	if err != nil {
 		log.Fatal(err)
 	}

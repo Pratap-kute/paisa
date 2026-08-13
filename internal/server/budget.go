@@ -103,7 +103,8 @@ func computeBudet(db *gorm.DB, forecastPostings, expensesPostings []posting.Post
 						return budget.Available
 					}
 					return decimal.Zero
-				})
+				},
+			)
 
 			forecast := utils.SumBy(
 				accountBudgets, func(budget AccountBudget) decimal.Decimal {
@@ -111,7 +112,8 @@ func computeBudet(db *gorm.DB, forecastPostings, expensesPostings []posting.Post
 						return budget.Forecast
 					}
 					return decimal.Zero
-				})
+				},
+			)
 
 			availableForBudgeting = availableForBudgeting.Sub(availableThisMonth)
 			endOfMonthBalance := availableForBudgeting
@@ -167,5 +169,4 @@ func popExpenses(forecastAccount string, expensesByAccount map[string][]posting.
 		}
 	}
 	return expenses
-
 }

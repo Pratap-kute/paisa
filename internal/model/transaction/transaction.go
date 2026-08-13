@@ -77,5 +77,4 @@ func Build(postings []posting.Posting) []Transaction {
 			FileName:     sample.FileName,
 		}
 	})
-
 }

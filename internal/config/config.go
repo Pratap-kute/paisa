@@ -159,9 +159,11 @@ type Config struct {
 	CreditCards []CreditCard `json:"credit_cards" yaml:"credit_cards"`
 }
 
-var config Config
-var configPath string
-var location *time.Location
+var (
+	config     Config
+	configPath string
+	location   *time.Location
+)
 
 var defaultConfig = Config{
 	Readonly:                   false,
@@ -197,11 +199,12 @@ var itemsUniquePropertiesMeta = jsonschema.MustCompileString("itemsUniquePropert
   }
 }`)
 
-type itemsUniquePropertiesSchema []string
-type itemsUniquePropertiessCompiler struct{}
+type (
+	itemsUniquePropertiesSchema    []string
+	itemsUniquePropertiessCompiler struct{}
+)
 
 func (itemsUniquePropertiessCompiler) Compile(ctx jsonschema.CompilerContext, m map[string]any) (jsonschema.ExtSchema, error) {
-
 	if items, ok := m["itemsUniqueProperties"]; ok {
 		itemsInterface := items.([]any)
 		itemsString := make([]string, len(itemsInterface))
@@ -268,7 +271,7 @@ func SaveConfig(content []byte) error {
 		return err
 	}
 
-	err = os.WriteFile(configPath, yamlContent, 0644)
+	err = os.WriteFile(configPath, yamlContent, 0o644)
 	if err != nil {
 		return err
 	}
@@ -315,7 +318,6 @@ func LoadConfig(content []byte, cp string) error {
 	}
 
 	err = mergo.Merge(&config, defaultConfig, mergo.WithOverrideEmptySlice)
-
 	if err != nil {
 		return err
 	}
@@ -359,7 +361,7 @@ func GetSheetDir() string {
 		dir = filepath.Join(GetConfigDir(), config.SheetsDirectory)
 	}
 
-	err := os.MkdirAll(dir, 0750)
+	err := os.MkdirAll(dir, 0o750)
 	if err != nil {
 		log.Fatal("Failed to create sheets directory", err)
 	}
@@ -400,12 +402,12 @@ func EnsureLogFilePath() (string, error) {
 
 	path := filepath.Join(cacheDir, "paisa", "paisa.log")
 
-	err = os.MkdirAll(filepath.Dir(path), 0750)
+	err = os.MkdirAll(filepath.Dir(path), 0o750)
 	if err != nil {
 		return "", err
 	}
 
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o640)
 	if err != nil {
 		return "", err
 	}

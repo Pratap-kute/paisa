@@ -80,7 +80,6 @@ func Delete(name string) {
 	})
 
 	err := config.SaveConfigObject(cfg)
-
 	if err != nil {
 		log.Fatal(err)
 	}

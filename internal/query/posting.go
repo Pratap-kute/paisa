@@ -2,7 +2,6 @@ package query
 
 import (
 	"errors"
-
 	"strings"
 
 	"github.com/ananthakumaran/paisa/internal/config"

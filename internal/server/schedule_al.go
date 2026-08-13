@@ -94,5 +94,4 @@ func computeScheduleAL(postings []posting.Posting) []ScheduleALEntry {
 			Amount:  amount,
 		}
 	})
-
 }

@@ -1,10 +1,9 @@
 package accounting
 
 import (
+	"path/filepath"
 	"sort"
 	"time"
-
-	"path/filepath"
 
 	"github.com/ananthakumaran/paisa/internal/model/posting"
 	"github.com/ananthakumaran/paisa/internal/model/transaction"
@@ -124,7 +123,6 @@ func CostBalance(postings []posting.Posting) decimal.Decimal {
 			return p.Amount
 		})
 	})
-
 }
 
 func CurrentBalance(postings []posting.Posting) decimal.Decimal {

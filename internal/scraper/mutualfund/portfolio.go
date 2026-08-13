@@ -37,7 +37,6 @@ WHERE s.code = %s
 	req.Header.Add("Content-Type", "text/plain")
 	req.Header.Add("Authorization", "Basic cGxheTo=")
 	resp, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +76,8 @@ WHERE s.code = %s
 			ParentCommodityID: schemeCode,
 			SecurityRating:    data.Rating,
 			SecurityIndustry:  data.Industry,
-			SecurityType:      data.Type}
+			SecurityType:      data.Type,
+		}
 		portfolios = append(portfolios, &portfolio)
 	}
 	return portfolios, nil

@@ -18,7 +18,7 @@ func getRetirementSummary(db *gorm.DB, ps []posting.Posting, conf config.Retirem
 	savingsTotal := accounting.CurrentBalance(savings)
 
 	yearlyExpenses := decimal.NewFromFloat(conf.YearlyExpenses)
-	if !(yearlyExpenses.GreaterThan(decimal.Zero)) {
+	if !yearlyExpenses.GreaterThan(decimal.Zero) {
 		yearlyExpenses = calculateAverageExpense(db, conf)
 	}
 
@@ -53,7 +53,7 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 	gainsTotal := savingsTotal.Sub(investmentTotal)
 
 	yearlyExpenses := decimal.NewFromFloat(conf.YearlyExpenses)
-	if !(yearlyExpenses.GreaterThan(decimal.Zero)) {
+	if !yearlyExpenses.GreaterThan(decimal.Zero) {
 		yearlyExpenses = calculateAverageExpense(db, conf)
 	}
 

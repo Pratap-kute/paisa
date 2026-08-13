@@ -439,6 +439,5 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		rateLimiter.RateLimitCtx(c.Request.Context(), "user", 1)
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
-
 	}
 }

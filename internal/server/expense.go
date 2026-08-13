@@ -58,13 +58,16 @@ func GetExpense(db *gorm.DB) gin.H {
 			"expenses":    utils.GroupByMonth(expenses),
 			"incomes":     utils.GroupByMonth(incomes),
 			"investments": utils.GroupByMonth(investments),
-			"taxes":       utils.GroupByMonth(taxes)},
+			"taxes":       utils.GroupByMonth(taxes),
+		},
 		"year_wise": gin.H{
 			"expenses":    utils.GroupByFY(expenses),
 			"incomes":     utils.GroupByFY(incomes),
 			"investments": utils.GroupByFY(investments),
-			"taxes":       utils.GroupByFY(taxes)},
-		"graph": graph}
+			"taxes":       utils.GroupByFY(taxes),
+		},
+		"graph": graph,
+	}
 }
 
 func sortGraph(graph Graph) Graph {
@@ -81,7 +84,6 @@ func sortGraph(graph Graph) Graph {
 		Nodes: nodes,
 		Links: links,
 	}
-
 }
 
 func computeHierarchyGraph(postings []posting.Posting) Graph {
@@ -119,7 +121,6 @@ func computeHierarchyGraph(postings []posting.Posting) Graph {
 	return Graph{Nodes: lo.Values(nodes), Links: lo.Map(lo.Keys(links), func(k Pair, _ int) Link {
 		return Link{Source: k.Source, Target: k.Target, Value: links[k]}
 	})}
-
 }
 
 func addNode(nodeID *uint, nodes *map[string]Node, account string) {
@@ -141,7 +142,6 @@ func addNode(nodeID *uint, nodes *map[string]Node, account string) {
 }
 
 func addLink(source string, target string, amount decimal.Decimal, nodes *map[string]Node, links *map[Pair]decimal.Decimal) {
-
 	sparts := strings.Split(source, ":")
 	if sparts[0] == "Income" {
 		for len(sparts) > 1 {

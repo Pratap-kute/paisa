@@ -102,7 +102,7 @@ func computeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 		netIncome := grossSalaryIncome.Add(grossOtherIncome).Sub(netTax)
 		var savingsRate decimal.Decimal = decimal.Zero
 		if !netIncome.Equal(decimal.Zero) {
-			savingsRate = (netInvestment.Div(netIncome)).Mul(decimal.NewFromInt(100))
+			savingsRate = netInvestment.Div(netIncome).Mul(decimal.NewFromInt(100))
 		}
 
 		yearlyCards = append(yearlyCards, InvestmentYearlyCard{

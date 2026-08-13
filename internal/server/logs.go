@@ -21,7 +21,6 @@ func GetLogs() gin.H {
 	file, err := os.Open(path)
 	if err != nil {
 		return gin.H{"logs": logs}
-
 	}
 	defer file.Close()
 
