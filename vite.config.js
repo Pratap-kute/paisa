@@ -23,6 +23,10 @@ const config = {
     nodePolyfills({ include: ["buffer"], globals: { Buffer: true } }),
   ],
   server: {
+    // The backend proxy is tied to this development server. Starting on an
+    // arbitrary fallback port hides stale `make develop` processes and leaves
+    // multiple competing app instances running.
+    strictPort: true,
     proxy: {
       "/api": {
         target: "http://localhost:7500",

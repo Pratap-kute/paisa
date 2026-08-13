@@ -1,10 +1,10 @@
 {
   "tasks": {
     "dev": "deno run -A npm:vite dev --host 0.0.0.0",
-    "develop": "deno run --allow-env --allow-read --allow-run --allow-write scripts/dev.ts --frontend",
-    "debug": "deno run --allow-env --allow-read --allow-run --allow-write scripts/dev.ts --frontend --now",
-    "serve": "deno run --allow-env --allow-read --allow-run --allow-write scripts/dev.ts",
-    "serve:now": "deno run --allow-env --allow-read --allow-run --allow-write scripts/dev.ts --now",
+    "develop": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend",
+    "debug": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend --now",
+    "serve": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts",
+    "serve:now": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts --now",
     "preview": "deno run -A npm:vite preview",
 
     "build": "deno run -A npm:vite build",
