@@ -20,7 +20,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <LegendCard {legends} clazz="ml-4" />
           <svg id="d3-gain-overview" />
         </div>

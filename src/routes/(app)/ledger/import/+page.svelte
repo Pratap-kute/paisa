@@ -249,7 +249,7 @@
   <div class="container is-fluid">
     <div class="columns mb-0">
       <div class="column is-5 py-0">
-        <div class="box p-3 mb-3 overflow-x-auto">
+        <div class="box p-3 mb-3 paisa-overflow-x-auto">
           <div class="field is-grouped mb-0">
             <p class="control">
               <span data-tippy-content="Create" data-tippy-followCursor="false">
@@ -371,7 +371,7 @@
             Drag 'n' drop CSV, TXT, XLS, XLSX, PDF file here or click to select
           </Dropzone>
         </div>
-        <div class="is-flex justify-end mb-3 gap-4">
+        <div class="is-flex is-justify-content-flex-end mb-3 gap-4">
           <div class="field color-switch">
             <input
               id="import-reverse"

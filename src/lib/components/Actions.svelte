@@ -59,7 +59,7 @@
       >
       <hr class="dropdown-divider" />
       <a class="dropdown-item icon-text">
-        <label for={obscureId} class="cursor-pointer w-full inline-block">
+        <label for={obscureId} class="paisa-clickable paisa-full-width is-inline-block">
           <input bind:checked={$obscure} id={obscureId} type="checkbox" class="is-hidden" />
           <span class="ml-0 icon is-small">
             <i class="fas {$obscure ? 'fa-eye-slash' : 'fa-eye'}" />

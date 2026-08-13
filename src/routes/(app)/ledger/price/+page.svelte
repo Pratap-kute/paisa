@@ -55,7 +55,7 @@
 
 <section class="section tab-price">
   <div class="container is-fluid">
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-12">
         <div class="box p-3">
           <div class="field has-addons mb-0">
@@ -74,7 +74,7 @@
         </div>
       </div>
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <table class="table is-narrow is-fullwidth is-light-border is-hoverable">
             <thead>
               <tr>
@@ -114,7 +114,7 @@
                     </td>
 
                     <td>{p.commodity_name}</td>
-                    <td class="whitespace-nowrap">{p.date.format("DD MMM YYYY")}</td>
+                    <td class="paisa-nowrap">{p.date.format("DD MMM YYYY")}</td>
                     <td class="has-text-right">{formatCurrency(p.value, 4)}</td>
                     <td class="has-text-right"
                       ><ValueChange value={change(prices[commodity], 1, 0)} /></td

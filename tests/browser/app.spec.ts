@@ -67,7 +67,15 @@ test("journal editor saves and reloads changes", async ({ page }) => {
   await expect(editor).toBeVisible();
   await editor.press("Control+End");
   await editor.pressSequentially("\n; browser smoke marker");
-  await page.getByText("Save", { exact: true }).click();
+  const [saveResponse] = await Promise.all([
+    page.waitForResponse((response) =>
+      new URL(response.url()).pathname === "/api/editor/save" &&
+      response.request().method() === "POST"
+    ),
+    page.getByText("Save", { exact: true }).click(),
+  ]);
+  expect(saveResponse.ok()).toBe(true);
+  expect((await saveResponse.json()).saved).toBe(true);
   await page.reload();
   await expect(editor).toContainText("browser smoke marker");
 });

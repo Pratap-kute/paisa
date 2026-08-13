@@ -43,4 +43,4 @@
   });
 </script>
 
-<div class="overflow-x-auto box py-0" style="max-width: 100%;" bind:this={tableComponent}></div>
+<div class="paisa-overflow-x-auto box py-0" style="max-width: 100%;" bind:this={tableComponent}></div>

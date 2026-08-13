@@ -19,12 +19,12 @@
 <div style="margin: 4px 0;">
   {#each postings as p}
     <div class="is-flex is-justify-content-space-between is-hoverable" style="margin: 1px 0;">
-      <div class="truncate custom-icon" style="min-width: 100px;" title={p.account}>
+      <div class="paisa-truncate custom-icon" style="min-width: 100px;" title={p.account}>
         <span style={accountColorStyle(firstName(p.account))}>{iconText(p.account)}</span>
         {p.account}
       </div>
       <div class="is-flex is-align-items-baseline is-justify-content-right">
-        <div class="has-text-right has-text-grey is-size-7 mr-2 truncate">
+        <div class="has-text-right has-text-grey is-size-7 mr-2 paisa-truncate">
           {unlessDefaultCurrency(p)}
         </div>
         <div class="has-text-right" style="min-width: 50px;">

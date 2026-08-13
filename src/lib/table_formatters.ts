@@ -16,7 +16,7 @@ export function indendedAssetAccountName(cell: CellComponent) {
     children = `(${data._children?.length})`;
   }
   return `
-<span class="whitespace-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
+<span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
   <span class="has-text-grey custom-icon">${iconText(account)}</span>
   <a href="/assets/gain/${account}">${lastName(account)}</a>
   <span class="has-text-grey-light is-size-7">${children}</span>
@@ -32,7 +32,7 @@ export function indendedLiabilityAccountName(cell: CellComponent) {
     children = `(${data._children?.length})`;
   }
   return `
-<span class="whitespace-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
+<span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
   <span class="has-text-grey custom-icon">${iconText(account)}</span>
   <span>${lastName(account)}</span>
   <span class="has-text-grey-light is-size-7">${children}</span>
@@ -43,7 +43,7 @@ export function indendedLiabilityAccountName(cell: CellComponent) {
 export function accountName(cell: CellComponent) {
   const account = cell.getValue();
   return `
-<span class="whitespace-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
+<span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
   <span class="has-text-grey custom-icon">${iconText(account)}</span>
   <a href="/assets/gain/${account}">${account}</a>
 </span>

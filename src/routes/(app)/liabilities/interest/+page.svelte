@@ -51,7 +51,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <svg id="d3-interest-overview" />
         </div>
       </div>

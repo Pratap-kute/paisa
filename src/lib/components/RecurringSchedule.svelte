@@ -27,8 +27,8 @@
   );
 </script>
 
-<div class="px-2 flex is-size-6 justify-between gap-2" data-tippy-content={tooltipHtml}>
-  <div class="truncate" title={schedule.key}>
+<div class="px-2 is-flex is-size-6 is-justify-content-space-between gap-2" data-tippy-content={tooltipHtml}>
+  <div class="paisa-truncate" title={schedule.key}>
     <span class="icon is-small {icon.color}">
       <i class="fas {icon.icon}" />
     </span>

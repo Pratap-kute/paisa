@@ -430,7 +430,7 @@ export function renderPerAccountOverview(interests: Interest[]) {
   const rightColumn = columns.append("div").attr("class", "column");
   rightColumn
     .append("div")
-    .attr("class", "box overflow-x-auto")
+    .attr("class", "box paisa-overflow-x-auto")
     .append("svg")
     .attr("height", "150")
     .each(function (gain) {

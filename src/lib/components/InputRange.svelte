@@ -14,7 +14,7 @@
       bind:value
       min={allowed.min}
       max={allowed.max}
-      class="du-range du-range-xs"
+      class="paisa-range"
       step={1}
     />
     <div

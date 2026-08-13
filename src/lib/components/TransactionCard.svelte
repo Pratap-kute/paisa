@@ -21,7 +21,7 @@
 
 <div class="box p-2 has-background-white">
   <div class="is-flex is-justify-content-space-between is-align-items-baseline">
-    <div class="has-text-grey is-size-7 truncate">
+    <div class="has-text-grey is-size-7 paisa-truncate">
       <PostingStatus {posting} />
       <TransactionNote transaction={t} />
       <a class="secondary-link" href={postingUrl(posting)}>{posting.payee}</a>
@@ -36,7 +36,7 @@
   <hr class="my-1" />
   {#each t.postings as posting}
     <div class="my-1 is-flex is-justify-content-space-between">
-      <div class="has-text-grey truncate custom-icon" title={posting.account}>
+      <div class="has-text-grey paisa-truncate custom-icon" title={posting.account}>
         <span style={accountColorStyle(firstName(posting.account))}
           >{iconText(posting.account)}</span
         >

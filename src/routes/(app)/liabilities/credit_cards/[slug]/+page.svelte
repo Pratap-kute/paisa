@@ -53,10 +53,10 @@
 
 <section class="section">
   <div class="container is-fluid">
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-3-widescreen is-4">
         {#if creditCard}
-          <div class="flex mb-12">
+          <div class="is-flex mb-12">
             <CreditCardCard {creditCard} />
           </div>
 
@@ -103,16 +103,16 @@
       </div>
       <div class="column is-9-widescreen is-8">
         {#if currentBill}
-          <div class="flex flex-wrap gap-4 mb-4">
+          <div class="is-flex is-flex-wrap-wrap gap-4 mb-4">
             <div
-              class="box py-2 m-0 flex-grow overflow-x-auto"
+              class="box py-2 m-0 is-flex-grow-1 paisa-overflow-x-auto"
               style="border: 1px solid transparent"
             >
               <div class="is-flex mr-2 is-align-items-baseline" style="min-width: fit-content">
-                <div class="ml-3 custom-icon is-size-5 whitespace-nowrap">
+                <div class="ml-3 custom-icon is-size-5 paisa-nowrap">
                   <span>{iconify(creditCard.account)}</span>
                 </div>
-                <div class="ml-3 whitespace-nowrap">
+                <div class="ml-3 paisa-nowrap">
                   <span class="mr-1 is-size-7 has-text-grey">Payment</span>
                   <span
                     ><DueDate dueDate={currentBill.dueDate} paidDate={currentBill.paidDate} /></span
@@ -134,7 +134,7 @@
               </div>
             </div>
           </div>
-          <nav class="level flex gap-4 overflow-x-auto" style="justify-content: start;">
+          <nav class="level is-flex gap-4 paisa-overflow-x-auto" style="justify-content: start;">
             <LevelItem
               {small}
               narrow

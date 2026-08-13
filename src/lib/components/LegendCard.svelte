@@ -41,33 +41,34 @@
   }
 </script>
 
-<div class="flex justify-start gap-0 {clazz}">
+<div class="is-flex is-justify-content-flex-start gap-0 {clazz}">
   {#each legends as legend}
     <div
-      class="flex flex-col p-1.5 gap-2 legend-box {legend.onClick && 'cursor-pointer'}"
+      class="is-flex is-flex-direction-column paisa-p-1-5 gap-2 legend-box {legend.onClick &&
+        'paisa-clickable'}"
       on:click={(_e) => onClick(legend)}
       class:selected={selectedLegend == legend}
     >
       {#if legend.texture}
         <svg
           use:texture={{ texture: legend.texture }}
-          class="self-center"
+          class="is-align-self-center"
           height="1rem"
           width="1rem"
           viewBox="0 0 {textureScale} {textureScale}"
         ></svg>
       {:else if legend.shape == "square"}
         <div
-          class="self-center"
+          class="is-align-self-center"
           style="background-color: {legend.color}; height: 1rem; width: 1rem;"
         ></div>
       {:else if legend.shape == "line"}
         <div
-          class="self-center"
+          class="is-align-self-center"
           style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 2rem;"
         ></div>
       {/if}
-      <div class="legend-label whitespace-pre is-size-6-5 has-text-grey custom-icon">
+      <div class="legend-label paisa-whitespace-pre is-size-6-5 has-text-grey custom-icon">
         {legend.label}
       </div>
     </div>

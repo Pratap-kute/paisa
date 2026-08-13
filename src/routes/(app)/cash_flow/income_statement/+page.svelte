@@ -146,28 +146,28 @@
 
 <section class="section">
   <div class="container is-fluid">
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       {#if incomeStatement}
         <div class="column is-12">
-          <div class="box py-2 my-0 overflow-x-auto">
+          <div class="box py-2 my-0 paisa-overflow-x-auto">
             <div class="is-flex mr-2 is-align-items-baseline" style="min-width: fit-content">
-              <div class="ml-3 custom-icon is-size-5 whitespace-nowrap">
+              <div class="ml-3 custom-icon is-size-5 paisa-nowrap">
                 {$year}
               </div>
-              <div class="ml-3 whitespace-nowrap">
+              <div class="ml-3 paisa-nowrap">
                 <span class="mr-1 is-size-7 has-text-grey">Start</span>
                 <span class="has-text-weight-bold"
                   >{formatCurrency(incomeStatement.startingBalance)}</span
                 >
               </div>
-              <div class="ml-3 whitespace-nowrap">
+              <div class="ml-3 paisa-nowrap">
                 <span class="mr-1 is-size-7 has-text-grey">End</span>
                 <span class="has-text-weight-bold"
                   >{formatCurrency(incomeStatement.endingBalance)}</span
                 >
               </div>
 
-              <div class="ml-3 whitespace-nowrap">
+              <div class="ml-3 paisa-nowrap">
                 <span class="mr-1 is-size-7 has-text-grey">change</span>
                 <span class="has-text-weight-bold {changeClass(diff)}">{formatCurrency(diff)}</span>
                 <span class="mr-1 is-size-7 has-text-weight-bold {changeClass(diff)}"
@@ -179,7 +179,7 @@
         </div>
       {/if}
       <div class="column is-12">
-        <div class="box overflow-x-auto">
+        <div class="box paisa-overflow-x-auto">
           <ZeroState item={!isEmpty}
             ><strong>Oops!</strong> You have not made any transactions for the selected year.</ZeroState
           >
@@ -195,7 +195,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12 pb-0">
-        <div class="box pt-0 overflow-x-auto max-h-screen max-w-fit">
+        <div class="box pt-0 paisa-overflow-x-auto paisa-max-screen-height paisa-max-width-fit">
           <table
             class="table is-narrow is-hoverable is-light-border has-sticky-header has-sticky-column"
           >
@@ -221,7 +221,7 @@
                 </tr>
                 {#each group.accounts as account}
                   <tr>
-                    <th class="custom-icon whitespace-nowrap"
+                    <th class="custom-icon paisa-nowrap"
                       ><span class="pl-3 has-text-weight-normal"
                         >{iconify(restName(account), { group: firstName(account) })}</span
                       ></th

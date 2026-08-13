@@ -219,7 +219,7 @@
         {/if}
 
         <div class="tile is-parent">
-          <article class="tile is-child min-w-0">
+          <article class="tile is-child paisa-min-width-0">
             <p class="subtitle">
               <a class="secondary-link has-text-grey" href="/cash_flow/monthly">Cash Flow</a>
             </p>
@@ -228,7 +228,7 @@
                 <strong>Oops!</strong> You have not made any transactions in the last 3 months.
               </ZeroState>
 
-              <LegendCard legends={cashflowLegends} clazz="mb-2 overflow-x-auto" />
+              <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
 
               <svg
                 class:is-not-visible={_.isEmpty(cashFlows)}
@@ -307,7 +307,7 @@
                   </p>
                   <div class="content box">
                     <div
-                      class="grid grid-rows-1 overflow-hidden"
+                      class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
                       style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
                     >
                       {#each transactionSequences as ts (ts)}

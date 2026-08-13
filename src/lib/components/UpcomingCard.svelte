@@ -14,8 +14,8 @@
   const icon = scheduleIcon(schedule);
 </script>
 
-<div class="has-text-centered mb-0 mr-3 max-w-[200px]">
-  <div class="is-size-7 truncate">{transactionSequece.key}</div>
+<div class="has-text-centered mb-0 mr-3 paisa-max-width-200">
+  <div class="is-size-7 paisa-truncate">{transactionSequece.key}</div>
   <div class="my-1">
     <span class="tag">{intervalText(transactionSequece)}</span>
   </div>
@@ -25,13 +25,13 @@
     </span>
     {schedule.scheduled.format("DD MMM YYYY")}
   </div>
-  <div class="grid justify-center">
+  <div class="paisa-grid is-justify-content-center">
     <div
-      class="mx-3 mt-3 du-radial-progress is-size-7 has-text-grey-lighter opacity-20"
+      class="mx-3 mt-3 radial-progress is-size-7 has-text-grey-lighter paisa-opacity-20"
       style="--value: 100; --thickness: 3px; --size: 100px; grid-area: 1/1"
     ></div>
     <div
-      class="mx-3 mt-3 du-radial-progress is-size-7 {icon.color}"
+      class="mx-3 mt-3 radial-progress is-size-7 {icon.color}"
       style="--value: {n.isBefore(now())
         ? '0'
         : (schedule.scheduled.diff(now(), 'day') / transactionSequece.interval) *

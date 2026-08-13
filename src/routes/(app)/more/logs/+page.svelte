@@ -36,7 +36,7 @@
       <div class="column is-12">
         <div class="columns">
           <div class="column is-12">
-            <div class="box px-2 overflow-x-auto">
+            <div class="box px-2 paisa-overflow-x-auto">
               <VirtualList
                 width="100%"
                 height={window.innerHeight - 130}
@@ -55,8 +55,8 @@
                     >
                       {log.level}
                     </div>
-                    <div class="msg truncate" title={log.msg}>{log.msg}</div>
-                    <div class="fields is-size-7 truncate" title={formatFields(log)}>
+                    <div class="msg paisa-truncate" title={log.msg}>{log.msg}</div>
+                    <div class="fields is-size-7 paisa-truncate" title={formatFields(log)}>
                       {#each Object.entries(fields) as [key, value]}
                         <span class="px-1 field"><span>{key}</span>=<span>{value}</span></span>
                       {/each}

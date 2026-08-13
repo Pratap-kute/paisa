@@ -10,14 +10,14 @@
 
 <div>
   {#if !_.isEmpty(breakPoints)}
-    <div class="flex justify-between">
+    <div class="is-flex is-justify-content-space-between">
       <div></div>
       {#each breakPoints as point, i}
         <div class="breakpoint is-hidden-mobile box py-1 px-4 mb-3 has-text-centered">
           <div class="has-text-grey-light has-text-weight-bold is-size-7">
             {point.date.format("DD MMM YYYY")}
           </div>
-          <div class="flex flex-row justify-center items-baseline">
+          <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-baseline">
             <div class="mr-2">
               <span
                 class="icon is-small {progressPercent >= (i + 1) * 25

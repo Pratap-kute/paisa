@@ -139,9 +139,9 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-9">
-        <div class="columns flex-wrap">
+        <div class="columns is-flex-wrap-wrap">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="400" bind:this={svg} />
             </div>
           </div>
@@ -149,7 +149,7 @@
         <BoxLabel text="{iconGlyph(icon)} {name} progress" />
         <div class="columns">
           <div class="column is-12">
-            <div class="box overflow-x-auto">
+            <div class="box paisa-overflow-x-auto">
               <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
             </div>
           </div>

@@ -8,7 +8,7 @@
 
 <div class="box p-3 has-background-white">
   <div class="my-1 is-flex is-justify-content-space-between">
-    <div class="has-text-grey truncate custom-icon" title={assetBreakdown.group}>
+    <div class="has-text-grey paisa-truncate custom-icon" title={assetBreakdown.group}>
       <span style={accountColorStyle(firstName(assetBreakdown.group))}
         >{iconText(assetBreakdown.group)}</span
       >

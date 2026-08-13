@@ -19,7 +19,7 @@
 <div class="column is-12">
   {#if compact}
     <div class="columns is-flex-wrap-wrap transaction">
-      <div class="column is-12 py-0 truncate">
+      <div class="column is-12 py-0 paisa-truncate">
         <div class="description is-size-7">
           <b>{t.date.format("DD MMM YYYY")}</b>
           <span title={t.payee}>
@@ -38,7 +38,7 @@
     </div>
   {:else}
     <div class="columns is-flex-wrap-wrap transaction bordered">
-      <div class="column is-3 py-0 truncate">
+      <div class="column is-3 py-0 paisa-truncate">
         <div class="description mt-2 is-size-7">
           <b>{t.date.format("DD MMM YYYY")}</b>
           <span title={t.payee}

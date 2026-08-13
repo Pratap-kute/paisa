@@ -239,14 +239,14 @@
 />
 
 <section
-  class="section tab-editor max-h-screen"
+  class="section tab-editor paisa-max-screen-height"
   style="padding-bottom: 0 !important"
 >
   <div class="container is-fluid">
     <div class="columuns">
       <div class="column is-12 px-0 pt-0 mb-2">
         <div
-          class="box p-3 is-flex is-align-items-center overflow-x-auto"
+          class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto"
           style="width: 100%"
         >
           <div class="field has-addons mb-0">
@@ -367,7 +367,7 @@
     </div>
     <div class="columns">
       <div class="column is-3-widescreen is-2-fullhd is-4">
-        <div class="box px-2 full-height overflow-y-auto">
+        <div class="box px-2 full-height paisa-overflow-y-auto">
           <aside class="menu">
             <FileTree
               path=""
@@ -380,7 +380,7 @@
         </div>
       </div>
       <div class="column is-9-widescreen is-10-fullhd is-8">
-        <div class="flex overflow-x-auto">
+        <div class="is-flex paisa-overflow-x-auto">
           <div
             class="box box-r-none py-0 pr-1 mb-0"
             style="min-width: min(75%,24rem); max-width: min(75%,48rem);"
@@ -403,7 +403,7 @@
                   class:underline={result.underline}
                   class:font-bold={result.bold}
                   class:text-left={result.align === "left"}
-                  class="m-0 p-0 truncate {result.error
+                  class="m-0 p-0 paisa-truncate {result.error
                     ? 'has-text-danger'
                     : ''}"
                   style="font-size: 0.9285714285714286rem; line-height: 1.4"

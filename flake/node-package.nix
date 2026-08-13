@@ -2380,15 +2380,6 @@ let
         sha512 = "iNB/39N3dRKDWF7V+4Bto0X3v7mcFWpdSJOgZ1p6K5pTMIg3AjCLtVifW2M4hLkGuyc/iQC0t9FgB+ow2NvPbg==";
       };
     };
-    "autoprefixer-10.4.16" = {
-      name = "autoprefixer";
-      packageName = "autoprefixer";
-      version = "10.4.16";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/autoprefixer/-/autoprefixer-10.4.16.tgz";
-        sha512 = "7vd3UC6xKp0HLfua5IjZlcXvGAGy7cBAXTg2lyQ/8WpNhd6SiZ8Be+xm3FyBSYJx5GKcpRCzBh7RH4/0dnY+uQ==";
-      };
-    };
     "available-typed-arrays-1.0.5" = {
       name = "available-typed-arrays";
       packageName = "available-typed-arrays";
@@ -3658,15 +3649,6 @@ let
       src = fetchurl {
         url = "https://registry.npmjs.org/d3-zoom/-/d3-zoom-3.0.0.tgz";
         sha512 = "b8AmV3kfQaqWAuacbPuNbL6vahnOJflOhexLzMMNLga62+/nh0JzvJ0aO/5a5MVgUFGS7Hu1P9P03o3fJkDCyw==";
-      };
-    };
-    "daisyui-4.6.0" = {
-      name = "daisyui";
-      packageName = "daisyui";
-      version = "4.6.0";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/daisyui/-/daisyui-4.6.0.tgz";
-        sha512 = "B5ZB/sczXpp4LMdo/SZrtYY/U2hq+Vr9I15QawuWZ0VwgtSAbuZpAZUftKVryEsPuv3BM0yVlBED0nAmtis/dw==";
       };
     };
     "date-fns-2.30.0" = {
@@ -8682,15 +8664,6 @@ let
         sha512 = "qFW7kfadtcaISQIibKAIy0f3eeIXUVi8242Vly1iJfMD79kfEGzfczNuPBN/80hDxHzQJXYbmJ8VipI40hQtfA==";
       };
     };
-    "tailwindcss-3.4.0" = {
-      name = "tailwindcss";
-      packageName = "tailwindcss";
-      version = "3.4.0";
-      src = fetchurl {
-        url = "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.0.tgz";
-        sha512 = "VigzymniH77knD1dryXbyxR+ePHihHociZbXnLZHUyzf2MMs2ZVqlUrZ3FvpXP8pno9JzmILt1sZPD19M3IxtA==";
-      };
-    };
     "tar-6.2.0" = {
       name = "tar";
       packageName = "tar";
@@ -9882,7 +9855,6 @@ let
       sources."asynckit-0.4.0"
       sources."atob-2.1.2"
       sources."auto-config-loader-1.7.6"
-      sources."autoprefixer-10.4.16"
       sources."available-typed-arrays-1.0.5"
       sources."axios-1.6.3"
       sources."axobject-query-3.2.1"
@@ -10087,7 +10059,6 @@ let
       sources."d3-timer-3.0.1"
       sources."d3-transition-3.0.1"
       sources."d3-zoom-3.0.0"
-      sources."daisyui-4.6.0"
       sources."date-fns-2.30.0"
       sources."date-picker-svelte-2.10.1"
       sources."dayjs-1.11.10"
@@ -10807,16 +10778,6 @@ let
       sources."svgpath-2.6.0"
       sources."svgtofont-4.1.1"
       sources."tabulator-tables-6.3.1"
-      (sources."tailwindcss-3.4.0" // {
-        dependencies = [
-          (sources."postcss-load-config-4.0.2" // {
-            dependencies = [
-              sources."lilconfig-3.0.0"
-            ];
-          })
-          sources."yaml-2.3.4"
-        ];
-      })
       (sources."tar-6.2.0" // {
         dependencies = [
           sources."minipass-5.0.0"

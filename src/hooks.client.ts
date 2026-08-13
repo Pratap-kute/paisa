@@ -75,7 +75,12 @@ export const handleError: HandleClientError = (
   if (error instanceof Error) {
     stack = error.stack;
   }
-  return { message, stack, status, detail: (error as any)?.toString?.() ?? String(error) } as any;
+  return {
+    message,
+    stack,
+    status,
+    detail: (error as any)?.toString?.() ?? String(error),
+  } as any;
 };
 
 function formatError(error: any) {

@@ -92,10 +92,10 @@
     </div>
     <div class="columns">
       <div class="column is-12">
-        <div class="box overflow-x-auto" style="max-width: 98rem;">
+        <div class="box paisa-overflow-x-auto" style="max-width: 98rem;">
           <div style="width: 98rem;">
             <div
-              class="px-3 pt-1 grid grid-cols-7x gap-1 posting-row items-baseline has-text-weight-bold"
+              class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline has-text-weight-bold"
             >
               <div>Date</div>
               <div>Description</div>
@@ -115,7 +115,7 @@
             >
               <div
                 slot="item"
-                class="px-3 pt-1 grid grid-cols-7x gap-1 posting-row items-baseline is-hoverable"
+                class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline is-hoverable"
                 let:index
                 let:style
                 {style}
@@ -123,13 +123,13 @@
                 {@const p = filteredPostings[index]}
                 {@const c = change(p)}
                 <div>{p.date.format("DD MMM YYYY")}</div>
-                <div class="is-size-7 truncate" title={p.payee}>
+                <div class="is-size-7 paisa-truncate" title={p.payee}>
                   <PostingStatus posting={p} />
                   <PostingNote posting={p} />
                   <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
                 </div>
-                <div class="custom-icon truncate" title={p.account}>
-                  <div class="flex">
+                <div class="custom-icon paisa-truncate" title={p.account}>
+                  <div class="is-flex">
                     <span class="mr-1" style={accountColorStyle(firstName(p.account))}
                       >{iconText(p.account)}</span
                     >

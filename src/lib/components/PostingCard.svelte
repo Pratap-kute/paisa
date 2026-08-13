@@ -18,7 +18,7 @@
 
 <div class="box p-2 my-2 has-background-white" style="border-left: 2px solid {color}">
   <div class="is-flex is-justify-content-space-between">
-    <div class="has-text-grey is-size-7 truncate">
+    <div class="has-text-grey is-size-7 paisa-truncate">
       <PostingStatus {posting} />
       <PostingNote {posting} />
       <a class="secondary-link" href={postingUrl(posting)}>{posting.payee}</a>
@@ -32,7 +32,7 @@
   </div>
   <hr class="my-1" />
   <div class="is-flex is-justify-content-space-between">
-    <div class="has-text-grey truncate custom-icon">
+    <div class="has-text-grey paisa-truncate custom-icon">
       {#if icon}
         {iconify(restName(posting.account), { group: firstName(posting.account) })}
       {:else}
@@ -41,7 +41,7 @@
     </div>
     <div class="is-flex is-align-items-baseline">
       <div
-        class="has-text-grey mr-1 truncate is-size-7"
+        class="has-text-grey mr-1 paisa-truncate is-size-7"
         class:is-hidden={posting.quantity == posting.amount}
       >
         {formatFloat(posting.quantity, 4)} @ {formatFloat(posting.amount / posting.quantity, 3)}

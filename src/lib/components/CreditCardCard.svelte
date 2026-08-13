@@ -23,9 +23,9 @@
   $: bill = lastBill(creditCard);
 </script>
 
-<div class="credit-card box p-3 m-0 flex-col justify-between">
-  <div class="is-flex justify-between has-text-weight-bold is-size-5">
-    <div style="margin: 35px 0 0 15px;" class="flex items-center opacity-20">
+<div class="credit-card box p-3 m-0 is-flex-direction-column is-justify-content-space-between">
+  <div class="is-flex is-justify-content-space-between has-text-weight-bold is-size-5">
+    <div style="margin: 35px 0 0 15px;" class="is-flex is-align-items-center paisa-opacity-20">
       <svg
         class="chip"
         xmlns="http://www.w3.org/2000/svg"
@@ -63,8 +63,8 @@
       </a>
     </div>
   </div>
-  <div class="flex justify-between">
-    <div class="flex flex-col">
+  <div class="is-flex is-justify-content-space-between">
+    <div class="is-flex is-flex-direction-column">
       {#if bill}
         <div class="is-size-7">
           <span class="has-text-grey">Amount Due</span>
@@ -77,11 +77,11 @@
         </div>
       {/if}
     </div>
-    <div class="flex flex-col">
+    <div class="is-flex is-flex-direction-column">
       <div class="is-size-7">
         <span class="has-text-grey">Balance</span>
       </div>
-      <div class="flex flex-col">
+      <div class="is-flex is-flex-direction-column">
         <span class="is-size-4 has-text-grey-dark">{formatCurrency(creditCard.balance)}</span>
         <span class="is-size-7 has-text-grey"
           >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
@@ -91,17 +91,17 @@
       </div>
     </div>
   </div>
-  <div class="is-flex justify-between items-end">
-    <div class="has-text-weight-bold is-size-5 inline-flex items-center">
-      <span class="opacity-40 inline-flex flex-col mr-2" style="font-size: 0.5rem; line-height: 1;">
+  <div class="is-flex is-justify-content-space-between is-align-items-flex-end">
+    <div class="has-text-weight-bold is-size-5 is-inline-flex is-align-items-center">
+      <span class="paisa-opacity-40 is-inline-flex is-flex-direction-column mr-2" style="font-size: 0.5rem; line-height: 1;">
         <span>VALID</span>
         <span>THRU</span>
       </span>
-      <span class="opacity-30"
+      <span class="paisa-opacity-30"
         >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * * * &nbsp; {creditCard.number}</span
       >
     </div>
-    <div class="opacity-15">
+    <div class="paisa-opacity-15">
       <CreditCardNetwork size={48} name={creditCard.network} />
     </div>
   </div>

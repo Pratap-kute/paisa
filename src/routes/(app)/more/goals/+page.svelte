@@ -110,7 +110,7 @@
 <section class="section">
   <div class="container is-fluid">
     <div
-      class="columns flex-wrap"
+      class="columns is-flex-wrap-wrap"
       use:goalDndzone={{
         items: goals,
         dropTargetStyle: {},
@@ -126,7 +126,7 @@
         </div>
       {/each}
     </div>
-    <div class="columns flex-wrap">
+    <div class="columns is-flex-wrap-wrap">
       <div class="column is-12">
         <ZeroState item={!isEmpty}>
           <strong>Oops!</strong> You haven't configured any goals yet. Checkout the

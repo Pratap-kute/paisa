@@ -25,18 +25,18 @@
   }
 </script>
 
-<ul class={root && "du-menu du-menu-sm w-full p-0"}>
+<ul class:ledger-file-tree={root} class:is-root={root}>
   {#each files as file}
     {#if file.type != "directory"}
       <li>
         <a
           on:click={() => dispatch("select", file)}
-          class={file.name == selectedFileName ? "du-active" : ""}
+          class:is-active={file.name == selectedFileName}
         >
           <span class="icon is-small">
             <i class="fa-regular fa-file-lines" />
           </span>
-          <span title={fileName(file.name)} class="truncate">{fileName(file.name)}</span>
+          <span title={fileName(file.name)} class="paisa-truncate">{fileName(file.name)}</span>
           {#if file.name == selectedFileName && hasUnsavedChanges}
             <span class="ml-1 tag is-danger">unsaved</span>
           {/if}
@@ -49,7 +49,7 @@
             <span class="icon is-small">
               <i class="fa-regular fa-folder" />
             </span>
-            <span title={file.name} class="truncate">{file.name}</span>
+            <span title={file.name} class="paisa-truncate">{file.name}</span>
           </summary>
           <svelte:self
             path={join([path, file.name])}

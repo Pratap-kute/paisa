@@ -11,7 +11,7 @@
 {:else if value == 0}
   <span class="has-text-grey-light">{formatPercentage(value, 2)}</span>
 {:else}
-  <span class="{color} whitespace-nowrap">
+  <span class="{color} paisa-nowrap">
     <span class="icon is-small">
       <i class="fas {icon}" />
     </span>

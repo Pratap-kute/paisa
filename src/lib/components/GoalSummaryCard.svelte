@@ -32,8 +32,8 @@
 </script>
 
 <div class="box p-3 goal-summary-card" class:mb-3={small}>
-  <div class="flex justify-between mb-4">
-    <div class="flex">
+  <div class="is-flex is-justify-content-space-between mb-4">
+    <div class="is-flex">
       {#if action}
         <span use:action class="icon is-size-4 mr-1 mt-1 has-text-grey-light">
           <i class="fas fa-grip-vertical" />
@@ -68,7 +68,7 @@
     />
   </nav>
   <Progress small showPercent={false} progressPercent={completed} />
-  <div class="flex justify-between has-text-grey">
+  <div class="is-flex is-justify-content-space-between has-text-grey">
     <div>{formatPercentage(completed / 100, 2)}</div>
     <div>{formatDate(goal.targetDate)}</div>
   </div>
