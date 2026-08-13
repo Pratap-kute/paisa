@@ -32,6 +32,13 @@ const config = {
       allow: ["./fonts"],
     },
   },
+  preview: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:7500",
+      },
+    },
+  },
 };
 
 export default config;

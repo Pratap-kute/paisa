@@ -70,6 +70,7 @@ try {
     join(fixture, "paisa.yaml"),
   );
   await run("go", ["build", "-o", binary, "."]);
+  await run(Deno.execPath(), ["task", "build"]);
 
   const backend = new Deno.Command(binary, {
     args: [
@@ -90,7 +91,15 @@ try {
   await waitForPort(7500);
 
   const frontend = new Deno.Command(Deno.execPath(), {
-    args: ["task", "dev"],
+    args: [
+      "task",
+      "preview",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "5173",
+      "--strictPort",
+    ],
     cwd: root,
     stdout: "inherit",
     stderr: "inherit",
