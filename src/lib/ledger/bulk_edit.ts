@@ -11,7 +11,7 @@ export function applyChanges(
   files: LedgerFile[],
   transactions: Transaction[],
   operation: string,
-  args: any,
+  args: RenameAccountArgs,
 ) {
   let updatedTransactionsCount = 0;
   const transactionsGrouped = _.groupBy(transactions, (t) => t.fileName);

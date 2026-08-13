@@ -1,6 +1,6 @@
 import { expect } from "@std/expect";
 import { get } from "svelte/store";
-import { persisted } from "./persisted.ts";
+import { persisted } from "./persisted";
 
 class MemoryStorage implements Storage {
   #values = new Map<string, string>();

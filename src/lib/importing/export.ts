@@ -20,11 +20,14 @@ export function download(balancedPostings: BalancedPosting[]) {
   const csv = Papa.unparse(rows);
   const downloadLink = document.createElement("a");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  downloadLink.href = window.URL.createObjectURL(blob);
+  downloadLink.href = globalThis.URL.createObjectURL(blob);
   downloadLink.download = "paisa-transactions.csv";
   downloadLink.style.display = "none";
   document.body.appendChild(downloadLink);
   downloadLink.click();
   downloadLink.remove();
-  window.setTimeout(() => window.URL.revokeObjectURL(downloadLink.href), 0);
+  globalThis.setTimeout(
+    () => globalThis.URL.revokeObjectURL(downloadLink.href),
+    0,
+  );
 }

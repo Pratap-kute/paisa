@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- d3-sankey-circular does not expose usable TypeScript datum types.
 import {
   type CashFlow,
   formatCurrencyCrude,

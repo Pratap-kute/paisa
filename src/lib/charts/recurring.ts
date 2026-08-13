@@ -36,7 +36,7 @@ export function renderRecurring(
           skipTicks(
             50,
             x,
-            (d: any) => dayjs(d).format("DD MMM YY"),
+            (d: Date) => dayjs(d).format("DD MMM YY"),
             dates.length,
           ),
         ),

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 stack callback datum types are augmented at runtime.
 import chroma from "chroma-js";
 import * as d3 from "d3";
 import type dayjs from "dayjs";
@@ -528,7 +529,7 @@ function renderOverviewSmall(
     .append("path")
     .attr(
       "clip-path",
-      `url(${new URL("#" + clipAboveID, window.location.toString())})`,
+      `url(${new URL("#" + clipAboveID, globalThis.location.toString())})`,
     )
     .style("fill", z("gain"))
     .style("opacity", "0.8")
@@ -543,7 +544,7 @@ function renderOverviewSmall(
     .append("path")
     .attr(
       "clip-path",
-      `url(${new URL("#" + clipBelowID, window.location.toString())})`,
+      `url(${new URL("#" + clipBelowID, globalThis.location.toString())})`,
     )
     .style("fill", z("loss"))
     .style("opacity", "0.8")

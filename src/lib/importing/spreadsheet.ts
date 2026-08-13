@@ -9,6 +9,8 @@ interface Result {
   error?: string;
 }
 
+type SpreadsheetRow = Record<string, string | number>;
+
 export function parse(file: File): Promise<Result> {
   let extension = file.name.split(".").pop();
   extension = extension?.toLowerCase();
@@ -22,15 +24,15 @@ export function parse(file: File): Promise<Result> {
   throw new Error(`Unsupported file type ${extension}`);
 }
 
-export function asRows(result: Result): Array<Record<string, any>> {
+export function asRows(result: Result): SpreadsheetRow[] {
   return _.map(result.data, (row, i) => {
-    return _.chain(row)
-      .map((cell, j) => {
-        return [String.fromCharCode(65 + j), cell];
-      })
-      .concat([["index", i as any]])
-      .fromPairs()
-      .value();
+    return Object.fromEntries([
+      ...Array.from(
+        row,
+        (cell, j) => [String.fromCharCode(65 + j), cell] as const,
+      ),
+      ["index", i],
+    ]);
   });
 }
 
@@ -41,7 +43,7 @@ const COLUMN_REFS = _.chain(_.range(65, 90))
   .value();
 
 export function render(
-  rows: Array<Record<string, any>>,
+  rows: SpreadsheetRow[],
   template: Handlebars.TemplateDelegate,
   options: { reverse?: boolean; trim?: boolean } = {},
 ) {
@@ -133,7 +135,7 @@ async function parseXLSX(file: File): Promise<Result> {
 
           return { data: json };
         }
-      } catch (e) {
+      } catch (_e) {
         // follow through to the error below
       }
 

@@ -1,8 +1,9 @@
+// deno-lint-ignore-file no-explicit-any -- Import fixtures intentionally exercise heterogeneous spreadsheet rows.
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
-import { asRows, parse, render } from "./spreadsheet.ts";
-import helpers from "./template_helpers.ts";
+import { asRows, parse, render } from "./spreadsheet";
+import helpers from "./template_helpers";
 import _ from "lodash";
 import Handlebars from "handlebars";
 import dayjs from "dayjs";

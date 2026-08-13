@@ -1,5 +1,6 @@
+// deno-lint-ignore-file no-explicit-any -- The sheet language intentionally evaluates heterogeneous user-defined values.
 import type { SyntaxNode } from "@lezer/common";
-import * as Terms from "./parser.terms";
+import * as Terms from "./parser.terms.js";
 import type { EditorState } from "@codemirror/state";
 import { BigNumber } from "bignumber.js";
 import {
@@ -460,7 +461,7 @@ class SheetAST extends AST {
     for (const node of nodes) {
       try {
         this.lines.push(new LineAST(node, state));
-      } catch (e) {
+      } catch (_e) {
         break;
       }
     }

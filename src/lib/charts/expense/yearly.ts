@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 stack and arc callback datum types are augmented at runtime.
 import * as d3 from "d3";
 import chroma from "chroma-js";
 import _ from "lodash";
@@ -19,7 +20,7 @@ import {
 import COLORS, { generateColorScheme } from "../../core/colors";
 import type { Writable } from "svelte/store";
 import { iconify } from "../../core/icon";
-import { byExpenseGroup, expenseGroup, pieData } from "../../charts/expense";
+import { byExpenseGroup, expenseGroup, pieData } from "../expense";
 import type { Dayjs } from "dayjs";
 
 export function renderCalendar(

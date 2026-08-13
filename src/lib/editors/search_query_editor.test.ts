@@ -1,6 +1,6 @@
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { parseDate } from "./search_query_editor.ts";
+import { parseDate } from "./search_query_editor";
 
 function assertRange(text: string, start: string, end: string) {
   const result = parseDate(text, reference);

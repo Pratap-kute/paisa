@@ -58,7 +58,6 @@
     "@lezer/highlight": "npm:@lezer/highlight@^1.1.6",
     "@lezer/lr": "npm:@lezer/lr@^1.3.10",
     "@playwright/test": "npm:@playwright/test@1.61.1",
-    "@std/diff": "jsr:@std/diff@^1",
     "@std/expect": "jsr:@std/expect@^1",
     "@std/fs": "jsr:@std/fs@^1",
     "@std/path": "jsr:@std/path@^1",
@@ -115,24 +114,29 @@
     "noImplicitAny": true
   },
   "fmt": {
-    "exclude": [".svelte-kit/", "web/static/"]
+    "exclude": [
+      ".svelte-kit/",
+      "web/static/",
+      "graphify-out/",
+      "desktop/frontend/wailsjs/",
+      "src/lib/search/parser/parser.js",
+      "src/lib/sheet/parser.js",
+      "tests/fixture/"
+    ]
   },
   "lint": {
     "rules": {
-      "exclude": [
-        "no-explicit-any",
-        "no-unused-vars",
-        "prefer-const",
-        "no-empty",
-        "no-window",
-        "no-window-prefix",
-        "require-await",
-        "no-var",
-        "no-inner-declarations",
-        "no-sloppy-imports"
-      ]
+      "exclude": ["no-sloppy-imports"]
     },
-    "exclude": [".svelte-kit/", "web/static/"]
+    "exclude": [
+      ".svelte-kit/",
+      "web/static/",
+      "graphify-out/",
+      "desktop/frontend/wailsjs/",
+      "src/lib/search/parser/parser.js",
+      "src/lib/sheet/parser.js",
+      "tests/fixture/"
+    ]
   },
   "unstable": ["sloppy-imports"],
   "nodeModulesDir": "auto"

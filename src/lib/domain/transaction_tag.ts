@@ -39,7 +39,7 @@ class SchedulePreview extends WidgetType {
       if (_.isEmpty(schedules)) {
         text = "Invalid";
       }
-    } catch (e) {
+    } catch (_e) {
       text = "Invalid";
     }
     const wrapper = document.createElement("span");
@@ -51,7 +51,7 @@ class SchedulePreview extends WidgetType {
 
 const periodDecorator = new MatchDecorator({
   regexp: /;\s*Period: (([^ ]+ ){2,}[^ ]+)$/gi,
-  decorate: (add, from, to, match) => {
+  decorate: (add, _from, to, match) => {
     const period = match[1];
     const start = to,
       end = to;

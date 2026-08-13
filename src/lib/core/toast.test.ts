@@ -1,6 +1,6 @@
 import { expect } from "@std/expect";
 import { get } from "svelte/store";
-import { dismissToast, toast, toasts } from "./toast.ts";
+import { dismissToast, toast, toasts } from "./toast";
 
 Deno.test("toast stacks, supports single replacement, and dismisses", () => {
   toasts.set([]);

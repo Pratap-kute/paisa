@@ -1,5 +1,5 @@
 import { ajax } from "../core/utils";
-import { ledger } from "../editors/ledger_parser";
+import { ledger } from "./ledger_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { type KeyBinding, keymap } from "@codemirror/view";
 import { EditorState as State } from "@codemirror/state";
@@ -174,7 +174,7 @@ export function focus(editor: EditorView, retry = 5) {
         () => {
           try {
             focus(editor, retry - 1);
-          } catch (e) {
+          } catch (_e) {
             // ignore
           }
         },

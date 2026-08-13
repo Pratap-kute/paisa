@@ -1,6 +1,6 @@
 import { expect } from "@std/expect";
 import { describe, it } from "@std/testing/bdd";
-import { svgRectSpan } from "./svg.ts";
+import { svgRectSpan } from "./svg";
 
 describe("svgRectSpan", () => {
   it("preserves a positive SVG rectangle", () => {

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- CodeMirror syntax-tree nodes expose dynamically shaped parser metadata.
 import type { Transaction } from "../core/utils";
 import {
   autocompletion,
@@ -21,7 +22,7 @@ import { EditorView, minimalSetup } from "codemirror";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { writable } from "svelte/store";
-import * as Terms from "../search/parser/parser.terms";
+import * as Terms from "../search/parser/parser.terms.js";
 import { queryExtension } from "../search/parser/query";
 
 abstract class AST {
@@ -655,11 +656,6 @@ function childrens(node: SyntaxNode): SyntaxNode[] {
     result.push(cur.node);
   } while (cur.nextSibling());
   return result;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function assertUnreachable(_x: never): never {
-  throw new Error("Didn't expect to get here");
 }
 
 export function createEditor(

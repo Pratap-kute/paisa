@@ -1,5 +1,5 @@
 import type { LedgerFileError } from "../core/utils";
-import { handlebars } from "../editors/handlebars_parser";
+import { handlebars } from "./handlebars_parser";
 import { StreamLanguage, syntaxHighlighting } from "@codemirror/language";
 import { keymap } from "@codemirror/view";
 import { basicSetup, EditorView } from "codemirror";

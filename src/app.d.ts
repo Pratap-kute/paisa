@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-var -- Ambient browser globals and untyped third-party modules require declaration syntax.
 /// <reference types="@sveltejs/kit" />
 // https://github.com/oven-sh/bun/issues/5134
 /// <reference lib="dom" />

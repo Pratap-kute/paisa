@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 hierarchy callbacks carry augmented runtime node fields.
 import * as d3 from "d3";
 import _ from "lodash";
 import {

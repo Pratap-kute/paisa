@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 hierarchy nodes are extended by the treemap layout.
 import * as d3 from "d3";
 import type dayjs from "dayjs";
 import _ from "lodash";

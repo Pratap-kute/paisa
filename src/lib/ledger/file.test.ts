@@ -1,5 +1,5 @@
 import { expect } from "@std/expect";
-import { ensureFileExtension } from "./file.ts";
+import { ensureFileExtension } from "./file";
 
 Deno.test("ensureFileExtension appends a missing extension", () => {
   expect(ensureFileExtension("expenses", ".ledger")).toBe("expenses.ledger");

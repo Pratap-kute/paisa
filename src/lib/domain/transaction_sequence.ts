@@ -11,7 +11,6 @@ import {
 import dayjs from "dayjs";
 import { type CronExprs, parse } from "@datasert/cronjs-parser";
 import { getFutureMatches } from "@datasert/cronjs-matcher";
-import { iconGlyph } from "../core/icon";
 
 const end = now().add(36, "month");
 
@@ -109,7 +108,7 @@ function enrich(ts: TransactionSequence) {
     } else {
       periodAvailable = false;
     }
-  } catch (e) {
+  } catch (_e) {
     periodAvailable = false;
   }
 

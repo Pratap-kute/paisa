@@ -1,4 +1,4 @@
-import { parser } from "./parser";
+import { parser } from "./parser.js";
 import { LanguageSupport, LRLanguage } from "@codemirror/language";
 
 export const queryLanguage = LRLanguage.define({

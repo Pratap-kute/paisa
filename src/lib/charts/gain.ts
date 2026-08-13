@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 series callback datum types are augmented at runtime.
 import { goto } from "$app/navigation";
 import chroma from "chroma-js";
 import * as d3 from "d3";

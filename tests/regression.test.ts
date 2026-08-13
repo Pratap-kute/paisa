@@ -1,7 +1,6 @@
 import { join } from "@std/path";
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { diff } from "@std/diff";
 
 const fixture = "tests/fixture";
 const port = 5700;
@@ -34,13 +33,6 @@ function withoutGeneratedIds(value: unknown): unknown {
   return value;
 }
 
-function updateConfig(dir: string, from: string, to: string) {
-  const filename = join(dir, "paisa.yaml");
-  let config = Deno.readTextFileSync(filename);
-  config = config.replace(from, to);
-  Deno.writeTextFileSync(filename, config);
-}
-
 async function recordAndVerify(dir: string, route: string, name: string) {
   const data = await request(route);
 
@@ -54,8 +46,7 @@ async function recordAndVerify(dir: string, route: string, name: string) {
   }
   if (exists && Deno.env.get("REGENERATE") !== "true") {
     const current = JSON.parse(Deno.readTextFileSync(filename));
-    expect(diff(withoutGeneratedIds(current), withoutGeneratedIds(data)))
-      .toEqual([]);
+    expect(withoutGeneratedIds(data)).toEqual(withoutGeneratedIds(current));
   }
   Deno.writeTextFileSync(filename, JSON.stringify(data, null, 2));
 }

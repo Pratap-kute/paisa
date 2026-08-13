@@ -35,7 +35,7 @@ export function iconGlyph(symbol: string): string {
 }
 
 export const iconsList = _.flatMap(icons, (glyph, font) => {
-  return _.map(glyph, (code, name) => `${font}:${name}`);
+  return _.map(glyph, (_code, name) => `${font}:${name}`);
 });
 
 interface IconLookup {

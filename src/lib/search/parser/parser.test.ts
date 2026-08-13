@@ -1,5 +1,5 @@
 import { describe, it as test } from "@std/testing/bdd";
-import { queryLanguage } from "./query.ts";
+import { queryLanguage } from "./query";
 import { fileTests } from "@lezer/generator/dist/test";
 
 import { dirname, fromFileUrl, join } from "@std/path";

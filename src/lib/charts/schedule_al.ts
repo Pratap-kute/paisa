@@ -3,8 +3,8 @@ import _ from "lodash";
 import { formatCurrency, type ScheduleALEntry } from "../core/utils";
 
 export function renderBreakdowns(scheduleALEntries: ScheduleALEntry[]) {
-  const tbody = d3.select(".d3-schedule-al");
-  const trs = tbody.selectAll("tr").data(
+  const tbody = d3.select<HTMLTableSectionElement, unknown>(".d3-schedule-al");
+  const trs = tbody.selectAll<HTMLTableRowElement, ScheduleALEntry>("tr").data(
     scheduleALEntries.concat([
       {
         section: { code: "", section: "", details: "Total" },
@@ -17,7 +17,7 @@ export function renderBreakdowns(scheduleALEntries: ScheduleALEntry[]) {
   trs
     .enter()
     .append("tr")
-    .merge(trs as any)
+    .merge(trs)
     .html((s) => {
       return `
        <td>${s.section.code}</td>

@@ -11,7 +11,7 @@ import { iconText } from "../core/icon";
 export function indendedAssetAccountName(cell: CellComponent) {
   const account = cell.getValue();
   let children = "";
-  const data = cell.getData() as Record<string, any>;
+  const data = cell.getData() as { _children?: unknown[] };
   if ((data._children?.length || 0) > 0) {
     children = `(${data._children?.length})`;
   }
@@ -27,7 +27,7 @@ export function indendedAssetAccountName(cell: CellComponent) {
 export function indendedLiabilityAccountName(cell: CellComponent) {
   const account = cell.getValue();
   let children = "";
-  const data = cell.getData() as Record<string, any>;
+  const data = cell.getData() as { _children?: unknown[] };
   if ((data._children?.length || 0) > 0) {
     children = `(${data._children?.length})`;
   }

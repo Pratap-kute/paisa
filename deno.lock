@@ -5459,7 +5459,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/diff@1",
       "jsr:@std/expect@1",
       "jsr:@std/fs@1",
       "jsr:@std/path@1",

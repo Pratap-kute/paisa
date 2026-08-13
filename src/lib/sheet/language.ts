@@ -1,5 +1,5 @@
-import { parser } from "./parser";
-import { parser as searchQueryParser } from "../search/parser/parser";
+import { parser } from "./parser.js";
+import { parser as searchQueryParser } from "../search/parser/parser.js";
 import { LanguageSupport, LRLanguage } from "@codemirror/language";
 import { parseMixed } from "@lezer/common";
 

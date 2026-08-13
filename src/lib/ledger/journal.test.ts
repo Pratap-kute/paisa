@@ -1,6 +1,6 @@
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { format } from "./journal.ts";
+import { format } from "./journal";
 
 function readFixture(name: string) {
   return Deno.readTextFileSync(`fixture/${name}`);

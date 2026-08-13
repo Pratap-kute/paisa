@@ -71,7 +71,7 @@ function lint(env: Environment) {
           const envCopy = env.clone();
           results = ast.evaluate(envCopy);
           latestIdentifiers = Object.keys(envCopy.scope);
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
         const endTime = performance.now();

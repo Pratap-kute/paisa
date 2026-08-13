@@ -1,8 +1,8 @@
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
-import { applyChanges } from "./bulk_edit.ts";
-import type { LedgerFile } from "../core/utils.ts";
+import { applyChanges } from "./bulk_edit";
+import type { LedgerFile } from "../core/utils";
 import _ from "lodash";
 
 describe("bulk_editor", () => {

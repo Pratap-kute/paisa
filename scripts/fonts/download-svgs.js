@@ -8,7 +8,7 @@ import { runSVGO } from "@iconify/tools/lib/optimise/svgo";
 
 const outputDir = "svg";
 
-async function downloadSVGs(sets) {
+function downloadSVGs(sets) {
   for (const set of sets) {
     const targetDir = join(outputDir, set);
     mkdirSync(targetDir, { recursive: true });
@@ -42,7 +42,7 @@ async function downloadSVGs(sets) {
   }
 }
 
-async function main() {
+function main() {
   rmdirSync(outputDir, { force: true, recursive: true });
   mkdirSync(outputDir, { recursive: true });
   console.log("downloading arcticons");
@@ -56,7 +56,7 @@ async function main() {
       "-d",
       "svg/arcticons",
     ]);
-  } catch (e) {
+  } catch (_e) {
     // ignore
   }
   console.log("downloading others");

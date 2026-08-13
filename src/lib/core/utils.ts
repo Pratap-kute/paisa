@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- Shared API overloads bridge heterogeneous JSON and third-party scale/texture types.
 import sha256 from "crypto-js/sha256";
 import dayjs from "dayjs";
 import _ from "lodash";
@@ -1185,7 +1186,7 @@ export function tooltip(
 }
 
 export function isMobile() {
-  return window.innerWidth < 769;
+  return globalThis.innerWidth < 769;
 }
 
 export function rem(value: number) {
@@ -1232,7 +1233,7 @@ export function getColorPreference() {
   if (localStorage.getItem(storageKey)) {
     return localStorage.getItem(storageKey);
   } else {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
+    return globalThis.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
   }
@@ -1329,7 +1330,7 @@ export function asTransaction(p: Posting): Transaction {
 }
 
 export function svgUrl(identifier: string) {
-  return `url(${new URL("#" + identifier, window.location.toString())})`;
+  return `url(${new URL("#" + identifier, globalThis.location.toString())})`;
 }
 
 export function dueDateIcon(dueDate: dayjs.Dayjs, clearedDate: dayjs.Dayjs) {

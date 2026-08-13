@@ -10,7 +10,7 @@ function browserEnvironment(): PersistedEnvironment {
     storage: typeof localStorage === "undefined" ? null : localStorage,
     onStorage: (listener) => {
       if (typeof window !== "undefined") {
-        window.addEventListener("storage", listener);
+        globalThis.addEventListener("storage", listener);
       }
     },
   };

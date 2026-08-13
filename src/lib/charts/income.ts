@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- D3 stack callback datum types are augmented at runtime.
 import * as d3 from "d3";
 import type dayjs from "dayjs";
 import _ from "lodash";

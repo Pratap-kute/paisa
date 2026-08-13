@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any -- Handlebars invokes helpers with heterogeneous positional values and option objects.
 import dayjs from "dayjs";
 import _ from "lodash";
 import { get } from "svelte/store";
