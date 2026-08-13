@@ -75,6 +75,23 @@ try {
     join(root, "tests/fixture/browser/paisa.db"),
     join(fixture, "paisa.db"),
   );
+  // Portfolio holdings normally come from an external provider, so journal
+  // synchronization cannot recreate them in CI. Seed a small deterministic
+  // portfolio to keep the assets-analysis browser fixture self-contained.
+  await run("sqlite3", [
+    join(fixture, "paisa.db"),
+    `DELETE FROM portfolios;
+     INSERT INTO portfolios
+       (commodity_type, parent_commodity_id, security_id, security_name,
+        security_type, security_rating, security_industry, percentage)
+     VALUES
+       ('mutualfund', '120716', 'INE001', 'Reliance Industries', 'equity', '', 'Energy', '24'),
+       ('mutualfund', '120716', 'INE002', 'HDFC Bank', 'equity', '', 'Financial Services', '22'),
+       ('mutualfund', '120716', 'INE003', 'Infosys', 'equity', '', 'Technology', '18'),
+       ('mutualfund', '120716', 'INE004', 'Bharti Airtel', 'equity', '', 'Telecommunication', '16'),
+       ('mutualfund', '120716', 'GOI2032', 'Government Bond 2032', 'debt', 'Sovereign', 'Government', '12'),
+       ('mutualfund', '120716', 'CORPAAA', 'AAA Corporate Bond', 'debt', 'AAA', 'Financial Services', '8');`,
+  ]);
   await Deno.mkdir(join(fixture, "sheets"), { recursive: true });
   await Deno.copyFile(
     join(root, "tests/fixture/browser/sheets/overview.paisa"),
