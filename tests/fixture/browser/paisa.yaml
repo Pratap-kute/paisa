@@ -1,0 +1,66 @@
+journal_path: main.ledger
+db_path: paisa.db
+sheets_directory: sheets
+ledger_cli: ledger
+
+commodities:
+  - name: NIFTY
+    type: mutualfund
+    harvest: 1
+    tax_category: equity65
+    price:
+      provider: in-mfapi
+      code: 120716
+  - name: AAPL
+    type: stock
+    harvest: 1
+    tax_category: equity
+    price:
+      provider: com-yahoo
+      code: AAPL
+
+goals:
+  retirement:
+    - name: Retirement
+      icon: mdi:palm-tree
+      swr: 3.3
+      yearly_expenses: 240000
+      savings:
+        - Assets:Equity:*
+  savings:
+    - name: House
+      icon: fluent-emoji-high-contrast:house-with-garden
+      target: 500000
+      target_date: "2025-02-07"
+      rate: 8
+      accounts:
+        - Assets:Equity:*
+
+credit_cards:
+  - account: Liabilities:CreditCard:Freedom
+    credit_limit: 150000
+    statement_end_day: 8
+    due_day: 20
+    network: visa
+    number: "0007"
+    expiration_date: "2029-05-01"
+
+accounts:
+  - name: Liabilities:CreditCard:Freedom
+    icon: arcticons:chase
+  - name: Liabilities:HomeLoan
+    icon: mdi:home-city
+
+schedule_al:
+  - code: bank
+    accounts:
+      - Assets:Checking
+  - code: share
+    accounts:
+      - Assets:Equity:*
+  - code: immovable
+    accounts:
+      - Assets:House
+  - code: liability
+    accounts:
+      - Liabilities:*

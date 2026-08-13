@@ -62,12 +62,23 @@ for (
 
 try {
   await Deno.copyFile(
-    join(root, "tests/fixture/inr/main.ledger"),
+    join(root, "tests/fixture/browser/main.ledger"),
     join(fixture, "main.ledger"),
   );
   await Deno.copyFile(
-    join(root, "tests/fixture/inr/paisa.yaml"),
+    join(root, "tests/fixture/browser/paisa.yaml"),
     join(fixture, "paisa.yaml"),
+  );
+  // Start browser tests from the committed fixture state. This keeps visual
+  // baselines deterministic even when the optional Ledger CLI is unavailable.
+  await Deno.copyFile(
+    join(root, "tests/fixture/browser/paisa.db"),
+    join(fixture, "paisa.db"),
+  );
+  await Deno.mkdir(join(fixture, "sheets"), { recursive: true });
+  await Deno.copyFile(
+    join(root, "tests/fixture/browser/sheets/overview.paisa"),
+    join(fixture, "sheets/overview.paisa"),
   );
   await run("go", ["build", "-o", binary, "."]);
   await run(Deno.execPath(), ["task", "build"]);
