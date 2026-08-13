@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import FileModal from "$lib/components/FileModal.svelte";
   import { ajax } from "$lib/utils";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
 
   let modalOpen = false;
   function openCreateModal() {

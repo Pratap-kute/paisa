@@ -7,7 +7,7 @@
   import BulkEditForm from "$lib/components/BulkEditForm.svelte";
   import { slide } from "svelte/transition";
   import * as bulkEdit from "$lib/bulk_edit";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
   import DiffViewModal from "$lib/components/DiffViewModal.svelte";
   import SearchQuery from "$lib/components/SearchQuery.svelte";
   import { editorState } from "$lib/search_query_editor";

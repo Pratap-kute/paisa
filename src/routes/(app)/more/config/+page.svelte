@@ -4,7 +4,7 @@
   import type { JSONSchema7 } from "json-schema";
   import JsonSchemaForm from "$lib/components/JsonSchemaForm.svelte";
   import _ from "lodash";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
   import { refresh } from "../../../../store";
   import { sync } from "$lib/sync";
 

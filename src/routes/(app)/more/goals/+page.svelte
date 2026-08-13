@@ -6,7 +6,7 @@
   import { ajax, helpUrl, type GoalSummary } from "$lib/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
 

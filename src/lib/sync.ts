@@ -1,4 +1,4 @@
-import * as toast from "bulma-toast";
+import * as toast from "$lib/toast";
 import { ajax } from "./utils";
 
 export async function sync(request: Record<string, any>) {

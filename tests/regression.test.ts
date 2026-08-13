@@ -1,12 +1,38 @@
 import { join } from "@std/path";
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import axios from "axios";
-import { diffString } from "json-diff";
+import { diff } from "@std/diff";
 
 const fixture = "tests/fixture";
 const port = 5700;
-axios.defaults.baseURL = `http://localhost:${port}`;
+const baseUrl = `http://localhost:${port}`;
+
+async function request(route: string, init?: RequestInit) {
+  const response = await fetch(new URL(route, baseUrl), {
+    ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `${init?.method || "GET"} ${route} failed: ${response.status}`,
+    );
+  }
+  return await response.json();
+}
+
+function withoutGeneratedIds(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(withoutGeneratedIds);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).filter(([key]) =>
+        !["id", "transaction_id", "endLine", "transaction_end_line"].includes(
+          key,
+        )
+      ).map(([key, item]) => [key, withoutGeneratedIds(item)]),
+    );
+  }
+  return value;
+}
 
 function updateConfig(dir: string, from: string, to: string) {
   const filename = join(dir, "paisa.yaml");
@@ -16,7 +42,7 @@ function updateConfig(dir: string, from: string, to: string) {
 }
 
 async function recordAndVerify(dir: string, route: string, name: string) {
-  const { data: data } = await axios.get(route);
+  const data = await request(route);
 
   const filename = join(dir, name + ".json");
   let exists = true;
@@ -28,21 +54,17 @@ async function recordAndVerify(dir: string, route: string, name: string) {
   }
   if (exists && Deno.env.get("REGENERATE") !== "true") {
     const current = JSON.parse(Deno.readTextFileSync(filename));
-    const diff = diffString(data, current, {
-      excludeKeys: ["id", "transaction_id", "endLine", "transaction_end_line"],
-    });
-
-    if (diff != "") {
-      expect(diff).toBe("");
-    }
+    expect(diff(withoutGeneratedIds(current), withoutGeneratedIds(data)))
+      .toEqual([]);
   }
   Deno.writeTextFileSync(filename, JSON.stringify(data, null, 2));
 }
 
 async function verifyApi(dir: string) {
-  const {
-    data: { success },
-  } = await axios.post("/api/sync", { journal: true });
+  const { success } = await request("/api/sync", {
+    method: "POST",
+    body: JSON.stringify({ journal: true }),
+  });
   expect(success).toBe(true);
 
   await recordAndVerify(dir, "/api/dashboard", "dashboard");

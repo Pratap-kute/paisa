@@ -103,10 +103,6 @@ declare module "d3-path-arrows" {
   export function pathArrows(): any;
 }
 
-declare module "compute-cosine-similarity" {
-  export default function similarity(a: number[], b: number[]): number;
-}
-
 declare module "svelte-carousel" {
   import type { SvelteComponentTyped } from "svelte";
 

@@ -8,14 +8,14 @@
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent
   } from "$lib/editor";
-  import Dropzone from "svelte-file-dropzone";
+  import FileDropzone from "$lib/components/FileDropzone.svelte";
   import { parse, asRows, render as renderJournal } from "$lib/spreadsheet";
   import _ from "lodash";
   import type { EditorView } from "codemirror";
   import { onMount } from "svelte";
   import { ajax, type ImportTemplate } from "$lib/utils";
   import { accountTfIdf } from "../../../../store";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
   import FileModal from "$lib/components/FileModal.svelte";
   import Modal from "$lib/components/Modal.svelte";
 
@@ -113,7 +113,6 @@
     $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
   }
 
-  let input: any;
 
   $: if (!_.isEmpty(data) && $templateEditorState.template) {
     if (
@@ -362,14 +361,13 @@
       </div>
       <div class="column is-7 py-0">
         <div class="box p-3 mb-3">
-          <Dropzone
+          <FileDropzone
             multiple={false}
-            inputElement={input}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
             on:drop={handleFilesSelect}
           >
             Drag 'n' drop CSV, TXT, XLS, XLSX, PDF file here or click to select
-          </Dropzone>
+          </FileDropzone>
         </div>
         <div class="is-flex is-justify-content-flex-end mb-3 gap-4">
           <div class="field color-switch">

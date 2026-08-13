@@ -41,11 +41,8 @@ if (pdfjs.GlobalWorkerOptions) {
 
 import Handlebars from "handlebars";
 import helpers from "$lib/template_helpers";
-import * as toast from "bulma-toast";
+import * as toast from "$lib/toast";
 import _ from "lodash";
-
-import "@formatjs/intl-numberformat/polyfill";
-import "@formatjs/intl-numberformat/locale-data/en";
 
 Handlebars.registerHelper(
   _.mapValues(helpers, (helper, name) => {

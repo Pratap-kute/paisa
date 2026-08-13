@@ -80,6 +80,15 @@ try {
     join(root, "tests/fixture/browser/sheets/overview.paisa"),
     join(fixture, "sheets/overview.paisa"),
   );
+  // Source checkouts intentionally contain only a release placeholder for the
+  // bundled Ledger binary. Let editor validation succeed in browser tests,
+  // while making synchronization fail before it can replace fixture DB rows.
+  const ledgerStub = join(fixture, "ledger");
+  await Deno.writeTextFile(
+    ledgerStub,
+    '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
+    { mode: 0o750 },
+  );
   await run("go", ["build", "-o", binary, "."]);
   await run(Deno.execPath(), ["task", "build"]);
 
@@ -94,7 +103,10 @@ try {
       "2022-02-07",
     ],
     cwd: fixture,
-    env: { TZ: "UTC" },
+    env: {
+      TZ: "UTC",
+      PATH: `${fixture}:${Deno.env.get("PATH") ?? ""}`,
+    },
     stdout: "inherit",
     stderr: "inherit",
   }).spawn();

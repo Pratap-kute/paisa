@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import _ from "lodash";
 import { get } from "svelte/store";
 import { accountTfIdf } from "../store";
-import similarity from "compute-cosine-similarity";
+import { cosineSimilarity } from "./cosine_similarity";
 
 const STOP_WORDS = ["", "fof", "growth", "direct", "plan", "the"];
 
@@ -68,7 +68,7 @@ function findMatch(query: string) {
       );
       const q = tokens.map((token) => queryVector[token] || 0);
       const a = tokens.map((token) => tf_idf[account][token] || 0);
-      return [account, similarity(q, a)];
+      return [account, cosineSimilarity(q, a)];
     })
     .sortBy(([, score]) => score)
     .filter(([, score]: [string, number]) => score > 0)

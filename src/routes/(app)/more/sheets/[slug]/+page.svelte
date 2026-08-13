@@ -11,7 +11,7 @@
   } from "$lib/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding } from "@codemirror/view";
-  import * as toast from "bulma-toast";
+  import * as toast from "$lib/toast";
   import type { EditorView } from "codemirror";
   import _ from "lodash";
   import { onMount } from "svelte";

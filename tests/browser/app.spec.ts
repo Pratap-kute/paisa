@@ -75,7 +75,8 @@ test("journal editor saves and reloads changes", async ({ page }) => {
     page.getByText("Save", { exact: true }).click(),
   ]);
   expect(saveResponse.ok()).toBe(true);
-  expect((await saveResponse.json()).saved).toBe(true);
+  const saveResult = await saveResponse.json();
+  expect(saveResult.saved, saveResult.message).toBe(true);
   await page.reload();
   await expect(editor).toContainText("browser smoke marker");
 });

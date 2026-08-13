@@ -30,8 +30,95 @@ $editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px -
   10.5px - 10.5px);
 
 @import "bulma/bulma.sass";
-@import "bulma-switch/src/sass/index.sass";
 @import "@cityssm/bulma-sticky-table/sticky-table";
+
+// Project-owned switch matching the former Bulma switch control.
+input.switch {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+
+  + label {
+    position: relative;
+    display: inline-flex;
+    height: $control-height;
+    align-items: center;
+    padding-left: 3.5rem;
+    padding-top: 0.2rem;
+    font-size: $size-normal;
+    line-height: $control-line-height;
+    cursor: pointer;
+
+    &::before {
+      position: absolute;
+      top: calc(50% - 0.75rem);
+      left: 0;
+      width: 3rem;
+      height: 1.5rem;
+      border-radius: $radius-rounded;
+      background: $grey-light;
+      content: "";
+      transition: background 0.15s ease;
+    }
+
+    &::after {
+      position: absolute;
+      top: calc(50% - 0.5rem);
+      left: 0.25rem;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background: $white;
+      box-shadow: 0 1px 2px rgba($black, 0.25);
+      content: "";
+      transition: transform 0.15s ease;
+    }
+  }
+
+  &:checked + label::before {
+    background: var(--color, #{$link});
+  }
+
+  &:checked + label::after {
+    transform: translateX(1.625rem);
+  }
+
+  &:focus-visible + label::before {
+    outline: 2px solid $link;
+    outline-offset: 2px;
+  }
+
+  &:disabled + label {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &.is-small + label {
+    height: $control-height;
+    padding-left: 2.75rem;
+    padding-top: 0.2rem;
+    font-size: $size-small;
+
+    &::before {
+      top: calc(50% - 0.5625rem);
+      width: 2.25rem;
+      height: 1.125rem;
+    }
+
+    &::after {
+      top: calc(50% - 0.375rem);
+      left: 0.1875rem;
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
+
+  &.is-small:checked + label::after {
+    transform: translateX(1.125rem);
+  }
+}
 
 $backgroundColor: $white;
 $borderColor: none;
@@ -251,6 +338,61 @@ $footerActiveColor: #d00;
 // Layout primitives used only where Bulma has no equivalent helper.
 .paisa-grid {
   display: grid;
+}
+
+.paisa-toast-container {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  right: 0;
+  display: flex;
+  width: 100%;
+  padding: 15px;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+
+  &.is-bottom {
+    top: auto;
+    bottom: 0;
+  }
+
+  &.is-center {
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .notification {
+    display: inline-flex;
+    width: auto;
+    padding: 1.25rem 1.5rem;
+    pointer-events: auto;
+    white-space: pre-wrap;
+  }
+}
+
+.paisa-file-dropzone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 2px dashed #eeeeee;
+  border-radius: 2px;
+  background: #fafafa;
+  color: #bdbdbd;
+  cursor: pointer;
+  font: inherit;
+  outline: none;
+  transition: border 0.24s ease-in-out;
+
+  &:focus-visible,
+  &.is-dragging {
+    border-color: #2196f3;
+  }
 }
 
 .dashboard-recurring-grid {
