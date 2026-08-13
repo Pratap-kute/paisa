@@ -113,7 +113,7 @@
     "pdfjs-dist": "npm:pdfjs-dist@^3.10.111",
     "pdfjs-dist/build/pdf.worker.js?url": "npm:pdfjs-dist@^3.10.111/build/pdf.worker.js",
     "postcss": "npm:postcss@^8.4.27",
-    "sass": "npm:sass@^1.57.1",
+    "sass": "npm:sass@1.77.6",
     "set-cookie-parser": "npm:set-cookie-parser@^2.6.0",
     "sprintf-js": "npm:sprintf-js@^1.1.2",
     "stemmer": "npm:stemmer@^2.0.1",
