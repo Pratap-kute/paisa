@@ -62,51 +62,29 @@ func TestParseHLegerPrices(t *testing.T) {
 }
 
 func TestParseAmount(t *testing.T) {
-	commodity, amount, _ := parseAmount("0.9 USD")
-	assert.Equal(t, "USD", commodity)
-	assert.Equal(t, 0.9, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("$0.9")
-	assert.Equal(t, "$", commodity)
-	assert.Equal(t, 0.9, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("0.9$")
-	assert.Equal(t, "$", commodity)
-	assert.Equal(t, 0.9, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("$-0.9")
-	assert.Equal(t, "$", commodity)
-	assert.Equal(t, -0.9, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("-0.9$")
-	assert.Equal(t, "$", commodity)
-	assert.Equal(t, -0.9, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("100,000 EUR")
-	assert.Equal(t, "EUR", commodity)
-	assert.Equal(t, 100000.0, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("100,000.00 \"EUR0-0\"")
-	assert.Equal(t, "EUR0-0", commodity)
-	assert.Equal(t, 100000.0, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("-100,000.00 \"EUR0-0\"")
-	assert.Equal(t, "EUR0-0", commodity)
-	assert.Equal(t, -100000.0, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("\"EUR0-0\" -100,000.00")
-	assert.Equal(t, "EUR0-0", commodity)
-	assert.Equal(t, -100000.0, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("INR 70.0099")
-	assert.Equal(t, "INR", commodity)
-	assert.Equal(t, 70.0099, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("1E-8 BTC")
-	assert.Equal(t, "BTC", commodity)
-	assert.Equal(t, 1e-08, amount.InexactFloat64())
-
-	commodity, amount, _ = parseAmount("100E-8    BTC")
-	assert.Equal(t, "BTC", commodity)
-	assert.Equal(t, 1e-06, amount.InexactFloat64())
+	tests := []struct {
+		name, input, commodity string
+		amount                 float64
+	}{
+		{name: "suffix commodity", input: "0.9 USD", commodity: "USD", amount: 0.9},
+		{name: "prefix symbol", input: "$0.9", commodity: "$", amount: 0.9},
+		{name: "suffix symbol", input: "0.9$", commodity: "$", amount: 0.9},
+		{name: "negative prefix symbol", input: "$-0.9", commodity: "$", amount: -0.9},
+		{name: "negative suffix symbol", input: "-0.9$", commodity: "$", amount: -0.9},
+		{name: "thousands separator", input: "100,000 EUR", commodity: "EUR", amount: 100000},
+		{name: "quoted suffix commodity", input: "100,000.00 \"EUR0-0\"", commodity: "EUR0-0", amount: 100000},
+		{name: "negative quoted suffix commodity", input: "-100,000.00 \"EUR0-0\"", commodity: "EUR0-0", amount: -100000},
+		{name: "negative quoted prefix commodity", input: "\"EUR0-0\" -100,000.00", commodity: "EUR0-0", amount: -100000},
+		{name: "prefix currency", input: "INR 70.0099", commodity: "INR", amount: 70.0099},
+		{name: "scientific notation", input: "1E-8 BTC", commodity: "BTC", amount: 1e-8},
+		{name: "scientific notation with spaces", input: "100E-8    BTC", commodity: "BTC", amount: 1e-6},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			commodity, amount, err := parseAmount(tt.input)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.commodity, commodity)
+			assert.Equal(t, tt.amount, amount.InexactFloat64())
+		})
+	}
 }

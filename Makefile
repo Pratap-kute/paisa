@@ -1,4 +1,4 @@
-.PHONY: docs clean
+.PHONY: docs clean lint go-lint quality
 .PHONY: fixture/main.transactions.json
 
 clean:
@@ -36,7 +36,13 @@ parser:
 lint:
 	deno task lint
 	deno task check
-	test -z $$(gofmt -l .)
+	$(MAKE) go-lint
+
+go-lint:
+	golangci-lint run
+
+quality: lint
+	go test ./...
 
 regen:
 	go build

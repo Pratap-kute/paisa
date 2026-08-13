@@ -111,15 +111,15 @@ func TestXIRR(t *testing.T) {
 	files := lo.Must(os.ReadDir(dirname))
 
 	for _, f := range files {
-		if value, exist := XIRR_EXPECTED_VALUES[f.Name()]; exist {
+		value, exists := XIRR_EXPECTED_VALUES[f.Name()]
+		if !exists {
+			continue
+		}
+		t.Run(f.Name(), func(t *testing.T) {
 			cashflows := readCSV(filepath.Join(dirname, f.Name()))
 			expected := decimal.NewFromFloat(value).Round(2)
-			if !expected.Equal(XIRR(cashflows)) {
-				t.Logf("XIRR(%s) : %s %s", f.Name(), XIRR(cashflows), expected)
-				break
-			}
 			assert.Equal(t, expected, XIRR(cashflows))
-		}
+		})
 	}
 
 }

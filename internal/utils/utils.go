@@ -306,7 +306,7 @@ func BuildSubPath(baseDirectory string, path string) (string, error) {
 		return "", err
 	}
 
-	if strings.Contains(relpath, "..") {
+	if relpath == ".." || strings.HasPrefix(relpath, ".."+string(filepath.Separator)) {
 		return "", errors.New("Not allowed to refer path outside the base directory")
 	}
 

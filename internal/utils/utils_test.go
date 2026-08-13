@@ -7,23 +7,31 @@ import (
 )
 
 func TestBuildSubPath(t *testing.T) {
-	path, err := BuildSubPath("/usr/home/john/paisa", "main.ledger")
-	assert.Nil(t, err)
-	assert.Equal(t, "/usr/home/john/paisa/main.ledger", path)
+	base := "/usr/home/john/paisa"
+	tests := []struct {
+		name    string
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{name: "file", input: "main.ledger", want: base + "/main.ledger"},
+		{name: "nested file", input: "subfolder/main.ledger", want: base + "/subfolder/main.ledger"},
+		{name: "safe double dots in filename", input: "reports/budget..draft.ledger", want: base + "/reports/budget..draft.ledger"},
+		{name: "escape multiple parents", input: "../../../subfolder/travel.ledger", wantErr: true},
+		{name: "parent", input: "..", wantErr: true},
+		{name: "cleaned parent", input: "./..", wantErr: true},
+		{name: "parent file", input: "./../test.ledger", wantErr: true},
+	}
 
-	path, err = BuildSubPath("/usr/home/john/paisa", "subfolder/main.ledger")
-	assert.Nil(t, err)
-	assert.Equal(t, "/usr/home/john/paisa/subfolder/main.ledger", path)
-
-	path, err = BuildSubPath("/usr/home/john/paisa", "../../../subfolder/travel.ledger")
-	assert.Error(t, err)
-
-	path, err = BuildSubPath("/usr/home/john/paisa", "..")
-	assert.Error(t, err)
-
-	path, err = BuildSubPath("/usr/home/john/paisa", "./..")
-	assert.Error(t, err)
-
-	path, err = BuildSubPath("/usr/home/john/paisa", "./../test.ledger")
-	assert.Error(t, err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path, err := BuildSubPath(base, tt.input)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, path)
+		})
+	}
 }
