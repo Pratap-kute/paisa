@@ -39,7 +39,6 @@ type Posting struct {
 	TransactionBeginLine uint64          `json:"transaction_begin_line"`
 	TransactionEndLine   uint64          `json:"transaction_end_line"`
 	FileName             string          `json:"file_name"`
-	LineNumber           int             `json:"line_number"`
 	Forecast             bool            `json:"forecast"`
 	Note                 string          `json:"note"`
 	TransactionNote      string          `json:"transaction_note"`
