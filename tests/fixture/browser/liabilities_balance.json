@@ -1,0 +1,36 @@
+{
+  "liability_breakdowns": {
+    "Liabilities": {
+      "group": "Liabilities",
+      "drawn_amount": 510000,
+      "repaid_amount": 19000,
+      "interest_amount": 5000,
+      "balance_amount": 496000,
+      "apr": 10.32
+    },
+    "Liabilities:CreditCard": {
+      "group": "Liabilities:CreditCard",
+      "drawn_amount": 10000,
+      "repaid_amount": 4000,
+      "interest_amount": 0,
+      "balance_amount": 6000,
+      "apr": 0
+    },
+    "Liabilities:CreditCard:Freedom": {
+      "group": "Liabilities:CreditCard:Freedom",
+      "drawn_amount": 10000,
+      "repaid_amount": 4000,
+      "interest_amount": 0,
+      "balance_amount": 6000,
+      "apr": 0
+    },
+    "Liabilities:HomeLoan": {
+      "group": "Liabilities:HomeLoan",
+      "drawn_amount": 500000,
+      "repaid_amount": 15000,
+      "interest_amount": 5000,
+      "balance_amount": 490000,
+      "apr": 10.37
+    }
+  }
+}
