@@ -76,6 +76,10 @@
       balances
     } = await ajax("/api/goals/savings/:name", null, data));
 
+    savingsTimeline = savingsTimeline || [];
+    postings = postings || [];
+    balances = balances || {};
+
     latestPostings = _.chain(postings)
       .sortBy((p) => p.date)
       .reverse()
@@ -98,7 +102,7 @@
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
       predictionsTimeline = project(targetSavings, rate, targetDateObject, pmt, savingsTotal);
-    } else if (savingsTotal < targetSavings) {
+    } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
       predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
     }

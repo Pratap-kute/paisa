@@ -34,6 +34,9 @@ func GetFiles(db *gorm.DB) gin.H {
 	db.Model(&posting.Posting{}).Distinct().Pluck("Commodity", &commodities)
 
 	path := config.GetJournalPath()
+	if err := ensureJournalFile(path, config.GetConfig().Readonly); err != nil {
+		log.Warn("Failed to initialize journal file: ", err)
+	}
 
 	files := []*LedgerFile{}
 	dir := filepath.Dir(path)
@@ -44,6 +47,32 @@ func GetFiles(db *gorm.DB) gin.H {
 	}
 
 	return gin.H{"files": files, "accounts": accounts, "payees": payees, "commodities": commodities}
+}
+
+func ensureJournalFile(path string, readonly bool) error {
+	if readonly {
+		return nil
+	}
+
+	_, err := os.Stat(path)
+	if err == nil {
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		return err
+	}
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	if os.IsExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return file.Close()
 }
 
 func GetFile(file LedgerFile) gin.H {
