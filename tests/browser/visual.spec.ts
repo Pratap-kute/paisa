@@ -1,9 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const pages = [
   { name: "dashboard", path: "/", readyText: "Net worth" },
   { name: "assets-allocation", path: "/assets/allocation" },
-  { name: "assets-analysis", path: "/assets/analysis" },
+  {
+    name: "assets-analysis",
+    path: "/assets/analysis",
+    ready: "#d3-portfolio-security-type > g",
+  },
   { name: "assets-balance", path: "/assets/balance" },
   { name: "assets-gain", path: "/assets/gain" },
   { name: "assets-gain-detail", path: "/assets/gain/Assets%3AEquity" },
@@ -14,7 +18,7 @@ const pages = [
   {
     name: "cash-flow-recurring",
     path: "/cash_flow/recurring",
-    readyText: "Rent",
+    readyText: "Rent started on",
   },
   { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
   { name: "expense-budget", path: "/expense/budget", ready: ".budget-card" },
@@ -65,6 +69,22 @@ const variants = [
   { name: "mobile-dark", width: 390, height: 844, theme: "dark" },
 ] as const;
 
+async function waitForStableLayout(page: Page) {
+  await page.waitForFunction(
+    `() => {
+      const height = document.documentElement.scrollHeight;
+      const previous = globalThis.__visualLayout;
+      globalThis.__visualLayout = {
+        height,
+        stableChecks: previous?.height === height ? previous.stableChecks + 1 : 0,
+      };
+      return globalThis.__visualLayout.stableChecks >= 2;
+    }`,
+    null,
+    { polling: 100 },
+  );
+}
+
 for (const route of pages) {
   for (const variant of variants) {
     test(`@visual ${route.name} ${variant.name}`, async ({ page }) => {
@@ -89,6 +109,7 @@ for (const route of pages) {
         : page.locator("body");
       await expect(ready.first()).toBeVisible();
       await page.evaluate("document.fonts.ready");
+      await waitForStableLayout(page);
       await expect(page).toHaveScreenshot(
         `${route.name}-${variant.name}.png`,
         { fullPage: true },
