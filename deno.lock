@@ -40,6 +40,7 @@
     "npm:@sveltejs/vite-plugin-svelte@3": "3.1.2_svelte@4.2.20_vite@5.4.21__sass@1.77.6_sass@1.77.6",
     "npm:@testing-library/jest-dom@6.9.1": "6.9.1",
     "npm:@testing-library/svelte@^4.2.3": "4.2.3_svelte@4.2.20",
+    "npm:@types/json-schema@^7.0.15": "7.0.15",
     "npm:@vitest/coverage-v8@2.1.9": "2.1.9_vitest@2.1.9__sass@1.77.6_sass@1.77.6",
     "npm:arima@~0.2.5": "0.2.8",
     "npm:bignumber.js@^9.1.2": "9.3.1",
@@ -1343,6 +1344,9 @@
     },
     "@types/estree@1.0.9": {
       "integrity": "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="
+    },
+    "@types/json-schema@7.0.15": {
+      "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA=="
     },
     "@types/node@16.9.1": {
       "integrity": "sha512-QpLcX9ZSsq3YYUUnD3nFDY8H7wctAhQj/TFKL8Ya8v5fMm3CFXxo8zStsLAl780ltoYoo1WvKUVGBQK+1ifr7g=="
@@ -5491,6 +5495,7 @@
       "npm:@sveltejs/vite-plugin-svelte@3",
       "npm:@testing-library/jest-dom@6.9.1",
       "npm:@testing-library/svelte@^4.2.3",
+      "npm:@types/json-schema@^7.0.15",
       "npm:@vitest/coverage-v8@2.1.9",
       "npm:arima@~0.2.5",
       "npm:bignumber.js@^9.1.2",

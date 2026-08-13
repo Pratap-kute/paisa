@@ -277,7 +277,7 @@ export function renderProgress(
   );
   const voronoi = Delaunay.from(voronoiPoints).voronoi([0, 0, width, height]);
   const hoverCircle = g.append("circle").attr("r", "3").attr("fill", "none");
-  const t = tippy(hoverCircle.node(), {
+  const t = tippy(hoverCircle.node() as Element, {
     theme: "light",
     delay: 0,
     allowHTML: true,

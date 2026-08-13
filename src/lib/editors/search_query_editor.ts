@@ -5,6 +5,7 @@ import {
   closeBrackets,
   completeFromList,
   type CompletionContext,
+  type CompletionSource,
   ifIn,
 } from "@codemirror/autocomplete";
 import {
@@ -679,9 +680,12 @@ export function createEditor(
     ],
   };
 
-  const completions = _.chain(autocomplete)
-    .mapValues((values) => completeFromList(values))
-    .value();
+  const completions: Record<string, CompletionSource> = Object.fromEntries(
+    Object.entries(autocomplete).map(([key, values]) => [
+      key,
+      completeFromList(values),
+    ]),
+  );
 
   editorState.set(initialEditorState);
 

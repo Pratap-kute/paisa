@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import {
@@ -25,7 +26,7 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let groups = writable([]);
-  let z: d3.ScaleOrdinal<string, string, never>,
+  let z: ScaleOrdinal<string, string, never>,
     renderer: (ps: Posting[]) => void,
     expenses: Posting[],
     grouped_expenses: Record<string, Posting[]>,

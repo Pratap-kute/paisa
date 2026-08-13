@@ -3,6 +3,7 @@ import {
   closeBrackets,
   completeFromList,
   type CompletionContext,
+  type CompletionSource,
   ifIn,
 } from "@codemirror/autocomplete";
 import { history, redoDepth, undoDepth } from "@codemirror/commands";
@@ -121,9 +122,12 @@ export function createEditor(
     ],
   };
 
-  const completions = _.chain(opts.autocomplete || {})
-    .mapValues((values) => completeFromList(values))
-    .value();
+  const completions: Record<string, CompletionSource> = Object.fromEntries(
+    Object.entries(opts.autocomplete || {}).map(([key, values]) => [
+      key,
+      completeFromList(values),
+    ]),
+  );
 
   return new EditorView({
     extensions: [

@@ -82,13 +82,13 @@ function scrubAmount(str: string) {
     .replace(/\((.+)\)/, "-$1")
     .replace(/[^0-9.-]/g, "");
 
-  if (!isNaN(amount as any) && !isNaN(parseFloat(amount))) {
+  if (!Number.isNaN(Number(amount)) && !Number.isNaN(parseFloat(amount))) {
     return amount;
   }
 }
 
-function parseAmount(str: string | number) {
-  if (_.isNumber(str)) {
+function parseAmount(str: string | number): number {
+  if (typeof str === "number") {
     return str;
   }
 
@@ -96,6 +96,8 @@ function parseAmount(str: string | number) {
   if (amount) {
     return parseFloat(amount);
   }
+
+  return Number.NaN;
 }
 
 export default {

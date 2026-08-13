@@ -62,6 +62,7 @@
     "@std/fs": "jsr:@std/fs@^1",
     "@std/path": "jsr:@std/path@^1",
     "@std/testing/bdd": "jsr:@std/testing@^1/bdd",
+    "json-schema": "npm:@types/json-schema@^7.0.15",
     "@sveltejs/adapter-static": "npm:@sveltejs/adapter-static@^3.0.0",
     "@sveltejs/kit": "npm:@sveltejs/kit@2.5.0",
     "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^3.0.0",

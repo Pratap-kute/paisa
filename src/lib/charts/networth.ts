@@ -174,7 +174,7 @@ export function renderNetworth(
     "fill",
     "none",
   );
-  const t = tippy(hoverCircle.node(), {
+  const t = tippy(hoverCircle.node() as Element, {
     theme: "light",
     delay: 0,
     allowHTML: true,
