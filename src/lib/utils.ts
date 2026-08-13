@@ -824,9 +824,9 @@ export async function ajax(
     "Content-Type": "application/json",
   };
 
-  const token = localStorage.getItem(tokenKey);
-  if (!_.isEmpty(token)) {
-    options.headers["X-Auth"] = token;
+  const requestToken = localStorage.getItem(tokenKey);
+  if (!_.isEmpty(requestToken)) {
+    options.headers["X-Auth"] = requestToken;
   }
 
   const response = await fetch(route, options);
@@ -835,7 +835,14 @@ export async function ajax(
     loading.set(false);
   }
 
-  if (response.status == 401 && route != "/api/ping") {
+  // A response can arrive after the user has logged in again. Do not let a
+  // stale request clear the newer token and send the app back to the login
+  // page.
+  const activeToken = localStorage.getItem(tokenKey);
+  if (
+    response.status == 401 && route != "/api/ping" &&
+    activeToken === requestToken
+  ) {
     logout();
     await goto("/login");
     error(401, "Unauthorized");
