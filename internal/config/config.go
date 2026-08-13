@@ -321,7 +321,7 @@ func LoadConfig(content []byte, cp string) error {
 		return err
 	}
 
-	if cp != "" && configPath == "" {
+	if cp != "" {
 		configPath = cp
 	}
 
