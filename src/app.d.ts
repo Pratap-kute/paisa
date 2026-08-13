@@ -77,7 +77,7 @@ declare module "textures" {
   export default textures;
 }
 
-declare module "xlsx-populate" {
+declare module "xlsx-populate/browser/xlsx-populate.js" {
   export function fromDataAsync(
     data: ArrayBuffer,
     options: { password?: string },

@@ -5,9 +5,9 @@ import { MatchDecorator, WidgetType } from "@codemirror/view";
 import {
   Decoration,
   type DecorationSet,
-  EditorView,
+  type EditorView,
   ViewPlugin,
-  ViewUpdate,
+  type ViewUpdate,
 } from "@codemirror/view";
 import _ from "lodash";
 import { prefixMinutesSeconds } from "./utils";

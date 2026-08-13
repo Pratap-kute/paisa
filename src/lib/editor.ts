@@ -12,7 +12,7 @@ import { editorState, initialEditorState } from "../store";
 import {
   autocompletion,
   completeFromList,
-  CompletionContext,
+  type CompletionContext,
   ifIn,
 } from "@codemirror/autocomplete";
 import { MergeView } from "@codemirror/merge";

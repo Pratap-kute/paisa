@@ -3,7 +3,7 @@ import {
   autocompletion,
   closeBrackets,
   completeFromList,
-  CompletionContext,
+  type CompletionContext,
   ifIn,
 } from "@codemirror/autocomplete";
 import {

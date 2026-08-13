@@ -2,7 +2,7 @@ import {
   autocompletion,
   closeBrackets,
   completeFromList,
-  CompletionContext,
+  type CompletionContext,
   ifIn,
 } from "@codemirror/autocomplete";
 import { history, redoDepth, undoDepth } from "@codemirror/commands";

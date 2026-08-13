@@ -40,6 +40,14 @@
     };
   }
 
+  function undoEdit() {
+    undo(editor);
+  }
+
+  function redoEdit() {
+    redo(editor);
+  }
+
   const keybindings: readonly KeyBinding[] = [
     { key: "Tab", run: insertTab },
     {
@@ -254,7 +262,7 @@
               <button
                 class="button is-small"
                 disabled={$editorState.undoDepth == 0}
-                on:click={(_e) => undo(editor)}
+                on:click={undoEdit}
               >
                 <span class="icon is-small">
                   <i class="fas fa-arrow-left" />
@@ -266,7 +274,7 @@
               <button
                 class="button is-small"
                 disabled={$editorState.redoDepth == 0}
-                on:click={(_e) => redo(editor)}
+                on:click={redoEdit}
               >
                 <span>Redo</span>
                 <span class="icon is-small">

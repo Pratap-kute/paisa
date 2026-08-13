@@ -16,6 +16,23 @@ const config = {
   },
   build: {
     target: "es2021",
+    // The largest chunk is the lazy-loaded encrypted-XLSX fallback and
+    // compresses to roughly 210 KiB. Keep warning on material growth.
+    chunkSizeWarningLimit: 700,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // These legacy browser libraries intentionally use eval in isolated
+        // compatibility shims. Neither source is maintained in this project.
+        if (
+          warning.code === "EVAL" &&
+          (warning.id?.includes("pdfjs-dist") ||
+            warning.id?.includes("xlsx-populate"))
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
   },
   plugins: [
     sveltekit(),

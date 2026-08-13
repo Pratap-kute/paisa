@@ -10,6 +10,8 @@
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
 
+  const goalDndzone = dndzone;
+
   let isEmpty = false;
   let config: UserConfig;
   let goals: GoalSummary[] = [];
@@ -109,7 +111,7 @@
   <div class="container is-fluid">
     <div
       class="columns flex-wrap"
-      use:dndzone={{
+      use:goalDndzone={{
         items: goals,
         dropTargetStyle: {},
         flipDurationMs: 300,

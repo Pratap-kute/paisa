@@ -7,7 +7,7 @@
     "serve:now": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts --now",
     "preview": "deno run -A npm:vite preview",
 
-    "build": "deno run -A npm:vite build",
+    "build": "deno run -A npm:@sveltejs/kit sync && deno run -A npm:vite build",
     "build:watch": "deno run -A npm:vite build --watch",
 
     "check": "deno task typecheck",
