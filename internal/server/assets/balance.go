@@ -51,7 +51,7 @@ func ComputeBreakdowns(db *gorm.DB, postings []posting.Posting, rollup bool) map
 
 		if rollup {
 			var parts []string
-			for _, part := range strings.Split(p.Account, ":") {
+			for part := range strings.SplitSeq(p.Account, ":") {
 				parts = append(parts, part)
 				accounts[strings.Join(parts, ":")] = false
 			}

@@ -3,6 +3,8 @@ package query
 import (
 	"errors"
 
+	"strings"
+
 	"github.com/ananthakumaran/paisa/internal/config"
 	"github.com/ananthakumaran/paisa/internal/model/posting"
 	"github.com/ananthakumaran/paisa/internal/utils"
@@ -83,12 +85,16 @@ func (q *Query) Credit() *Query {
 }
 
 func (q *Query) AccountPrefix(account ...string) *Query {
-	query := "account like ? or account = ?"
-	for range account[1:] {
-		query += " or account like ? or account = ?"
+	var builder strings.Builder
+	builder.WriteString("account like ? or account = ?")
+	if len(account) > 0 {
+		for range account[1:] {
+			builder.WriteString(" or account like ? or account = ?")
+		}
 	}
+	query := builder.String()
 
-	args := make([]interface{}, len(account)*2)
+	args := make([]any, len(account)*2)
 	for i, a := range account {
 		args[i*2] = a + ":%"
 		args[i*2+1] = a
@@ -103,12 +109,16 @@ func (q *Query) NotAccountPrefix(account string) *Query {
 }
 
 func (q *Query) Like(accounts ...string) *Query {
-	query := "account like ?"
-	for range accounts[1:] {
-		query += " or account like ?"
+	var builder strings.Builder
+	builder.WriteString("account like ?")
+	if len(accounts) > 0 {
+		for range accounts[1:] {
+			builder.WriteString(" or account like ?")
+		}
 	}
+	query := builder.String()
 
-	args := make([]interface{}, len(accounts))
+	args := make([]any, len(accounts))
 	for i, a := range accounts {
 		args[i] = a
 	}
@@ -121,7 +131,7 @@ func (q *Query) NotLike(account string) *Query {
 	return q
 }
 
-func (q *Query) Where(query interface{}, args ...interface{}) *Query {
+func (q *Query) Where(query any, args ...any) *Query {
 	q.context = q.context.Where(query, args...)
 	return q
 }

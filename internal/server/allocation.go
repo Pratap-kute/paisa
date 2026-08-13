@@ -142,7 +142,7 @@ func computeAggregate(db *gorm.DB, postings []posting.Posting, date time.Time) m
 	result := make(map[string]Aggregate)
 	for account, ps := range byAccount {
 		var parts []string
-		for _, part := range strings.Split(account, ":") {
+		for part := range strings.SplitSeq(account, ":") {
 			parts = append(parts, part)
 			parent := strings.Join(parts, ":")
 			result[parent] = Aggregate{Account: parent}

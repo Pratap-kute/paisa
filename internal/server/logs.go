@@ -11,7 +11,7 @@ import (
 )
 
 func GetLogs() gin.H {
-	logs := make([]interface{}, 0)
+	logs := make([]any, 0)
 	path, err := config.EnsureLogFilePath()
 	if err != nil {
 		log.Warn(err)
@@ -41,7 +41,7 @@ func GetLogs() gin.H {
 		if count > 10000 {
 			break
 		}
-		var log interface{}
+		var log any
 		err = json.Unmarshal(line, &log)
 		if err == nil {
 			logs = append(logs, log)

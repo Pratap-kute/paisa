@@ -81,8 +81,7 @@ func GetPriceAutoCompletions(db *gorm.DB, request AutoCompleteRequest) gin.H {
 	completions = lo.Filter(completions, func(completion price.AutoCompleteItem, _ int) bool {
 		item := completion.Label
 		item = strings.Replace(strings.ToLower(item), " ", "", -1)
-		words := strings.Split(strings.ToLower(request.Filters[request.Field]), " ")
-		for _, word := range words {
+		for word := range strings.SplitSeq(strings.ToLower(request.Filters[request.Field]), " ") {
 			if strings.TrimSpace(word) != "" && !strings.Contains(item, word) {
 				return false
 			}

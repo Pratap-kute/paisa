@@ -31,7 +31,7 @@ func newtonXIRR(transactions []Transaction, initialGuess float64) (float64, bool
 	const MAX_TRIES = 100
 	const EPSILON = 1.0e-6
 
-	for tries := 0; tries < MAX_TRIES; tries++ {
+	for range MAX_TRIES {
 		fxs := 0.0
 		dfxs := 0.0
 		for _, tx := range transactions {

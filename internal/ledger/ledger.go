@@ -244,8 +244,7 @@ func (Beancount) ValidateFile(journalPath string) ([]LedgerFileError, string, er
 
 	re := regexp.MustCompile(`(?:.*):([0-9]+):\s+(.+)`)
 
-	lines := strings.Split(utils.Dos2Unix(error.String()), "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(utils.Dos2Unix(error.String()), "\n") {
 		match := re.FindStringSubmatch(line)
 		if len(match) == 0 {
 			lastError := errors[len(errors)-1]
@@ -432,9 +431,7 @@ func parseHLedgerCommodities(journalPath string) ([]string, error) {
 		return commodities, err
 	}
 
-	lines := strings.Split(utils.Dos2Unix(output.String()), "\n")
-
-	for _, line := range lines {
+	for line := range strings.SplitSeq(utils.Dos2Unix(output.String()), "\n") {
 		commodities = append(commodities, utils.UnQuote(strings.TrimSpace(line)))
 	}
 

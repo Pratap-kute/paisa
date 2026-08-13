@@ -1,6 +1,7 @@
 package service
 
 import (
+	"slices"
 	"strings"
 	"sync"
 
@@ -95,12 +96,7 @@ func IsSellWithCapitalGains(db *gorm.DB, p posting.Posting) bool {
 		return false
 	}
 
-	for _, tp := range t.Postings {
-		if IsCapitalGains(tp) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(t.Postings, IsCapitalGains)
 }
 
 func IsContraPostingRefund(db *gorm.DB, p posting.Posting) bool {
@@ -109,12 +105,7 @@ func IsContraPostingRefund(db *gorm.DB, p posting.Posting) bool {
 		return false
 	}
 
-	for _, tp := range t.Postings {
-		if IsRefund(tp) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(t.Postings, IsRefund)
 }
 
 func IsInterestRepayment(db *gorm.DB, p posting.Posting) bool {

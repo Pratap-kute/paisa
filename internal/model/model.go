@@ -44,11 +44,12 @@ func SyncJournal(db *gorm.DB) (string, error) {
 			return err.Error(), err
 		}
 
-		var message string
+		var message strings.Builder
 		for _, error := range errors {
-			message += error.Message + "\n\n"
+			message.WriteString(error.Message)
+			message.WriteString("\n\n")
 		}
-		return strings.TrimRight(message, "\n"), err
+		return strings.TrimRight(message.String(), "\n"), err
 	}
 
 	prices, err := ledger.Cli().Prices(config.GetJournalPath())
@@ -93,11 +94,12 @@ func SyncCommodities(db *gorm.DB) error {
 	}
 
 	if len(errors) > 0 {
-		var message string
+		var message strings.Builder
 		for _, error := range errors {
-			message += error.Error() + "\n"
+			message.WriteString(error.Error())
+			message.WriteString("\n")
 		}
-		return fmt.Errorf("%s", strings.Trim(message, "\n"))
+		return fmt.Errorf("%s", strings.Trim(message.String(), "\n"))
 	}
 	return nil
 }

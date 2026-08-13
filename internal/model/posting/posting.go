@@ -1,6 +1,7 @@
 package posting
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -106,12 +107,7 @@ func (p Posting) Behaviours() []string {
 }
 
 func (p Posting) HasBehaviour(behaviour string) bool {
-	for _, b := range p.Behaviours() {
-		if b == behaviour {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(p.Behaviours(), behaviour)
 }
 
 func UpsertAll(db *gorm.DB, postings []*Posting) {

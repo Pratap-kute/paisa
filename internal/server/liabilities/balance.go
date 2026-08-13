@@ -36,7 +36,7 @@ func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[str
 	accounts := make(map[string]bool)
 	for _, p := range postings {
 		var parts []string
-		for _, part := range strings.Split(p.Account, ":") {
+		for part := range strings.SplitSeq(p.Account, ":") {
 			parts = append(parts, part)
 			accounts[strings.Join(parts, ":")] = false
 		}

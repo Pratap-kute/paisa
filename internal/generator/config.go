@@ -175,7 +175,7 @@ credit_cards:
 	}
 }
 
-func emitTransaction(file *os.File, date time.Time, payee string, from string, to string, amount interface{}) {
+func emitTransaction(file *os.File, date time.Time, payee string, from string, to string, amount any) {
 	amountString := ""
 	switch amount.(type) {
 	case string:

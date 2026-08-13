@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -251,7 +251,7 @@ func SumBy[C any](collection []C, iteratee func(item C) decimal.Decimal) decimal
 
 func SortedKeys[K constraints.Ordered, V any](m map[K]V) []K {
 	keys := lo.Keys(m)
-	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+	slices.Sort(keys)
 	return keys
 }
 
