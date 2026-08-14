@@ -39,12 +39,12 @@
 
           doCheck = false;
 
-          subPackages = [ "." ];
+          subPackages = [ "backend" ];
 
           preConfigure = ''
-            ln -s ${nodeDependencies}/lib/node_modules ./node_modules
+            ln -s ${nodeDependencies}/lib/node_modules ./frontend/node_modules
             export PATH="${nodeDependencies}/.bin:$PATH"
-            npm run build
+            cd frontend && npm run build && cd ..
           '';
 
         };

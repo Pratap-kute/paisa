@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ananthakumaran/paisa/internal/config"
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/google/btree"
 	gorm_logrus "github.com/onrik/gorm-logrus"
 	"github.com/samber/lo"

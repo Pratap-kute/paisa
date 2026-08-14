@@ -24,12 +24,10 @@ jobs:
       - uses: vegardit/fast-apt-mirror.sh@v1
       - run: |
           sudo apt-get install -y sqlite3
-          deno install
-          deno task build
+          cd frontend && deno install && deno task build && cd ..
           nix-build packaging/ledger/ledger.nix
-          cp ./result/bin/ledger internal/binary/ledger
-          go build
-          cp paisa paisa-cli-linux-amd64
+          cp ./result/bin/ledger backend/pkg/binary/ledger
+          cd backend && go build -o ../paisa-cli-linux-amd64 .
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

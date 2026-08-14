@@ -3,7 +3,11 @@ import { expect } from "@std/expect";
 import { format } from "./journal";
 
 function readFixture(name: string) {
-  return Deno.readTextFileSync(`fixture/${name}`);
+  try {
+    return Deno.readTextFileSync(`../fixture/${name}`);
+  } catch (_) {
+    return Deno.readTextFileSync(`fixture/${name}`);
+  }
 }
 
 describe("journal", () => {

@@ -3,9 +3,9 @@ package server
 import (
 	"time"
 
-	"github.com/ananthakumaran/paisa/internal/accounting"
-	"github.com/ananthakumaran/paisa/internal/query"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/query"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"

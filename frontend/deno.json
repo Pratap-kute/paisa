@@ -1,10 +1,6 @@
 {
   "tasks": {
     "dev": "deno run -A npm:vite dev --host 0.0.0.0",
-    "develop": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend",
-    "debug": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend --now",
-    "serve": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts",
-    "serve:now": "deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts --now",
     "preview": "deno run -A npm:vite preview",
 
     "build": "deno run -A npm:@sveltejs/kit sync && deno run -A npm:vite build",
@@ -32,7 +28,7 @@
     "test:visual": "deno run -A scripts/run_browser_tests.ts --grep @visual",
     "test:visual:update": "deno run -A scripts/run_browser_tests.ts --grep @visual --update-snapshots",
 
-    "clean": "rm -rf .svelte-kit web/static paisa"
+    "clean": "rm -rf .svelte-kit ../backend/web/static coverage playwright-report test-results"
   },
   "imports": {
     "$lib": "./src/lib",
@@ -118,9 +114,8 @@
   "fmt": {
     "exclude": [
       ".svelte-kit/",
-      "web/static/",
+      "../backend/web/static/",
       "graphify-out/",
-      "desktop/frontend/wailsjs/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
       "tests/fixture/"
@@ -132,9 +127,8 @@
     },
     "exclude": [
       ".svelte-kit/",
-      "web/static/",
+      "../backend/web/static/",
       "graphify-out/",
-      "desktop/frontend/wailsjs/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
       "tests/fixture/"

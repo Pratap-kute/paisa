@@ -41,8 +41,7 @@ jobs:
         run: brew install ledger sqlite3
       - if: runner.os == 'Windows'
         run: choco install ledger sqlite
-      - run: deno install
-      - run: deno task build
+      - run: cd frontend && deno install && deno task build
       - run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
       - name: Build Linux desktop app
         if: runner.os == 'Linux'
@@ -54,11 +53,13 @@ jobs:
         run: wails build
       - name: Smoke-test Linux app
         if: runner.os == 'Linux'
+        working-directory: frontend
         env:
           PAISA_DESKTOP_BINARY: ${{ github.workspace }}/${{ matrix.binary }}
         run: xvfb-run -a deno task test:desktop
       - name: Smoke-test desktop app
         if: runner.os != 'Linux'
+        working-directory: frontend
         env:
           PAISA_DESKTOP_BINARY: ${{ github.workspace }}/${{ matrix.binary }}
         run: deno task test:desktop

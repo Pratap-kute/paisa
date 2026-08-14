@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"net/http"
 
-	"github.com/ananthakumaran/paisa/internal/model/mutualfund/scheme"
+	"github.com/ananthakumaran/paisa/pkg/model/mutualfund/scheme"
 	log "github.com/sirupsen/logrus"
 )
 

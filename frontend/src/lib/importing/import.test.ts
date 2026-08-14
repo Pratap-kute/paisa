@@ -32,40 +32,69 @@ Handlebars.registerHelper(
   }),
 );
 
+function fixturePath(path: string): string {
+  try {
+    Deno.statSync(`../fixture/${path}`);
+    return `../fixture/${path}`;
+  } catch (_) {
+    return `fixture/${path}`;
+  }
+}
+
+function templatePath(path: string): string {
+  try {
+    Deno.statSync(`../backend/pkg/model/template/templates/${path}`);
+    return `../backend/pkg/model/template/templates/${path}`;
+  } catch (_) {
+    try {
+      Deno.statSync(`../backend/internal/model/template/templates/${path}`);
+      return `../backend/internal/model/template/templates/${path}`;
+    } catch (_) {
+      return `pkg/model/template/templates/${path}`;
+    }
+  }
+}
+
 describe("import", () => {
-  Array.from(Deno.readDirSync("fixture/import")).forEach(({ name: dir }) => {
-    test(dir, async () => {
-      const files = Array.from(
-        Deno.readDirSync(`fixture/import/${dir}`),
-        ({ name }) => name,
-      );
-      for (const file of files) {
-        const [name, extension] = file.split(".");
-        if (extension === "ledger") {
-          const inputFile = _.find(
-            files,
-            (f) => f != file && f.startsWith(name),
-          );
-          if (!inputFile || inputFile.endsWith(".pdf")) {
-            break;
+  Array.from(Deno.readDirSync(fixturePath("import"))).forEach(
+    ({ name: dir }) => {
+      test(dir, async () => {
+        const files = Array.from(
+          Deno.readDirSync(fixturePath(`import/${dir}`)),
+          ({ name }) => name,
+        );
+        for (const file of files) {
+          const [name, extension] = file.split(".");
+          if (extension === "ledger") {
+            const inputFile = _.find(
+              files,
+              (f) => f != file && f.startsWith(name),
+            );
+            if (!inputFile || inputFile.endsWith(".pdf")) {
+              break;
+            }
+            const input = Deno.readFileSync(
+              fixturePath(`import/${dir}/${inputFile}`),
+            );
+            const output = Deno.readTextFileSync(
+              fixturePath(`import/${dir}/${file}`),
+            );
+            const template = Deno.readTextFileSync(
+              templatePath(`${dir}.handlebars`),
+            );
+
+            const compiled = Handlebars.compile(template);
+            const result = await parse(new File([input as any], inputFile));
+            const rows = asRows(result);
+
+            const actual = render(rows, compiled, { trim: true });
+
+            expect(actual).toBe(_.trim(output));
           }
-          const input = Deno.readFileSync(`fixture/import/${dir}/${inputFile}`);
-          const output = Deno.readTextFileSync(`fixture/import/${dir}/${file}`);
-          const template = Deno.readTextFileSync(
-            `internal/model/template/templates/${dir}.handlebars`,
-          );
-
-          const compiled = Handlebars.compile(template);
-          const result = await parse(new File([input as any], inputFile));
-          const rows = asRows(result);
-
-          const actual = render(rows, compiled, { trim: true });
-
-          expect(actual).toBe(_.trim(output));
         }
-      }
-    });
-  });
+      });
+    },
+  );
 });
 
 describe("template helpers", () => {

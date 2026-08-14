@@ -1,12 +1,12 @@
 package goal
 
 import (
-	"github.com/ananthakumaran/paisa/internal/accounting"
-	"github.com/ananthakumaran/paisa/internal/config"
-	"github.com/ananthakumaran/paisa/internal/model/posting"
-	"github.com/ananthakumaran/paisa/internal/query"
-	"github.com/ananthakumaran/paisa/internal/server/assets"
-	"github.com/ananthakumaran/paisa/internal/service"
+	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/config"
+	"github.com/ananthakumaran/paisa/pkg/model/posting"
+	"github.com/ananthakumaran/paisa/pkg/query"
+	"github.com/ananthakumaran/paisa/pkg/server/assets"
+	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"

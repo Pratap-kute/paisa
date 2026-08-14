@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ananthakumaran/paisa/internal/model/cii"
+	"github.com/ananthakumaran/paisa/pkg/model/cii"
 	log "github.com/sirupsen/logrus"
 )
 

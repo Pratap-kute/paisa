@@ -3,9 +3,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/ananthakumaran/paisa/internal/model"
-	"github.com/ananthakumaran/paisa/internal/server"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/model"
+	"github.com/ananthakumaran/paisa/pkg/server"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

@@ -3,7 +3,7 @@ package accounting
 import (
 	"slices"
 
-	"github.com/ananthakumaran/paisa/internal/model/posting"
+	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/samber/lo"
 )
 

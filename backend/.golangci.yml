@@ -83,6 +83,10 @@ linters:
       - text: G307
         linters:
           - gosec
+      - path: pkg/utils/
+        text: "var-naming: avoid meaningless package names"
+        linters:
+          - revive
     paths:
       - vendor
       - web/static

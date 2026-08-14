@@ -5,7 +5,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/ananthakumaran/paisa/internal/config"
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/google/btree"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"

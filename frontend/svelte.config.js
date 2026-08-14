@@ -14,9 +14,9 @@ const config = {
 
   kit: {
     adapter: adapter({
-      pages: "web/static",
-      assets: "web/static",
-      out: "web/static",
+      pages: "../backend/web/static",
+      assets: "../backend/web/static",
+      out: "../backend/web/static",
       fallback: "index.html",
     }),
   },

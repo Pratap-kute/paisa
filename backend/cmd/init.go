@@ -3,7 +3,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/ananthakumaran/paisa/internal/generator"
+	"github.com/ananthakumaran/paisa/pkg/generator"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

@@ -3,9 +3,9 @@ package server
 import (
 	"sort"
 
-	"github.com/ananthakumaran/paisa/internal/accounting"
-	"github.com/ananthakumaran/paisa/internal/model/transaction"
-	"github.com/ananthakumaran/paisa/internal/query"
+	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/model/transaction"
+	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/gin-gonic/gin"
 
 	"gorm.io/gorm"

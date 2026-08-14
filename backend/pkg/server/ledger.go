@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/ananthakumaran/paisa/internal/accounting"
-	"github.com/ananthakumaran/paisa/internal/query"
-	"github.com/ananthakumaran/paisa/internal/service"
+	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/query"
+	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

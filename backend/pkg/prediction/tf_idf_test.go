@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ananthakumaran/paisa/internal/model/posting"
+	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

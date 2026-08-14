@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"

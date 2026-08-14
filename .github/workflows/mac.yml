@@ -21,11 +21,9 @@ jobs:
       - run: |
           brew install --force --overwrite sqlite3 create-dmg
           brew install --build-from-source --verbose ./packaging/ledger/ledger.rb
-          cp "$(brew --prefix ledger)/bin/ledger" internal/binary/ledger
-          deno install
-          deno task build
-          go build
-          cp paisa paisa-cli-macos-amd64
+          cp "$(brew --prefix ledger)/bin/ledger" backend/pkg/binary/ledger
+          cd frontend && deno install && deno task build && cd ..
+          cd backend && go build -o ../paisa-cli-macos-amd64 . && cd ..
           cd desktop
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
           wails build

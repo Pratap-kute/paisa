@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/ananthakumaran/paisa/internal/config"
-	"github.com/ananthakumaran/paisa/internal/model/posting"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/config"
+	"github.com/ananthakumaran/paisa/pkg/model/posting"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"

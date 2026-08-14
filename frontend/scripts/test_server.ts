@@ -106,7 +106,7 @@ try {
     '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
     { mode: 0o750 },
   );
-  await run("go", ["build", "-o", binary, "."]);
+  await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
   await run(Deno.execPath(), ["task", "build"]);
 
   const backend = new Deno.Command(binary, {

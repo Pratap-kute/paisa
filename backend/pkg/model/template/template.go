@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ananthakumaran/paisa/internal/config"
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 )

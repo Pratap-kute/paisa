@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/ananthakumaran/paisa/internal/config"
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/gin-gonic/gin"
 	"github.com/icza/backscanner"
 	log "github.com/sirupsen/logrus"

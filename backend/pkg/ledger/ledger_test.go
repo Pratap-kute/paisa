@@ -3,8 +3,8 @@ package ledger
 import (
 	"testing"
 
-	"github.com/ananthakumaran/paisa/internal/model/price"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/model/price"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 

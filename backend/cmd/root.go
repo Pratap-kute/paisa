@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/adrg/xdg"
-	"github.com/ananthakumaran/paisa/internal/config"
-	"github.com/ananthakumaran/paisa/internal/generator"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/config"
+	"github.com/ananthakumaran/paisa/pkg/generator"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"github.com/snowzach/rotatefilehook"

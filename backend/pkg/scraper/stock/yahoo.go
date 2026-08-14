@@ -16,9 +16,9 @@ import (
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ananthakumaran/paisa/internal/config"
-	"github.com/ananthakumaran/paisa/internal/model/price"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/config"
+	"github.com/ananthakumaran/paisa/pkg/model/price"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 )
 
 var UserAgents = []string{

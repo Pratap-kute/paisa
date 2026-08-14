@@ -107,8 +107,17 @@ async function waitForPort(timeout = 10_000) {
   throw new Error(`Timed out waiting for port ${port}`);
 }
 
+function findPaisaBinary(): string {
+  try {
+    Deno.statSync("../backend/paisa");
+    return "../backend/paisa";
+  } catch (_) {
+    return "./paisa";
+  }
+}
+
 async function check(directory: string) {
-  const command = new Deno.Command("./paisa", {
+  const command = new Deno.Command(findPaisaBinary(), {
     args: [
       "--config",
       join(directory, "paisa.yaml"),

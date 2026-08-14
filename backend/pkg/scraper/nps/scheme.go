@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ananthakumaran/paisa/internal/model/nps/scheme"
+	"github.com/ananthakumaran/paisa/pkg/model/nps/scheme"
 	log "github.com/sirupsen/logrus"
 )
 

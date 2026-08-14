@@ -6,7 +6,7 @@ import (
 
 	"github.com/ananthakumaran/paisa/cmd"
 	"github.com/ananthakumaran/paisa/desktop/logger"
-	"github.com/ananthakumaran/paisa/internal/server"
+	"github.com/ananthakumaran/paisa/pkg/server"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
