@@ -22,8 +22,7 @@ jobs:
         with:
           go-version: "1.26.5"
       - run: |
-          brew install --force --overwrite sqlite3 create-dmg
-          brew install --build-from-source --verbose ./packaging/ledger/ledger.rb
+          brew install --force --overwrite sqlite3 create-dmg ledger
           cp "$(brew --prefix ledger)/bin/ledger" backend/pkg/binary/ledger
           cd frontend && deno install && deno task build && cd ..
           cd backend && go build -o ../paisa-cli-macos-amd64 . && cd ..
