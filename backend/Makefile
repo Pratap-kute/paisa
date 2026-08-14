@@ -11,14 +11,17 @@ help: ## Display this help message
 
 ##@ Build & Installation
 
-.PHONY: build build-windows install clean
-build: ## Build the Go backend binary
+.PHONY: ensure-static build build-windows install clean
+ensure-static: ## ensure static files are present
+	@if [ ! -f web/static/index.html ]; then mkdir -p web/static && touch web/static/index.html; fi
+
+build: ensure-static ## Build the Go backend binary
 	go build -o paisa .
 
-build-windows: ## Cross-compile Go binary for Windows (amd64)
+build-windows: ensure-static ## Cross-compile Go binary for Windows (amd64)
 	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CXX=x86_64-w64-mingw32-g++ CC=x86_64-w64-mingw32-gcc go build -o paisa.exe .
 
-install: ## Install binary to GOBIN
+install: ensure-static ## Install binary to GOBIN
 	go install
 
 clean: ## Clean built backend binary
@@ -27,10 +30,10 @@ clean: ## Clean built backend binary
 ##@ Testing & Code Quality
 
 .PHONY: test lint format fmt
-test: ## Run all Go unit and regression tests
+test: ensure-static ## Run all Go unit and regression tests
 	go test -count=1 ./...
 
-lint: ## Run golangci-lint
+lint: ensure-static ## Run golangci-lint
 	golangci-lint run
 
 format fmt: ## Format Go source code

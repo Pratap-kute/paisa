@@ -32,6 +32,8 @@ jobs:
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
       - name: Install dependencies
         run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Build frontend static assets
+        run: nix develop --command make build-frontend
       - name: Lint and type-check
         run: nix develop --command make lint
       - name: Build and test
