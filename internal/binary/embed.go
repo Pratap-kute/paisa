@@ -24,22 +24,24 @@ var cachedLedgerBinaryPath string
 
 func LookPath(name string) (string, error) {
 	path, err := exec.LookPath(name)
-	if err != nil {
-		// macOS doesn't set $PATH correctly for GUI apps
-		if runtime.GOOS == "darwin" {
-			for _, p := range DefaultPath {
-				path = filepath.Join(p, name)
-				_, err := os.Stat(path)
-				if err == nil {
-					return path, nil
-				}
-			}
-		}
-
-		return "", err
+	if err == nil {
+		return path, nil
 	}
 
-	return path, nil
+	searchPaths := make([]string, len(DefaultPath))
+	copy(searchPaths, DefaultPath)
+	if home, err := os.UserHomeDir(); err == nil {
+		searchPaths = append([]string{filepath.Join(home, ".local", "bin")}, searchPaths...)
+	}
+
+	for _, p := range searchPaths {
+		candidate := filepath.Join(p, name)
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, nil
+		}
+	}
+
+	return "", err
 }
 
 func LedgerBinaryPath() (string, error) {

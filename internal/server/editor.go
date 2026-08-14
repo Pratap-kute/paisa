@@ -1,9 +1,11 @@
 package server
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ananthakumaran/paisa/internal/config"
@@ -101,7 +103,11 @@ func DeleteBackups(file LedgerFile) gin.H {
 func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 	errors, _, err := validateFile(file)
 	if err != nil {
-		return gin.H{"errors": errors, "saved": false, "message": "Validation failed"}
+		msg := "Validation failed"
+		if len(errors) > 0 && errors[0].Message != "" {
+			msg = fmt.Sprintf("Validation failed at Line %d: %s", errors[0].LineFrom, strings.TrimSpace(errors[0].Message))
+		}
+		return gin.H{"errors": errors, "saved": false, "message": msg}
 	}
 
 	path := config.GetJournalPath()
