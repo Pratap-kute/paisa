@@ -34,7 +34,7 @@ dayjs.extend(updateLocale);
 
 import * as pdfjs from "pdfjs-dist";
 // @ts-ignore: Vite worker ?url import
-import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.js?url";
+import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 if (pdfjs.GlobalWorkerOptions) {
   pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;

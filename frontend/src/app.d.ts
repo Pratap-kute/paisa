@@ -78,6 +78,15 @@ declare module "textures" {
   export default textures;
 }
 
+declare module "xlsx" {
+  export function read(data: any, opts?: any): any;
+  export namespace utils {
+    export function sheet_to_json<T = any>(sheet: any, opts?: any): T[];
+  }
+  const all: any;
+  export default all;
+}
+
 declare module "xlsx-populate/browser/xlsx-populate.js" {
   export function fromDataAsync(
     data: ArrayBuffer,

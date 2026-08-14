@@ -4,6 +4,11 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 /** @type {import('vite').UserConfig} */
 const config = {
   cacheDir: "node_modules/.vite",
+  resolve: {
+    alias: {
+      xlsx: new URL("./src/lib/vendor/xlsx.mjs", import.meta.url).pathname,
+    },
+  },
   css: {
     preprocessorOptions: {
       sass: {

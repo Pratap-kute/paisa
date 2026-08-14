@@ -9,6 +9,7 @@ export default defineConfig({
       "$app/navigation":
         new URL("./src/test/navigation.ts", import.meta.url).pathname,
       $lib: new URL("./src/lib", import.meta.url).pathname,
+      xlsx: new URL("./src/lib/vendor/xlsx.mjs", import.meta.url).pathname,
     },
   },
   test: {
