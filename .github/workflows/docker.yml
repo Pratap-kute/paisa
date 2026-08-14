@@ -20,7 +20,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ananthakumaran/paisa
+          images: pratapkute/paisa
       - uses: docker/build-push-action@v5
         with:
           context: .
@@ -32,7 +32,7 @@ jobs:
       - id: meta-hledger
         uses: docker/metadata-action@v5
         with:
-          images: ananthakumaran/paisa
+          images: pratapkute/paisa
           flavor: |
             latest=auto
             prefix=
@@ -48,7 +48,7 @@ jobs:
       - id: meta-beancount
         uses: docker/metadata-action@v5
         with:
-          images: ananthakumaran/paisa
+          images: pratapkute/paisa
           flavor: |
             latest=auto
             prefix=
@@ -64,7 +64,7 @@ jobs:
       - id: meta-all
         uses: docker/metadata-action@v5
         with:
-          images: ananthakumaran/paisa
+          images: pratapkute/paisa
           flavor: |
             latest=auto
             prefix=
