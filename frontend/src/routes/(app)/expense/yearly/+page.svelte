@@ -38,7 +38,7 @@
     investment = "",
     savingRate = "";
 
-  $: if (grouped_expenses) {
+  $: if (grouped_expenses && renderer) {
     currentYearExpenses = grouped_expenses[$year];
     renderCalendar(currentYearExpenses, z, $groups);
 

@@ -1,15 +1,19 @@
-import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url";
 import process from "node:process";
+import { defineConfig } from "vitest/config";
 
 const threshold = process.env.COVERAGE_REPORT_ONLY === "true" ? 0 : 60;
 
 export default defineConfig({
   resolve: {
     alias: {
-      "$app/navigation":
-        new URL("./src/test/navigation.ts", import.meta.url).pathname,
-      $lib: new URL("./src/lib", import.meta.url).pathname,
-      xlsx: new URL("./src/lib/vendor/xlsx.mjs", import.meta.url).pathname,
+      "$app/navigation": fileURLToPath(
+        new URL("./src/test/navigation.ts", import.meta.url),
+      ),
+      $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
+      xlsx: fileURLToPath(
+        new URL("./src/lib/vendor/xlsx.mjs", import.meta.url),
+      ),
     },
   },
   test: {

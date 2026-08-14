@@ -1,11 +1,20 @@
+import { fileURLToPath } from "node:url";
 import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
 
-/** @type {import('vite').UserConfig} */
-const config = {
+const apiProxy = {
+  "/api": {
+    target: "http://localhost:7500",
+  },
+};
+
+export default defineConfig({
   cacheDir: "node_modules/.vite",
   resolve: {
     alias: {
-      xlsx: new URL("./src/lib/vendor/xlsx.mjs", import.meta.url).pathname,
+      xlsx: fileURLToPath(
+        new URL("./src/lib/vendor/xlsx.mjs", import.meta.url),
+      ),
     },
   },
   css: {
@@ -38,30 +47,18 @@ const config = {
       },
     },
   },
-  plugins: [
-    sveltekit(),
-  ],
+  plugins: [sveltekit()],
   server: {
     // The backend proxy is tied to this development server. Starting on an
     // arbitrary fallback port hides stale `make develop` processes and leaves
     // multiple competing app instances running.
     strictPort: true,
-    proxy: {
-      "/api": {
-        target: "http://localhost:7500",
-      },
-    },
+    proxy: apiProxy,
     fs: {
       allow: ["./fonts"],
     },
   },
   preview: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:7500",
-      },
-    },
+    proxy: apiProxy,
   },
-};
-
-export default config;
+});

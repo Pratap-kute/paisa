@@ -74,31 +74,35 @@
 
   <div class="column is-8">
     <Carousel bind:this={carousel} infinite={false} initialPageIndex={pageSize - 1}>
-      <button
-        type="button"
+      <div
         slot="prev"
         let:showPrevPage
+        role="button"
+        tabindex="0"
         aria-label="Previous page"
         on:click={showPrevPage}
+        on:keydown={(e) => e.key === "Enter" && showPrevPage()}
         class="custom-arrow custom-arrow-prev"
       >
         <i class="fa-solid has-text-grey-light fa-angle-left"></i>
-      </button>
+      </div>
       {#each _.reverse(_.take(ts.transactions, 20)) as t}
         <div class="box px-5 py-3 my-0 has-text-grey" style="box-shadow: none;">
           <Transaction {t} compact={true} />
         </div>
       {/each}
-      <button
-        type="button"
+      <div
         slot="next"
         let:showNextPage
+        role="button"
+        tabindex="0"
         aria-label="Next page"
         on:click={showNextPage}
+        on:keydown={(e) => e.key === "Enter" && showNextPage()}
         class="custom-arrow custom-arrow-next"
       >
         <i class="fa-solid has-text-grey-light fa-angle-right"></i>
-      </button>
+      </div>
     </Carousel>
   </div>
 </div>

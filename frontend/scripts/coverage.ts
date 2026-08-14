@@ -25,7 +25,7 @@ async function runVitest(
   const args = [
     "run",
     "-A",
-    "npm:vitest@2.1.9",
+    "npm:vitest@^3.2.7",
     "run",
     "--config",
     config,
@@ -59,7 +59,7 @@ const component = await new Deno.Command(Deno.execPath(), {
   args: [
     "run",
     "-A",
-    "npm:vitest@2.1.9",
+    "npm:vitest@^3.2.7",
     "run",
     "--config",
     "vitest.config.ts",

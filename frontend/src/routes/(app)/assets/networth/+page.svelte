@@ -26,7 +26,7 @@
   let points: Networth[] = [];
   let legends: Legend[] = [];
 
-  $: if (!_.isEmpty(points)) {
+  $: if (!_.isEmpty(points) && svg) {
     if (destroy) {
       destroy();
     }

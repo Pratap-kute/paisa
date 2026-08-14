@@ -106,7 +106,7 @@
     industryEmpty = industry.length === 0;
   });
 
-  $: if (securityTypeR) {
+  $: if (securityTypeR && ratingR && industryR && portfolioR) {
     securityTypeR(filterCommodityBreakdowns(security_type, selectedCommodities), color);
     ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);
     industryR(filterCommodityBreakdowns(industry, selectedCommodities), color);

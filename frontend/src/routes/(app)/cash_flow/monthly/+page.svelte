@@ -9,9 +9,9 @@
 
   let legends: Legend[] = [];
   let cashFlows: CashFlow[] = [];
-  let renderer: (cashflows: CashFlow[]) => void;
+  let renderer: ((cashflows: CashFlow[]) => void) | null = null;
 
-  $: if (!_.isEmpty(cashFlows)) {
+  $: if (renderer && !_.isEmpty(cashFlows)) {
     renderer(
       _.filter(
         cashFlows,

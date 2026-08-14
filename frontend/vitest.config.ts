@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vitest/config";
 
@@ -6,9 +7,13 @@ export default defineConfig({
   resolve: {
     conditions: ["browser"],
     alias: {
-      "$app/navigation":
-        new URL("./src/test/navigation.ts", import.meta.url).pathname,
-      $lib: new URL("./src/lib", import.meta.url).pathname,
+      "$app/navigation": fileURLToPath(
+        new URL("./src/test/navigation.ts", import.meta.url),
+      ),
+      $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
+      xlsx: fileURLToPath(
+        new URL("./src/lib/vendor/xlsx.mjs", import.meta.url),
+      ),
     },
   },
   test: {

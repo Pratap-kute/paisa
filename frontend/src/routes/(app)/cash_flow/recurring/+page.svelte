@@ -28,10 +28,10 @@
   let days: Dayjs[] = [];
   let schedulesByDate: Record<string, TransactionSchedule[]> = {};
 
-  $: if (days) {
+  $: {
     ({ days } = monthDays($month));
     schedulesByDate = _.chain(transactionSequences)
-      .flatMap((ts) => ts.schedulesByMonth[$month] || [])
+      .flatMap((ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [])
       .groupBy((s) => s.scheduled.format("YYYY-MM-DD"))
       .value();
   }
@@ -49,9 +49,7 @@
       _.compact(_.flatMap(transactionSequences, (ts) => ts.schedules.map((s) => s.scheduled)))
     );
 
-    setTimeout(() => {
-      transactionSequencesDelayed = transactionSequences;
-    }, 100);
+    transactionSequencesDelayed = transactionSequences;
   });
 </script>
 

@@ -43,7 +43,7 @@
     color = generateColorScheme(commodities);
   });
 
-  $: if (securityTypeR) {
+  $: if (securityTypeR && ratingR && industryR && portfolioR && color) {
     securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
     ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);
     industryR.renderer(filterCommodityBreakdowns(industry, selectedCommodities), color);
@@ -77,7 +77,7 @@
       <div class="column is-12 is-flex">
         {#each commodities as commodity}
           {@const name = `switch-${commodity}`}
-          <div class="field mr-5 color-switch" style="--color: {color(commodity)}">
+          <div class="field mr-5 color-switch" style="--color: {color ? color(commodity) : ''}">
             <input
               id={name}
               type="checkbox"

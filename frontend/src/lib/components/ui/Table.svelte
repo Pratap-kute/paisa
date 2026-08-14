@@ -1,45 +1,44 @@
 <script lang="ts">
   import { rem } from "$lib/core/utils";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { TabulatorFull as Tabulator, type ColumnDefinition } from "tabulator-tables";
 
-  export let data: any[];
+  export let data: any[] = [];
   export let columns: ColumnDefinition[];
   export let tree = false;
 
   let tableComponent: HTMLElement;
   let tabulator: Tabulator;
+  let isBuilt = false;
 
-  $: if (data.length > 0) {
-    build();
+  $: if (isBuilt && data && data.length > 0) {
+    try {
+      tabulator?.setData(data);
+    } catch (_) {}
   }
 
-  async function build() {
-    if (data.length === 0) {
-      return;
-    }
+  onMount(() => {
+    if (!tableComponent) return;
+    tabulator = new Tabulator(tableComponent, {
+      dataTree: tree,
+      dataTreeStartExpanded: [true, true, false],
+      dataTreeBranchElement: false,
+      dataTreeChildIndent: rem(30),
+      dataTreeCollapseElement:
+        "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-up'></i></span>",
+      dataTreeExpandElement:
+        "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-down'></i></span>",
+      data: data || [],
+      columns: columns,
+      layout: "fitDataTable"
+    });
+    tabulator.on("tableBuilt", () => {
+      isBuilt = true;
+    });
+  });
 
-    if (tabulator) {
-      tabulator.replaceData(data);
-    } else {
-      tabulator = new Tabulator(tableComponent, {
-        dataTree: tree,
-        dataTreeStartExpanded: [true, true, false],
-        dataTreeBranchElement: false,
-        dataTreeChildIndent: rem(30),
-        dataTreeCollapseElement:
-          "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-up'></i></span>",
-        dataTreeExpandElement:
-          "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-down'></i></span>",
-        data: data,
-        columns: columns,
-        layout: "fitDataTable"
-      });
-    }
-  }
-
-  onMount(async () => {
-    build();
+  onDestroy(() => {
+    tabulator?.destroy();
   });
 </script>
 

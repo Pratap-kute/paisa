@@ -94,8 +94,9 @@
             </thead>
             <tbody class="has-text-grey-dark">
               {#each Object.keys(prices) as commodity}
-                {@const p = prices[commodity][0]}
-                <Toggleable>
+                {@const p = prices[commodity]?.[0]}
+                {#if p}
+                  <Toggleable>
                   <tr
                     class={active ? "is-active" : ""}
                     style="cursor: pointer;"
@@ -153,17 +154,20 @@
                             {style}
                             class="small-box is-flex is-flex-wrap-wrap is-justify-content-space-between is-size-7"
                           >
-                            {@const p = prices[commodity][index]}
-                            <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
-                            <div class="pr-1 has-text-right">
-                              {formatCurrency(p.value, 4)}
-                            </div>
+                            {@const p = prices[commodity]?.[index]}
+                            {#if p}
+                              <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
+                              <div class="pr-1 has-text-right">
+                                {formatCurrency(p.value, 4)}
+                              </div>
+                            {/if}
                           </div>
                         </VirtualList>
                       </div>
                     </td>
                   </tr>
-                </Toggleable>
+                  </Toggleable>
+                {/if}
               {/each}
             </tbody>
           </table>

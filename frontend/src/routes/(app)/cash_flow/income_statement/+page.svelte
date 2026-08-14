@@ -58,7 +58,7 @@
 
   const sum = (object: Record<string, number>) => Object.values(object).reduce((a, b) => a + b, 0);
 
-  const accountGroups: AccountGroup[] = [];
+  let accountGroups: AccountGroup[] = [];
 
   $: if (yearly && renderer) {
     if (yearly[$year] == null) {
@@ -93,54 +93,50 @@
       dateMin.set(y.date);
     }
 
-    accountGroups.push({
-      key: "income",
-      accounts: uniqueAccounts(_.values(yearly), "income"),
-      label: "Income",
-      multiplier: -1
-    });
-
-    accountGroups.push({
-      key: "tax",
-      accounts: uniqueAccounts(_.values(yearly), "tax"),
-      label: "Tax",
-      multiplier: -1
-    });
-
-    accountGroups.push({
-      key: "interest",
-      accounts: uniqueAccounts(_.values(yearly), "interest"),
-      label: "Interest",
-      multiplier: -1
-    });
-
-    accountGroups.push({
-      key: "pnl",
-      accounts: uniqueAccounts(_.values(yearly), "pnl"),
-      label: "Gain / Loss",
-      multiplier: 1
-    });
-
-    accountGroups.push({
-      key: "equity",
-      accounts: uniqueAccounts(_.values(yearly), "equity"),
-      label: "Equity",
-      multiplier: -1
-    });
-
-    accountGroups.push({
-      key: "liabilities",
-      accounts: uniqueAccounts(_.values(yearly), "liabilities"),
-      label: "Liabilities",
-      multiplier: -1
-    });
-
-    accountGroups.push({
-      key: "expenses",
-      accounts: uniqueAccounts(_.values(yearly), "expenses"),
-      label: "Expenses",
-      multiplier: -1
-    });
+    accountGroups = [
+      {
+        key: "income",
+        accounts: uniqueAccounts(_.values(yearly), "income"),
+        label: "Income",
+        multiplier: -1
+      },
+      {
+        key: "tax",
+        accounts: uniqueAccounts(_.values(yearly), "tax"),
+        label: "Tax",
+        multiplier: -1
+      },
+      {
+        key: "interest",
+        accounts: uniqueAccounts(_.values(yearly), "interest"),
+        label: "Interest",
+        multiplier: -1
+      },
+      {
+        key: "pnl",
+        accounts: uniqueAccounts(_.values(yearly), "pnl"),
+        label: "Gain / Loss",
+        multiplier: 1
+      },
+      {
+        key: "equity",
+        accounts: uniqueAccounts(_.values(yearly), "equity"),
+        label: "Equity",
+        multiplier: -1
+      },
+      {
+        key: "liabilities",
+        accounts: uniqueAccounts(_.values(yearly), "liabilities"),
+        label: "Liabilities",
+        multiplier: -1
+      },
+      {
+        key: "expenses",
+        accounts: uniqueAccounts(_.values(yearly), "expenses"),
+        label: "Expenses",
+        multiplier: -1
+      }
+    ];
   });
 </script>
 
