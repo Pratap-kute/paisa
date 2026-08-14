@@ -386,11 +386,15 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 	return router
 }
 
-func Listen(db *gorm.DB, port int) {
+func Listen(db *gorm.DB, host string, port int) {
 	router := Build(db, true)
 
-	log.Infof("Listening on http://localhost:%d", port)
-	err := router.Run(fmt.Sprintf(":%d", port))
+	if host == "" {
+		host = "127.0.0.1"
+	}
+	addr := fmt.Sprintf("%s:%d", host, port)
+	log.Infof("Listening on http://%s", addr)
+	err := router.Run(addr)
 	if err != nil {
 		log.Fatal(err)
 	}

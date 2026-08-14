@@ -858,7 +858,7 @@ export async function ajax(
           value,
         )
     ) {
-      return dayjs(value);
+      return dayjs(value.substring(0, 19));
     }
     return value;
   });
@@ -1333,11 +1333,19 @@ export function svgUrl(identifier: string) {
   return `url(${new URL("#" + identifier, globalThis.location.toString())})`;
 }
 
-export function dueDateIcon(dueDate: dayjs.Dayjs, clearedDate: dayjs.Dayjs) {
+export function dueDateIcon(
+  dueDate: dayjs.Dayjs,
+  clearedDate: dayjs.Dayjs,
+  amountDue?: number,
+) {
   let icon = "fa-circle-check";
   let glyph = iconGlyph("fa6-solid:circle-check");
   let color = "has-text-success";
   let svgColor = "svg-text-success";
+
+  if (amountDue !== undefined && amountDue <= 0) {
+    return { icon, color, svgColor, glyph };
+  }
 
   if (!clearedDate) {
     if (dueDate.isBefore(now(), "day")) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -79,6 +80,11 @@ func (p *PriceProvider) GetPrices(code string, commodityName string) ([]*price.P
 		return nil, err
 	}
 
+	divisor := decimal.NewFromInt(10)
+	if strings.HasPrefix(strings.ToLower(code), "silver") {
+		divisor = decimal.NewFromInt(1000)
+	}
+
 	var prices []*price.Price
 	for _, data := range result.Data {
 		date, err := time.ParseInLocation("2006-01-02", data.Date, config.TimeZone())
@@ -86,7 +92,7 @@ func (p *PriceProvider) GetPrices(code string, commodityName string) ([]*price.P
 			return nil, err
 		}
 
-		price := price.Price{Date: date, CommodityType: config.Metal, CommodityID: code, CommodityName: commodityName, Value: data.Close.Div(decimal.NewFromInt(10))}
+		price := price.Price{Date: date, CommodityType: config.Metal, CommodityID: code, CommodityName: commodityName, Value: data.Close.Div(divisor)}
 		prices = append(prices, &price)
 	}
 	return prices, nil

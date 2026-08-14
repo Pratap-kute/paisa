@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var port int
+var (
+	host string
+	port int
+)
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
@@ -26,11 +29,12 @@ var serveCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		server.Listen(db, port)
+		server.Listen(db, host, port)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
+	serveCmd.Flags().StringVarP(&host, "host", "H", "127.0.0.1", "host to listen on")
 	serveCmd.Flags().IntVarP(&port, "port", "p", 7500, "port to listen on")
 }

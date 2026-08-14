@@ -2,7 +2,7 @@
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
-import { asRows, parse, render } from "./spreadsheet";
+import { asRows, columnIndexToLetter, parse, render } from "./spreadsheet";
 import helpers from "./template_helpers";
 import _ from "lodash";
 import Handlebars from "handlebars";
@@ -74,5 +74,28 @@ describe("template helpers", () => {
     expect(helpers.acronym("foo   the bar")).toBe("FB");
     expect(helpers.acronym("Motital S & P 500")).toBe("MSP");
     expect(helpers.acronym("Axis Liquid Growth Direct Plan")).toBe("AL");
+  });
+});
+
+describe("spreadsheet column indexing", () => {
+  test("converts index to excel column letters beyond Z", () => {
+    expect(columnIndexToLetter(0)).toBe("A");
+    expect(columnIndexToLetter(25)).toBe("Z");
+    expect(columnIndexToLetter(26)).toBe("AA");
+    expect(columnIndexToLetter(27)).toBe("AB");
+    expect(columnIndexToLetter(51)).toBe("AZ");
+    expect(columnIndexToLetter(52)).toBe("BA");
+    expect(columnIndexToLetter(701)).toBe("ZZ");
+    expect(columnIndexToLetter(702)).toBe("AAA");
+  });
+
+  test("asRows properly indexes columns beyond Z", () => {
+    const cells = Array.from({ length: 30 }, (_, i) => `val_${i}`);
+    const rows = asRows({ data: [cells] });
+    expect(rows[0]["A"]).toBe("val_0");
+    expect(rows[0]["Z"]).toBe("val_25");
+    expect(rows[0]["AA"]).toBe("val_26");
+    expect(rows[0]["AB"]).toBe("val_27");
+    expect(rows[0]["AD"]).toBe("val_29");
   });
 });

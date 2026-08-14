@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -91,37 +92,61 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 		return nil, err
 	}
 
+	if len(response.Chart.Result) == 0 {
+		return nil, fmt.Errorf("no chart result found for ticker %s", ticker)
+	}
+
 	var prices []*price.Price
 	result := response.Chart.Result[0]
+	if len(result.Indicators.Quote) == 0 || len(result.Indicators.Quote[0].Close) == 0 {
+		return nil, fmt.Errorf("no quote data found for ticker %s", ticker)
+	}
+
+	currency := result.Meta.Currency
+	scale := 1.0
+	if strings.EqualFold(currency, "GBp") || strings.EqualFold(currency, "GBX") {
+		currency = "GBP"
+		scale = 0.01
+	}
+
 	needExchangePrice := false
 	var exchangePrice *btree.BTree
 
-	if !utils.IsCurrency(result.Meta.Currency) {
+	if !utils.IsCurrency(currency) {
 		needExchangePrice = true
-		exchangeResponse, err := getTicker(fmt.Sprintf("%s%s=X", result.Meta.Currency, config.DefaultCurrency()))
+		exchangeResponse, err := getTicker(fmt.Sprintf("%s%s=X", currency, config.DefaultCurrency()))
 		if err != nil {
 			return nil, err
 		}
 
-		exchangeResult := exchangeResponse.Chart.Result[0]
+		if len(exchangeResponse.Chart.Result) == 0 || len(exchangeResponse.Chart.Result[0].Indicators.Quote) == 0 {
+			return nil, fmt.Errorf("failed to fetch exchange rate for %s to %s", currency, config.DefaultCurrency())
+		}
 
+		exchangeResult := exchangeResponse.Chart.Result[0]
 		exchangePrice = btree.New(2)
 		for i, t := range exchangeResult.Timestamp {
-			exchangePrice.ReplaceOrInsert(ExchangePrice{Timestamp: t, Close: exchangeResult.Indicators.Quote[0].Close[i]})
+			if i < len(exchangeResult.Indicators.Quote[0].Close) {
+				exchangePrice.ReplaceOrInsert(ExchangePrice{Timestamp: t, Close: exchangeResult.Indicators.Quote[0].Close[i]})
+			}
 		}
 	}
 
 	for i, timestamp := range result.Timestamp {
+		if i >= len(result.Indicators.Quote[0].Close) {
+			continue
+		}
 		date := time.Unix(timestamp, 0)
-		value := result.Indicators.Quote[0].Close[i]
+		value := result.Indicators.Quote[0].Close[i] * scale
 
 		if needExchangePrice {
-			exchangePrice := utils.BTreeDescendFirstLessOrEqual(exchangePrice, ExchangePrice{Timestamp: timestamp})
-			value *= exchangePrice.Close
+			rate := utils.BTreeDescendFirstLessOrEqual(exchangePrice, ExchangePrice{Timestamp: timestamp})
+			if rate.Close > 0 {
+				value *= rate.Close
+			}
 		}
 
 		price := price.Price{Date: date, CommodityType: config.Stock, CommodityID: ticker, CommodityName: commodityName, Value: decimal.NewFromFloat(value)}
-
 		prices = append(prices, &price)
 	}
 	return prices, nil

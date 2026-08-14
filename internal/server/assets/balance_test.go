@@ -70,6 +70,9 @@ func TestComputeBreakdown(t *testing.T) {
 
 		got := ComputeBreakdown(db, ps, true, "Assets:Checking:SBI")
 		assert.True(t, got.InvestmentAmount.IsZero(), "Checking account should have 0 investmentAmount")
+		assert.True(t, got.GainAmount.IsZero(), "Checking account should have 0 gainAmount")
+		assert.True(t, got.AbsoluteReturn.IsZero(), "Checking account should have 0 absoluteReturn")
+		assert.True(t, got.XIRR.IsZero(), "Checking account should have 0 XIRR")
 		assert.Equal(t, "500", got.MarketAmount.String())
 	})
 }

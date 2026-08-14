@@ -24,23 +24,38 @@ export function parse(file: File): Promise<Result> {
   throw new Error(`Unsupported file type ${extension}`);
 }
 
+export function columnIndexToLetter(index: number): string {
+  let temp = index;
+  let letter = "";
+  while (temp >= 0) {
+    letter = String.fromCharCode((temp % 26) + 65) + letter;
+    temp = Math.floor(temp / 26) - 1;
+  }
+  return letter;
+}
+
 export function asRows(result: Result): SpreadsheetRow[] {
   return _.map(result.data, (row, i) => {
     return Object.fromEntries([
       ...Array.from(
         row,
-        (cell, j) => [String.fromCharCode(65 + j), cell] as const,
+        (cell, j) => [columnIndexToLetter(j), cell] as const,
       ),
       ["index", i],
     ]);
   });
 }
 
-const COLUMN_REFS = _.chain(_.range(65, 90))
-  .map((i) => String.fromCharCode(i))
-  .map((a) => [a, a])
-  .fromPairs()
-  .value();
+function generateColumnRefs(maxCols = 702): Record<string, string> {
+  const refs: Record<string, string> = {};
+  for (let i = 0; i < maxCols; i++) {
+    const col = columnIndexToLetter(i);
+    refs[col] = col;
+  }
+  return refs;
+}
+
+const COLUMN_REFS = generateColumnRefs(702);
 
 export function render(
   rows: SpreadsheetRow[],
