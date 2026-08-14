@@ -218,7 +218,8 @@ export function sortTrantionSequence(
 ) {
   return _.chain(transactionSequences)
     .sortBy((ts) => {
-      return Math.abs(nextUnpaidSchedule(ts).scheduled.diff(now()));
+      const s = nextUnpaidSchedule(ts);
+      return s?.scheduled ? Math.abs(s.scheduled.diff(now())) : Number.MAX_SAFE_INTEGER;
     })
     .value();
 }

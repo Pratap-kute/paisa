@@ -1,10 +1,8 @@
 // deno-lint-ignore-file no-explicit-any no-var -- Ambient browser globals and untyped third-party modules require declaration syntax.
 /// <reference types="@sveltejs/kit" />
-// https://github.com/oven-sh/bun/issues/5134
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 /// <reference lib="esnext" />
-/// <reference lib="webworker" />
 
 declare type Item = import("svelte-dnd-action").Item;
 declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<
@@ -13,10 +11,10 @@ declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<
 declare namespace svelteHTML {
   interface HTMLAttributes<T> {
     "on:consider"?: (
-      event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T },
+      event: CustomEvent<DndEvent> & { target: EventTarget & T },
     ) => void;
     "on:finalize"?: (
-      event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T },
+      event: CustomEvent<DndEvent> & { target: EventTarget & T },
     ) => void;
   }
 }

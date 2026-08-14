@@ -4,6 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [svelte()],
   resolve: {
+    conditions: ["browser"],
     alias: {
       "$app/navigation":
         new URL("./src/test/navigation.ts", import.meta.url).pathname,
@@ -12,6 +13,11 @@ export default defineConfig({
   },
   test: {
     environment: "happy-dom",
+    server: {
+      deps: {
+        inline: [/svelte/, /@testing-library/],
+      },
+    },
     include: ["src/**/*.component.test.ts"],
     setupFiles: ["./src/test/setup.ts"],
     coverage: {

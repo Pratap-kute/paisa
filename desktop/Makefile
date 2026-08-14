@@ -13,10 +13,10 @@ help: ## Display this help message
 
 .PHONY: develop build dmg
 develop: ## Start Wails development mode
-	wails dev -tags webkit2_40
+	wails dev -tags webkit2_41
 
 build: ## Build desktop application
-	wails build -tags webkit2_40
+	wails build -tags webkit2_41
 
 dmg: ## Build macOS DMG installer
 	rm -rf Paisa.dmg

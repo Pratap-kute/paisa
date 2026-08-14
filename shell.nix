@@ -18,7 +18,13 @@ pkgs.mkShell {
     # test
     pkgs.ledger
     hledger.hledger
-  ] ++ (pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.wails);
+  ] ++ (pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+    pkgs.wails
+    pkgs.pkg-config
+    pkgs.gtk3
+    pkgs.webkitgtk_4_1
+    pkgs.libsoup_3
+  ]);
 
   shellHook = ''
     export CGO_ENABLED=1
