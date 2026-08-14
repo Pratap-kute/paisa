@@ -1,6 +1,6 @@
 module github.com/ananthakumaran/paisa
 
-go 1.26.5
+go 1.24
 
 require (
 	dario.cat/mergo v1.0.0

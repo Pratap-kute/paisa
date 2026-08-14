@@ -1,6 +1,6 @@
 module github.com/ananthakumaran/paisa/desktop
 
-go 1.26.5
+go 1.24
 
 require (
 	github.com/ananthakumaran/paisa v0.0.0
