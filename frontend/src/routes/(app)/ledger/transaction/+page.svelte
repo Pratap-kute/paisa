@@ -155,17 +155,17 @@
                 <p class="is-6"><b>{filtered.length}</b> transaction(s)</p>
               </div>
               <div class="level-item">
-                <a
-                  href="javascript:void(0)"
-                  role="button"
-                  class="has-text-link"
+                <button
+                  type="button"
+                  class="has-text-link p-0"
+                  style="background: transparent; border: none; font: inherit; cursor: pointer; display: inline-flex; align-items: center;"
                   on:click={(_e) => downloadTransactions()}
                 >
                   <span class="icon is-small">
                     <i class="fa-solid fa-file-arrow-down"></i>
                   </span>
                   <span>download</span>
-                </a>
+                </button>
               </div>
             </div>
           </nav>

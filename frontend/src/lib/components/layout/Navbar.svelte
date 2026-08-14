@@ -322,9 +322,9 @@
         <li>
           <span class="is-inactive">{selectedLink.label}</span>
           {#if selectedLink.help}
-            <a style="margin-left: -10px;" class="p-0" aria-label="Help documentation" href={helpUrl(selectedLink.help)}
+            <a class="p-0 ml-1 has-text-grey" aria-label="Help documentation" href={helpUrl(selectedLink.help)}
               ><span class="icon is-small">
-                <i class="fas fa-question fa-border"></i>
+                <i class="fas fa-circle-question"></i>
               </span></a
             >
           {/if}
@@ -340,9 +340,9 @@
             <span class="is-inactive">{selectedSubLink.label}</span>
 
             {#if selectedSubLink.help}
-              <a style="margin-left: -10px;" class="p-0" aria-label="Sublink help documentation" href={helpUrl(selectedSubLink.help)}
+              <a class="p-0 ml-1 has-text-grey" aria-label="Sublink help documentation" href={helpUrl(selectedSubLink.help)}
                 ><span class="icon is-small">
-                  <i class="fas fa-question fa-border"></i>
+                  <i class="fas fa-circle-question"></i>
                 </span></a
               >
             {/if}
@@ -435,7 +435,25 @@
 </div>
 
 <style lang="scss">
-  li a span.icon {
-    margin-top: -5px;
+  .breadcrumb {
+    ul {
+      align-items: center;
+    }
+    li {
+      display: inline-flex;
+      align-items: center;
+
+      & + li::before {
+        padding: 0 0.5rem;
+      }
+    }
+    .is-inactive {
+      display: inline-flex;
+      align-items: center;
+      color: inherit;
+    }
+    li a span.icon {
+      margin-top: -2px;
+    }
   }
 </style>

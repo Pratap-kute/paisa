@@ -43,35 +43,65 @@
 
 <div class="is-flex is-justify-content-flex-start gap-0 {clazz}">
   {#each legends as legend}
-    <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-    <div
-      class="is-flex is-flex-direction-column paisa-p-1-5 gap-2 legend-box {legend.onClick &&
-        'paisa-clickable'}"
-      on:click={(_e) => onClick(legend)}
-      class:selected={selectedLegend == legend}
-    >
-      {#if legend.texture}
-        <svg
-          use:texture={{ texture: legend.texture }}
-          class="is-align-self-center"
-          height="1rem"
-          width="1rem"
-          viewBox="0 0 {textureScale} {textureScale}"
-        ></svg>
-      {:else if legend.shape == "square"}
-        <div
-          class="is-align-self-center"
-          style="background-color: {legend.color}; height: 1rem; width: 1rem;"
-        ></div>
-      {:else if legend.shape == "line"}
-        <div
-          class="is-align-self-center"
-          style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 2rem;"
-        ></div>
-      {/if}
-      <div class="legend-label paisa-whitespace-pre is-size-6-5 has-text-grey custom-icon">
-        {legend.label}
+    {#if legend.onClick}
+      <button
+        type="button"
+        class="is-flex is-flex-direction-column paisa-p-1-5 gap-2 legend-box paisa-clickable"
+        style="border: none; background: transparent; padding: 0; margin: 0; font: inherit; color: inherit; text-align: inherit;"
+        on:click={(_e) => onClick(legend)}
+        class:selected={selectedLegend == legend}
+      >
+        {#if legend.texture}
+          <svg
+            use:texture={{ texture: legend.texture }}
+            class="is-align-self-center"
+            height="1rem"
+            width="1rem"
+            viewBox="0 0 {textureScale} {textureScale}"
+          ></svg>
+        {:else if legend.shape == "square"}
+          <div
+            class="is-align-self-center"
+            style="background-color: {legend.color}; height: 1rem; width: 1rem;"
+          ></div>
+        {:else if legend.shape == "line"}
+          <div
+            class="is-align-self-center"
+            style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 2rem;"
+          ></div>
+        {/if}
+        <div class="legend-label paisa-whitespace-pre is-size-6-5 has-text-grey custom-icon">
+          {legend.label}
+        </div>
+      </button>
+    {:else}
+      <div
+        class="is-flex is-flex-direction-column paisa-p-1-5 gap-2 legend-box"
+        class:selected={selectedLegend == legend}
+      >
+        {#if legend.texture}
+          <svg
+            use:texture={{ texture: legend.texture }}
+            class="is-align-self-center"
+            height="1rem"
+            width="1rem"
+            viewBox="0 0 {textureScale} {textureScale}"
+          ></svg>
+        {:else if legend.shape == "square"}
+          <div
+            class="is-align-self-center"
+            style="background-color: {legend.color}; height: 1rem; width: 1rem;"
+          ></div>
+        {:else if legend.shape == "line"}
+          <div
+            class="is-align-self-center"
+            style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 2rem;"
+          ></div>
+        {/if}
+        <div class="legend-label paisa-whitespace-pre is-size-6-5 has-text-grey custom-icon">
+          {legend.label}
+        </div>
       </div>
-    </div>
+    {/if}
   {/each}
 </div>

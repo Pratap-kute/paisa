@@ -65,9 +65,8 @@
 </script>
 
 {#if deletable}
-  <a
-    href="javascript:void(0)"
-    role="button"
+  <button
+    type="button"
     aria-label="Delete entry"
     on:click={(_e) => deletable()}
     class="config-delete"
@@ -75,7 +74,7 @@
     <span class="icon is-small">
       <i class="fas fa-circle-minus"></i>
     </span>
-  </a>
+  </button>
 {/if}
 
 {#if schema["ui:widget"] == "hidden"}
@@ -231,17 +230,16 @@
   </div>
 {:else if schema["ui:widget"] == "price"}
   <div class="config-header">
-    <a
-      href="javascript:void(0)"
+    <button
+      type="button"
       class="is-link"
       data-tippy-content={documentation(schema)}
     >
       <span>{title}</span>
-    </a>
+    </button>
 
-    <a
-      href="javascript:void(0)"
-      role="button"
+    <button
+      type="button"
       aria-label="Edit price code"
       on:click={(_e) => (modalOpen = true)}
       class="is-link"
@@ -249,7 +247,7 @@
       <span class="icon is-small">
         <i class="fas fa-pen-to-square"></i>
       </span>
-    </a>
+    </button>
   </div>
 
   <PriceCodeSearchModal
@@ -275,9 +273,8 @@
   </div>
 {:else if schema.type == "object"}
   <div class="config-header">
-    <a
-      href="javascript:void(0)"
-      role="button"
+    <button
+      type="button"
       class="is-link is-light invertable"
       data-tippy-content={documentation(schema)}
       on:click={(_e) => (open = !open)}
@@ -286,7 +283,7 @@
       <span class="icon is-small">
         <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
       </span>
-    </a>
+    </button>
   </div>
 
   {#if open}
@@ -305,10 +302,8 @@
   {/if}
 {:else if schema.type == "array"}
   <div class="config-header">
-    <!-- svelte-ignore a11y_invalid_attribute -->
-    <a
-      href="javascript:void(0)"
-      role="button"
+    <button
+      type="button"
       class="is-link is-light invertable"
       data-tippy-content={documentation(schema)}
       on:click={(_e) => (open = !open)}
@@ -317,12 +312,10 @@
       <span class="icon is-small">
         <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
       </span>
-    </a>
+    </button>
     {#if open}
-      <!-- svelte-ignore a11y_invalid_attribute -->
-      <a
-        href="javascript:void(0)"
-        role="button"
+      <button
+        type="button"
         aria-label="Add item"
         on:click={(_e) => (value = [newItem(schema), ...value])}
         class="config-add"
@@ -330,7 +323,7 @@
         <span class="icon is-small">
           <i class="fas fa-circle-plus"></i>
         </span>
-      </a>
+      </button>
     {/if}
   </div>
 
@@ -354,3 +347,18 @@
 {:else}
   <div>{JSON.stringify(schema)}</div>
 {/if}
+
+<style>
+  button.is-link,
+  button.config-delete,
+  button.config-add {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-align: inherit;
+  }
+</style>
