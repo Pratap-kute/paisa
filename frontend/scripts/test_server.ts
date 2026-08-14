@@ -107,12 +107,14 @@ try {
     { mode: 0o750 },
   );
   const staticIndex = join(root, "../backend/web/static/index.html");
+  const serverIndex = join(root, ".svelte-kit/output/server/index.js");
   let hasStatic = false;
   try {
     Deno.statSync(staticIndex);
+    Deno.statSync(serverIndex);
     hasStatic = true;
   } catch (_) {
-    // Static assets not built yet
+    // Static assets or preview server build not ready yet
   }
   if (!hasStatic || Deno.env.get("PAISA_REBUILD_FRONTEND") === "true") {
     await run(Deno.execPath(), ["task", "build"]);

@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+test.describe.configure({ mode: "parallel" });
+
 const pages = [
   { name: "dashboard", path: "/", readyText: "Net worth" },
   { name: "assets-allocation", path: "/assets/allocation" },
@@ -18,7 +20,7 @@ const pages = [
   {
     name: "cash-flow-recurring",
     path: "/cash_flow/recurring",
-    readyText: "Rent started on",
+    ready: ".columns.mb-4 .box",
   },
   { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
   { name: "expense-budget", path: "/expense/budget", ready: ".budget-card" },
