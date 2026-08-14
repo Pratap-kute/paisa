@@ -1,15 +1,22 @@
-paisa.db
+/paisa.db
+backend/paisa.db
+!**/tests/fixture/**/paisa.db
 /paisa.yaml
 /Schedule AL.paisa
 /paisa
+backend/paisa
+backend/paisa.exe
 /sample
 web/static
+backend/web/static
 /example.ledger
 /main.ledger
 .DS_Store
 node_modules
+frontend/node_modules
 /build
 /.svelte-kit
+frontend/.svelte-kit
 /package
 .env
 .env.*

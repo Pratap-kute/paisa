@@ -6,7 +6,7 @@ import (
 
 	"github.com/ananthakumaran/paisa/cmd"
 	"github.com/ananthakumaran/paisa/desktop/logger"
-	"github.com/ananthakumaran/paisa/internal/server"
+	"github.com/ananthakumaran/paisa/pkg/server"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
@@ -25,13 +25,14 @@ func main() {
 	linuxGpuPolicy := linux.WebviewGpuPolicyNever
 
 	if gpuPolicyConfig := os.Getenv("PAISA_GPU_POLICY"); gpuPolicyConfig != "" {
-		if gpuPolicyConfig == "always" {
+		switch gpuPolicyConfig {
+		case "always":
 			linuxGpuPolicy = linux.WebviewGpuPolicyAlways
-		} else if gpuPolicyConfig == "never" {
+		case "never":
 			linuxGpuPolicy = linux.WebviewGpuPolicyNever
-		} else if gpuPolicyConfig == "ondemand" {
+		case "ondemand":
 			linuxGpuPolicy = linux.WebviewGpuPolicyOnDemand
-		} else {
+		default:
 			log.Warnf("Unknown gpuPolicy: %s", gpuPolicyConfig)
 		}
 	}
@@ -52,7 +53,7 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 250, G: 250, B: 250, A: 1},
 		OnStartup:        app.startup,
-		Bind: []interface{}{
+		Bind: []any{
 			app,
 		},
 		WindowStartState:         options.Maximised,
@@ -72,7 +73,6 @@ func main() {
 			WebviewGpuPolicy: linuxGpuPolicy,
 		},
 	})
-
 	if err != nil {
 		println("Error:", err.Error())
 	}

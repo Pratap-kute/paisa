@@ -1,89 +1,179 @@
-.PHONY: docs clean
-.PHONY: fixture/main.transactions.json
+# ==============================================================================
+# Paisa - Monorepo Orchestration
+# ==============================================================================
 
-clean:
-	deno task clean
+SHELL := /usr/bin/env bash
+.DEFAULT_GOAL := help
 
-develop:
-	@if [ ! -f web/static/index.html ]; then deno task build; fi
-	deno task develop
+# ------------------------------------------------------------------------------
+# Help
+# ------------------------------------------------------------------------------
 
-serve:
-	deno task serve
+##@ Help
 
-debug:
-	@if [ ! -f web/static/index.html ]; then deno task build; fi
-	deno task debug
+.PHONY: help
+help: ## Display this help message
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_ .-]+:.*?##/ { printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1;34m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-serve-now:
-	deno task serve:now
+# ------------------------------------------------------------------------------
+# Development & Server
+# ------------------------------------------------------------------------------
 
+##@ Development & Server
 
-watch:
-	deno task build:watch
-docs:
+.PHONY: dev develop debug serve serve-now watch
+dev develop: ## Start frontend and backend in development mode
+	@if [ ! -f backend/web/static/index.html ]; then $(MAKE) build-frontend; fi
+	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend
+
+debug: ## Start frontend and backend with fixed date for debugging
+	@if [ ! -f backend/web/static/index.html ]; then $(MAKE) build-frontend; fi
+	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend --now
+
+serve: ## Start the backend HTTP server only
+	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts
+
+serve-now: ## Start backend server with fixed current date
+	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts --now
+
+watch: ## Watch and rebuild frontend assets on change
+	$(MAKE) -C frontend watch
+
+sample: build ## Initialize and update demo sample data
+	./backend/paisa init && ./backend/paisa update
+
+# ------------------------------------------------------------------------------
+# Build & Installation
+# ------------------------------------------------------------------------------
+
+##@ Build & Installation
+
+.PHONY: build build-frontend build-backend build-windows install clean jsbuild windows
+build: build-frontend build-backend ## Build both frontend assets and backend binary
+
+build-frontend jsbuild: ## Build SvelteKit static assets into backend/web/static
+	$(MAKE) -C frontend build
+
+build-backend: ## Build the Go backend binary
+	$(MAKE) -C backend build
+
+build-windows windows: ## Cross-compile Go binary for Windows (amd64)
+	$(MAKE) -C backend build-windows
+
+install: build-frontend ## Build frontend and install backend binary to GOBIN
+	$(MAKE) -C backend install
+
+clean: ## Clean build artifacts, static files, and temporary databases
+	$(MAKE) -C frontend clean
+	$(MAKE) -C backend clean
+	rm -rf test-results playwright-report /tmp/ledger_bin /tmp/paisa-*
+
+# ------------------------------------------------------------------------------
+# Testing
+# ------------------------------------------------------------------------------
+
+##@ Testing
+
+.PHONY: test test-all test-frontend test-backend test-unit test-core test-component test-go test-integration test-e2e test-visual test-visual-update test-coverage jstest
+test: test-frontend test-backend ## Run frontend tests and Go backend test suite
+
+test-all: test-frontend test-backend test-integration test-e2e ## Run entire test suite (unit, Go, integration, E2E)
+
+test-frontend: ## Run frontend test suite
+	$(MAKE) -C frontend test
+
+test-backend test-go: ## Run all Go backend unit and regression tests
+	$(MAKE) -C backend test
+
+test-unit: ## Run frontend unit tests
+	$(MAKE) -C frontend test-unit
+
+test-core: ## Run domain core Vitest tests
+	$(MAKE) -C frontend test-core
+
+test-component: ## Run Svelte component Vitest tests
+	$(MAKE) -C frontend test-component
+
+test-integration jstest: build ## Run ledger CLI integration tests
+	$(MAKE) -C frontend test-integration
+
+test-e2e: ## Run Playwright end-to-end browser tests
+	$(MAKE) -C frontend test-e2e
+
+test-visual: ## Run Playwright visual snapshot regression tests
+	$(MAKE) -C frontend test-visual
+
+test-visual-update: ## Update Playwright visual snapshot baselines
+	$(MAKE) -C frontend test-visual-update
+
+test-coverage: ## Generate frontend test coverage report
+	$(MAKE) -C frontend test-coverage
+
+# ------------------------------------------------------------------------------
+# Code Quality & Formatting
+# ------------------------------------------------------------------------------
+
+##@ Code Quality
+
+.PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck format fmt
+quality: lint test-backend ## Run full code quality pipeline (linters, typecheck, tests)
+
+lint: lint-frontend typecheck lint-backend ## Run all linters (Deno, TypeScript, GolangCI)
+
+lint-backend lint-go go-lint: ## Run golangci-lint for Go backend
+	$(MAKE) -C backend lint
+
+lint-frontend: ## Run Deno linter for frontend code
+	$(MAKE) -C frontend lint
+
+check typecheck: ## Run TypeScript and Svelte template type checks
+	$(MAKE) -C frontend check
+
+format fmt: ## Format frontend and Go source files
+	$(MAKE) -C frontend format
+	$(MAKE) -C backend format
+
+# ------------------------------------------------------------------------------
+# Documentation
+# ------------------------------------------------------------------------------
+
+##@ Documentation
+
+.PHONY: docs docs-build publish
+docs: ## Serve documentation locally with live-reload (port 8000)
 	mkdocs serve -a 0.0.0.0:8000
 
-sample:
-	go build && ./paisa init && ./paisa update
+docs-build publish: ## Build static documentation site with MkDocs
+	mkdocs build
 
-publish:
-	nix develop --command bash -c 'mkdocs build'
+# ------------------------------------------------------------------------------
+# Code Generation & Tooling
+# ------------------------------------------------------------------------------
 
-parser:
-	deno task parser-build-debug
+##@ Code Generation & Tooling
 
-lint:
-	deno task lint
-	deno task check
-	test -z $$(gofmt -l .)
+.PHONY: parsers parser generate-fonts node2nix regen regen-fixtures
+parsers parser: ## Rebuild Lezer sheet and search query grammars
+	$(MAKE) -C frontend parsers
 
-regen:
-	go build
-	unset PAISA_CONFIG && REGENERATE=true TZ=UTC deno task test:integration
+generate-fonts: ## Download SVGs and generate custom icon font
+	$(MAKE) -C frontend generate-fonts
 
-jstest:
-	deno task test:unit
-	go build
-	unset PAISA_CONFIG && TZ=UTC deno task test:integration
+node2nix: ## Re-generate Nix package expressions from package.json
+	npm install --lockfile-version 2
+	node2nix --development -18 --input package.json \
+		--lock package-lock.json \
+		--node-env ./flake/node-env.nix \
+		--composition ./flake/default.nix \
+		--output ./flake/node-package.nix
 
-jsbuild:
-	deno task build
+regen regen-fixtures: build ## Re-generate integration test JSON fixtures
+	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration
 
-test: jsbuild jstest
-	go test ./...
-
-windows:
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CXX=x86_64-w64-mingw32-g++ CC=x86_64-w64-mingw32-gcc go build
-
-
-deploy:
-	fly scale count 2 --region lax --yes
-	docker build -t paisa . --file packaging/docker/demo.Dockerfile
-	fly deploy -i paisa:latest --local-only
-	fly scale count 1 --region lax --yes
-
-install:
-	deno task build
-	go build
-	go install
-
-fixture/main.transactions.json:
-	cd /tmp && paisa init
+fixture/main.transactions.json: build
+	cd /tmp && ../backend/paisa init
 	cp fixture/main.ledger /tmp/main.ledger
-	cd /tmp && paisa update --journal && paisa serve -p 6500 &
+	cd /tmp && ../backend/paisa update --journal && ../backend/paisa serve -p 6500 &
 	sleep 1
 	curl http://localhost:6500/api/transaction | jq .transactions > fixture/main.transactions.json
 	pkill -f 'paisa serve -p 6500'
-
-generate-fonts:
-	deno run -A scripts/fonts/download-svgs.js
-	node scripts/fonts/generate-font.js
-
-node2nix:
-	npm install --lockfile-version 2
-	node2nix --development -18 --input package.json \
-	--lock package-lock.json \
-	--node-env ./flake/node-env.nix \
-	--composition ./flake/default.nix \
-	--output ./flake/node-package.nix

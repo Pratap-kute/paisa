@@ -5,7 +5,7 @@ const ignoredDirectories = new Set([
   ".svelte-kit",
   "graphify-out",
   "node_modules",
-  "web/static",
+  "backend/web/static",
 ]);
 
 function ensurePortAvailable(port: number, service: string) {
@@ -38,6 +38,7 @@ let shuttingDown = false;
 async function startBackend() {
   const buildStatus = await new Deno.Command("go", {
     args: ["build", "-o", backendBinary, "."],
+    cwd: "backend",
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
@@ -68,6 +69,7 @@ async function startBackend() {
 function startFrontend() {
   frontend = new Deno.Command(Deno.execPath(), {
     args: ["task", "dev"],
+    cwd: "frontend",
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
@@ -113,7 +115,8 @@ function shouldRestart(paths: string[]) {
         normalized.includes(`/${dir}/`) || normalized.endsWith(`/${dir}`)
       )
     ) return false;
-    return normalized.endsWith(".go") || normalized.endsWith(".json");
+    return (normalized.includes("/backend/") || normalized.startsWith("backend/")) &&
+      (normalized.endsWith(".go") || normalized.endsWith(".json"));
   });
 }
 
@@ -127,7 +130,7 @@ for (const signal of terminationSignals) {
 if (includeFrontend) startFrontend();
 await startBackend();
 
-for await (const event of Deno.watchFs(".")) {
+for await (const event of Deno.watchFs("./backend")) {
   if (shuttingDown || !shouldRestart(event.paths)) continue;
   if (restartTimer !== undefined) clearTimeout(restartTimer);
   restartTimer = setTimeout(() => {

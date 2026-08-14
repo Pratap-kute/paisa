@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ananthakumaran/paisa/cmd"
-	"github.com/ananthakumaran/paisa/internal/model"
-	"github.com/ananthakumaran/paisa/internal/utils"
+	"github.com/ananthakumaran/paisa/pkg/model"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 

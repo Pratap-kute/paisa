@@ -1,0 +1,107 @@
+version: "2"
+
+run:
+  issues-exit-code: 1
+  allow-parallel-runners: true
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - contextcheck
+    - dupl
+    - errcheck
+    - errorlint
+    - exhaustive
+    - goconst
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - makezero
+    - nilerr
+    - nilnil
+    - nolintlint
+    - revive
+    - rowserrcheck
+    - staticcheck
+    - unparam
+    - unused
+  settings:
+    dupl:
+      threshold: 150
+    errcheck:
+      check-type-assertions: false
+      check-blank: false
+    exhaustive:
+      default-signifies-exhaustive: true
+    gocritic:
+      enabled-checks:
+        - badLock
+        - boolExprSimplify
+        - emptyStringTest
+        - filepathJoin
+        - nilValReturn
+        - rangeValCopy
+        - sliceClear
+        - stringsCompare
+        - truncateCmp
+    gocyclo:
+      min-complexity: 30
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    revive:
+      rules:
+        - name: early-return
+        - name: error-strings
+        - name: if-return
+        - name: unexported-return
+        - name: var-naming
+
+  exclusions:
+    generated: lax
+    rules:
+      # Tests favor readability and intentionally exercise error paths.
+      - path: _test\.go
+        linters:
+          - dupl
+          - errcheck
+          - goconst
+          - gocritic
+          - gocyclo
+          - gosec
+          - revive
+          - unparam
+      # Closing HTTP response bodies is handled explicitly by the callers.
+      - text: G104
+        linters:
+          - gosec
+      - text: G307
+        linters:
+          - gosec
+      - path: pkg/utils/
+        text: "var-naming: avoid meaningless package names"
+        linters:
+          - revive
+    paths:
+      - vendor
+      - web/static
+      - desktop/build
+      - dist
+      - node_modules
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - web/static
+      - desktop/build
+      - dist
+      - node_modules
