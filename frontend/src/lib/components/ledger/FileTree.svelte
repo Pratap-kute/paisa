@@ -1,13 +1,26 @@
 <script lang="ts">
+  import FileTree from './FileTree.svelte';
+  import { preventDefault } from 'svelte/legacy';
+
   import type { Directory, LedgerFile } from "$lib/core/utils";
   import _ from "lodash";
   import { createEventDispatcher } from "svelte";
 
-  export let files: Array<Directory | LedgerFile>;
-  export let path: string;
-  export let selectedFileName: string;
-  export let hasUnsavedChanges: boolean;
-  export let root: boolean = true;
+  interface Props {
+    files: Array<Directory | LedgerFile>;
+    path: string;
+    selectedFileName: string;
+    hasUnsavedChanges: boolean;
+    root?: boolean;
+  }
+
+  let {
+    files,
+    path,
+    selectedFileName,
+    hasUnsavedChanges,
+    root = true
+  }: Props = $props();
 
   const dispatch = createEventDispatcher();
 
@@ -32,7 +45,7 @@
         <a
           href="#/"
           role="button"
-          on:click|preventDefault={() => dispatch("select", file)}
+          onclick={preventDefault(() => dispatch("select", file))}
           class:is-active={file.name == selectedFileName}
         >
           <span class="icon is-small">
@@ -53,7 +66,7 @@
             </span>
             <span title={file.name} class="paisa-truncate">{file.name}</span>
           </summary>
-          <svelte:self
+          <FileTree
             path={join([path, file.name])}
             on:select={(e) => dispatch("select", e.detail)}
             root={false}

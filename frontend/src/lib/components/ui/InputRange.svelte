@@ -1,9 +1,13 @@
 <script lang="ts">
   import _ from "lodash";
 
-  export let label: string;
-  export let value: number;
-  export let allowed: { min: number; max: number };
+  interface Props {
+    label: string;
+    value: number;
+    allowed: { min: number; max: number };
+  }
+
+  let { label, value = $bindable(), allowed }: Props = $props();
 </script>
 
 {#if allowed.max > 1}

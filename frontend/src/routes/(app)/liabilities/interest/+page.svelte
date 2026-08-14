@@ -9,8 +9,8 @@
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
-  let isEmpty = false;
-  let legends: Legend[] = [];
+  let isEmpty = $state(false);
+  let legends: Legend[] = $state([]);
 
   onMount(async () => {
     const { interest_timeline_breakdown: interests } = await ajax("/api/liabilities/interest");

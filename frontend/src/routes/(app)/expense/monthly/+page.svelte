@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
@@ -26,65 +28,29 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let groups = writable([]);
-  let z: ScaleOrdinal<string, string, never>,
-    renderer: (ps: Posting[]) => void,
-    expenses: Posting[],
-    grouped_expenses: Record<string, Posting[]>,
-    grouped_incomes: Record<string, Posting[]>,
-    grouped_investments: Record<string, Posting[]>,
-    grouped_taxes: Record<string, Posting[]>,
+  let z: ScaleOrdinal<string, string, never> = $state(),
+    renderer: (ps: Posting[]) => void = $state(),
+    expenses: Posting[] = $state(),
+    grouped_expenses: Record<string, Posting[]> = $state(),
+    grouped_incomes: Record<string, Posting[]> = $state(),
+    grouped_investments: Record<string, Posting[]> = $state(),
+    grouped_taxes: Record<string, Posting[]> = $state(),
     destroy: () => void;
 
-  let legends: Legend[] = [];
+  let legends: Legend[] = $state([]);
 
-  let taxRate = "",
-    netIncome = "",
-    tax = "",
-    expenseRate = "",
-    expense = "",
-    saving = "",
-    savingRate = "",
-    income = "";
+  let taxRate = $state(""),
+    netIncome = $state(""),
+    tax = $state(""),
+    expenseRate = $state(""),
+    expense = $state(""),
+    saving = $state(""),
+    savingRate = $state(""),
+    income = $state("");
 
-  let current_month_expenses: Posting[] = [];
+  let current_month_expenses: Posting[] = $state([]);
 
-  $: {
-    current_month_expenses = _.chain((grouped_expenses && grouped_expenses[$month]) || [])
-      .filter((e) => _.includes($groups, secondName(e.account)))
-      .sortBy((e) => e.date)
-      .reverse()
-      .value();
-  }
 
-  $: if (grouped_expenses && renderer) {
-    renderCalendar($month, grouped_expenses[$month], z, $groups);
-
-    const expenses = grouped_expenses[$month] || [];
-    const incomes = grouped_incomes[$month] || [];
-    const taxes = grouped_taxes[$month] || [];
-    const investments = grouped_investments[$month] || [];
-
-    income = sumCurrency(incomes, -1);
-    tax = sumCurrency(taxes);
-    expense = sumCurrency(expenses);
-    saving = sumCurrency(investments);
-
-    if (_.isEmpty(incomes)) {
-      taxRate = "";
-      expenseRate = "";
-      savingRate = "";
-      netIncome = "";
-    } else {
-      netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
-      taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " on income";
-      expenseRate =
-        formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-      savingRate =
-        formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-    }
-
-    renderer(expenses);
-  }
 
   onDestroy(async () => {
     if (destroy) {
@@ -115,6 +81,44 @@
   function sumCurrency(postings: Posting[], sign = 1) {
     return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
   }
+  run(() => {
+    current_month_expenses = _.chain((grouped_expenses && grouped_expenses[$month]) || [])
+      .filter((e) => _.includes($groups, secondName(e.account)))
+      .sortBy((e) => e.date)
+      .reverse()
+      .value();
+  });
+  run(() => {
+    if (grouped_expenses && renderer) {
+      renderCalendar($month, grouped_expenses[$month], z, $groups);
+
+      const expenses = grouped_expenses[$month] || [];
+      const incomes = grouped_incomes[$month] || [];
+      const taxes = grouped_taxes[$month] || [];
+      const investments = grouped_investments[$month] || [];
+
+      income = sumCurrency(incomes, -1);
+      tax = sumCurrency(taxes);
+      expense = sumCurrency(expenses);
+      saving = sumCurrency(investments);
+
+      if (_.isEmpty(incomes)) {
+        taxRate = "";
+        expenseRate = "";
+        savingRate = "";
+        netIncome = "";
+      } else {
+        netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
+        taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " on income";
+        expenseRate =
+          formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+        savingRate =
+          formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+      }
+
+      renderer(expenses);
+    }
+  });
 </script>
 
 <section class="section tab-expense">

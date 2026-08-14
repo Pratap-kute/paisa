@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { page } from "$app/stores";
   import Actions from "$lib/components/layout/Actions.svelte";
   import { month, year, dateMax, dateMin, dateRangeOption } from "../../../store";
@@ -18,7 +20,11 @@
   import MonthPicker from "$lib/components/ui/MonthPicker.svelte";
   import Logo from "./Logo.svelte";
   import InputRange from "$lib/components/ui/InputRange.svelte";
-  export let isBurger: boolean = null;
+  interface Props {
+    isBurger?: boolean;
+  }
+
+  let { isBurger = $bindable(null) }: Props = $props();
   const readonly = USER_CONFIG.readonly;
 
   onMount(async () => {
@@ -150,40 +156,42 @@
   const about = { label: "About", href: "/about" };
   _.last(links).children.push(about);
 
-  let selectedLink: Link = null;
-  let selectedSubLink: Link = null;
-  let selectedSubSubLink: Link = null;
+  let selectedLink: Link = $state(null);
+  let selectedSubLink: Link = $state(null);
+  let selectedSubSubLink: Link = $state(null);
 
-  $: normalizedPath = $page.url.pathname?.replace(/(.+)\/$/, "");
+  let normalizedPath = $derived($page.url.pathname?.replace(/(.+)\/$/, ""));
 
-  $: if (normalizedPath) {
-    selectedSubLink = null;
-    selectedSubSubLink = null;
-    selectedLink = _.find(links, (l) => normalizedPath == l.href);
-    if (!selectedLink) {
-      selectedLink = _.find(
-        links,
-        (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
-      );
-
-      selectedSubLink = _.find(
-        selectedLink.children,
-        (l) => normalizedPath == selectedLink.href + l.href
-      );
-
-      if (!selectedSubLink) {
-        selectedSubLink = _.find(selectedLink.children, (l) =>
-          normalizedPath.startsWith(selectedLink.href + l.href)
+  run(() => {
+    if (normalizedPath) {
+      selectedSubLink = null;
+      selectedSubSubLink = null;
+      selectedLink = _.find(links, (l) => normalizedPath == l.href);
+      if (!selectedLink) {
+        selectedLink = _.find(
+          links,
+          (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
         );
 
-        if (!_.isEmpty(selectedSubLink.children)) {
-          selectedSubSubLink = _.find(selectedSubLink.children, (l) =>
-            normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
+        selectedSubLink = _.find(
+          selectedLink.children,
+          (l) => normalizedPath == selectedLink.href + l.href
+        );
+
+        if (!selectedSubLink) {
+          selectedSubLink = _.find(selectedLink.children, (l) =>
+            normalizedPath.startsWith(selectedLink.href + l.href)
           );
+
+          if (!_.isEmpty(selectedSubLink.children)) {
+            selectedSubSubLink = _.find(selectedSubLink.children, (l) =>
+              normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
+            );
+          }
         }
       }
     }
-  }
+  });
 </script>
 
 <nav class="navbar px-2 is-transparent" aria-label="main navigation">
@@ -205,7 +213,7 @@
       type="button"
       class="navbar-burger"
       class:is-active={isBurger === true}
-      on:click={(_e) => (isBurger = !isBurger)}
+      onclick={(_e) => (isBurger = !isBurger)}
       aria-label="menu"
       aria-expanded={isBurger}
       data-target="navbarBasicExample"
@@ -235,7 +243,7 @@
               class="navbar-link"
               style="background: transparent; border: none; font: inherit; cursor: pointer; text-align: left; width: 100%;"
               class:is-active={normalizedPath.startsWith(link.href)}
-              on:click={(e) =>
+              onclick={(e) =>
                 isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}
               >{link.label}</button
             >

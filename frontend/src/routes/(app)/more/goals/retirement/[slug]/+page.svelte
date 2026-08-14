@@ -22,27 +22,31 @@
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
 
-  export let data: PageData;
+  interface Props {
+    data: PageData;
+  }
 
-  let svg: Element;
-  let investmentTimelineSvg: Element;
-  let savingsTotal = 0,
-    investmentTotal = 0,
-    gainTotal = 0,
-    icon = "",
-    name = "",
-    targetSavings = 0,
-    swr = 0,
-    xirr = 0,
-    yearlyExpense = 0,
-    progressPercent = 0,
-    savingsX = 0,
-    targetX = 0,
-    breakPoints: Point[] = [],
+  let { data }: Props = $props();
+
+  let svg: Element = $state();
+  let investmentTimelineSvg: Element = $state();
+  let savingsTotal = $state(0),
+    investmentTotal = $state(0),
+    gainTotal = $state(0),
+    icon = $state(""),
+    name = $state(""),
+    targetSavings = $state(0),
+    swr = $state(0),
+    xirr = $state(0),
+    yearlyExpense = $state(0),
+    progressPercent = $state(0),
+    savingsX = $state(0),
+    targetX = $state(0),
+    breakPoints: Point[] = $state([]),
     savingsTimeline: Point[] = [],
     postings: Posting[] = [],
-    latestPostings: Posting[] = [],
-    balances: Record<string, AssetBreakdown> = {},
+    latestPostings: Posting[] = $state([]),
+    balances: Record<string, AssetBreakdown> = $state({}),
     destroyCallback = () => {};
 
   onDestroy(async () => {
@@ -163,22 +167,24 @@
         <BoxLabel text="Current Balance" />
       </div>
       <div class="column is-3">
-        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY" let:groupedPostings>
-          <div>
-            {#each groupedPostings as posting}
-              <PostingCard
-                {posting}
-                color={posting.amount >= 0
-                  ? posting.account.startsWith("Income:CapitalGains")
-                    ? COLORS.tertiary
-                    : COLORS.secondary
-                  : posting.account.startsWith("Income:CapitalGains")
-                    ? COLORS.secondary
-                    : COLORS.tertiary}
-              />
-            {/each}
-          </div>
-        </PostingGroup>
+        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY" >
+          {#snippet children({ groupedPostings })}
+                    <div>
+              {#each groupedPostings as posting}
+                <PostingCard
+                  {posting}
+                  color={posting.amount >= 0
+                    ? posting.account.startsWith("Income:CapitalGains")
+                      ? COLORS.tertiary
+                      : COLORS.secondary
+                    : posting.account.startsWith("Income:CapitalGains")
+                      ? COLORS.secondary
+                      : COLORS.tertiary}
+                />
+              {/each}
+            </div>
+                            {/snippet}
+                </PostingGroup>
       </div>
     </div>
   </div>

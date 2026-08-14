@@ -5,8 +5,8 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let isEmpty = false;
-  let creditCards: CreditCardSummary[] = [];
+  let isEmpty = $state(false);
+  let creditCards: CreditCardSummary[] = $state([]);
 
   onMount(async () => {
     ({ creditCards } = await ajax("/api/credit_cards"));

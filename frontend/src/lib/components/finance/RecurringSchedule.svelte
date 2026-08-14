@@ -7,23 +7,29 @@
     tooltip,
     type TransactionSchedule
   } from "$lib/core/utils";
-  export let schedule: TransactionSchedule;
+  interface Props {
+    schedule: TransactionSchedule;
+  }
 
-  const icon = scheduleIcon(schedule);
+  let { schedule }: Props = $props();
 
-  const tooltipHtml = tooltip(
-    [
+  let icon = $derived(scheduleIcon(schedule));
+
+  let tooltipHtml = $derived(
+    tooltip(
       [
-        "Due Date",
-        [schedule.scheduled.format("DD MMM YYYY"), "has-text-weight-bold has-text-right"]
+        [
+          "Due Date",
+          [schedule.scheduled.format("DD MMM YYYY"), "has-text-weight-bold has-text-right"]
+        ],
+        [
+          "Cleared On",
+          [schedule.actual?.format("DD MMM YYYY") || "", "has-text-weight-bold has-text-right"]
+        ],
+        ["Amount", [formatCurrency(schedule.amount), "has-text-weight-bold has-text-right"]]
       ],
-      [
-        "Cleared On",
-        [schedule.actual?.format("DD MMM YYYY") || "", "has-text-weight-bold has-text-right"]
-      ],
-      ["Amount", [formatCurrency(schedule.amount), "has-text-weight-bold has-text-right"]]
-    ],
-    { header: schedule.key }
+      { header: schedule.key }
+    )
   );
 </script>
 

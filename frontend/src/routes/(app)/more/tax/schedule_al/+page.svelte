@@ -1,20 +1,26 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { renderBreakdowns } from "$lib/charts/schedule_al";
   import _ from "lodash";
   import { ajax, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
 
-  let scheduleAls: Record<string, ScheduleAL>;
-  let selectedScheduleAl: ScheduleAL;
+  let scheduleAls: Record<string, ScheduleAL> = $state();
+  let selectedScheduleAl: ScheduleAL = $state();
 
-  $: if (scheduleAls) {
-    selectedScheduleAl = scheduleAls[$year];
-  }
+  run(() => {
+    if (scheduleAls) {
+      selectedScheduleAl = scheduleAls[$year];
+    }
+  });
 
-  $: if (selectedScheduleAl) {
-    renderBreakdowns(selectedScheduleAl.entries);
-  }
+  run(() => {
+    if (selectedScheduleAl) {
+      renderBreakdowns(selectedScheduleAl.entries);
+    }
+  });
 
   onMount(async () => {
     ({ schedule_als: scheduleAls } = await ajax("/api/schedule_al"));

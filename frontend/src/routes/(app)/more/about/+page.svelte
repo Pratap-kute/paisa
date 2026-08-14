@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { preventDefault } from 'svelte/legacy';
+
   import Logo from "$lib/components/layout/Logo.svelte";
   const links = [
     { name: "Chat", href: "https://matrix.to/#/#paisa:matrix.org", icon: "fa-solid fa-headset" },
@@ -52,7 +54,7 @@
           <ul>
             {#each links as link}
               <li>
-                <a href={link.href} on:click|preventDefault={(_e) => externalLink(link.href)}>
+                <a href={link.href} onclick={preventDefault((_e) => externalLink(link.href))}>
                   <span class="icon is-small">
                     <i class={link.icon}></i>
                   </span>

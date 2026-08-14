@@ -12,11 +12,13 @@
   import PostingStatus from "./PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
-  export let t: Transaction;
-  let posting: Posting;
-  $: {
-    posting = t.postings[0];
+  interface Props {
+    t: Transaction;
   }
+
+  let { t }: Props = $props();
+  let posting: Posting = $derived(t.postings[0]);
+  
 </script>
 
 <div class="box p-2 has-background-white">

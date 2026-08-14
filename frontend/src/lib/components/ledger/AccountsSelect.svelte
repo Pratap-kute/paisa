@@ -3,39 +3,50 @@
   import _ from "lodash";
   import Select from "svelte-select";
 
-  export let allAccounts: string[];
-  export let accounts: string[];
+  interface Props {
+    allAccounts: string[];
+    accounts: string[];
+  }
 
-  let allAccountItems: { value: string; label: string; created?: boolean }[];
-  let accountItems: { value: string; label: string; created?: boolean }[];
+  let { allAccounts = [], accounts = $bindable([]) }: Props = $props();
 
-  let filterText = "";
-  $: allAccountItems = _.map(allAccounts, (account) => ({
-    value: account,
-    label: account
-  }));
+  let filterText = $state("");
+  let customAccountItems: { value: string; label: string; created?: boolean }[] = $state([]);
 
-  $: accountItems = _.map(accounts, (account) => ({
-    value: account,
-    label: account
-  }));
+  let baseAccountItems = $derived(
+    _.map(allAccounts, (account) => ({
+      value: account,
+      label: account
+    }))
+  );
+
+  let allAccountItems = $derived([...baseAccountItems, ...customAccountItems]);
+
+  let accountItems = $derived(
+    _.map(accounts, (account) => ({
+      value: account,
+      label: account
+    }))
+  );
 
   function handleFilter(e: any) {
     if (accountItems?.find((i) => i.label === filterText)) return;
     if (e.detail.length === 0 && filterText.length > 0) {
-      const prev = allAccountItems.filter((i) => !i.created);
-      allAccountItems = [...prev, { value: filterText, label: filterText, created: true }];
+      if (!customAccountItems.some((i) => i.value === filterText)) {
+        customAccountItems = [...customAccountItems, { value: filterText, label: filterText, created: true }];
+      }
     }
   }
 
   function handleChange(e: any) {
+    let items: any[];
     if (e.type === "clear") {
-      accountItems = _.without(accountItems, e.detail);
+      items = _.without(accountItems, e.detail);
     } else {
-      accountItems = _.cloneDeep(e.detail);
+      items = _.cloneDeep(e.detail) || [];
     }
 
-    accounts = accountItems.map((i) => i.value);
+    accounts = items.map((i) => i.value);
   }
 </script>
 

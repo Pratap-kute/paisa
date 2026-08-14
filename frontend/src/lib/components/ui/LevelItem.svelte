@@ -1,12 +1,23 @@
 <script lang="ts">
   import _ from "lodash";
 
-  export let title: string;
-  export let value: string;
-  export let small: boolean = false;
-  export let narrow: boolean = false;
-  export let color: string = null;
-  export let subtitle: string = null;
+  interface Props {
+    title: string;
+    value: string;
+    small?: boolean;
+    narrow?: boolean;
+    color?: string;
+    subtitle?: string;
+  }
+
+  let {
+    title,
+    value,
+    small = false,
+    narrow = false,
+    color = null,
+    subtitle = null
+  }: Props = $props();
 </script>
 
 <div class="level-item {narrow && 'is-narrow'} has-text-left" class:small>

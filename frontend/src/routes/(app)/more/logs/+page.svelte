@@ -4,7 +4,7 @@
   import VirtualList from "svelte-tiny-virtual-list";
   import _ from "lodash";
 
-  let logs: Log[] = [];
+  let logs: Log[] = $state([]);
   const ITEM_SIZE = 20;
   onMount(async () => {
     ({ logs } = await ajax("/api/logs"));
@@ -43,26 +43,28 @@
                 itemCount={logs.length}
                 itemSize={ITEM_SIZE}
               >
-                <div slot="item" let:index let:style {style}>
+                <svelte:fragment slot="item" let:index let:style>
                   {@const log = logs[index]}
                   {@const fields = _.omit(log, ["time", "level", "msg"])}
-                  <div class="is-flex log is-align-items-baseline" style="min-width: 1000px;">
-                    <div class="time is-size-7">{log.time.format("YYYY-MM-DD HH:mm:ss")}</div>
-                    <div
-                      class="is-size-7 tag is-small is-light invertable py-0 log-level {levelClass(
-                        log.level
-                      )}"
-                    >
-                      {log.level}
-                    </div>
-                    <div class="msg paisa-truncate" title={log.msg}>{log.msg}</div>
-                    <div class="fields is-size-7 paisa-truncate" title={formatFields(log)}>
-                      {#each Object.entries(fields) as [key, value]}
-                        <span class="px-1 field"><span>{key}</span>=<span>{value}</span></span>
-                      {/each}
+                  <div {style}>
+                    <div class="is-flex log is-align-items-baseline" style="min-width: 1000px;">
+                      <div class="time is-size-7">{log.time.format("YYYY-MM-DD HH:mm:ss")}</div>
+                      <div
+                        class="is-size-7 tag is-small is-light invertable py-0 log-level {levelClass(
+                          log.level
+                        )}"
+                      >
+                        {log.level}
+                      </div>
+                      <div class="msg paisa-truncate" title={log.msg}>{log.msg}</div>
+                      <div class="fields is-size-7 paisa-truncate" title={formatFields(log)}>
+                        {#each Object.entries(fields) as [key, value]}
+                          <span class="px-1 field"><span>{key}</span>=<span>{value}</span></span>
+                        {/each}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </svelte:fragment>
               </VirtualList>
             </div>
           </div>

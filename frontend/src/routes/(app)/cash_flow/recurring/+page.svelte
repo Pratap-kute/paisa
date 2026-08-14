@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import {
     enrichTrantionSequence,
     nextUnpaidSchedule,
@@ -21,20 +23,20 @@
   import RecurringDay from "$lib/components/finance/RecurringDay.svelte";
   import dayjs from "dayjs";
 
-  let isEmpty = false;
-  let transactionSequences: TransactionSequence[] = [];
-  let transactionSequencesDelayed: TransactionSequence[] = [];
+  let isEmpty = $state(false);
+  let transactionSequences: TransactionSequence[] = $state([]);
+  let transactionSequencesDelayed: TransactionSequence[] = $state([]);
 
-  let days: Dayjs[] = [];
-  let schedulesByDate: Record<string, TransactionSchedule[]> = {};
+  let days: Dayjs[] = $state([]);
+  let schedulesByDate: Record<string, TransactionSchedule[]> = $state({});
 
-  $: {
+  run(() => {
     ({ days } = monthDays($month));
     schedulesByDate = _.chain(transactionSequences)
       .flatMap((ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [])
       .groupBy((s) => s.scheduled.format("YYYY-MM-DD"))
       .value();
-  }
+  });
 
   onMount(async () => {
     ({ transaction_sequences: transactionSequences } = await ajax("/api/recurring"));

@@ -12,13 +12,13 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let grossIncome = 0;
-  let netTax = 0;
+  let grossIncome = $state(0);
+  let netTax = $state(0);
 
-  let monthlyInvestmentTimelineLegends: Legend[] = [];
-  let yearlyIncomeTimelineLegends: Legend[] = [];
-  let yearlyNetIncomeTimelineLegends: Legend[] = [];
-  let yearlyNetTaxTimelineLegends: Legend[] = [];
+  let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
+  let yearlyIncomeTimelineLegends: Legend[] = $state([]);
+  let yearlyNetIncomeTimelineLegends: Legend[] = $state([]);
+  let yearlyNetTaxTimelineLegends: Legend[] = $state([]);
 
   onMount(async () => {
     const {

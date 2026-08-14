@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import * as d3 from "d3";
   import { onMount } from "svelte";
   import _ from "lodash";
@@ -17,58 +19,27 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let groups = writable([]);
-  let z: d3.ScaleOrdinal<string, string, never>,
-    renderer: (ps: Posting[]) => void,
-    expenses: Posting[],
-    grouped_expenses: Record<string, Posting[]>,
-    grouped_incomes: Record<string, Posting[]>,
-    grouped_investments: Record<string, Posting[]>,
-    grouped_taxes: Record<string, Posting[]>;
+  let z: d3.ScaleOrdinal<string, string, never> = $state(),
+    renderer: (ps: Posting[]) => void = $state(),
+    expenses: Posting[] = $state(),
+    grouped_expenses: Record<string, Posting[]> = $state(),
+    grouped_incomes: Record<string, Posting[]> = $state(),
+    grouped_investments: Record<string, Posting[]> = $state(),
+    grouped_taxes: Record<string, Posting[]> = $state();
 
-  let currentYearExpenses: Posting[] = [];
+  let currentYearExpenses: Posting[] = $state([]);
 
-  let legends: Legend[] = [];
+  let legends: Legend[] = $state([]);
 
-  let income = "",
-    netIncome = "",
-    taxRate = "",
-    tax = "",
-    expenseRate = "",
-    expense = "",
-    investment = "",
-    savingRate = "";
+  let income = $state(""),
+    netIncome = $state(""),
+    taxRate = $state(""),
+    tax = $state(""),
+    expenseRate = $state(""),
+    expense = $state(""),
+    investment = $state(""),
+    savingRate = $state("");
 
-  $: if (grouped_expenses && renderer) {
-    currentYearExpenses = grouped_expenses[$year];
-    renderCalendar(currentYearExpenses, z, $groups);
-
-    const expenses = grouped_expenses[$year] || [];
-    const incomes = grouped_incomes[$year] || [];
-    const taxes = grouped_taxes[$year] || [];
-    const investments = grouped_investments[$year] || [];
-
-    income = sumCurrency(incomes, -1);
-
-    tax = sumCurrency(taxes);
-    expense = sumCurrency(expenses);
-    investment = sumCurrency(investments);
-
-    if (_.isEmpty(incomes)) {
-      expenseRate = "";
-      taxRate = "";
-      savingRate = "";
-      netIncome = "";
-    } else {
-      netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
-      taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " of income";
-      expenseRate =
-        formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-      savingRate =
-        formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-    }
-
-    renderer(expenses);
-  }
 
   onMount(async () => {
     ({
@@ -99,6 +70,39 @@
   function sumCurrency(postings: Posting[], sign = 1) {
     return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
   }
+  run(() => {
+    if (grouped_expenses && renderer) {
+      currentYearExpenses = grouped_expenses[$year];
+      renderCalendar(currentYearExpenses, z, $groups);
+
+      const expenses = grouped_expenses[$year] || [];
+      const incomes = grouped_incomes[$year] || [];
+      const taxes = grouped_taxes[$year] || [];
+      const investments = grouped_investments[$year] || [];
+
+      income = sumCurrency(incomes, -1);
+
+      tax = sumCurrency(taxes);
+      expense = sumCurrency(expenses);
+      investment = sumCurrency(investments);
+
+      if (_.isEmpty(incomes)) {
+        expenseRate = "";
+        taxRate = "";
+        savingRate = "";
+        netIncome = "";
+      } else {
+        netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
+        taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " of income";
+        expenseRate =
+          formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+        savingRate =
+          formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+      }
+
+      renderer(expenses);
+    }
+  });
 </script>
 
 <section class="section tab-expense">

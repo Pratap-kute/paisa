@@ -39,19 +39,19 @@
   </div>
   <div class="dropdown-menu" id="dropdown-menu4" role="menu">
     <div class="dropdown-content">
-      <button type="button" on:click={(_e) => syncWithLoader({ journal: true })} class="dropdown-item icon-text">
+      <button type="button" onclick={(_e) => syncWithLoader({ journal: true })} class="dropdown-item icon-text">
         <span class="icon is-small">
           <i class="fa-regular fa-file-lines"></i>
         </span>
         <span>Sync Journal</span>
       </button>
-      <button type="button" on:click={(_e) => syncWithLoader({ prices: true })} class="dropdown-item icon-text">
+      <button type="button" onclick={(_e) => syncWithLoader({ prices: true })} class="dropdown-item icon-text">
         <span class="icon is-small">
           <i class="fas fa-dollar-sign"></i>
         </span>
         <span>Update Prices</span>
       </button>
-      <button type="button" on:click={(_e) => syncWithLoader({ portfolios: true })} class="dropdown-item icon-text">
+      <button type="button" onclick={(_e) => syncWithLoader({ portfolios: true })} class="dropdown-item icon-text">
         <span class="icon is-small">
           <i class="fas fa-layer-group"></i>
         </span>
@@ -69,7 +69,7 @@
       </div>
       {#if showLogout}
         <hr class="dropdown-divider" />
-        <button type="button" on:click={(_e) => doLogout()} class="dropdown-item icon-text">
+        <button type="button" onclick={(_e) => doLogout()} class="dropdown-item icon-text">
           <span class="icon is-small">
             <i class="fas fa-arrow-right-from-bracket"></i>
           </span>

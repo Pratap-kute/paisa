@@ -5,8 +5,12 @@
   import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
   import _ from "lodash";
 
-  export let compact = false;
-  export let accountBudget: AccountBudget;
+  interface Props {
+    compact?: boolean;
+    accountBudget: AccountBudget;
+  }
+
+  let { compact = false, accountBudget }: Props = $props();
 
   function canShow(accountBudget: AccountBudget): boolean {
     return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
@@ -27,14 +31,16 @@
     return {};
   };
 
-  const tooltipContent = tooltip(
-    accountBudget.expenses.map((e) => {
-      return [
-        e.date.format("DD MMM YYYY"),
-        [e.payee, "is-clipped"],
-        [formatCurrency(e.amount), "has-text-weight-bold has-text-right"]
-      ];
-    })
+  let tooltipContent = $derived(
+    tooltip(
+      accountBudget.expenses.map((e) => {
+        return [
+          e.date.format("DD MMM YYYY"),
+          [e.payee, "is-clipped"],
+          [formatCurrency(e.amount), "has-text-weight-bold has-text-right"]
+        ];
+      })
+    )
   );
 </script>
 

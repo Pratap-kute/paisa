@@ -3,19 +3,24 @@
   import BoxedTabs from "./BoxedTabs.svelte";
   import { now } from "$lib/core/utils";
 
-  export let n = 2;
-
   let currentMonth = now();
-  export let value: string = currentMonth.format("YYYY-MM");
+  interface Props {
+    n?: number;
+    value?: string;
+  }
 
-  let options: { label: string; value: string }[] = _.reverse(
-    _.map(_.range(0, n), (i) => {
-      let month = currentMonth.subtract(i, "month");
-      return {
-        label: month.format("MMMM"),
-        value: month.format("YYYY-MM")
-      };
-    })
+  let { n = 2, value = $bindable(currentMonth.format("YYYY-MM")) }: Props = $props();
+
+  let options: { label: string; value: string }[] = $derived(
+    _.reverse(
+      _.map(_.range(0, n), (i) => {
+        let month = currentMonth.subtract(i, "month");
+        return {
+          label: month.format("MMMM"),
+          value: month.format("YYYY-MM")
+        };
+      })
+    )
   );
 </script>
 

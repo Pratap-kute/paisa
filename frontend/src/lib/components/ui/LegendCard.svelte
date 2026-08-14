@@ -3,8 +3,12 @@
   import type { Action } from "svelte/action";
   import type { Legend } from "$lib/core/utils";
 
-  export let clazz = "";
-  export let legends: Legend[];
+  interface Props {
+    clazz?: string;
+    legends: Legend[];
+  }
+
+  let { clazz = "", legends }: Props = $props();
 
   const textureScale = 14;
   const texture: Action<SVGSVGElement, { texture: any }> = (element, props) => {
@@ -21,7 +25,7 @@
     return {};
   };
 
-  let selectedLegend: Legend;
+  let selectedLegend: Legend = $state();
 
   function onClick(legend: Legend) {
     if (!legend.onClick) {
@@ -48,7 +52,7 @@
         type="button"
         class="is-flex is-flex-direction-column paisa-p-1-5 gap-2 legend-box paisa-clickable"
         style="border: none; background: transparent; padding: 0; margin: 0; font: inherit; color: inherit; text-align: inherit;"
-        on:click={(_e) => onClick(legend)}
+        onclick={(_e) => onClick(legend)}
         class:selected={selectedLegend == legend}
       >
         {#if legend.texture}

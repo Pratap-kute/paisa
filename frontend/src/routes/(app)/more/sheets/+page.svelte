@@ -4,7 +4,7 @@
   import { ajax } from "$lib/core/utils";
   import * as toast from "$lib/core/toast";
 
-  let modalOpen = false;
+  let modalOpen = $state(false);
   function openCreateModal() {
     modalOpen = true;
   }
@@ -52,7 +52,7 @@
         <div class="is-flex is-align-items-center is-justify-content-center mt-5">
           <div class="field">
             <p class="control">
-              <button class="button is-medium is-link" on:click={(_e) => openCreateModal()}>
+              <button class="button is-medium is-link" onclick={(_e) => openCreateModal()}>
                 <span class="icon is-small">
                   <i class="fas fa-file-circle-plus"></i>
                 </span>

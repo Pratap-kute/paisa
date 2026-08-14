@@ -14,10 +14,10 @@
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
 
-  let showAllocation = false;
-  let depth = 2;
-  let allocationTimelineLegends: Legend[] = [];
-  let aggregateLeafNodes: Aggregate[] = [];
+  let showAllocation = $state(false);
+  let depth = $state(2);
+  let allocationTimelineLegends: Legend[] = $state([]);
+  let aggregateLeafNodes: Aggregate[] = $state([]);
   let total = 0;
 
   const columns: ColumnDefinition[] = [

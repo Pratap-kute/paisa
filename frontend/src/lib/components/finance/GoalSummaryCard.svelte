@@ -8,9 +8,13 @@
   import dayjs from "dayjs";
   import type { Action } from "svelte/action";
 
-  export let goal: GoalSummary;
-  export let small = false;
-  export let action: Action = null;
+  interface Props {
+    goal: GoalSummary;
+    small?: boolean;
+    action?: Action;
+  }
+
+  let { goal, small = false, action = null }: Props = $props();
 
   function formatDate(date: string) {
     const d = dayjs(date, "YYYY-MM-DD", true);
@@ -28,7 +32,7 @@
     return (goal.current / goal.target) * 100;
   }
 
-  $: completed = percentComplete(goal);
+  let completed = $derived(percentComplete(goal));
 </script>
 
 <div class="box p-3 goal-summary-card" class:mb-3={small}>

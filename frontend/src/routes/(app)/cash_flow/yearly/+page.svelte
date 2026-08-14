@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { onMount } from "svelte";
   import _ from "lodash";
   import { renderFlow } from "$lib/charts/cash_flow";
@@ -12,9 +14,9 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
-  let legends: Legend[] = [];
-  let graph: Record<string, Graph>, expenses: Posting[];
-  let isEmpty = false;
+  let legends: Legend[] = $state([]);
+  let graph: Record<string, Graph> = $state(), expenses: Posting[];
+  let isEmpty = $state(false);
 
   function maxDepth(prefix: string) {
     if (!graph) return 1;
@@ -47,16 +49,18 @@
     };
   }
 
-  $: if (graph) {
-    if (graph[$year] == null) {
-      isEmpty = true;
-    } else {
-      legends = renderFlow(
-        filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth)
-      );
-      isEmpty = false;
+  run(() => {
+    if (graph) {
+      if (graph[$year] == null) {
+        isEmpty = true;
+      } else {
+        legends = renderFlow(
+          filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth)
+        );
+        isEmpty = false;
+      }
     }
-  }
+  });
 
   onMount(async () => {
     ({ expenses, graph } = await ajax("/api/expense"));

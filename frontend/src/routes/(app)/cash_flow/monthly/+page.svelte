@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import _ from "lodash";
   import { renderMonthlyFlow } from "$lib/charts/cash_flow";
   import { ajax, type CashFlow, type Legend } from "$lib/core/utils";
@@ -7,18 +9,20 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
-  let legends: Legend[] = [];
-  let cashFlows: CashFlow[] = [];
-  let renderer: ((cashflows: CashFlow[]) => void) | null = null;
+  let legends: Legend[] = $state([]);
+  let cashFlows: CashFlow[] = $state([]);
+  let renderer: ((cashflows: CashFlow[]) => void) | null = $state(null);
 
-  $: if (renderer && !_.isEmpty(cashFlows)) {
-    renderer(
-      _.filter(
-        cashFlows,
-        (c) => c.date.isSameOrBefore($dateRange.to) && c.date.isSameOrAfter($dateRange.from)
-      )
-    );
-  }
+  run(() => {
+    if (renderer && !_.isEmpty(cashFlows)) {
+      renderer(
+        _.filter(
+          cashFlows,
+          (c) => c.date.isSameOrBefore($dateRange.to) && c.date.isSameOrAfter($dateRange.from)
+        )
+      );
+    }
+  });
 
   onMount(async () => {
     ({ cash_flows: cashFlows } = await ajax("/api/cash_flow"));

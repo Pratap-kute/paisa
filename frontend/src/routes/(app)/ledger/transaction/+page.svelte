@@ -14,15 +14,15 @@
   import { get } from "svelte/store";
   import { download } from "$lib/importing/export";
 
-  let buldEditOpen = false;
-  let transactions: T[] = null;
-  let filtered: T[] = [];
-  let files: LedgerFile[] = [];
-  let newFiles: LedgerFile[] = [];
-  let updatedTransactionsCount = 0;
-  let openPreviewModal = false;
-  let accounts: string[] = [];
-  let commodities: string[] = [];
+  let buldEditOpen = $state(false);
+  let transactions: T[] = $state(null);
+  let filtered: T[] = $state([]);
+  let files: LedgerFile[] = $state([]);
+  let newFiles: LedgerFile[] = $state([]);
+  let updatedTransactionsCount = $state(0);
+  let openPreviewModal = $state(false);
+  let accounts: string[] = $state([]);
+  let commodities: string[] = $state([]);
 
   const debits = (t: T) => {
     return _.filter(t.postings, (p) => p.amount < 0);
@@ -139,7 +139,7 @@
                   <div class="control">
                     <button
                       class="button is-link is-light invertable"
-                      on:click={(_e) => (buldEditOpen = !buldEditOpen)}
+                      onclick={(_e) => (buldEditOpen = !buldEditOpen)}
                     >
                       <span>Bulk Edit</span>
                       <span class="icon is-small">
@@ -159,7 +159,7 @@
                   type="button"
                   class="has-text-link p-0"
                   style="background: transparent; border: none; font: inherit; cursor: pointer; display: inline-flex; align-items: center;"
-                  on:click={(_e) => downloadTransactions()}
+                  onclick={(_e) => downloadTransactions()}
                 >
                   <span class="icon is-small">
                     <i class="fa-solid fa-file-arrow-down"></i>
@@ -189,10 +189,12 @@
               itemCount={filtered.length}
               {itemSize}
             >
-              <div slot="item" let:index let:style {style}>
+              <svelte:fragment slot="item" let:index let:style>
                 {@const t = filtered[index]}
-                <Transaction {t} />
-              </div>
+                <div {style}>
+                  <Transaction {t} />
+                </div>
+              </svelte:fragment>
             </VirtualList>
           </div>
         </div>

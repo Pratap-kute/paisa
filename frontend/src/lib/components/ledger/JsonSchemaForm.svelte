@@ -1,4 +1,5 @@
 <script lang="ts">
+  import JsonSchemaForm from "./JsonSchemaForm.svelte";
   import sha256 from "crypto-js/sha256";
   import type { JSONSchema7 } from "json-schema";
   import Select from "svelte-select";
@@ -13,29 +14,44 @@
     "ui:order"?: number;
   }
 
+  interface Props {
+    key: string;
+    value: any;
+    rawValue?: string;
+    schema: Schema;
+    depth?: number;
+    required?: boolean;
+    deletable?: (() => void) | null;
+    disabled?: boolean;
+    allAccounts?: string[];
+    modalOpen?: boolean;
+  }
+
   const ICON_MAX_RESULTS = 200;
 
-  export let key: string;
-  export let value: any;
-  export let rawValue: string = "";
-  export let schema: Schema;
-  export let depth: number = 0;
-  export let required = false;
-  export let deletable: () => void = null;
-  export let disabled: boolean = false;
-  export let allAccounts: string[];
+  let {
+    key,
+    value = $bindable(),
+    rawValue = $bindable(""),
+    schema,
+    depth = 0,
+    required = false,
+    deletable = null,
+    disabled = false,
+    allAccounts = [],
+    modalOpen = $bindable(false)
+  }: Props = $props();
 
-  export let modalOpen = false;
-
-  let open = depth < 1;
-  $: title = _.startCase(key);
+  // svelte-ignore state_referenced_locally
+  let open = $state(depth < 1);
+  let title = $derived(_.startCase(key));
 
   function newItem(schema: any) {
     return _.cloneDeep(schema.default[0]);
   }
 
   function sortedProperties(schema: Schema) {
-    return _.sortBy(Object.entries(schema.properties), ([key, subSchema]: [string, Schema]) => {
+    return _.sortBy(Object.entries(schema.properties || {}), ([key, subSchema]: [string, Schema]) => {
       return [
         subSchema["ui:order"] || 999,
         _.includes(schema.required || [], key) ? 0 : 1,
@@ -68,7 +84,7 @@
   <button
     type="button"
     aria-label="Delete entry"
-    on:click={(_e) => deletable()}
+    onclick={() => deletable?.()}
     class="config-delete"
   >
     <span class="icon is-small">
@@ -94,7 +110,7 @@
             style="max-width: 350px;"
             type="password"
             bind:value={rawValue}
-            on:change={() => {
+            onchange={() => {
               if (!_.isEmpty(rawValue)) {
                 value = "sha256:" + sha256(sha256(rawValue).toString()).toString();
               }
@@ -241,7 +257,7 @@
     <button
       type="button"
       aria-label="Edit price code"
-      on:click={(_e) => (modalOpen = true)}
+      onclick={() => (modalOpen = true)}
       class="is-link"
     >
       <span class="icon is-small">
@@ -260,7 +276,7 @@
 
   <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
     {#each sortedProperties(schema) as [key, subSchema]}
-      <svelte:self
+      <JsonSchemaForm
         {allAccounts}
         required={_.includes(schema.required || [], key)}
         depth={depth + 1}
@@ -277,7 +293,7 @@
       type="button"
       class="is-link is-light invertable"
       data-tippy-content={documentation(schema)}
-      on:click={(_e) => (open = !open)}
+      onclick={() => (open = !open)}
     >
       <span>{schema["ui:header"] ? value[schema["ui:header"]] || title : title}</span>
       <span class="icon is-small">
@@ -289,7 +305,7 @@
   {#if open}
     <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
       {#each sortedProperties(schema) as [key, subSchema]}
-        <svelte:self
+        <JsonSchemaForm
           {allAccounts}
           required={_.includes(schema.required || [], key)}
           depth={depth + 1}
@@ -306,7 +322,7 @@
       type="button"
       class="is-link is-light invertable"
       data-tippy-content={documentation(schema)}
-      on:click={(_e) => (open = !open)}
+      onclick={() => (open = !open)}
     >
       <span>{title}</span>
       <span class="icon is-small">
@@ -317,7 +333,7 @@
       <button
         type="button"
         aria-label="Add item"
-        on:click={(_e) => (value = [newItem(schema), ...value])}
+        onclick={() => (value = [newItem(schema), ...value])}
         class="config-add"
       >
         <span class="icon is-small">
@@ -330,17 +346,19 @@
   {#if open}
     <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
       {#each value as _item, i}
-        <svelte:self
-          {allAccounts}
-          deletable={() => {
-            value.splice(i, 1);
-            value = [...value];
-          }}
-          depth={depth + 1}
-          key=""
-          bind:value={value[i]}
-          schema={schema.items}
-        />
+        {#if schema.items && typeof schema.items === "object" && !Array.isArray(schema.items)}
+          <JsonSchemaForm
+            {allAccounts}
+            deletable={() => {
+              value.splice(i, 1);
+              value = [...value];
+            }}
+            depth={depth + 1}
+            key=""
+            bind:value={value[i]}
+            schema={schema.items as Schema}
+          />
+        {/if}
       {/each}
     </div>
   {/if}

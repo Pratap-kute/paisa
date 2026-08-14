@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import Select from "svelte-select";
   import {
     createEditor as createTemplateEditor,
@@ -20,24 +22,24 @@
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
 
-  let templates: ImportTemplate[] = [];
-  let selectedTemplate: ImportTemplate;
-  let saveAsName: string;
-  let lastTemplate: any;
-  let lastData: any;
-  let preview = "";
-  let parseErrorMessage: string = null;
-  let columnCount: number;
-  let data: any[][] = [];
-  let rows: Array<Record<string, any>> = [];
-  let lastOptions: any;
-  let options: { reverse: boolean; trim: boolean } = { reverse: false, trim: true };
+  let templates: ImportTemplate[] = $state([]);
+  let selectedTemplate: ImportTemplate = $state();
+  let saveAsName: string = $state();
+  let lastTemplate: any = $state();
+  let lastData: any = $state();
+  let preview = $state("");
+  let parseErrorMessage: string = $state(null);
+  let columnCount: number = $state();
+  let data: any[][] = $state([]);
+  let rows: Array<Record<string, any>> = $state([]);
+  let lastOptions: any = $state();
+  let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
 
-  let templateEditorDom: Element;
-  let templateEditor: EditorView;
+  let templateEditorDom: Element = $state();
+  let templateEditor: EditorView = $state();
 
-  let previewEditorDom: Element;
-  let previewEditor: EditorView;
+  let previewEditorDom: Element = $state();
+  let previewEditor: EditorView = $state();
 
   onMount(async () => {
     accountTfIdf.set(await ajax("/api/account/tf_idf"));
@@ -48,7 +50,7 @@
     previewEditor = createPreviewEditor(preview, previewEditorDom, { readonly: true });
   });
 
-  $: saveAsNameDuplicate = !!_.find(templates, { name: saveAsName, template_type: "custom" });
+  let saveAsNameDuplicate = $derived(!!_.find(templates, { name: saveAsName, template_type: "custom" }));
 
   async function save() {
     const { template, saved, message } = await ajax("/api/templates/upsert", {
@@ -115,33 +117,37 @@
   }
 
 
-  $: if (!_.isEmpty(data) && $templateEditorState.template) {
-    if (
-      lastTemplate != $templateEditorState.template ||
-      lastData != data ||
-      lastOptions != options
-    ) {
-      try {
-        preview = renderJournal(rows, $templateEditorState.template, {
-          reverse: options.reverse,
-          trim: options.trim
-        });
-        updatePreviewContent(previewEditor, preview);
-        lastTemplate = $templateEditorState.template;
-        lastData = data;
-        lastOptions = _.clone(options);
-      } catch (e) {
-        console.log(e);
+  run(() => {
+    if (!_.isEmpty(data) && $templateEditorState.template) {
+      if (
+        lastTemplate != $templateEditorState.template ||
+        lastData != data ||
+        lastOptions != options
+      ) {
+        try {
+          preview = renderJournal(rows, $templateEditorState.template, {
+            reverse: options.reverse,
+            trim: options.trim
+          });
+          updatePreviewContent(previewEditor, preview);
+          lastTemplate = $templateEditorState.template;
+          lastData = data;
+          lastOptions = _.clone(options);
+        } catch (e) {
+          console.log(e);
+        }
       }
     }
-  }
+  });
 
-  $: if (selectedTemplate && templateEditor) {
-    if (templateEditor.state.doc.toString() != selectedTemplate.content) {
-      templateEditor.destroy();
-      templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+  run(() => {
+    if (selectedTemplate && templateEditor) {
+      if (templateEditor.state.doc.toString() != selectedTemplate.content) {
+        templateEditor.destroy();
+        templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+      }
     }
-  }
+  });
 
   async function handleFilesSelect(e: { detail: { acceptedFiles: File[] } }) {
     const { acceptedFiles } = e.detail;
@@ -177,7 +183,7 @@
     }
   }
 
-  let modalOpen = false;
+  let modalOpen = $state(false);
   function openSaveModal() {
     modalOpen = true;
   }
@@ -214,34 +220,40 @@
     return action;
   }
 
-  let templateCreateModalOpen = false;
+  let templateCreateModalOpen = $state(false);
   function openTemplateCreateModal() {
     templateCreateModalOpen = true;
   }
 </script>
 
 <Modal bind:active={templateCreateModalOpen}>
-  <svelte:fragment slot="head" let:close>
-    <p class="modal-card-title">Create Template</p>
-    <button class="delete" aria-label="close" on:click={(e) => close(e)}></button>
-  </svelte:fragment>
-  <div class="field" slot="body">
-    <label class="label" for="save-filename">Template Name</label>
-    <div class="control" id="save-filename">
-      <input class="input" type="text" bind:value={saveAsName} />
-      {#if saveAsNameDuplicate}
-        <p class="help is-danger">Template with the same name already exists</p>
-      {/if}
+  {#snippet head({ close })}
+  
+      <p class="modal-card-title">Create Template</p>
+      <button class="delete" aria-label="close" onclick={(e) => close(e)}></button>
+    
+  {/snippet}
+  {#snippet body()}
+    <div class="field" >
+      <label class="label" for="save-filename">Template Name</label>
+      <div class="control" id="save-filename">
+        <input class="input" type="text" bind:value={saveAsName} />
+        {#if saveAsNameDuplicate}
+          <p class="help is-danger">Template with the same name already exists</p>
+        {/if}
+      </div>
     </div>
-  </div>
-  <svelte:fragment slot="foot" let:close>
-    <button
-      class="button is-success"
-      disabled={_.isEmpty(saveAsName) || saveAsNameDuplicate}
-      on:click={(e) => save() && close(e)}>Create</button
-    >
-    <button class="button" on:click={(e) => close(e)}>Cancel</button>
-  </svelte:fragment>
+  {/snippet}
+  {#snippet foot({ close })}
+  
+      <button
+        class="button is-success"
+        disabled={_.isEmpty(saveAsName) || saveAsNameDuplicate}
+        onclick={(e) => save() && close(e)}>Create</button
+      >
+      <button class="button" onclick={(e) => close(e)}>Cancel</button>
+    
+  {/snippet}
 </Modal>
 
 <FileModal bind:open={modalOpen} on:save={(e) => saveToFile(e.detail)} />
@@ -254,7 +266,7 @@
           <div class="field is-grouped mb-0">
             <p class="control">
               <span data-tippy-content="Create" data-tippy-followCursor="false">
-                <button class="button" aria-label="Create Template" on:click={(_e) => openTemplateCreateModal()}>
+                <button class="button" aria-label="Create Template" onclick={(_e) => openTemplateCreateModal()}>
                   <span class="icon">
                     <i class="fas fa-file-circle-plus"></i>
                   </span>
@@ -271,7 +283,7 @@
                 <button
                   class="button"
                   aria-label="Save Template"
-                  on:click={(_e) => save()}
+                  onclick={(_e) => save()}
                   disabled={$templateEditorState.hasUnsavedChanges == false ||
                     selectedTemplate?.template_type == "builtin"}
                 >
@@ -288,7 +300,7 @@
                 <button
                   class="button"
                   aria-label="Delete Template"
-                  on:click={(_e) => remove()}
+                  onclick={(_e) => remove()}
                   disabled={selectedTemplate?.template_type == "builtin"}
                 >
                   <span class="icon">
@@ -342,7 +354,7 @@
                 aria-label="Copy to Clipboard"
                 class="button clipboard"
                 disabled={_.isEmpty(preview)}
-                on:click={copyToClipboard}
+                onclick={copyToClipboard}
               >
                 <span class="icon">
                   <i class="fas fa-copy"></i>
@@ -354,7 +366,7 @@
                 aria-label="Save"
                 class="button save"
                 disabled={_.isEmpty(preview)}
-                on:click={openSaveModal}
+                onclick={openSaveModal}
               >
                 <span class="icon">
                   <i class="fas fa-floppy-disk"></i>

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { onMount } from "svelte";
   import _ from "lodash";
   import { renderIncomeStatement } from "$lib/charts/income_statement";
@@ -14,15 +16,15 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { iconify } from "$lib/core/icon";
 
-  let isEmpty = false;
+  let isEmpty = $state(false);
 
-  let svg: Element;
-  let incomeStatement: IncomeStatement;
-  let renderer: (data: IncomeStatement) => void;
-  let yearly: Record<string, IncomeStatement> = {};
-  let diff: number;
-  let diffPercent: number;
-  let years: string[] = [];
+  let svg: Element = $state();
+  let incomeStatement: IncomeStatement = $state();
+  let renderer: (data: IncomeStatement) => void = $state();
+  let yearly: Record<string, IncomeStatement> = $state({});
+  let diff: number = $state();
+  let diffPercent: number = $state();
+  let years: string[] = $state([]);
 
   type AccountGroupName =
     | "income"
@@ -58,22 +60,24 @@
 
   const sum = (object: Record<string, number>) => Object.values(object).reduce((a, b) => a + b, 0);
 
-  let accountGroups: AccountGroup[] = [];
+  let accountGroups: AccountGroup[] = $state([]);
 
-  $: if (yearly && renderer) {
-    if (yearly[$year] == null) {
-      incomeStatement = null;
-      isEmpty = true;
-    } else {
-      incomeStatement = yearly[$year];
-      years = _.sortBy(_.keys(yearly)).reverse();
-      diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
-      diffPercent = diff / incomeStatement.startingBalance;
+  run(() => {
+    if (yearly && renderer) {
+      if (yearly[$year] == null) {
+        incomeStatement = null;
+        isEmpty = true;
+      } else {
+        incomeStatement = yearly[$year];
+        years = _.sortBy(_.keys(yearly)).reverse();
+        diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
+        diffPercent = diff / incomeStatement.startingBalance;
 
-      renderer(incomeStatement);
-      isEmpty = false;
+        renderer(incomeStatement);
+        isEmpty = false;
+      }
     }
-  }
+  });
 
   function uniqueAccounts(statements: IncomeStatement[], key: AccountGroupName) {
     const accounts = new Set<string>();

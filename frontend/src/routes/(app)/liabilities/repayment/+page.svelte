@@ -6,8 +6,8 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let isEmpty = false;
-  let legends: Legend[] = [];
+  let isEmpty = $state(false);
+  let legends: Legend[] = $state([]);
 
   onMount(async () => {
     const { repayments: repayments } = await ajax("/api/liabilities/repayment");

@@ -1,15 +1,21 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import type dayjs from "dayjs";
   import BoxedTabs from "./BoxedTabs.svelte";
   import { isMobile } from "$lib/core/utils";
 
-  export let value: number;
-  export let dateMin: dayjs.Dayjs;
-  export let dateMax: dayjs.Dayjs;
+  interface Props {
+    value: number;
+    dateMin: dayjs.Dayjs;
+    dateMax: dayjs.Dayjs;
+  }
 
-  let options: { label: string; value: number }[] = [];
+  let { value = $bindable(), dateMin, dateMax }: Props = $props();
 
-  $: {
+  let options: { label: string; value: number }[] = $state([]);
+
+  run(() => {
     options = [{ label: "All", value: -1 }];
     const diff = dateMax.diff(dateMin, "year");
     if (diff >= 10 && !isMobile()) {
@@ -27,7 +33,7 @@
     if (diff >= 1) {
       options.push({ label: "1 year", value: 1 });
     }
-  }
+  });
 </script>
 
 {#if options.length > 1}

@@ -6,7 +6,7 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let legends: Legend[] = [];
+  let legends: Legend[] = $state([]);
 
   onMount(async () => {
     const { gain_breakdown: gains } = await ajax("/api/gain");

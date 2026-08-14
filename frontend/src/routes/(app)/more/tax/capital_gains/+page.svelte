@@ -5,8 +5,8 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let years: string[] = [];
-  let capitalGains: CapitalGain[] = [];
+  let years: string[] = $state([]);
+  let capitalGains: CapitalGain[] = $state([]);
 
   onMount(async () => {
     const { capital_gains: capital_gains } = await ajax("/api/capital_gains");

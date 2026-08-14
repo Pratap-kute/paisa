@@ -2,12 +2,17 @@
   import { fade } from "svelte/transition";
   import { delayedLoading, delayedUnLoading } from "../../../store";
   import Logo from "$lib/components/layout/Logo.svelte";
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
+
+  let { children }: Props = $props();
   let size = 90;
 </script>
 
 <div>
   <div style={$delayedUnLoading || $delayedLoading ? "visibility: hidden" : ""}>
-    <slot />
+    {@render children?.()}
   </div>
   {#if $delayedLoading}
     <div class="circle-container" transition:fade={{ duration: 400 }}>

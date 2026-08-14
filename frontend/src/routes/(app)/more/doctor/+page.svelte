@@ -4,7 +4,7 @@
   import { ajax } from "$lib/core/utils";
   import { renderIssues } from "$lib/charts/doctor";
 
-  let issues = [];
+  let issues = $state([]);
   onMount(async () => {
     ({ issues } = await ajax("/api/diagnosis"));
     renderIssues(issues);

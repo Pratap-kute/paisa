@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import {
     ajax,
     formatCurrency,
@@ -17,28 +19,30 @@
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
-  let networth = 0;
-  let investment = 0;
-  let gain = 0;
-  let xirr = 0;
-  let svg: Element;
-  let destroy: () => void;
-  let points: Networth[] = [];
-  let legends: Legend[] = [];
+  let networth = $state(0);
+  let investment = $state(0);
+  let gain = $state(0);
+  let xirr = $state(0);
+  let svg: Element = $state();
+  let destroy: () => void = $state();
+  let points: Networth[] = $state([]);
+  let legends: Legend[] = $state([]);
 
-  $: if (!_.isEmpty(points) && svg) {
-    if (destroy) {
-      destroy();
+  run(() => {
+    if (!_.isEmpty(points) && svg) {
+      if (destroy) {
+        destroy();
+      }
+
+      ({ destroy, legends } = renderNetworth(
+        _.filter(
+          points,
+          (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
+        ),
+        svg
+      ));
     }
-
-    ({ destroy, legends } = renderNetworth(
-      _.filter(
-        points,
-        (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
-      ),
-      svg
-    ));
-  }
+  });
 
   onDestroy(async () => {
     if (destroy) {

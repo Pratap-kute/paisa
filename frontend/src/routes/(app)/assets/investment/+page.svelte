@@ -10,8 +10,8 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let monthlyInvestmentTimelineLegends: Legend[] = [];
-  let yearlyInvestmentTimelineLegends: Legend[] = [];
+  let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
+  let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
 
   onMount(async () => {
     const { assets: assets, yearly_cards: yearlyCards } = await ajax("/api/investment");

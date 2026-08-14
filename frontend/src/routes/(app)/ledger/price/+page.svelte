@@ -7,7 +7,7 @@
   import { onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
 
-  let prices: Record<string, Price[]> = {};
+  let prices: Record<string, Price[]> = $state({});
 
   const ITEM_SIZE = 18;
 
@@ -62,7 +62,7 @@
             <p class="control">
               <button
                 class="button is-small is-link invertable is-light is-danger"
-                on:click={(_e) => clearPriceCache()}
+                onclick={(_e) => clearPriceCache()}
               >
                 <span class="icon is-small">
                   <i class="fas fa-trash-can"></i>
@@ -97,75 +97,78 @@
                 {@const p = prices[commodity]?.[0]}
                 {#if p}
                   <Toggleable>
-                  <tr
-                    class={active ? "is-active" : ""}
-                    style="cursor: pointer;"
-                    slot="toggle"
-                    let:active
-                    let:onclick
-                    on:click={(e) => onclick(e)}
-                  >
-                    <td>
-                      <span class="icon has-text-link">
-                        <i
-                          class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
-                          aria-hidden="true"></i>
-                      </span>
-                    </td>
+                  {#snippet toggle({ active, onclick })}
+                                        <tr
+                      class={active ? "is-active" : ""}
+                      style="cursor: pointer;"
+                      
+                      
+                      
+                      onclick={(e) => onclick(e)}
+                    >
+                      <td>
+                        <span class="icon has-text-link">
+                          <i
+                            class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
+                            aria-hidden="true"></i>
+                        </span>
+                      </td>
 
-                    <td>{p.commodity_name}</td>
-                    <td class="paisa-nowrap">{p.date.format("DD MMM YYYY")}</td>
-                    <td class="has-text-right">{formatCurrency(p.value, 4)}</td>
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 1, 0)} /></td
-                    >
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 7, 2)} /></td
-                    >
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 28, 4)} />
-                    </td>
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 365, 7)} />
-                    </td>
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 365 * 3, 7)} /></td
-                    >
-                    <td class="has-text-right"
-                      ><ValueChange value={change(prices[commodity], 365 * 5, 7)} /></td
-                    >
-                    <td>{p.commodity_type}</td>
-                    <td>{p.commodity_id}</td>
-                  </tr>
-                  <tr slot="content">
-                    <td colspan="10"></td>
-                    <td colspan="2" class="p-0">
-                      <div>
-                        <VirtualList
-                          width="100%"
-                          height={_.min([ITEM_SIZE * prices[commodity].length, ITEM_SIZE * 20])}
-                          itemCount={prices[commodity].length}
-                          itemSize={ITEM_SIZE}
-                        >
-                          <div
-                            slot="item"
-                            let:index
-                            let:style
-                            {style}
-                            class="small-box is-flex is-flex-wrap-wrap is-justify-content-space-between is-size-7"
+                      <td>{p.commodity_name}</td>
+                      <td class="paisa-nowrap">{p.date.format("DD MMM YYYY")}</td>
+                      <td class="has-text-right">{formatCurrency(p.value, 4)}</td>
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 1, 0)} /></td
+                      >
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 7, 2)} /></td
+                      >
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 28, 4)} />
+                      </td>
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 365, 7)} />
+                      </td>
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 365 * 3, 7)} /></td
+                      >
+                      <td class="has-text-right"
+                        ><ValueChange value={change(prices[commodity], 365 * 5, 7)} /></td
+                      >
+                      <td>{p.commodity_type}</td>
+                      <td>{p.commodity_id}</td>
+                    </tr>
+                                      {/snippet}
+                  {#snippet content()}
+                                        <tr >
+                      <td colspan="10"></td>
+                      <td colspan="2" class="p-0">
+                        <div>
+                          <VirtualList
+                            width="100%"
+                            height={_.min([ITEM_SIZE * prices[commodity].length, ITEM_SIZE * 20])}
+                            itemCount={prices[commodity].length}
+                            itemSize={ITEM_SIZE}
                           >
-                            {@const p = prices[commodity]?.[index]}
-                            {#if p}
-                              <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
-                              <div class="pr-1 has-text-right">
-                                {formatCurrency(p.value, 4)}
+                            <svelte:fragment slot="item" let:index let:style>
+                              {@const p = prices[commodity]?.[index]}
+                              <div
+                                {style}
+                                class="small-box is-flex is-flex-wrap-wrap is-justify-content-space-between is-size-7"
+                              >
+                                {#if p}
+                                  <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
+                                  <div class="pr-1 has-text-right">
+                                    {formatCurrency(p.value, 4)}
+                                  </div>
+                                {/if}
                               </div>
-                            {/if}
-                          </div>
-                        </VirtualList>
-                      </div>
-                    </td>
-                  </tr>
+                            </svelte:fragment>
+                          </VirtualList>
+                        </div>
+                      </td>
+                    </tr>
+                                      {/snippet}
                   </Toggleable>
                 {/if}
               {/each}

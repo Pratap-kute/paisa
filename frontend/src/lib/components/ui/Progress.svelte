@@ -1,21 +1,29 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { formatPercentage } from "$lib/core/utils";
   import { dropRight, floor, range } from "lodash";
 
-  export let small: boolean = false;
-  export let progressPercent: number;
-  export let showPercent: boolean = true;
-  $: times = range(0, floor(progressPercent / 100));
-  $: remainder = progressPercent % 100;
-
-  $: if (remainder == 0) {
-    times = dropRight(times, 1);
-    if (progressPercent == 0) {
-      remainder = 0;
-    } else {
-      remainder = 100;
-    }
+  interface Props {
+    small?: boolean;
+    progressPercent: number;
+    showPercent?: boolean;
   }
+
+  let { small = false, progressPercent, showPercent = true }: Props = $props();
+  let times = $derived(range(0, floor(progressPercent / 100)));
+  let remainder = $derived(progressPercent % 100);
+
+  run(() => {
+    if (remainder == 0) {
+      times = dropRight(times, 1);
+      if (progressPercent == 0) {
+        remainder = 0;
+      } else {
+        remainder = 100;
+      }
+    }
+  });
 </script>
 
 <div>

@@ -5,8 +5,13 @@
   import Spinner from "$lib/components/ui/Spinner.svelte";
   import Navbar from "$lib/components/layout/Navbar.svelte";
   import { willClearTippy, willRefresh } from "../../store";
+  interface Props {
+    children?: import('svelte').Snippet;
+  }
 
-  let isBurger: boolean = null;
+  let { children }: Props = $props();
+
+  let isBurger: boolean = $state(null);
 
   function clearTippy() {
     hideAll();
@@ -59,6 +64,6 @@
   <Navbar bind:isBurger />
 
   <Spinner>
-    <slot />
+    {@render children?.()}
   </Spinner>
 {/key}

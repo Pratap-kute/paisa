@@ -1,17 +1,30 @@
 <script lang="ts">
-  import { onMount, onDestroy, afterUpdate } from "svelte";
+  import { onMount, onDestroy } from "svelte";
+  import type { Snippet } from "svelte";
   import { MasonryGrid as EgjsMasonryGrid } from "@egjs/grid";
 
-  export let gap: number = 0;
-  export let maxStretchColumnSize: number = Infinity;
-  export let align: "justify" | "stretch" | "start" | "center" | "end" = "justify";
-  export let defaultDirection: "end" | "start" = "end";
+  interface Props {
+    gap?: number;
+    maxStretchColumnSize?: number;
+    align?: "justify" | "stretch" | "start" | "center" | "end";
+    defaultDirection?: "end" | "start";
+    children?: Snippet;
+  }
 
-  let container: HTMLDivElement;
+  let {
+    gap = 0,
+    maxStretchColumnSize = Infinity,
+    align = "justify",
+    defaultDirection = "end",
+    children
+  }: Props = $props();
+
+  let container: HTMLDivElement | undefined = $state();
   let grid: EgjsMasonryGrid | null = null;
   let observer: MutationObserver | null = null;
 
   onMount(() => {
+    if (!container) return;
     grid = new EgjsMasonryGrid(container, {
       gap,
       maxStretchColumnSize,
@@ -30,7 +43,8 @@
     }
   });
 
-  afterUpdate(() => {
+  $effect(() => {
+    // Sync elements when dependencies change
     grid?.syncElements();
   });
 
@@ -42,5 +56,5 @@
 </script>
 
 <div bind:this={container} class="masonry-grid-container">
-  <slot />
+  {@render children?.()}
 </div>

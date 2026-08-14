@@ -11,9 +11,13 @@
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 
-  export let posting: Posting;
-  export let color: string;
-  export let icon: boolean = false;
+  interface Props {
+    posting: Posting;
+    color: string;
+    icon?: boolean;
+  }
+
+  let { posting, color, icon = false }: Props = $props();
 </script>
 
 <div class="box p-2 my-2 has-background-white" style="border-left: 2px solid {color}">

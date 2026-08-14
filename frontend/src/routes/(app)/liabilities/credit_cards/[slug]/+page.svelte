@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { goto } from "$app/navigation";
   import COLORS from "$lib/core/colors";
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
@@ -20,14 +22,18 @@
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
-  export let data: PageData;
-  let svg: SVGElement;
+  interface Props {
+    data: PageData;
+  }
 
-  let creditCard: CreditCardSummary;
-  let currentBill: CreditCardBill;
+  let { data }: Props = $props();
+  let svg: SVGElement = $state();
+
+  let creditCard: CreditCardSummary = $state();
+  let currentBill: CreditCardBill = $state();
   let found = false;
   let small = true;
-  let rendered = false;
+  let rendered = $state(false);
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
     return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
@@ -35,10 +41,12 @@
     });
   }
 
-  $: if (creditCard && svg && !rendered) {
-    renderYearlySpends(svg, creditCard.yearlySpends);
-    rendered = true;
-  }
+  run(() => {
+    if (creditCard && svg && !rendered) {
+      renderYearlySpends(svg, creditCard.yearlySpends);
+      rendered = true;
+    }
+  });
 
   onMount(async () => {
     ({ creditCard, found } = await ajax("/api/credit_cards/:account", null, data));

@@ -3,7 +3,11 @@
   import { iconText } from "$lib/core/icon";
   import { restName, type AssetBreakdown, formatCurrency, firstName } from "$lib/core/utils";
 
-  export let assetBreakdown: AssetBreakdown;
+  interface Props {
+    assetBreakdown: AssetBreakdown;
+  }
+
+  let { assetBreakdown }: Props = $props();
 </script>
 
 <div class="box p-3 has-background-white">

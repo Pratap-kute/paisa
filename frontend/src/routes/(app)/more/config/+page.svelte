@@ -8,15 +8,18 @@
   import { refresh } from "../../../../store";
   import { sync } from "$lib/api/sync";
 
-  let lastConfig: UserConfig;
-  let config: UserConfig;
-  let schema: JSONSchema7;
-  let hasChanges = true;
-  let isLoading = false;
-  let error: string = null;
-  let accounts: string[] = [];
+  let lastConfig = $state<UserConfig | null>(null);
+  let config = $state<UserConfig | null>(null);
+  let schema = $state<JSONSchema7 | null>(null);
+  let isLoading = $state(false);
+  let error = $state<string | null>(null);
+  let accounts = $state<string[]>([]);
+
   onMount(async () => {
-    ({ config, schema, accounts } = await ajax("/api/config"));
+    const data = await ajax("/api/config");
+    config = data.config;
+    schema = data.schema;
+    accounts = data.accounts || [];
     lastConfig = _.cloneDeep(config);
   });
 
@@ -26,22 +29,27 @@
         "Are you sure you want to reset the config to defaults? This action is not reversible."
       )
     ) {
-      save({
-        journal_path: lastConfig.journal_path,
-        db_path: lastConfig.db_path
-      } as any);
+      if (lastConfig) {
+        save({
+          journal_path: lastConfig.journal_path,
+          db_path: lastConfig.db_path
+        } as any);
+      }
     }
   }
 
-  async function save(newConfig: UserConfig) {
+  async function save(newConfig: UserConfig | null) {
+    if (!newConfig) return;
     isLoading = true;
     try {
       let success = false;
-      ({ success, error } = await ajax("/api/config", {
+      let respError: string | null = null;
+      ({ success, error: respError } = await ajax("/api/config", {
         method: "POST",
         body: JSON.stringify(newConfig),
         background: true
       }));
+      error = respError;
 
       if (success) {
         lastConfig = _.cloneDeep(newConfig);
@@ -61,14 +69,14 @@
     }
   }
 
-  $: hasChanges = !_.isEqual(config, lastConfig);
+  let hasChanges = $derived(!_.isEqual(config, lastConfig));
 </script>
 
 <div class="section">
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        {#if schema}
+        {#if schema && config}
           <div class="box px-3" style="max-width: 1024px;">
             <article class="message">
               <div class="message-body">
@@ -88,19 +96,19 @@
             <div class="field is-grouped is-grouped-right">
               <div class="control">
                 <button
-                  on:click={(_e) => save(config)}
+                  onclick={() => save(config)}
                   class="button is-success {isLoading && 'is-loading'}"
                   disabled={!hasChanges}>Save</button
                 >
               </div>
               <div class="control">
                 <button
-                  on:click={(_e) => (config = _.cloneDeep(lastConfig))}
+                  onclick={() => (config = _.cloneDeep(lastConfig))}
                   class="button is-light">Cancel</button
                 >
               </div>
               <div class="control">
-                <button on:click={(_e) => resetToDefault()} class="button is-danger"
+                <button onclick={() => resetToDefault()} class="button is-danger"
                   >Reset to Defaults</button
                 >
               </div>

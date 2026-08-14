@@ -1,29 +1,23 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { now } from "$lib/core/utils";
   import dayjs from "dayjs";
   import _ from "lodash";
 
-  export let min: dayjs.Dayjs;
-  export let max: dayjs.Dayjs;
-  export let value: string;
-
-  let allowedYears: number[] = [];
-  let selectedYear: number;
-  let open = false;
-
-  $: valueDate = dayjs(value, "YYYY-MM");
-  $: allowedYears = _.range(min.year(), max.year() + 1);
-  $: selectedYear = valueDate.year();
-
-  $: {
-    if (!isAllowed(valueDate, min, max)) {
-      if (isAllowed(now(), min, max)) {
-        select(now());
-      } else {
-        select(max);
-      }
-    }
+  interface Props {
+    min: dayjs.Dayjs;
+    max: dayjs.Dayjs;
+    value: string;
   }
+
+  let { min, max, value = $bindable() }: Props = $props();
+
+  let allowedYears: number[] = $state([]);
+  let selectedYear: number = $state();
+  let open = $state(false);
+
+
 
   function isAllowed(date: dayjs.Dayjs, min: dayjs.Dayjs, max: dayjs.Dayjs) {
     return date.isSameOrAfter(min.startOf("month")) && date.isSameOrBefore(max.endOf("month"));
@@ -59,6 +53,22 @@
     "Nov",
     "Dec"
   ];
+  let valueDate = $derived(dayjs(value, "YYYY-MM"));
+  run(() => {
+    allowedYears = _.range(min.year(), max.year() + 1);
+  });
+  run(() => {
+    selectedYear = valueDate.year();
+  });
+  run(() => {
+    if (!isAllowed(valueDate, min, max)) {
+      if (isAllowed(now(), min, max)) {
+        select(now());
+      } else {
+        select(max);
+      }
+    }
+  });
 </script>
 
 <div class="is-flex">
@@ -66,7 +76,7 @@
     class="button is-small border-left"
     aria-label="Previous month"
     disabled={!isAllowed(valueDate.add(-1, "month"), min, max)}
-    on:click={(_e) => select(valueDate.add(-1, "month"))}
+    onclick={(_e) => select(valueDate.add(-1, "month"))}
   >
     <span class="icon">
       <i class="fas fa-chevron-left"></i>
@@ -79,7 +89,7 @@
         aria-label="Select month and year"
         aria-haspopup="true"
         aria-controls="dropdown-menu2"
-        on:click={(_e) => (open = !open)}
+        onclick={(_e) => (open = !open)}
       >
         <span class="has-text-weight-bold">{valueDate.format("MMM YYYY")}</span>
         <span class="icon">
@@ -95,7 +105,7 @@
               class="button is-small"
               aria-label="Previous year"
               disabled={selectedYear - 1 < min.year()}
-              on:click={(_e) => selectedYear--}
+              onclick={(_e) => selectedYear--}
             >
               <span class="icon">
                 <i class="fas fa-chevron-left"></i>
@@ -106,7 +116,7 @@
                 class="has-text-weight-bold"
                 aria-label="Select year"
                 value={selectedYear}
-                on:change={(e) => selectYear(e)}
+                onchange={(e) => selectYear(e)}
               >
                 {#each allowedYears as year}
                   <option value={year}>{year}</option>
@@ -117,7 +127,7 @@
               class="button is-small"
               aria-label="Next year"
               disabled={selectedYear + 1 > max.year()}
-              on:click={(_e) => selectedYear++}
+              onclick={(_e) => selectedYear++}
             >
               <span class="icon">
                 <i class="fas fa-chevron-right"></i>
@@ -136,7 +146,7 @@
                     class="button is-ghost p-0 {valueDate.year() == selectedYear && valueDate.month() == i
                       ? 'is-link has-text-weight-bold'
                       : 'has-text-black-ter'}"
-                    on:click={(_e) => selectMonth(i)}>{month}</button
+                    onclick={(_e) => selectMonth(i)}>{month}</button
                   >
                 {:else}
                   <span class="has-text-grey-light">{month}</span>
@@ -152,7 +162,7 @@
     class="button is-small border-right"
     aria-label="Next month"
     disabled={!isAllowed(valueDate.add(1, "month"), min, max)}
-    on:click={(_e) => select(valueDate.add(1, "month"))}
+    onclick={(_e) => select(valueDate.add(1, "month"))}
   >
     <span class="icon">
       <i class="fas fa-chevron-right"></i>

@@ -2,10 +2,14 @@
   import Progress from "$lib/components/ui/Progress.svelte";
   import { formatCurrencyCrude, type Point } from "$lib/core/utils";
   import _ from "lodash";
-  export let progressPercent: number;
-  export let breakPoints: Point[];
+  interface Props {
+    progressPercent: number;
+    breakPoints: Point[];
+  }
 
-  $: spacers = _.range(breakPoints.length, 4);
+  let { progressPercent, breakPoints }: Props = $props();
+
+  let spacers = $derived(_.range(breakPoints.length, 4));
 </script>
 
 <div>

@@ -4,7 +4,7 @@
   import _ from "lodash";
   import { onMount } from "svelte";
 
-  let breakdowns: Record<string, AssetBreakdown> = {};
+  let breakdowns: Record<string, AssetBreakdown> = $state({});
 
   onMount(async () => {
     ({ asset_breakdowns: breakdowns } = await ajax("/api/assets/balance"));

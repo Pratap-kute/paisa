@@ -12,7 +12,11 @@
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
 
-  export let creditCard: CreditCardSummary;
+  interface Props {
+    creditCard: CreditCardSummary;
+  }
+
+  let { creditCard }: Props = $props();
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
     return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
@@ -20,7 +24,7 @@
     });
   }
 
-  $: bill = lastBill(creditCard);
+  let bill = $derived(lastBill(creditCard));
 </script>
 
 <div class="credit-card box p-3 m-0 is-flex-direction-column is-justify-content-space-between">

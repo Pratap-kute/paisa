@@ -1,11 +1,16 @@
 <script lang="ts">
   import _ from "lodash";
 
-  export let item: any;
+  interface Props {
+    item: any;
+    children?: import('svelte').Snippet;
+  }
+
+  let { item, children }: Props = $props();
 </script>
 
 {#if item == null || item == false || (item != true && _.isEmpty(item))}
   <div class="has-text-centered p-6">
-    <slot />
+    {@render children?.()}
   </div>
 {/if}

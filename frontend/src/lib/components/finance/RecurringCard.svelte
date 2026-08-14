@@ -12,13 +12,17 @@
   import { renderRecurring } from "$lib/charts/recurring";
   import _ from "lodash";
 
-  export let ts: TransactionSequence;
-  export let schedule: TransactionSchedule;
-  const HEIGHT = 50;
-  const icon = scheduleIcon(schedule);
+  interface Props {
+    ts: TransactionSequence;
+    schedule: TransactionSchedule;
+  }
 
-  let carousel: Carousel;
-  let pageSize = _.min([20, ts.transactions.length]);
+  let { ts, schedule }: Props = $props();
+  const HEIGHT = 50;
+  let icon = $derived(scheduleIcon(schedule));
+
+  let carousel: Carousel = $state();
+  let pageSize = $derived(_.min([20, ts.transactions.length]) ?? 1);
 
   function showPage(pageIndex: number) {
     carousel.goTo(pageSize - 1 - pageIndex);
@@ -80,8 +84,8 @@
         role="button"
         tabindex="0"
         aria-label="Previous page"
-        on:click={showPrevPage}
-        on:keydown={(e) => e.key === "Enter" && showPrevPage()}
+        onclick={showPrevPage}
+        onkeydown={(e) => e.key === "Enter" && showPrevPage()}
         class="custom-arrow custom-arrow-prev"
       >
         <i class="fa-solid has-text-grey-light fa-angle-left"></i>
@@ -97,8 +101,8 @@
         role="button"
         tabindex="0"
         aria-label="Next page"
-        on:click={showNextPage}
-        on:keydown={(e) => e.key === "Enter" && showNextPage()}
+        onclick={showNextPage}
+        onkeydown={(e) => e.key === "Enter" && showNextPage()}
         class="custom-arrow custom-arrow-next"
       >
         <i class="fa-solid has-text-grey-light fa-angle-right"></i>

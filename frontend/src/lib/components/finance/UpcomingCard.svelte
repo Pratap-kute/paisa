@@ -7,11 +7,15 @@
   } from "$lib/domain/transaction_sequence";
   import { formatCurrencyCrude, now, type TransactionSequence } from "$lib/core/utils";
 
-  export let transactionSequece: TransactionSequence;
+  interface Props {
+    transactionSequece: TransactionSequence;
+  }
 
-  $: schedule = nextUnpaidSchedule(transactionSequece);
-  $: n = schedule?.scheduled;
-  $: icon = schedule ? scheduleIcon(schedule) : { color: "", icon: "" };
+  let { transactionSequece }: Props = $props();
+
+  let schedule = $derived(nextUnpaidSchedule(transactionSequece));
+  let n = $derived(schedule?.scheduled);
+  let icon = $derived(schedule ? scheduleIcon(schedule) : { color: "", icon: "" });
 </script>
 
 {#if schedule && n}

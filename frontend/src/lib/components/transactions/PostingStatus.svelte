@@ -1,7 +1,11 @@
 <script lang="ts">
   import type { Posting } from "$lib/core/utils";
 
-  export let posting: Posting;
+  interface Props {
+    posting: Posting;
+  }
+
+  let { posting }: Props = $props();
 </script>
 
 {#if posting.status == "cleared"}

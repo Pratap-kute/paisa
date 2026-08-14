@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import COLORS, { generateColorScheme, genericBarColor } from "$lib/core/colors";
   import { renderAccountOverview, buildLegends } from "$lib/charts/gain";
   import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
@@ -24,31 +26,35 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
 
   let commodities: string[] = [];
-  let selectedCommodities: string[] = [];
-  let security_type: PortfolioAggregate[] = [];
-  let name_and_security_type: PortfolioAggregate[] = [];
-  let rating: PortfolioAggregate[] = [];
-  let industry: PortfolioAggregate[] = [];
-  let color: any;
+  let selectedCommodities: string[] = $state([]);
+  let security_type: PortfolioAggregate[] = $state([]);
+  let name_and_security_type: PortfolioAggregate[] = $state([]);
+  let rating: PortfolioAggregate[] = $state([]);
+  let industry: PortfolioAggregate[] = $state([]);
+  let color: any = $state();
 
-  let securityTypeEmpty: boolean = false;
-  let nameAndSecurityTypeEmpty: boolean = false;
-  let ratingEmpty: boolean = false;
-  let industryEmpty: boolean = false;
+  let securityTypeEmpty: boolean = $state(false);
+  let nameAndSecurityTypeEmpty: boolean = $state(false);
+  let ratingEmpty: boolean = $state(false);
+  let industryEmpty: boolean = $state(false);
 
-  export let data: PageData;
-  let gain: AccountGain;
-  let overview: Networth;
-  let assetBreakdown: AssetBreakdown;
+  interface Props {
+    data: PageData;
+  }
+
+  let { data }: Props = $props();
+  let gain: AccountGain = $state();
+  let overview: Networth = $state();
+  let assetBreakdown: AssetBreakdown = $state();
   let legends = buildLegends();
 
   let destroyCallback = () => {};
-  let postings: Posting[] = [];
+  let postings: Posting[] = $state([]);
 
-  let securityTypeR: any,
-    portfolioR: any,
-    industryR: any,
-    ratingR: any = null;
+  let securityTypeR: any = $state(),
+    portfolioR: any = $state(),
+    industryR: any = $state(),
+    ratingR: any = $state(null);
 
   onDestroy(async () => {
     destroyCallback();
@@ -106,12 +112,14 @@
     industryEmpty = industry.length === 0;
   });
 
-  $: if (securityTypeR && ratingR && industryR && portfolioR) {
-    securityTypeR(filterCommodityBreakdowns(security_type, selectedCommodities), color);
-    ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);
-    industryR(filterCommodityBreakdowns(industry, selectedCommodities), color);
-    portfolioR(filterCommodityBreakdowns(name_and_security_type, selectedCommodities), color);
-  }
+  run(() => {
+    if (securityTypeR && ratingR && industryR && portfolioR) {
+      securityTypeR(filterCommodityBreakdowns(security_type, selectedCommodities), color);
+      ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);
+      industryR(filterCommodityBreakdowns(industry, selectedCommodities), color);
+      portfolioR(filterCommodityBreakdowns(name_and_security_type, selectedCommodities), color);
+    }
+  });
 </script>
 
 <section class="section">
