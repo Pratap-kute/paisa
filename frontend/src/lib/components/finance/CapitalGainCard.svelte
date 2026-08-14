@@ -74,7 +74,7 @@
             <table class="table is-narrow is-fullwidth is-hoverable">
               <thead>
                 <tr>
-                  <th />
+                  <th ></th>
                   <th>Account</th>
                   <th>Tax Category</th>
                   <th class="has-text-right">Sold Units</th>
@@ -106,8 +106,7 @@
                           <span class="icon has-text-link">
                             <i
                               class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
-                              aria-hidden="true"
-                            />
+                              aria-hidden="true"></i>
                           </span>
                         </td>
                         <td>{cg.account}</td>

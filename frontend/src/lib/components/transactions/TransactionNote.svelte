@@ -5,6 +5,6 @@
 
 {#if transaction.note != ""}
   <span class="icon is-small" data-tippy-content={formatTextAsHtml(transaction.note)}>
-    <i class="fa-regular fa-comment-dots" />
+    <i class="fa-regular fa-comment-dots"></i>
   </span>
 {/if}

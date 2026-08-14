@@ -62,7 +62,7 @@
 <section class="section tab-interest">
   <div class="container is-fluid d3-interest-timeline-breakdown">
     <div class="columns">
-      <div id="d3-interest-timeline-breakdown" class="column is-12" />
+      <div id="d3-interest-timeline-breakdown" class="column is-12"></div>
     </div>
   </div>
 </section>

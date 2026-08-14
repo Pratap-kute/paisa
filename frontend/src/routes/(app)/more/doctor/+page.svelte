@@ -24,6 +24,6 @@
         </div>
       </div>
     </div>
-    <div class="columns is-flex-wrap-wrap" id="d3-diagnosis" />
+    <div class="columns is-flex-wrap-wrap" id="d3-diagnosis"></div>
   </div>
 </section>

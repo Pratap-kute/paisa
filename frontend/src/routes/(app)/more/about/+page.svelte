@@ -54,7 +54,7 @@
               <li>
                 <a href={link.href} on:click|preventDefault={(_e) => externalLink(link.href)}>
                   <span class="icon is-small">
-                    <i class={link.icon} />
+                    <i class={link.icon}></i>
                   </span>
                   <span>{link.name}</span>
                 </a>

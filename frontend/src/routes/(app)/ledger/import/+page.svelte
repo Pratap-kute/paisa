@@ -223,7 +223,7 @@
 <Modal bind:active={templateCreateModalOpen}>
   <svelte:fragment slot="head" let:close>
     <p class="modal-card-title">Create Template</p>
-    <button class="delete" aria-label="close" on:click={(e) => close(e)} />
+    <button class="delete" aria-label="close" on:click={(e) => close(e)}></button>
   </svelte:fragment>
   <div class="field" slot="body">
     <label class="label" for="save-filename">Template Name</label>
@@ -254,9 +254,9 @@
           <div class="field is-grouped mb-0">
             <p class="control">
               <span data-tippy-content="Create" data-tippy-followCursor="false">
-                <button class="button" on:click={(_e) => openTemplateCreateModal()}>
+                <button class="button" aria-label="Create Template" on:click={(_e) => openTemplateCreateModal()}>
                   <span class="icon">
-                    <i class="fas fa-file-circle-plus" />
+                    <i class="fas fa-file-circle-plus"></i>
                   </span>
                 </button>
               </span>
@@ -270,12 +270,13 @@
               >
                 <button
                   class="button"
+                  aria-label="Save Template"
                   on:click={(_e) => save()}
                   disabled={$templateEditorState.hasUnsavedChanges == false ||
                     selectedTemplate?.template_type == "builtin"}
                 >
                   <span class="icon">
-                    <i class="fas fa-floppy-disk" />
+                    <i class="fas fa-floppy-disk"></i>
                   </span>
                 </button>
               </span>
@@ -286,11 +287,12 @@
               >
                 <button
                   class="button"
+                  aria-label="Delete Template"
                   on:click={(_e) => remove()}
                   disabled={selectedTemplate?.template_type == "builtin"}
                 >
                   <span class="icon">
-                    <i class="fas fa-trash-can" />
+                    <i class="fas fa-trash-can"></i>
                   </span>
                 </button>
               </span>
@@ -327,7 +329,7 @@
         <div class="box py-0">
           <div class="field">
             <div class="control">
-              <div class="template-editor" bind:this={templateEditorDom} />
+              <div class="template-editor" bind:this={templateEditorDom}></div>
             </div>
           </div>
         </div>
@@ -337,26 +339,28 @@
               <button
                 data-tippy-followCursor="false"
                 data-tippy-content="Copy to Clipboard"
+                aria-label="Copy to Clipboard"
                 class="button clipboard"
                 disabled={_.isEmpty(preview)}
                 on:click={copyToClipboard}
               >
                 <span class="icon">
-                  <i class="fas fa-copy" />
+                  <i class="fas fa-copy"></i>
                 </span>
               </button>
               <button
                 data-tippy-followCursor="false"
                 data-tippy-content="Save"
+                aria-label="Save"
                 class="button save"
                 disabled={_.isEmpty(preview)}
                 on:click={openSaveModal}
               >
                 <span class="icon">
-                  <i class="fas fa-floppy-disk" />
+                  <i class="fas fa-floppy-disk"></i>
                 </span>
               </button>
-              <div class="preview-editor" bind:this={previewEditorDom} />
+              <div class="preview-editor" bind:this={previewEditorDom}></div>
             </div>
           </div>
         </div>
@@ -404,7 +408,7 @@
             >
               <thead>
                 <tr>
-                  <th />
+                  <th ></th>
                   {#each _.range(0, columnCount) as ci}
                     <th class="has-background-light">{String.fromCharCode(65 + ci)}</th>
                   {/each}
@@ -425,7 +429,7 @@
         {/if}
       </div>
     </div>
-    <div />
+    <div ></div>
   </div>
 </section>
 

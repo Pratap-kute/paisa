@@ -29,7 +29,7 @@
   on:click={() => item.closeOnClick !== false && dismissToast(item.id)}
 >
   {#if item.dismissible}
-    <button class="delete" aria-label="Dismiss notification" on:click|stopPropagation={() => dismissToast(item.id)} />
+    <button class="delete" aria-label="Dismiss notification" on:click|stopPropagation={() => dismissToast(item.id)}></button>
   {/if}
   {@html item.message}
 </div>

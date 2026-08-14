@@ -65,11 +65,11 @@
 </script>
 
 {#if deletable}
-  <a on:click={(_e) => deletable()} class="config-delete">
+  <button type="button" aria-label="Delete entry" on:click={(_e) => deletable()} class="button is-ghost config-delete p-0">
     <span class="icon is-small">
       <i class="fas fa-circle-minus"></i>
     </span>
-  </a>
+  </button>
 {/if}
 
 {#if schema["ui:widget"] == "hidden"}
@@ -172,8 +172,7 @@
               rows="5"
               bind:value
               spellcheck="false"
-              data-enable-grammarly="false"
-            />
+              data-enable-grammarly="false"></textarea>
           {:else}
             <input
               {disabled}
@@ -226,15 +225,15 @@
   </div>
 {:else if schema["ui:widget"] == "price"}
   <div class="config-header">
-    <a class="is-link" data-tippy-content={documentation(schema)}>
+    <span class="is-link" data-tippy-content={documentation(schema)}>
       <span>{title}</span>
-    </a>
+    </span>
 
-    <a on:click={(_e) => (modalOpen = true)} class="is-link">
+    <button type="button" aria-label="Edit price code" on:click={(_e) => (modalOpen = true)} class="button is-ghost is-link p-0">
       <span class="icon is-small">
         <i class="fas fa-pen-to-square"></i>
       </span>
-    </a>
+    </button>
   </div>
 
   <PriceCodeSearchModal
@@ -260,8 +259,9 @@
   </div>
 {:else if schema.type == "object"}
   <div class="config-header">
-    <a
-      class="is-link is-light invertable"
+    <button
+      type="button"
+      class="button is-ghost is-link is-light invertable p-0"
       data-tippy-content={documentation(schema)}
       on:click={(_e) => (open = !open)}
     >
@@ -269,7 +269,7 @@
       <span class="icon is-small">
         <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
       </span>
-    </a>
+    </button>
   </div>
 
   {#if open}
@@ -288,8 +288,9 @@
   {/if}
 {:else if schema.type == "array"}
   <div class="config-header">
-    <a
-      class="is-link is-light invertable"
+    <button
+      type="button"
+      class="button is-ghost is-link is-light invertable p-0"
       data-tippy-content={documentation(schema)}
       on:click={(_e) => (open = !open)}
     >
@@ -297,13 +298,13 @@
       <span class="icon is-small">
         <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
       </span>
-    </a>
+    </button>
     {#if open}
-      <a on:click={(_e) => (value = [newItem(schema), ...value])} class="config-add">
+      <button type="button" aria-label="Add item" on:click={(_e) => (value = [newItem(schema), ...value])} class="button is-ghost config-add p-0">
         <span class="icon is-small">
           <i class="fas fa-circle-plus"></i>
         </span>
-      </a>
+      </button>
     {/if}
   </div>
 

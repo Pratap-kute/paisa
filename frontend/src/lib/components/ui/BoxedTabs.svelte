@@ -9,13 +9,16 @@
   }
 </script>
 
-<div class="boxed-tabs">
+<div class="boxed-tabs" role="tablist">
   {#each options as option}
-    <a
+    <button
+      type="button"
+      role="tab"
+      aria-selected={option.value === value}
       class="boxed-tab {option.value === value ? 'is-active' : ''}"
       on:click={() => (value = option.value)}
     >
       {option.label}
-    </a>
+    </button>
   {/each}
 </div>

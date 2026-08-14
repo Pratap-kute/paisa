@@ -180,7 +180,7 @@
                     <div>{day}</div>
                   {/each}
                 </div>
-                <div class="days" />
+                <div class="days"></div>
               </div>
             </div>
           </div>

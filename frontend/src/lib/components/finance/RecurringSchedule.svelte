@@ -30,7 +30,7 @@
 <div class="px-2 is-flex is-size-6 is-justify-content-space-between gap-2" data-tippy-content={tooltipHtml}>
   <div class="paisa-truncate" title={schedule.key}>
     <span class="icon is-small {icon.color}">
-      <i class="fas {icon.icon}" />
+      <i class="fas {icon.icon}"></i>
     </span>
     <span class="ml-1">
       {#if schedule.actual}

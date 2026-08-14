@@ -22,7 +22,7 @@
     </div>
     <div class="has-text-grey is-size-7">
       <span class="icon has-text-grey-light">
-        <i class="fas fa-calendar" />
+        <i class="fas fa-calendar"></i>
       </span>
       {schedule.scheduled.format("DD MMM YYYY")}
     </div>
@@ -40,7 +40,7 @@
       >
         <div class="is-size-6">
           <span class="icon">
-            <i class="fas {icon.icon}" />
+            <i class="fas {icon.icon}"></i>
           </span>
         </div>
         <span>{formatCurrencyCrude(totalRecurring(transactionSequece))}</span>

@@ -13,7 +13,7 @@
 {:else}
   <span class="{color} paisa-nowrap">
     <span class="icon is-small">
-      <i class="fas {icon}" />
+      <i class="fas {icon}"></i>
     </span>
     {formatPercentage(value, 2)}
   </span>

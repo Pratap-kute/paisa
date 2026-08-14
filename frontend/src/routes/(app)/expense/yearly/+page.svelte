@@ -143,7 +143,7 @@
       <div class="column is-3">
         <div class="px-3 box">
           <div id="d3-current-year-expense-calendar" class="d3-calendar">
-            <div class="months" />
+            <div class="months"></div>
           </div>
         </div>
       </div>

@@ -65,7 +65,7 @@
                 on:click={(_e) => clearPriceCache()}
               >
                 <span class="icon is-small">
-                  <i class="fas fa-trash-can" />
+                  <i class="fas fa-trash-can"></i>
                 </span>
                 <span>Clear Price Cache</span>
               </button>
@@ -78,7 +78,7 @@
           <table class="table is-narrow is-fullwidth is-light-border is-hoverable">
             <thead>
               <tr>
-                <th />
+                <th ></th>
                 <th>Commodity Name</th>
                 <th>Last Date</th>
                 <th class="has-text-right">Last Price</th>
@@ -108,8 +108,7 @@
                       <span class="icon has-text-link">
                         <i
                           class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
-                          aria-hidden="true"
-                        />
+                          aria-hidden="true"></i>
                       </span>
                     </td>
 
@@ -138,7 +137,7 @@
                     <td>{p.commodity_id}</td>
                   </tr>
                   <tr slot="content">
-                    <td colspan="10" />
+                    <td colspan="10"></td>
                     <td colspan="2" class="p-0">
                       <div>
                         <VirtualList

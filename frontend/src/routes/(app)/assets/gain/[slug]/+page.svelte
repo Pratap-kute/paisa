@@ -216,8 +216,7 @@
               <div class="box paisa-overflow-x-auto">
                 <div
                   id="d3-portfolio-security-type-treemap"
-                  style="width: 100%; position: relative"
-                />
+                  style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio-security-type" width="100%" />
               </div>
               <BoxLabel text="Security Type" />
@@ -227,8 +226,7 @@
               <div class="box paisa-overflow-x-auto">
                 <div
                   id="d3-portfolio-security-rating-treemap"
-                  style="width: 100%; position: relative"
-                />
+                  style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio-security-rating" width="100%" />
               </div>
               <BoxLabel text="Security Rating" />
@@ -238,8 +236,7 @@
               <div class="box paisa-overflow-x-auto">
                 <div
                   id="d3-portfolio-security-industry-treemap"
-                  style="width: 100%; position: relative"
-                />
+                  style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio-security-industry" width="100%" />
               </div>
               <BoxLabel text="Industry" />
@@ -248,7 +245,7 @@
           <div class="column is-6 mt-5">
             <div class:is-hidden={nameAndSecurityTypeEmpty}>
               <div class="box paisa-overflow-x-auto">
-                <div id="d3-portfolio-treemap" style="width: 100%; position: relative" />
+                <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio" width="100%" />
               </div>
               <BoxLabel text="Security" />

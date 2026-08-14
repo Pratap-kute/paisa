@@ -238,7 +238,7 @@
                 on:click={(_e) => openCreateModal()}
               >
                 <span class="icon is-small">
-                  <i class="fas fa-file-circle-plus" />
+                  <i class="fas fa-file-circle-plus"></i>
                 </span>
                 <span>Create</span>
               </button>
@@ -253,7 +253,7 @@
                 on:click={(_e) => save()}
               >
                 <span class="icon is-small">
-                  <i class="fas fa-floppy-disk" />
+                  <i class="fas fa-floppy-disk"></i>
                 </span>
                 <span>Save</span>
               </button>
@@ -265,7 +265,7 @@
                 on:click={undoEdit}
               >
                 <span class="icon is-small">
-                  <i class="fas fa-arrow-left" />
+                  <i class="fas fa-arrow-left"></i>
                 </span>
                 <span>Undo</span>
               </button>
@@ -278,14 +278,14 @@
               >
                 <span>Redo</span>
                 <span class="icon is-small">
-                  <i class="fas fa-arrow-right" />
+                  <i class="fas fa-arrow-right"></i>
                 </span>
               </button>
             </p>
             <p class="control">
               <button class="button is-small" on:click={(_e) => pretty()}>
                 <span class="icon is-small">
-                  <i class="fas fa-code" />
+                  <i class="fas fa-code"></i>
                 </span>
                 <span>Prettify</span>
               </button>
@@ -301,7 +301,7 @@
                   on:click={(_e) => revert(selectedVersion)}
                 >
                   <span class="icon is-small">
-                    <i class="fas fa-clock-rotate-left" />
+                    <i class="fas fa-clock-rotate-left"></i>
                   </span>
                   <span>Revert</span>
                 </button>
@@ -318,9 +318,9 @@
               </div>
 
               <p class="control">
-                <button class="button is-small" on:click={(_e) => deleteBackups()}>
+                <button class="button is-small" aria-label="Delete backups" on:click={(_e) => deleteBackups()}>
                   <span class="icon is-small">
-                    <i class="fas fa-trash-can" />
+                    <i class="fas fa-trash-can"></i>
                   </span>
                 </button>
               </p>
@@ -329,10 +329,10 @@
 
           {#if $editorState.errors.length > 0}
             <div class="control ml-5">
-              <a on:click={(_e) => moveToLine(editor, $editorState.errors[0].line_from)}
+              <button type="button" class="button is-ghost p-0" on:click={(_e) => moveToLine(editor, $editorState.errors[0].line_from)}
                 ><span class="ml-1 tag invertable is-danger is-light"
                   >{$editorState.errors.length} error(s) found</span
-                ></a
+                ></button
               >
             </div>
           {/if}
@@ -355,7 +355,7 @@
       </div>
       <div class="column is-6-widescreen is-6-fullhd is-8">
         <div class="box py-0">
-          <div class="editor" bind:this={editorDom} />
+          <div class="editor" bind:this={editorDom}></div>
         </div>
       </div>
       <div class="column is-3-widescreen is-4-fullhd is-hidden-touch is-hidden-desktop-only">

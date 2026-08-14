@@ -87,11 +87,11 @@
         </button>
       </p>
     </div>
-    <button class="delete" aria-label="close" on:click={(e) => close(e)} />
+    <button class="delete" aria-label="close" on:click={(e) => close(e)}></button>
   </svelte:fragment>
   <div class="field" slot="body">
     <div class="box py-0">
-      <div class="diff-editor" bind:this={editorDom} />
+      <div class="diff-editor" bind:this={editorDom}></div>
       {#if changedOldFiles.length === 0}
         <div class="has-text-centered mt-6">
           <strong>Oops!</strong> No changes has been made. Make sure the bulk edit arguments are correct.

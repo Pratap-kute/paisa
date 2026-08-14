@@ -82,7 +82,7 @@
     <div class="columns">
       <div class="column is-12 has-text-centered">
         <div class="box paisa-overflow-x-auto">
-          <div id="d3-allocation-target-treemap" style="width: 100%; position: relative" />
+          <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-allocation-target" />
         </div>
       </div>
@@ -94,7 +94,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px" />
+        <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px"></div>
       </div>
     </div>
     <BoxLabel text="Allocation by category" />
@@ -104,7 +104,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-value" style="width: 100%; height: 300px" />
+        <div id="d3-allocation-value" style="width: 100%; height: 300px"></div>
       </div>
     </div>
     <BoxLabel text="Allocation by value" />

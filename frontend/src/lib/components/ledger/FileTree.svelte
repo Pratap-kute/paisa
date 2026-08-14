@@ -30,11 +30,13 @@
     {#if file.type != "directory"}
       <li>
         <a
-          on:click={() => dispatch("select", file)}
+          href="#/"
+          role="button"
+          on:click|preventDefault={() => dispatch("select", file)}
           class:is-active={file.name == selectedFileName}
         >
           <span class="icon is-small">
-            <i class="fa-regular fa-file-lines" />
+            <i class="fa-regular fa-file-lines"></i>
           </span>
           <span title={fileName(file.name)} class="paisa-truncate">{fileName(file.name)}</span>
           {#if file.name == selectedFileName && hasUnsavedChanges}
@@ -47,7 +49,7 @@
         <details open={isOpen(file)}>
           <summary>
             <span class="icon is-small">
-              <i class="fa-regular fa-folder" />
+              <i class="fa-regular fa-folder"></i>
             </span>
             <span title={file.name} class="paisa-truncate">{file.name}</span>
           </summary>

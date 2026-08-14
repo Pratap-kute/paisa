@@ -45,7 +45,7 @@
         <BoxLabel text="Financial Year Investment Timeline" />
       </div>
       <div class="column is-full-tablet is-half-fullhd">
-        <div class="columns is-flex-wrap-wrap" id="d3-yearly-investment-cards" />
+        <div class="columns is-flex-wrap-wrap" id="d3-yearly-investment-cards"></div>
       </div>
     </div>
   </div>

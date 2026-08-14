@@ -55,10 +55,11 @@
     </div>
   {/if}
   <p class="control">
-    <a
+    <button
+      type="button"
       class="button is-link"
       on:click={(_e) => dispatch("preview", { operation: selectedOperation, args: args })}
-      >Preview</a
+      >Preview</button
     >
   </p>
 </div>

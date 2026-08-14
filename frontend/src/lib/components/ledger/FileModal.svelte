@@ -15,7 +15,7 @@
 <Modal bind:active={open}>
   <svelte:fragment slot="head" let:close>
     <p class="modal-card-title">{label}</p>
-    <button class="delete" aria-label="close" on:click={(e) => close(e)} />
+    <button class="delete" aria-label="close" on:click={(e) => close(e)}></button>
   </svelte:fragment>
   <div class="field" slot="body">
     <label class="label" for="save-filename">File Name</label>

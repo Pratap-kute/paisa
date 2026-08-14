@@ -81,7 +81,7 @@
 <Modal bind:active={open} footerClass="is-justify-content-space-between">
   <svelte:fragment slot="head" let:close>
     <p class="modal-card-title">{label}</p>
-    <button class="delete" aria-label="close" on:click={(e) => close(e)} />
+    <button class="delete" aria-label="close" on:click={(e) => close(e)}></button>
   </svelte:fragment>
   <div style="min-height: 500px;" slot="body">
     {#if selectedProvider}

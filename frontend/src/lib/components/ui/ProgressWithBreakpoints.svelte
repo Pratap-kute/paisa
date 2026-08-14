@@ -24,7 +24,7 @@
                   ? 'has-text-success'
                   : 'has-text-grey'}"
               >
-                <i class="fas fa-check-circle" />
+                <i class="fas fa-check-circle"></i>
               </span>
             </div>
             <div>{(i + 1) * 25}%</div>

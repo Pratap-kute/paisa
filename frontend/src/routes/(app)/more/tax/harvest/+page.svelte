@@ -11,6 +11,6 @@
 
 <section class="section tab-harvest">
   <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap has-text-grey-dark" id="d3-harvestables" />
+    <div class="columns is-flex-wrap-wrap has-text-grey-dark" id="d3-harvestables"></div>
   </div>
 </section>

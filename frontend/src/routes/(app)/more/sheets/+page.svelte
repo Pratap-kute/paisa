@@ -54,7 +54,7 @@
             <p class="control">
               <button class="button is-medium is-link" on:click={(_e) => openCreateModal()}>
                 <span class="icon is-small">
-                  <i class="fas fa-file-circle-plus" />
+                  <i class="fas fa-file-circle-plus"></i>
                 </span>
                 <span>Create</span>
               </button>

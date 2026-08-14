@@ -11,7 +11,7 @@
 
 <span title="due on {dueDate.format('DD MMM YYYY')}">
   <span class="icon is-small {icon.color}">
-    <i class="fas {icon.icon}" />
+    <i class="fas {icon.icon}"></i>
   </span>
   {#if amountDue !== undefined && amountDue <= 0}
     <span>no dues</span>

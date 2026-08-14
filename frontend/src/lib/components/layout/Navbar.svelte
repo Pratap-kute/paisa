@@ -195,26 +195,25 @@
     >
       {#if $obscure}
         <span class="icon is-small is-size-5">
-          <i class="fas fa-user-secret" />
+          <i class="fas fa-user-secret"></i>
         </span><span class="ml-2 is-primary-color">Paisa</span>
       {:else}
         <Logo size={22} /><span class="ml-1 is-primary-color">Paisa</span>
       {/if}
     </a>
-    <a
-      role="button"
-      tabindex="-1"
+    <button
+      type="button"
       class="navbar-burger"
       class:is-active={isBurger === true}
-      on:click|preventDefault={(_e) => (isBurger = !isBurger)}
+      on:click={(_e) => (isBurger = !isBurger)}
       aria-label="menu"
-      aria-expanded="false"
+      aria-expanded={isBurger}
       data-target="navbarBasicExample"
     >
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-    </a>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
   </div>
 
   <div class="navbar-menu" class:is-active={isBurger === true}>
@@ -231,12 +230,14 @@
           {/if}
         {:else}
           <div class="navbar-item has-dropdown is-hoverable">
-            <a
+            <button
+              type="button"
               class="navbar-link"
+              style="background: transparent; border: none; font: inherit; cursor: pointer; text-align: left; width: 100%;"
               class:is-active={normalizedPath.startsWith(link.href)}
-              on:click|preventDefault={(e) =>
-                isMobile() && e.currentTarget.parentElement.classList.toggle("is-active")}
-              >{link.label}</a
+              on:click={(e) =>
+                isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}
+              >{link.label}</button
             >
             <div class="navbar-dropdown {!isMobile() && 'is-boxed'}">
               {#each link.children as sublink}
@@ -250,7 +251,7 @@
                   >
                 {:else}
                   <div class="nested has-dropdown navbar-item">
-                    <a
+                    <div
                       class="navbar-link is-arrowless is-flex is-justify-content-space-between is-active"
                       class:is-active={normalizedPath.startsWith(href)}
                     >
@@ -261,7 +262,7 @@
                           aria-hidden="true"
                         ></i>
                       </span>
-                    </a>
+                    </div>
 
                     <div class="dropdown-menu">
                       <div class="dropdown-content">
@@ -319,11 +320,11 @@
     >
       <ul>
         <li>
-          <a class="is-inactive">{selectedLink.label}</a>
+          <span class="is-inactive">{selectedLink.label}</span>
           {#if selectedLink.help}
-            <a style="margin-left: -10px;" class="p-0" href={helpUrl(selectedLink.help)}
+            <a style="margin-left: -10px;" class="p-0" aria-label="Help documentation" href={helpUrl(selectedLink.help)}
               ><span class="icon is-small">
-                <i class="fas fa-question fa-border" />
+                <i class="fas fa-question fa-border"></i>
               </span></a
             >
           {/if}
@@ -336,12 +337,12 @@
         </li>
         {#if selectedSubLink}
           <li>
-            <a class="is-inactive">{selectedSubLink.label}</a>
+            <span class="is-inactive">{selectedSubLink.label}</span>
 
             {#if selectedSubLink.help}
-              <a style="margin-left: -10px;" class="p-0" href={helpUrl(selectedSubLink.help)}
+              <a style="margin-left: -10px;" class="p-0" aria-label="Sublink help documentation" href={helpUrl(selectedSubLink.help)}
                 ><span class="icon is-small">
-                  <i class="fas fa-question fa-border" />
+                  <i class="fas fa-question fa-border"></i>
                 </span></a
               >
             {/if}
@@ -357,11 +358,11 @@
         {#if selectedSubLink}
           {#if selectedSubSubLink}
             <li>
-              <a class="is-inactive">{selectedSubSubLink.label}</a>
+              <span class="is-inactive">{selectedSubSubLink.label}</span>
             </li>
           {:else if selectedLink.href + selectedSubLink.href != normalizedPath}
             <li>
-              <a class="is-inactive">{decodeURIComponent(_.last(normalizedPath.split("/")))}</a>
+              <span class="is-inactive">{decodeURIComponent(_.last(normalizedPath.split("/")) || "")}</span>
             </li>
           {/if}
         {/if}
@@ -375,7 +376,7 @@
         {#each RecurringIcons as icon}
           <div data-tippy-content="<p>{icon.label}</p>">
             <span class="icon is-small has-text-{icon.color}">
-              <i class={"fas " + icon.icon} />
+              <i class={"fas " + icon.icon}></i>
             </span>
             <span class="is-hidden-mobile">{icon.label}</span>
           </div>
@@ -386,9 +387,9 @@
     {#if selectedSubLink?.maxDepthSelector && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
       <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
-          <button class="button is-small" aria-haspopup="true">
+          <button class="button is-small" aria-label="Depth settings" aria-haspopup="true">
             <span class="icon is-small">
-              <i class="fas fa-sliders" />
+              <i class="fas fa-sliders"></i>
             </span>
           </button>
         </div>

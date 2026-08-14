@@ -15,4 +15,4 @@
   }
 </script>
 
-<div class="search-query-editor" bind:this={editorDom} />
+<div class="search-query-editor" bind:this={editorDom}></div>

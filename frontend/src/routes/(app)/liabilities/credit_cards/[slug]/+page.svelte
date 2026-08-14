@@ -143,7 +143,7 @@
             />
             <div class="level-item is-narrow">
               <span class="icon is-size-3">
-                <i class="fas fa-plus" />
+                <i class="fas fa-plus"></i>
               </span>
             </div>
             <LevelItem
@@ -155,7 +155,7 @@
             />
             <div class="level-item is-narrow">
               <span class="icon is-size-3">
-                <i class="fas fa-minus" />
+                <i class="fas fa-minus"></i>
               </span>
             </div>
             <LevelItem
@@ -167,7 +167,7 @@
             />
             <div class="level-item is-narrow">
               <span class="icon is-size-3">
-                <i class="fas fa-equals" />
+                <i class="fas fa-equals"></i>
               </span>
             </div>
             <LevelItem

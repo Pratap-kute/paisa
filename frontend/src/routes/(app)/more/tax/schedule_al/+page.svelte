@@ -52,7 +52,7 @@
                 <th class="has-text-right">Amount</th>
               </tr>
             </thead>
-            <tbody class="d3-schedule-al has-text-grey-dark" />
+            <tbody class="d3-schedule-al has-text-grey-dark"></tbody>
           </table>
         </div>
       </div>
