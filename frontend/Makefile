@@ -81,4 +81,4 @@ parsers parser: ## Rebuild Lezer sheet and search query grammars
 
 generate-fonts: ## Download SVGs and generate custom icon font
 	deno run -A scripts/fonts/download-svgs.js
-	node scripts/fonts/generate-font.js
+	deno run -A scripts/fonts/generate-font.js

@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "mkhl.direnv",
+    "golang.go",
+    "denoland.vscode-deno",
+    "svelte.svelte-vscode",
+    "jnoortheen.nix-ide"
+  ]
+}

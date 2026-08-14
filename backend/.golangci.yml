@@ -30,6 +30,8 @@ linters:
     - unparam
     - unused
   settings:
+    goconst:
+      ignore-tests: true
     dupl:
       threshold: 150
     errcheck:
@@ -82,6 +84,15 @@ linters:
       - text: G307
         linters:
           - gosec
+      - text: G204
+        linters:
+          - gosec
+      - text: G703
+        linters:
+          - gosec
+      - path: pkg/server/
+        linters:
+          - goconst
       - path: pkg/utils/
         text: "var-naming: avoid meaningless package names"
         linters:

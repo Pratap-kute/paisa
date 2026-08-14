@@ -1,5 +1,4 @@
-{ pkgs ? import <nixpkgs> { }, hledger ? import <nixpkgs> { }
-, deno ? pkgs.deno, playwright ? pkgs.playwright-driver }:
+{ pkgs ? import <nixpkgs> { }, hledger ? import <nixpkgs> { } }:
 
 pkgs.mkShell {
   nativeBuildInputs = [
@@ -8,11 +7,9 @@ pkgs.mkShell {
     pkgs.gotools
     pkgs.gopls
     pkgs.sqlite
-    pkgs.nodejs_22
     pkgs.libuuid
-    deno
-    playwright
-    pkgs.node2nix
+    pkgs.deno
+    pkgs.playwright-driver
     # pkgs.pkgsCross.mingwW64.buildPackages.gcc
 
     pkgs.python312Packages.mkdocs-material
@@ -21,11 +18,11 @@ pkgs.mkShell {
     # test
     pkgs.ledger
     hledger.hledger
-  ] ++ (pkgs.lib.optional pkgs.stdenv.isLinux pkgs.wails);
+  ] ++ (pkgs.lib.optional pkgs.stdenv.hostPlatform.isLinux pkgs.wails);
 
   shellHook = ''
     export CGO_ENABLED=1
-    export PLAYWRIGHT_BROWSERS_PATH=${playwright.browsers}
+    export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
   '';
 
   env = { LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.libuuid ]; };

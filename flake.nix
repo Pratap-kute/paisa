@@ -4,49 +4,17 @@
   # https://github.com/simonmichael/hledger/issues/2254
   inputs.hledger-pkgs.url =
     "github:NixOS/nixpkgs/ebe4301cbd8f81c4f8d3244b3632338bbeb6d49c";
-  inputs.deno-pkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs, flake-utils, hledger-pkgs, deno-pkgs }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils, hledger-pkgs }:
+    flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ] (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         hledger = hledger-pkgs.legacyPackages.${system};
-        nodeDependencies = (pkgs.callPackage ./flake/override.nix {
-          nodejs = pkgs.nodejs_22;
-        }).nodeDependencies;
       in {
         devShells.default = import ./shell.nix {
           inherit pkgs;
           inherit hledger;
-          deno = deno-pkgs.legacyPackages.${system}.deno;
-          playwright = deno-pkgs.legacyPackages.${system}.playwright-driver;
-        };
-
-        packages.default = pkgs.buildGoModule {
-          pname = "paisa-cli";
-          meta.mainProgram = "paisa";
-          version = "0.8.0";
-
-          src = ./.;
-
-          nativeBuildInputs = [ pkgs.nodejs_22 ];
-
-          vendorHash = "sha256-5jrxI+zSKbopGs5GmGVyqQcMHNZJbCsiFEH/LPXWxpk=";
-
-          env = {
-            CGO_ENABLED = 1;
-          };
-
-          doCheck = false;
-
-          subPackages = [ "backend" ];
-
-          preConfigure = ''
-            ln -s ${nodeDependencies}/lib/node_modules ./frontend/node_modules
-            export PATH="${nodeDependencies}/.bin:$PATH"
-            cd frontend && npm run build && cd ..
-          '';
-
         };
       });
 }
