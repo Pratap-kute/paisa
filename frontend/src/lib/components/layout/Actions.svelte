@@ -5,7 +5,11 @@
   import { obscure } from "../../../persisted_store";
   import { goto } from "$app/navigation";
 
+  let open = $state(false);
+  let dropdownEl: HTMLElement | undefined = $state();
+
   async function syncWithLoader(request: Record<string, any>) {
+    open = false;
     try {
       await sync(request);
     } finally {
@@ -22,16 +26,39 @@
   });
 
   function doLogout() {
+    open = false;
     logout();
     goto("/login");
   }
 
-  let showLogout = isLoggedIn();
+  let showLogout = $derived(isLoggedIn());
+
+  function onWindowClick(event: MouseEvent) {
+    if (open && dropdownEl && !dropdownEl.contains(event.target as Node)) {
+      open = false;
+    }
+  }
 </script>
 
-<div class="dropdown ml-2 is-hoverable {isMobile() ? 'is-left' : 'is-right'}">
+<svelte:window onclick={onWindowClick} />
+
+<div
+  bind:this={dropdownEl}
+  class="dropdown ml-2 {isMobile() ? 'is-left' : 'is-right'}"
+  class:is-active={open}
+>
   <div class="dropdown-trigger dropdown-icon">
-    <button class="button is-large" aria-label="More actions" aria-haspopup="true">
+    <button
+      type="button"
+      class="button is-large"
+      aria-label="More actions"
+      aria-haspopup="true"
+      aria-expanded={open}
+      onclick={(e) => {
+        e.stopPropagation();
+        open = !open;
+      }}
+    >
       <span class="icon">
         <i class="fas fa-ellipsis-vertical"></i>
       </span>
@@ -39,19 +66,31 @@
   </div>
   <div class="dropdown-menu" id="dropdown-menu4" role="menu">
     <div class="dropdown-content">
-      <button type="button" onclick={(_e) => syncWithLoader({ journal: true })} class="dropdown-item icon-text">
+      <button
+        type="button"
+        onclick={() => syncWithLoader({ journal: true })}
+        class="dropdown-item icon-text"
+      >
         <span class="icon is-small">
           <i class="fa-regular fa-file-lines"></i>
         </span>
         <span>Sync Journal</span>
       </button>
-      <button type="button" onclick={(_e) => syncWithLoader({ prices: true })} class="dropdown-item icon-text">
+      <button
+        type="button"
+        onclick={() => syncWithLoader({ prices: true })}
+        class="dropdown-item icon-text"
+      >
         <span class="icon is-small">
           <i class="fas fa-dollar-sign"></i>
         </span>
         <span>Update Prices</span>
       </button>
-      <button type="button" onclick={(_e) => syncWithLoader({ portfolios: true })} class="dropdown-item icon-text">
+      <button
+        type="button"
+        onclick={() => syncWithLoader({ portfolios: true })}
+        class="dropdown-item icon-text"
+      >
         <span class="icon is-small">
           <i class="fas fa-layer-group"></i>
         </span>
@@ -69,7 +108,7 @@
       </div>
       {#if showLogout}
         <hr class="dropdown-divider" />
-        <button type="button" onclick={(_e) => doLogout()} class="dropdown-item icon-text">
+        <button type="button" onclick={() => doLogout()} class="dropdown-item icon-text">
           <span class="icon is-small">
             <i class="fas fa-arrow-right-from-bracket"></i>
           </span>

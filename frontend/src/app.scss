@@ -1507,6 +1507,16 @@ textarea:invalid {
   }
 }
 
+button.dropdown-item {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  font: inherit;
+}
+
 .nested.has-dropdown {
   &:hover > .dropdown-menu {
     display: block;
