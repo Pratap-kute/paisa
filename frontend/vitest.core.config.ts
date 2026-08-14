@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import process from "node:process";
 
 const threshold = process.env.COVERAGE_REPORT_ONLY === "true" ? 0 : 60;
 
