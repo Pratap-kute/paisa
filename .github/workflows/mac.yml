@@ -7,11 +7,14 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   mac-binary:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
@@ -31,7 +34,7 @@ jobs:
           cd ..
           cp desktop/Paisa.dmg paisa-app-macos-amd64.dmg
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           files: |

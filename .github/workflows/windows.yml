@@ -7,11 +7,14 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: write
+
 jobs:
   windows-binary:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
@@ -34,11 +37,11 @@ jobs:
           $env:PATH += ";C:\Program Files (x86)\NSIS\Bin"
           cd desktop
           go install github.com/wailsapp/wails/v2/cmd/wails@latest
-          wails build -tags webkit2_40 -nsis -webview2 embed
+          wails build -nsis -webview2 embed
           cd ..
           cp .\desktop\build\bin\paisa-amd64-installer.exe paisa-app-windows-amd64.exe
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           files: |
