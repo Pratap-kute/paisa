@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine AS web
+FROM --platform=$BUILDPLATFORM denoland/deno:alpine AS web
 WORKDIR /usr/src/paisa/frontend
 COPY frontend/deno.json frontend/deno.lock* ./
 RUN deno install

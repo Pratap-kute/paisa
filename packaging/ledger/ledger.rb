@@ -38,11 +38,16 @@ class Ledger < Formula
   depends_on "python@3.12" => :build
   depends_on "cmake" => :build
 
-  patch :DATA
-
   def install
     ENV.cxx11
     ENV.prepend_path "PATH", Formula["python@3.12"].opt_libexec/"bin"
+
+    inreplace "CMakeLists.txt",
+      "target_link_libraries(${_target} ${MPFR_LIB})",
+      "target_link_libraries(${_target} #{Formula["mpfr"].opt_lib}/libmpfr.a)"
+    inreplace "CMakeLists.txt",
+      "target_link_libraries(${_target} ${GMP_LIB})",
+      "target_link_libraries(${_target} #{Formula["gmp"].opt_lib}/libgmp.a)"
 
     args = %W[
       --jobs=#{ENV.make_jobs}
@@ -75,20 +80,3 @@ class Ledger < Formula
     assert_equal "          $-2,500.00  Equity", balance.read.chomp
   end
 end
-
-__END__
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 83a6f89d..e84be891 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -274,8 +274,8 @@ find_opt_library_and_header(EDIT_PATH histedit.h EDIT_LIB edit HAVE_EDIT)
- ########################################################################
-
- macro(add_ledger_library_dependencies _target)
--  target_link_libraries(${_target} ${MPFR_LIB})
--  target_link_libraries(${_target} ${GMP_LIB})
-+  target_link_libraries(${_target} /usr/local/lib/libmpfr.a)
-+  target_link_libraries(${_target} /usr/local/lib/libgmp.a)
-   if (HAVE_EDIT)
-     target_link_libraries(${_target} ${EDIT_LIB})
-   endif()
