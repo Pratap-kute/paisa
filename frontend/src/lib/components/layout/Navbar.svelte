@@ -433,27 +433,3 @@
     {/if}
   </div>
 </div>
-
-<style lang="scss">
-  .breadcrumb {
-    ul {
-      align-items: center;
-    }
-    li {
-      display: inline-flex;
-      align-items: center;
-
-      & + li::before {
-        padding: 0 0.5rem;
-      }
-    }
-    .is-inactive {
-      display: inline-flex;
-      align-items: center;
-      color: inherit;
-    }
-    li a span.icon {
-      margin-top: -2px;
-    }
-  }
-</style>

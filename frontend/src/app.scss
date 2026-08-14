@@ -219,13 +219,18 @@ $footerActiveColor: #d00;
     border-radius: $radius;
     color: $grey-dark !important;
     font-size: 0.75rem;
-    border: none;
-    background: transparent;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
     cursor: pointer;
+    font-family: inherit;
+    line-height: normal;
 
     &.is-active {
       background-color: $white !important;
       color: $black-bis !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
     }
   }
 }
@@ -1287,15 +1292,39 @@ nav.level.grid-2 {
   }
 }
 
-nav.breadcrumb a.is-inactive,
-nav.breadcrumb span.is-inactive {
-  align-items: center;
-  color: $grey;
-  cursor: default;
-  display: flex;
-  justify-content: center;
-  padding: 0 0.75em;
-  pointer-events: none;
+nav.breadcrumb {
+  ul {
+    align-items: center;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+
+    & + li::before {
+      padding: 0 0.5rem;
+    }
+  }
+
+  a.is-inactive,
+  span.is-inactive {
+    align-items: center;
+    color: $grey;
+    cursor: default;
+    display: inline-flex;
+    justify-content: center;
+    padding: 0 0.5rem;
+    pointer-events: none;
+  }
+
+  li:first-child a.is-inactive,
+  li:first-child span.is-inactive {
+    padding-left: 0;
+  }
+
+  li a span.icon {
+    margin-top: -2px;
+  }
 }
 
 .breadcrumb.has-chevron-separator li + li::before {
@@ -1410,6 +1439,19 @@ span.progress-percent.less-than-10 {
 .config-header {
   margin-left: -3px;
   margin-bottom: 5px;
+
+  button.is-link {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-align: inherit;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 .config-body {
@@ -1431,6 +1473,11 @@ span.progress-percent.less-than-10 {
 .config-add {
   float: right;
   margin-right: 10px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .config-delete {

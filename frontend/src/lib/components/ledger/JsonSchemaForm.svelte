@@ -347,18 +347,3 @@
 {:else}
   <div>{JSON.stringify(schema)}</div>
 {/if}
-
-<style>
-  button.is-link,
-  button.config-delete,
-  button.config-add {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font: inherit;
-    color: inherit;
-    cursor: pointer;
-    text-align: inherit;
-  }
-</style>
