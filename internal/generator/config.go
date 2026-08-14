@@ -16,6 +16,7 @@ import (
 	"github.com/ananthakumaran/paisa/internal/utils"
 	"github.com/google/btree"
 	"github.com/samber/lo"
+	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,7 +35,7 @@ type GeneratorState struct {
 
 var pricesTree map[string]*btree.BTree
 
-func MinimalConfig(cwd string) {
+func MinimalConfig(cwd string) error {
 	configFilePath := filepath.Join(cwd, "paisa.yaml")
 	config := `
 journal_path: '%s'
@@ -45,24 +46,33 @@ db_path: '%s'
 	dbFilePath := filepath.Join(cwd, "paisa.db")
 	err := os.WriteFile(configFilePath, fmt.Appendf(nil, config, filepath.Base(journalFilePath), filepath.Base(dbFilePath)), 0o600)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	log.Info("Generating journal file: ", journalFilePath)
 	//nolint:gosec // generating sample journal in current working directory
-	_, err = os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	f, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	_ = f.Close()
+	return nil
 }
 
-func Demo(cwd string) {
-	generateConfigFile(cwd)
-	generateJournalFile(cwd)
-	generateSheetFile(cwd)
+func Demo(cwd string) error {
+	if err := generateConfigFile(cwd); err != nil {
+		return err
+	}
+	if err := generateJournalFile(cwd); err != nil {
+		return err
+	}
+	if err := generateSheetFile(cwd); err != nil {
+		return err
+	}
+	return nil
 }
 
-func generateConfigFile(cwd string) {
+func generateConfigFile(cwd string) error {
 	configFilePath := filepath.Join(cwd, "paisa.yaml")
 	config := `
 journal_path: '%s'
@@ -169,8 +179,9 @@ credit_cards:
 	dbFilePath := filepath.Join(cwd, "paisa.db")
 	err := os.WriteFile(configFilePath, fmt.Appendf(nil, config, filepath.Base(journalFilePath), filepath.Base(dbFilePath)), 0o600)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 func emitTransaction(file *os.File, date time.Time, payee string, from string, to string, amount any) {
@@ -182,35 +193,91 @@ func emitTransaction(file *os.File, date time.Time, payee string, from string, t
 		amountString = formatFloat(amount)
 	}
 
-	_, err := fmt.Fprintf(file, `
+	_, _ = fmt.Fprintf(file, `
 %s %s
     %s                                %s INR
     %s
 `, date.Format("2006/01/02"), payee, to, amountString, from)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func emitCommodityBuy(file *os.File, date time.Time, commodity string, from string, to string, amount float64) float64 {
 	pc := utils.BTreeDescendFirstLessOrEqual(pricesTree[commodity], price.Price{Date: date})
-	units := amount / pc.Value.InexactFloat64()
-	_, err := fmt.Fprintf(file, `
+	priceVal := pc.Value.InexactFloat64()
+	if priceVal <= 0 {
+		priceVal = 10.0
+	}
+	units := amount / priceVal
+	_, _ = fmt.Fprintf(file, `
 %s Investment
     %s                      %s %s @    %s INR
     %s
-`, date.Format("2006/01/02"), to, formatFloat(units), commodity, formatFloat(pc.Value.InexactFloat64()), from)
-	if err != nil {
-		log.Fatal(err)
-	}
+`, date.Format("2006/01/02"), to, formatFloat(units), commodity, formatFloat(priceVal), from)
 	return units
 }
 
 func emitCommoditySell(file *os.File, date time.Time, commodity string, from string, to string, amount float64, availableUnits float64) (float64, float64) {
 	pc := utils.BTreeDescendFirstLessOrEqual(pricesTree[commodity], price.Price{Date: date})
-	requiredUnits := amount / pc.Value.InexactFloat64()
+	priceVal := pc.Value.InexactFloat64()
+	if priceVal <= 0 {
+		priceVal = 10.0
+	}
+	requiredUnits := amount / priceVal
 	units := math.Min(availableUnits, requiredUnits)
-	return emitCommodityBuy(file, date, commodity, from, to, -units*pc.Value.InexactFloat64()), units * pc.Value.InexactFloat64()
+	return emitCommodityBuy(file, date, commodity, from, to, -units*priceVal), units * priceVal
+}
+
+func generateFallbackPrices(schemeCode string, commodityType config.CommodityType, commodityName string) []*price.Price {
+	basePrice := 20.0
+	annualGrowth := 0.10
+
+	switch commodityName {
+	case "NIFTY":
+		basePrice = 35.0
+		annualGrowth = 0.12
+	case "PPFAS":
+		basePrice = 12.0
+		annualGrowth = 0.15
+	case "ABCBF":
+		basePrice = 40.0
+		annualGrowth = 0.08
+	case "NPS_HDFC_E":
+		basePrice = 12.0
+		annualGrowth = 0.11
+	case "NPS_HDFC_C":
+		basePrice = 12.0
+		annualGrowth = 0.08
+	case "NPS_HDFC_G":
+		basePrice = 12.0
+		annualGrowth = 0.08
+	}
+
+	startDate, _ := time.ParseInLocation("02-01-2006", fmt.Sprintf("01-01-%d", StartYear), config.TimeZone())
+	endDate := utils.EndOfToday().AddDate(0, 1, 0)
+
+	var prices []*price.Price
+	currentDate := startDate
+	currentPrice := basePrice
+
+	monthlyGrowth := math.Pow(1.0+annualGrowth, 1.0/12.0)
+
+	for !currentDate.After(endDate) {
+		monthIndex := (currentDate.Year()-StartYear)*12 + int(currentDate.Month())
+		fuzz := 1.0 + 0.02*math.Sin(float64(monthIndex)*0.5)
+		val := decimal.NewFromFloat(math.Round(currentPrice*fuzz*100) / 100)
+
+		prices = append(prices, &price.Price{
+			Date:          currentDate,
+			CommodityType: commodityType,
+			CommodityID:   schemeCode,
+			CommodityName: commodityName,
+			Value:         val,
+		})
+
+		currentPrice *= monthlyGrowth
+		currentDate = currentDate.AddDate(0, 1, 0)
+	}
+
+	return prices
 }
 
 func loadPrices(schemeCode string, commodityType config.CommodityType, commodityName string, pricesTree map[string]*btree.BTree) {
@@ -226,13 +293,16 @@ func loadPrices(schemeCode string, commodityType config.CommodityType, commodity
 		// Other commodity types not supported in mock generator
 	}
 
-	if err != nil {
-		log.Fatal(err)
+	if err != nil || len(prices) == 0 {
+		if err != nil {
+			log.Warnf("Failed to fetch prices for %s (%s): %v. Using fallback demo prices.", commodityName, schemeCode, err)
+		}
+		prices = generateFallbackPrices(schemeCode, commodityType, commodityName)
 	}
 
 	pricesTree[commodityName] = btree.New(2)
-	for _, price := range prices {
-		pricesTree[commodityName].ReplaceOrInsert(*price)
+	for _, p := range prices {
+		pricesTree[commodityName].ReplaceOrInsert(*p)
 	}
 }
 
@@ -419,14 +489,15 @@ func emitInvestment(state *GeneratorState, start time.Time) {
 	}
 }
 
-func generateJournalFile(cwd string) {
+func generateJournalFile(cwd string) error {
 	journalFilePath := filepath.Join(cwd, "main.ledger")
 	log.Info("Generating journal file: ", journalFilePath)
 	//nolint:gosec // generating sample journal in current working directory
 	ledgerFile, err := os.OpenFile(journalFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	defer func() { _ = ledgerFile.Close() }()
 
 	startMonth := utils.BeginningOfMonth(utils.EndOfToday())
 	endMonth := startMonth.AddDate(0, 2, 0)
@@ -460,13 +531,13 @@ func generateJournalFile(cwd string) {
 
 `, startMonth.Format("2006-01-02"), endMonth.Format("2006-01-02"))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	end := utils.EndOfToday()
 	start, err := time.Parse("02-01-2006", fmt.Sprintf("01-01-%d", StartYear))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	pricesTree = make(map[string]*btree.BTree)
@@ -488,9 +559,10 @@ func generateJournalFile(cwd string) {
 	}
 
 	emitChitFund(&state)
+	return nil
 }
 
-func generateSheetFile(cwd string) {
+func generateSheetFile(cwd string) error {
 	sheetFilePath := filepath.Join(cwd, "Schedule AL.paisa")
 	sheet := `
 date_query = {date <= [2023-03-31]}
@@ -520,6 +592,7 @@ total = immovable + metal + art + vehicle + bank + share + insurance + loan + ca
 	log.Info("Generating sheet file: ", sheetFilePath)
 	err := os.WriteFile(sheetFilePath, []byte(sheet), 0o600)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }

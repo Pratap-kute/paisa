@@ -134,7 +134,9 @@ func InitConfig() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		generator.MinimalConfig(xdgDocumentDir)
+		if err := generator.MinimalConfig(xdgDocumentDir); err != nil {
+			log.Fatal(err)
+		}
 		config.LoadConfigFile(xdgDocumentPath)
 	}
 }

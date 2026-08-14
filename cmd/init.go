@@ -17,7 +17,9 @@ var initCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		generator.Demo(cwd)
+		if err := generator.Demo(cwd); err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 

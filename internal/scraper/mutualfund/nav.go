@@ -15,11 +15,15 @@ import (
 	"github.com/ananthakumaran/paisa/internal/model/price"
 )
 
+var httpClient = &http.Client{
+	Timeout: 15 * time.Second,
+}
+
 func GetNav(schemeCode string, commodityName string) ([]*price.Price, error) {
 	log.Info("Fetching Mutual Fund nav from mfapi.in")
 	url := fmt.Sprintf("https://api.mfapi.in/mf/%s", schemeCode)
 	//nolint:gosec // URL is constructed from validated scheme code
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err
 	}

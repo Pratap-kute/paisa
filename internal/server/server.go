@@ -88,7 +88,11 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		generator.Demo(config.GetConfigDir())
+		if err := generator.Demo(config.GetConfigDir()); err != nil {
+			log.Errorf("Failed to generate demo data: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
+			return
+		}
 		config.LoadConfigFile(config.GetConfigPath())
 		Sync(db, SyncRequest{Journal: true, Prices: true, Portfolios: true})
 		c.JSON(200, gin.H{"success": true})
