@@ -7,9 +7,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var updateJournal bool
-var updateCommodities bool
-var updatePortfolios bool
+var (
+	updateJournal     bool
+	updateCommodities bool
+	updatePortfolios  bool
+)
 
 var updateCmd = &cobra.Command{
 	Use:   "update",

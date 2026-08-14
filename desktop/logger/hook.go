@@ -14,7 +14,6 @@ type Hook struct {
 }
 
 func (hook *Hook) Fire(entry *log.Entry) error {
-
 	if *hook.Ctx == nil {
 		return nil
 	}
@@ -37,8 +36,7 @@ func (hook *Hook) Levels() []log.Level {
 	return hook.LogLevels
 }
 
-type Logger struct {
-}
+type Logger struct{}
 
 func (logger *Logger) Print(message string) {
 	log.Print(message)

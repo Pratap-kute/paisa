@@ -73,7 +73,6 @@ func main() {
 			WebviewGpuPolicy: linuxGpuPolicy,
 		},
 	})
-
 	if err != nil {
 		println("Error:", err.Error())
 	}

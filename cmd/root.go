@@ -19,8 +19,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configFile string
-var now string
+var (
+	configFile string
+	now        string
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "paisa",
@@ -52,7 +54,6 @@ func Initialize() {
 	}
 
 	InitConfig()
-
 }
 
 const envTrue = "true"
