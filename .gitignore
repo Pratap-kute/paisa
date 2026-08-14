@@ -1,4 +1,6 @@
-paisa.db
+/paisa.db
+backend/paisa.db
+!**/tests/fixture/**/paisa.db
 /paisa.yaml
 /Schedule AL.paisa
 /paisa
