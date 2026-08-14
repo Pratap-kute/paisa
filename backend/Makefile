@@ -29,12 +29,15 @@ clean: ## Clean built backend binary
 
 ##@ Testing & Code Quality
 
-.PHONY: test lint format fmt
+.PHONY: test lint audit vulncheck format fmt
 test: ensure-static ## Run all Go unit and regression tests
 	go test -count=1 ./...
 
 lint: ensure-static ## Run golangci-lint
 	golangci-lint run
+
+audit vulncheck: ensure-static ## Run govulncheck vulnerability scanner
+	govulncheck ./...
 
 format fmt: ## Format Go source code
 	gofmt -s -w .

@@ -58,11 +58,14 @@ test-visual: ## Run Playwright visual snapshot tests
 test-coverage: ## Generate frontend test coverage report
 	deno task test:coverage
 
-##@ Code Quality
+##@ Code Quality & Security
 
-.PHONY: lint check typecheck format fmt
+.PHONY: lint check typecheck format fmt audit vulncheck
 lint: ## Run Deno linter
 	deno task lint
+
+audit vulncheck: ## Run Deno dependency vulnerability audit
+	deno task audit
 
 check typecheck: ## Run TypeScript and Svelte template type checks
 	deno task check

@@ -110,12 +110,12 @@ test-coverage: ## Generate frontend test coverage report
 	$(MAKE) -C frontend test-coverage
 
 # ------------------------------------------------------------------------------
-# Code Quality & Formatting
+# Code Quality & Security
 # ------------------------------------------------------------------------------
 
-##@ Code Quality
+##@ Code Quality & Security
 
-.PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck format fmt
+.PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck audit audit-all audit-frontend audit-backend audit-desktop vulncheck vulncheck-all vulncheck-frontend vulncheck-backend vulncheck-desktop vulncheck-go format fmt
 quality: lint test-backend ## Run full code quality pipeline (linters, typecheck, tests)
 
 lint: lint-frontend typecheck lint-backend ## Run all linters (Deno, TypeScript, GolangCI)
@@ -128,6 +128,17 @@ lint-frontend: ## Run Deno linter for frontend code
 
 check typecheck: ## Run TypeScript and Svelte template type checks
 	$(MAKE) -C frontend check
+
+audit vulncheck audit-all vulncheck-all: audit-frontend audit-backend audit-desktop ## Run vulnerability checks across frontend, backend, and desktop
+
+audit-frontend vulncheck-frontend: ## Run vulnerability audit for frontend (deno audit)
+	$(MAKE) -C frontend audit
+
+audit-backend vulncheck-backend vulncheck-go: ## Run vulnerability check for backend (govulncheck)
+	$(MAKE) -C backend audit
+
+audit-desktop vulncheck-desktop: ## Run vulnerability check for desktop (govulncheck)
+	$(MAKE) -C desktop audit
 
 format fmt: ## Format frontend and Go source files
 	$(MAKE) -C frontend format

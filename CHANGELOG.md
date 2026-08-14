@@ -3,7 +3,7 @@
 ### 0.8.0 (2026-08-14)
 
 - **Monorepo Architecture**: Clean isolation of `frontend/` (SvelteKit/Deno), `backend/` (Go service/CLI), and `desktop/` (Wails application) with top-level workspace coordination
-- **Modernized Toolchain**: Migrated frontend toolchain to native Deno and updated Go workspace to 1.24/1.26 compatibility
+- **Modernized Toolchain**: Migrated frontend toolchain to native Deno and updated Go workspace to 1.26
 - **Wails Desktop App**: Standalone cross-platform desktop application packaging for Linux (`.deb`), macOS (`.dmg`), and Windows (`.exe`)
 - **Docker Multi-Arch Images**: Automated multi-architecture release pipeline (`linux/amd64`, `linux/arm64`) with variants for `hledger` and `beancount`
 - **CI & Testing Automation**: Fully automated Playwright E2E browser tests, visual regression snapshot suite, and Go unit/regression tests

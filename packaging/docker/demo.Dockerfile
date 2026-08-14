@@ -1,24 +1,24 @@
-FROM denoland/deno:alpine AS web
-WORKDIR /usr/src/paisa
-COPY deno.json deno.lock* ./
+FROM --platform=$BUILDPLATFORM denoland/deno:alpine AS web
+WORKDIR /usr/src/paisa/frontend
+COPY frontend/deno.json frontend/deno.lock* ./
 RUN deno install
-COPY . .
+COPY frontend ./
 RUN deno task build
 
-FROM golang:1.24-alpine3.21 AS go
-WORKDIR /usr/src/paisa
+FROM golang:1.26-alpine AS go
+WORKDIR /usr/src/paisa/backend
 RUN apk --no-cache add sqlite gcc g++
-COPY go.mod go.sum ./
+COPY backend/go.mod backend/go.sum ./
 RUN go mod download && go mod verify
-COPY . .
-COPY --from=web /usr/src/paisa/web/static ./web/static
-RUN CGO_ENABLED=1 go build
+COPY backend ./
+COPY --from=web /usr/src/paisa/backend/web/static ./web/static
+RUN CGO_ENABLED=1 go build -o /usr/src/paisa/paisa .
 
-FROM alpine:3.21
+FROM alpine:latest
 RUN apk --no-cache add ca-certificates ledger yq
 WORKDIR /root/
-COPY --from=go /usr/src/paisa/paisa ./
-RUN ./paisa init && ./paisa update && yq -i '.readonly = true' paisa.yaml
+COPY --from=go /usr/src/paisa/paisa /usr/bin/
+RUN paisa init && paisa update && yq -i '.readonly = true' paisa.yaml
 ENV PAISA_DISABLE_LOG_FILE=true
 EXPOSE 7500
-CMD ["./paisa", "serve"]
+CMD ["paisa", "serve"]

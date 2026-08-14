@@ -3,9 +3,10 @@
     "dev": "deno run -A npm:vite dev --host 0.0.0.0",
     "preview": "deno run -A npm:vite preview",
 
-    "build": "deno run -A npm:@sveltejs/kit sync && deno run -A npm:vite build",
+    "build": "deno run -A --unsafe-proto npm:@sveltejs/kit sync && deno run -A --unsafe-proto npm:vite build",
     "build:watch": "deno run -A npm:vite build --watch",
 
+    "audit": "deno audit",
     "check": "deno task typecheck",
     "check:tooling": "deno run -A scripts/check.ts --tooling",
     "format": "deno fmt",
