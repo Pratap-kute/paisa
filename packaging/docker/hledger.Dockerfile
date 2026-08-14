@@ -1,4 +1,5 @@
-FROM docker.io/ananthakumaran/paisa:v0.7.4
+ARG BASE_IMAGE=pratapkute/paisa:latest
+FROM ${BASE_IMAGE}
 
 RUN apk --no-cache add hledger
 
