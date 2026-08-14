@@ -21,7 +21,6 @@ var httpClient = &http.Client{
 func GetNav(schemeCode string, commodityName string) ([]*price.Price, error) {
 	log.Info("Fetching NPS Fund nav from Purified Bytes")
 	url := fmt.Sprintf("https://nps.finbodhi.com/api/schemes/%s/nav.json", schemeCode)
-	//nolint:gosec // URL is constructed from scheme code
 	resp, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err

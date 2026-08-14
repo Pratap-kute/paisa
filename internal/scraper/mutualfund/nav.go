@@ -22,7 +22,6 @@ var httpClient = &http.Client{
 func GetNav(schemeCode string, commodityName string) ([]*price.Price, error) {
 	log.Info("Fetching Mutual Fund nav from mfapi.in")
 	url := fmt.Sprintf("https://api.mfapi.in/mf/%s", schemeCode)
-	//nolint:gosec // URL is constructed from validated scheme code
 	resp, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err

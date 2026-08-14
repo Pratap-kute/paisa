@@ -66,10 +66,7 @@ func Demo(cwd string) error {
 	if err := generateJournalFile(cwd); err != nil {
 		return err
 	}
-	if err := generateSheetFile(cwd); err != nil {
-		return err
-	}
-	return nil
+	return generateSheetFile(cwd)
 }
 
 func generateConfigFile(cwd string) error {
