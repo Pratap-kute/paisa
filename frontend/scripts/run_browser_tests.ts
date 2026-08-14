@@ -1,6 +1,21 @@
-async function waitForPort(port: number, timeout = 120_000) {
+async function waitForPort(
+  port: number,
+  serverStatus: Promise<Deno.CommandStatus>,
+  timeout = 120_000,
+) {
+  let isDone = false;
+  serverStatus.then((status) => {
+    isDone = true;
+    if (!status.success) {
+      throw new Error(`Test server exited early with code ${status.code}`);
+    }
+  });
+
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
+    if (isDone) {
+      throw new Error(`Test server exited before port ${port} became ready`);
+    }
     try {
       const connection = await Deno.connect({ hostname: "127.0.0.1", port });
       connection.close();
@@ -24,12 +39,12 @@ const server = new Deno.Command(Deno.execPath(), {
     "scripts/test_server.ts",
   ],
   stdin: "null",
-  stdout: Deno.env.get("PAISA_TEST_SERVER_LOG") ? "inherit" : "null",
-  stderr: Deno.env.get("PAISA_TEST_SERVER_LOG") ? "inherit" : "null",
+  stdout: "inherit",
+  stderr: "inherit",
 }).spawn();
 
 try {
-  await waitForPort(5173);
+  await waitForPort(5173, server.status);
   const status = await new Deno.Command(Deno.execPath(), {
     args: ["run", "-A", "npm:playwright@1.61.1", "test", ...Deno.args],
     stdin: "inherit",
@@ -40,10 +55,8 @@ try {
 } finally {
   try {
     server.kill("SIGTERM");
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error("Failed to stop browser test server", error);
-    }
+  } catch (_error) {
+    // Child process may already have terminated
   }
   await server.status;
 }
