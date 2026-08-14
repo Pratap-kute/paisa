@@ -53,7 +53,11 @@ const pages = [
   { name: "goals", path: "/more/goals", readyText: "Retirement" },
   { name: "retirement-goal", path: "/more/goals/retirement/Retirement" },
   { name: "savings-goal", path: "/more/goals/savings/House" },
-  { name: "logs", path: "/more/logs" },
+  {
+    name: "logs",
+    path: "/more/logs",
+    readyText: "paisa server started on port 7500",
+  },
   { name: "sheets", path: "/more/sheets" },
   { name: "sheet-detail", path: "/more/sheets/overview.paisa" },
   { name: "tax-capital-gains", path: "/more/tax/capital_gains" },
@@ -61,6 +65,41 @@ const pages = [
   { name: "tax-schedule-al", path: "/more/tax/schedule_al" },
   { name: "login", path: "/login" },
 ] as const;
+
+const mockLogs = {
+  logs: [
+    {
+      time: "2022-02-07T10:00:00Z",
+      level: "info",
+      msg: "paisa server started on port 7500",
+      port: 7500,
+    },
+    {
+      time: "2022-02-07T10:00:01Z",
+      level: "info",
+      msg: "loaded ledger journal with 42 transactions",
+      file: "main.ledger",
+    },
+    {
+      time: "2022-02-07T10:00:02Z",
+      level: "warning",
+      msg: "commodity price history partially synced",
+      source: "yahoo",
+    },
+    {
+      time: "2022-02-07T10:00:03Z",
+      level: "error",
+      msg: "failed to fetch latest exchange rate",
+      symbol: "USD/INR",
+    },
+    {
+      time: "2022-02-07T10:00:04Z",
+      level: "info",
+      msg: "client session authenticated",
+      user: "demo",
+    },
+  ],
+};
 
 const variants = [
   { name: "desktop-light", width: 1440, height: 900, theme: "light" },
@@ -99,6 +138,15 @@ for (const route of pages) {
       await page.addInitScript((theme) => {
         localStorage.setItem("theme-preference", theme);
       }, variant.theme);
+
+      if (route.name === "logs") {
+        await page.route("**/api/logs", (r) =>
+          r.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(mockLogs),
+          }));
+      }
 
       await page.goto(route.path);
       await page.waitForLoadState("networkidle");
