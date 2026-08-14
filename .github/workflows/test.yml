@@ -20,9 +20,54 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  lint:
+    name: Lint & Type-Check
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Install dependencies
+        run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Lint and type-check
+        run: nix develop --command make lint
+
+  unit-coverage:
+    name: Backend & Frontend Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Install dependencies
+        run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Backend tests
+        run: nix develop --command make test-backend
+      - name: Frontend unit tests
+        run: nix develop --command make test-unit
+      - name: Core coverage gate and component coverage report
+        run: nix develop --command make test-coverage
+      - name: Upload coverage artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: coverage/
+
+  e2e:
+    name: Browser E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: nixbuild/nix-quick-install-action@v30
@@ -34,26 +79,43 @@ jobs:
         run: nix develop --command bash -c "cd frontend && deno install"
       - name: Build frontend static assets
         run: nix develop --command make build-frontend
-      - name: Lint and type-check
-        run: nix develop --command make lint
-      - name: Build and test
-        run: nix develop --command make test
-      - name: Component tests
-        run: nix develop --command make test-component
-      - name: Browser tests
+      - name: Browser E2E tests
         run: nix develop --command make test-e2e
-      - name: Visual tests
-        run: nix develop --command make test-visual
-      - name: Core coverage gate and component coverage report
-        run: nix develop --command make test-coverage
-      - name: Upload failed-test reports
+      - name: Upload E2E test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-test-reports-${{ github.run_attempt }}
+          name: e2e-test-reports-${{ github.run_attempt }}
           if-no-files-found: ignore
           retention-days: 7
           path: |
-            coverage/
+            playwright-report/
+            test-results/
+
+  visual:
+    name: Visual Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Install dependencies
+        run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Build frontend static assets
+        run: nix develop --command make build-frontend
+      - name: Visual snapshot tests
+        run: nix develop --command make test-visual
+      - name: Upload visual test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-test-reports-${{ github.run_attempt }}
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
             playwright-report/
             test-results/

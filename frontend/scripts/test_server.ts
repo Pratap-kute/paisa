@@ -106,7 +106,17 @@ try {
     '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
     { mode: 0o750 },
   );
-  await run(Deno.execPath(), ["task", "build"]);
+  const staticIndex = join(root, "../backend/web/static/index.html");
+  let hasStatic = false;
+  try {
+    Deno.statSync(staticIndex);
+    hasStatic = true;
+  } catch (_) {
+    // Static assets not built yet
+  }
+  if (!hasStatic || Deno.env.get("PAISA_REBUILD_FRONTEND") === "true") {
+    await run(Deno.execPath(), ["task", "build"]);
+  }
   await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
 
   const backend = new Deno.Command(binary, {
