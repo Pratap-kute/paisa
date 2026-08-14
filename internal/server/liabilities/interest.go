@@ -32,9 +32,21 @@ func GetInterest(db *gorm.DB) gin.H {
 	expenses := query.Init(db).Like("Expenses:Interest:%").All()
 	postings = service.PopulateMarketPrice(db, postings)
 	byAccount := lo.GroupBy(postings, func(p posting.Posting) string { return p.RestName(1) })
+	var accounts []string
+	seen := make(map[string]bool)
+	for i := range postings {
+		p := &postings[i]
+		acc := p.RestName(1)
+		if !seen[acc] {
+			seen[acc] = true
+			accounts = append(accounts, acc)
+		}
+	}
+
 	//nolint:prealloc // nil slice required for null JSON serialization when empty
 	var interests []Interest
-	for account, ps := range byAccount {
+	for _, account := range accounts {
+		ps := byAccount[account]
 		es := lo.Filter(expenses, func(e posting.Posting, _ int) bool { return e.RestName(1) == "Interest:"+account })
 		ps = append(ps, es...)
 		interests = append(interests, Interest{Account: "Liabilities:" + account, APR: service.APR(db, ps), OverviewTimeline: computeOverviewTimeline(db, ps)})

@@ -1,7 +1,7 @@
 {
   "expenses": [
     {
-      "id": 166,
+      "id": 274,
       "transaction_id": "2",
       "date": "2022-01-03T00:00:00Z",
       "payee": "Rent",
@@ -22,7 +22,7 @@
       "balance": 0
     },
     {
-      "id": 184,
+      "id": 292,
       "transaction_id": "11",
       "date": "2022-01-09T00:00:00Z",
       "payee": "Multi Currency Debit",
@@ -199,7 +199,7 @@
     "expenses": {
       "2022-01": [
         {
-          "id": 166,
+          "id": 274,
           "transaction_id": "2",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
@@ -220,7 +220,7 @@
           "balance": 0
         },
         {
-          "id": 184,
+          "id": 292,
           "transaction_id": "11",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
@@ -245,7 +245,7 @@
     "incomes": {
       "2022-01": [
         {
-          "id": 163,
+          "id": 271,
           "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
@@ -266,7 +266,7 @@
           "balance": 0
         },
         {
-          "id": 167,
+          "id": 275,
           "transaction_id": "3",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
@@ -287,7 +287,7 @@
           "balance": 0
         },
         {
-          "id": 182,
+          "id": 290,
           "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",
@@ -308,7 +308,7 @@
           "balance": 0
         },
         {
-          "id": 188,
+          "id": 296,
           "transaction_id": "12",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
@@ -333,7 +333,7 @@
     "investments": {
       "2022-01": [
         {
-          "id": 170,
+          "id": 278,
           "transaction_id": "4",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
@@ -354,7 +354,7 @@
           "balance": 0
         },
         {
-          "id": 175,
+          "id": 283,
           "transaction_id": "7",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
@@ -375,7 +375,7 @@
           "balance": 0
         },
         {
-          "id": 172,
+          "id": 280,
           "transaction_id": "5",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
@@ -396,7 +396,7 @@
           "balance": 0
         },
         {
-          "id": 177,
+          "id": 285,
           "transaction_id": "9",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy Apple",
@@ -417,7 +417,7 @@
           "balance": 0
         },
         {
-          "id": 174,
+          "id": 282,
           "transaction_id": "6",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 3",
@@ -438,7 +438,7 @@
           "balance": 0
         },
         {
-          "id": 185,
+          "id": 293,
           "transaction_id": "11",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
@@ -459,7 +459,7 @@
           "balance": 0
         },
         {
-          "id": 179,
+          "id": 287,
           "transaction_id": "8",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy ABNB total price",
@@ -480,7 +480,7 @@
           "balance": 0
         },
         {
-          "id": 181,
+          "id": 289,
           "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",
@@ -508,7 +508,7 @@
     "expenses": {
       "2021 - 22": [
         {
-          "id": 166,
+          "id": 274,
           "transaction_id": "2",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
@@ -529,7 +529,7 @@
           "balance": 0
         },
         {
-          "id": 184,
+          "id": 292,
           "transaction_id": "11",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
@@ -554,7 +554,7 @@
     "incomes": {
       "2021 - 22": [
         {
-          "id": 163,
+          "id": 271,
           "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
@@ -575,7 +575,7 @@
           "balance": 0
         },
         {
-          "id": 167,
+          "id": 275,
           "transaction_id": "3",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
@@ -596,7 +596,7 @@
           "balance": 0
         },
         {
-          "id": 182,
+          "id": 290,
           "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",
@@ -617,7 +617,7 @@
           "balance": 0
         },
         {
-          "id": 188,
+          "id": 296,
           "transaction_id": "12",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
@@ -642,7 +642,7 @@
     "investments": {
       "2021 - 22": [
         {
-          "id": 170,
+          "id": 278,
           "transaction_id": "4",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
@@ -663,7 +663,7 @@
           "balance": 0
         },
         {
-          "id": 175,
+          "id": 283,
           "transaction_id": "7",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
@@ -684,7 +684,7 @@
           "balance": 0
         },
         {
-          "id": 172,
+          "id": 280,
           "transaction_id": "5",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
@@ -705,7 +705,7 @@
           "balance": 0
         },
         {
-          "id": 177,
+          "id": 285,
           "transaction_id": "9",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy Apple",
@@ -726,7 +726,7 @@
           "balance": 0
         },
         {
-          "id": 174,
+          "id": 282,
           "transaction_id": "6",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 3",
@@ -747,7 +747,7 @@
           "balance": 0
         },
         {
-          "id": 185,
+          "id": 293,
           "transaction_id": "11",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
@@ -768,7 +768,7 @@
           "balance": 0
         },
         {
-          "id": 179,
+          "id": 287,
           "transaction_id": "8",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy ABNB total price",
@@ -789,7 +789,7 @@
           "balance": 0
         },
         {
-          "id": 181,
+          "id": 289,
           "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",

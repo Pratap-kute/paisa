@@ -51,7 +51,7 @@
       "payee": "Buy stock",
       "postings": [
         {
-          "id": 27,
+          "id": 43,
           "transaction_id": "2",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
@@ -72,7 +72,7 @@
           "balance": 0
         },
         {
-          "id": 28,
+          "id": 44,
           "transaction_id": "2",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
@@ -106,7 +106,7 @@
       "payee": "Salary",
       "postings": [
         {
-          "id": 26,
+          "id": 42,
           "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
@@ -127,7 +127,7 @@
           "balance": 0
         },
         {
-          "id": 25,
+          "id": 41,
           "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
