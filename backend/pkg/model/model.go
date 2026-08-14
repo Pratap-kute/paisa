@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"math/rand"
+	"slices"
 	"strings"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
@@ -17,7 +19,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/scraper"
 	"github.com/ananthakumaran/paisa/pkg/scraper/india"
 	"github.com/ananthakumaran/paisa/pkg/scraper/mutualfund"
-	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -75,7 +76,10 @@ func SyncJournal(db *gorm.DB) (string, error) {
 func SyncCommodities(db *gorm.DB) error {
 	AutoMigrate(db)
 	log.Info("Fetching commodities price history")
-	commodities := lo.Shuffle(commodity.All())
+	commodities := slices.Clone(commodity.All())
+	rand.Shuffle(len(commodities), func(i, j int) {
+		commodities[i], commodities[j] = commodities[j], commodities[i]
+	})
 
 	var errors []error
 	for _, commodity := range commodities {
