@@ -49,6 +49,8 @@ jobs:
           restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
       - name: Install dependencies
         run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Sync SvelteKit generated types
+        run: nix develop --command bash -c "cd frontend && deno run -A npm:@sveltejs/kit sync"
       - name: Backend tests
         run: nix develop --command make test-backend
       - name: Frontend unit tests

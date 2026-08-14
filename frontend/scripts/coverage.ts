@@ -2,6 +2,21 @@ import { ensureDir } from "@std/fs";
 
 await ensureDir("coverage");
 
+async function ensureSvelteKitSync() {
+  try {
+    Deno.statSync(".svelte-kit/tsconfig.json");
+  } catch (_) {
+    await new Deno.Command(Deno.execPath(), {
+      args: ["run", "-A", "npm:@sveltejs/kit", "sync"],
+      stdin: "inherit",
+      stdout: "inherit",
+      stderr: "inherit",
+    }).spawn().status;
+  }
+}
+
+await ensureSvelteKitSync();
+
 async function runVitest(
   config: string,
   coverage: boolean,
