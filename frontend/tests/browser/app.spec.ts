@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
 test.beforeAll(async ({ request }) => {
@@ -82,10 +83,11 @@ test("journal editor saves and reloads changes", async ({ page }) => {
 });
 
 test("import produces a preview without saving", async ({ page }) => {
+  const fixturePath = existsSync("../fixture/import/Paytm/statement.csv")
+    ? "../fixture/import/Paytm/statement.csv"
+    : "fixture/import/Paytm/statement.csv";
   await page.goto("/ledger/import");
-  await page.locator('input[type="file"]').setInputFiles(
-    "fixture/import/Paytm/statement.csv",
-  );
+  await page.locator('input[type="file"]').setInputFiles(fixturePath);
   await expect(page.locator("table")).toBeVisible();
   await expect(page.locator("button.save")).toBeVisible();
 });
