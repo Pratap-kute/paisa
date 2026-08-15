@@ -28,20 +28,20 @@
   }: Props = $props();
 </script>
 
-<div class="paisa-page-header mb-4 {className}">
-  <div class="is-flex is-justify-content-space-between is-align-items-flex-start is-flex-wrap-wrap gap-3">
-    <div class="paisa-page-header-main is-flex is-align-items-flex-start gap-2">
+<div class="paisa-page-header {className}">
+  <div class="paisa-page-header-row">
+    <div class="paisa-page-header-main">
       {#if leading}
-        <div class="paisa-page-header-leading mt-1">
+        <div class="paisa-page-header-leading">
           {@render leading()}
         </div>
       {/if}
       <div>
-        <div class="is-flex is-align-items-center gap-2">
-          <h1 class="title is-4 mb-0 has-text-weight-bold">{title}</h1>
+        <div class="paisa-page-header-title-row">
+          <h1 class="paisa-page-title">{title}</h1>
           {#if help}
             <a
-              class="p-0 has-text-grey"
+              class="paisa-help-link"
               aria-label="{title} documentation"
               href={helpUrl(help)}
               target="_blank"
@@ -57,30 +57,88 @@
           {/if}
         </div>
         {#if description}
-          <p class="subtitle is-6 has-text-grey mt-1 mb-0">{description}</p>
+          <p class="paisa-page-description">{description}</p>
         {/if}
       </div>
     </div>
 
     {#if actions}
-      <div class="paisa-page-header-actions is-flex is-align-items-center gap-2">
+      <div class="paisa-page-header-actions">
         {@render actions()}
       </div>
     {/if}
   </div>
 
   {#if children}
-    <div class="paisa-page-header-children mt-3">
+    <div class="paisa-page-header-children">
       {@render children()}
     </div>
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .paisa-page-header {
     width: 100%;
+    margin-bottom: var(--paisa-space-5);
   }
+
+  .paisa-page-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+  }
+
   .paisa-page-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--paisa-space-3);
     min-width: 0;
+  }
+
+  .paisa-page-header-leading {
+    margin-top: 0.125rem;
+  }
+
+  .paisa-page-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    flex-wrap: wrap;
+  }
+
+  .paisa-page-title {
+    font-size: var(--paisa-font-size-xl);
+    font-weight: var(--paisa-font-weight-bold);
+    color: var(--paisa-text-primary);
+    line-height: var(--paisa-line-height-tight);
+    margin: 0;
+  }
+
+  .paisa-help-link {
+    color: var(--paisa-text-muted);
+    transition: color var(--paisa-transition-fast);
+
+    &:hover {
+      color: var(--paisa-brand-primary);
+    }
+  }
+
+  .paisa-page-description {
+    font-size: var(--paisa-font-size-sm);
+    color: var(--paisa-text-secondary);
+    margin-top: var(--paisa-space-1);
+    margin-bottom: 0;
+  }
+
+  .paisa-page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+  }
+
+  .paisa-page-header-children {
+    margin-top: var(--paisa-space-3);
   }
 </style>

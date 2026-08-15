@@ -2,7 +2,6 @@
   import type { Snippet } from "svelte";
   import Navbar from "./Navbar.svelte";
   import Spinner from "$lib/components/ui/Spinner.svelte";
-  import ToastContainer from "$lib/components/ui/ToastContainer.svelte";
 
   interface Props {
     isBurger?: boolean;
@@ -20,8 +19,6 @@
       {@render children?.()}
     </Spinner>
   </main>
-
-  <ToastContainer />
 </div>
 
 <style>

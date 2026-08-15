@@ -50,13 +50,13 @@
     aria-label="close modal"
     onclick={close}
   ></button>
-  <div class="modal-card" style:width>
+  <div class="modal-card paisa-modal-card" style:width>
     {#if head || title}
-      <header class="modal-card-head {headerClass}">
+      <header class="modal-card-head paisa-modal-head {headerClass}">
         {#if head}
           {@render head({ close })}
         {:else}
-          <p class="modal-card-title is-size-5 has-text-weight-bold mb-0">{title}</p>
+          <p class="modal-card-title paisa-modal-title mb-0">{title}</p>
           <button
             type="button"
             class="delete"
@@ -66,7 +66,7 @@
         {/if}
       </header>
     {/if}
-    <section class="modal-card-body {bodyClass}">
+    <section class="modal-card-body paisa-modal-body {bodyClass}">
       {#if body}
         {@render body()}
       {:else if children}
@@ -74,9 +74,43 @@
       {/if}
     </section>
     {#if foot}
-      <footer class="modal-card-foot {footerClass}">
+      <footer class="modal-card-foot paisa-modal-foot {footerClass}">
         {@render foot({ close })}
       </footer>
     {/if}
   </div>
 </div>
+
+<style lang="scss">
+  .paisa-modal-card {
+    background-color: var(--paisa-surface-card);
+    border: 1px solid var(--paisa-border-default);
+    border-radius: var(--paisa-radius-lg);
+    box-shadow: var(--paisa-shadow-lg);
+    overflow: hidden;
+  }
+
+  .paisa-modal-head {
+    background-color: var(--paisa-surface-bg);
+    border-bottom: 1px solid var(--paisa-border-subtle);
+    padding: var(--paisa-space-4);
+  }
+
+  .paisa-modal-title {
+    color: var(--paisa-text-primary);
+    font-size: var(--paisa-font-size-lg);
+    font-weight: var(--paisa-font-weight-bold);
+  }
+
+  .paisa-modal-body {
+    background-color: var(--paisa-surface-bg);
+    color: var(--paisa-text-primary);
+    padding: var(--paisa-space-4);
+  }
+
+  .paisa-modal-foot {
+    background-color: var(--paisa-surface-muted);
+    border-top: 1px solid var(--paisa-border-subtle);
+    padding: var(--paisa-space-3) var(--paisa-space-4);
+  }
+</style>

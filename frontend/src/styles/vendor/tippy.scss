@@ -1,0 +1,44 @@
+/**
+ * Tippy Tooltip Integration
+ */
+
+@use "tippy.js/dist/tippy.css" as *;
+@use "tippy.js/themes/light.css" as *;
+
+[data-tippy-root] {
+  font-family: var(--paisa-font-sans);
+}
+
+.tippy-box {
+  background-color: var(--paisa-tooltip-bg);
+  color: var(--paisa-tooltip-text);
+  border-radius: var(--paisa-radius-sm);
+  font-size: var(--paisa-font-size-xs);
+  box-shadow: var(--paisa-shadow-md);
+
+  &[data-theme~="light"] {
+    background-color: var(--paisa-surface-bg);
+    color: var(--paisa-text-primary);
+    box-shadow: var(--paisa-shadow-md);
+    border: 1px solid var(--paisa-border-default);
+
+    &[data-placement^="top"] > .tippy-arrow:before {
+      border-top-color: var(--paisa-surface-bg);
+    }
+    &[data-placement^="bottom"] > .tippy-arrow:before {
+      border-bottom-color: var(--paisa-surface-bg);
+    }
+    &[data-placement^="left"] > .tippy-arrow:before {
+      border-left-color: var(--paisa-surface-bg);
+    }
+    &[data-placement^="right"] > .tippy-arrow:before {
+      border-right-color: var(--paisa-surface-bg);
+    }
+    > .tippy-backdrop {
+      background-color: var(--paisa-surface-bg);
+    }
+    > .tippy-svg-arrow {
+      fill: var(--paisa-surface-bg);
+    }
+  }
+}

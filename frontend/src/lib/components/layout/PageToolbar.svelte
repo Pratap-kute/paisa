@@ -16,8 +16,8 @@
   }: Props = $props();
 </script>
 
-<div class="paisa-page-toolbar mb-4 is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap gap-2 {className}">
-  <div class="paisa-toolbar-start is-flex is-align-items-center is-flex-wrap-wrap gap-2">
+<div class="paisa-page-toolbar {className}">
+  <div class="paisa-toolbar-start">
     {#if start}
       {@render start()}
     {/if}
@@ -27,14 +27,28 @@
   </div>
 
   {#if end}
-    <div class="paisa-toolbar-end is-flex is-align-items-center is-flex-wrap-wrap gap-2">
+    <div class="paisa-toolbar-end">
       {@render end()}
     </div>
   {/if}
 </div>
 
-<style>
+<style lang="scss">
   .paisa-page-toolbar {
     width: 100%;
+    margin-bottom: var(--paisa-space-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+  }
+
+  .paisa-toolbar-start,
+  .paisa-toolbar-end {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-2);
   }
 </style>

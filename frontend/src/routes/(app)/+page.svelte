@@ -26,14 +26,17 @@
   import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import MasonryGrid from "$lib/components/ui/MasonryGrid.svelte";
   import { refresh } from "../../store";
   import UpcomingCard from "$lib/components/finance/UpcomingCard.svelte";
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import BalanceCard from "$lib/components/finance/BalanceCard.svelte";
   import Button from "$lib/components/ui/Button.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -105,61 +108,52 @@
   });
 </script>
 
-<section class="section" class:is-hidden={!isEmpty}>
-  <div class="container is-max-tablet">
-    <div class="columns">
-      <div class="column is-12">
-        <ZeroState item={!isEmpty}>
-          <div class="has-text-left">
-            <p class="mb-2">
-              Looks like you are new here, you can either get started or look at a demo setup
-            </p>
-            <div>
-              <p class="is-size-4 has-text-weight-bold">I want to get started</p>
-              <ol class="ml-5 mt-2 mb-4">
-                <li>
-                  Go to <a href="/more/config">configuration</a> page and set your default currency and
-                  locale.
-                </li>
-                <li>
-                  Go to <a href="/ledger/editor">editor</a> page and start adding transactions to your
-                  journal.
-                </li>
-              </ol>
-              <p class="is-size-4 has-text-weight-bold">I want to view a Demo</p>
-              <ol class="ml-5 mt-2 mb-4">
-                <li>
-                  Click the button below to load a demo setup. This will load a demo journal with
-                  relevant config.
-                </li>
-                <li>
-                  Once you are done playing around, you can go to <a href="/ledger/editor">editor</a
-                  > page and select all the content and delete them.
-                </li>
-                <li>
-                  Go to <a href="/more/config">configuration</a> page and click the reset to defaults
-                  button.
-                </li>
-              </ol>
+{#if isEmpty}
+  <Page width="standard">
+    <Card padding="lg">
+      <ZeroState item={false}>
+        <div class="has-text-left">
+          <p class="mb-3">
+            Looks like you are new here, you can either get started or look at a demo setup
+          </p>
+          <div class="mb-4">
+            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to get started</h2>
+            <ol class="ml-5 mb-4">
+              <li>
+                Go to <a href="/more/config">configuration</a> page and set your default currency and locale.
+              </li>
+              <li>
+                Go to <a href="/ledger/editor">editor</a> page and start adding transactions to your journal.
+              </li>
+            </ol>
+            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to view a Demo</h2>
+            <ol class="ml-5 mb-4">
+              <li>
+                Click the button below to load a demo setup. This will load a demo journal with relevant config.
+              </li>
+              <li>
+                Once you are done playing around, you can go to <a href="/ledger/editor">editor</a> page and select all the content and delete them.
+              </li>
+              <li>
+                Go to <a href="/more/config">configuration</a> page and click the reset to defaults button.
+              </li>
+            </ol>
 
-              <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
-            </div>
+            <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
           </div>
-        </ZeroState>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section tab-networth" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop is-align-items-start">
+        </div>
+      </ZeroState>
+    </Card>
+  </Page>
+{:else}
+  <Page width="fluid">
+    <div class="columns is-multiline is-variable is-3-desktop is-align-items-start">
       <!-- Left Column: Summary, Checking, Cash Flow, Budget, Goals -->
       <div class="column is-12 is-5-desktop">
         <Section title="Assets" titleHref="/assets/networth">
           <div>
             {#if networth}
-              <nav class="level grid-2">
+              <div class="paisa-metric-grid mb-3">
                 <LevelItem
                   narrow
                   title="Net worth"
@@ -173,8 +167,7 @@
                   color={COLORS.secondary}
                   value={formatCurrency(networth.netInvestmentAmount)}
                 />
-              </nav>
-              <nav class="level grid-2">
+
                 <LevelItem
                   narrow
                   title="Gain / Loss"
@@ -183,38 +176,38 @@
                 />
 
                 <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
-              </nav>
+              </div>
             {/if}
           </div>
         </Section>
 
         {#if !_.isEmpty(checkingBalances)}
           <Section title="Checking Balance" titleHref="/assets/balance">
-            <MasonryGrid gap={10} maxStretchColumnSize={400} align="stretch">
+            <ResponsiveGrid cols="auto-fit" minColWidth="160px" gap={2}>
               {#each _.values(checkingBalances) as assetBreakdown}
-                <div class="is-flex-grow-1">
-                  <BalanceCard {assetBreakdown} />
-                </div>
+                <BalanceCard {assetBreakdown} />
               {/each}
-            </MasonryGrid>
+            </ResponsiveGrid>
           </Section>
         {/if}
 
         <Section title="Cash Flow" titleHref="/cash_flow/monthly">
-          <div class="content box px-2 pb-0">
+          <Card padding="sm">
             <ZeroState item={cashFlows}>
               <strong>Oops!</strong> You have not made any transactions in the last 3 months.
             </ZeroState>
 
             <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
 
-            <svg
-              class:is-not-visible={_.isEmpty(cashFlows)}
-              id="d3-current-cash-flow"
-              height="250"
-              width="100%"
-            />
-          </div>
+            <ChartFrame size="compact">
+              <svg
+                class:is-not-visible={_.isEmpty(cashFlows)}
+                id="d3-current-cash-flow"
+                height="250"
+                width="100%"
+              />
+            </ChartFrame>
+          </Card>
         </Section>
 
         {#if currentBudget}
@@ -245,8 +238,8 @@
             <LastNMonths n={3} bind:value={month} />
           {/snippet}
 
-          <div class="content box px-3">
-            <div class="mb-2 is-flex is-align-items-center">
+          <Card padding="md">
+            <div class="mb-3 is-flex is-align-items-center">
               <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
               <span class="is-size-5 has-text-weight-bold" style="color: {COLORS.expenses}">
                 {formatCurrency(totalExpense)}
@@ -255,34 +248,43 @@
             <ZeroState item={selectedExpenses}>
               <strong>Hurray!</strong> You have no expenses this month.
             </ZeroState>
-            <svg id="d3-current-month-breakdown" width="100%" />
-          </div>
+            <ChartFrame size="standard">
+              <svg id="d3-current-month-breakdown" width="100%" />
+            </ChartFrame>
+          </Card>
         </Section>
 
         {#if !_.isEmpty(transactionSequences)}
           <Section title="Recurring" titleHref="/cash_flow/recurring">
-            <div class="content box">
+            <Card padding="md">
               <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
                 {#each transactionSequences as ts (ts)}
                   <UpcomingCard transactionSequece={ts} />
                 {/each}
               </div>
-            </div>
+            </Card>
           </Section>
         {/if}
 
         {#if !_.isEmpty(transactions)}
           <Section title="Recent Transactions" titleHref="/ledger/transaction">
-            <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
+            <ResponsiveGrid cols="auto-fit" minColWidth="300px" gap={3}>
               {#each _.take(transactions, 20) as t}
-                <div class="mr-3 is-flex-grow-1">
-                  <TransactionCard {t} />
-                </div>
+                <TransactionCard {t} />
               {/each}
-            </MasonryGrid>
+            </ResponsiveGrid>
           </Section>
         {/if}
       </div>
     </div>
-  </div>
-</section>
+  </Page>
+{/if}
+
+<style lang="scss">
+  .paisa-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--paisa-space-3);
+    margin-bottom: var(--paisa-space-3);
+  }
+</style>

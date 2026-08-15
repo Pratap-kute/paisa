@@ -1,0 +1,48 @@
+/**
+ * Tabulator Table Integration
+ */
+
+@use "tabulator-tables/dist/css/tabulator_simple.min.css" as *;
+
+.tabulator {
+  background-color: var(--paisa-table-bg);
+  color: var(--paisa-text-primary);
+  border-radius: var(--paisa-radius-sm);
+  border: 1px solid var(--paisa-table-border);
+
+  .tabulator-header {
+    background-color: var(--paisa-table-header-bg);
+    color: var(--paisa-table-header-text);
+    border-bottom: 1px solid var(--paisa-table-border);
+
+    .tabulator-col {
+      background-color: var(--paisa-table-header-bg);
+      border-right: 1px solid var(--paisa-table-border);
+      padding: 0.5rem;
+
+      .tabulator-col-content .tabulator-col-title {
+        white-space: normal;
+      }
+    }
+  }
+
+  .tabulator-row {
+    background-color: var(--paisa-table-bg);
+    color: var(--paisa-text-primary);
+    border-bottom: 1px solid var(--paisa-table-border);
+
+    &:hover {
+      background-color: var(--paisa-table-row-hover);
+    }
+
+    &.tabulator-selected {
+      background-color: var(--paisa-table-row-selected);
+    }
+  }
+
+  .tabulator-footer {
+    background-color: var(--paisa-table-header-bg);
+    color: var(--paisa-text-secondary);
+    border-top: 1px solid var(--paisa-table-border);
+  }
+}

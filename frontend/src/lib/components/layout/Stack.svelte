@@ -47,9 +47,17 @@
 </script>
 
 <div
-  class="is-flex is-flex-direction-column {gapClasses[gap] || 'gap-4'} {alignClasses[align]} {className}"
+  class="paisa-stack {gapClasses[gap] || 'gap-4'} {alignClasses[align]} {className}"
   {style}
   {...restProps}
 >
   {@render children?.()}
 </div>
+
+<style lang="scss">
+  .paisa-stack {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+</style>

@@ -60,9 +60,15 @@
 </script>
 
 <div
-  class="is-flex {wrap ? 'is-flex-wrap-wrap' : 'is-flex-wrap-nowrap'} {gapClasses[gap] || 'gap-2'} {alignClasses[align]} {justifyClasses[justify]} {className}"
+  class="paisa-cluster {wrap ? 'is-flex-wrap-wrap' : 'is-flex-wrap-nowrap'} {gapClasses[gap] || 'gap-2'} {alignClasses[align]} {justifyClasses[justify]} {className}"
   {style}
   {...restProps}
 >
   {@render children?.()}
 </div>
+
+<style lang="scss">
+  .paisa-cluster {
+    display: flex;
+  }
+</style>

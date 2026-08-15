@@ -28,14 +28,14 @@
   }: Props = $props();
 
   const widthClasses: Record<PageWidth, string> = {
-    fluid: "is-fluid",
-    standard: "is-max-widescreen",
-    narrow: "is-max-desktop",
+    fluid: "paisa-page-fluid",
+    standard: "paisa-page-standard",
+    narrow: "paisa-page-narrow",
   };
 </script>
 
-<section class="section py-4 px-3 paisa-page-section {className}">
-  <div class="container {widthClasses[width]}">
+<div class="paisa-page-container {className}">
+  <div class="paisa-page-content {widthClasses[width]}">
     {#if loading}
       <LoadingState fullscreen message={loadingMessage} />
     {:else if error}
@@ -49,10 +49,33 @@
       {@render children?.()}
     {/if}
   </div>
-</section>
+</div>
 
-<style>
-  .paisa-page-section {
-    min-height: calc(100vh - 4rem);
+<style lang="scss">
+  .paisa-page-container {
+    width: 100%;
+    min-height: calc(100vh - 3.5rem);
+    padding: var(--paisa-space-4) var(--paisa-space-4) var(--paisa-space-6);
+
+    @media screen and (max-width: 768px) {
+      padding: var(--paisa-space-3) var(--paisa-space-3) var(--paisa-space-5);
+    }
+  }
+
+  .paisa-page-content {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .paisa-page-fluid {
+    max-width: 100%;
+  }
+
+  .paisa-page-standard {
+    max-width: 1344px;
+  }
+
+  .paisa-page-narrow {
+    max-width: 960px;
   }
 </style>

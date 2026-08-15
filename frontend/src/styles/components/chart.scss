@@ -1,0 +1,108 @@
+/**
+ * D3 SVG Chart & Visualization Styling
+ * Normalized typography, axes, legends, and chart frame containers
+ */
+
+svg text,
+.axis text,
+.legend-label {
+  fill: var(--paisa-chart-text);
+  color: var(--paisa-chart-text);
+}
+
+.axis {
+  font-family: var(--paisa-font-sans);
+
+  &.dark text {
+    fill: var(--paisa-chart-muted);
+    font-size: var(--paisa-font-size-xs);
+  }
+
+  &.is-large text {
+    font-size: var(--paisa-font-size-lg);
+  }
+
+  &.link text {
+    fill: var(--paisa-brand-primary);
+    font-size: var(--paisa-font-size-xs);
+    cursor: pointer;
+  }
+
+  text {
+    font-size: var(--paisa-font-size-xs);
+    fill: var(--paisa-chart-muted);
+  }
+
+  path.domain,
+  line {
+    fill: none;
+    stroke: var(--paisa-chart-grid);
+    shape-rendering: crispEdges;
+  }
+
+  &.light-domain {
+    path.domain {
+      stroke: var(--paisa-border-subtle);
+    }
+  }
+
+  .tick line {
+    stroke: var(--paisa-chart-grid);
+    shape-rendering: crispEdges;
+  }
+
+  &.y {
+    line {
+      stroke: var(--paisa-border-subtle);
+    }
+
+    path.domain {
+      display: none;
+    }
+
+    &.keep-domain path.domain {
+      display: block;
+    }
+  }
+}
+
+.g-arrow path {
+  opacity: 0.4;
+  stroke: var(--paisa-text-primary) !important;
+}
+
+.g-arrow path.arrow-head {
+  fill: var(--paisa-text-primary) !important;
+}
+
+.g-arrow.is-light path {
+  opacity: 1;
+  stroke: var(--paisa-chart-muted) !important;
+  fill: var(--paisa-chart-muted) !important;
+}
+
+.legend-label {
+  text-transform: capitalize;
+  text-align: center;
+  font-size: var(--paisa-font-size-sm);
+  line-height: var(--paisa-line-height-normal);
+}
+
+.legend-box.selected {
+  background-color: var(--paisa-surface-hover);
+  border-radius: var(--paisa-radius-sm);
+}
+
+.inline-text text {
+  font-size: var(--paisa-font-size-sm);
+  font-weight: var(--paisa-font-weight-semibold);
+}
+
+/* Chart container overflow control */
+.box > svg[id^="d3-"],
+.box svg[width="100%"],
+.paisa-chart-container svg {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}

@@ -20,21 +20,21 @@
   }: Props = $props();
 </script>
 
-<section class="paisa-section mb-5 {className}">
+<section class="paisa-section {className}">
   {#if title || action || subtitle}
-    <div class="paisa-section-header mb-2 is-flex is-justify-content-space-between is-align-items-baseline">
-      <div>
+    <div class="paisa-section-header">
+      <div class="paisa-section-heading">
         {#if title}
-          <p class="subtitle mb-0">
+          <div class="paisa-section-title-wrap">
             {#if titleHref}
-              <a class="secondary-link has-text-grey" href={titleHref}>{title}</a>
+              <a class="paisa-section-title-link" href={titleHref}>{title}</a>
             {:else}
-              <span class="has-text-grey has-text-weight-bold is-size-6">{title}</span>
+              <span class="paisa-section-title">{title}</span>
             {/if}
-          </p>
+          </div>
         {/if}
         {#if subtitle}
-          <p class="is-size-7 has-text-grey">{subtitle}</p>
+          <p class="paisa-section-subtitle">{subtitle}</p>
         {/if}
       </div>
       {#if action}
@@ -49,13 +49,54 @@
   </div>
 </section>
 
-<style>
+<style lang="scss">
   .paisa-section {
     min-width: 0;
+    margin-bottom: var(--paisa-space-5);
   }
-  p.subtitle a.secondary-link {
+
+  .paisa-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--paisa-space-2);
+    gap: var(--paisa-space-3);
+    flex-wrap: wrap;
+  }
+
+  .paisa-section-heading {
+    min-width: 0;
+  }
+
+  .paisa-section-title,
+  .paisa-section-title-link {
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-secondary);
     text-transform: uppercase;
-    font-size: 0.95rem;
-    letter-spacing: 0.025em;
+    letter-spacing: 0.04em;
+    line-height: var(--paisa-line-height-tight);
+    transition: color var(--paisa-transition-fast);
+  }
+
+  .paisa-section-title-link:hover {
+    color: var(--paisa-brand-primary);
+  }
+
+  .paisa-section-subtitle {
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-muted);
+    margin-top: var(--paisa-space-1);
+    margin-bottom: 0;
+  }
+
+  .paisa-section-action {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+  }
+
+  .paisa-section-content {
+    min-width: 0;
   }
 </style>

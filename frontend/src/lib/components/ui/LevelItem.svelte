@@ -24,62 +24,48 @@
   <div>
     <p class="heading">{title}</p>
     {#if color}
-      <p class="title" style="padding: 5px 0; color: {color};">{value}</p>
+      <p class="title" style="color: {color};">{value}</p>
     {:else}
       <p class="title paisa-level-value">{value}</p>
     {/if}
     {#if !_.isEmpty(subtitle)}
-      <div class="sub-title has-text-grey">{@html subtitle}</div>
+      <div class="sub-title">{@html subtitle}</div>
     {/if}
   </div>
 </div>
 
 <style lang="scss">
-  .paisa-level-value {
-    color: var(--paisa-text-primary, #0f172a);
-  }
-
-  .level-item.small {
-    .title {
-      font-size: 1.25rem !important;
-      line-height: 1.5rem !important;
-    }
-  }
-
   .heading {
-    color: var(--paisa-text-secondary, #475569) !important;
-    font-weight: 500 !important;
-    font-size: 0.875rem !important;
-    text-transform: capitalize !important;
-    letter-spacing: normal !important;
-    margin-bottom: 0 !important;
+    color: var(--paisa-text-secondary);
+    font-weight: var(--paisa-font-weight-medium);
+    font-size: var(--paisa-font-size-sm);
+    text-transform: capitalize;
+    letter-spacing: normal;
+    margin-bottom: var(--paisa-space-1);
   }
 
   .title {
-    font-weight: 800 !important;
-    font-size: 1.75rem !important;
-    line-height: 2rem !important;
-    padding-left: 0 !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
+    color: var(--paisa-text-primary);
+    font-weight: var(--paisa-font-weight-bold);
+    font-size: var(--paisa-font-size-metric);
+    line-height: var(--paisa-line-height-tight);
+    padding: 0.125rem 0;
+    margin-bottom: 0;
   }
 
-  @media screen and (min-width: 1216px) {
-    .title {
-      font-size: 2.25rem !important;
-      line-height: 2.5rem !important;
-    }
+  .paisa-level-value {
+    color: var(--paisa-text-primary);
+  }
 
-    .level-item.small {
-      .title {
-        font-size: 1.5rem !important;
-        line-height: 1.75rem !important;
-      }
-    }
+  .level-item.small .title {
+    font-size: var(--paisa-font-size-xl);
+    line-height: var(--paisa-line-height-tight);
   }
 
   .sub-title {
-    font-weight: normal !important;
-    font-size: 0.75rem !important;
+    color: var(--paisa-text-muted);
+    font-weight: var(--paisa-font-weight-normal);
+    font-size: var(--paisa-font-size-xs);
+    margin-top: var(--paisa-space-1);
   }
 </style>

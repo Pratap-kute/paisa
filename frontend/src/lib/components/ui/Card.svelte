@@ -29,16 +29,22 @@
   }: Props = $props();
 
   const paddingClasses: Record<CardPadding, string> = {
-    none: "p-0",
-    xs: "p-2",
-    sm: "p-3",
-    md: "p-4",
-    lg: "p-5",
+    none: "p-0 paisa-card-pad-none",
+    xs: "p-2 paisa-card-pad-xs",
+    sm: "p-3 paisa-card-pad-sm",
+    md: "p-4 paisa-card-pad-md",
+    lg: "p-5 paisa-card-pad-lg",
+  };
+
+  const variantClasses: Record<CardVariant, string> = {
+    default: "paisa-card-default",
+    flat: "box-shadow-none paisa-card-flat",
+    bordered: "is-bordered paisa-card-bordered",
   };
 </script>
 
 <div
-  class="box {paddingClasses[padding]} {variant === 'flat' ? 'box-shadow-none' : ''} {variant === 'bordered' ? 'is-bordered' : ''} {interactive ? 'paisa-card-interactive' : ''} {className}"
+  class="box paisa-card {variantClasses[variant]} {paddingClasses[padding]} {interactive ? 'paisa-card-interactive' : ''} {className}"
   {style}
   {...restProps}
 >
@@ -55,15 +61,50 @@
   {/if}
 </div>
 
-<style>
-  .paisa-card-interactive {
-    cursor: pointer;
+<style lang="scss">
+  .paisa-card {
+    width: 100%;
+    border-radius: var(--paisa-radius-md);
+    background-color: var(--paisa-surface-card);
+    color: var(--paisa-text-primary);
     transition: transform var(--paisa-transition-fast), box-shadow var(--paisa-transition-fast), border-color var(--paisa-transition-fast);
   }
-  .paisa-card-interactive:hover {
-    border-color: var(--paisa-brand-primary);
-    box-shadow: var(--paisa-shadow-md);
+
+  .paisa-card-default {
+    border: 1px solid var(--paisa-border-default);
+    box-shadow: var(--paisa-shadow-sm);
   }
+
+  .paisa-card-flat {
+    border: 1px solid var(--paisa-border-subtle);
+    box-shadow: none;
+  }
+
+  .paisa-card-bordered {
+    border: 1px solid var(--paisa-border-strong);
+    box-shadow: none;
+  }
+
+  .paisa-card-pad-none { padding: 0; }
+  .paisa-card-pad-xs { padding: var(--paisa-space-2); }
+  .paisa-card-pad-sm { padding: var(--paisa-space-3); }
+  .paisa-card-pad-md { padding: var(--paisa-space-4); }
+  .paisa-card-pad-lg { padding: var(--paisa-space-5); }
+
+  .paisa-card-interactive {
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--paisa-brand-primary);
+      box-shadow: var(--paisa-shadow-md);
+    }
+  }
+
+  .paisa-card-header {
+    border-bottom: 1px solid var(--paisa-border-subtle);
+    padding-bottom: var(--paisa-space-2);
+  }
+
   .paisa-card-footer {
     border-top: 1px solid var(--paisa-border-subtle);
   }

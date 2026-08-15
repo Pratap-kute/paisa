@@ -1,0 +1,206 @@
+/**
+ * Navbar & Navigation Styling
+ * Clean token-driven styling for the application navigation bar, dropdowns, and breadcrumbs
+ */
+
+.navbar {
+  background-color: var(--paisa-navbar-bg) !important;
+  color: var(--paisa-navbar-text);
+  border-bottom: 1px solid var(--paisa-border-subtle);
+
+  a.navbar-item,
+  button.navbar-link {
+    background-color: transparent !important;
+    color: var(--paisa-navbar-text);
+    border-radius: var(--paisa-radius-sm);
+    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    padding: 0.5rem 0.75rem;
+
+    &:hover {
+      background-color: var(--paisa-surface-hover) !important;
+      color: var(--paisa-brand-primary);
+    }
+
+    &.is-active {
+      color: var(--paisa-brand-primary);
+      font-weight: var(--paisa-font-weight-semibold);
+    }
+  }
+
+  .navbar-dropdown {
+    background-color: var(--paisa-dropdown-bg);
+    border: 1px solid var(--paisa-dropdown-border);
+    border-top: 2px solid var(--paisa-brand-primary);
+    box-shadow: var(--paisa-dropdown-shadow);
+    border-radius: 0 0 var(--paisa-radius-md) var(--paisa-radius-md);
+    padding: 0.25rem 0;
+
+    a.navbar-item {
+      padding: 0.5rem 1rem !important;
+      border-radius: 0 !important;
+      font-size: var(--paisa-font-size-sm);
+      color: var(--paisa-text-primary) !important;
+
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+        font-weight: var(--paisa-font-weight-semibold);
+      }
+    }
+  }
+
+  .navbar-item.has-dropdown.is-hoverable {
+    > button.navbar-link {
+      &::after {
+        border-color: var(--paisa-text-muted);
+        transition: border-color var(--paisa-transition-fast);
+      }
+
+      &:hover::after {
+        border-color: var(--paisa-brand-primary);
+      }
+    }
+  }
+}
+
+.dropdown-content {
+  background-color: var(--paisa-dropdown-bg);
+  box-shadow: var(--paisa-dropdown-shadow);
+  border: 1px solid var(--paisa-dropdown-border);
+}
+
+.nested.has-dropdown {
+  &:hover > .dropdown-menu {
+    display: block;
+  }
+
+  > .navbar-link {
+    padding: 0;
+    width: 100%;
+
+    > span.icon {
+      float: right;
+    }
+  }
+
+  .dropdown-menu {
+    top: -15px;
+    margin-left: calc(100% - 10px);
+
+    .dropdown-content {
+      box-shadow: var(--paisa-dropdown-shadow);
+      background-color: var(--paisa-dropdown-bg);
+
+      a.navbar-item {
+        color: var(--paisa-text-primary) !important;
+        padding: 0.4rem 1rem;
+        transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+
+        &:hover {
+          background-color: var(--paisa-surface-hover) !important;
+          color: var(--paisa-brand-primary) !important;
+        }
+
+        &.is-active {
+          background-color: var(--paisa-brand-primary-light) !important;
+          color: var(--paisa-brand-primary) !important;
+          font-weight: var(--paisa-font-weight-semibold);
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .dropdown-menu {
+      position: static;
+      margin-left: 0;
+
+      .dropdown-content {
+        box-shadow: none !important;
+        background-color: transparent;
+      }
+    }
+  }
+}
+
+/* Breadcrumb bar below navbar */
+nav.breadcrumb {
+  ul {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    line-height: var(--paisa-line-height-normal);
+
+    & + li::before {
+      padding: 0 0.4rem;
+      font-size: 0.65rem;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
+  a.is-inactive,
+  span.is-inactive {
+    align-items: center;
+    color: var(--paisa-breadcrumb-muted);
+    cursor: default;
+    display: inline-flex;
+    justify-content: center;
+    padding: 0 0.35rem;
+    pointer-events: none;
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+  }
+
+  li:first-child a.is-inactive,
+  li:first-child span.is-inactive {
+    padding-left: 0;
+  }
+
+  li a span.icon {
+    margin-top: -1px;
+    font-size: var(--paisa-font-size-xs);
+  }
+
+  .paisa-badge {
+    margin-left: var(--paisa-space-1);
+    font-size: 0.625rem;
+    vertical-align: middle;
+  }
+}
+
+.breadcrumb.has-chevron-separator li + li::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  content: "\f054";
+  font-size: 0.55rem;
+  color: var(--paisa-breadcrumb-separator);
+  opacity: 0.7;
+}
+
+@media screen and (max-width: 1023px) {
+  .navbar-menu {
+    box-shadow: var(--paisa-shadow-lg) !important;
+    background-color: var(--paisa-navbar-bg) !important;
+  }
+
+  .navbar-item.has-dropdown {
+    .navbar-dropdown {
+      display: none;
+    }
+    &.is-active .navbar-dropdown {
+      display: block;
+    }
+  }
+}
