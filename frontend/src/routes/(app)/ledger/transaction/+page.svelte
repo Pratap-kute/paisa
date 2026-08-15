@@ -13,6 +13,9 @@
   import { editorState } from "$lib/editors/search_query_editor";
   import { get } from "svelte/store";
   import { download } from "$lib/importing/export";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let buldEditOpen = $state(false);
   let transactions: T[] = $state(null);
@@ -115,89 +118,97 @@
 />
 
 {#if transactions}
-  <section class="section tab-journal">
-    <div class="container is-fluid">
-      <div class="columns">
-        <div class="column is-12">
-          <nav class="level">
-            <div class="level-left">
-              <div class="level-item">
-                <div class="field">
-                  <div class="control">
-                    <SearchQuery
-                      autocomplete={{
-                        account: accounts,
-                        commodity: commodities,
-                        filename: files.map((f) => f.name)
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="level-item">
-                <div class="field">
-                  <div class="control">
-                    <button
-                      class="button is-link is-light invertable"
-                      onclick={(_e) => (buldEditOpen = !buldEditOpen)}
-                    >
-                      <span>Bulk Edit</span>
-                      <span class="icon is-small">
-                        <i class="fas {buldEditOpen ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="level-right">
-              <div class="level-item">
-                <p class="is-6"><b>{filtered.length}</b> transaction(s)</p>
-              </div>
-              <div class="level-item">
-                <button
-                  type="button"
-                  class="paisa-button-reset has-text-link is-inline-flex is-align-items-center"
-                  onclick={(_e) => downloadTransactions()}
-                >
-                  <span class="icon is-small">
-                    <i class="fa-solid fa-file-arrow-down"></i>
-                  </span>
-                  <span>download</span>
-                </button>
-              </div>
-            </div>
-          </nav>
+  <Page width="fluid">
+    <PageHeader
+      title="Transactions"
+      description="Journal transactions, search, and bulk edits"
+    />
+
+    <Section>
+      <div class="paisa-transaction-toolbar-bar">
+        <div class="paisa-transaction-search-controls">
+          <div class="control is-expanded">
+            <SearchQuery
+              autocomplete={{
+                account: accounts,
+                commodity: commodities,
+                filename: files.map((f) => f.name)
+              }}
+            />
+          </div>
+          <button
+            class="button is-link is-light invertable"
+            onclick={(_e) => (buldEditOpen = !buldEditOpen)}
+          >
+            <span>Bulk Edit</span>
+            <span class="icon is-small">
+              <i class="fas {buldEditOpen ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+            </span>
+          </button>
+        </div>
+
+        <div class="paisa-transaction-meta-actions">
+          <p class="is-size-7"><b>{filtered.length}</b> transaction(s)</p>
+          <button
+            type="button"
+            class="paisa-button-reset has-text-link is-inline-flex is-align-items-center"
+            onclick={(_e) => downloadTransactions()}
+          >
+            <span class="icon is-small">
+              <i class="fa-solid fa-file-arrow-down"></i>
+            </span>
+            <span class="ml-1">download</span>
+          </button>
         </div>
       </div>
 
       {#if buldEditOpen}
-        <div class="columns">
-          <div class="column is-12" transition:slide>
-            <BulkEditForm {accounts} on:preview={(e) => showPreview(e.detail)} />
-          </div>
+        <div class="mt-4" transition:slide>
+          <BulkEditForm {accounts} on:preview={(e) => showPreview(e.detail)} />
         </div>
       {/if}
+    </Section>
 
-      <div class="columns">
-        <div class="column is-12">
-          <div class="box">
-            <VirtualList
-              width="100%"
-              height={window.innerHeight - 150}
-              itemCount={filtered.length}
-              {itemSize}
-            >
-              <svelte:fragment slot="item" let:index let:style>
-                {@const t = filtered[index]}
-                <div {style}>
-                  <Transaction {t} />
-                </div>
-              </svelte:fragment>
-            </VirtualList>
-          </div>
-        </div>
+    <Section>
+      <div class="box p-0">
+        <VirtualList
+          width="100%"
+          height={window.innerHeight - 260}
+          itemCount={filtered.length}
+          {itemSize}
+        >
+          <svelte:fragment slot="item" let:index let:style>
+            {@const t = filtered[index]}
+            <div {style}>
+              <Transaction {t} />
+            </div>
+          </svelte:fragment>
+        </VirtualList>
       </div>
-    </div>
-  </section>
+    </Section>
+  </Page>
 {/if}
+
+<style lang="scss">
+  .paisa-transaction-toolbar-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+  }
+
+  .paisa-transaction-search-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-3);
+    flex-grow: 1;
+    min-width: 280px;
+  }
+
+  .paisa-transaction-meta-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-4);
+  }
+</style>

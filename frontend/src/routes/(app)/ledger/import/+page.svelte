@@ -19,6 +19,8 @@
   import { ensureFileExtension } from "$lib/ledger/file";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let templates: ImportTemplate[] = $state([]);
   let selectedTemplate: ImportTemplate = $state();
@@ -256,8 +258,8 @@
 
 <FileModal bind:open={modalOpen} on:save={(e) => saveToFile(e.detail)} />
 
-<section class="section tab-import" style="padding-bottom: 0 !important">
-  <div class="container is-fluid">
+<Page width="fluid">
+  <Section class="paisa-pb-0">
     <div class="columns mb-0">
       <div class="column is-5 py-0">
         <div class="box p-3 mb-3 paisa-overflow-x-auto">
@@ -439,9 +441,8 @@
         {/if}
       </div>
     </div>
-    <div ></div>
-  </div>
-</section>
+  </Section>
+</Page>
 
 <style lang="scss">
   $import-full-height: calc(100vh - 205px);

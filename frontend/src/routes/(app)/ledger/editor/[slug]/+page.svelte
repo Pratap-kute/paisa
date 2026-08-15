@@ -21,6 +21,8 @@
   import FileTree from "$lib/components/ledger/FileTree.svelte";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   interface Props {
     data: PageData;
@@ -237,122 +239,119 @@
 
 <FileModal bind:open={modalOpen} on:save={(e) => createFile(e.detail)} label="Create" help="" />
 
-<section class="section tab-editor paisa-max-screen-height paisa-pb-0">
-  <div class="container is-fluid">
-    <div class="columuns">
-      <div class="column is-12 px-0 pt-0 mb-2">
-        <div class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto" style="width: 100%">
-          <div class="field has-addons mb-0">
-            <p class="control">
-              <button
-                class="button is-small is-link invertable is-light"
-                disabled={$editorState.hasUnsavedChanges}
-                onclick={(_e) => openCreateModal()}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-file-circle-plus"></i>
-                </span>
-                <span>Create</span>
-              </button>
-            </p>
-          </div>
-
-          <div class="field has-addons ml-5 mb-0">
-            <p class="control">
-              <button
-                class="button is-small"
-                disabled={$editorState.hasUnsavedChanges == false}
-                onclick={(_e) => save()}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-floppy-disk"></i>
-                </span>
-                <span>Save</span>
-              </button>
-            </p>
-            <p class="control">
-              <button
-                class="button is-small"
-                disabled={$editorState.undoDepth == 0}
-                onclick={undoEdit}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-arrow-left"></i>
-                </span>
-                <span>Undo</span>
-              </button>
-            </p>
-            <p class="control">
-              <button
-                class="button is-small"
-                disabled={$editorState.redoDepth == 0}
-                onclick={redoEdit}
-              >
-                <span>Redo</span>
-                <span class="icon is-small">
-                  <i class="fas fa-arrow-right"></i>
-                </span>
-              </button>
-            </p>
-            <p class="control">
-              <button class="button is-small" onclick={(_e) => pretty()}>
-                <span class="icon is-small">
-                  <i class="fas fa-code"></i>
-                </span>
-                <span>Prettify</span>
-              </button>
-            </p>
-          </div>
-
-          {#if !_.isEmpty(selectedFile?.versions)}
-            <div class="field has-addons ml-5 mb-0">
-              <p class="control">
-                <button
-                  class="button is-small"
-                  disabled={!selectedVersion}
-                  onclick={(_e) => revert(selectedVersion)}
-                >
-                  <span class="icon is-small">
-                    <i class="fas fa-clock-rotate-left"></i>
-                  </span>
-                  <span>Revert</span>
-                </button>
-              </p>
-
-              <div class="control">
-                <div class="select is-small">
-                  <select bind:value={selectedVersion}>
-                    {#each selectedFile.versions as version}
-                      <option>{version}</option>
-                    {/each}
-                  </select>
-                </div>
-              </div>
-
-              <p class="control">
-                <button class="button is-small" aria-label="Delete backups" onclick={(_e) => deleteBackups()}>
-                  <span class="icon is-small">
-                    <i class="fas fa-trash-can"></i>
-                  </span>
-                </button>
-              </p>
-            </div>
-          {/if}
-
-          {#if $editorState.errors.length > 0}
-            <div class="control ml-5">
-              <button type="button" class="button is-ghost p-0" onclick={(_e) => moveToLine(editor, $editorState.errors[0].line_from)}
-                ><span class="ml-1 tag invertable is-danger is-light"
-                  >{$editorState.errors.length} error(s) found</span
-                ></button
-              >
-            </div>
-          {/if}
-        </div>
+<Page width="fluid">
+  <Section class="paisa-pb-0">
+    <div class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto mb-3" style="width: 100%">
+      <div class="field has-addons mb-0">
+        <p class="control">
+          <button
+            class="button is-small is-link invertable is-light"
+            disabled={$editorState.hasUnsavedChanges}
+            onclick={(_e) => openCreateModal()}
+          >
+            <span class="icon is-small">
+              <i class="fas fa-file-circle-plus"></i>
+            </span>
+            <span>Create</span>
+          </button>
+        </p>
       </div>
+
+      <div class="field has-addons ml-5 mb-0">
+        <p class="control">
+          <button
+            class="button is-small"
+            disabled={$editorState.hasUnsavedChanges == false}
+            onclick={(_e) => save()}
+          >
+            <span class="icon is-small">
+              <i class="fas fa-floppy-disk"></i>
+            </span>
+            <span>Save</span>
+          </button>
+        </p>
+        <p class="control">
+          <button
+            class="button is-small"
+            disabled={$editorState.undoDepth == 0}
+            onclick={undoEdit}
+          >
+            <span class="icon is-small">
+              <i class="fas fa-arrow-left"></i>
+            </span>
+            <span>Undo</span>
+          </button>
+        </p>
+        <p class="control">
+          <button
+            class="button is-small"
+            disabled={$editorState.redoDepth == 0}
+            onclick={redoEdit}
+          >
+            <span>Redo</span>
+            <span class="icon is-small">
+              <i class="fas fa-arrow-right"></i>
+            </span>
+          </button>
+        </p>
+        <p class="control">
+          <button class="button is-small" onclick={(_e) => pretty()}>
+            <span class="icon is-small">
+              <i class="fas fa-code"></i>
+            </span>
+            <span>Prettify</span>
+          </button>
+        </p>
+      </div>
+
+      {#if !_.isEmpty(selectedFile?.versions)}
+        <div class="field has-addons ml-5 mb-0">
+          <p class="control">
+            <button
+              class="button is-small"
+              disabled={!selectedVersion}
+              onclick={(_e) => revert(selectedVersion)}
+            >
+              <span class="icon is-small">
+                <i class="fas fa-clock-rotate-left"></i>
+              </span>
+              <span>Revert</span>
+            </button>
+          </p>
+
+          <div class="control">
+            <div class="select is-small">
+              <select bind:value={selectedVersion}>
+                {#each selectedFile.versions as version}
+                  <option>{version}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+
+          <p class="control">
+            <button class="button is-small" aria-label="Delete backups" onclick={(_e) => deleteBackups()}>
+              <span class="icon is-small">
+                <i class="fas fa-trash-can"></i>
+              </span>
+            </button>
+          </p>
+        </div>
+      {/if}
+
+      {#if $editorState.errors.length > 0}
+        <div class="control ml-5">
+          <button type="button" class="button is-ghost p-0" onclick={(_e) => moveToLine(editor, $editorState.errors[0].line_from)}
+            ><span class="ml-1 tag invertable is-danger is-light"
+              >{$editorState.errors.length} error(s) found</span
+            ></button
+          >
+        </div>
+      {/if}
     </div>
-    <div class="columns">
-      <div class="column is-3-widescreen is-2-fullhd is-4">
+
+    <div class="paisa-editor-split-grid">
+      <div class="paisa-editor-filetree-col">
         <div class="box px-2 full-height paisa-overflow-y-auto">
           <aside class="menu">
             <FileTree
@@ -365,16 +364,38 @@
           </aside>
         </div>
       </div>
-      <div class="column is-6-widescreen is-6-fullhd is-8">
+      <div class="paisa-editor-main-col">
         <div class="box py-0">
           <div class="editor" bind:this={editorDom}></div>
         </div>
       </div>
-      <div class="column is-3-widescreen is-4-fullhd is-hidden-touch is-hidden-desktop-only">
+      <div class="paisa-editor-output-col">
         {#if !_.isEmpty($editorState.output)}
           <pre class="box px-3 full-height">{$editorState.output}</pre>
         {/if}
       </div>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>
+
+<style lang="scss">
+  .paisa-editor-split-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-3);
+
+    @media screen and (min-width: 768px) {
+      grid-template-columns: minmax(220px, 1fr) minmax(0, 3fr);
+    }
+
+    @media screen and (min-width: 1200px) {
+      grid-template-columns: minmax(220px, 2fr) minmax(0, 7fr) minmax(0, 3fr);
+    }
+  }
+
+  .paisa-editor-filetree-col,
+  .paisa-editor-main-col,
+  .paisa-editor-output-col {
+    min-width: 0;
+  }
+</style>
