@@ -359,7 +359,7 @@
             <div class="paisa-editor-card-title">
               <span class="icon is-small has-text-link mr-1"><i class="fas fa-code"></i></span>
               <span>Template Definition</span>
-              <span class="tag is-small is-light ml-2">Handlebars</span>
+              <span class="tag is-small is-link is-light ml-2">Handlebars</span>
             </div>
             {#if $templateEditorState.hasUnsavedChanges}
               <span class="tag is-warning is-light is-small">

@@ -407,6 +407,43 @@ input.switch {
   --max-height: 200px;
 }
 
+/* Tag Overrides for Light & Dark Themes */
+.tag {
+  background-color: var(--paisa-surface-hover);
+  color: var(--paisa-text-primary);
+  border-radius: var(--paisa-radius-sm);
+
+  &.is-light {
+    background-color: var(--paisa-surface-hover) !important;
+    color: var(--paisa-text-secondary) !important;
+  }
+
+  &.is-info.is-light {
+    background-color: var(--paisa-info-light, rgba(34, 211, 238, 0.15)) !important;
+    color: var(--paisa-info, #22d3ee) !important;
+  }
+
+  &.is-success.is-light {
+    background-color: var(--paisa-success-light, rgba(34, 197, 94, 0.15)) !important;
+    color: var(--paisa-success, #22c55e) !important;
+  }
+
+  &.is-warning.is-light {
+    background-color: var(--paisa-warning-light, rgba(251, 191, 36, 0.15)) !important;
+    color: var(--paisa-warning, #fbbf24) !important;
+  }
+
+  &.is-danger.is-light {
+    background-color: var(--paisa-danger-light, rgba(248, 113, 113, 0.15)) !important;
+    color: var(--paisa-danger, #f87171) !important;
+  }
+
+  &.is-link.is-light {
+    background-color: var(--paisa-brand-primary-light, rgba(59, 130, 246, 0.15)) !important;
+    color: var(--paisa-brand-primary, #60a5fa) !important;
+  }
+}
+
 /* Svelte Carousel */
 .sc-carousel-dots__dot-container {
   margin-top: 0.714em;
