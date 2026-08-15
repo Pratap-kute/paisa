@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { defineConfig, type UserConfig } from "vitest/config";
+import { defineConfig, type ViteUserConfig } from "vitest/config";
 
-type VitestPluginOption = NonNullable<UserConfig["plugins"]>[number];
+type VitestPluginOption = NonNullable<ViteUserConfig["plugins"]>[number];
 
 export default defineConfig({
   plugins: [svelte() as unknown as VitestPluginOption],
