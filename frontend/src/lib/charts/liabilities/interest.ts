@@ -77,10 +77,7 @@ export function renderOverview(gains: Interest[]) {
   svg.selectAll("*").remove();
 
   const margin = { top: rem(25), right: rem(20), bottom: rem(30), left: rem(150) },
-    width = Math.max(
-      el.parentElement.clientWidth,
-      850,
-    ) -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = gains.length * BAR_HEIGHT * 2,
@@ -136,13 +133,14 @@ export function renderOverview(gains: Interest[]) {
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
     .value();
-  const aprWidth = rem(200);
-  const aprTextWidth = rem(40);
-  const aprMargin = rem(20);
-  const textGroupWidth = rem(240);
+  const textGroupWidth = rem(140);
+  const aprMargin = rem(15);
+  const textGroupMargin = rem(10);
+  const aprWidth = Math.max(rem(120), Math.round((width - textGroupWidth - aprMargin - textGroupMargin) * 0.25));
+  const aprTextWidth = rem(35);
   const textGroupZero = aprWidth + aprTextWidth + aprMargin;
 
-  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth + rem(10), width]);
+  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth + textGroupMargin, width]);
   x.domain([0, maxX]);
   const x1 = d3
     .scaleLinear()
@@ -442,23 +440,28 @@ export function renderPerAccountOverview(interests: Interest[]) {
 
   divs.exit().remove();
 
-  const columns = divs.enter().append("div").attr("class", "columns");
+  const rows = divs.enter().append("div")
+    .style("display", "grid")
+    .style("grid-template-columns", "minmax(160px, 200px) 1fr")
+    .style("gap", "var(--space-md)")
+    .style("align-items", "stretch")
+    .style("margin-bottom", "var(--space-lg)");
 
-  const leftColumn = columns
+  const leftColumn = rows
     .append("div")
-    .attr("class", "column is-4 is-3-desktop is-2-fullhd")
-    .append("div")
-    .attr("class", "box px-3 py-5");
+    .attr("class", "box")
+    .style("padding", "var(--space-sm) var(--space-md)");
   leftColumn
     .append("table")
     .attr("class", "table is-narrow is-fullwidth is-size-7")
     .append("tbody")
     .each(renderTable);
 
-  const rightColumn = columns.append("div").attr("class", "column");
+  const rightColumn = rows.append("div");
   rightColumn
     .append("div")
     .attr("class", "box paisa-overflow-x-auto")
+    .style("padding", "var(--space-sm)")
     .append("svg")
     .attr("height", "150")
     .each(function (gain) {
@@ -475,7 +478,7 @@ function renderOverviewSmall(
 
   const svg = d3.select(element),
     margin = { top: 5, right: 80, bottom: 20, left: 40 },
-    width = Math.max(element.parentElement.clientWidth, 800) - margin.left -
+    width = element.parentElement.clientWidth - margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(

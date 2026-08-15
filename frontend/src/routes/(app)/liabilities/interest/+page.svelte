@@ -47,12 +47,12 @@
   {:else}
     <Section title="Interest Overview">
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline">
+      <ChartFrame type="dynamic">
         <svg id="d3-interest-overview" width="100%" />
       </ChartFrame>
     </Section>
 
-    <Section>
+    <Section title="Per-Account Breakdown">
       <div class="d3-interest-timeline-breakdown">
         <div id="d3-interest-timeline-breakdown"></div>
       </div>
