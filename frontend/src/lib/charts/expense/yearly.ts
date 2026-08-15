@@ -171,9 +171,12 @@ export function renderYearlyExpensesTimeline(
 
   const id = "#d3-yearly-expense-timeline";
   const MAX_BAR_WIDTH = 40;
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return { z: null, legends: [] };
+
   const svg = d3.select(id),
     margin = { top: 15, right: 30, bottom: 60, left: 40 },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
@@ -378,9 +381,12 @@ export function renderCurrentExpensesBreakdown(
   const id = "#d3-current-year-breakdown";
   const BAR_HEIGHT = 20;
   const LABEL_GAP = 8;
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return () => {};
+
   const svg = d3.select(id),
     margin = { top: 0, right: 160, bottom: 20, left: 100 },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     g = svg.append("g").attr(

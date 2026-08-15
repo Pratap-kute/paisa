@@ -35,10 +35,13 @@ export function renderOverview(gains: Gain[]) {
   gains = _.sortBy(gains, (g) => g.account);
   const BAR_HEIGHT = rem(15);
   const id = "#d3-gain-overview";
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
   const svg = d3.select(id),
     margin = { top: rem(25), right: rem(20), bottom: rem(10), left: rem(150) },
     width = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      el.parentElement.clientWidth,
       1000,
     ) -
       margin.left -

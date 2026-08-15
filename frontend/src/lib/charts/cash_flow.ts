@@ -32,6 +32,14 @@ export function renderMonthlyFlow(
   },
 ) {
   const MAX_BAR_WIDTH = rem(20);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) {
+    return {
+      renderer: () => {},
+      legends: [],
+    };
+  }
+
   const svg = d3.select(id),
     margin = {
       top: rem(15),
@@ -39,7 +47,7 @@ export function renderMonthlyFlow(
       bottom: options.rotate ? rem(50) : rem(20),
       left: rem(40),
     },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
@@ -309,15 +317,18 @@ export function renderMonthlyFlow(
 
 export function renderFlow(graph: Graph) {
   const id = "#d3-expense-flow";
-  const svg = d3.select(id);
-  const margin = {
-      top: rem(60),
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
+  const svg = d3.select(id),
+    margin = {
+      top: rem(20),
       right: rem(20),
       bottom: rem(40),
       left: rem(20),
     },
     width = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      el.parentElement.clientWidth,
       1000,
     ) -
       margin.left -

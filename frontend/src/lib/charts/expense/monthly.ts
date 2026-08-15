@@ -154,9 +154,18 @@ export function renderMonthlyExpensesTimeline(
   const id = "#d3-monthly-expense-timeline";
   const timeFormat = "MMM-YYYY";
   const MAX_BAR_WIDTH = rem(40);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) {
+    return {
+      z: d3.scaleOrdinal<string, string, never>(),
+      destroy: () => {},
+      legends: [],
+    };
+  }
+
   const svg = d3.select(id),
     margin = { top: rem(15), right: rem(30), bottom: rem(60), left: rem(40) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
@@ -450,9 +459,12 @@ export function renderCurrentExpensesBreakdown(
   const id = "#d3-current-month-breakdown";
   const BAR_HEIGHT = rem(20);
   const LABEL_GAP = rem(8);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return () => {};
+
   const svg = d3.select(id),
     margin = { top: 0, right: rem(160), bottom: rem(20), left: rem(100) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     g = svg.append("g").attr(

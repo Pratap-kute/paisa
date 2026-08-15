@@ -70,10 +70,13 @@ export function renderOverview(gains: Interest[]) {
   gains = _.sortBy(gains, (g) => g.account);
   const BAR_HEIGHT = rem(15);
   const id = "#d3-interest-overview";
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
   const svg = d3.select(id),
     margin = { top: rem(5), right: rem(20), bottom: rem(30), left: rem(150) },
     width = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      el.parentElement.clientWidth,
       850,
     ) -
       margin.left -
@@ -445,6 +448,8 @@ function renderOverviewSmall(
   element: Element,
   xDomain: [dayjs.Dayjs, dayjs.Dayjs],
 ) {
+  if (!element?.parentElement) return;
+
   const svg = d3.select(element),
     margin = { top: 5, right: 80, bottom: 20, left: 40 },
     width = Math.max(element.parentElement.clientWidth, 800) - margin.left -

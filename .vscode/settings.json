@@ -9,5 +9,12 @@
     "go": "go",
     "gopls": "gopls"
   },
-  "deno.enable": false
+  "deno.enable": true,
+  "deno.enablePaths": [
+    "frontend/scripts",
+    "frontend/playwright.config.ts",
+    "frontend/vitest.config.ts",
+    "frontend/vitest.core.config.ts",
+    "frontend/tests/browser"
+  ]
 }

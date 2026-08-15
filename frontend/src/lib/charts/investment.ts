@@ -26,9 +26,12 @@ export function renderMonthlyInvestmentTimeline(postings: Posting[]): Legend[] {
   const id = "#d3-investment-timeline";
   const timeFormat = "MMM-YYYY";
   const MAX_BAR_WIDTH = rem(40);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return [];
+
   const svg = d3.select(id),
     margin = { top: rem(15), right: rem(30), bottom: rem(60), left: rem(40) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
@@ -207,9 +210,12 @@ export function renderYearlyInvestmentTimeline(
 ): Legend[] {
   const id = "#d3-yearly-investment-timeline";
   const BAR_HEIGHT = rem(20);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return [];
+
   const svg = d3.select(id),
     margin = { top: rem(15), right: rem(20), bottom: rem(20), left: rem(70) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     g = svg.append("g").attr(

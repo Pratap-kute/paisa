@@ -31,10 +31,13 @@ export function renderAllocationTarget(
   }
   allocationTargets = _.sortBy(allocationTargets, (t) => t.name);
   const BAR_HEIGHT = rem(25);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
   const svg = d3.select(id),
     margin = { top: rem(20), right: rem(20), bottom: rem(10), left: rem(150) },
     fullWidth = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      el.parentElement.clientWidth,
       1000,
     ),
     width = fullWidth - margin.left - margin.right,
@@ -382,10 +385,12 @@ export function renderAllocationTimeline(
     );
   });
 
+  const el = document.getElementById("d3-allocation-timeline");
+  if (!el?.parentElement) return [];
+
   const svg = d3.select("#d3-allocation-timeline"),
     margin = { top: 40, right: 60, bottom: 20, left: 35 },
-    width = document.getElementById("d3-allocation-timeline").parentElement
-      .clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,

@@ -17,7 +17,7 @@
   import type { EditorView } from "codemirror";
   import { format } from "$lib/ledger/journal";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import FileTree from "$lib/components/ledger/FileTree.svelte";
@@ -29,8 +29,8 @@
   }
 
   let { data }: Props = $props();
-  let editorDom: Element = $state();
-  let editor: EditorView = $state();
+  let editorDom: Element | undefined = $state();
+  let editor: EditorView | undefined;
   let filesMap: Record<string, LedgerFile> = $state({});
   let selectedFile: LedgerFile = $state(null);
   let accounts: string[] = $state([]);
@@ -170,8 +170,14 @@
     }
   }
 
+  onDestroy(() => {
+    if (editor) {
+      editor.destroy();
+    }
+  });
+
   run(() => {
-    if (selectedFile) {
+    if (selectedFile && editorDom) {
       if (!editor || editor.state.doc.toString() != selectedFile.content) {
         if (editor) {
           editor.destroy();

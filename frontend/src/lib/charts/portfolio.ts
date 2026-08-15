@@ -55,10 +55,18 @@ export function renderPortfolioBreakdown(
 } {
   const { small } = options;
   const BAR_HEIGHT = rem(25);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) {
+    return {
+      legends: [],
+      renderer: () => {},
+    };
+  }
+
   const svg = d3.select(id),
     margin = { top: rem(20), right: 0, bottom: rem(10), left: rem(20) },
     fullWidth = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      el.parentElement.clientWidth,
       small ? 320 : 800,
     ) - 2,
     width = fullWidth - margin.left - margin.right,
