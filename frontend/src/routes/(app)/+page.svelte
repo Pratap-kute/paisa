@@ -248,7 +248,7 @@
             <ZeroState item={selectedExpenses}>
               <strong>Hurray!</strong> You have no expenses this month.
             </ZeroState>
-            <ChartFrame size="standard">
+            <ChartFrame size="dynamic">
               <svg id="d3-current-month-breakdown" width="100%" />
             </ChartFrame>
           </Card>

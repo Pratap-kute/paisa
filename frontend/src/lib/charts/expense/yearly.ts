@@ -13,6 +13,7 @@ import {
   type Legend,
   now,
   type Posting,
+  rem,
   secondName,
   skipTicks,
   tooltip,
@@ -379,8 +380,8 @@ export function renderCurrentExpensesBreakdown(
   z: d3.ScaleOrdinal<string, string, never>,
 ) {
   const id = "#d3-current-year-breakdown";
-  const BAR_HEIGHT = 20;
-  const LABEL_GAP = 8;
+  const BAR_HEIGHT = rem(28);
+  const LABEL_GAP = rem(8);
   const el = document.getElementById(id.substring(1));
   if (!el?.parentElement) return () => {};
 

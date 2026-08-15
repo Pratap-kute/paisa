@@ -473,7 +473,7 @@ export function renderCurrentExpensesBreakdown(
   z: d3.ScaleOrdinal<string, string, never>,
 ) {
   const id = "#d3-current-month-breakdown";
-  const BAR_HEIGHT = rem(20);
+  const BAR_HEIGHT = rem(28);
   const LABEL_GAP = rem(8);
   const el = document.getElementById(id.substring(1));
   if (!el?.parentElement) return () => {};

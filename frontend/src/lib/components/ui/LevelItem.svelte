@@ -35,6 +35,18 @@
 </div>
 
 <style lang="scss">
+  .level-item {
+    display: block !important;
+    text-align: left;
+    width: 100%;
+    margin: 0;
+
+    > div {
+      width: 100%;
+      text-align: left;
+    }
+  }
+
   .heading {
     color: var(--paisa-text-secondary);
     font-weight: var(--paisa-font-weight-medium);

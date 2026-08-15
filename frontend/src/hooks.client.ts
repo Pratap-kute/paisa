@@ -105,8 +105,22 @@ const footer = `
 </p>
 `;
 
+function isIgnoredClientError(error: any): boolean {
+  if (!error) return true;
+  const msg = typeof error === "string" ? error : error?.message || String(error);
+  if (
+    typeof msg === "string" &&
+    (msg.includes("ResizeObserver loop completed with undelivered notifications") ||
+      msg.includes("ResizeObserver loop limit exceeded") ||
+      msg.includes("ResizeObserver loop"))
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function displayError(error: any) {
-  if (!error) return;
+  if (!error || isIgnoredClientError(error)) return;
   console.error("Client Error Caught:", error);
   const message = formatError(error);
   toast.toast({
@@ -121,20 +135,38 @@ function displayError(error: any) {
   });
 }
 
-globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-  if (event.reason) {
-    displayError(event.reason);
-  }
-});
+globalThis.addEventListener(
+  "unhandledrejection",
+  (event: PromiseRejectionEvent) => {
+    if (isIgnoredClientError(event.reason)) {
+      event.stopImmediatePropagation?.();
+      event.preventDefault?.();
+      return;
+    }
+    if (event.reason) {
+      displayError(event.reason);
+    }
+  },
+  true,
+);
 
-globalThis.addEventListener("error", (event: ErrorEvent) => {
-  // Ignore DOM/resource loading events without a runtime Error object
-  if (!event.error && (event.target as any) instanceof HTMLElement) {
-    console.warn("Resource loading failed:", event.target);
-    return;
-  }
-  const err = event.error || event.message;
-  if (err) {
-    displayError(err);
-  }
-});
+globalThis.addEventListener(
+  "error",
+  (event: ErrorEvent) => {
+    // Ignore DOM/resource loading events without a runtime Error object
+    if (!event.error && (event.target as any) instanceof HTMLElement) {
+      console.warn("Resource loading failed:", event.target);
+      return;
+    }
+    const err = event.error || event.message;
+    if (isIgnoredClientError(err)) {
+      event.stopImmediatePropagation?.();
+      event.preventDefault?.();
+      return;
+    }
+    if (err) {
+      displayError(err);
+    }
+  },
+  true,
+);
