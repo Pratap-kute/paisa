@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import type * as XLSXTypes from "xlsx";
 import _ from "lodash";
 import { format } from "../ledger/journal";
 import { pdf2array } from "./pdf";
@@ -108,6 +108,7 @@ function parseCSV(file: File): Promise<Result> {
 
 async function parseXLSX(file: File): Promise<Result> {
   const buffer = await readFile(file);
+  const XLSX = await import("xlsx") as typeof XLSXTypes;
   try {
     const sheet = XLSX.read(buffer, { type: "binary" });
     const json = XLSX.utils.sheet_to_json<string[]>(
