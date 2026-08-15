@@ -68,13 +68,15 @@ function renderTable(interest: Interest) {
 
 export function renderOverview(gains: Interest[]) {
   gains = _.sortBy(gains, (g) => g.account);
-  const BAR_HEIGHT = rem(15);
+  const BAR_HEIGHT = rem(24);
   const id = "#d3-interest-overview";
   const el = document.getElementById(id.substring(1));
   if (!el?.parentElement) return;
 
-  const svg = d3.select(id),
-    margin = { top: rem(5), right: rem(20), bottom: rem(30), left: rem(150) },
+  const svg = d3.select(id);
+  svg.selectAll("*").remove();
+
+  const margin = { top: rem(25), right: rem(20), bottom: rem(30), left: rem(150) },
     width = Math.max(
       el.parentElement.clientWidth,
       850,
@@ -90,7 +92,7 @@ export function renderOverview(gains: Interest[]) {
 
   svg.attr("width", width + margin.left + margin.right);
 
-  const y = d3.scaleBand().range([0, height]).paddingInner(0).paddingOuter(0);
+  const y = d3.scaleBand().range([0, height]).paddingInner(0.1).paddingOuter(0.05);
   y.domain(gains.map((g) => restName(g.account)));
   const y1 = d3
     .scaleBand()
@@ -104,7 +106,7 @@ export function renderOverview(gains: Interest[]) {
     .range([0, y.bandwidth()])
     .domain(["0", "1"])
     .paddingInner(0.15)
-    .paddingOuter(0.6);
+    .paddingOuter(0.3);
 
   const keys = ["balance", "drawn", "repaid", "gain", "loss"];
   const colors = [
@@ -134,13 +136,13 @@ export function renderOverview(gains: Interest[]) {
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
     .value();
-  const aprWidth = rem(250);
+  const aprWidth = rem(200);
   const aprTextWidth = rem(40);
   const aprMargin = rem(20);
-  const textGroupWidth = rem(225);
+  const textGroupWidth = rem(240);
   const textGroupZero = aprWidth + aprTextWidth + aprMargin;
 
-  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth, width]);
+  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth + rem(10), width]);
   x.domain([0, maxX]);
   const x1 = d3
     .scaleLinear()
@@ -169,7 +171,28 @@ export function renderOverview(gains: Interest[]) {
     .text("APR")
     .attr("text-anchor", "middle")
     .attr("x", aprWidth / 2)
-    .attr("y", height + 30);
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Loan Drawn")
+    .attr("text-anchor", "end")
+    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Interest")
+    .attr("text-anchor", "end")
+    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Balance / Repaid")
+    .attr("text-anchor", "end")
+    .attr("x", textGroupZero + textGroupWidth)
+    .attr("y", -8);
 
   g.append("g")
     .attr("class", "axis y")

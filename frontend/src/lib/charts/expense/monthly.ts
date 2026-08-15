@@ -76,10 +76,12 @@ export function renderCalendar(
     );
   };
 
+  const width = 36;
+  const height = 36;
+
   const dayDiv = dayDivs
     .join("div")
-    .attr("class", "date p-1")
-    .style("position", "relative")
+    .attr("class", "date")
     .attr("data-tippy-content", tooltipContent)
     .style(
       "visibility",
@@ -87,44 +89,29 @@ export function renderCalendar(
         d.isBefore(monthStart) || d.isAfter(monthEnd) ? "hidden" : "visible",
     );
 
-  dayDiv
-    .selectAll("span.day")
-    .data((d) => [d])
-    .join("span")
-    .attr("class", "day has-text-grey-light")
-    .style("position", "absolute")
-    .text((d) => d.date().toString());
-
-  dayDiv
-    .selectAll("span.total")
-    .data((d) => [d])
-    .join("span")
-    .attr("class", "total is-size-7 has-text-weight-bold")
-    .style("position", "absolute")
-    .style("bottom", "-5px")
-    .style("color", (d) =>
-      chroma(COLORS.lossText)
-        .alpha(alpha(expensesByDayTotal[d.format("YYYY-MM-DD")]))
-        .hex())
-    .text((d) => {
-      const total = expensesByDayTotal[d.format("YYYY-MM-DD")];
-      if (total > 0) {
-        return formatCurrencyCrude(total);
-      }
-      return "";
-    });
-
-  const width = 35;
-  const height = 50;
-
-  dayDiv
-    .selectAll("svg")
+  const svg = dayDiv
+    .selectAll("svg.donut-svg")
     .data((d) => [d])
     .join("svg")
+    .attr("class", "donut-svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+    .attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+  // Subtle background ring for days without expenses
+  svg
+    .selectAll("circle.bg-ring")
+    .data((d) => [d])
+    .join("circle")
+    .attr("class", "bg-ring")
+    .attr("r", 15)
+    .attr("fill", "none")
+    .attr("stroke", "var(--paisa-border-subtle)")
+    .attr("stroke-width", 2)
+    .attr("opacity", (d) => (expensesByDayTotal[d.format("YYYY-MM-DD")] > 0 ? 0 : 0.4));
+
+  // Donut slices
+  svg
     .selectAll("path")
     .data((d) => pieData(expensesByDay[d.format("YYYY-MM-DD")]))
     .join("path")
@@ -133,6 +120,35 @@ export function renderCalendar(
     })
     .attr("d", (arc) => {
       return d3.arc().innerRadius(13).outerRadius(17)(arc as any);
+    });
+
+  // Date number centered inside donut circle
+  svg
+    .selectAll("text.day-text")
+    .data((d) => [d])
+    .join("text")
+    .attr("class", "day-text")
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
+    .attr("x", 0)
+    .attr("y", 0)
+    .style("font-size", "0.75rem")
+    .style("font-weight", "500")
+    .style("fill", "var(--paisa-text-primary)")
+    .text((d) => d.date().toString());
+
+  // Total amount below donut
+  dayDiv
+    .selectAll("span.total")
+    .data((d) => [d])
+    .join("span")
+    .attr("class", "total")
+    .text((d) => {
+      const total = expensesByDayTotal[d.format("YYYY-MM-DD")];
+      if (total > 0) {
+        return formatCurrencyCrude(total);
+      }
+      return "";
     });
 }
 
