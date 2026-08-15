@@ -62,7 +62,7 @@
     "json-schema": "npm:@types/json-schema@^7.0.15",
     "@sveltejs/adapter-static": "npm:@sveltejs/adapter-static@^3.0.8",
     "@sveltejs/kit": "npm:@sveltejs/kit@^2.70.2",
-    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5.0.0",
+    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.3.0",
     "@testing-library/jest-dom": "npm:@testing-library/jest-dom@6.9.1",
     "@testing-library/svelte": "npm:@testing-library/svelte@^5.2.0",
     "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^3.2.7",
@@ -99,7 +99,7 @@
     "textures": "npm:textures@^1.2.3",
     "tippy.js": "npm:tippy.js@^6.3.7",
     "typescript": "npm:typescript@^5.0.0",
-    "vite": "npm:vite@^6.4.3",
+    "vite": "npm:vite@^8.2.1",
     "vitest": "npm:vitest@^3.2.7",
     "xlsx": "./src/lib/vendor/xlsx.mjs",
     "xlsx-populate": "npm:xlsx-populate@^1.21.0"

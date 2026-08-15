@@ -53,6 +53,7 @@ export default defineConfig({
     // arbitrary fallback port hides stale `make develop` processes and leaves
     // multiple competing app instances running.
     strictPort: true,
+    forwardConsole: true,
     proxy: apiProxy,
     fs: {
       allow: ["./fonts"],
