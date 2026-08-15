@@ -6,9 +6,11 @@
 .table {
   background-color: var(--paisa-table-bg);
   color: var(--paisa-text-primary);
+  font-size: var(--paisa-font-size-sm);
 
   th {
     color: var(--paisa-table-header-text);
+    font-weight: var(--paisa-font-weight-semibold);
   }
 
   &.is-light-border tbody {
@@ -18,7 +20,39 @@
   }
 
   tr.is-sub-header {
-    background-color: var(--paisa-surface-muted);
+    background-color: var(--paisa-surface-hover);
+
+    th, td {
+      color: var(--paisa-brand-primary);
+      font-weight: var(--paisa-font-weight-bold);
+      background-color: var(--paisa-surface-hover);
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-top: 1px solid var(--paisa-border-default);
+      border-bottom: 1px solid var(--paisa-border-subtle);
+    }
+  }
+
+  tr.is-account-row {
+    td, th {
+      color: var(--paisa-text-secondary);
+      font-size: var(--paisa-font-size-xs);
+    }
+  }
+
+  tfoot {
+    border-top: 2px solid var(--paisa-border-strong);
+
+    tr.is-summary-row {
+      background-color: var(--paisa-surface-default);
+
+      th, td {
+        font-weight: var(--paisa-font-weight-bold);
+        background-color: var(--paisa-surface-default);
+        color: var(--paisa-text-primary);
+        border-bottom: 1px solid var(--paisa-border-subtle);
+      }
+    }
   }
 }
 
@@ -109,3 +143,8 @@
 .table.has-sticky-column tbody tr.is-sub-header th:first-child {
   background-color: var(--paisa-surface-muted);
 }
+
+.table.has-sticky-column tbody tr.is-summary-row th:first-child {
+  background-color: var(--paisa-surface-default);
+}
+
