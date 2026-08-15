@@ -2,7 +2,8 @@
   import Select from "svelte-select";
   import {
     createEditor as createTemplateEditor,
-    editorState as templateEditorState
+    editorState as templateEditorState,
+    updateContent as updateTemplateContent
   } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
@@ -25,14 +26,11 @@
   let templates: ImportTemplate[] = $state([]);
   let selectedTemplate: ImportTemplate = $state();
   let saveAsName: string = $state();
-  let lastTemplate: any = $state();
-  let lastData: any = $state();
   let preview = $state("");
   let parseErrorMessage: string = $state(null);
   let columnCount: number = $state(0);
   let data: any[][] = $state([]);
   let rows: Array<Record<string, any>> = $state([]);
-  let lastOptions: any = $state();
   let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
   let loading = $state(false);
   let activeFileName = $state("");
@@ -43,12 +41,23 @@
   let previewEditorDom: Element = $state();
   let previewEditor: EditorView = $state();
 
+  function onSelectTemplate(tmpl: ImportTemplate) {
+    if (!tmpl) return;
+    selectedTemplate = tmpl;
+    saveAsName = tmpl.name;
+    if (templateEditor) {
+      updateTemplateContent(templateEditor, tmpl.content);
+    }
+  }
+
   onMount(async () => {
     accountTfIdf.set(await ajax("/api/account/tf_idf"));
     ({ templates } = await ajax("/api/templates"));
-    selectedTemplate = templates[0];
-    saveAsName = selectedTemplate.name;
-    templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+    if (templates.length > 0) {
+      selectedTemplate = templates[0];
+      saveAsName = selectedTemplate.name;
+      templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+    }
     previewEditor = createPreviewEditor(preview, previewEditorDom, { readonly: true });
   });
 
@@ -74,8 +83,10 @@
     }
 
     ({ templates } = await ajax("/api/templates", { background: true }));
-    selectedTemplate = _.find(templates, { id: template.id });
-    saveAsName = selectedTemplate.name;
+    const savedTmpl = _.find(templates, { id: template.id });
+    if (savedTmpl) {
+      onSelectTemplate(savedTmpl);
+    }
     toast.toast({
       message: `Saved ${saveAsName}`,
       type: "is-success"
@@ -108,8 +119,9 @@
     }
 
     ({ templates } = await ajax("/api/templates", { background: true }));
-    selectedTemplate = templates[0];
-    saveAsName = selectedTemplate.name;
+    if (templates.length > 0) {
+      onSelectTemplate(templates[0]);
+    }
     toast.toast({
       message: `Removed ${oldName}`,
       type: "is-success"
@@ -119,34 +131,25 @@
   }
 
   $effect(() => {
-    if (!_.isEmpty(data) && $templateEditorState.template) {
-      if (
-        lastTemplate != $templateEditorState.template ||
-        lastData != data ||
-        lastOptions != options
-      ) {
-        try {
-          preview = renderJournal(rows, $templateEditorState.template, {
-            reverse: options.reverse,
-            trim: options.trim
-          });
-          updatePreviewContent(previewEditor, preview);
-          lastTemplate = $templateEditorState.template;
-          lastData = data;
-          lastOptions = _.clone(options);
-        } catch (e) {
-          console.log(e);
-        }
-      }
-    }
-  });
+    const currentTemplate = $templateEditorState.template;
+    const currentRows = rows;
+    const currentReverse = options.reverse;
+    const currentTrim = options.trim;
 
-  $effect(() => {
-    if (selectedTemplate && templateEditor) {
-      if (templateEditor.state.doc.toString() != selectedTemplate.content) {
-        templateEditor.destroy();
-        templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+    if (!_.isEmpty(currentRows) && currentTemplate && previewEditor) {
+      try {
+        const generated = renderJournal(currentRows, currentTemplate, {
+          reverse: currentReverse,
+          trim: currentTrim
+        });
+        preview = generated;
+        updatePreviewContent(previewEditor, generated);
+      } catch (e) {
+        console.error(e);
       }
+    } else if (_.isEmpty(currentRows) && previewEditor) {
+      preview = "";
+      updatePreviewContent(previewEditor, "");
     }
   });
 
@@ -290,8 +293,8 @@
               searchable={true}
               clearable={false}
               floatingConfig={{ strategy: "fixed" }}
-              on:change={(_e) => {
-                saveAsName = selectedTemplate.name;
+              on:change={(e) => {
+                onSelectTemplate(e.detail);
               }}
             >
               <div slot="selection" let:selection class="paisa-select-item-rendered">
