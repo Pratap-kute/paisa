@@ -148,7 +148,7 @@
         </div>
 
         <div class="paisa-transaction-meta-actions">
-          <p class="is-size-7"><b>{filtered.length}</b> transaction(s)</p>
+          <p class="is-6"><b>{filtered.length}</b> transaction(s)</p>
           <button
             type="button"
             class="paisa-button-reset has-text-link is-inline-flex is-align-items-center"
