@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { onMount } from "svelte";
   import _ from "lodash";
   import { renderIncomeStatement } from "$lib/charts/income_statement";
@@ -62,7 +60,7 @@
 
   let accountGroups: AccountGroup[] = $state([]);
 
-  run(() => {
+  $effect(() => {
     if (yearly && renderer) {
       if (yearly[$year] == null) {
         incomeStatement = null;

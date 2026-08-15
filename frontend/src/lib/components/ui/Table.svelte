@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { rem } from "$lib/core/utils";
   import { onMount, onDestroy } from "svelte";
   import { TabulatorFull as Tabulator, type ColumnDefinition } from "tabulator-tables";
@@ -17,7 +15,7 @@
   let tabulator: Tabulator = $state();
   let isBuilt = $state(false);
 
-  run(() => {
+  $effect(() => {
     if (isBuilt && data && data.length > 0) {
       try {
         tabulator?.setData(data);

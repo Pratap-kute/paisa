@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import * as d3 from "d3";
   import { onMount } from "svelte";
   import _ from "lodash";
@@ -27,8 +25,6 @@
     grouped_investments: Record<string, Posting[]> = $state(),
     grouped_taxes: Record<string, Posting[]> = $state();
 
-  let currentYearExpenses: Posting[] = $state([]);
-
   let legends: Legend[] = $state([]);
 
   let income = $state(""),
@@ -40,6 +36,9 @@
     investment = $state(""),
     savingRate = $state("");
 
+  let currentYearExpenses: Posting[] = $derived(
+    grouped_expenses ? (grouped_expenses[$year] || []) : []
+  );
 
   onMount(async () => {
     ({
@@ -70,9 +69,9 @@
   function sumCurrency(postings: Posting[], sign = 1) {
     return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
   }
-  run(() => {
+
+  $effect(() => {
     if (grouped_expenses && renderer) {
-      currentYearExpenses = grouped_expenses[$year];
       renderCalendar(currentYearExpenses, z, $groups);
 
       const expenses = grouped_expenses[$year] || [];

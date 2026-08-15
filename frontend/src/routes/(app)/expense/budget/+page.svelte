@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
   import {
     ajax,
@@ -20,15 +18,13 @@
 
   const monthStart = now().startOf("month");
   let budgetsByMonth: Record<string, Budget> = $state({});
-  let currentMonthAccountBudgets: AccountBudget[] = $state([]);
-  let currentMonthBudget: Budget = $state();
   let checkingBalance: number = $state(), availableForBudgeting: number = $state();
   let isEmpty = $state(false);
 
-  run(() => {
-    currentMonthBudget = budgetsByMonth[$month];
-    currentMonthAccountBudgets = budgetsByMonth[$month]?.accounts || [];
-  });
+  let currentMonthBudget: Budget = $derived(budgetsByMonth[$month]);
+  let currentMonthAccountBudgets: AccountBudget[] = $derived(
+    budgetsByMonth[$month]?.accounts || []
+  );
 
   onMount(async () => {
     ({ budgetsByMonth, checkingBalance, availableForBudgeting } = await ajax("/api/budget"));

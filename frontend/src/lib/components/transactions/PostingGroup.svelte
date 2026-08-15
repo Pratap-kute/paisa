@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { formatCurrency, type Posting } from "$lib/core/utils";
   import _ from "lodash";
 
@@ -17,8 +15,6 @@
     postings: Posting[];
     total: number;
   }
-
-  let groupedPostings: GroupedPosting[] = $state([]);
 
   function group(ps: Posting[]) {
     let groupedPostings: GroupedPosting[] = [];
@@ -48,9 +44,8 @@
 
     return groupedPostings;
   }
-  run(() => {
-    groupedPostings = group(postings);
-  });
+
+  let groupedPostings: GroupedPosting[] = $derived(group(postings));
   let isGrouped = $derived(_.some(groupedPostings, (groupedPosting) => groupedPosting.postings.length > 1));
 </script>
 

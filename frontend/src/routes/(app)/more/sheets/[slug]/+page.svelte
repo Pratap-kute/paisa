@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { createEditor, sheetEditorState } from "$lib/editors/sheet_editor";
   import { focus, moveToLine, updateContent } from "$lib/editors/editor";
   import {
@@ -172,7 +170,7 @@
     }
   }
 
-  run(() => {
+  $effect(() => {
     if (selectedFile) {
       if (!editor || editor.state.doc.toString() != selectedFile.content) {
         if (editor) {

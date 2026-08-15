@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
@@ -48,8 +46,6 @@
     savingRate = $state(""),
     income = $state("");
 
-  let current_month_expenses: Posting[] = $state([]);
-
 
 
   onDestroy(async () => {
@@ -81,14 +77,15 @@
   function sumCurrency(postings: Posting[], sign = 1) {
     return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
   }
-  run(() => {
-    current_month_expenses = _.chain((grouped_expenses && grouped_expenses[$month]) || [])
+  let current_month_expenses: Posting[] = $derived(
+    _.chain((grouped_expenses && grouped_expenses[$month]) || [])
       .filter((e) => _.includes($groups, secondName(e.account)))
       .sortBy((e) => e.date)
       .reverse()
-      .value();
-  });
-  run(() => {
+      .value()
+  );
+
+  $effect(() => {
     if (grouped_expenses && renderer) {
       renderCalendar($month, grouped_expenses[$month], z, $groups);
 

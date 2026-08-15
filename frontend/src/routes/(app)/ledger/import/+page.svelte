@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import Select from "svelte-select";
   import {
     createEditor as createTemplateEditor,
@@ -117,7 +115,7 @@
   }
 
 
-  run(() => {
+  $effect(() => {
     if (!_.isEmpty(data) && $templateEditorState.template) {
       if (
         lastTemplate != $templateEditorState.template ||
@@ -140,7 +138,7 @@
     }
   });
 
-  run(() => {
+  $effect(() => {
     if (selectedTemplate && templateEditor) {
       if (templateEditor.state.doc.toString() != selectedTemplate.content) {
         templateEditor.destroy();

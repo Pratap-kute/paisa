@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { formatPercentage } from "$lib/core/utils";
   import { dropRight, floor, range } from "lodash";
 
@@ -11,19 +9,19 @@
   }
 
   let { small = false, progressPercent, showPercent = true }: Props = $props();
-  let times = $derived(range(0, floor(progressPercent / 100)));
-  let remainder = $derived(progressPercent % 100);
 
-  run(() => {
-    if (remainder == 0) {
-      times = dropRight(times, 1);
-      if (progressPercent == 0) {
-        remainder = 0;
-      } else {
-        remainder = 100;
-      }
+  let computed = $derived.by(() => {
+    let rawTimes = range(0, floor(progressPercent / 100));
+    let rawRemainder = progressPercent % 100;
+    if (rawRemainder === 0) {
+      rawTimes = dropRight(rawTimes, 1);
+      rawRemainder = progressPercent === 0 ? 0 : 100;
     }
+    return { times: rawTimes, remainder: rawRemainder };
   });
+
+  let times = $derived(computed.times);
+  let remainder = $derived(computed.remainder);
 </script>
 
 <div>

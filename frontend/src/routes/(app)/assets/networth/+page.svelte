@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import {
     ajax,
     formatCurrency,
@@ -12,7 +10,7 @@
   import COLORS from "$lib/core/colors";
   import { renderNetworth } from "$lib/charts/networth";
   import _ from "lodash";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
@@ -24,29 +22,22 @@
   let gain = $state(0);
   let xirr = $state(0);
   let svg: Element = $state();
-  let destroy: () => void = $state();
   let points: Networth[] = $state([]);
   let legends: Legend[] = $state([]);
 
-  run(() => {
+  $effect(() => {
     if (!_.isEmpty(points) && svg) {
-      if (destroy) {
-        destroy();
-      }
-
-      ({ destroy, legends } = renderNetworth(
+      const res = renderNetworth(
         _.filter(
           points,
           (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
         ),
         svg
-      ));
-    }
-  });
-
-  onDestroy(async () => {
-    if (destroy) {
-      destroy();
+      );
+      legends = res.legends;
+      return () => {
+        res.destroy?.();
+      };
     }
   });
 

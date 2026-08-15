@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import _ from "lodash";
   import { renderMonthlyFlow } from "$lib/charts/cash_flow";
   import { ajax, type CashFlow, type Legend } from "$lib/core/utils";
@@ -13,7 +11,7 @@
   let cashFlows: CashFlow[] = $state([]);
   let renderer: ((cashflows: CashFlow[]) => void) | null = $state(null);
 
-  run(() => {
+  $effect(() => {
     if (renderer && !_.isEmpty(cashFlows)) {
       renderer(
         _.filter(

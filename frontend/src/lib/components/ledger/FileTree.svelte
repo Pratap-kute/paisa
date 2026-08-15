@@ -1,6 +1,5 @@
 <script lang="ts">
   import FileTree from './FileTree.svelte';
-  import { preventDefault } from 'svelte/legacy';
 
   import type { Directory, LedgerFile } from "$lib/core/utils";
   import _ from "lodash";
@@ -45,7 +44,7 @@
         <a
           href="#/"
           role="button"
-          onclick={preventDefault(() => dispatch("select", file))}
+          onclick={(e) => { e.preventDefault(); dispatch("select", file); }}
           class:is-active={file.name == selectedFileName}
         >
           <span class="icon is-small">

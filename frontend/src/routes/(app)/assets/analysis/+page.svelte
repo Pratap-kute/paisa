@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { generateColorScheme, genericBarColor } from "$lib/core/colors";
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -45,7 +43,7 @@
     color = generateColorScheme(commodities);
   });
 
-  run(() => {
+  $effect(() => {
     if (securityTypeR && ratingR && industryR && portfolioR && color) {
       securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
       ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);

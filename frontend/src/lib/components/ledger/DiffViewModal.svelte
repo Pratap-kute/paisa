@@ -1,15 +1,9 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { createEventDispatcher } from "svelte";
   import Modal from "$lib/components/ui/Modal.svelte";
-  import type { MergeView } from "@codemirror/merge";
   import { createDiffEditor } from "$lib/editors/editor";
   import type { LedgerFile } from "$lib/core/utils";
   let editorDom: Element = $state();
-  let editor: MergeView = $state();
-  let changedOldFiles: LedgerFile[] = $state([]);
-  let changedNewFiles: LedgerFile[] = $state([]);
   let selectedFileIndex = $state(0);
 
   const dispatch = createEventDispatcher();
@@ -27,30 +21,31 @@
     open = $bindable(false)
   }: Props = $props();
 
-  run(() => {
-    changedOldFiles = [];
-    changedNewFiles = [];
+  let changedFiles = $derived.by(() => {
+    const oldF: LedgerFile[] = [];
+    const newF: LedgerFile[] = [];
     for (let i = 0; i < newFiles.length; i++) {
-      if (oldFiles[i].content !== newFiles[i].content) {
-        changedOldFiles.push(oldFiles[i]);
-        changedNewFiles.push(newFiles[i]);
+      if (oldFiles[i] && newFiles[i] && oldFiles[i].content !== newFiles[i].content) {
+        oldF.push(oldFiles[i]);
+        newF.push(newFiles[i]);
       }
     }
+    return { oldF, newF };
   });
 
-  run(() => {
-    if (open) {
-      if (editor) {
-        editor.destroy();
-      }
+  let changedOldFiles = $derived(changedFiles.oldF);
+  let changedNewFiles = $derived(changedFiles.newF);
 
-      if (changedOldFiles.length > 0) {
-        editor = createDiffEditor(
-          changedOldFiles[selectedFileIndex].content,
-          changedNewFiles[selectedFileIndex].content,
-          editorDom
-        );
-      }
+  $effect(() => {
+    if (open && changedOldFiles.length > 0 && editorDom) {
+      const editor = createDiffEditor(
+        changedOldFiles[selectedFileIndex].content,
+        changedNewFiles[selectedFileIndex].content,
+        editorDom
+      );
+      return () => {
+        editor.destroy();
+      };
     }
   });
 </script>

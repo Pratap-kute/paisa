@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { goto } from "$app/navigation";
   import COLORS from "$lib/core/colors";
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
@@ -41,7 +39,7 @@
     });
   }
 
-  run(() => {
+  $effect(() => {
     if (creditCard && svg && !rendered) {
       renderYearlySpends(svg, creditCard.yearlySpends);
       rendered = true;

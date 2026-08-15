@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { renderBreakdowns } from "$lib/charts/schedule_al";
   import _ from "lodash";
   import { ajax, type ScheduleAL } from "$lib/core/utils";
@@ -8,15 +6,9 @@
   import { dateMin, year } from "../../../../../store";
 
   let scheduleAls: Record<string, ScheduleAL> = $state();
-  let selectedScheduleAl: ScheduleAL = $state();
+  let selectedScheduleAl: ScheduleAL = $derived(scheduleAls ? scheduleAls[$year] : null);
 
-  run(() => {
-    if (scheduleAls) {
-      selectedScheduleAl = scheduleAls[$year];
-    }
-  });
-
-  run(() => {
+  $effect(() => {
     if (selectedScheduleAl) {
       renderBreakdowns(selectedScheduleAl.entries);
     }

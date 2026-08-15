@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy';
-
   import { goto } from "$app/navigation";
   import Logo from "$lib/components/layout/Logo.svelte";
   import { login } from "$lib/core/utils";
@@ -38,7 +36,7 @@
                 <a href="https://paisa.fyi" class="is-primary-color">Paisa</a>
               </div>
             </div>
-            <form onsubmit={preventDefault(tryLogin)}>
+            <form onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
               <div class="field">
                 <label for="" class="label">Username</label>
                 <div class="control">

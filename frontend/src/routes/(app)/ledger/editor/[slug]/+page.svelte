@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import {
     createEditor,
     editorState,
@@ -176,7 +174,7 @@
     }
   });
 
-  run(() => {
+  $effect(() => {
     if (selectedFile && editorDom) {
       if (!editor || editor.state.doc.toString() != selectedFile.content) {
         if (editor) {

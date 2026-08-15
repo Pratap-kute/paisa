@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { now } from "$lib/core/utils";
   import dayjs from "dayjs";
   import _ from "lodash";
@@ -13,21 +11,34 @@
 
   let { min, max, value = $bindable() }: Props = $props();
 
-  let allowedYears: number[] = $state([]);
-  let selectedYear: number = $state();
   let open = $state(false);
+  let valueDate = $derived(dayjs(value, "YYYY-MM"));
+  let selectedYear: number = $state(dayjs(value, "YYYY-MM").year());
+  let allowedYears: number[] = $derived(
+    min && max ? _.range(min.year(), max.year() + 1) : []
+  );
 
+  $effect(() => {
+    selectedYear = valueDate.year();
+  });
 
+  $effect(() => {
+    if (min && max && !isAllowed(valueDate, min, max)) {
+      if (isAllowed(now(), min, max)) {
+        select(now());
+      } else {
+        select(max);
+      }
+    }
+  });
 
   function isAllowed(date: dayjs.Dayjs, min: dayjs.Dayjs, max: dayjs.Dayjs) {
     return date.isSameOrAfter(min.startOf("month")) && date.isSameOrBefore(max.endOf("month"));
   }
 
   function select(date: dayjs.Dayjs) {
-    valueDate = date;
     value = date.format("YYYY-MM");
-    selectedYear = valueDate.year();
-    allowedYears = _.range(min.year(), max.year() + 1);
+    selectedYear = date.year();
     open = false;
   }
 
@@ -35,8 +46,9 @@
     select(dayjs(`${selectedYear}-${month + 1}`, "YYYY-M"));
   }
 
-  function selectYear(event: any) {
-    selectedYear = parseInt(event.target.value);
+  function selectYear(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    selectedYear = parseInt(target.value);
   }
 
   const MONTHS = [
@@ -53,22 +65,6 @@
     "Nov",
     "Dec"
   ];
-  let valueDate = $derived(dayjs(value, "YYYY-MM"));
-  run(() => {
-    allowedYears = _.range(min.year(), max.year() + 1);
-  });
-  run(() => {
-    selectedYear = valueDate.year();
-  });
-  run(() => {
-    if (!isAllowed(valueDate, min, max)) {
-      if (isAllowed(now(), min, max)) {
-        select(now());
-      } else {
-        select(max);
-      }
-    }
-  });
 </script>
 
 <div class="is-flex">

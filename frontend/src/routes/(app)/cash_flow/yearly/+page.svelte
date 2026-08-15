@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { onMount } from "svelte";
   import _ from "lodash";
   import { renderFlow } from "$lib/charts/cash_flow";
@@ -49,7 +47,7 @@
     };
   }
 
-  run(() => {
+  $effect(() => {
     if (graph) {
       if (graph[$year] == null) {
         isEmpty = true;

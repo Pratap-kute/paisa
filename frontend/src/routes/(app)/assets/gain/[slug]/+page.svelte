@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import COLORS, { generateColorScheme, genericBarColor } from "$lib/core/colors";
   import { renderAccountOverview, buildLegends } from "$lib/charts/gain";
   import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
@@ -112,7 +110,7 @@
     industryEmpty = industry.length === 0;
   });
 
-  run(() => {
+  $effect(() => {
     if (securityTypeR && ratingR && industryR && portfolioR) {
       securityTypeR(filterCommodityBreakdowns(security_type, selectedCommodities), color);
       ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);

@@ -1,8 +1,5 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { createEditor } from "$lib/editors/search_query_editor";
-  import type { EditorView } from "codemirror";
 
   let editorDom: HTMLElement = $state();
   interface Props {
@@ -10,15 +7,13 @@
   }
 
   let { autocomplete }: Props = $props();
-  let editor: EditorView = $state();
 
-  run(() => {
+  $effect(() => {
     if (autocomplete && editorDom) {
-      if (editor) {
+      const editor = createEditor("", editorDom, autocomplete);
+      return () => {
         editor.destroy();
-      }
-
-      editor = createEditor("", editorDom, autocomplete);
+      };
     }
   });
 </script>
