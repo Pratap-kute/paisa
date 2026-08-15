@@ -77,7 +77,12 @@ export function renderAllocationTarget(
   const targetMargin = rem(15);
   const textGroupMargin = rem(15);
   const targetWidth = hasTreemap
-    ? Math.max(rem(300), Math.round((width - textGroupWidth - targetMargin - textGroupMargin) * 0.5))
+    ? Math.max(
+      rem(300),
+      Math.round(
+        (width - textGroupWidth - targetMargin - textGroupMargin) * 0.5,
+      ),
+    )
     : Math.max(rem(300), width - textGroupWidth - targetMargin);
   const textGroupZero = targetWidth + targetMargin;
 

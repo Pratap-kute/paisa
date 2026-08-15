@@ -21,7 +21,8 @@ export function buildDirectoryTree<T extends { name: string; path?: string }>(
 
       let dir = currentLevel.find(
         (item): item is Directory<T> =>
-          (item as Directory<T>).type === "directory" && (item as Directory<T>).name === part,
+          (item as Directory<T>).type === "directory" &&
+          (item as Directory<T>).name === part,
       );
 
       if (!dir) {

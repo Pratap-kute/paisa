@@ -801,7 +801,6 @@ export function ajax(
   options?: RequestOptions,
 ): Promise<any>;
 
-
 export function ajax(
   route: "/api/ping",
 ): Promise<{ success: boolean; error?: string }>;

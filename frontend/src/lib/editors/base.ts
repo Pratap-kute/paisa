@@ -31,5 +31,3 @@ export const fullEditorExtensions: Extension = [
   search({ top: true }),
   keymap.of(searchKeymap),
 ];
-
-

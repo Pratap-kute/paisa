@@ -1,4 +1,4 @@
-import { render, fireEvent } from "@testing-library/svelte";
+import { fireEvent, render } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
 import Tabs from "./Tabs.svelte";
 

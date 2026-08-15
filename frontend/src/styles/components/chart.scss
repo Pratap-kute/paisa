@@ -118,14 +118,24 @@ svg text,
 }
 
 /* SVG Text Semantic Colors */
-.svg-text-success { fill: var(--paisa-success) !important; }
-.svg-text-danger { fill: var(--paisa-danger) !important; }
+.svg-text-success {
+  fill: var(--paisa-success) !important;
+}
+.svg-text-danger {
+  fill: var(--paisa-danger) !important;
+}
 .svg-text-warning,
-.svg-text-warning-dark { fill: var(--paisa-warning) !important; }
-.svg-text-grey { fill: var(--paisa-chart-muted) !important; }
+.svg-text-warning-dark {
+  fill: var(--paisa-warning) !important;
+}
+.svg-text-grey {
+  fill: var(--paisa-chart-muted) !important;
+}
 .svg-text-grey-dark,
 .svg-text-black-ter,
-.svg-text-dark { fill: var(--paisa-chart-text) !important; }
+.svg-text-dark {
+  fill: var(--paisa-chart-text) !important;
+}
 
 /* Calendar charts in Monthly & Yearly Expense views */
 .d3-calendar {
@@ -160,7 +170,8 @@ svg text,
       border: 1px solid var(--paisa-border-subtle);
       padding: 0.35rem 0.125rem 0.25rem;
       gap: 0.15rem;
-      transition: background-color var(--paisa-transition-fast), border-color var(--paisa-transition-fast);
+      transition: background-color var(--paisa-transition-fast), border-color
+        var(--paisa-transition-fast);
 
       &:hover {
         background-color: var(--paisa-surface-hover);

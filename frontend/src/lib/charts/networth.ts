@@ -6,13 +6,13 @@ import { financialColors } from "../theme/chartPalette";
 import {
   formatCurrency,
   formatCurrencyCrude,
+  getColorPreference,
   isMobile,
   type Legend,
   type Networth,
   now,
   svgUrl,
   tooltip,
-  getColorPreference,
 } from "../core/utils";
 
 function networth(d: Networth) {
@@ -40,8 +40,15 @@ export function createNetworthChart(
   const right = isMobile() ? 10 : 80;
   const margin = { top: 15, right, bottom: 20, left: 40 };
 
-  let currentWidth = Math.max(50, (element.parentElement?.clientWidth || 600) - margin.left - margin.right);
-  let currentHeight = Math.max(50, (element.clientHeight || Number(svg.attr("height")) || 400) - margin.top - margin.bottom);
+  let currentWidth = Math.max(
+    50,
+    (element.parentElement?.clientWidth || 600) - margin.left - margin.right,
+  );
+  let currentHeight = Math.max(
+    50,
+    (element.clientHeight || Number(svg.attr("height")) || 400) - margin.top -
+      margin.bottom,
+  );
 
   const g = svg.append("g").attr(
     "transform",
@@ -169,28 +176,36 @@ export function createNetworthChart(
       yAxisRight.selectAll("*").remove();
     }
 
-    yAxisLeft.call(d3.axisLeft(y).tickSize(-currentWidth).tickFormat(formatCurrencyCrude));
+    yAxisLeft.call(
+      d3.axisLeft(y).tickSize(-currentWidth).tickFormat(formatCurrencyCrude),
+    );
 
     clipAbove.attr(
       "d",
-      area(currentHeight, (d) =>
-        y(d.gainAmount + d.investmentAmount - d.withdrawalAmount))(points) || null,
+      area(
+        currentHeight,
+        (d) => y(d.gainAmount + d.investmentAmount - d.withdrawalAmount),
+      )(points) || null,
     );
 
     clipBelow.attr(
       "d",
-      area(0, (d) =>
-        y(d.gainAmount + d.investmentAmount - d.withdrawalAmount))(points) || null,
+      area(0, (d) => y(d.gainAmount + d.investmentAmount - d.withdrawalAmount))(
+        points,
+      ) || null,
     );
 
     gainArea.attr(
       "d",
-      area(0, (d) => y(d.investmentAmount - d.withdrawalAmount))(points) || null,
+      area(0, (d) => y(d.investmentAmount - d.withdrawalAmount))(points) ||
+        null,
     );
 
     lossArea.attr(
       "d",
-      area(currentHeight, (d) => y(d.investmentAmount - d.withdrawalAmount))(points) || null,
+      area(currentHeight, (d) => y(d.investmentAmount - d.withdrawalAmount))(
+        points,
+      ) || null,
     );
 
     investmentLine.attr(
@@ -277,7 +292,10 @@ export function createNetworthChart(
   function resize(dimensions: { width: number; height: number }) {
     if (dimensions.width <= 0 || dimensions.height <= 0) return;
     currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
-    currentHeight = Math.max(50, dimensions.height - margin.top - margin.bottom);
+    currentHeight = Math.max(
+      50,
+      dimensions.height - margin.top - margin.bottom,
+    );
     render(currentPoints);
   }
 

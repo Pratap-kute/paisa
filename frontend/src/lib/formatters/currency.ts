@@ -12,13 +12,18 @@ export function normalize(value: number): number {
   if (get(obscure)) {
     return 0;
   }
-  if (Object.is(value, -0) || Math.abs(value) < 1e-9 || !Number.isFinite(value)) {
+  if (
+    Object.is(value, -0) || Math.abs(value) < 1e-9 || !Number.isFinite(value)
+  ) {
     return 0;
   }
   return value;
 }
 
-export function formatCurrency(value: number, precision: number = null): string {
+export function formatCurrency(
+  value: number,
+  precision: number = null,
+): string {
   value = normalize(value);
 
   if (precision == null) {

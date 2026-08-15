@@ -84,7 +84,12 @@ export function renderPortfolioBreakdown(
   const textGroupMargin = rem(15);
   const targetWidth = small
     ? Math.max(rem(200), width - textGroupWidth - targetMargin)
-    : Math.max(rem(300), Math.round((width - textGroupWidth - targetMargin - textGroupMargin) * 0.5));
+    : Math.max(
+      rem(300),
+      Math.round(
+        (width - textGroupWidth - targetMargin - textGroupMargin) * 0.5,
+      ),
+    );
   const textGroupZero = targetWidth + targetMargin;
 
   const x = d3.scaleLinear().range([
@@ -314,7 +319,10 @@ function renderPartition(
   color: d3.ScaleOrdinal<string, string>,
   clientWidth: number,
 ) {
-  const rawBreakdowns = _.filter(pa.breakdowns, (b) => b.commodity_name !== "root");
+  const rawBreakdowns = _.filter(
+    pa.breakdowns,
+    (b) => b.commodity_name !== "root",
+  );
   if (_.isEmpty(rawBreakdowns)) {
     return;
   }
@@ -371,7 +379,9 @@ function renderPartition(
       return tooltip([
         ["Commodity", [breakdown.commodity_name, "has-text-right"]],
         ["Security Count", [
-          breakdown.security_id ? breakdown.security_id.split(",").length.toString() : "0",
+          breakdown.security_id
+            ? breakdown.security_id.split(",").length.toString()
+            : "0",
           "has-text-right",
         ]],
         ["Amount", [

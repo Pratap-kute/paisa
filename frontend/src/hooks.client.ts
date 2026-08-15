@@ -107,10 +107,14 @@ const footer = `
 
 function isIgnoredClientError(error: any): boolean {
   if (!error) return true;
-  const msg = typeof error === "string" ? error : error?.message || String(error);
+  const msg = typeof error === "string"
+    ? error
+    : error?.message || String(error);
   if (
     typeof msg === "string" &&
-    (msg.includes("ResizeObserver loop completed with undelivered notifications") ||
+    (msg.includes(
+      "ResizeObserver loop completed with undelivered notifications",
+    ) ||
       msg.includes("ResizeObserver loop limit exceeded") ||
       msg.includes("ResizeObserver loop"))
   ) {

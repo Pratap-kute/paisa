@@ -1,6 +1,8 @@
-import type { LedgerFileError, SheetFileError, SheetLineResult } from "../core/utils";
-
-
+import type {
+  LedgerFileError,
+  SheetFileError,
+  SheetLineResult,
+} from "../core/utils";
 
 export interface EditorState {
   hasUnsavedChanges: boolean;

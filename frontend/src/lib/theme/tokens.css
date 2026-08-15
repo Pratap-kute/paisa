@@ -17,13 +17,13 @@
   --paisa-font-mono: "Roboto Mono Variable", monospace;
 
   /* Typography Scale (Stable 1rem = 16px) */
-  --paisa-font-size-xs: 0.75rem;      /* 12px */
-  --paisa-font-size-sm: 0.875rem;     /* 14px */
-  --paisa-font-size-base: 1rem;       /* 16px */
-  --paisa-font-size-lg: 1.125rem;     /* 18px */
-  --paisa-font-size-xl: 1.25rem;      /* 20px */
-  --paisa-font-size-2xl: 1.5rem;      /* 24px */
-  --paisa-font-size-metric: 1.75rem;  /* 28px */
+  --paisa-font-size-xs: 0.75rem; /* 12px */
+  --paisa-font-size-sm: 0.875rem; /* 14px */
+  --paisa-font-size-base: 1rem; /* 16px */
+  --paisa-font-size-lg: 1.125rem; /* 18px */
+  --paisa-font-size-xl: 1.25rem; /* 20px */
+  --paisa-font-size-2xl: 1.5rem; /* 24px */
+  --paisa-font-size-metric: 1.75rem; /* 28px */
 
   /* Line Heights */
   --paisa-line-height-tight: 1.25;
@@ -129,12 +129,12 @@
   --paisa-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Spacing Scale */
-  --paisa-space-1: 0.25rem;  /* 4px */
-  --paisa-space-2: 0.5rem;   /* 8px */
-  --paisa-space-3: 0.75rem;  /* 12px */
-  --paisa-space-4: 1rem;     /* 16px */
-  --paisa-space-5: 1.5rem;   /* 24px */
-  --paisa-space-6: 2rem;     /* 32px */
+  --paisa-space-1: 0.25rem; /* 4px */
+  --paisa-space-2: 0.5rem; /* 8px */
+  --paisa-space-3: 0.75rem; /* 12px */
+  --paisa-space-4: 1rem; /* 16px */
+  --paisa-space-5: 1.5rem; /* 24px */
+  --paisa-space-6: 2rem; /* 32px */
 
   /* Layout & Grid Tracks */
   --paisa-grid-gap: 0.75rem;

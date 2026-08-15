@@ -250,7 +250,8 @@
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+  transition: background-color var(--paisa-transition-fast), color
+    var(--paisa-transition-fast);
 
   &:hover,
   &:focus-visible {

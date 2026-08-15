@@ -12,7 +12,8 @@
 .paisa-login-card {
   width: min(100%, 26rem);
   margin: 0 auto;
-  padding: var(--paisa-space-5, 1.5rem) var(--paisa-space-5, 1.5rem) var(--paisa-space-4, 1rem);
+  padding: var(--paisa-space-5, 1.5rem) var(--paisa-space-5, 1.5rem)
+    var(--paisa-space-4, 1rem);
   border: 1px solid var(--paisa-login-card-border);
   border-radius: var(--paisa-radius-lg, 0.5rem);
   box-shadow: var(--paisa-shadow-md);

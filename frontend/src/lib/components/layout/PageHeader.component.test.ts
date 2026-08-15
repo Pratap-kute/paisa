@@ -9,8 +9,12 @@ test("renders page header with title, description, and tag", () => {
     tag: "Beta",
   });
 
-  expect(container.querySelector(".paisa-page-title")).toHaveTextContent("Transactions");
-  expect(container.querySelector(".paisa-page-description")).toHaveTextContent("View all journal transactions");
+  expect(container.querySelector(".paisa-page-title")).toHaveTextContent(
+    "Transactions",
+  );
+  expect(container.querySelector(".paisa-page-description")).toHaveTextContent(
+    "View all journal transactions",
+  );
   expect(container.querySelector(".paisa-badge")).toHaveTextContent("Beta");
   unmount();
 });

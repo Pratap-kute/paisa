@@ -6,14 +6,11 @@ import {
   closeBracketsKeymap,
   completeFromList,
   type CompletionContext,
-  type CompletionSource,
   completionKeymap,
+  type CompletionSource,
   ifIn,
 } from "@codemirror/autocomplete";
-import {
-  bracketMatching,
-  syntaxTree,
-} from "@codemirror/language";
+import { bracketMatching, syntaxTree } from "@codemirror/language";
 import { type Diagnostic, linter, lintKeymap } from "@codemirror/lint";
 import type { EditorState } from "@codemirror/state";
 import { EditorView, keymap, placeholder } from "@codemirror/view";

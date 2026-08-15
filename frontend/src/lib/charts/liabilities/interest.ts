@@ -76,7 +76,12 @@ export function renderOverview(gains: Interest[]) {
   const svg = d3.select(id);
   svg.selectAll("*").remove();
 
-  const margin = { top: rem(25), right: rem(20), bottom: rem(30), left: rem(150) },
+  const margin = {
+      top: rem(25),
+      right: rem(20),
+      bottom: rem(30),
+      left: rem(150),
+    },
     width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
@@ -89,7 +94,9 @@ export function renderOverview(gains: Interest[]) {
 
   svg.attr("width", width + margin.left + margin.right);
 
-  const y = d3.scaleBand().range([0, height]).paddingInner(0.1).paddingOuter(0.05);
+  const y = d3.scaleBand().range([0, height]).paddingInner(0.1).paddingOuter(
+    0.05,
+  );
   y.domain(gains.map((g) => restName(g.account)));
   const y1 = d3
     .scaleBand()
@@ -136,11 +143,17 @@ export function renderOverview(gains: Interest[]) {
   const textGroupWidth = rem(140);
   const aprMargin = rem(15);
   const textGroupMargin = rem(10);
-  const aprWidth = Math.max(rem(120), Math.round((width - textGroupWidth - aprMargin - textGroupMargin) * 0.25));
+  const aprWidth = Math.max(
+    rem(120),
+    Math.round((width - textGroupWidth - aprMargin - textGroupMargin) * 0.25),
+  );
   const aprTextWidth = rem(35);
   const textGroupZero = aprWidth + aprTextWidth + aprMargin;
 
-  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth + textGroupMargin, width]);
+  const x = d3.scaleLinear().range([
+    textGroupZero + textGroupWidth + textGroupMargin,
+    width,
+  ]);
   x.domain([0, maxX]);
   const x1 = d3
     .scaleLinear()

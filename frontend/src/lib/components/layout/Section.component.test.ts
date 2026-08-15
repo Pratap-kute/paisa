@@ -8,8 +8,12 @@ test("renders section with title and subtitle", () => {
     subtitle: "By monthly category",
   });
 
-  expect(container.querySelector(".paisa-section-title")).toHaveTextContent("Income Breakdown");
-  expect(container.querySelector(".paisa-section-subtitle")).toHaveTextContent("By monthly category");
+  expect(container.querySelector(".paisa-section-title")).toHaveTextContent(
+    "Income Breakdown",
+  );
+  expect(container.querySelector(".paisa-section-subtitle")).toHaveTextContent(
+    "By monthly category",
+  );
   unmount();
 });
 

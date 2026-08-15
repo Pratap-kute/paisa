@@ -3,12 +3,12 @@
  * and UI tokens from `$lib/theme/tokens.css`.
  */
 export {
-  MaterialUI,
+  accountColorStyle,
   chartColors,
-  financialColors,
   default,
+  financialColors,
   generateColorScheme,
   genericBarColor,
-  accountColorStyle,
+  MaterialUI,
   white,
 } from "../theme/chartPalette";

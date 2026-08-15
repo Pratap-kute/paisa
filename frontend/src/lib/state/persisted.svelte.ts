@@ -34,6 +34,9 @@ export class PersistedState<T> {
   }
 }
 
-export function createPersistedState<T>(key: string, initialValue: T): PersistedState<T> {
+export function createPersistedState<T>(
+  key: string,
+  initialValue: T,
+): PersistedState<T> {
   return new PersistedState<T>(key, initialValue);
 }

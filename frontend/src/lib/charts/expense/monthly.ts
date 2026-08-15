@@ -108,7 +108,10 @@ export function renderCalendar(
     .attr("fill", "none")
     .attr("stroke", "var(--paisa-border-subtle)")
     .attr("stroke-width", 2)
-    .attr("opacity", (d) => (expensesByDayTotal[d.format("YYYY-MM-DD")] > 0 ? 0 : 0.4));
+    .attr(
+      "opacity",
+      (d) => (expensesByDayTotal[d.format("YYYY-MM-DD")] > 0 ? 0 : 0.4),
+    );
 
   // Donut slices
   svg

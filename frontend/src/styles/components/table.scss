@@ -14,7 +14,8 @@
   }
 
   &.is-light-border tbody {
-    td, th {
+    td,
+    th {
       border-bottom: 1px solid var(--paisa-border-subtle);
     }
   }
@@ -22,7 +23,8 @@
   tr.is-sub-header {
     background-color: var(--paisa-surface-hover);
 
-    th, td {
+    th,
+    td {
       color: var(--paisa-brand-primary);
       font-weight: var(--paisa-font-weight-bold);
       background-color: var(--paisa-surface-hover);
@@ -34,7 +36,8 @@
   }
 
   tr.is-account-row {
-    td, th {
+    td,
+    th {
       color: var(--paisa-text-secondary);
       font-size: var(--paisa-font-size-xs);
     }
@@ -46,7 +49,8 @@
     tr.is-summary-row {
       background-color: var(--paisa-surface-default);
 
-      th, td {
+      th,
+      td {
         font-weight: var(--paisa-font-weight-bold);
         background-color: var(--paisa-surface-default);
         color: var(--paisa-text-primary);
@@ -67,7 +71,8 @@
 
   tbody,
   thead {
-    td, th {
+    td,
+    th {
       border-top-width: 0;
     }
   }
@@ -75,7 +80,8 @@
   &.is-bordered {
     border: 1px solid var(--paisa-table-border);
 
-    td, th {
+    td,
+    th {
       border-left-width: 0;
 
       &:last-child {
@@ -85,7 +91,8 @@
 
     tbody tr:last-child,
     tfoot tr:last-child {
-      td, th {
+      td,
+      th {
         border-bottom-width: 0;
       }
     }
@@ -147,4 +154,3 @@
 .table.has-sticky-column tbody tr.is-summary-row th:first-child {
   background-color: var(--paisa-surface-default);
 }
-

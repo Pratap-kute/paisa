@@ -2,6 +2,7 @@
 import {
   type CashFlow,
   formatCurrencyCrude,
+  getColorPreference,
   type Graph,
   lastName,
   type Legend,
@@ -10,7 +11,6 @@ import {
   rem,
   restName,
   skipTicks,
-  getColorPreference,
 } from "../core/utils";
 import * as d3 from "d3";
 import { sankeyCircular, sankeyJustify } from "d3-sankey-circular";
@@ -41,7 +41,9 @@ export function createMonthlyFlow(
 ): MonthlyFlowChart {
   const MAX_BAR_WIDTH = rem(20);
   const el = typeof target === "string"
-    ? document.getElementById(target.startsWith("#") ? target.substring(1) : target)
+    ? document.getElementById(
+      target.startsWith("#") ? target.substring(1) : target,
+    )
     : target;
 
   if (!el) {
@@ -63,8 +65,15 @@ export function createMonthlyFlow(
     left: rem(40),
   };
 
-  let currentWidth = Math.max(100, (el.parentElement?.clientWidth || 600) - margin.left - margin.right);
-  let currentHeight = Math.max(100, (el.clientHeight || Number(svg.attr("height")) || 400) - margin.top - margin.bottom);
+  let currentWidth = Math.max(
+    100,
+    (el.parentElement?.clientWidth || 600) - margin.left - margin.right,
+  );
+  let currentHeight = Math.max(
+    100,
+    (el.clientHeight || Number(svg.attr("height")) || 400) - margin.top -
+      margin.bottom,
+  );
 
   const g = svg.append("g").attr(
     "transform",
@@ -82,14 +91,18 @@ export function createMonthlyFlow(
         ? chroma(COLORS.expenses).darken(0.8).hex()
         : chroma(COLORS.expenses).brighten(1.5).hex(),
     )
-    .stroke(darkMode ? chroma(COLORS.expenses).brighten(0.2).hex() : COLORS.expenses);
+    .stroke(
+      darkMode ? chroma(COLORS.expenses).brighten(0.2).hex() : COLORS.expenses,
+    );
   svg.call(texture);
 
   const areaKeys = ["income", "expenses", "liabilities", "tax", "investment"];
   const colors = [
     darkMode ? chroma(COLORS.income).brighten(0.2).hex() : COLORS.income,
     darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
-    darkMode ? chroma(COLORS.liabilities).brighten(0.15).hex() : COLORS.liabilities,
+    darkMode
+      ? chroma(COLORS.liabilities).brighten(0.15).hex()
+      : COLORS.liabilities,
     darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
     darkMode ? chroma(COLORS.assets).brighten(0.15).hex() : COLORS.assets,
   ];
@@ -103,7 +116,9 @@ export function createMonthlyFlow(
   const y = d3.scaleLinear().range([currentHeight, 0]);
   const z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
 
-  const x1 = d3.scaleBand().domain(["0", "1"]).paddingInner(0.1).paddingOuter(0.1);
+  const x1 = d3.scaleBand().domain(["0", "1"]).paddingInner(0.1).paddingOuter(
+    0.1,
+  );
 
   const xAxis = g
     .append("g")
@@ -233,7 +248,9 @@ export function createMonthlyFlow(
                 : x1(d[0].data.i))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH))
             .attr("y", y.range()[0])
-            .call((sel) => duration > 0 ? sel.transition(t) : sel)
+            .call((sel) =>
+              duration > 0 ? sel.transition(t) : sel
+            )
             .attr("y", (d: any) => y(d[0][1]))
             .attr("height", (d: any) => y(d[0][0]) - y(d[0][1])),
         (update) =>
@@ -249,8 +266,10 @@ export function createMonthlyFlow(
                 ? x1(d[0].data.i) + x1.bandwidth() -
                   Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
                 : x1(d[0].data.i))
-            .attr("y", (d: any) => y(d[0][1]))
-            .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]))
+            .attr("y", (d: any) =>
+              y(d[0][1]))
+            .attr("height", (d: any) =>
+              y(d[0][0]) - y(d[0][1]))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH)),
         (exit) => exit.remove(),
       );
@@ -313,7 +332,10 @@ export function createMonthlyFlow(
   function resize(dimensions: { width: number; height: number }) {
     if (dimensions.width <= 0 || dimensions.height <= 0) return;
     currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
-    currentHeight = Math.max(50, dimensions.height - margin.top - margin.bottom);
+    currentHeight = Math.max(
+      50,
+      dimensions.height - margin.top - margin.bottom,
+    );
 
     x.range([0, currentWidth]);
     y.range([currentHeight, 0]);

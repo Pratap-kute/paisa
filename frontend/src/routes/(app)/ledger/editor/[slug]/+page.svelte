@@ -242,6 +242,50 @@
   let outputOpen = $state(true);
   let copiedOutput = $state(false);
 
+  interface FormattedBalanceLine {
+    type: "divider" | "entry" | "raw";
+    amount?: string;
+    isNegative?: boolean;
+    commodity?: string;
+    isCurrency?: boolean;
+    account?: string;
+    indent?: number;
+    rawText?: string;
+  }
+
+  let parsedOutput = $derived.by(() => {
+    const raw = $editorState.output;
+    if (!raw) return [];
+    const lines = raw.split("\n");
+    return lines.map((line): FormattedBalanceLine => {
+      const trimmed = line.trim();
+      if (!trimmed) return { type: "raw", rawText: "" };
+      if (trimmed.startsWith("---") || trimmed.startsWith("===")) {
+        return { type: "divider", rawText: line };
+      }
+      const match = line.match(/^(\s*)([-+]?[0-9,]+(?:\.[0-9]+)?)\s+([A-Za-z0-9_$-]+)(?:\s+(.*))?$/);
+      if (match) {
+        const leading = match[1] || "";
+        const amount = match[2];
+        const commodity = match[3];
+        const account = match[4] ? match[4].trim() : "";
+        const isNegative = amount.startsWith("-");
+        const isCurrency = commodity.toUpperCase() === "INR" || commodity === "$" || commodity.toUpperCase() === "USD" || commodity.toUpperCase() === "EUR";
+        return {
+          type: "entry",
+          amount,
+          isNegative,
+          commodity,
+          isCurrency,
+          account,
+          indent: Math.min(Math.floor(leading.length / 2), 6),
+          rawText: line,
+        };
+      }
+      return { type: "raw", rawText: line };
+    });
+  });
+
   async function copyOutput() {
     if ($editorState.output) {
       await navigator.clipboard.writeText($editorState.output);
@@ -481,20 +525,66 @@
       {#if outputOpen && !_.isEmpty($editorState.output)}
         <section class="paisa-editor-output-pane">
           <div class="paisa-pane-header">
-            <span class="paisa-pane-title">
+            <span class="paisa-pane-title" title="hledger CLI validation balance report">
               <i class="fas fa-scale-balanced mr-1"></i>
-              BALANCES & DIAGNOSTICS
+              LEDGER BALANCE
             </span>
+
+            <a
+              href="/assets/investment"
+              class="paisa-portfolio-link-pill ml-auto"
+              title="Open Portfolio Dashboard with full INR valuations, charts, and gain/loss analytics"
+            >
+              <i class="fas fa-chart-pie mr-1"></i>
+              <span>Portfolio ↗</span>
+            </a>
+
             <button
-              class="paisa-pane-action-btn ml-auto"
-              title="Copy output to clipboard"
+              class="paisa-pane-action-btn"
+              title="Copy raw output to clipboard"
               onclick={copyOutput}
             >
               <i class={copiedOutput ? "fas fa-check" : "fa-regular fa-copy"}></i>
             </button>
           </div>
+
+          <div class="paisa-output-hint-bar">
+            <span class="icon is-small">
+              <i class="fa-solid fa-circle-info"></i>
+            </span>
+            <span>Non-cash holdings show <b>raw units</b>. For calculated market values, see <b>Portfolio</b>.</span>
+          </div>
+
           <div class="paisa-pane-content paisa-output-scroll">
-            <pre class="paisa-output-pre">{$editorState.output}</pre>
+            <div class="paisa-bal-table">
+              {#each parsedOutput as item}
+                {#if item.type === "divider"}
+                  <div class="paisa-bal-divider-row">
+                    <div class="paisa-bal-divider-line"></div>
+                  </div>
+                {:else if item.type === "entry"}
+                  <div class="paisa-bal-row" class:has-account={!!item.account}>
+                    <span class="paisa-bal-amount" class:is-negative={item.isNegative}>
+                      {item.amount}
+                    </span>
+                    <span class="paisa-bal-tag">
+                      {#if item.isCurrency}
+                        <span class="paisa-bal-currency">{item.commodity}</span>
+                      {:else}
+                        <span class="paisa-bal-commodity" title="Fund / Commodity units (not INR value)">{item.commodity}</span>
+                      {/if}
+                    </span>
+                    <span class="paisa-bal-account" style="padding-left: {(item.indent || 0) * 12}px">
+                      {item.account || ""}
+                    </span>
+                  </div>
+                {:else if item.rawText}
+                  <div class="paisa-bal-raw-row">
+                    <span class="paisa-bal-raw">{item.rawText}</span>
+                  </div>
+                {/if}
+              {/each}
+            </div>
           </div>
         </section>
       {/if}
@@ -786,23 +876,138 @@
     }
   }
 
+  .paisa-portfolio-link-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: var(--paisa-font-weight-medium);
+    border-radius: var(--paisa-radius-full);
+    background-color: var(--paisa-brand-primary-light);
+    color: var(--paisa-brand-primary);
+    text-decoration: none;
+    transition: all var(--paisa-transition-fast);
+
+    &:hover {
+      background-color: var(--paisa-brand-primary);
+      color: var(--paisa-text-inverse);
+    }
+  }
+
+  .paisa-output-hint-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
+    background-color: var(--paisa-surface-hover);
+    color: var(--paisa-text-secondary);
+    border-bottom: 1px solid var(--paisa-border-subtle);
+    line-height: 1.35;
+
+    .icon {
+      color: var(--paisa-brand-primary);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+  }
+
   /* Output Right Pane */
   .paisa-output-scroll {
     overflow-y: auto;
     background-color: var(--paisa-surface-bg);
   }
 
-  .paisa-output-pre {
-    background-color: transparent;
-    color: var(--paisa-text-primary);
+  .paisa-bal-table {
+    display: grid;
+    grid-template-columns: minmax(90px, auto) minmax(70px, auto) 1fr;
+    padding: var(--paisa-space-2) 0;
     font-family: var(--paisa-font-mono);
-    font-size: 0.8rem;
-    line-height: 1.45;
-    padding: var(--paisa-space-3);
-    margin: 0;
-    white-space: pre;
-    word-break: normal;
-    border: none;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    gap: 0;
+  }
+
+  .paisa-bal-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: baseline;
+    padding: 1px var(--paisa-space-3);
+    border-radius: 0;
+
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+    }
+
+    &.has-account {
+      border-bottom: 1px solid transparent;
+    }
+  }
+
+  .paisa-bal-amount {
+    text-align: right;
+    font-weight: var(--paisa-font-weight-medium);
+    color: var(--paisa-text-primary);
+    white-space: nowrap;
+    padding-right: var(--paisa-space-2);
+    font-variant-numeric: tabular-nums;
+
+    &.is-negative {
+      color: var(--paisa-brand-primary);
+    }
+  }
+
+  .paisa-bal-tag {
+    display: flex;
+    align-items: baseline;
+    white-space: nowrap;
+    padding-right: var(--paisa-space-2);
+  }
+
+  .paisa-bal-currency {
+    font-size: 0.7rem;
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-muted);
+  }
+
+  .paisa-bal-commodity {
+    display: inline-block;
+    padding: 0px 5px;
+    font-size: 0.65rem;
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-brand-primary);
+    background-color: var(--paisa-brand-primary-light);
+    border-radius: var(--paisa-radius-xs);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+  }
+
+  .paisa-bal-account {
+    color: var(--paisa-text-secondary);
+    font-weight: var(--paisa-font-weight-medium);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .paisa-bal-divider-row {
+    grid-column: 1 / -1;
+    padding: var(--paisa-space-1) var(--paisa-space-3);
+  }
+
+  .paisa-bal-divider-line {
+    border-bottom: 1px dashed var(--paisa-border-default);
+  }
+
+  .paisa-bal-raw-row {
+    grid-column: 1 / -1;
+  }
+
+  .paisa-bal-raw {
+    color: var(--paisa-text-muted);
+    font-size: 0.75rem;
+    padding: 1px var(--paisa-space-3);
   }
 </style>
 

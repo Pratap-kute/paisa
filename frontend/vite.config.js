@@ -13,7 +13,10 @@ function fixVendorEvalPlugin() {
     name: "fix-vendor-eval",
     transform(code, id) {
       if (id.includes("xlsx-populate")) {
-        return code.replace("return eval(this.code)", "return (0, eval)(this.code)");
+        return code.replace(
+          "return eval(this.code)",
+          "return (0, eval)(this.code)",
+        );
       }
     },
   };

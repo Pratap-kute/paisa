@@ -4,8 +4,8 @@ import {
   closeBracketsKeymap,
   completeFromList,
   type CompletionContext,
-  type CompletionSource,
   completionKeymap,
+  type CompletionSource,
   ifIn,
 } from "@codemirror/autocomplete";
 import {

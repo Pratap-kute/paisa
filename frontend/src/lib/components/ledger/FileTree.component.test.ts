@@ -22,8 +22,9 @@ test("selects a nested ledger file and displays unsaved state", async () => {
       hasUnsavedChanges: true,
     },
     events: {
-      select: (event: CustomEvent<{ name: string }>) =>
-        (selected = event.detail.name),
+      select: (
+        event: CustomEvent<{ name: string }>,
+      ) => (selected = event.detail.name),
     },
   });
 

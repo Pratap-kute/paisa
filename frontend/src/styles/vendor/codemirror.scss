@@ -2,7 +2,8 @@
  * CodeMirror Editor Integration
  */
 
-$editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px - 10.5px - 10.5px);
+$editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px -
+  10.5px - 10.5px);
 
 .cm-editor {
   .cm-gutters {
@@ -223,7 +224,8 @@ $editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px - 10.5
 
   .cm-changedText {
     border: none;
-    ins, del {
+    ins,
+    del {
       text-decoration: none !important;
       span {
         color: var(--paisa-text-primary) !important;

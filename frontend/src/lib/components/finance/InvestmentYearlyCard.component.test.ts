@@ -14,11 +14,11 @@ test("renders investment yearly card with financial metrics", () => {
     net_expense: 600000,
     net_investment: 830000,
     savings_rate: 58.04,
-    postings: []
+    postings: [],
   };
 
   const { container, unmount } = render(InvestmentYearlyCard, {
-    card: mockCard
+    card: mockCard,
   });
 
   expect(screen.getByText("2024 - 25")).toBeInTheDocument();

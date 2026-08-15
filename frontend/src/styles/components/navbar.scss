@@ -30,7 +30,8 @@
     background-color: transparent !important;
     color: var(--paisa-navbar-text);
     border-radius: var(--paisa-radius-sm);
-    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    transition: background-color var(--paisa-transition-fast), color
+      var(--paisa-transition-fast);
     padding: 0.5rem 0.75rem;
 
     &:hover {
@@ -102,7 +103,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--paisa-radius-full);
-    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    transition: background-color var(--paisa-transition-fast), color
+      var(--paisa-transition-fast);
     box-shadow: none !important;
 
     &:hover,
@@ -145,7 +147,8 @@
     padding: 0.5rem 1rem;
     font-size: var(--paisa-font-size-sm);
     white-space: nowrap;
-    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    transition: background-color var(--paisa-transition-fast), color
+      var(--paisa-transition-fast);
 
     &:hover {
       background-color: var(--paisa-surface-hover);
@@ -221,7 +224,8 @@
       a.navbar-item {
         color: var(--paisa-text-primary) !important;
         padding: 0.4rem 1rem;
-        transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+        transition: background-color var(--paisa-transition-fast), color
+          var(--paisa-transition-fast);
 
         &:hover {
           background-color: var(--paisa-surface-hover) !important;
