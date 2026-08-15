@@ -29,7 +29,11 @@
   import dayjs from "dayjs";
   import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   interface Props {
     data: PageData;
@@ -121,80 +125,77 @@
   });
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <nav class="level custom-icon {isMobile() && 'grid-2'}">
-      <LevelItem title={name} value={iconGlyph(icon)} />
+<Page width="fluid">
+  <PageHeader
+    title="{iconGlyph(icon)} {name}"
+    description="Savings goal progress, monthly target, and investments"
+  />
+
+  <MetricStrip cols="auto">
+    <LevelItem title={name} value={iconGlyph(icon)} />
+    <LevelItem
+      title="Net Investment"
+      value={formatCurrency(investmentTotal)}
+      color={COLORS.secondary}
+      subtitle={`<b>${formatCurrency(gainTotal)}</b> ${gainTotal >= 0 ? "gain" : "loss"}`}
+    />
+
+    <LevelItem
+      title="Current Savings"
+      value={formatCurrency(savingsTotal)}
+      color={COLORS.gainText}
+      subtitle={`<b>${formatFloat(xirr)}</b> XIRR`}
+    />
+
+    <LevelItem
+      title="Target Savings"
+      value={formatCurrency(targetSavings)}
+      color={COLORS.primary}
+      subtitle={targetDateObject?.isValid() ? targetDateObject.format("DD MMM YYYY") : null}
+    />
+
+    {#if pmt > 0}
       <LevelItem
-        title="Net Investment"
-        value={formatCurrency(investmentTotal)}
+        title="Monthly Investment needed"
+        value={formatCurrency(pmt)}
         color={COLORS.secondary}
-        subtitle={`<b>${formatCurrency(gainTotal)}</b> ${gainTotal >= 0 ? "gain" : "loss"}`}
+        subtitle={rate > 0 ? `Expected <b>${formatFloat(rate, 2)}</b> rate of return` : null}
       />
+    {/if}
+  </MetricStrip>
 
-      <LevelItem
-        title="Current Savings"
-        value={formatCurrency(savingsTotal)}
-        color={COLORS.gainText}
-        subtitle={`<b>${formatFloat(xirr)}</b> XIRR`}
-      />
-
-      <LevelItem
-        title="Target Savings"
-        value={formatCurrency(targetSavings)}
-        color={COLORS.primary}
-        subtitle={targetDateObject?.isValid() ? targetDateObject.format("DD MMM YYYY") : null}
-      />
-
-      {#if pmt > 0}
-        <LevelItem
-          title="Monthly Investment needed"
-          value={formatCurrency(pmt)}
-          color={COLORS.secondary}
-          subtitle={rate > 0 ? `Expected <b>${formatFloat(rate, 2)}</b> rate of return` : null}
-        />
-      {/if}
-    </nav>
-  </div>
-</section>
-
-<section class="section">
-  <div class="container is-fluid">
+  <Section>
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />
-  </div>
-</section>
+  </Section>
 
-<section class="section tab-retirement-progress">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-9">
-        <div class="columns is-flex-wrap-wrap">
-          <div class="column is-12">
-            <div class="box paisa-overflow-x-auto">
-              <svg height="400" bind:this={svg} />
-            </div>
-          </div>
+  <div class="paisa-goal-detail-layout">
+    <!-- Main Content Panel -->
+    <div class="paisa-goal-detail-main">
+      <Section title="{iconGlyph(icon)} {name} Progress">
+        <ChartFrame type="timeline">
+          <svg height="400" width="100%" bind:this={svg} />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Monthly Investment">
+        <ChartFrame type="timeline">
+          <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Current Balance">
+        <div class="has-text-grey">
+          <AssetsBalance breakdowns={balances} indent={false} />
         </div>
-        <BoxLabel text="{iconGlyph(icon)} {name} progress" />
-        <div class="columns">
-          <div class="column is-12">
-            <div class="box paisa-overflow-x-auto">
-              <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
-            </div>
-          </div>
-        </div>
-        <BoxLabel text="Monthly Investment" />
-        <div class="columns">
-          <div class="column is-12 has-text-grey">
-            <AssetsBalance breakdowns={balances} indent={false} />
-          </div>
-        </div>
-        <BoxLabel text="Current Balance" />
-      </div>
-      <div class="column is-3">
-        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY" >
+      </Section>
+    </div>
+
+    <!-- Side Postings Panel -->
+    <div class="paisa-goal-detail-side">
+      <Section title="Recent Postings">
+        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY">
           {#snippet children({ groupedPostings })}
-                    <div>
+            <div>
               {#each groupedPostings as posting}
                 <PostingCard
                   {posting}
@@ -208,9 +209,30 @@
                 />
               {/each}
             </div>
-                            {/snippet}
-                </PostingGroup>
-      </div>
+          {/snippet}
+        </PostingGroup>
+      </Section>
     </div>
   </div>
-</section>
+</Page>
+
+<style lang="scss">
+  .paisa-goal-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-5);
+    width: 100%;
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
+    }
+  }
+
+  .paisa-goal-detail-main,
+  .paisa-goal-detail-side {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+</style>

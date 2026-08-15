@@ -20,7 +20,11 @@
   import PostingCard from "$lib/components/transactions/PostingCard.svelte";
   import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   interface Props {
     data: PageData;
@@ -97,79 +101,74 @@
   });
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <nav class="level custom-icon {isMobile() && 'grid-2'}">
-      <LevelItem title={name} value={iconGlyph(icon)} />
-      <LevelItem
-        title="Net Investment"
-        value={formatCurrency(investmentTotal)}
-        color={COLORS.secondary}
-        subtitle={`<b>${formatCurrency(gainTotal)}</b> ${
-          gainTotal >= 0 ? "gain" : "loss"
-        } at <b>${formatFloat(xirr)}</b> XIRR`}
-      />
+<Page width="fluid">
+  <PageHeader
+    title="{iconGlyph(icon)} {name}"
+    description="Retirement goal tracking, forecast, and portfolio health"
+  />
 
-      <LevelItem
-        title="Current Savings"
-        value={formatCurrency(savingsTotal)}
-        color={COLORS.gainText}
-        subtitle="{formatFloat(savingsX, 0)}x times Yearly Expenses"
-      />
-      <LevelItem
-        title="Yearly Expenses"
-        color={COLORS.lossText}
-        value={formatCurrency(yearlyExpense)}
-      />
+  <MetricStrip cols={4}>
+    <LevelItem
+      title="Net Investment"
+      value={formatCurrency(investmentTotal)}
+      color={COLORS.secondary}
+      subtitle={`<b>${formatCurrency(gainTotal)}</b> ${
+        gainTotal >= 0 ? "gain" : "loss"
+      } at <b>${formatFloat(xirr)}</b> XIRR`}
+    />
 
-      <LevelItem
-        title="Target Savings"
-        value={formatCurrency(targetSavings)}
-        color={COLORS.primary}
-        subtitle="{formatFloat(targetX, 0)}x times Yearly Expenses"
-      />
-      <LevelItem title="SWR" value={formatFloat(swr)} />
-    </nav>
-  </div>
-</section>
+    <LevelItem
+      title="Current Savings"
+      value={formatCurrency(savingsTotal)}
+      color={COLORS.gainText}
+      subtitle="{formatFloat(savingsX, 0)}x times Yearly Expenses"
+    />
+    <LevelItem
+      title="Yearly Expenses"
+      color={COLORS.lossText}
+      value={formatCurrency(yearlyExpense)}
+    />
 
-<section class="section">
-  <div class="container is-fluid">
+    <LevelItem
+      title="Target Savings"
+      value={formatCurrency(targetSavings)}
+      color={COLORS.primary}
+      subtitle="{formatFloat(targetX, 0)}x times Yearly Expenses (SWR {formatFloat(swr)})"
+    />
+  </MetricStrip>
+
+  <Section>
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />
-  </div>
-</section>
+  </Section>
 
-<section class="section tab-retirement-progress">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-9">
-        <div class="columns is-flex-wrap-wrap">
-          <div class="column is-12">
-            <div class="box paisa-overflow-x-auto">
-              <svg height="400" bind:this={svg} />
-            </div>
-          </div>
+  <div class="paisa-goal-detail-layout">
+    <!-- Main Content Panel -->
+    <div class="paisa-goal-detail-main">
+      <Section title="{iconGlyph(icon)} {name} Progress">
+        <ChartFrame type="timeline">
+          <svg height="400" width="100%" bind:this={svg} />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Monthly Investment">
+        <ChartFrame type="timeline">
+          <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Current Balance">
+        <div class="has-text-grey">
+          <AssetsBalance breakdowns={balances} indent={false} />
         </div>
-        <BoxLabel text="{iconGlyph(icon)} {name} progress" />
-        <div class="columns">
-          <div class="column is-12">
-            <div class="box paisa-overflow-x-auto">
-              <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
-            </div>
-          </div>
-        </div>
-        <BoxLabel text="Monthly Investment" />
-        <div class="columns">
-          <div class="column is-12 has-text-grey">
-            <AssetsBalance breakdowns={balances} indent={false} />
-          </div>
-        </div>
-        <BoxLabel text="Current Balance" />
-      </div>
-      <div class="column is-3">
-        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY" >
+      </Section>
+    </div>
+
+    <!-- Side Postings Panel -->
+    <div class="paisa-goal-detail-side">
+      <Section title="Recent Postings">
+        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY">
           {#snippet children({ groupedPostings })}
-                    <div>
+            <div>
               {#each groupedPostings as posting}
                 <PostingCard
                   {posting}
@@ -183,9 +182,30 @@
                 />
               {/each}
             </div>
-                            {/snippet}
-                </PostingGroup>
-      </div>
+          {/snippet}
+        </PostingGroup>
+      </Section>
     </div>
   </div>
-</section>
+</Page>
+
+<style lang="scss">
+  .paisa-goal-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-5);
+    width: 100%;
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
+    }
+  }
+
+  .paisa-goal-detail-main,
+  .paisa-goal-detail-side {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+</style>

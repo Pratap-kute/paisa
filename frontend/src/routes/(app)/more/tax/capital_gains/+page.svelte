@@ -4,6 +4,9 @@
   import { ajax } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let years: string[] = $state([]);
   let capitalGains: CapitalGain[] = $state([]);
@@ -23,12 +26,25 @@
   });
 </script>
 
-<section class="section tab-capital-gains">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
+<Page width="fluid">
+  <PageHeader
+    title="Capital Gains"
+    description="Financial year capital gains summary and asset realization"
+  />
+
+  <Section>
+    <div class="paisa-capital-gains-list">
       {#each years as year}
         <CapitalGainCard financialYear={year} {capitalGains} />
       {/each}
     </div>
-  </div>
-</section>
+  </Section>
+</Page>
+
+<style lang="scss">
+  .paisa-capital-gains-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+</style>
