@@ -19,17 +19,11 @@ pkgs.mkShell {
     pkgs.ledger
     hledger.hledger
   ] ++ (pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
-    pkgs.wails
     pkgs.pkg-config
-    pkgs.gtk3
-    pkgs.webkitgtk_4_1
-    pkgs.libsoup_3
   ]);
 
   shellHook = ''
     export CGO_ENABLED=1
     export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
   '';
-
-  env = { LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.libuuid ]; };
 }
