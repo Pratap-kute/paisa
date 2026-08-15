@@ -24,6 +24,8 @@
       title: "Account",
       field: "group",
       formatter: indent ? indendedAssetAccountName : accountName,
+      minWidth: 220,
+      widthGrow: 2,
       frozen: true
     },
     {

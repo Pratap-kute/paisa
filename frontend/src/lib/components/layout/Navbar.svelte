@@ -316,7 +316,7 @@
   </div>
 </nav>
 
-<div class="mt-1 px-3 is-flex is-justify-content-space-between">
+<div class="navbar-subtoolbar is-flex is-justify-content-space-between is-align-items-center">
   {#if selectedLink}
     <nav
       class="breadcrumb has-chevron-separator mb-0 is-small"
@@ -370,7 +370,7 @@
     </nav>
   {/if}
 
-  <div class="mr-3 is-flex" style="gap: 12px">
+  <div class="is-flex is-align-items-center" style="gap: 12px">
     {#if selectedSubLink?.recurringIcons}
       <div class="is-flex gap-5 is-align-items-center has-text-grey">
         {#each RecurringIcons as icon}

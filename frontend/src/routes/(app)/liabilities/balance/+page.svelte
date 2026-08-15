@@ -26,6 +26,8 @@
       title: "Account",
       field: "group",
       formatter: indendedLiabilityAccountName,
+      minWidth: 220,
+      widthGrow: 2,
       frozen: true
     },
     {

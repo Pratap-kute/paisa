@@ -5,6 +5,7 @@
 @use "tabulator-tables/dist/css/tabulator_simple.min.css" as *;
 
 .tabulator {
+  width: 100%;
   background-color: var(--paisa-table-bg);
   color: var(--paisa-text-primary);
   border-radius: var(--paisa-radius-sm);
@@ -14,14 +15,47 @@
     background-color: var(--paisa-table-header-bg);
     color: var(--paisa-table-header-text);
     border-bottom: 1px solid var(--paisa-table-border);
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-semibold);
 
     .tabulator-col {
       background-color: var(--paisa-table-header-bg);
       border-right: 1px solid var(--paisa-table-border);
-      padding: 0.5rem;
+      padding: 0.5rem 0.75rem;
 
-      .tabulator-col-content .tabulator-col-title {
-        white-space: normal;
+      .tabulator-col-content {
+        padding: 0;
+
+        .tabulator-col-title-holder {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+
+          .tabulator-col-title {
+            white-space: normal;
+            font-weight: var(--paisa-font-weight-semibold);
+          }
+
+          .tabulator-col-sorter {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.25rem;
+          }
+        }
+      }
+
+      &[tabulator-header-hoz-align="right"] {
+        .tabulator-col-content .tabulator-col-title-holder {
+          justify-content: flex-end;
+          text-align: right;
+        }
+      }
+
+      &[tabulator-header-hoz-align="center"] {
+        .tabulator-col-content .tabulator-col-title-holder {
+          justify-content: center;
+          text-align: center;
+        }
       }
     }
   }
@@ -30,6 +64,12 @@
     background-color: var(--paisa-table-bg);
     color: var(--paisa-text-primary);
     border-bottom: 1px solid var(--paisa-table-border);
+    font-size: var(--paisa-font-size-sm);
+
+    .tabulator-cell {
+      padding: 0.5rem 0.75rem;
+      border-right: 1px solid var(--paisa-table-border);
+    }
 
     &:hover {
       background-color: var(--paisa-table-row-hover);

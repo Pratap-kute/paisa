@@ -23,6 +23,16 @@
   let tabulator: Tabulator = $state();
   let isBuilt = $state(false);
 
+  let processedColumns = $derived(
+    (columns || []).map((col) => {
+      const colDef = { ...col };
+      if (colDef.hozAlign && !colDef.headerHozAlign) {
+        colDef.headerHozAlign = colDef.hozAlign;
+      }
+      return colDef;
+    })
+  );
+
   $effect(() => {
     if (isBuilt && data && data.length > 0) {
       try {
@@ -43,8 +53,8 @@
       dataTreeExpandElement:
         "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-down'></i></span>",
       data: data || [],
-      columns: columns,
-      layout: "fitDataTable",
+      columns: processedColumns,
+      layout: "fitColumns",
       ...options,
     });
     tabulator.on("tableBuilt", () => {

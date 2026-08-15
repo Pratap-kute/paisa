@@ -249,6 +249,20 @@
   }
 }
 
+/* Secondary sub-toolbar below navbar (breadcrumbs, date range, year selectors) */
+.navbar-subtoolbar {
+  padding: 0.5rem 1.25rem;
+  margin-bottom: 0.5rem;
+  min-height: 44px;
+  background-color: var(--paisa-surface-default);
+  border-bottom: 1px solid var(--paisa-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--paisa-space-4);
+  flex-wrap: wrap;
+}
+
 /* Breadcrumb bar below navbar */
 nav.breadcrumb {
   ul {

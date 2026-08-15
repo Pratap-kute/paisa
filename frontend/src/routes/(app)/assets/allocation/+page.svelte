@@ -21,7 +21,7 @@
   let total = 0;
 
   const columns: ColumnDefinition[] = [
-    { title: "Account", field: "account", formatter: accountName },
+    { title: "Account", field: "account", formatter: accountName, minWidth: 200, widthGrow: 2 },
     {
       title: "Market Value",
       field: "market_amount",
