@@ -11,6 +11,10 @@
   } from "../../../../persisted_store";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let legends: Legend[] = $state([]);
   let graph: Record<string, Graph> = $state(), expenses: Posting[];
@@ -71,23 +75,25 @@
   });
 </script>
 
-<section class="section paisa-pb-0">
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <ZeroState item={!isEmpty}
-            ><strong>Oops!</strong> You have not made any transactions for the selected year.</ZeroState
-          >
+<Page width="analysis">
+  <PageHeader
+    title="Yearly Cash Flow"
+    description="Annual income, expense, and asset transfer flows"
+  />
 
-          <LegendCard {legends} clazz="ml-5 mb-2" />
-          <svg
-            class:is-not-visible={isEmpty}
-            id="d3-expense-flow"
-            height={window.innerHeight - rem(210)}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  <Section>
+    <ZeroState item={!isEmpty}>
+      <strong>Oops!</strong> You have not made any transactions for the selected year.
+    </ZeroState>
+
+    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline">
+      <svg
+        class:is-not-visible={isEmpty}
+        id="d3-expense-flow"
+        height={window.innerHeight - rem(210)}
+        width="100%"
+      />
+    </ChartFrame>
+  </Section>
+</Page>

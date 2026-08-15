@@ -16,6 +16,10 @@
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import COLORS from "$lib/core/colors";
   import { iconify } from "$lib/core/icon";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
 
   let isEmpty = $state(false);
 
@@ -150,131 +154,128 @@
   });
 </script>
 
-<section class="section pt-4 pb-0">
-  <div class="container is-fluid">
-    <div class="columns is-multiline">
-      {#if incomeStatement}
-        <div class="column is-12 pb-2">
-          <Card padding="sm">
-            <nav class="level is-mobile mb-0">
-              <LevelItem title="Selected Year" value={$year} />
-              <LevelItem
-                title="Starting Net Worth"
-                value={formatCurrency(incomeStatement.startingBalance)}
-              />
-              <LevelItem
-                title="Ending Net Worth"
-                value={formatCurrency(incomeStatement.endingBalance)}
-              />
-              <LevelItem
-                title="Net Change"
-                value={formatCurrency(diff)}
-                subtitle={formatPercentage(diffPercent, 2)}
-                color={diff >= 0 ? COLORS.gainText : COLORS.lossText}
-              />
-            </nav>
-          </Card>
+<Page width="fluid">
+  <PageHeader
+    title="Income Statement"
+    description="Yearly profit and loss statement across all accounts"
+  />
+
+  {#if incomeStatement}
+    <MetricStrip cols={4}>
+      <LevelItem title="Selected Year" value={$year} />
+      <LevelItem
+        title="Starting Net Worth"
+        value={formatCurrency(incomeStatement.startingBalance)}
+      />
+      <LevelItem
+        title="Ending Net Worth"
+        value={formatCurrency(incomeStatement.endingBalance)}
+      />
+      <LevelItem
+        title="Net Change"
+        value={formatCurrency(diff)}
+        subtitle={formatPercentage(diffPercent, 2)}
+        color={diff >= 0 ? COLORS.gainText : COLORS.lossText}
+      />
+    </MetricStrip>
+  {/if}
+
+  <Section title="Cash Flow Overview">
+    <Card padding="md">
+      {#if isEmpty}
+        <ZeroState item={false}>
+          <strong>Oops!</strong> You have not made any transactions for the selected year.
+        </ZeroState>
+      {:else}
+        <div style="width: 100%; position: relative; min-height: 280px;">
+          <svg bind:this={svg} style="width: 100%; display: block; overflow: visible;"></svg>
         </div>
       {/if}
+    </Card>
+  </Section>
 
-      <div class="column is-12 pb-2">
-        <Card padding="md">
-          {#if isEmpty}
-            <ZeroState item={false}
-              ><strong>Oops!</strong> You have not made any transactions for the selected year.</ZeroState
-            >
-          {:else}
-            <div style="width: 100%; position: relative; min-height: 280px;">
-              <svg bind:this={svg} style="width: 100%; display: block; overflow: visible;"></svg>
-            </div>
-          {/if}
-        </Card>
-      </div>
-
-      <div class="column is-12 pb-4">
-        <Card padding="none">
-          <div class="paisa-overflow-x-auto" style="max-height: calc(100vh - 440px); min-height: 260px;">
-            <table
-              class="table is-narrow is-hoverable is-fullwidth has-sticky-header has-sticky-column mb-0"
-            >
-              <thead>
-                <tr>
-                  <th class="py-2">Account</th>
-                  {#each years as y}
-                    <th class="py-2 has-text-right">{y}</th>
-                  {/each}
-                </tr>
-              </thead>
-              <tbody>
-                {#each accountGroups as group}
-                  <tr class="has-text-weight-bold is-sub-header">
-                    <th>{group.label}</th>
-                    {#each years as y}
-                      <td class="has-text-right">
-                        {#if yearly[y]?.[group.key]}
-                          {formatUnlessZero(sum(yearly[y][group.key]) * group.multiplier)}
-                        {/if}
-                      </td>
-                    {/each}
-                  </tr>
-                  {#each group.accounts as account}
-                    <tr class="is-account-row">
-                      <th class="custom-icon paisa-nowrap"
-                        ><span class="pl-4 has-text-weight-normal"
-                          >{iconify(restName(account), { group: firstName(account) })}</span
-                        ></th
-                      >
-                      {#each years as y}
-                        <td class="has-text-right">
-                          {#if yearly[y]?.[group.key]?.[account]}
-                            {formatUnlessZero(yearly[y][group.key][account] * group.multiplier)}
-                          {/if}
-                        </td>
-                      {/each}
-                    </tr>
-                  {/each}
-                {/each}
-              </tbody>
-              <tfoot>
-                <tr class="has-text-weight-bold is-summary-row is-summary-first">
-                  <th>Change</th>
-                  {#each years as y}
-                    {#if yearly[y]}
-                      {@const diff = yearly[y].endingBalance - yearly[y].startingBalance}
-                      <td class="has-text-right {changeClass(diff)}">
-                        <div>{formatCurrency(diff)}</div>
-                        <div class="is-size-7">{formatPercentage(diff / yearly[y].startingBalance)}</div>
-                      </td>
-                    {:else}
-                      <td></td>
+  <Section title="Detailed Statement">
+    <Card padding="none">
+      <div class="paisa-overflow-x-auto" style="max-height: calc(100vh - 440px); min-height: 260px;">
+        <table
+          class="table is-narrow is-hoverable is-fullwidth has-sticky-header has-sticky-column mb-0"
+        >
+          <thead>
+            <tr>
+              <th class="py-2">Account</th>
+              {#each years as y}
+                <th class="py-2 has-text-right">{y}</th>
+              {/each}
+            </tr>
+          </thead>
+          <tbody>
+            {#each accountGroups as group}
+              <tr class="has-text-weight-bold is-sub-header">
+                <th>{group.label}</th>
+                {#each years as y}
+                  <td class="has-text-right">
+                    {#if yearly[y]?.[group.key]}
+                      {formatUnlessZero(sum(yearly[y][group.key]) * group.multiplier)}
                     {/if}
-                  {/each}
-                </tr>
-                <tr class="has-text-weight-bold is-summary-row">
-                  <th>End Balance</th>
+                  </td>
+                {/each}
+              </tr>
+              {#each group.accounts as account}
+                <tr class="is-account-row">
+                  <th class="custom-icon paisa-nowrap"
+                    ><span class="pl-4 has-text-weight-normal"
+                      >{iconify(restName(account), { group: firstName(account) })}</span
+                    ></th
+                  >
                   {#each years as y}
                     <td class="has-text-right">
-                      {#if yearly[y]}
-                        {formatCurrency(yearly[y].endingBalance)}
+                      {#if yearly[y]?.[group.key]?.[account]}
+                        {formatUnlessZero(yearly[y][group.key][account] * group.multiplier)}
                       {/if}
                     </td>
                   {/each}
                 </tr>
-                <tr class="has-text-weight-bold is-summary-row">
-                  <th>Start Balance</th>
-                  {#each years as y}
-                    <td class="has-text-right">
-                      {#if yearly[y]}
-                        {formatCurrency(yearly[y].startingBalance)}
-                      {/if}
-                    </td>
-                  {/each}
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </Card>
+              {/each}
+            {/each}
+          </tbody>
+          <tfoot>
+            <tr class="has-text-weight-bold is-summary-row is-summary-first">
+              <th>Change</th>
+              {#each years as y}
+                {#if yearly[y]}
+                  {@const diff = yearly[y].endingBalance - yearly[y].startingBalance}
+                  <td class="has-text-right {changeClass(diff)}">
+                    <div>{formatCurrency(diff)}</div>
+                    <div class="is-size-7">{formatPercentage(diff / yearly[y].startingBalance)}</div>
+                  </td>
+                {:else}
+                  <td></td>
+                {/if}
+              {/each}
+            </tr>
+            <tr class="has-text-weight-bold is-summary-row">
+              <th>End Balance</th>
+              {#each years as y}
+                <td class="has-text-right">
+                  {#if yearly[y]}
+                    {formatCurrency(yearly[y].endingBalance)}
+                  {/if}
+                </td>
+              {/each}
+            </tr>
+            <tr class="has-text-weight-bold is-summary-row">
+              <th>Start Balance</th>
+              {#each years as y}
+                <td class="has-text-right">
+                  {#if yearly[y]}
+                    {formatCurrency(yearly[y].startingBalance)}
+                  {/if}
+                </td>
+              {/each}
+            </tr>
+          </tfoot>
+        </table>
       </div>
-    </div>
-  </div>
-</section>
+    </Card>
+  </Section>
+</Page>
