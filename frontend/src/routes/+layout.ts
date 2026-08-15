@@ -3,5 +3,5 @@ export const ssr = false;
 export const trailingSlash = "never";
 
 import "../common.scss";
-import "../light.scss";
+import "../app.scss";
 import "../dark.scss";

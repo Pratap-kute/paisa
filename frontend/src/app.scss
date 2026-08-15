@@ -1,4 +1,6 @@
-@import "./colors";
+@use "./colors" as *;
+@use "bulma/css/bulma.min.css";
+@use "tabulator-tables/dist/css/tabulator_simple.min.css";
 
 $black: hsl(221, 14%, 4%) !default;
 $black-bis: hsl(221, 14%, 9%) !default;
@@ -38,7 +40,13 @@ $box-padding: 1.25rem 0;
 
 $card-shadow: none;
 $shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1), 0 0px 0 1px rgba(10, 10, 10, 0.02) !default;
+$card-header-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1) !default;
 $danger-light: hsl(347, 90%, 96%);
+
+$diff-add-bg-light: rgba(70, 149, 74, 0.15) !default;
+$diff-add-bg-dark: rgba(70, 149, 74, 0.4) !default;
+$diff-del-bg-light: rgba(229, 83, 75, 0.1) !default;
+$diff-del-bg-dark: rgba(229, 83, 75, 0.4) !default;
 
 $switch-focus: none;
 
@@ -65,10 +73,6 @@ $table-row-active-background-color: #00d1b2 !default;
 $table-row-hover-background-color: #fafafa !default;
 $table-striped-row-even-background-color: #fafafa !default;
 $table-striped-row-even-hover-background-color: #f5f5f5 !default;
-
-@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
-@import "bulma/bulma.scss";
-@import "@cityssm/bulma-sticky-table/sticky-table";
 
 .menu-list a {
   &:hover {
@@ -192,8 +196,6 @@ $footerTextColor: #555;
 $footerBorderColor: #aaa;
 $footerSeparatorColor: #999;
 $footerActiveColor: #d00;
-
-@import "tabulator-tables/src/scss/themes/tabulator_simple.scss";
 
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
   white-space: normal;
@@ -616,6 +618,89 @@ body {
 
 .table tr.is-sub-header {
   background-color: $white-ter;
+}
+
+.table.has-sticky-column,
+.table.has-sticky-footer,
+.table.has-sticky-header {
+  border-collapse: separate;
+
+  tbody,
+  thead {
+    td,
+    th {
+      border-top-width: 0;
+    }
+  }
+
+  &.is-bordered {
+    border: var(--bulma-table-cell-border, 1px solid #dbdbdb);
+
+    td,
+    th {
+      border-left-width: 0;
+
+      &:last-child {
+        border-right-width: 0;
+      }
+    }
+
+    tbody tr:last-child,
+    tfoot tr:last-child {
+      td,
+      th {
+        border-bottom-width: 0;
+      }
+    }
+  }
+}
+
+.table.has-sticky-header {
+  thead th {
+    background-color: var(--bulma-table-background-color, var(--bulma-body-background-color, #fff));
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+}
+
+.table.has-sticky-column {
+  tfoot th:first-child,
+  thead th:first-child {
+    background-color: var(--bulma-table-background-color, var(--bulma-body-background-color, #fff));
+    position: sticky;
+    left: 0;
+    z-index: 6;
+  }
+
+  tbody th:first-child {
+    background-color: var(--bulma-table-background-color, var(--bulma-body-background-color, #fff));
+    position: sticky;
+    left: 0;
+    z-index: 5;
+  }
+
+  tbody tr.is-selected th:first-child {
+    background-color: var(--bulma-table-row-active-background-color, #00d1b2);
+  }
+
+  &.is-hoverable {
+    tbody tr:not(.is-selected):hover th:first-child {
+      background-color: var(--bulma-table-row-hover-background-color, #fafafa);
+    }
+  }
+
+  &.is-striped {
+    tbody tr:not(.is-selected):nth-child(even) th:first-child {
+      background-color: var(--bulma-table-striped-row-even-background-color, #fafafa);
+    }
+  }
+
+  &.is-striped.is-hoverable {
+    tbody tr:not(.is-selected):nth-child(even):hover th:first-child {
+      background-color: var(--bulma-table-striped-row-even-hover-background-color, #f5f5f5);
+    }
+  }
 }
 
 .table.has-sticky-column tbody tr.is-sub-header th:first-child {
@@ -1396,7 +1481,7 @@ nav.breadcrumb {
 .breadcrumb.has-chevron-separator li + li::before {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
-  content: unquote('"#{ $fa-var-chevron-right }"');
+  content: "\f054";
   color: $link;
 }
 

@@ -33,7 +33,6 @@
   },
   "imports": {
     "$lib": "./src/lib",
-    "@cityssm/bulma-sticky-table": "npm:@cityssm/bulma-sticky-table@^2.1.0",
     "@codemirror/autocomplete": "npm:@codemirror/autocomplete@^6.4.2",
     "@codemirror/commands": "npm:@codemirror/commands@^6.3.3",
     "@codemirror/language": "npm:@codemirror/language@^6.10.0",
@@ -68,6 +67,7 @@
     "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^3.2.7",
     "arima": "npm:arima@^0.2.5",
     "bignumber.js": "npm:bignumber.js@^9.1.2",
+    "buffer": "npm:buffer@^6.0.3",
     "bulma": "npm:bulma@^1.0.4",
     "chroma-js": "npm:chroma-js@^2.4.2",
     "chrono-node": "npm:chrono-node@^2.6.6",
