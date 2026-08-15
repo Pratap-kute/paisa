@@ -174,7 +174,7 @@
     <div class="paisa-split-main">
       <div class="paisa-split-top-row">
         <!-- Calendar -->
-        <Section title="Calendar" class="paisa-split-calendar-cell">
+        <Section title="Calendar">
           <div id="d3-current-month-expense-calendar" class="d3-calendar">
             <div class="weekdays">
               {#each dayjs.weekdaysShort(true) as day}
@@ -186,7 +186,7 @@
         </Section>
 
         <!-- Category Breakdown -->
-        <Section title="Category Breakdown" class="paisa-split-breakdown-cell">
+        <Section title="Category Breakdown">
           <ZeroState item={grouped_expenses?.[$month]}>
             <strong>Hurray!</strong> You have no expenses this month.
           </ZeroState>
@@ -256,11 +256,10 @@
     @media screen and (min-width: 1024px) {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     }
-  }
 
-  .paisa-split-calendar-cell,
-  .paisa-split-breakdown-cell {
-    min-width: 0;
-    margin-bottom: 0;
+    > :global(*) {
+      min-width: 0;
+      margin-bottom: 0;
+    }
   }
 </style>

@@ -203,7 +203,7 @@
         </ChartFrame>
       </Section>
 
-      <Section title="Expenses" titleHref="/expense/monthly" class="paisa-dashboard-cell">
+      <Section title="Expenses" titleHref="/expense/monthly">
         {#snippet action()}
           <LastNMonths n={3} bind:value={month} />
         {/snippet}
@@ -226,7 +226,7 @@
     <!-- Row 3: Operational Data (Budget ~35% + Recent Transactions ~65%) -->
     <div class="paisa-dashboard-row paisa-dashboard-operations">
       {#if currentBudget}
-        <Section title="Budget" titleHref="/expense/budget" class="paisa-dashboard-cell">
+        <Section title="Budget" titleHref="/expense/budget">
           <div class="paisa-dashboard-budget-list">
             {#each currentBudget.accounts as accountBudget (accountBudget)}
               <BudgetCard compact {accountBudget} />
@@ -236,7 +236,7 @@
       {/if}
 
       {#if !_.isEmpty(transactions)}
-        <Section title="Recent Transactions" titleHref="/ledger/transaction" class="paisa-dashboard-cell">
+        <Section title="Recent Transactions" titleHref="/ledger/transaction">
           <ResponsiveGrid variant="transactions" gap={2}>
             {#each _.take(transactions, 12) as t}
               <TransactionCard {t} />
@@ -249,7 +249,7 @@
     <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
     <div class="paisa-dashboard-row paisa-dashboard-longterm">
       {#if !_.isEmpty(goalSummaries)}
-        <Section title="Goals" titleHref="/more/goals" class="paisa-dashboard-cell">
+        <Section title="Goals" titleHref="/more/goals">
           <div class="paisa-dashboard-goals-list">
             {#each goalSummaries as goal}
               <GoalSummaryCard {goal} small />
@@ -259,7 +259,7 @@
       {/if}
 
       {#if !_.isEmpty(transactionSequences)}
-        <Section title="Recurring" titleHref="/cash_flow/recurring" class="paisa-dashboard-cell">
+        <Section title="Recurring" titleHref="/cash_flow/recurring">
           <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
             {#each transactionSequences as ts (ts)}
               <UpcomingCard transactionSequece={ts} />
@@ -277,6 +277,11 @@
     gap: var(--paisa-space-4);
     width: 100%;
     margin-bottom: var(--paisa-space-5);
+
+    > :global(*) {
+      min-width: 0;
+      margin-bottom: 0;
+    }
   }
 
   .paisa-dashboard-visualizations {
@@ -298,10 +303,5 @@
     @media screen and (min-width: 1024px) {
       grid-template-columns: repeat(2, 1fr);
     }
-  }
-
-  .paisa-dashboard-cell {
-    min-width: 0;
-    margin-bottom: 0;
   }
 </style>
