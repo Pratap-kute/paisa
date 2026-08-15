@@ -101,6 +101,7 @@
     "typescript": "npm:typescript@^5.0.0",
     "vite": "npm:vite@^8.2.1",
     "vitest": "npm:vitest@^3.2.7",
+    "vitest/config": "npm:vitest@^3.2.7/config",
     "xlsx": "./src/lib/vendor/xlsx.mjs",
     "xlsx-populate": "npm:xlsx-populate@^1.21.0"
   },
@@ -116,6 +117,7 @@
       "graphify-out/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
+      "src/lib/vendor/",
       "tests/fixture/"
     ]
   },
@@ -129,6 +131,7 @@
       "graphify-out/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
+      "src/lib/vendor/",
       "tests/fixture/"
     ]
   },

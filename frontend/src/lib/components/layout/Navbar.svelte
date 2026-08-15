@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { page } from "$app/stores";
   import Actions from "$lib/components/layout/Actions.svelte";
   import { month, year, dateMax, dateMin, dateRangeOption } from "../../../store";
@@ -156,41 +154,41 @@
   const about = { label: "About", href: "/about" };
   _.last(links).children.push(about);
 
-  let selectedLink: Link = $state(null);
-  let selectedSubLink: Link = $state(null);
-  let selectedSubSubLink: Link = $state(null);
-
   let normalizedPath = $derived($page.url.pathname?.replace(/(.+)\/$/, ""));
 
-  run(() => {
-    if (normalizedPath) {
-      selectedSubLink = null;
-      selectedSubSubLink = null;
-      selectedLink = _.find(links, (l) => normalizedPath == l.href);
-      if (!selectedLink) {
-        selectedLink = _.find(
-          links,
-          (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
-        );
-
-        selectedSubLink = _.find(
-          selectedLink.children,
-          (l) => normalizedPath == selectedLink.href + l.href
-        );
-
-        if (!selectedSubLink) {
-          selectedSubLink = _.find(selectedLink.children, (l) =>
-            normalizedPath.startsWith(selectedLink.href + l.href)
-          );
-
-          if (!_.isEmpty(selectedSubLink.children)) {
-            selectedSubSubLink = _.find(selectedSubLink.children, (l) =>
-              normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
-            );
-          }
-        }
-      }
+  let selectedLink: Link = $derived.by(() => {
+    if (!normalizedPath) return null;
+    let link = _.find(links, (l) => normalizedPath == l.href);
+    if (!link) {
+      link = _.find(
+        links,
+        (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
+      );
     }
+    return link || null;
+  });
+
+  let selectedSubLink: Link = $derived.by(() => {
+    if (!selectedLink || _.isEmpty(selectedLink.children)) return null;
+    let sublink = _.find(
+      selectedLink.children,
+      (l) => normalizedPath == selectedLink.href + l.href
+    );
+    if (!sublink) {
+      sublink = _.find(selectedLink.children, (l) =>
+        normalizedPath.startsWith(selectedLink.href + l.href)
+      );
+    }
+    return sublink || null;
+  });
+
+  let selectedSubSubLink: Link = $derived.by(() => {
+    if (!selectedLink || !selectedSubLink || _.isEmpty(selectedSubLink.children)) return null;
+    return (
+      _.find(selectedSubLink.children, (l) =>
+        normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
+      ) || null
+    );
   });
 </script>
 

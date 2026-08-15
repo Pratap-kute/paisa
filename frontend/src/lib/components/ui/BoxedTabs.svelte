@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import _ from "lodash";
 
   interface Props {
@@ -10,7 +8,7 @@
 
   let { options, value = $bindable() }: Props = $props();
 
-  run(() => {
+  $effect(() => {
     if (value && !options.find((option) => option.value === value) && !_.isEmpty(options)) {
       value = _.last(options).value;
     }

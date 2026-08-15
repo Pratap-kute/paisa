@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import * as cashFlow from "$lib/charts/cash_flow";
   import COLORS from "$lib/core/colors";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
@@ -44,19 +42,18 @@
   let xirr = $state(0);
   let networth: Networth = $state();
   let renderer: (data: Posting[]) => void = $state();
-  let totalExpense = $state(0);
   let transactions: Transaction[] = $state([]);
   let budgetsByMonth: Record<string, Budget> = {};
   let currentBudget: Budget = $state();
-  let selectedExpenses: Posting[] = $state([]);
   let isEmpty = $state(false);
   let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
-  run(() => {
+  let selectedExpenses: Posting[] = $derived(expenses[month] || []);
+  let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
+
+  $effect(() => {
     if (renderer) {
-      selectedExpenses = expenses[month] || [];
       renderer(selectedExpenses);
-      totalExpense = _.sumBy(selectedExpenses, (p) => p.amount);
     }
   });
 

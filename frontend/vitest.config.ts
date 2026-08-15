@@ -1,9 +1,11 @@
 import { fileURLToPath } from "node:url";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { defineConfig } from "vitest/config";
+import { defineConfig, type UserConfig } from "vitest/config";
+
+type VitestPluginOption = NonNullable<UserConfig["plugins"]>[number];
 
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [svelte() as unknown as VitestPluginOption],
   resolve: {
     conditions: ["browser"],
     alias: {
