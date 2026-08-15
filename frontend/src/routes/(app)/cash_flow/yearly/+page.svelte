@@ -71,7 +71,7 @@
   });
 </script>
 
-<section class="section" style="padding-bottom: 0 !important">
+<section class="section paisa-pb-0">
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">

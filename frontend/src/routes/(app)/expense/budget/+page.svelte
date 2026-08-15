@@ -72,7 +72,7 @@
       {/if}
       <div class="column">
         <div class="is-flex">
-          <div style="max-width: 800px; min-width: 350px; width: 100%; margin: auto;">
+          <div class="paisa-container-budget">
             <ZeroState item={!isEmpty}>
               <strong>Oops!</strong> You haven't set a budget yet. Checkout the
               <a href={helpUrl("budget")}>docs</a> page to get started.

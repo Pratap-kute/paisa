@@ -520,6 +520,17 @@ $footerActiveColor: #d00;
   cursor: pointer;
 }
 
+.paisa-button-reset,
+.paisa-button-unstyled {
+  background: transparent;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+}
+
 @each $value in 15, 20, 30, 40 {
   .paisa-opacity-#{$value} {
     opacity: $value * 0.01;
@@ -554,12 +565,39 @@ $footerActiveColor: #d00;
   margin-bottom: -0.25rem;
 }
 
+.paisa-pb-0 {
+  padding-bottom: 0 !important;
+}
+
 .mb-12 {
   margin-bottom: 3rem !important;
 }
 
 .paisa-width-80 {
   width: 20rem;
+}
+
+.paisa-max-width-400 {
+  max-width: 400px;
+}
+
+.paisa-max-width-640 {
+  max-width: 640px;
+}
+
+.paisa-max-width-800 {
+  max-width: 800px;
+}
+
+.paisa-max-width-1024 {
+  max-width: 1024px;
+}
+
+.paisa-container-budget {
+  max-width: 800px;
+  min-width: 350px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .paisa-max-width-200 {

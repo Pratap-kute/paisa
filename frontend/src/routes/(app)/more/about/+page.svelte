@@ -26,6 +26,8 @@
     }
   ];
 
+  import Card from "$lib/components/ui/Card.svelte";
+
   function externalLink(url: string) {
     if (window.runtime) {
       window.runtime.BrowserOpenURL(url);
@@ -39,15 +41,15 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <div class="box has-text-centered px-3 mx-auto" style="max-width: 400px;">
+        <Card padding="sm" class="has-text-centered mx-auto paisa-max-width-400 mb-4">
           <div><Logo size={128} /></div>
           <div class="is-size-3 is-primary-color">Paisa</div>
           <div>
             Version: <b>0.8.0</b>
           </div>
-        </div>
+        </Card>
 
-        <div class="box px-3 mx-auto" style="max-width: 400px;">
+        <Card padding="sm" class="mx-auto paisa-max-width-400">
           <h3 class="is-size-5 mb-1">Links</h3>
           <ul>
             {#each links as link}
@@ -61,7 +63,7 @@
               </li>
             {/each}
           </ul>
-        </div>
+        </Card>
       </div>
     </div>
   </div>

@@ -237,7 +237,7 @@
 
 <FileModal bind:open={modalOpen} on:save={(e) => createFile(e.detail)} label="Create" help="" />
 
-<section class="section tab-editor paisa-max-screen-height" style="padding-bottom: 0 !important">
+<section class="section tab-editor paisa-max-screen-height paisa-pb-0">
   <div class="container is-fluid">
     <div class="columuns">
       <div class="column is-12 px-0 pt-0 mb-2">

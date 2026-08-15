@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import * as d3 from "d3";
-import type { AccountTfIdf } from "$lib/core/utils";
+import type { AccountTfIdf } from "../core/utils";
+
+
 
 interface GlobalWithNow {
   __now?: dayjs.Dayjs;

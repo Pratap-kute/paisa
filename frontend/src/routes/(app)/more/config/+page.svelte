@@ -77,7 +77,7 @@
     <div class="columns">
       <div class="column is-12">
         {#if schema && config}
-          <div class="box px-3" style="max-width: 1024px;">
+          <div class="box px-3 paisa-max-width-1024">
             <article class="message">
               <div class="message-body">
                 Prices are <b>not</b> automatically updated after config change. Use the menu at the

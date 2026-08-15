@@ -245,8 +245,7 @@
 />
 
 <section
-  class="section tab-editor paisa-max-screen-height"
-  style="padding-bottom: 0 !important"
+  class="section tab-editor paisa-max-screen-height paisa-pb-0"
 >
   <div class="container is-fluid">
     <div class="columuns">

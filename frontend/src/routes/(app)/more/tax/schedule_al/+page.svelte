@@ -40,7 +40,7 @@
 
     <div class="columns">
       <div class="column is-12">
-        <div class="box px-3" style="max-width: 1024px;">
+        <div class="box px-3 paisa-max-width-1024">
           <table class="table is-narrow is-fullwidth is-hoverable">
             <thead>
               <tr>

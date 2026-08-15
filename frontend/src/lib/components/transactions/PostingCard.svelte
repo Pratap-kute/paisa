@@ -11,6 +11,8 @@
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 
+  import Card from "$lib/components/ui/Card.svelte";
+
   interface Props {
     posting: Posting;
     color: string;
@@ -20,7 +22,7 @@
   let { posting, color, icon = false }: Props = $props();
 </script>
 
-<div class="box p-2 my-2 has-background-white" style="border-left: 2px solid {color}">
+<Card padding="xs" class="my-2" style="border-left: 2px solid {color}">
   <div class="is-flex is-justify-content-space-between">
     <div class="has-text-grey is-size-7 paisa-truncate">
       <PostingStatus {posting} />
@@ -53,4 +55,4 @@
       <div class="has-text-weight-bold is-size-6">{formatCurrency(posting.amount)}</div>
     </div>
   </div>
-</div>
+</Card>

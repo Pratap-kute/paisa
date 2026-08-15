@@ -157,8 +157,7 @@
               <div class="level-item">
                 <button
                   type="button"
-                  class="has-text-link p-0"
-                  style="background: transparent; border: none; font: inherit; cursor: pointer; display: inline-flex; align-items: center;"
+                  class="paisa-button-reset has-text-link is-inline-flex is-align-items-center"
                   onclick={(_e) => downloadTransactions()}
                 >
                   <span class="icon is-small">

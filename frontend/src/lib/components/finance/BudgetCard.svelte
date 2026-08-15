@@ -31,6 +31,8 @@
     return {};
   };
 
+  import Card from "$lib/components/ui/Card.svelte";
+
   let tooltipContent = $derived(
     tooltip(
       accountBudget.expenses.map((e) => {
@@ -44,8 +46,9 @@
   );
 </script>
 
-<div
-  class="budget-card box px-2 pt-2 pb-2 my-3 has-background-white"
+<Card
+  padding="sm"
+  class="budget-card my-3"
   data-tippy-content={_.isEmpty(accountBudget.expenses) ? null : tooltipContent}
 >
   <div class="paisa-is-flex-tablet is-justify-content-space-between">
@@ -91,4 +94,4 @@
       <svg height="10" width="100%"></svg>
     </div>
   {/if}
-</div>
+</Card>

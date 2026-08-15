@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { HTMLAttributes } from "svelte/elements";
 
   type CardVariant = "default" | "flat" | "bordered";
   type CardPadding = "none" | "xs" | "sm" | "md" | "lg";
 
-  interface Props {
+  interface Props extends HTMLAttributes<HTMLDivElement> {
     variant?: CardVariant;
     padding?: CardPadding;
     class?: string;
@@ -18,6 +19,7 @@
     class: className = "",
     style = "",
     children,
+    ...restProps
   }: Props = $props();
 
   const paddingClasses: Record<CardPadding, string> = {
@@ -32,6 +34,7 @@
 <div
   class="box {paddingClasses[padding]} {variant === 'flat' ? 'box-shadow-none' : ''} {variant === 'bordered' ? 'is-bordered' : ''} {className}"
   {style}
+  {...restProps}
 >
   {@render children?.()}
 </div>

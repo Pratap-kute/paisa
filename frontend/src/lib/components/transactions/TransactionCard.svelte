@@ -12,16 +12,17 @@
   import PostingStatus from "./PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
+  import Card from "$lib/components/ui/Card.svelte";
+
   interface Props {
     t: Transaction;
   }
 
   let { t }: Props = $props();
   let posting: Posting = $derived(t.postings[0]);
-  
 </script>
 
-<div class="box p-2 has-background-white">
+<Card padding="xs">
   <div class="is-flex is-justify-content-space-between is-align-items-baseline">
     <div class="has-text-grey is-size-7 paisa-truncate">
       <PostingStatus {posting} />
@@ -49,4 +50,4 @@
       </div>
     </div>
   {/each}
-</div>
+</Card>

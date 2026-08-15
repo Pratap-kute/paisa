@@ -5,8 +5,6 @@ import _ from "lodash";
 import * as d3 from "d3";
 import { loading } from "../../store";
 import type { JSONSchema7 } from "json-schema";
-import { get } from "svelte/store";
-import { obscure } from "../../persisted_store";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
 import chroma from "chroma-js";
@@ -877,23 +875,6 @@ export function logout() {
   localStorage.removeItem(tokenKey);
 }
 
-function normalize(value: number) {
-  if (get(obscure)) {
-    value = 0;
-  }
-
-  // minus 0
-  if (1 / value === -Infinity) {
-    value = 0;
-  }
-
-  if (!Number.isFinite(value)) {
-    value = 0;
-  }
-
-  return value;
-}
-
 export function configUpdated() {
   dayjs.locale("en");
   dayjs.updateLocale("en", {
@@ -914,158 +895,24 @@ export function now(): dayjs.Dayjs {
   return dayjs();
 }
 
-function unicodeMinus(value: string) {
-  return value.replace(/^-/, "\u2212");
-}
+export {
+  formatCurrency,
+  formatCurrencyCrude,
+  formatCurrencyCrudeWithPrecision,
+  formatFixedWidthFloat,
+  formatFloat,
+  formatFloatUptoPrecision,
+  formatPercentage,
+  normalize,
+  unicodeMinus,
+} from "../formatters/currency";
 
-export function formatCurrency(value: number, precision: number = null) {
-  value = normalize(value);
-
-  if (precision == null) {
-    precision = USER_CONFIG.display_precision;
-  }
-
-  return unicodeMinus(
-    value.toLocaleString(USER_CONFIG.locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }),
-  );
-}
-
-export function formatCurrencyCrude(value: number) {
-  return formatCurrencyCrudeWithPrecision(value, -1);
-}
-
-export function formatCurrencyCrudeWithPrecision(
-  value: number,
-  precision: number,
-) {
-  value = normalize(value);
-
-  const options: Intl.NumberFormatOptions = {
-    notation: "compact",
-  };
-
-  if (precision < 0) {
-    options.maximumFractionDigits = 2;
-  } else {
-    options.maximumFractionDigits = precision;
-    options.minimumFractionDigits = precision;
-  }
-
-  return unicodeMinus(value.toLocaleString(USER_CONFIG.locale, options));
-}
-
-export function formatFloat(value: number, precision = 2) {
-  value = normalize(value);
-
-  return unicodeMinus(
-    value.toLocaleString(USER_CONFIG.locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }),
-  );
-}
-
-export function formatFloatUptoPrecision(value: number, precision = 2) {
-  value = normalize(value);
-
-  return unicodeMinus(
-    value.toLocaleString(USER_CONFIG.locale, {
-      maximumFractionDigits: precision,
-    }),
-  );
-}
-
-export function formatPercentage(value: number, precision = 0) {
-  value = normalize(value);
-
-  return unicodeMinus(
-    value.toLocaleString(USER_CONFIG.locale, {
-      style: "percent",
-      minimumFractionDigits: precision,
-    }),
-  );
-}
-
-export function formatFixedWidthFloat(
-  value: number,
-  width: number,
-  precision = 2,
-) {
-  value = normalize(value);
-
-  const formatted = unicodeMinus(
-    value.toLocaleString(USER_CONFIG.locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }),
-  );
-
-  if (formatted.length < width) {
-    return formatted.padStart(width, " ");
-  }
-  return formatted;
-}
-
-export function forEachMonth(
-  start: dayjs.Dayjs,
-  end: dayjs.Dayjs,
-  cb: (current: dayjs.Dayjs) => any,
-) {
-  let current = start.startOf("month");
-  while (current.isSameOrBefore(end, "month")) {
-    cb(current);
-    current = current.add(1, "month");
-  }
-}
-
-export function forEachYear(
-  start: dayjs.Dayjs,
-  end: dayjs.Dayjs,
-  cb: (current: dayjs.Dayjs) => any,
-) {
-  let current = start;
-  while (current.isSameOrBefore(end, "year")) {
-    cb(current);
-    current = current.add(1, "year");
-  }
-}
-
-export function forEachFinancialYear(
-  start: dayjs.Dayjs,
-  end: dayjs.Dayjs,
-  cb?: (current: dayjs.Dayjs) => any,
-) {
-  let current = beginningOfFinancialYear(start);
-  const years: dayjs.Dayjs[] = [];
-  while (current.isSameOrBefore(end, "month")) {
-    if (cb) {
-      cb(current);
-    }
-    years.push(current);
-    current = current.add(1, "year");
-  }
-  return years;
-}
-
-function beginningOfFinancialYear(date: dayjs.Dayjs) {
-  date = date.startOf("month");
-  if (date.month() + 1 < USER_CONFIG.financial_year_starting_month) {
-    return date
-      .add(-1, "year")
-      .add(
-        USER_CONFIG.financial_year_starting_month - date.month() - 1,
-        "month",
-      );
-  } else {
-    return date.add(
-      -(date.month() + 1 - USER_CONFIG.financial_year_starting_month),
-      "month",
-    );
-  }
-}
+export {
+  beginningOfFinancialYear,
+  forEachFinancialYear,
+  forEachMonth,
+  forEachYear,
+} from "../formatters/date";
 
 export function firstName(account: string) {
   return _.first(account.split(":"));

@@ -239,8 +239,7 @@
           <div class="navbar-item has-dropdown is-hoverable">
             <button
               type="button"
-              class="navbar-link"
-              style="background: transparent; border: none; font: inherit; cursor: pointer; text-align: left; width: 100%;"
+              class="navbar-link paisa-button-reset is-fullwidth has-text-left"
               class:is-active={normalizedPath.startsWith(link.href)}
               onclick={(e) =>
                 isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}

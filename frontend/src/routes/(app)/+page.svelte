@@ -108,7 +108,7 @@
     <div class="columns">
       <div class="column is-12">
         <ZeroState item={!isEmpty}>
-          <div class="has-text-left" style="max-width: 640px;">
+          <div class="has-text-left paisa-max-width-640">
             <p class="mb-2">
               Looks like you are new here, you can either get started or look at a demo setup
             </p>
