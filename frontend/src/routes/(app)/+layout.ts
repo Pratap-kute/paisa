@@ -3,8 +3,8 @@ export const trailingSlash = "never";
 import type { LayoutLoad } from "./$types";
 import { ajax, configUpdated, setNow } from "$lib/core/utils";
 
-export const load = (async () => {
-  const { config, now } = await ajax("/api/config");
+export const load = (async ({ fetch }) => {
+  const { config, now } = await ajax("/api/config", { customFetch: fetch });
   if (now) {
     setNow(now);
   }

@@ -540,10 +540,16 @@ const tokenKey = "token";
 
 type RequestOptions = RequestInit & {
   background?: boolean;
+  customFetch?: typeof fetch;
 };
 
 export function ajax(
   route: "/api/config",
+  options: RequestOptions & { method: "POST" },
+): Promise<{ success: boolean; error?: string }>;
+export function ajax(
+  route: "/api/config",
+  options?: RequestOptions,
 ): Promise<
   {
     config: UserConfig;
@@ -739,7 +745,10 @@ export function ajax(
   options?: RequestOptions,
 ): Promise<{ file: LedgerFile }>;
 
-export function ajax(route: "/api/sheets/files"): Promise<{
+export function ajax(
+  route: "/api/sheets/files",
+  options?: RequestOptions,
+): Promise<{
   files: SheetFile[];
   postings: Posting[];
 }>;
@@ -792,10 +801,6 @@ export function ajax(
   options?: RequestOptions,
 ): Promise<any>;
 
-export function ajax(
-  route: "/api/config",
-  options?: RequestOptions,
-): Promise<{ success: boolean; error?: string }>;
 
 export function ajax(
   route: "/api/ping",
@@ -828,7 +833,8 @@ export async function ajax(
     options.headers["X-Auth"] = requestToken;
   }
 
-  const response = await fetch(route, options);
+  const fetchFn = options?.customFetch || fetch;
+  const response = await fetchFn(route, options);
   const body = await response.text();
   if (!background) {
     loading.set(false);
