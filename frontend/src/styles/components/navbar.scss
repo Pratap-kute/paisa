@@ -8,6 +8,23 @@
   color: var(--paisa-navbar-text);
   border-bottom: 1px solid var(--paisa-border-subtle);
 
+  .navbar-brand {
+    align-items: center;
+
+    a.navbar-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: var(--paisa-font-weight-medium);
+      color: var(--paisa-navbar-text);
+
+      &:hover {
+        background-color: transparent !important;
+        color: var(--paisa-brand-primary);
+      }
+    }
+  }
+
   a.navbar-item,
   button.navbar-link {
     background-color: transparent !important;
@@ -68,10 +85,90 @@
   }
 }
 
+/* Navbar action / more button */
+.dropdown-trigger.dropdown-icon {
+  display: flex;
+  align-items: center;
+
+  button {
+    height: 2.25rem;
+    width: 2.25rem;
+    padding: 0;
+    border: none !important;
+    background: transparent !important;
+    color: var(--paisa-navbar-text) !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--paisa-radius-full);
+    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--paisa-surface-hover) !important;
+      color: var(--paisa-brand-primary) !important;
+    }
+
+    .icon {
+      font-size: 1.125rem;
+    }
+  }
+}
+
 .dropdown-content {
   background-color: var(--paisa-dropdown-bg);
   box-shadow: var(--paisa-dropdown-shadow);
   border: 1px solid var(--paisa-dropdown-border);
+  border-radius: var(--paisa-radius-md);
+  padding: 0.35rem 0;
+
+  .dropdown-divider {
+    background-color: var(--paisa-border-subtle);
+    margin: 0.25rem 0;
+  }
+
+  button.dropdown-item {
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: none;
+    font: inherit;
+    color: var(--paisa-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    padding: 0.5rem 1rem;
+    font-size: var(--paisa-font-size-sm);
+    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+      color: var(--paisa-brand-primary);
+    }
+  }
+
+  .dropdown-item {
+    color: var(--paisa-text-primary);
+    padding: 0.5rem 1rem;
+    font-size: var(--paisa-font-size-sm);
+
+    label.paisa-clickable {
+      display: flex;
+      align-items: center;
+      gap: var(--paisa-space-2);
+      color: var(--paisa-text-primary);
+      cursor: pointer;
+      width: 100%;
+
+      &:hover {
+        color: var(--paisa-brand-primary);
+      }
+    }
+  }
 }
 
 .nested.has-dropdown {

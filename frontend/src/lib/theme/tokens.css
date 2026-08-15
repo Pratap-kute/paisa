@@ -13,7 +13,7 @@
   --paisa-surface-card: #ffffff;
 
   /* Typography Families */
-  --paisa-font-sans: "Roboto Flex Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --paisa-font-sans: "Roboto Flex Variable", "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --paisa-font-mono: "Roboto Mono Variable", monospace;
 
   /* Typography Scale (Stable 1rem = 16px) */

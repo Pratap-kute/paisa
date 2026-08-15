@@ -3,11 +3,21 @@
  * Normalized typography, axes, legends, and chart frame containers
  */
 
+svg {
+  font-family: var(--paisa-font-sans);
+}
+
 svg text,
 .axis text,
 .legend-label {
   fill: var(--paisa-chart-text);
   color: var(--paisa-chart-text);
+  font-family: var(--paisa-font-sans);
+}
+
+.custom-icon,
+[data-tippy-root] {
+  font-family: var(--paisa-font-sans);
 }
 
 .axis {
@@ -97,6 +107,16 @@ svg text,
   font-size: var(--paisa-font-size-sm);
   font-weight: var(--paisa-font-weight-semibold);
 }
+
+/* SVG Text Semantic Colors */
+.svg-text-success { fill: var(--paisa-success) !important; }
+.svg-text-danger { fill: var(--paisa-danger) !important; }
+.svg-text-warning,
+.svg-text-warning-dark { fill: var(--paisa-warning) !important; }
+.svg-text-grey { fill: var(--paisa-chart-muted) !important; }
+.svg-text-grey-dark,
+.svg-text-black-ter,
+.svg-text-dark { fill: var(--paisa-chart-text) !important; }
 
 /* Chart container overflow control */
 .box > svg[id^="d3-"],

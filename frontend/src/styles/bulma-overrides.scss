@@ -330,3 +330,21 @@ input.switch {
   border-radius: 0 var(--paisa-radius-sm) var(--paisa-radius-sm) 0;
   right: 0;
 }
+
+/* Semantic Color Utility Bridges */
+.has-text-success { color: var(--paisa-success) !important; }
+.has-text-danger { color: var(--paisa-danger) !important; }
+.has-text-warning { color: var(--paisa-warning) !important; }
+.has-text-warning-dark { color: var(--paisa-warning) !important; }
+.has-text-info { color: var(--paisa-info) !important; }
+.has-text-primary { color: var(--paisa-brand-primary) !important; }
+.has-text-link { color: var(--paisa-brand-primary) !important; }
+.has-text-grey { color: var(--paisa-text-secondary) !important; }
+.has-text-grey-light { color: var(--paisa-text-muted) !important; }
+.has-text-grey-dark { color: var(--paisa-text-primary) !important; }
+.has-text-white { color: var(--paisa-text-inverse) !important; }
+.has-text-black { color: var(--paisa-text-primary) !important; }
+.has-text-dark { color: var(--paisa-text-primary) !important; }
+.has-text-light { color: var(--paisa-text-secondary) !important; }
+.is-primary-color { color: var(--paisa-brand-primary) !important; }
+
