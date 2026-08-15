@@ -1224,10 +1224,65 @@ nav.level.grid-2 {
 .navbar {
   background-color: var(--paisa-navbar-bg) !important;
   color: var(--paisa-navbar-text);
+  border-bottom: 1px solid var(--paisa-border-subtle);
 
-  a.navbar-item {
-    background-color: var(--paisa-navbar-bg) !important;
+  a.navbar-item,
+  button.navbar-link {
+    background-color: transparent !important;
     color: var(--paisa-navbar-text);
+    border-radius: var(--paisa-radius-sm);
+    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+    padding: 0.5rem 0.75rem;
+
+    &:hover {
+      background-color: var(--paisa-surface-hover) !important;
+      color: var(--paisa-brand-primary);
+    }
+
+    &.is-active {
+      color: var(--paisa-brand-primary);
+      font-weight: 600;
+    }
+  }
+
+  .navbar-dropdown {
+    background-color: var(--paisa-dropdown-bg);
+    border: 1px solid var(--paisa-dropdown-border);
+    border-top: 2px solid var(--paisa-brand-primary);
+    box-shadow: var(--paisa-dropdown-shadow);
+    border-radius: 0 0 var(--paisa-radius-md) var(--paisa-radius-md);
+    padding: 0.25rem 0;
+
+    a.navbar-item {
+      padding: 0.5rem 1rem !important;
+      border-radius: 0 !important;
+      font-size: 0.875rem;
+      color: var(--paisa-text-primary) !important;
+
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .navbar-item.has-dropdown.is-hoverable {
+    > button.navbar-link {
+      &::after {
+        border-color: var(--paisa-text-muted);
+        transition: border-color var(--paisa-transition-fast);
+      }
+
+      &:hover::after {
+        border-color: var(--paisa-brand-primary);
+      }
+    }
   }
 }
 
@@ -1598,14 +1653,21 @@ nav.level.grid-2 {
 nav.breadcrumb {
   ul {
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
   }
 
   li {
     display: inline-flex;
     align-items: center;
+    line-height: 1.5;
 
     & + li::before {
-      padding: 0 0.5rem;
+      padding: 0 0.4rem;
+      font-size: 0.65rem;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
     }
   }
 
@@ -1616,8 +1678,10 @@ nav.breadcrumb {
     cursor: default;
     display: inline-flex;
     justify-content: center;
-    padding: 0 0.5rem;
+    padding: 0 0.35rem;
     pointer-events: none;
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
   }
 
   li:first-child a.is-inactive,
@@ -1626,7 +1690,14 @@ nav.breadcrumb {
   }
 
   li a span.icon {
-    margin-top: -2px;
+    margin-top: -1px;
+    font-size: 0.75rem;
+  }
+
+  .paisa-badge {
+    margin-left: 0.25rem;
+    font-size: 0.625rem;
+    vertical-align: middle;
   }
 }
 
@@ -1634,7 +1705,9 @@ nav.breadcrumb {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   content: "\f054";
+  font-size: 0.55rem;
   color: var(--paisa-breadcrumb-separator);
+  opacity: 0.7;
 }
 
 div.small-box:hover {
@@ -1930,4 +2003,43 @@ div.is-hoverable:hover {
   align-items: center;
   justify-content: center;
   line-height: 0;
+}
+
+/* Chart container overflow control */
+.box > svg[id^="d3-"],
+.box svg[width="100%"] {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.box {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Nested dropdown item hover states */
+.nested.has-dropdown .dropdown-content a.navbar-item {
+  padding: 0.4rem 1rem;
+  transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+
+  &:hover {
+    background-color: var(--paisa-surface-hover) !important;
+    color: var(--paisa-brand-primary) !important;
+  }
+
+  &.is-active {
+    background-color: var(--paisa-brand-primary-light) !important;
+    color: var(--paisa-brand-primary) !important;
+    font-weight: 600;
+  }
+}
+
+/* Breadcrumb bar below navbar — tighter spacing */
+.mt-3.px-3.is-flex.is-justify-content-space-between {
+  margin-top: 0.5rem !important;
+  padding-top: 0;
+  padding-bottom: 0.25rem;
+  min-height: 1.75rem;
+  align-items: center;
 }

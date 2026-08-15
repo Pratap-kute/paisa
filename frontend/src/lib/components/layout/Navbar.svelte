@@ -316,10 +316,9 @@
   </div>
 </nav>
 
-<div class="mt-3 px-3 is-flex is-justify-content-space-between">
+<div class="mt-1 px-3 is-flex is-justify-content-space-between">
   {#if selectedLink}
     <nav
-      style="margin-left: 0.73rem;"
       class="breadcrumb has-chevron-separator mb-0 is-small"
       aria-label="breadcrumbs"
     >

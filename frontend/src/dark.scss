@@ -95,6 +95,25 @@ html[data-theme="dark"] {
     box-shadow: $shadow;
   }
 
+  .navbar-dropdown {
+    background-color: var(--paisa-dropdown-bg) !important;
+    border-color: var(--paisa-dropdown-border) !important;
+
+    a.navbar-item {
+      color: var(--paisa-text-primary) !important;
+
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+    }
+  }
+
   .dropdown-content {
     background-color: var(--paisa-dropdown-bg);
     box-shadow: var(--paisa-dropdown-shadow);
@@ -104,6 +123,21 @@ html[data-theme="dark"] {
     .dropdown-menu {
       .dropdown-content {
         box-shadow: $shadow;
+        background-color: var(--paisa-dropdown-bg);
+
+        a.navbar-item {
+          color: var(--paisa-text-primary) !important;
+
+          &:hover {
+            background-color: var(--paisa-surface-hover) !important;
+            color: var(--paisa-brand-primary) !important;
+          }
+
+          &.is-active {
+            background-color: var(--paisa-brand-primary-light) !important;
+            color: var(--paisa-brand-primary) !important;
+          }
+        }
       }
     }
   }
