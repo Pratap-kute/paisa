@@ -79,10 +79,12 @@ export function renderPortfolioBreakdown(
 
   const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
 
-  const targetWidth = small ? width - rem(190) : rem(500);
-  const targetMargin = rem(20);
-  const textGroupWidth = rem(150);
-  const textGroupMargin = rem(20);
+  const textGroupWidth = rem(140);
+  const targetMargin = rem(15);
+  const textGroupMargin = rem(15);
+  const targetWidth = small
+    ? Math.max(rem(200), width - textGroupWidth - targetMargin)
+    : Math.max(rem(300), Math.round((width - textGroupWidth - targetMargin - textGroupMargin) * 0.5));
   const textGroupZero = targetWidth + targetMargin;
 
   const x = d3.scaleLinear().range([

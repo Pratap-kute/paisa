@@ -9,6 +9,7 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);
@@ -37,8 +38,8 @@
     }
 
     selectedCommodities = [...commodities];
-    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type);
-    ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating);
+    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
+    ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
     industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
       z: [genericBarColor()]
     });
@@ -95,32 +96,35 @@
       </div>
     </Section>
 
-    <Section title="Security Type">
-      <ChartFrame type="distribution">
-        <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
-        <svg id="d3-portfolio-security-type" />
-      </ChartFrame>
-    </Section>
+    <!-- Side-by-Side Summary: Security Type & Security Rating -->
+    <ResponsiveGrid variant="two-column">
+      <Section title="Security Type">
+        <ChartFrame type="dynamic">
+          <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
+          <svg id="d3-portfolio-security-type" />
+        </ChartFrame>
+      </Section>
 
-    <Section title="Security Rating">
-      <ChartFrame type="distribution">
-        <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
-        <svg id="d3-portfolio-security-rating" />
-      </ChartFrame>
-    </Section>
+      <Section title="Security Rating">
+        <ChartFrame type="dynamic">
+          <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
+          <svg id="d3-portfolio-security-rating" />
+        </ChartFrame>
+      </Section>
+    </ResponsiveGrid>
 
     <Section title="Industry">
-      <ChartFrame type="distribution">
+      <ChartFrame type="dynamic">
         <div id="d3-portfolio-security-industry-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio-security-industry" />
       </ChartFrame>
     </Section>
 
-    <Section title="Security">
+    <Section title="Holdings">
       {#if portfolioR}
         <LegendCard legends={portfolioR.legends} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
-      <ChartFrame type="distribution">
+      <ChartFrame type="dynamic">
         <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio" />
       </ChartFrame>
