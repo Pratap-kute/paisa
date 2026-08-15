@@ -123,6 +123,7 @@
   border: 1px solid var(--paisa-dropdown-border);
   border-radius: var(--paisa-radius-md);
   padding: 0.35rem 0;
+  min-width: max-content;
 
   .dropdown-divider {
     background-color: var(--paisa-border-subtle);
@@ -143,11 +144,22 @@
     gap: var(--paisa-space-2);
     padding: 0.5rem 1rem;
     font-size: var(--paisa-font-size-sm);
+    white-space: nowrap;
     transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
 
     &:hover {
       background-color: var(--paisa-surface-hover);
       color: var(--paisa-brand-primary);
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      margin: 0 !important;
     }
   }
 
@@ -155,6 +167,17 @@
     color: var(--paisa-text-primary);
     padding: 0.5rem 1rem;
     font-size: var(--paisa-font-size-sm);
+    white-space: nowrap;
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      margin: 0 !important;
+    }
 
     label.paisa-clickable {
       display: flex;
@@ -163,6 +186,7 @@
       color: var(--paisa-text-primary);
       cursor: pointer;
       width: 100%;
+      white-space: nowrap;
 
       &:hover {
         color: var(--paisa-brand-primary);

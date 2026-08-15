@@ -312,7 +312,8 @@ function renderPartition(
   color: d3.ScaleOrdinal<string, string>,
   clientWidth: number,
 ) {
-  if (_.isEmpty(pa.breakdowns)) {
+  const rawBreakdowns = _.filter(pa.breakdowns, (b) => b.commodity_name !== "root");
+  if (_.isEmpty(rawBreakdowns)) {
     return;
   }
 
@@ -325,9 +326,9 @@ function renderPartition(
     amount: pa.amount,
   };
 
-  pa.breakdowns.unshift(rootBreakdown);
+  const allBreakdowns = [rootBreakdown, ...rawBreakdowns];
 
-  const byName: Record<string, CommodityBreakdown> = _.chain(pa.breakdowns)
+  const byName: Record<string, CommodityBreakdown> = _.chain(allBreakdowns)
     .map((b) => [b.commodity_name, b])
     .fromPairs()
     .value();
@@ -349,7 +350,7 @@ function renderPartition(
 
   const partition = hierarchy.size([width, height]).round(true);
 
-  const root = stratify(pa.breakdowns)
+  const root = stratify(allBreakdowns)
     .sum((a) => a.percentage)
     .sort(function (a, b) {
       return b.height - a.height || b.value - a.value;
@@ -359,15 +360,16 @@ function renderPartition(
 
   div
     .selectAll(".node")
-    .data(root.descendants(), (d: any) => d.id)
+    .data(root.leaves(), (d: any) => d.id)
     .join("div")
     .attr("class", "node")
     .attr("data-tippy-content", (d) => {
       const breakdown = byName[d.id];
+      if (!breakdown) return "";
       return tooltip([
         ["Commodity", [breakdown.commodity_name, "has-text-right"]],
         ["Security Count", [
-          breakdown.security_id.split(",").length.toString(),
+          breakdown.security_id ? breakdown.security_id.split(",").length.toString() : "0",
           "has-text-right",
         ]],
         ["Amount", [
@@ -379,13 +381,13 @@ function renderPartition(
     })
     .style("top", (d: any) => d.y0 + "px")
     .style("left", (d: any) => d.x0 + "px")
-    .style("width", (d: any) => d.x1 - d.x0 + "px")
-    .style("height", (d: any) => d.y1 - d.y0 + "px")
+    .style("width", (d: any) => Math.max(d.x1 - d.x0, 0) + "px")
+    .style("height", (d: any) => Math.max(d.y1 - d.y0, 0) + "px")
     .style("background", (d) => color(d.id))
     .style("color", (d) => darkenOrLighten(color(d.id)))
     .selectAll("p")
     .data(
-      (d) => d,
+      (d) => [d],
       (d: any) => d.id,
     )
     .join("p")

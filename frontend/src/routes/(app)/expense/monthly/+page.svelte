@@ -171,9 +171,9 @@
           </div>
         </div>
       </div>
-      <div class="column is-12 is-7-desktop">
+      <div class="column is-12 is-9-desktop">
         <div class="columns is-flex-wrap-wrap">
-          <div class="column is-4">
+          <div class="column is-12 is-5-desktop">
             <div class="p-3 box">
               <div id="d3-current-month-expense-calendar" class="d3-calendar">
                 <div class="weekdays">
@@ -185,7 +185,7 @@
               </div>
             </div>
           </div>
-          <div class="column is-8">
+          <div class="column is-12 is-7-desktop">
             <div class="px-3 box paisa-full-height">
               <ZeroState item={grouped_expenses?.[$month]}>
                 <strong>Hurray!</strong> You have no expenses this month.

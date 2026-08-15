@@ -81,16 +81,20 @@ export const handleError: HandleClientError = (
   } as any;
 };
 
-function formatError(error: any) {
+function formatError(error: any): string {
+  if (!error) {
+    return "An unknown error occurred.";
+  }
   if (error?.stack) {
     return error.stack;
   }
-
   if (error?.message) {
     return error.message;
-  } else {
-    return String(error);
   }
+  if (typeof error === "string") {
+    return error;
+  }
+  return String(error);
 }
 
 const footer = `
@@ -102,6 +106,8 @@ const footer = `
 `;
 
 function displayError(error: any) {
+  if (!error) return;
+  console.error("Client Error Caught:", error);
   const message = formatError(error);
   toast.toast({
     message:
@@ -115,9 +121,20 @@ function displayError(error: any) {
   });
 }
 
-globalThis.addEventListener("unhandledrejection", (event: any) => {
-  displayError(event.reason);
+globalThis.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+  if (event.reason) {
+    displayError(event.reason);
+  }
 });
-globalThis.addEventListener("error", (event: any) => {
-  displayError(event.error);
+
+globalThis.addEventListener("error", (event: ErrorEvent) => {
+  // Ignore DOM/resource loading events without a runtime Error object
+  if (!event.error && (event.target as any) instanceof HTMLElement) {
+    console.warn("Resource loading failed:", event.target);
+    return;
+  }
+  const err = event.error || event.message;
+  if (err) {
+    displayError(err);
+  }
 });

@@ -143,32 +143,36 @@
           </div>
         </div>
       </div>
-      <div class="column is-3">
-        <div class="px-3 box">
-          <div id="d3-current-year-expense-calendar" class="d3-calendar">
-            <div class="months"></div>
+      <div class="column is-12 is-9-desktop">
+        <div class="columns is-flex-wrap-wrap">
+          <div class="column is-12 is-5-desktop">
+            <div class="px-3 box paisa-full-height">
+              <div id="d3-current-year-expense-calendar" class="d3-calendar">
+                <div class="months"></div>
+              </div>
+            </div>
+          </div>
+          <div class="column is-12 is-7-desktop">
+            <div class="px-3 box paisa-full-height">
+              <ZeroState item={currentYearExpenses}>
+                <strong>Hurray!</strong> You have no expenses this year.
+              </ZeroState>
+              <svg id="d3-current-year-breakdown" width="100%" />
+            </div>
+          </div>
+          <div class="column is-12">
+            <div class="box">
+              <ZeroState item={expenses}>
+                <strong>Oops!</strong> You have no expenses.
+              </ZeroState>
+
+              <LegendCard {legends} clazz="ml-4" />
+              <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
+            </div>
           </div>
         </div>
-      </div>
-      <div class="column is-full-tablet is-half-fullhd">
-        <div class="px-3 box paisa-full-height">
-          <ZeroState item={currentYearExpenses}>
-            <strong>Hurray!</strong> You have no expenses this year.
-          </ZeroState>
-          <svg id="d3-current-year-breakdown" width="100%" />
-        </div>
-      </div>
-      <div class="column is-12 is-7-desktop">
-        <div class="box">
-          <ZeroState item={expenses}>
-            <strong>Oops!</strong> You have no expenses.
-          </ZeroState>
-
-          <LegendCard {legends} clazz="ml-4" />
-          <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
-        </div>
+        <BoxLabel text="Yearly Expenses" />
       </div>
     </div>
-    <BoxLabel text="Yearly Expenses" />
   </div>
 </section>
