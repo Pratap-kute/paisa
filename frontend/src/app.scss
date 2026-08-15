@@ -60,6 +60,40 @@ $radius-rounded: 9999px;
 $radius: 4px;
 $radius-small: 2px;
 
+:root {
+  --bulma-body-size: 14px;
+  --bulma-body-family: #{$family-sans-serif};
+  --bulma-family-primary: #{$family-sans-serif};
+  --bulma-family-code: #{$family-monospace};
+  --bulma-box-radius: 4px;
+  --bulma-box-shadow: none;
+  --bulma-box-padding: 1.25rem 0;
+  --bulma-card-shadow: none;
+  --bulma-radius: 4px;
+  --bulma-radius-small: 2px;
+  --bulma-radius-large: 6px;
+  --bulma-control-height: 2.5em;
+  --bulma-navbar-height: 3.25rem;
+  --bulma-primary-h: 171deg;
+  --bulma-primary-s: 100%;
+  --bulma-primary-l: 41%;
+  --bulma-link-h: 233deg;
+  --bulma-link-s: 100%;
+  --bulma-link-l: 63%;
+  --bulma-info-h: 198deg;
+  --bulma-info-s: 100%;
+  --bulma-info-l: 70%;
+  --bulma-success-h: 153deg;
+  --bulma-success-s: 53%;
+  --bulma-success-l: 53%;
+  --bulma-warning-h: 42deg;
+  --bulma-warning-s: 100%;
+  --bulma-warning-l: 53%;
+  --bulma-danger-h: 348deg;
+  --bulma-danger-s: 100%;
+  --bulma-danger-l: 70%;
+}
+
 $editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px -
   10.5px - 10.5px);
 

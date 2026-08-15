@@ -41,7 +41,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12">
-        <Card padding="sm" class="has-text-centered mx-auto paisa-max-width-400 mb-4">
+        <Card padding="sm" class="has-text-centered mx-auto paisa-max-width-400">
           <div><Logo size={128} /></div>
           <div class="is-size-3 is-primary-color">Paisa</div>
           <div>
