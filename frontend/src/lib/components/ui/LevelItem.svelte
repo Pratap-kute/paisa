@@ -20,21 +20,25 @@
   }: Props = $props();
 </script>
 
-<div class="level-item {narrow && 'is-narrow'} has-text-left" class:small>
+<div class="level-item {narrow ? 'is-narrow' : ''} has-text-left" class:small>
   <div>
     <p class="heading">{title}</p>
     {#if color}
-      <p class="title" style="padding: 5px; color: {color};">{value}</p>
+      <p class="title" style="padding: 5px 0; color: {color};">{value}</p>
     {:else}
-      <p class="title has-text-grey-dark">{value}</p>
+      <p class="title paisa-level-value">{value}</p>
     {/if}
     {#if !_.isEmpty(subtitle)}
-      <div class="sub-title">{@html subtitle}</div>
+      <div class="sub-title has-text-grey">{@html subtitle}</div>
     {/if}
   </div>
 </div>
 
 <style lang="scss">
+  .paisa-level-value {
+    color: var(--paisa-text-primary, #0f172a);
+  }
+
   .level-item.small {
     .title {
       font-size: 1.25rem !important;
@@ -43,8 +47,9 @@
   }
 
   .heading {
-    font-weight: 400 !important;
-    font-size: 1rem !important;
+    color: var(--paisa-text-secondary, #475569) !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
     text-transform: capitalize !important;
     letter-spacing: normal !important;
     margin-bottom: 0 !important;

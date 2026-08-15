@@ -18,7 +18,7 @@
 
 <section class="section tab-gain">
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12">
         <div class="box paisa-overflow-x-auto">
           <LegendCard {legends} clazz="ml-4" />
@@ -31,7 +31,7 @@
 </section>
 <section class="section tab-gain">
   <div class="container is-fluid d3-gain-timeline-breakdown">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div id="d3-gain-timeline-breakdown" class="column is-12"></div>
     </div>
   </div>

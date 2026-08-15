@@ -10,6 +10,7 @@
   --paisa-surface-hover: #f1f5f9;
   --paisa-surface-active: #e2e8f0;
   --paisa-surface-muted: #f8fafc;
+  --paisa-surface-card: #ffffff;
 
   /* Typography */
   --paisa-font-sans: "Roboto Flex Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -20,6 +21,52 @@
   --paisa-text-secondary: #475569;
   --paisa-text-muted: #94a3b8;
   --paisa-text-inverse: #ffffff;
+
+  /* Navbar / Navigation */
+  --paisa-navbar-bg: #ffffff;
+  --paisa-navbar-text: #0f172a;
+  --paisa-navbar-muted: #475569;
+  --paisa-breadcrumb-muted: #64748b;
+  --paisa-breadcrumb-separator: #3b82f6;
+
+  /* Form & Controls */
+  --paisa-input-bg: #ffffff;
+  --paisa-input-border: #cbd5e1;
+  --paisa-input-border-hover: #94a3b8;
+  --paisa-input-border-focus: #3b82f6;
+  --paisa-input-text: #0f172a;
+  --paisa-input-placeholder: #94a3b8;
+  --paisa-input-disabled-bg: #f1f5f9;
+  --paisa-input-disabled-text: #94a3b8;
+  --paisa-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.25);
+
+  /* Login Card */
+  --paisa-login-card-bg: rgba(255, 255, 255, 0.92);
+  --paisa-login-card-border: rgba(148, 163, 184, 0.24);
+  --paisa-login-input-bg: rgba(255, 255, 255, 0.8);
+  --paisa-login-input-border: rgba(148, 163, 184, 0.34);
+  --paisa-login-input-text: #0f172a;
+  --paisa-login-button-bg: #3b82f6;
+  --paisa-login-button-border: #3b82f6;
+
+  /* Overlays, Modals & Dropdowns */
+  --paisa-overlay-bg: rgba(15, 23, 42, 0.6);
+  --paisa-dropdown-bg: #ffffff;
+  --paisa-dropdown-border: #e2e8f0;
+  --paisa-dropdown-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --paisa-tooltip-bg: #0f172a;
+  --paisa-tooltip-text: #f8fafc;
+
+  /* Tables */
+  --paisa-table-bg: #ffffff;
+  --paisa-table-header-bg: #f8fafc;
+  --paisa-table-header-text: #475569;
+  --paisa-table-border: #e2e8f0;
+  --paisa-table-row-hover: #f1f5f9;
+  --paisa-table-row-selected: #eff6ff;
+
+  /* Chart / SVG Text */
+  --paisa-chart-text: #0f172a;
 
   /* Borders & Dividers */
   --paisa-border-subtle: #f1f5f9;
@@ -43,6 +90,7 @@
   --paisa-info-light: #ecfeff;
 
   /* Radii & Shadows */
+  --paisa-radius-xs: 2px;
   --paisa-radius-sm: 4px;
   --paisa-radius-md: 6px;
   --paisa-radius-lg: 8px;
@@ -77,12 +125,59 @@ html[data-theme="dark"] {
   --paisa-surface-hover: #1f2937;
   --paisa-surface-active: #374151;
   --paisa-surface-muted: #1e293b;
+  --paisa-surface-card: #111827;
 
   /* Dark Text Colors */
   --paisa-text-primary: #f8fafc;
   --paisa-text-secondary: #cbd5e1;
   --paisa-text-muted: #64748b;
   --paisa-text-inverse: #0f172a;
+
+  /* Dark Navbar / Breadcrumb */
+  --paisa-navbar-bg: #0f172a;
+  --paisa-navbar-text: #f8fafc;
+  --paisa-navbar-muted: #cbd5e1;
+  --paisa-breadcrumb-muted: #94a3b8;
+  --paisa-breadcrumb-separator: #60a5fa;
+
+  /* Dark Form & Controls */
+  --paisa-input-bg: #0f172a;
+  --paisa-input-border: #334155;
+  --paisa-input-border-hover: #475569;
+  --paisa-input-border-focus: #60a5fa;
+  --paisa-input-text: #f8fafc;
+  --paisa-input-placeholder: #64748b;
+  --paisa-input-disabled-bg: #1e293b;
+  --paisa-input-disabled-text: #64748b;
+  --paisa-focus-ring: 0 0 0 3px rgba(96, 165, 250, 0.25);
+
+  /* Dark Login Card */
+  --paisa-login-card-bg: rgba(17, 24, 39, 0.92);
+  --paisa-login-card-border: rgba(148, 163, 184, 0.24);
+  --paisa-login-input-bg: rgba(15, 23, 42, 0.7);
+  --paisa-login-input-border: rgba(148, 163, 184, 0.34);
+  --paisa-login-input-text: #f8fafc;
+  --paisa-login-button-bg: rgba(96, 165, 250, 0.92);
+  --paisa-login-button-border: rgba(96, 165, 250, 0.92);
+
+  /* Dark Overlays, Modals & Dropdowns */
+  --paisa-overlay-bg: rgba(0, 0, 0, 0.75);
+  --paisa-dropdown-bg: #1e293b;
+  --paisa-dropdown-border: #334155;
+  --paisa-dropdown-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --paisa-tooltip-bg: #f8fafc;
+  --paisa-tooltip-text: #0f172a;
+
+  /* Dark Tables */
+  --paisa-table-bg: #111827;
+  --paisa-table-header-bg: #1e293b;
+  --paisa-table-header-text: #cbd5e1;
+  --paisa-table-border: #334155;
+  --paisa-table-row-hover: #1f2937;
+  --paisa-table-row-selected: #1e3a5f;
+
+  /* Dark Chart / SVG Text */
+  --paisa-chart-text: #cbd5e1;
 
   /* Dark Borders & Dividers */
   --paisa-border-subtle: #1e293b;

@@ -1,15 +1,23 @@
 <script lang="ts">
   import { rem } from "$lib/core/utils";
   import { onMount, onDestroy } from "svelte";
-  import { TabulatorFull as Tabulator, type ColumnDefinition } from "tabulator-tables";
+  import { TabulatorFull as Tabulator, type ColumnDefinition, type Options } from "tabulator-tables";
 
   interface Props {
     data?: any[];
     columns: ColumnDefinition[];
     tree?: boolean;
+    class?: string;
+    options?: Partial<Options>;
   }
 
-  let { data = [], columns, tree = false }: Props = $props();
+  let {
+    data = [],
+    columns,
+    tree = false,
+    class: className = "",
+    options = {},
+  }: Props = $props();
 
   let tableComponent: HTMLElement = $state();
   let tabulator: Tabulator = $state();
@@ -36,7 +44,8 @@
         "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-down'></i></span>",
       data: data || [],
       columns: columns,
-      layout: "fitDataTable"
+      layout: "fitDataTable",
+      ...options,
     });
     tabulator.on("tableBuilt", () => {
       isBuilt = true;
@@ -48,4 +57,4 @@
   });
 </script>
 
-<div class="paisa-overflow-x-auto box py-0" style="max-width: 100%;" bind:this={tableComponent}></div>
+<div class="paisa-overflow-x-auto box py-0 {className}" style="max-width: 100%;" bind:this={tableComponent}></div>

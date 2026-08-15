@@ -32,6 +32,8 @@
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import BalanceCard from "$lib/components/finance/BalanceCard.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -113,7 +115,7 @@
               Looks like you are new here, you can either get started or look at a demo setup
             </p>
             <div>
-              <p class="is-size-4">I want to get started</p>
+              <p class="is-size-4 has-text-weight-bold">I want to get started</p>
               <ol class="ml-5 mt-2 mb-4">
                 <li>
                   Go to <a href="/more/config">configuration</a> page and set your default currency and
@@ -124,8 +126,7 @@
                   journal.
                 </li>
               </ol>
-              <p class="is-size-4">I want to view a Demo</p>
-              <p class="ml-3"></p>
+              <p class="is-size-4 has-text-weight-bold">I want to view a Demo</p>
               <ol class="ml-5 mt-2 mb-4">
                 <li>
                   Click the button below to load a demo setup. This will load a demo journal with
@@ -141,7 +142,7 @@
                 </li>
               </ol>
 
-              <button type="button" onclick={(_e) => initDemo()} class="button is-link">Setup Demo</button>
+              <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
             </div>
           </div>
         </ZeroState>
@@ -152,194 +153,136 @@
 
 <section class="section tab-networth" class:is-hidden={isEmpty}>
   <div class="container is-fluid">
-    <div class="columns is-desktop is-align-items-start">
-      <div class="column is-4-desktop is-12-tablet">
-        <div class="mb-5">
-          <div class="content">
-            <p class="subtitle">
-              <a class="secondary-link has-text-grey" href="/assets/networth">Assets</a>
-            </p>
-            <div class="content">
-              <div>
-                {#if networth}
-                  <nav class="level grid-2">
-                    <LevelItem
-                      narrow
-                      title="Net worth"
-                      color={COLORS.primary}
-                      value={formatCurrency(networth.balanceAmount)}
-                    />
+    <div class="columns is-multiline is-variable is-2-desktop is-align-items-start">
+      <!-- Left Column: Summary, Checking, Cash Flow, Budget, Goals -->
+      <div class="column is-12 is-5-desktop">
+        <Section title="Assets" titleHref="/assets/networth">
+          <div>
+            {#if networth}
+              <nav class="level grid-2">
+                <LevelItem
+                  narrow
+                  title="Net worth"
+                  color={COLORS.primary}
+                  value={formatCurrency(networth.balanceAmount)}
+                />
 
-                    <LevelItem
-                      narrow
-                      title="Net Investment"
-                      color={COLORS.secondary}
-                      value={formatCurrency(networth.netInvestmentAmount)}
-                    />
-                  </nav>
-                  <nav class="level grid-2">
-                    <LevelItem
-                      narrow
-                      title="Gain / Loss"
-                      color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
-                      value={formatCurrency(networth.gainAmount)}
-                    />
+                <LevelItem
+                  narrow
+                  title="Net Investment"
+                  color={COLORS.secondary}
+                  value={formatCurrency(networth.netInvestmentAmount)}
+                />
+              </nav>
+              <nav class="level grid-2">
+                <LevelItem
+                  narrow
+                  title="Gain / Loss"
+                  color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
+                  value={formatCurrency(networth.gainAmount)}
+                />
 
-                    <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
-                  </nav>
-                {/if}
-              </div>
-            </div>
+                <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
+              </nav>
+            {/if}
           </div>
-        </div>
+        </Section>
 
         {#if !_.isEmpty(checkingBalances)}
-          <div class="mb-5">
-            <article>
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/assets/balance">Checking Balance</a>
-                </p>
-                <div class="content">
-                  <MasonryGrid gap={10} maxStretchColumnSize={400} align="stretch">
-                    {#each _.values(checkingBalances) as assetBreakdown}
-                      <div class="is-flex-grow-1">
-                        <BalanceCard {assetBreakdown} />
-                      </div>
-                    {/each}
-                  </MasonryGrid>
+          <Section title="Checking Balance" titleHref="/assets/balance">
+            <MasonryGrid gap={10} maxStretchColumnSize={400} align="stretch">
+              {#each _.values(checkingBalances) as assetBreakdown}
+                <div class="is-flex-grow-1">
+                  <BalanceCard {assetBreakdown} />
                 </div>
-              </div>
-            </article>
-          </div>
+              {/each}
+            </MasonryGrid>
+          </Section>
         {/if}
 
-        <div class="mb-5">
-          <article class="paisa-min-width-0">
-            <p class="subtitle">
-              <a class="secondary-link has-text-grey" href="/cash_flow/monthly">Cash Flow</a>
-            </p>
-            <div class="content box px-2 pb-0">
-              <ZeroState item={cashFlows}>
-                <strong>Oops!</strong> You have not made any transactions in the last 3 months.
-              </ZeroState>
+        <Section title="Cash Flow" titleHref="/cash_flow/monthly">
+          <div class="content box px-2 pb-0">
+            <ZeroState item={cashFlows}>
+              <strong>Oops!</strong> You have not made any transactions in the last 3 months.
+            </ZeroState>
 
-              <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
+            <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
 
-              <svg
-                class:is-not-visible={_.isEmpty(cashFlows)}
-                id="d3-current-cash-flow"
-                height="250"
-                width="100%"
-              />
-            </div>
-          </article>
-        </div>
+            <svg
+              class:is-not-visible={_.isEmpty(cashFlows)}
+              id="d3-current-cash-flow"
+              height="250"
+              width="100%"
+            />
+          </div>
+        </Section>
+
         {#if currentBudget}
-          <div class="mb-5">
-            <div class="content">
-              <p class="subtitle">
-                <a class="secondary-link has-text-grey" href="/expense/budget">Budget</a>
-              </p>
-              <div class="content">
-                <div>
-                  {#each currentBudget.accounts as accountBudget (accountBudget)}
-                    <BudgetCard compact {accountBudget} />
-                  {/each}
-                </div>
-              </div>
+          <Section title="Budget" titleHref="/expense/budget">
+            <div>
+              {#each currentBudget.accounts as accountBudget (accountBudget)}
+                <BudgetCard compact {accountBudget} />
+              {/each}
             </div>
-          </div>
+          </Section>
         {/if}
+
         {#if !_.isEmpty(goalSummaries)}
-          <div class="mb-5">
-            <article>
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/more/goals">Goals</a>
-                </p>
-                <div class="content">
-                  {#each goalSummaries as goal}
-                    <GoalSummaryCard {goal} small />
-                  {/each}
-                </div>
-              </div>
-            </article>
-          </div>
+          <Section title="Goals" titleHref="/more/goals">
+            <div>
+              {#each goalSummaries as goal}
+                <GoalSummaryCard {goal} small />
+              {/each}
+            </div>
+          </Section>
         {/if}
       </div>
-      <div class="column is-8-desktop is-12-tablet">
-        <div class="mb-5">
-          <article>
-            <p class="subtitle is-flex is-justify-content-space-between is-align-items-end">
-              <span
-                ><a class="secondary-link has-text-grey" href="/expense/monthly">Expenses</a>
-                <span class="is-size-5 has-text-weight-bold px-2" style="color: {COLORS.expenses}"
-                  >{formatCurrency(totalExpense)}</span
-                ></span
-              >
-              <LastNMonths n={3} bind:value={month} />
-            </p>
-            <div class="content box px-3">
-              <ZeroState item={selectedExpenses}>
-                <strong>Hurray!</strong> You have no expenses this month.
-              </ZeroState>
-              <svg id="d3-current-month-breakdown" width="100%" />
+
+      <!-- Right Column: Expenses, Recurring, Recent Transactions -->
+      <div class="column is-12 is-7-desktop">
+        <Section title="Expenses" titleHref="/expense/monthly">
+          {#snippet action()}
+            <LastNMonths n={3} bind:value={month} />
+          {/snippet}
+
+          <div class="content box px-3">
+            <div class="mb-2 is-flex is-align-items-center">
+              <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
+              <span class="is-size-5 has-text-weight-bold" style="color: {COLORS.expenses}">
+                {formatCurrency(totalExpense)}
+              </span>
             </div>
-          </article>
-        </div>
+            <ZeroState item={selectedExpenses}>
+              <strong>Hurray!</strong> You have no expenses this month.
+            </ZeroState>
+            <svg id="d3-current-month-breakdown" width="100%" />
+          </div>
+        </Section>
+
         {#if !_.isEmpty(transactionSequences)}
-          <div class="mb-5">
-            <article>
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/cash_flow/recurring">Recurring</a>
-                </p>
-                <div class="content box">
-                  <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
-                    {#each transactionSequences as ts (ts)}
-                      <UpcomingCard transactionSequece={ts} />
-                    {/each}
-                  </div>
-                </div>
+          <Section title="Recurring" titleHref="/cash_flow/recurring">
+            <div class="content box">
+              <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
+                {#each transactionSequences as ts (ts)}
+                  <UpcomingCard transactionSequece={ts} />
+                {/each}
               </div>
-            </article>
-          </div>
+            </div>
+          </Section>
         {/if}
+
         {#if !_.isEmpty(transactions)}
-          <div class="mb-5">
-            <article>
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/ledger/transaction"
-                    >Recent Transactions</a
-                  >
-                </p>
-                <div>
-                  <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
-                    {#each _.take(transactions, 20) as t}
-                      <div class="mr-3 is-flex-grow-1">
-                        <TransactionCard {t} />
-                      </div>
-                    {/each}
-                  </MasonryGrid>
+          <Section title="Recent Transactions" titleHref="/ledger/transaction">
+            <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
+              {#each _.take(transactions, 20) as t}
+                <div class="mr-3 is-flex-grow-1">
+                  <TransactionCard {t} />
                 </div>
-              </div>
-            </article>
-          </div>
+              {/each}
+            </MasonryGrid>
+          </Section>
         {/if}
       </div>
     </div>
   </div>
 </section>
-
-<style lang="scss">
-  p.subtitle {
-    margin-bottom: 0.5rem !important;
-  }
-
-  p.subtitle a.secondary-link {
-    text-transform: uppercase;
-    font-size: 1rem;
-  }
-</style>

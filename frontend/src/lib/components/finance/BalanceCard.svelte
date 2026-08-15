@@ -12,9 +12,9 @@
   let { assetBreakdown }: Props = $props();
 </script>
 
-<Card padding="sm">
-  <div class="my-1 is-flex is-justify-content-space-between">
-    <div class="has-text-grey paisa-truncate custom-icon" title={assetBreakdown.group}>
+<Card padding="sm" interactive>
+  <div class="my-1 is-flex is-justify-content-space-between is-align-items-center">
+    <div class="has-text-grey paisa-truncate custom-icon mr-2" title={assetBreakdown.group}>
       <span style={accountColorStyle(firstName(assetBreakdown.group))}
         >{iconText(assetBreakdown.group)}</span
       >
@@ -22,7 +22,7 @@
         {restName(restName(assetBreakdown.group))}</a
       >
     </div>
-    <div class="has-text-weight-bold is-size-6">
+    <div class="has-text-weight-bold is-size-6 paisa-nowrap">
       {formatCurrency(assetBreakdown.marketAmount)}
     </div>
   </div>

@@ -23,7 +23,7 @@
 
 <section class="section tab-investment">
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12">
         <div class="box">
           <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="ml-4" />
@@ -36,16 +36,16 @@
 </section>
 <section class="section tab-investment">
   <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-full-tablet is-half-fullhd">
+    <div class="columns is-multiline is-variable is-2-desktop">
+      <div class="column is-12 is-6-desktop">
         <div class="box px-2">
           <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="ml-4" />
           <svg id="d3-yearly-investment-timeline" width="100%" />
         </div>
         <BoxLabel text="Financial Year Investment Timeline" />
       </div>
-      <div class="column is-full-tablet is-half-fullhd">
-        <div class="columns is-flex-wrap-wrap" id="d3-yearly-investment-cards"></div>
+      <div class="column is-12 is-6-desktop">
+        <div class="columns is-multiline" id="d3-yearly-investment-cards"></div>
       </div>
     </div>
   </div>

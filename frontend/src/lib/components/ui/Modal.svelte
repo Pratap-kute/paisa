@@ -1,41 +1,82 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   interface Props {
     active?: boolean;
+    title?: string;
     width?: string;
     bodyClass?: string;
     headerClass?: string;
     footerClass?: string;
-    head?: import('svelte').Snippet<[any]>;
-    body?: import('svelte').Snippet;
-    foot?: import('svelte').Snippet<[any]>;
+    onclose?: () => void;
+    head?: Snippet<[{ close: (e?: any) => void }]>;
+    body?: Snippet;
+    foot?: Snippet<[{ close: (e?: any) => void }]>;
+    children?: Snippet;
   }
 
   let {
     active = $bindable(false),
-    width = "min(640px, 100vw)",
+    title = "",
+    width = "min(640px, 95vw)",
     bodyClass = "",
     headerClass = "",
     footerClass = "",
+    onclose,
     head,
     body,
-    foot
+    foot,
+    children,
   }: Props = $props();
-  let close = function (_e: any) {
-    active = !active;
-  };
+
+  function close(_e?: any) {
+    active = false;
+    onclose?.();
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape" && active) {
+      close();
+    }
+  }
 </script>
 
-<div class="modal" class:is-active={active}>
-  <button type="button" class="modal-background" aria-label="close modal" onclick={(e) => close(e)}></button>
+<svelte:window onkeydown={handleKeydown} />
+
+<div class="modal {active ? 'is-active' : ''}" role="dialog" aria-modal="true">
+  <button
+    type="button"
+    class="modal-background"
+    aria-label="close modal"
+    onclick={close}
+  ></button>
   <div class="modal-card" style:width>
-    <header class="modal-card-head {headerClass}">
-      {@render head?.({ close, })}
-    </header>
+    {#if head || title}
+      <header class="modal-card-head {headerClass}">
+        {#if head}
+          {@render head({ close })}
+        {:else}
+          <p class="modal-card-title is-size-5 has-text-weight-bold mb-0">{title}</p>
+          <button
+            type="button"
+            class="delete"
+            aria-label="close"
+            onclick={close}
+          ></button>
+        {/if}
+      </header>
+    {/if}
     <section class="modal-card-body {bodyClass}">
-      {@render body?.()}
+      {#if body}
+        {@render body()}
+      {:else if children}
+        {@render children()}
+      {/if}
     </section>
-    <footer class="modal-card-foot {footerClass}">
-      {@render foot?.({ close, })}
-    </footer>
+    {#if foot}
+      <footer class="modal-card-foot {footerClass}">
+        {@render foot({ close })}
+      </footer>
+    {/if}
   </div>
 </div>

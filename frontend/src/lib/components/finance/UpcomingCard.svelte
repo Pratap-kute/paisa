@@ -6,6 +6,7 @@
     totalRecurring
   } from "$lib/domain/transaction_sequence";
   import { formatCurrencyCrude, now, type TransactionSequence } from "$lib/core/utils";
+  import Badge from "$lib/components/ui/Badge.svelte";
 
   interface Props {
     transactionSequece: TransactionSequence;
@@ -20,9 +21,9 @@
 
 {#if schedule && n}
   <div class="has-text-centered mb-0">
-    <div class="is-size-7 paisa-truncate">{transactionSequece.key}</div>
+    <div class="is-size-7 paisa-truncate has-text-weight-medium">{transactionSequece.key}</div>
     <div class="my-1">
-      <span class="tag">{intervalText(transactionSequece)}</span>
+      <Badge variant="neutral" size="sm" rounded>{intervalText(transactionSequece)}</Badge>
     </div>
     <div class="has-text-grey is-size-7">
       <span class="icon has-text-grey-light">
@@ -47,8 +48,8 @@
             <i class="fas {icon.icon}"></i>
           </span>
         </div>
-        <span>{formatCurrencyCrude(totalRecurring(transactionSequece))}</span>
-        <span>due {n.fromNow()}</span>
+        <span class="has-text-weight-bold">{formatCurrencyCrude(totalRecurring(transactionSequece))}</span>
+        <span class="is-size-7">{n.isBefore(now()) ? 'past due' : `due ${n.fromNow()}`}</span>
       </div>
     </div>
   </div>

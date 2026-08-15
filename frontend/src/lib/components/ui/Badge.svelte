@@ -8,6 +8,7 @@
     variant?: BadgeVariant;
     size?: BadgeSize;
     rounded?: boolean;
+    dot?: boolean;
     class?: string;
     children?: Snippet;
   }
@@ -16,6 +17,7 @@
     variant = "neutral",
     size = "sm",
     rounded = false,
+    dot = false,
     class: className = "",
     children,
   }: Props = $props();
@@ -39,5 +41,18 @@
 <span
   class="tag {variantClasses[variant]} {sizeClasses[size]} {rounded ? 'is-rounded' : ''} {className}"
 >
+  {#if dot}
+    <span class="paisa-badge-dot mr-1" class:dot-success={variant === 'success'} class:dot-danger={variant === 'danger'} class:dot-warning={variant === 'warning'} class:dot-primary={variant === 'primary'}></span>
+  {/if}
   {@render children?.()}
 </span>
+
+<style>
+  .paisa-badge-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+</style>

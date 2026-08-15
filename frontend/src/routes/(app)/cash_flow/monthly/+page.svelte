@@ -34,7 +34,7 @@
 
 <section class="section">
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12">
         <div class="box">
           <ZeroState item={cashFlows}>

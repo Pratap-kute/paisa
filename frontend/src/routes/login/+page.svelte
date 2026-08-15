@@ -24,43 +24,41 @@
   }
 </script>
 
-<section class="section m-0 p-0">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 p-0">
-        <div class="is-flex is-justify-content-center is-align-items-center paisa-screen-height">
-          <div class="box px-5 paisa-width-80">
-            <div class="is-flex is-justify-content-center is-align-items-center mb-2">
-              <div class="mt-1 mr-1"><Logo size={32} /></div>
-              <div class="is-size-3">
-                <a href="https://paisa.fyi" class="is-primary-color">Paisa</a>
+<section class="section m-0 p-0 paisa-login-section">
+  <div class="container is-max-tablet">
+    <div class="columns is-centered">
+      <div class="column is-12-mobile is-8-tablet is-6-desktop">
+        <div class="box paisa-login-card">
+          <div class="paisa-login-brand">
+            <div class="mr-2"><Logo size={32} /></div>
+            <div class="is-size-3">
+              <a href="https://paisa.fyi" class="is-primary-color">Paisa</a>
+            </div>
+          </div>
+          <form onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
+            <div class="field">
+              <label for="username" class="label paisa-login-label">Username</label>
+              <div class="control">
+                <input id="username" class="input paisa-login-input" type="text" bind:value={username} />
               </div>
             </div>
-            <form onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
-              <div class="field">
-                <label for="" class="label">Username</label>
-                <div class="control">
-                  <input class="input" type="text" bind:value={username} />
-                </div>
-              </div>
 
-              <div class="field">
-                <label for="" class="label">Password</label>
-                <div class="control">
-                  <input class="input" type="password" bind:value={password} />
-                </div>
-                {#if invalid}
-                  <p class="help is-danger">{invalidErrorMessage}</p>
-                {/if}
+            <div class="field">
+              <label for="password" class="label paisa-login-label">Password</label>
+              <div class="control">
+                <input id="password" class="input paisa-login-input" type="password" bind:value={password} />
               </div>
+              {#if invalid}
+                <p class="help is-danger">{invalidErrorMessage}</p>
+              {/if}
+            </div>
 
-              <div class="field is-grouped is-grouped-right">
-                <div class="control">
-                  <button class="button is-link" disabled={loginDisabled}>Login</button>
-                </div>
+            <div class="field mt-5 mb-0">
+              <div class="control">
+                <button class="button is-primary paisa-login-button" disabled={loginDisabled}>Login</button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

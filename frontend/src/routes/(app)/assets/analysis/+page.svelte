@@ -75,7 +75,7 @@
 
 <section class="section tab-portfolio" class:is-hidden={isEmpty}>
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12 is-flex">
         {#each commodities as commodity}
           {@const name = `switch-${commodity}`}

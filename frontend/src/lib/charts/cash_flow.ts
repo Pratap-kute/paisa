@@ -10,6 +10,7 @@ import {
   rem,
   restName,
   skipTicks,
+  getColorPreference,
 } from "../core/utils";
 import * as d3 from "d3";
 import { sankeyCircular, sankeyJustify } from "d3-sankey-circular";
@@ -56,27 +57,32 @@ export function renderMonthlyFlow(
       "translate(" + margin.left + "," + margin.top + ")",
     );
 
+  const darkMode = getColorPreference() === "dark";
   const texture = textures
     .lines()
     .strokeWidth(1)
-    .size(4)
+    .size(darkMode ? 5 : 4)
     .orientation("vertical")
-    .background(chroma(COLORS.expenses).brighten(1.5).hex())
-    .stroke(COLORS.expenses);
+    .background(
+      darkMode
+        ? chroma(COLORS.expenses).darken(0.8).hex()
+        : chroma(COLORS.expenses).brighten(1.5).hex(),
+    )
+    .stroke(darkMode ? chroma(COLORS.expenses).brighten(0.2).hex() : COLORS.expenses);
   svg.call(texture);
 
   const areaKeys = ["income", "expenses", "liabilities", "tax", "investment"];
   const colors = [
-    COLORS.income,
-    COLORS.expenses,
-    COLORS.liabilities,
-    COLORS.expenses,
-    COLORS.assets,
+    darkMode ? chroma(COLORS.income).brighten(0.2).hex() : COLORS.income,
+    darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
+    darkMode ? chroma(COLORS.liabilities).brighten(0.15).hex() : COLORS.liabilities,
+    darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
+    darkMode ? chroma(COLORS.assets).brighten(0.15).hex() : COLORS.assets,
   ];
 
   const lineKeys = ["balance"];
   const lineScale = d3.scaleOrdinal<string>().domain(lineKeys).range([
-    COLORS.primary,
+    darkMode ? "#7dd3fc" : COLORS.primary,
   ]);
 
   const x = d3.scaleBand().range([0, width]).paddingInner(0.1),

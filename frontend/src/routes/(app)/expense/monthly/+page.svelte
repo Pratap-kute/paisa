@@ -171,7 +171,7 @@
           </div>
         </div>
       </div>
-      <div class="column is-9">
+      <div class="column is-12 is-7-desktop">
         <div class="columns is-flex-wrap-wrap">
           <div class="column is-4">
             <div class="p-3 box">

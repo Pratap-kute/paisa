@@ -3,22 +3,24 @@
 
   interface Props {
     id?: string;
+    name?: string;
     checked?: boolean;
     disabled?: boolean;
-    size?: "sm" | "md";
     label?: string;
-    color?: string;
+    description?: string;
+    class?: string;
     children?: Snippet;
     onchange?: (checked: boolean) => void;
   }
 
   let {
-    id = `switch-${Math.random().toString(36).substring(2, 9)}`,
+    id = `checkbox-${Math.random().toString(36).substring(2, 9)}`,
+    name,
     checked = $bindable(false),
     disabled = false,
-    size = "sm",
     label = "",
-    color = "",
+    description = "",
+    class: className = "",
     children,
     onchange,
   }: Props = $props();
@@ -30,32 +32,24 @@
   }
 </script>
 
-<div class="field mb-0 color-switch" style="--color: {color}">
+<label class="checkbox is-inline-flex is-align-items-start gap-2 {disabled ? 'is-disabled' : ''} {className}" for={id}>
   <input
     {id}
+    {name}
     type="checkbox"
-    class="switch is-rounded {size === 'sm' ? 'is-small' : ''}"
-    {checked}
+    bind:checked
     {disabled}
     onchange={handleChange}
+    class="mt-1"
   />
-  <label for={id}>
+  <div>
     {#if children}
       {@render children()}
-    {:else}
-      {label}
+    {:else if label}
+      <span class="has-text-weight-normal">{label}</span>
     {/if}
-  </label>
-</div>
-
-<style lang="scss">
-  .color-switch {
-    display: inline-flex;
-    align-items: center;
-
-    .switch[type="checkbox"]:checked + label::before,
-    .switch[type="checkbox"]:checked + label:before {
-      background: var(--color, var(--paisa-brand-primary, #3b82f6));
-    }
-  }
-</style>
+    {#if description}
+      <p class="help is-marginless has-text-grey">{description}</p>
+    {/if}
+  </div>
+</label>

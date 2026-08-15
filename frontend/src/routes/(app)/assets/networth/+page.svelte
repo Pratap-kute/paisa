@@ -58,7 +58,9 @@
 
 <section class="section tab-networth">
   <div class="container is-fluid">
-    <nav class="level {isMobile() && 'grid-2'}">
+    <div class="columns is-multiline is-variable is-2-desktop">
+      <div class="column is-12">
+        <nav class="level {isMobile() && 'grid-2'}">
       <LevelItem title="Net worth" color={COLORS.primary} value={formatCurrency(networth)} />
       <LevelItem
         title="Net Investment"
@@ -72,12 +74,14 @@
       />
       <LevelItem title="XIRR" value={formatFloat(xirr)} />
     </nav>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="section tab-networth">
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline">
       <div class="column is-12">
         <div class="box paisa-overflow-x-auto">
           <ZeroState item={points}>

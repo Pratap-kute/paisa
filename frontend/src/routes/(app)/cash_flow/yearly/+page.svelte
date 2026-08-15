@@ -73,7 +73,7 @@
 
 <section class="section paisa-pb-0">
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12">
         <div class="box paisa-overflow-x-auto">
           <ZeroState item={!isEmpty}

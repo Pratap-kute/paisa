@@ -12,6 +12,7 @@ import {
   now,
   svgUrl,
   tooltip,
+  getColorPreference,
 } from "../core/utils";
 
 function networth(d: Networth) {
@@ -28,6 +29,7 @@ export function renderNetworth(
 ): { destroy: () => void; legends: Legend[] } {
   const start = _.min(_.map(points, (p) => p.date)),
     end = now();
+  const darkMode = getColorPreference() === "dark";
 
   const svg = d3.select(element);
 
@@ -46,7 +48,10 @@ export function renderNetworth(
   svg.attr("width", width + margin.left + margin.right);
 
   const areaKeys = ["gain", "loss"];
-  const colors = [COLORS.gain, COLORS.loss];
+  const colors = [
+    darkMode ? "#22c55e" : COLORS.gain,
+    darkMode ? "#f87171" : COLORS.loss,
+  ];
   const areaScale = d3.scaleOrdinal<string>().domain(areaKeys).range(colors);
 
   const lineKeys = ["networth", "investment"];

@@ -79,7 +79,7 @@
 
 <section class="section tab-allocation" style={showAllocation ? "" : "display: none"}>
   <div class="container is-fluid">
-    <div class="columns">
+    <div class="columns is-multiline is-variable is-2-desktop">
       <div class="column is-12 has-text-centered">
         <div class="box paisa-overflow-x-auto">
           <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>

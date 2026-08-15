@@ -43,8 +43,8 @@
 </script>
 
 <section class="section">
-  <div class="container is-max-widescreen">
-    <div class="columns is-flex-wrap-wrap is-centered">
+  <div class="container is-fluid">
+    <div class="columns is-multiline is-variable is-2-desktop">
       {#if currentMonthBudget}
         <div class="column is-12">
           <nav class="level {isMobile() && 'grid-2'}">
@@ -70,7 +70,7 @@
           </nav>
         </div>
       {/if}
-      <div class="column is-10-desktop is-12-tablet">
+      <div class="column is-12">
         <ZeroState item={!isEmpty}>
           <strong>Oops!</strong> You haven't set a budget yet. Checkout the
           <a href={helpUrl("budget")}>docs</a> page to get started.

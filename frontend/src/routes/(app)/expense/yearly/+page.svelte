@@ -158,7 +158,7 @@
           <svg id="d3-current-year-breakdown" width="100%" />
         </div>
       </div>
-      <div class="column is-12">
+      <div class="column is-12 is-7-desktop">
         <div class="box">
           <ZeroState item={expenses}>
             <strong>Oops!</strong> You have no expenses.
