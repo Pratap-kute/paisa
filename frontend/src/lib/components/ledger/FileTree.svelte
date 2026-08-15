@@ -11,6 +11,7 @@
     selectedFileName: string;
     hasUnsavedChanges: boolean;
     root?: boolean;
+    onselect?: (file: LedgerFile | Directory) => void;
   }
 
   let {
@@ -18,10 +19,18 @@
     path,
     selectedFileName,
     hasUnsavedChanges,
-    root = true
+    root = true,
+    onselect
   }: Props = $props();
 
   const dispatch = createEventDispatcher();
+
+  function handleSelect(file: LedgerFile | Directory) {
+    if (onselect) {
+      onselect(file);
+    }
+    dispatch("select", file);
+  }
 
   function fileName(path: string) {
     return _.last(path.split("/"));
@@ -44,7 +53,7 @@
         <a
           href="#/"
           role="button"
-          onclick={(e) => { e.preventDefault(); dispatch("select", file); }}
+          onclick={(e) => { e.preventDefault(); handleSelect(file); }}
           class:is-active={file.name == selectedFileName}
         >
           <span class="icon is-small">

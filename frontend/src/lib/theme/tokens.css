@@ -1,0 +1,97 @@
+/**
+ * Paisa Design Tokens
+ * Centralized Design System tokens for light and dark themes
+ */
+
+:root {
+  /* Surface & Canvas */
+  --paisa-canvas-bg: #f8fafc;
+  --paisa-surface-bg: #ffffff;
+  --paisa-surface-hover: #f1f5f9;
+  --paisa-surface-active: #e2e8f0;
+  --paisa-surface-muted: #f8fafc;
+
+  /* Typography */
+  --paisa-font-sans: "Roboto Flex Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --paisa-font-mono: "Roboto Mono Variable", monospace;
+
+  /* Text Colors */
+  --paisa-text-primary: #0f172a;
+  --paisa-text-secondary: #475569;
+  --paisa-text-muted: #94a3b8;
+  --paisa-text-inverse: #ffffff;
+
+  /* Borders & Dividers */
+  --paisa-border-subtle: #f1f5f9;
+  --paisa-border-default: #e2e8f0;
+  --paisa-border-strong: #cbd5e1;
+
+  /* Brand & Accent */
+  --paisa-brand-primary: #3b82f6;
+  --paisa-brand-primary-hover: #2563eb;
+  --paisa-brand-primary-light: #eff6ff;
+  --paisa-brand-accent: #b388ff;
+
+  /* Status / Feedback */
+  --paisa-success: #16a34a;
+  --paisa-success-light: #f0fdf4;
+  --paisa-warning: #f59e0b;
+  --paisa-warning-light: #fffbeb;
+  --paisa-danger: #ef4444;
+  --paisa-danger-light: #fef2f2;
+  --paisa-info: #06b6d4;
+  --paisa-info-light: #ecfeff;
+
+  /* Radii & Shadows */
+  --paisa-radius-sm: 4px;
+  --paisa-radius-md: 6px;
+  --paisa-radius-lg: 8px;
+  --paisa-radius-full: 9999px;
+
+  --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --paisa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --paisa-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --paisa-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[data-theme="dark"] {
+  /* Dark Surface & Canvas */
+  --paisa-canvas-bg: #0b1120;
+  --paisa-surface-bg: #111827;
+  --paisa-surface-hover: #1f2937;
+  --paisa-surface-active: #374151;
+  --paisa-surface-muted: #1e293b;
+
+  /* Dark Text Colors */
+  --paisa-text-primary: #f8fafc;
+  --paisa-text-secondary: #cbd5e1;
+  --paisa-text-muted: #64748b;
+  --paisa-text-inverse: #0f172a;
+
+  /* Dark Borders & Dividers */
+  --paisa-border-subtle: #1e293b;
+  --paisa-border-default: #334155;
+  --paisa-border-strong: #475569;
+
+  /* Dark Brand & Accent */
+  --paisa-brand-primary: #60a5fa;
+  --paisa-brand-primary-hover: #93c5fd;
+  --paisa-brand-primary-light: rgba(59, 130, 246, 0.15);
+
+  /* Dark Status / Feedback */
+  --paisa-success: #22c55e;
+  --paisa-success-light: rgba(34, 197, 94, 0.15);
+  --paisa-warning: #fbbf24;
+  --paisa-warning-light: rgba(251, 191, 36, 0.15);
+  --paisa-danger: #f87171;
+  --paisa-danger-light: rgba(248, 113, 113, 0.15);
+  --paisa-info: #22d3ee;
+  --paisa-info-light: rgba(34, 211, 238, 0.15);
+
+  --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+  --paisa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+}

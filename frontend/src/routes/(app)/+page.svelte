@@ -152,56 +152,53 @@
 
 <section class="section tab-networth" class:is-hidden={isEmpty}>
   <div class="container is-fluid">
-    <div class="tile is-ancestor is-align-items-start">
-      <div class="tile is-4 is-vertical">
-        <div class="tile is-parent">
-          <div class="tile is-child">
+    <div class="columns is-desktop is-align-items-start">
+      <div class="column is-4-desktop is-12-tablet">
+        <div class="mb-5">
+          <div class="content">
+            <p class="subtitle">
+              <a class="secondary-link has-text-grey" href="/assets/networth">Assets</a>
+            </p>
             <div class="content">
-              <p class="subtitle">
-                <a class="secondary-link has-text-grey" href="/assets/networth">Assets</a>
-              </p>
-              <div class="content">
-                <div>
-                  {#if networth}
-                    <nav class="level grid-2">
-                      <LevelItem
-                        narrow
-                        title="Net worth"
-                        color={COLORS.primary}
-                        value={formatCurrency(networth.balanceAmount)}
-                      />
+              <div>
+                {#if networth}
+                  <nav class="level grid-2">
+                    <LevelItem
+                      narrow
+                      title="Net worth"
+                      color={COLORS.primary}
+                      value={formatCurrency(networth.balanceAmount)}
+                    />
 
-                      <LevelItem
-                        narrow
-                        title="Net Investment"
-                        color={COLORS.secondary}
-                        value={formatCurrency(networth.netInvestmentAmount)}
-                      />
-                    </nav>
-                    <nav class="level grid-2">
-                      <LevelItem
-                        narrow
-                        title="Gain / Loss"
-                        color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
-                        value={formatCurrency(networth.gainAmount)}
-                      />
+                    <LevelItem
+                      narrow
+                      title="Net Investment"
+                      color={COLORS.secondary}
+                      value={formatCurrency(networth.netInvestmentAmount)}
+                    />
+                  </nav>
+                  <nav class="level grid-2">
+                    <LevelItem
+                      narrow
+                      title="Gain / Loss"
+                      color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
+                      value={formatCurrency(networth.gainAmount)}
+                    />
 
-                      <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
-                    </nav>
-                  {/if}
-                </div>
+                    <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
+                  </nav>
+                {/if}
               </div>
             </div>
           </div>
         </div>
 
         {#if !_.isEmpty(checkingBalances)}
-          <div class="tile is-parent">
-            <article class="tile is-child">
+          <div class="mb-5">
+            <article>
               <div class="content">
                 <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/assets/balance">Checking Balance</a
-                  >
+                  <a class="secondary-link has-text-grey" href="/assets/balance">Checking Balance</a>
                 </p>
                 <div class="content">
                   <MasonryGrid gap={10} maxStretchColumnSize={400} align="stretch">
@@ -217,8 +214,8 @@
           </div>
         {/if}
 
-        <div class="tile is-parent">
-          <article class="tile is-child paisa-min-width-0">
+        <div class="mb-5">
+          <article class="paisa-min-width-0">
             <p class="subtitle">
               <a class="secondary-link has-text-grey" href="/cash_flow/monthly">Cash Flow</a>
             </p>
@@ -239,45 +236,41 @@
           </article>
         </div>
         {#if currentBudget}
-          <div class="tile is-parent">
-            <div class="tile is-child">
+          <div class="mb-5">
+            <div class="content">
+              <p class="subtitle">
+                <a class="secondary-link has-text-grey" href="/expense/budget">Budget</a>
+              </p>
               <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/expense/budget">Budget</a>
-                </p>
-                <div class="content">
-                  <div>
-                    {#each currentBudget.accounts as accountBudget (accountBudget)}
-                      <BudgetCard compact {accountBudget} />
-                    {/each}
-                  </div>
+                <div>
+                  {#each currentBudget.accounts as accountBudget (accountBudget)}
+                    <BudgetCard compact {accountBudget} />
+                  {/each}
                 </div>
               </div>
             </div>
           </div>
         {/if}
         {#if !_.isEmpty(goalSummaries)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
+          <div class="mb-5">
+            <article>
+              <div class="content">
+                <p class="subtitle">
+                  <a class="secondary-link has-text-grey" href="/more/goals">Goals</a>
+                </p>
                 <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/more/goals">Goals</a>
-                  </p>
-                  <div class="content">
-                    {#each goalSummaries as goal}
-                      <GoalSummaryCard {goal} small />
-                    {/each}
-                  </div>
+                  {#each goalSummaries as goal}
+                    <GoalSummaryCard {goal} small />
+                  {/each}
                 </div>
-              </article>
-            </div>
+              </div>
+            </article>
           </div>
         {/if}
       </div>
-      <div class="tile is-vertical">
-        <div class="tile is-parent is-12">
-          <article class="tile is-child">
+      <div class="column is-8-desktop is-12-tablet">
+        <div class="mb-5">
+          <article>
             <p class="subtitle is-flex is-justify-content-space-between is-align-items-end">
               <span
                 ><a class="secondary-link has-text-grey" href="/expense/monthly">Expenses</a>
@@ -296,51 +289,46 @@
           </article>
         </div>
         {#if !_.isEmpty(transactionSequences)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
-                <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/cash_flow/recurring">Recurring</a
-                    >
-                  </p>
-                  <div class="content box">
-                    <div
-                      class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
-                      style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
-                    >
-                      {#each transactionSequences as ts (ts)}
-                        <UpcomingCard transactionSequece={ts} />
-                      {/each}
-                    </div>
+          <div class="mb-5">
+            <article>
+              <div class="content">
+                <p class="subtitle">
+                  <a class="secondary-link has-text-grey" href="/cash_flow/recurring">Recurring</a>
+                </p>
+                <div class="content box">
+                  <div
+                    class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
+                    style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
+                  >
+                    {#each transactionSequences as ts (ts)}
+                      <UpcomingCard transactionSequece={ts} />
+                    {/each}
                   </div>
                 </div>
-              </article>
-            </div>
+              </div>
+            </article>
           </div>
         {/if}
         {#if !_.isEmpty(transactions)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
-                <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/ledger/transaction"
-                      >Recent Transactions</a
-                    >
-                  </p>
-                  <div>
-                    <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
-                      {#each _.take(transactions, 20) as t}
-                        <div class="mr-3 is-flex-grow-1">
-                          <TransactionCard {t} />
-                        </div>
-                      {/each}
-                    </MasonryGrid>
-                  </div>
+          <div class="mb-5">
+            <article>
+              <div class="content">
+                <p class="subtitle">
+                  <a class="secondary-link has-text-grey" href="/ledger/transaction"
+                    >Recent Transactions</a
+                  >
+                </p>
+                <div>
+                  <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
+                    {#each _.take(transactions, 20) as t}
+                      <div class="mr-3 is-flex-grow-1">
+                        <TransactionCard {t} />
+                      </div>
+                    {/each}
+                  </MasonryGrid>
                 </div>
-              </article>
-            </div>
+              </div>
+            </article>
           </div>
         {/if}
       </div>

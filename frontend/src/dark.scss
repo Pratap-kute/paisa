@@ -30,6 +30,18 @@ html[data-theme="dark"] {
 
   color-scheme: dark;
   --fa-border-color: hsl(0, 0%, 15%);
+  --bulma-scheme-main: #{$white-bis};
+  --bulma-body-background-color: #{$white-bis};
+  --bulma-box-background-color: #{$white};
+  --bulma-card-background-color: #{$white};
+  --bulma-navbar-background-color: #{$white-bis};
+  --bulma-text: #{$grey-darker};
+  --bulma-text-strong: #{$black};
+  --bulma-border: #{$grey-lightest};
+  --bulma-border-weak: #{$grey-lightest};
+  --bulma-link-light: #{rgba(59, 130, 246, 0.15)};
+  --bulma-link-dark: #60a5fa;
+
   background: $white-bis;
   background-image: radial-gradient(rgba($grey-light, 0.15) 1px, $white-bis 1px);
 

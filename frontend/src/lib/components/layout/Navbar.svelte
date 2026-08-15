@@ -18,6 +18,7 @@
   import MonthPicker from "$lib/components/ui/MonthPicker.svelte";
   import Logo from "./Logo.svelte";
   import InputRange from "$lib/components/ui/InputRange.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
   interface Props {
     isBurger?: boolean;
   }
@@ -298,10 +299,9 @@
         <div class="field is-grouped">
           {#if readonly}
             <p class="control">
-              <span
-                class="mt-1 tag is-rounded is-danger is-light invertable"
-                data-tippy-content="<p>Paisa is in readonly mode</p>">readonly</span
-              >
+              <span data-tippy-content="<p>Paisa is in readonly mode</p>">
+                <Badge variant="danger" rounded class="mt-1">readonly</Badge>
+              </span>
             </p>
           {/if}
 
@@ -336,9 +336,7 @@
           {/if}
 
           {#if selectedLink.tag}
-            <span style="font-size: 0.6rem" class="tag is-rounded is-warning"
-              >{selectedLink.tag}</span
-            >
+            <Badge variant="warning" rounded class="is-small">{selectedLink.tag}</Badge>
           {/if}
         </li>
         {#if selectedSubLink}
@@ -354,9 +352,7 @@
             {/if}
 
             {#if selectedSubLink.tag}
-              <span style="font-size: 0.6rem" class="tag is-rounded is-warning mr-2"
-                >{selectedSubLink.tag}</span
-              >
+              <Badge variant="warning" rounded class="is-small mr-2">{selectedSubLink.tag}</Badge>
             {/if}
           </li>
         {/if}

@@ -18,10 +18,13 @@
   }
 
   const obscureId = "obscure";
-  let last = $obscure;
-  obscure.subscribe(() => {
-    if ($obscure === last) return;
-
+  let initialized = false;
+  $effect(() => {
+    const isObscured = $obscure;
+    if (!initialized) {
+      initialized = true;
+      return;
+    }
     refresh();
   });
 

@@ -8,17 +8,26 @@
     help?: string;
     placeholder?: string;
     open?: boolean;
+    onsave?: (filename: string) => void;
   }
 
   let {
     label = "Save As",
     help = "Create or overwrite existing file",
     placeholder = "expense.ledger",
-    open = $bindable(false)
+    open = $bindable(false),
+    onsave
   }: Props = $props();
   let destinationFile = $state("");
 
   const dispatch = createEventDispatcher();
+
+  function handleSave(e: Event) {
+    if (onsave) {
+      onsave(destinationFile);
+    }
+    dispatch("save", destinationFile);
+  }
 </script>
 
 <Modal bind:active={open}>
@@ -42,7 +51,7 @@
       <button
         class="button is-success"
         disabled={_.isEmpty(destinationFile)}
-        onclick={(e) => dispatch("save", destinationFile) && close(e)}>{label}</button
+        onclick={(e) => { handleSave(e); close(e); }}>{label}</button
       >
       <button class="button" onclick={(e) => close(e)}>Cancel</button>
     
