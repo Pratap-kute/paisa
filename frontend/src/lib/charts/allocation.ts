@@ -36,10 +36,7 @@ export function renderAllocationTarget(
 
   const svg = d3.select(id),
     margin = { top: rem(20), right: rem(20), bottom: rem(10), left: rem(150) },
-    fullWidth = Math.max(
-      el.parentElement.clientWidth,
-      1000,
-    ),
+    fullWidth = el.parentElement.clientWidth,
     width = fullWidth - margin.left - margin.right,
     height = allocationTargets.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
@@ -75,10 +72,13 @@ export function renderAllocationTarget(
     .flatMap((t) => [t.current, t.target])
     .max()
     .value();
-  const targetWidth = rem(400);
-  const targetMargin = rem(20);
+  const hasTreemap = _.some(allocationTargets, (t) => !_.isEmpty(t.aggregates));
   const textGroupWidth = rem(150);
-  const textGroupMargin = rem(20);
+  const targetMargin = rem(15);
+  const textGroupMargin = rem(15);
+  const targetWidth = hasTreemap
+    ? Math.max(rem(300), Math.round((width - textGroupWidth - targetMargin - textGroupMargin) * 0.5))
+    : Math.max(rem(300), width - textGroupWidth - targetMargin);
   const textGroupZero = targetWidth + targetMargin;
 
   const x = d3.scaleLinear().range([
@@ -123,7 +123,7 @@ export function renderAllocationTarget(
       d3
         .axisBottom(x1)
         .tickSize(-height)
-        .tickFormat(skipTicks(40, x, (n: number) => formatFloat(n, 0))),
+        .tickFormat(skipTicks(40, x1, (n: number) => formatFloat(n, 0))),
     );
 
   g.append("g").attr("class", "axis y dark").call(d3.axisLeft(y));

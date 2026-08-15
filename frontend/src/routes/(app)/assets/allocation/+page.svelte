@@ -88,7 +88,7 @@
 
   {#if showAllocation}
     <Section title="Allocation Targets">
-      <ChartFrame type="distribution">
+      <ChartFrame type="dynamic">
         <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-allocation-target" />
       </ChartFrame>
