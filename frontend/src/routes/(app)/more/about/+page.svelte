@@ -38,10 +38,10 @@
 </script>
 
 <section class="section">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <Card padding="sm" class="has-text-centered mx-auto paisa-max-width-400">
+  <div class="container is-max-tablet">
+    <div class="columns is-centered">
+      <div class="column is-10-tablet is-8-desktop">
+        <Card padding="sm" class="has-text-centered">
           <div><Logo size={128} /></div>
           <div class="is-size-3 is-primary-color">Paisa</div>
           <div>
@@ -49,7 +49,7 @@
           </div>
         </Card>
 
-        <Card padding="sm" class="mx-auto paisa-max-width-400">
+        <Card padding="sm">
           <h3 class="is-size-5 mb-1">Links</h3>
           <ul>
             {#each links as link}

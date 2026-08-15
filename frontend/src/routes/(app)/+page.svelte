@@ -104,11 +104,11 @@
 </script>
 
 <section class="section" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
+  <div class="container is-max-tablet">
     <div class="columns">
       <div class="column is-12">
         <ZeroState item={!isEmpty}>
-          <div class="has-text-left paisa-max-width-640">
+          <div class="has-text-left">
             <p class="mb-2">
               Looks like you are new here, you can either get started or look at a demo setup
             </p>
@@ -296,10 +296,7 @@
                   <a class="secondary-link has-text-grey" href="/cash_flow/recurring">Recurring</a>
                 </p>
                 <div class="content box">
-                  <div
-                    class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
-                    style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
-                  >
+                  <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
                     {#each transactionSequences as ts (ts)}
                       <UpcomingCard transactionSequece={ts} />
                     {/each}

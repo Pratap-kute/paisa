@@ -58,10 +58,7 @@
     >
       {iconify(restName(accountBudget.account), { group: firstName(accountBudget.account) })}
     </div>
-    <div
-      class="is-flex is-justify-content-flex-end mr-2 is-align-items-center"
-      style="min-width: fit-content"
-    >
+    <div class="is-flex is-justify-content-flex-end mr-2 is-align-items-center paisa-nowrap">
       {#if !compact}
         <div class="mr-3">
           <span class="budget-label mr-1">Budget</span>

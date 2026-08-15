@@ -148,7 +148,7 @@
       {#if incomeStatement}
         <div class="column is-12">
           <div class="box py-2 my-0 paisa-overflow-x-auto">
-            <div class="is-flex mr-2 is-align-items-baseline" style="min-width: fit-content">
+            <div class="is-flex mr-2 is-align-items-baseline paisa-nowrap">
               <div class="ml-3 custom-icon is-size-5 paisa-nowrap">
                 {$year}
               </div>
@@ -193,7 +193,7 @@
   <div class="container is-fluid">
     <div class="columns">
       <div class="column is-12 pb-0">
-        <div class="box pt-0 paisa-overflow-x-auto paisa-max-screen-height paisa-max-width-fit">
+        <div class="box pt-0 paisa-overflow-x-auto paisa-max-screen-height">
           <table
             class="table is-narrow is-hoverable is-light-border has-sticky-header has-sticky-column"
           >

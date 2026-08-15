@@ -25,7 +25,7 @@
 </script>
 
 <section class="section tab-schedule_al">
-  <div class="container is-fluid">
+  <div class="container is-max-desktop">
     {#if selectedScheduleAl}
       <div class="columns">
         <div class="column is-12">
@@ -40,7 +40,7 @@
 
     <div class="columns">
       <div class="column is-12">
-        <div class="box px-3 paisa-max-width-1024">
+        <div class="box px-3">
           <table class="table is-narrow is-fullwidth is-hoverable">
             <thead>
               <tr>

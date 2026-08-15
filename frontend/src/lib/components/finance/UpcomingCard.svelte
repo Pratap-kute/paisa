@@ -19,7 +19,7 @@
 </script>
 
 {#if schedule && n}
-  <div class="has-text-centered mb-0 mr-3 paisa-max-width-200">
+  <div class="has-text-centered mb-0">
     <div class="is-size-7 paisa-truncate">{transactionSequece.key}</div>
     <div class="my-1">
       <span class="tag">{intervalText(transactionSequece)}</span>

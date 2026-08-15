@@ -186,7 +186,7 @@
             </div>
           </div>
           <div class="column is-8">
-            <div class="px-3 box" style="height: 100%">
+            <div class="px-3 box paisa-full-height">
               <ZeroState item={grouped_expenses?.[$month]}>
                 <strong>Hurray!</strong> You have no expenses this month.
               </ZeroState>

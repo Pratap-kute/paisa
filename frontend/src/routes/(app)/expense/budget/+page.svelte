@@ -43,7 +43,7 @@
 </script>
 
 <section class="section">
-  <div class="container is-fluid">
+  <div class="container is-max-widescreen">
     <div class="columns is-flex-wrap-wrap is-centered">
       {#if currentMonthBudget}
         <div class="column is-12">
@@ -70,19 +70,15 @@
           </nav>
         </div>
       {/if}
-      <div class="column">
-        <div class="is-flex">
-          <div class="paisa-container-budget">
-            <ZeroState item={!isEmpty}>
-              <strong>Oops!</strong> You haven't set a budget yet. Checkout the
-              <a href={helpUrl("budget")}>docs</a> page to get started.
-            </ZeroState>
+      <div class="column is-10-desktop is-12-tablet">
+        <ZeroState item={!isEmpty}>
+          <strong>Oops!</strong> You haven't set a budget yet. Checkout the
+          <a href={helpUrl("budget")}>docs</a> page to get started.
+        </ZeroState>
 
-            {#each currentMonthAccountBudgets as accountBudget (accountBudget)}
-              <BudgetCard {accountBudget} />
-            {/each}
-          </div>
-        </div>
+        {#each currentMonthAccountBudgets as accountBudget (accountBudget)}
+          <BudgetCard {accountBudget} />
+        {/each}
       </div>
     </div>
   </div>

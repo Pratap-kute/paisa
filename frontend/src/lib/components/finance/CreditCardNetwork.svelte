@@ -13,7 +13,7 @@
 </script>
 
 {#if name == "visa"}
-  <div style="margin: -{size / 2.9}px 0">
+  <div class="credit-card-network-logo">
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
       ><path
         fill="currentColor"
@@ -24,7 +24,7 @@
 {/if}
 
 {#if name == "mastercard"}
-  <div style="margin: -{size / 2.8}px 0">
+  <div class="credit-card-network-logo">
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
       ><path
         fill="currentColor"
@@ -39,7 +39,7 @@
 {/if}
 
 {#if name == "dinersclub"}
-  <div style="margin: -{size / 6}px 0">
+  <div class="credit-card-network-logo">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size * 0.65}
@@ -54,7 +54,7 @@
 {/if}
 
 {#if name == "amex"}
-  <div style="margin: -{size / 2.1}px 0">
+  <div class="credit-card-network-logo">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size * 1.2}
@@ -70,7 +70,7 @@
 {/if}
 
 {#if name == "rupay"}
-  <div style="margin: -{size / 1.9}px -{size * 1.7}px">
+  <div class="credit-card-network-logo">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 333334 199007"
@@ -93,7 +93,7 @@
 {/if}
 
 {#if name == "jcb"}
-  <div style="margin: -{size / 2.6}px 0">
+  <div class="credit-card-network-logo">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size * multiplier}
@@ -108,7 +108,7 @@
 {/if}
 
 {#if name == "discover"}
-  <div style="margin: -{size / 1.4}px 0">
+  <div class="credit-card-network-logo">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={size * multiplier}

@@ -151,7 +151,7 @@
         </div>
       </div>
       <div class="column is-full-tablet is-half-fullhd">
-        <div class="px-3 box" style="height: 100%">
+        <div class="px-3 box paisa-full-height">
           <ZeroState item={currentYearExpenses}>
             <strong>Hurray!</strong> You have no expenses this year.
           </ZeroState>

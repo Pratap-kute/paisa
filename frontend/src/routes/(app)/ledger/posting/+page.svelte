@@ -92,8 +92,8 @@
     </div>
     <div class="columns">
       <div class="column is-12">
-        <div class="box paisa-overflow-x-auto" style="max-width: 98rem;">
-          <div style="width: 98rem;">
+        <div class="box paisa-posting-table-container">
+          <div class="paisa-posting-table">
             <div
               class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline has-text-weight-bold"
             >

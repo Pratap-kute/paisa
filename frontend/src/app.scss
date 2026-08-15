@@ -546,10 +546,6 @@ $footerActiveColor: #d00;
   min-width: 0;
 }
 
-.paisa-max-width-fit {
-  max-width: fit-content;
-}
-
 .paisa-clickable {
   cursor: pointer;
 }
@@ -583,12 +579,20 @@ $footerActiveColor: #d00;
   gap: 0.5rem;
 }
 
+.gap-3 {
+  gap: var(--paisa-space-3, 0.75rem);
+}
+
 .gap-4 {
   gap: 1rem;
 }
 
 .gap-5 {
   gap: 1.25rem;
+}
+
+.paisa-full-height {
+  height: 100%;
 }
 
 .paisa-p-1-5 {
@@ -607,35 +611,41 @@ $footerActiveColor: #d00;
   margin-bottom: 3rem !important;
 }
 
-.paisa-width-80 {
-  width: 20rem;
+.paisa-postings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--paisa-space-1, 0.25rem);
+  margin: var(--paisa-space-1, 0.25rem) 0;
 }
 
-.paisa-max-width-400 {
-  max-width: 400px;
+.paisa-postings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: var(--paisa-space-2, 0.5rem);
 }
 
-.paisa-max-width-640 {
-  max-width: 640px;
-}
-
-.paisa-max-width-800 {
-  max-width: 800px;
-}
-
-.paisa-max-width-1024 {
-  max-width: 1024px;
-}
-
-.paisa-container-budget {
-  max-width: 800px;
-  min-width: 350px;
+.paisa-posting-table-container {
+  overflow-x: auto;
   width: 100%;
-  margin: 0 auto;
 }
 
-.paisa-max-width-200 {
-  max-width: 200px;
+.paisa-posting-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.paisa-dashboard-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--paisa-card-min-width, 130px), 1fr));
+  gap: var(--paisa-grid-gap, 0.75rem);
+}
+
+.paisa-dashboard-recurring-grid {
+  display: grid;
+  grid-auto-rows: 0px;
+  grid-template-columns: repeat(auto-fit, minmax(var(--paisa-card-min-width, 130px), var(--paisa-card-max-width, 150px)));
+  gap: var(--paisa-grid-gap, 0.75rem);
 }
 
 @media screen and (min-width: 769px) {
@@ -1827,6 +1837,15 @@ div.is-hoverable:hover {
     $grey 100%
   );
 
+  .credit-card-chip {
+    margin: 2.25rem 0 0 1rem;
+  }
+
+  .credit-card-valid-thru {
+    font-size: 0.5rem;
+    line-height: 1;
+  }
+
   .chip {
     color: $amber-700;
   }
@@ -1834,4 +1853,11 @@ div.is-hoverable:hover {
   .nfc {
     color: $black;
   }
+}
+
+.credit-card-network-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
