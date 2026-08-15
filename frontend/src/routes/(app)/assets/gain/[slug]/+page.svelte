@@ -20,8 +20,12 @@
   import PostingCard from "$lib/components/transactions/PostingCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import { iconify } from "$lib/core/icon";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -120,145 +124,204 @@
   });
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-3">
-        <div class="columns is-flex-wrap-wrap">
-          {#if overview}
-            <div class="column is-full">
-              <div>
-                <nav class="level grid-2">
-                  <LevelItem
-                    narrow
-                    title="Balance"
-                    color={COLORS.primary}
-                    value={formatCurrency(overview.balanceAmount)}
-                  />
-                  <LevelItem
-                    narrow
-                    title="Net Investment"
-                    color={COLORS.secondary}
-                    value={formatCurrency(overview.netInvestmentAmount)}
-                  />
-                </nav>
-              </div>
-            </div>
-            <div class="column is-full">
-              <div>
-                <nav class="level grid-2">
-                  <LevelItem
-                    narrow
-                    title="Gain / Loss"
-                    color={overview.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
-                    value={formatCurrency(overview.gainAmount)}
-                  />
+<Page width="fluid">
+  <PageHeader
+    title={data.name || "Asset Gain"}
+    description="Account performance, asset allocation, and transaction history"
+  />
 
-                  <LevelItem
-                    narrow
-                    title="XIRR"
-                    value={formatFloat(gain.xirr)}
-                    subtitle="{formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return"
-                  />
-                </nav>
-              </div>
+  <div class="paisa-gain-slug-layout">
+    <!-- Side Context Panel: Metrics + Postings -->
+    <div class="paisa-gain-slug-side">
+      {#if overview}
+        <Section title="Overview">
+          <MetricStrip cols={2}>
+            <LevelItem
+              narrow
+              title="Balance"
+              value={formatCurrency(overview.balanceAmount)}
+            />
+            <LevelItem
+              narrow
+              title="Net Investment"
+              value={formatCurrency(overview.netInvestmentAmount)}
+            />
+            <LevelItem
+              narrow
+              title="Gain / Loss"
+              color={overview.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
+              value={formatCurrency(overview.gainAmount)}
+            />
+            <LevelItem
+              narrow
+              title="XIRR"
+              value={formatFloat(gain.xirr)}
+              subtitle={assetBreakdown ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return` : ""}
+            />
+          </MetricStrip>
+        </Section>
+      {/if}
+
+      <Section title="Postings">
+        <div class="paisa-postings-list">
+          {#each postings as posting}
+            <PostingCard
+              {posting}
+              color={posting.amount >= 0
+                ? posting.account.startsWith("Income:CapitalGains")
+                  ? COLORS.loss
+                  : COLORS.secondary
+                : posting.account.startsWith("Income:CapitalGains")
+                  ? COLORS.gain
+                  : COLORS.tertiary}
+            />
+          {/each}
+        </div>
+      </Section>
+    </div>
+
+    <!-- Main Analysis Panel: Timeline + Portfolio breakdown -->
+    <div class="paisa-gain-slug-main">
+      {#if overview}
+        <Section>
+          <div class="paisa-gain-snapshot-bar">
+            <span class="custom-icon is-size-5">{iconify(data.name)}</span>
+            <div class="paisa-gain-meta-item">
+              <span class="paisa-gain-meta-label">Investment</span>
+              <span class="has-text-weight-bold">{formatCurrency(overview.investmentAmount)}</span>
             </div>
+            <div class="paisa-gain-meta-item">
+              <span class="paisa-gain-meta-label">Withdrawal</span>
+              <span class="has-text-weight-bold">{formatCurrency(overview.withdrawalAmount)}</span>
+            </div>
+            {#if overview.balanceUnits > 0}
+              <div class="paisa-gain-meta-item">
+                <span class="paisa-gain-meta-label">Balance Units</span>
+                <span class="has-text-weight-bold">{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span>
+              </div>
+            {/if}
+          </div>
+        </Section>
+      {/if}
+
+      <Section title="Timeline">
+        <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+        <ChartFrame type="timeline">
+          <svg id="d3-account-timeline-breakdown" width="100%" height="450" />
+        </ChartFrame>
+      </Section>
+
+      <div class="paisa-portfolio-breakdown-grid">
+        <div class="paisa-portfolio-sub-charts">
+          {#if !securityTypeEmpty}
+            <Section title="Security Type">
+              <ChartFrame type="distribution">
+                <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
+                <svg id="d3-portfolio-security-type" width="100%" />
+              </ChartFrame>
+            </Section>
           {/if}
 
-          <div class="column is-full">
-            Postings
-            {#each postings as posting}
-              <PostingCard
-                {posting}
-                color={posting.amount >= 0
-                  ? posting.account.startsWith("Income:CapitalGains")
-                    ? COLORS.loss
-                    : COLORS.secondary
-                  : posting.account.startsWith("Income:CapitalGains")
-                    ? COLORS.gain
-                    : COLORS.tertiary}
-              />
-            {/each}
-          </div>
-        </div>
-      </div>
-      <div class="column is-9">
-        {#if overview}
-          <div class="box py-2 mb-4 mt-0">
-            <div class="is-flex mr-2 is-align-items-baseline" style="min-width: fit-content">
-              <div class="ml-3 custom-icon is-size-5">
-                <span>{iconify(data.name)}</span>
-              </div>
-              <div class="ml-3">
-                <span class="mr-1 is-size-7 has-text-grey">Investment</span>
-                <span class="has-text-weight-bold">{formatCurrency(overview.investmentAmount)}</span
-                >
-              </div>
-              <div class="ml-3">
-                <span class="mr-1 is-size-7 has-text-grey">Withdrawal</span>
-                <span class="has-text-weight-bold">{formatCurrency(overview.withdrawalAmount)}</span
-                >
-              </div>
-              {#if overview.balanceUnits > 0}
-                <div class="ml-3">
-                  <span class="mr-1 is-size-7 has-text-grey">Balance Units</span>
-                  <span class="has-text-weight-bold"
-                    >{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span
-                  >
-                </div>
-              {/if}
-            </div>
-          </div>
-        {/if}
-        <LegendCard {legends} clazz="mb-2" />
-        <div class="box">
-          <svg id="d3-account-timeline-breakdown" width="100%" height="450" />
-        </div>
-        <BoxLabel text="Timeline" />
-
-        <div class="columns">
-          <div class="column is-6">
-            <div class="mt-5" class:is-hidden={securityTypeEmpty}>
-              <div class="box paisa-overflow-x-auto">
-                <div
-                  id="d3-portfolio-security-type-treemap"
-                  style="width: 100%; position: relative"></div>
-                <svg id="d3-portfolio-security-type" width="100%" />
-              </div>
-              <BoxLabel text="Security Type" />
-            </div>
-
-            <div class="mt-5" class:is-hidden={ratingEmpty}>
-              <div class="box paisa-overflow-x-auto">
-                <div
-                  id="d3-portfolio-security-rating-treemap"
-                  style="width: 100%; position: relative"></div>
+          {#if !ratingEmpty}
+            <Section title="Security Rating">
+              <ChartFrame type="distribution">
+                <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio-security-rating" width="100%" />
-              </div>
-              <BoxLabel text="Security Rating" />
-            </div>
+              </ChartFrame>
+            </Section>
+          {/if}
 
-            <div class="mt-5" class:is-hidden={industryEmpty}>
-              <div class="box paisa-overflow-x-auto">
-                <div
-                  id="d3-portfolio-security-industry-treemap"
-                  style="width: 100%; position: relative"></div>
+          {#if !industryEmpty}
+            <Section title="Industry">
+              <ChartFrame type="distribution">
+                <div id="d3-portfolio-security-industry-treemap" style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio-security-industry" width="100%" />
-              </div>
-              <BoxLabel text="Industry" />
-            </div>
-          </div>
-          <div class="column is-6 mt-5">
-            <div class:is-hidden={nameAndSecurityTypeEmpty}>
-              <div class="box paisa-overflow-x-auto">
+              </ChartFrame>
+            </Section>
+          {/if}
+        </div>
+
+        {#if !nameAndSecurityTypeEmpty}
+          <div class="paisa-portfolio-security-chart">
+            <Section title="Security">
+              <ChartFrame type="distribution">
                 <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
                 <svg id="d3-portfolio" width="100%" />
-              </div>
-              <BoxLabel text="Security" />
-            </div>
+              </ChartFrame>
+            </Section>
           </div>
-        </div>
+        {/if}
       </div>
     </div>
   </div>
-</section>
+</Page>
+
+<style lang="scss">
+  .paisa-gain-slug-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-5);
+    width: 100%;
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(280px, 1fr) minmax(0, 3fr);
+    }
+  }
+
+  .paisa-gain-slug-side,
+  .paisa-gain-slug-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+
+  .paisa-postings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-2);
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+
+    @media screen and (max-width: 1023px) {
+      max-height: 400px;
+    }
+  }
+
+  .paisa-gain-snapshot-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-4);
+    padding: var(--paisa-space-3) var(--paisa-space-4);
+    background: var(--paisa-surface-card);
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md);
+    flex-wrap: wrap;
+  }
+
+  .paisa-gain-meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--paisa-space-2);
+  }
+
+  .paisa-gain-meta-label {
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-muted);
+  }
+
+  .paisa-portfolio-breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-4);
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .paisa-portfolio-sub-charts,
+  .paisa-portfolio-security-chart {
+    min-width: 0;
+  }
+</style>

@@ -5,6 +5,9 @@
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let legends: Legend[] = $state([]);
 
@@ -16,23 +19,17 @@
   });
 </script>
 
-<section class="section tab-gain">
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <LegendCard {legends} clazz="ml-4" />
-          <svg id="d3-gain-overview" />
-        </div>
-      </div>
+<Page width="analysis">
+  <Section title="Gain Overview">
+    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="category">
+      <svg id="d3-gain-overview" />
+    </ChartFrame>
+  </Section>
+
+  <Section>
+    <div class="d3-gain-timeline-breakdown">
+      <div id="d3-gain-timeline-breakdown"></div>
     </div>
-    <BoxLabel text="Gain Overview" />
-  </div>
-</section>
-<section class="section tab-gain">
-  <div class="container is-fluid d3-gain-timeline-breakdown">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div id="d3-gain-timeline-breakdown" class="column is-12"></div>
-    </div>
-  </div>
-</section>
+  </Section>
+</Page>

@@ -5,7 +5,6 @@
     renderAllocationTimeline
   } from "$lib/charts/allocation";
   import COLORS, { generateColorScheme } from "$lib/core/colors";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
@@ -13,6 +12,10 @@
   import _ from "lodash";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let showAllocation = $state(false);
   let depth = $state(2);
@@ -77,59 +80,37 @@
   });
 </script>
 
-<section class="section tab-allocation" style={showAllocation ? "" : "display: none"}>
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
-          <svg id="d3-allocation-target" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation Targets" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px"></div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation by category" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-value" style="width: 100%; height: 300px"></div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation by value" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box">
-          <LegendCard legends={allocationTimelineLegends} clazz="ml-4" />
-          <svg id="d3-allocation-timeline" width="100%" height="300" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation Timeline" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <Table data={aggregateLeafNodes} tree {columns} />
-      </div>
-    </div>
-    <BoxLabel text="Allocation Table" />
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Asset Allocation"
+    description="Asset class distribution, targets, and historical allocation"
+  />
+
+  {#if showAllocation}
+    <Section title="Allocation Targets">
+      <ChartFrame type="distribution">
+        <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
+        <svg id="d3-allocation-target" />
+      </ChartFrame>
+    </Section>
+  {/if}
+
+  <Section title="Allocation by category">
+    <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px"></div>
+  </Section>
+
+  <Section title="Allocation by value">
+    <div id="d3-allocation-value" style="width: 100%; height: 300px"></div>
+  </Section>
+
+  <Section title="Allocation Timeline">
+    <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline">
+      <svg id="d3-allocation-timeline" width="100%" height="300" />
+    </ChartFrame>
+  </Section>
+
+  <Section title="Allocation Table">
+    <Table data={aggregateLeafNodes} tree {columns} />
+  </Section>
+</Page>

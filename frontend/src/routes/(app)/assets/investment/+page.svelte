@@ -1,5 +1,4 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     renderMonthlyInvestmentTimeline,
@@ -9,6 +8,10 @@
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
   let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
@@ -21,32 +24,45 @@
   });
 </script>
 
-<section class="section tab-investment">
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12">
-        <div class="box">
-          <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="ml-4" />
-          <svg id="d3-investment-timeline" width="100%" height="500" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Monthly Investment Timeline" />
-  </div>
-</section>
-<section class="section tab-investment">
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12 is-6-desktop">
-        <div class="box px-2">
-          <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="ml-4" />
+<Page width="analysis">
+  <PageHeader
+    title="Investment"
+    description="Monthly and yearly investment timeline breakdowns"
+  />
+
+  <Section title="Monthly Investment Timeline">
+    <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline">
+      <svg id="d3-investment-timeline" width="100%" height="500" />
+    </ChartFrame>
+  </Section>
+
+  <Section title="Financial Year Investment">
+    <div class="paisa-investment-yearly-layout">
+      <div class="paisa-investment-yearly-chart">
+        <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+        <ChartFrame type="timeline">
           <svg id="d3-yearly-investment-timeline" width="100%" />
-        </div>
-        <BoxLabel text="Financial Year Investment Timeline" />
+        </ChartFrame>
       </div>
-      <div class="column is-12 is-6-desktop">
-        <div class="columns is-multiline" id="d3-yearly-investment-cards"></div>
-      </div>
+      <div id="d3-yearly-investment-cards" class="paisa-investment-yearly-cards"></div>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>
+
+<style lang="scss">
+  .paisa-investment-yearly-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-4);
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .paisa-investment-yearly-chart,
+  .paisa-investment-yearly-cards {
+    min-width: 0;
+  }
+</style>
