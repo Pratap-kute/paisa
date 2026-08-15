@@ -2,15 +2,15 @@ import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import ChartFrame from "./ChartFrame.svelte";
 
-test("renders chart frame with semantic size class", () => {
+test("renders chart frame with semantic type and size class", () => {
   const { container, unmount } = render(ChartFrame, {
-    size: "compact",
+    type: "timeline",
     title: "Monthly Cash Flow",
   });
 
   const frame = container.querySelector(".paisa-chart-frame");
   expect(frame).toBeInTheDocument();
-  expect(frame).toHaveClass("paisa-chart-compact");
+  expect(frame).toHaveClass("paisa-chart-type-timeline");
   expect(container.querySelector(".paisa-chart-frame-title")).toHaveTextContent("Monthly Cash Flow");
   unmount();
 });

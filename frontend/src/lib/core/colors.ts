@@ -5,6 +5,7 @@
 export {
   MaterialUI,
   chartColors,
+  financialColors,
   default,
   generateColorScheme,
   genericBarColor,

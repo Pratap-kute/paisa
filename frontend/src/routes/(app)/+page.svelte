@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as cashFlow from "$lib/charts/cash_flow";
-  import COLORS from "$lib/core/colors";
+  import { financialColors } from "$lib/theme/chartPalette";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
   import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
   import * as expense from "$lib/charts/expense/monthly";
@@ -36,6 +36,7 @@
   import Section from "$lib/components/layout/Section.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let cashflowLegends: Legend[] = $state([]);
@@ -147,144 +148,160 @@
   </Page>
 {:else}
   <Page width="fluid">
-    <div class="columns is-multiline is-variable is-3-desktop is-align-items-start">
-      <!-- Left Column: Summary, Checking, Cash Flow, Budget, Goals -->
-      <div class="column is-12 is-5-desktop">
-        <Section title="Assets" titleHref="/assets/networth">
-          <div>
-            {#if networth}
-              <div class="paisa-metric-grid mb-3">
-                <LevelItem
-                  narrow
-                  title="Net worth"
-                  color={COLORS.primary}
-                  value={formatCurrency(networth.balanceAmount)}
-                />
+    <!-- Row 1: Primary Financial KPIs -->
+    {#if networth}
+      <Section title="Assets" titleHref="/assets/networth">
+        <MetricStrip cols={4}>
+          <LevelItem
+            narrow
+            title="Net worth"
+            value={formatCurrency(networth.balanceAmount)}
+          />
+          <LevelItem
+            narrow
+            title="Net Investment"
+            value={formatCurrency(networth.netInvestmentAmount)}
+          />
+          <LevelItem
+            narrow
+            title="Gain / Loss"
+            color={networth.gainAmount >= 0 ? financialColors.gainText : financialColors.lossText}
+            value={formatCurrency(networth.gainAmount)}
+          />
+          <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
+        </MetricStrip>
+      </Section>
+    {/if}
 
-                <LevelItem
-                  narrow
-                  title="Net Investment"
-                  color={COLORS.secondary}
-                  value={formatCurrency(networth.netInvestmentAmount)}
-                />
+    <!-- Row 1B: Checking Balance Snapshot -->
+    {#if !_.isEmpty(checkingBalances)}
+      <Section title="Checking Balance" titleHref="/assets/balance">
+        <ResponsiveGrid cols="auto-fit" minColWidth="160px" gap={2}>
+          {#each _.values(checkingBalances) as assetBreakdown}
+            <BalanceCard {assetBreakdown} />
+          {/each}
+        </ResponsiveGrid>
+      </Section>
+    {/if}
 
-                <LevelItem
-                  narrow
-                  title="Gain / Loss"
-                  color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
-                  value={formatCurrency(networth.gainAmount)}
-                />
+    <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-visualizations">
+      <Section title="Cash Flow" titleHref="/cash_flow/monthly" class="paisa-dashboard-cell">
+        <ZeroState item={cashFlows}>
+          <strong>Oops!</strong> You have not made any transactions in the last 3 months.
+        </ZeroState>
 
-                <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
-              </div>
-            {/if}
+        <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
+
+        <ChartFrame type="dashboard-timeline">
+          <svg
+            class:is-not-visible={_.isEmpty(cashFlows)}
+            id="d3-current-cash-flow"
+            height="250"
+            width="100%"
+          />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Expenses" titleHref="/expense/monthly" class="paisa-dashboard-cell">
+        {#snippet action()}
+          <LastNMonths n={3} bind:value={month} />
+        {/snippet}
+
+        <div class="mb-3 is-flex is-align-items-center">
+          <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
+          <span class="is-size-5 has-text-weight-bold" style="color: {financialColors.expenses}">
+            {formatCurrency(totalExpense)}
+          </span>
+        </div>
+        <ZeroState item={selectedExpenses}>
+          <strong>Hurray!</strong> You have no expenses this month.
+        </ZeroState>
+        <ChartFrame type="category" rows={Math.min(8, selectedExpenses.length || 4)}>
+          <svg id="d3-current-month-breakdown" width="100%" />
+        </ChartFrame>
+      </Section>
+    </div>
+
+    <!-- Row 3: Operational Data (Budget ~35% + Recent Transactions ~65%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-operations">
+      {#if currentBudget}
+        <Section title="Budget" titleHref="/expense/budget" class="paisa-dashboard-cell">
+          <div class="paisa-dashboard-budget-list">
+            {#each currentBudget.accounts as accountBudget (accountBudget)}
+              <BudgetCard compact {accountBudget} />
+            {/each}
           </div>
         </Section>
+      {/if}
 
-        {#if !_.isEmpty(checkingBalances)}
-          <Section title="Checking Balance" titleHref="/assets/balance">
-            <ResponsiveGrid cols="auto-fit" minColWidth="160px" gap={2}>
-              {#each _.values(checkingBalances) as assetBreakdown}
-                <BalanceCard {assetBreakdown} />
-              {/each}
-            </ResponsiveGrid>
-          </Section>
-        {/if}
-
-        <Section title="Cash Flow" titleHref="/cash_flow/monthly">
-          <Card padding="sm">
-            <ZeroState item={cashFlows}>
-              <strong>Oops!</strong> You have not made any transactions in the last 3 months.
-            </ZeroState>
-
-            <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
-
-            <ChartFrame size="compact">
-              <svg
-                class:is-not-visible={_.isEmpty(cashFlows)}
-                id="d3-current-cash-flow"
-                height="250"
-                width="100%"
-              />
-            </ChartFrame>
-          </Card>
+      {#if !_.isEmpty(transactions)}
+        <Section title="Recent Transactions" titleHref="/ledger/transaction" class="paisa-dashboard-cell">
+          <ResponsiveGrid variant="transactions" gap={2}>
+            {#each _.take(transactions, 12) as t}
+              <TransactionCard {t} />
+            {/each}
+          </ResponsiveGrid>
         </Section>
+      {/if}
+    </div>
 
-        {#if currentBudget}
-          <Section title="Budget" titleHref="/expense/budget">
-            <div>
-              {#each currentBudget.accounts as accountBudget (accountBudget)}
-                <BudgetCard compact {accountBudget} />
-              {/each}
-            </div>
-          </Section>
-        {/if}
-
-        {#if !_.isEmpty(goalSummaries)}
-          <Section title="Goals" titleHref="/more/goals">
-            <div>
-              {#each goalSummaries as goal}
-                <GoalSummaryCard {goal} small />
-              {/each}
-            </div>
-          </Section>
-        {/if}
-      </div>
-
-      <!-- Right Column: Expenses, Recurring, Recent Transactions -->
-      <div class="column is-12 is-7-desktop">
-        <Section title="Expenses" titleHref="/expense/monthly">
-          {#snippet action()}
-            <LastNMonths n={3} bind:value={month} />
-          {/snippet}
-
-          <Card padding="md">
-            <div class="mb-3 is-flex is-align-items-center">
-              <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
-              <span class="is-size-5 has-text-weight-bold" style="color: {COLORS.expenses}">
-                {formatCurrency(totalExpense)}
-              </span>
-            </div>
-            <ZeroState item={selectedExpenses}>
-              <strong>Hurray!</strong> You have no expenses this month.
-            </ZeroState>
-            <ChartFrame size="dynamic">
-              <svg id="d3-current-month-breakdown" width="100%" />
-            </ChartFrame>
-          </Card>
+    <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-longterm">
+      {#if !_.isEmpty(goalSummaries)}
+        <Section title="Goals" titleHref="/more/goals" class="paisa-dashboard-cell">
+          <div class="paisa-dashboard-goals-list">
+            {#each goalSummaries as goal}
+              <GoalSummaryCard {goal} small />
+            {/each}
+          </div>
         </Section>
+      {/if}
 
-        {#if !_.isEmpty(transactionSequences)}
-          <Section title="Recurring" titleHref="/cash_flow/recurring">
-            <Card padding="md">
-              <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
-                {#each transactionSequences as ts (ts)}
-                  <UpcomingCard transactionSequece={ts} />
-                {/each}
-              </div>
-            </Card>
-          </Section>
-        {/if}
-
-        {#if !_.isEmpty(transactions)}
-          <Section title="Recent Transactions" titleHref="/ledger/transaction">
-            <ResponsiveGrid cols="auto-fit" minColWidth="300px" gap={3}>
-              {#each _.take(transactions, 20) as t}
-                <TransactionCard {t} />
-              {/each}
-            </ResponsiveGrid>
-          </Section>
-        {/if}
-      </div>
+      {#if !_.isEmpty(transactionSequences)}
+        <Section title="Recurring" titleHref="/cash_flow/recurring" class="paisa-dashboard-cell">
+          <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
+            {#each transactionSequences as ts (ts)}
+              <UpcomingCard transactionSequece={ts} />
+            {/each}
+          </div>
+        </Section>
+      {/if}
     </div>
   </Page>
 {/if}
 
 <style lang="scss">
-  .paisa-metric-grid {
+  .paisa-dashboard-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--paisa-space-3);
-    margin-bottom: var(--paisa-space-3);
+    gap: var(--paisa-space-4);
+    width: 100%;
+    margin-bottom: var(--paisa-space-5);
+  }
+
+  .paisa-dashboard-visualizations {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+    }
+  }
+
+  .paisa-dashboard-operations {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+    }
+  }
+
+  .paisa-dashboard-longterm {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .paisa-dashboard-cell {
+    min-width: 0;
+    margin-bottom: 0;
   }
 </style>

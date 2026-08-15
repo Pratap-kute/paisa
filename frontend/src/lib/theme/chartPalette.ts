@@ -303,6 +303,22 @@ export const MaterialUI = {
   },
 };
 
+export const financialColors = {
+  assets: MaterialUI.lightblue.a400,
+  expenses: MaterialUI.red.a400,
+  income: MaterialUI.lime.a700,
+  liabilities: MaterialUI.amber.a700,
+  equity: MaterialUI.purple.a400,
+  investment: "#8b5cf6",
+  tax: "#f97316",
+  gain: "#b2df8a",
+  gainText: "#48c78e",
+  loss: "#fb9a99",
+  lossText: "#f14668",
+  balance: "#7dd3fc",
+  networth: MaterialUI.deeppurple.a100,
+};
+
 export const chartColors = {
   gain: "#b2df8a",
   gainText: "#48c78e",
@@ -314,18 +330,24 @@ export const chartColors = {
   warnText: "#946c00",
   diff: "#4a4a4a",
 
-  // Financial Domain mapping
+  // Explicit Financial Domain mapping
+  assets: financialColors.assets,
+  expenses: financialColors.expenses,
+  income: financialColors.income,
+  liabilities: financialColors.liabilities,
+  equity: financialColors.equity,
+  investment: financialColors.investment,
+  tax: financialColors.tax,
+  balance: financialColors.balance,
+  networth: financialColors.networth,
+
+  /** @deprecated Prefer using financialColors.networth or UI tokens */
   primary: MaterialUI.deeppurple.a100,
+  /** @deprecated Prefer using financialColors.assets / financialColors.balance or UI tokens */
   secondary: MaterialUI.lightblue.a400,
+  /** @deprecated Prefer using financialColors.liabilities or UI tokens */
   tertiary: MaterialUI.amber.a400,
   neutral: "hsl(0, 0%, 48%)",
-  assets: MaterialUI.lightblue.a400,
-  expenses: MaterialUI.red.a400,
-  income: MaterialUI.lime.a700,
-  liabilities: MaterialUI.amber.a700,
-  equity: MaterialUI.purple.a400,
-  investment: "#8b5cf6",
-  tax: "#f97316",
 };
 
 export default chartColors;

@@ -3,7 +3,7 @@
   import LoadingState from "$lib/components/ui/LoadingState.svelte";
   import ErrorState from "$lib/components/ui/ErrorState.svelte";
 
-  type PageWidth = "fluid" | "standard" | "narrow";
+  type PageWidth = "fluid" | "analysis" | "standard" | "narrow";
 
   interface Props {
     width?: PageWidth;
@@ -29,6 +29,7 @@
 
   const widthClasses: Record<PageWidth, string> = {
     fluid: "paisa-page-fluid",
+    analysis: "paisa-page-analysis",
     standard: "paisa-page-standard",
     narrow: "paisa-page-narrow",
   };
@@ -69,6 +70,10 @@
 
   .paisa-page-fluid {
     max-width: 100%;
+  }
+
+  .paisa-page-analysis {
+    max-width: 1600px;
   }
 
   .paisa-page-standard {

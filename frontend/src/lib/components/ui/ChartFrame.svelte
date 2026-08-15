@@ -2,32 +2,61 @@
   import type { Snippet } from "svelte";
   import Spinner from "./Spinner.svelte";
   import ZeroState from "./ZeroState.svelte";
+  import { observeElementSize, type Dimensions } from "$lib/charts/resize";
 
+  type ChartType = "timeline" | "dashboard-timeline" | "category" | "distribution" | "dynamic";
   type ChartSize = "compact" | "standard" | "large" | "dynamic";
 
   interface Props {
+    type?: ChartType;
     size?: ChartSize;
+    rows?: number;
+    centered?: boolean;
     title?: string;
     loading?: boolean;
     empty?: boolean;
     emptyMessage?: string;
     class?: string;
+    style?: string;
     id?: string;
     actions?: Snippet;
     children?: Snippet;
+    onresize?: (dimensions: Dimensions) => void;
   }
 
   let {
+    type,
     size = "standard",
+    rows = 6,
+    centered = false,
     title,
     loading = false,
     empty = false,
     emptyMessage = "No data available for the selected period.",
     class: className = "",
+    style = "",
     id,
     actions,
     children,
+    onresize,
   }: Props = $props();
+
+  let frameBody: HTMLDivElement | undefined = $state();
+
+  $effect(() => {
+    if (frameBody && onresize) {
+      const cleanup = observeElementSize(frameBody, onresize);
+      return cleanup;
+    }
+  });
+
+  const typeClasses: Record<ChartType, string> = {
+    timeline: "paisa-chart-type-timeline",
+    "dashboard-timeline": "paisa-chart-type-dashboard-timeline",
+    category: "paisa-chart-type-category",
+    distribution: "paisa-chart-type-distribution",
+    dynamic: "paisa-chart-dynamic",
+  };
 
   const sizeClasses: Record<ChartSize, string> = {
     compact: "paisa-chart-compact",
@@ -35,9 +64,17 @@
     large: "paisa-chart-large",
     dynamic: "paisa-chart-dynamic",
   };
+
+  const typeOrSizeClass = $derived(
+    type ? typeClasses[type] : (sizeClasses[size] || "paisa-chart-standard")
+  );
 </script>
 
-<div {id} class="paisa-chart-frame {sizeClasses[size]} {className}">
+<div
+  {id}
+  class="paisa-chart-frame {typeOrSizeClass} {centered ? 'paisa-chart-centered' : ''} {className}"
+  style="--paisa-chart-rows: {rows}; {style}"
+>
   {#if title || actions}
     <div class="paisa-chart-frame-header">
       {#if title}
@@ -51,7 +88,7 @@
     </div>
   {/if}
 
-  <div class="paisa-chart-frame-body">
+  <div class="paisa-chart-frame-body" bind:this={frameBody}>
     {#if loading}
       <div class="paisa-chart-frame-loading">
         <Spinner />
@@ -108,12 +145,34 @@
     :global(svg) {
       display: block;
       width: 100%;
-      height: 100%;
       overflow: visible;
     }
   }
 
-  /* Semantic sizes */
+  .paisa-chart-centered .paisa-chart-frame-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Semantic Types */
+  .paisa-chart-type-timeline {
+    min-height: clamp(320px, 42vh, 520px);
+  }
+
+  .paisa-chart-type-dashboard-timeline {
+    min-height: clamp(220px, 28vh, 300px);
+  }
+
+  .paisa-chart-type-category {
+    min-height: clamp(180px, calc(var(--paisa-chart-rows, 6) * 28px + 40px), 480px);
+  }
+
+  .paisa-chart-type-distribution {
+    min-height: 280px;
+  }
+
+  /* Fallback Semantic sizes */
   .paisa-chart-compact {
     min-height: 240px;
   }

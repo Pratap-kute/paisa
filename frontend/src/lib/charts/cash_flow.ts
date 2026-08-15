@@ -25,37 +25,51 @@ import COLORS, { generateColorScheme } from "../core/colors";
 import textures from "textures";
 import chroma from "chroma-js";
 
-export function renderMonthlyFlow(
-  id: string,
+export interface MonthlyFlowChart {
+  update: (cashFlows: CashFlow[]) => void;
+  resize: (dimensions: { width: number; height: number }) => void;
+  destroy: () => void;
+  legends: Legend[];
+}
+
+export function createMonthlyFlow(
+  target: string | SVGElement,
   options = {
     rotate: true,
     balance: 0,
   },
-) {
+): MonthlyFlowChart {
   const MAX_BAR_WIDTH = rem(20);
-  const el = document.getElementById(id.substring(1));
-  if (!el?.parentElement) {
+  const el = typeof target === "string"
+    ? document.getElementById(target.startsWith("#") ? target.substring(1) : target)
+    : target;
+
+  if (!el) {
     return {
-      renderer: () => {},
+      update: () => {},
+      resize: () => {},
+      destroy: () => {},
       legends: [],
     };
   }
 
-  const svg = d3.select(id),
-    margin = {
-      top: rem(15),
-      right: rem(30),
-      bottom: options.rotate ? rem(50) : rem(20),
-      left: rem(40),
-    },
-    width = el.parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
+  const svg = d3.select(el as any);
+  svg.selectAll("*").remove();
+
+  const margin = {
+    top: rem(15),
+    right: rem(30),
+    bottom: options.rotate ? rem(50) : rem(20),
+    left: rem(40),
+  };
+
+  let currentWidth = Math.max(100, (el.parentElement?.clientWidth || 600) - margin.left - margin.right);
+  let currentHeight = Math.max(100, (el.clientHeight || Number(svg.attr("height")) || 400) - margin.top - margin.bottom);
+
+  const g = svg.append("g").attr(
+    "transform",
+    "translate(" + margin.left + "," + margin.top + ")",
+  );
 
   const darkMode = getColorPreference() === "dark";
   const texture = textures
@@ -85,21 +99,18 @@ export function renderMonthlyFlow(
     darkMode ? "#7dd3fc" : COLORS.primary,
   ]);
 
-  const x = d3.scaleBand().range([0, width]).paddingInner(0.1),
-    y = d3.scaleLinear().range([height, 0]),
-    z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
+  const x = d3.scaleBand().range([0, currentWidth]).paddingInner(0.1);
+  const y = d3.scaleLinear().range([currentHeight, 0]);
+  const z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
 
-  const x1 = d3.scaleBand().domain(["0", "1"]).paddingInner(0.1).paddingOuter(
-    0.1,
-  );
+  const x1 = d3.scaleBand().domain(["0", "1"]).paddingInner(0.1).paddingOuter(0.1);
 
   const xAxis = g
     .append("g")
     .attr("class", "axis x")
-    .attr("transform", "translate(0," + height + ")");
+    .attr("transform", "translate(0," + currentHeight + ")");
 
   const yAxis = g.append("g").attr("class", "axis y");
-
   const groups = g.append("g");
 
   const line = g
@@ -110,9 +121,18 @@ export function renderMonthlyFlow(
 
   const tooltipRects = g.append("g");
 
+  let currentData: CashFlow[] = [];
   let firstRender = true;
 
-  const renderer = function (cashFlows: CashFlow[]) {
+  function render(cashFlows: CashFlow[], animate = true) {
+    currentData = cashFlows;
+    if (_.isEmpty(cashFlows)) {
+      groups.selectAll("*").remove();
+      line.attr("d", null);
+      tooltipRects.selectAll("*").remove();
+      return;
+    }
+
     const positions = _.flatMap(cashFlows, (c) => [
       c.income + (c.investment < 0 ? -c.investment : 0) +
       (c.liabilities > 0 ? c.liabilities : 0),
@@ -128,11 +148,11 @@ export function renderMonthlyFlow(
     y.domain(d3.extent(positions));
     x1.range([0, x.bandwidth()]);
 
-    const t = svg.transition().duration(firstRender ? 0 : 750);
+    const duration = (!animate || firstRender) ? 0 : 500;
     firstRender = false;
+    const t = svg.transition().duration(duration);
 
-    const axis = xAxis
-      .transition(t)
+    const axis = (duration > 0 ? xAxis.transition(t) : xAxis)
       .call(
         d3
           .axisBottom(x)
@@ -148,8 +168,8 @@ export function renderMonthlyFlow(
       axis.attr("transform", "rotate(-45)").style("text-anchor", "end");
     }
 
-    yAxis.transition(t).call(
-      d3.axisLeft(y).tickSize(-width).tickFormat(formatCurrencyCrude),
+    (duration > 0 ? yAxis.transition(t) : yAxis).call(
+      d3.axisLeft(y).tickSize(-currentWidth).tickFormat(formatCurrencyCrude),
     );
 
     const gbars = groups
@@ -163,8 +183,7 @@ export function renderMonthlyFlow(
             .attr("transform", (c) =>
               `translate(${x(c.date.format("MMM YYYY"))},0)`),
         (update) =>
-          update
-            .transition(t)
+          (duration > 0 ? update.transition(t) : update)
             .attr("transform", (c) =>
               `translate(${x(c.date.format("MMM YYYY"))},0)`),
         (exit) => exit.remove(),
@@ -195,9 +214,7 @@ export function renderMonthlyFlow(
       ])
       .join("g")
       .selectAll("rect")
-      .data((d) => {
-        return d;
-      })
+      .data((d) => d)
       .join(
         (enter) =>
           enter
@@ -216,14 +233,11 @@ export function renderMonthlyFlow(
                 : x1(d[0].data.i))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH))
             .attr("y", y.range()[0])
-            .transition(t)
-            .attr("y", (d: any) =>
-              y(d[0][1]))
-            .attr("height", (d: any) =>
-              y(d[0][0]) - y(d[0][1])),
+            .call((sel) => duration > 0 ? sel.transition(t) : sel)
+            .attr("y", (d: any) => y(d[0][1]))
+            .attr("height", (d: any) => y(d[0][0]) - y(d[0][1])),
         (update) =>
-          update
-            .transition(t)
+          (duration > 0 ? update.transition(t) : update)
             .attr("fill", (d) => {
               if (d.key === "tax") {
                 return texture.url();
@@ -235,10 +249,8 @@ export function renderMonthlyFlow(
                 ? x1(d[0].data.i) + x1.bandwidth() -
                   Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
                 : x1(d[0].data.i))
-            .attr("y", (d: any) =>
-              y(d[0][1]))
-            .attr("height", (d: any) =>
-              y(d[0][0]) - y(d[0][1]))
+            .attr("y", (d: any) => y(d[0][1]))
+            .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH)),
         (exit) => exit.remove(),
       );
@@ -248,7 +260,7 @@ export function renderMonthlyFlow(
       d3
         .line<CashFlow>()
         .curve(d3.curveMonotoneX)
-        .x((c) => x(c.date.format("MMM YYYY")) + x.bandwidth() / 2)
+        .x((c) => (x(c.date.format("MMM YYYY")) || 0) + x.bandwidth() / 2)
         .y((c) => y(c.balance))(cashFlows),
     );
 
@@ -292,11 +304,24 @@ export function renderMonthlyFlow(
           { header: c.date.format("MMM YYYY") },
         );
       })
-      .attr("x", (c) => x(c.date.format("MMM YYYY")))
+      .attr("x", (c) => x(c.date.format("MMM YYYY")) || 0)
       .attr("y", 0)
-      .attr("height", height)
+      .attr("height", currentHeight)
       .attr("width", x.bandwidth());
-  };
+  }
+
+  function resize(dimensions: { width: number; height: number }) {
+    if (dimensions.width <= 0 || dimensions.height <= 0) return;
+    currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
+    currentHeight = Math.max(50, dimensions.height - margin.top - margin.bottom);
+
+    x.range([0, currentWidth]);
+    y.range([currentHeight, 0]);
+    x1.range([0, x.bandwidth()]);
+
+    xAxis.attr("transform", "translate(0," + currentHeight + ")");
+    render(currentData, false);
+  }
 
   const legends: Legend[] = _.map(_.without(areaKeys, "tax"), (k) => ({
     label: k,
@@ -318,7 +343,30 @@ export function renderMonthlyFlow(
     shape: "line",
   });
 
-  return { renderer, legends };
+  return {
+    update: render,
+    resize,
+    destroy: () => {
+      svg.selectAll("*").remove();
+    },
+    legends,
+  };
+}
+
+export function renderMonthlyFlow(
+  id: string,
+  options = {
+    rotate: true,
+    balance: 0,
+  },
+) {
+  const chart = createMonthlyFlow(id, options);
+  return {
+    renderer: chart.update,
+    resize: chart.resize,
+    destroy: chart.destroy,
+    legends: chart.legends,
+  };
 }
 
 export function renderFlow(graph: Graph) {

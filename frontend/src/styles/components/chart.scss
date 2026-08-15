@@ -156,7 +156,7 @@ svg text,
       min-height: 62px;
       position: relative;
       border-radius: var(--paisa-radius-sm);
-      background-color: var(--paisa-surface-default);
+      background-color: var(--paisa-surface-card);
       border: 1px solid var(--paisa-border-subtle);
       padding: 0.35rem 0.125rem 0.25rem;
       gap: 0.15rem;
@@ -176,7 +176,7 @@ svg text,
         font-size: 0.6875rem;
         line-height: 1.1;
         font-weight: var(--paisa-font-weight-semibold);
-        color: var(--paisa-loss);
+        color: var(--paisa-danger);
         min-height: 0.75rem;
         text-align: center;
       }
@@ -196,7 +196,7 @@ svg text,
       align-items: center;
       gap: 0.25rem;
       border-radius: var(--paisa-radius-sm);
-      background-color: var(--paisa-surface-default);
+      background-color: var(--paisa-surface-card);
       border: 1px solid var(--paisa-border-subtle);
       padding: 0.35rem 0.25rem;
       transition: background-color var(--paisa-transition-fast);
@@ -219,7 +219,7 @@ svg text,
 
         .total {
           font-size: 0.7rem;
-          color: var(--paisa-loss);
+          color: var(--paisa-danger);
         }
       }
 

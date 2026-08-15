@@ -3,42 +3,52 @@
     ajax,
     formatCurrency,
     formatFloat,
-    isMobile,
     type Legend,
     type Networth
   } from "$lib/core/utils";
-  import COLORS from "$lib/core/colors";
-  import { renderNetworth } from "$lib/charts/networth";
+  import { financialColors } from "$lib/theme/chartPalette";
+  import { createNetworthChart, type NetworthChart } from "$lib/charts/networth";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let networth = $state(0);
   let investment = $state(0);
   let gain = $state(0);
   let xirr = $state(0);
-  let svg: Element = $state();
+  let svg: SVGElement = $state() as any;
+  let chart: NetworthChart | null = $state(null);
   let points: Networth[] = $state([]);
   let legends: Legend[] = $state([]);
 
+  let filteredPoints = $derived(
+    _.filter(
+      points,
+      (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
+    )
+  );
+
   $effect(() => {
-    if (!_.isEmpty(points) && svg) {
-      const res = renderNetworth(
-        _.filter(
-          points,
-          (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
-        ),
-        svg
-      );
-      legends = res.legends;
-      return () => {
-        res.destroy?.();
-      };
+    if (svg && !chart) {
+      chart = createNetworthChart(svg);
+      legends = chart.legends;
     }
+
+    if (chart && !_.isEmpty(points)) {
+      chart.update(filteredPoints);
+    }
+  });
+
+  onDestroy(() => {
+    chart?.destroy();
   });
 
   onMount(async () => {
@@ -56,43 +66,35 @@
   });
 </script>
 
-<section class="section tab-networth">
-  <div class="container is-fluid">
-    <div class="columns is-multiline is-variable is-2-desktop">
-      <div class="column is-12">
-        <nav class="level {isMobile() && 'grid-2'}">
-      <LevelItem title="Net worth" color={COLORS.primary} value={formatCurrency(networth)} />
-      <LevelItem
-        title="Net Investment"
-        color={COLORS.secondary}
-        value={formatCurrency(investment)}
-      />
-      <LevelItem
-        title="Gain / Loss"
-        color={gain >= 0 ? COLORS.gainText : COLORS.lossText}
-        value={formatCurrency(gain)}
-      />
-      <LevelItem title="XIRR" value={formatFloat(xirr)} />
-    </nav>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Net Worth"
+    description="Track assets and investment growth over time"
+  />
 
-<section class="section tab-networth">
-  <div class="container is-fluid">
-    <div class="columns is-multiline">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <ZeroState item={points}>
-            <strong>Oops!</strong> You have no transactions.
-          </ZeroState>
+  <MetricStrip cols={4}>
+    <LevelItem title="Net worth" value={formatCurrency(networth)} />
+    <LevelItem title="Net Investment" value={formatCurrency(investment)} />
+    <LevelItem
+      title="Gain / Loss"
+      color={gain >= 0 ? financialColors.gainText : financialColors.lossText}
+      value={formatCurrency(gain)}
+    />
+    <LevelItem title="XIRR" value={formatFloat(xirr)} />
+  </MetricStrip>
 
-          <LegendCard {legends} clazz="ml-4" />
-          <svg id="d3-networth-timeline" height="500" bind:this={svg} />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Networth Timeline" />
-  </div>
-</section>
+  <Section>
+    <ZeroState item={points}>
+      <strong>Oops!</strong> You have no transactions.
+    </ZeroState>
+
+    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+
+    <ChartFrame
+      type="timeline"
+      onresize={(dim) => chart?.resize(dim)}
+    >
+      <svg id="d3-networth-timeline" width="100%" bind:this={svg} />
+    </ChartFrame>
+  </Section>
+</Page>

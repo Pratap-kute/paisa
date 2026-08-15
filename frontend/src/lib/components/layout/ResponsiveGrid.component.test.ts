@@ -14,3 +14,16 @@ test("renders responsive grid with column and gap classes", () => {
   expect(grid).toHaveClass("gap-3");
   unmount();
 });
+
+test("renders responsive grid with semantic variant", () => {
+  const { container, unmount } = render(ResponsiveGrid, {
+    variant: "cards",
+    gap: 2,
+  });
+
+  const grid = container.querySelector(".paisa-responsive-grid");
+  expect(grid).toBeInTheDocument();
+  expect(grid).toHaveClass("paisa-grid-variant-cards");
+  expect(grid).toHaveClass("gap-2");
+  unmount();
+});
