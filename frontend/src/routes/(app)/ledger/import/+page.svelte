@@ -444,8 +444,6 @@
 </section>
 
 <style lang="scss">
-  @import "bulma/sass/utilities/_all.sass";
-
   $import-full-height: calc(100vh - 205px);
 
   .clipboard {
@@ -471,7 +469,7 @@
   .color-switch {
     .switch[type="checkbox"]:checked + label::before,
     .switch[type="checkbox"]:checked + label:before {
-      background: $link;
+      background: var(--bulma-link, #3273dc);
     }
   }
 </style>
