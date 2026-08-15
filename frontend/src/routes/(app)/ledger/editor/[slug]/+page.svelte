@@ -10,9 +10,8 @@
   import { insertTab } from "@codemirror/commands";
   import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
-  import type { KeyBinding } from "@codemirror/view";
+  import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
-  import type { EditorView } from "codemirror";
   import { format } from "$lib/ledger/journal";
   import _ from "lodash";
   import { onDestroy, onMount } from "svelte";

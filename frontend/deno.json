@@ -71,7 +71,6 @@
     "bulma": "npm:bulma@^1.0.4",
     "chroma-js": "npm:chroma-js@^2.4.2",
     "chrono-node": "npm:chrono-node@^2.6.6",
-    "codemirror": "npm:codemirror@^6.0.1",
     "cookie": "npm:cookie@^0.7.2",
     "crypto-js": "npm:crypto-js@^4.2.0",
     "d3": "npm:d3@^7.4.0",

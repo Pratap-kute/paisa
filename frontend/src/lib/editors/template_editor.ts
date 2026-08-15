@@ -1,19 +1,30 @@
 import type { LedgerFileError } from "../core/utils";
 import { handlebars } from "./handlebars_parser";
-import { StreamLanguage, syntaxHighlighting } from "@codemirror/language";
-import { keymap } from "@codemirror/view";
-import { basicSetup, EditorView } from "codemirror";
-import { history, insertTab, redoDepth, undoDepth } from "@codemirror/commands";
-import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
+import { StreamLanguage } from "@codemirror/language";
+import { EditorView, keymap } from "@codemirror/view";
+import { fullEditorExtensions } from "./base";
+import {
+  history,
+  historyKeymap,
+  insertTab,
+  redoDepth,
+  undoDepth,
+} from "@codemirror/commands";
+import {
+  type Diagnostic,
+  linter,
+  lintGutter,
+  lintKeymap,
+} from "@codemirror/lint";
 import _ from "lodash";
 import { writable } from "svelte/store";
 import {
   autocompletion,
   completeFromList,
+  completionKeymap,
   ifIn,
 } from "@codemirror/autocomplete";
 import Handlebars from "handlebars";
-import { classHighlighter } from "@lezer/highlight";
 
 interface EditorState {
   hasUnsavedChanges: boolean;
@@ -67,19 +78,20 @@ export function createEditor(content: string, dom: Element) {
   return new EditorView({
     extensions: [
       keymap.of([{ key: "Tab", run: insertTab }]),
-      basicSetup,
-      syntaxHighlighting(classHighlighter),
-      EditorView.contentAttributes.of({ "data-enable-grammarly": "false" }),
+      fullEditorExtensions,
       StreamLanguage.define(handlebars),
       lintGutter(),
       linter(lint),
+      keymap.of(lintKeymap),
       history(),
+      keymap.of(historyKeymap),
       autocompletion({
         override: _.map(
           autocompletions,
           (options, node) => ifIn([node], completeFromList(options)),
         ),
       }),
+      keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
         editorState.update((current) =>
           _.assign({}, current, {

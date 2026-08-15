@@ -10,9 +10,8 @@
     type SheetFile,
   } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
-  import type { KeyBinding } from "@codemirror/view";
+  import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
-  import type { EditorView } from "codemirror";
   import _ from "lodash";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";

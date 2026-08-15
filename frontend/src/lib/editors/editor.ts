@@ -1,18 +1,28 @@
 import { ajax } from "../core/utils";
 import { ledger } from "./ledger_parser";
 import { StreamLanguage } from "@codemirror/language";
-import { type KeyBinding, keymap } from "@codemirror/view";
+import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import { EditorState as State } from "@codemirror/state";
-import { EditorView } from "codemirror";
-import { basicSetup } from "./base";
-import { history, redoDepth, undoDepth } from "@codemirror/commands";
-import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
+import { fullEditorExtensions } from "./base";
+import {
+  history,
+  historyKeymap,
+  redoDepth,
+  undoDepth,
+} from "@codemirror/commands";
+import {
+  type Diagnostic,
+  linter,
+  lintGutter,
+  lintKeymap,
+} from "@codemirror/lint";
 import _ from "lodash";
 import { editorState, initialEditorState } from "../../store";
 import {
   autocompletion,
   completeFromList,
   type CompletionContext,
+  completionKeymap,
   ifIn,
 } from "@codemirror/autocomplete";
 import { MergeView } from "@codemirror/merge";
@@ -51,12 +61,14 @@ export function createDiffEditor(
   dom: Element,
 ) {
   const extensions = [
-    basicSetup,
+    fullEditorExtensions,
     State.readOnly.of(true),
     StreamLanguage.define(ledger),
-    EditorView.contentAttributes.of({ "data-enable-grammarly": "false" }),
+    history(),
+    keymap.of(historyKeymap),
     lintGutter(),
     linter(lint),
+    keymap.of(lintKeymap),
   ];
   return new MergeView({
     a: { extensions: extensions, doc: oldContent },
@@ -80,13 +92,14 @@ export function createEditor(
   return new EditorView({
     extensions: [
       keymap.of(opts.keybindings || []),
-      basicSetup,
+      fullEditorExtensions,
       State.readOnly.of(!!opts.readonly),
-      EditorView.contentAttributes.of({ "data-enable-grammarly": "false" }),
       StreamLanguage.define(ledger),
       lintGutter(),
       linter(lint),
+      keymap.of(lintKeymap),
       history(),
+      keymap.of(historyKeymap),
       autocompletion({
         override: [
           (context: CompletionContext) => {
@@ -104,6 +117,7 @@ export function createEditor(
           ),
         ],
       }),
+      keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
         editorState.update((current) =>
           _.assign({}, current, {

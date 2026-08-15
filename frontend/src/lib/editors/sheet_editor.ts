@@ -1,19 +1,30 @@
 import {
   autocompletion,
   closeBrackets,
+  closeBracketsKeymap,
   completeFromList,
   type CompletionContext,
   type CompletionSource,
+  completionKeymap,
   ifIn,
 } from "@codemirror/autocomplete";
-import { history, redoDepth, undoDepth } from "@codemirror/commands";
+import {
+  history,
+  historyKeymap,
+  redoDepth,
+  undoDepth,
+} from "@codemirror/commands";
 import { bracketMatching, syntaxTree } from "@codemirror/language";
-import { type Diagnostic, linter, lintGutter } from "@codemirror/lint";
-import { type KeyBinding, keymap } from "@codemirror/view";
-import { EditorView } from "codemirror";
+import {
+  type Diagnostic,
+  linter,
+  lintGutter,
+  lintKeymap,
+} from "@codemirror/lint";
+import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import _ from "lodash";
 import { initialSheetEditorState, sheetEditorState } from "../../store";
-import { basicSetup } from "./base";
+import { fullEditorExtensions } from "./base";
 import { sheetExtension, sheetLanguage } from "../sheet/language";
 import { schedulePlugin } from "../domain/transaction_tag";
 export { sheetEditorState } from "../../store";
@@ -132,11 +143,12 @@ export function createEditor(
   return new EditorView({
     extensions: [
       keymap.of(opts.keybindings || []),
-      basicSetup,
+      fullEditorExtensions,
       bracketMatching(),
       closeBrackets(),
-      EditorView.contentAttributes.of({ "data-enable-grammarly": "false" }),
+      keymap.of(closeBracketsKeymap),
       sheetExtension(),
+      lintGutter(),
       linter(lint(env), {
         delay: 300,
         needsRefresh: () => {
@@ -148,8 +160,9 @@ export function createEditor(
           return false;
         },
       }),
-      lintGutter(),
+      keymap.of(lintKeymap),
       history(),
+      keymap.of(historyKeymap),
       autocompletion({
         override: [
           completeIdentifier,
@@ -170,6 +183,7 @@ export function createEditor(
           ),
         ],
       }),
+      keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
         const doc = viewUpdate.state.doc.toString();
         const currentLine = viewUpdate.state.doc.lineAt(

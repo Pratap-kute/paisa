@@ -12,7 +12,7 @@
   import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
   import { parse, asRows, render as renderJournal } from "$lib/importing/spreadsheet";
   import _ from "lodash";
-  import type { EditorView } from "codemirror";
+  import type { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
   import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
