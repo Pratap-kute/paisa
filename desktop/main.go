@@ -22,7 +22,7 @@ var icon []byte
 func main() {
 	decimal.MarshalJSONWithoutQuotes = true
 	// https://github.com/wailsapp/wails/issues/2977
-	linuxGpuPolicy := linux.WebviewGpuPolicyNever
+	linuxGpuPolicy := linux.WebviewGpuPolicyOnDemand
 
 	if gpuPolicyConfig := os.Getenv("PAISA_GPU_POLICY"); gpuPolicyConfig != "" {
 		switch gpuPolicyConfig {
