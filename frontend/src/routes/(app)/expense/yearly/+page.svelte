@@ -113,12 +113,19 @@
             <div>
               <nav class="level grid-2">
                 <LevelItem
+                  narrow
                   title="Gross Income"
                   value={income}
                   color={COLORS.gainText}
                   subtitle={netIncome}
                 />
-                <LevelItem title="Tax" value={tax} color={COLORS.lossText} subtitle={taxRate} />
+                <LevelItem
+                  narrow
+                  title="Tax"
+                  value={tax}
+                  color={COLORS.lossText}
+                  subtitle={taxRate}
+                />
               </nav>
             </div>
           </div>
@@ -126,6 +133,7 @@
             <div>
               <nav class="level grid-2">
                 <LevelItem
+                  narrow
                   title="Net Investment"
                   value={investment}
                   color={COLORS.secondary}
@@ -133,6 +141,7 @@
                 />
 
                 <LevelItem
+                  narrow
                   title="Expenses"
                   value={expense}
                   color={COLORS.lossText}

@@ -41,6 +41,7 @@ export function renderHarvestables(harvestables: Harvestable[]) {
     .style("flex-grow", "1")
     .style("cursor", "auto")
     .append("div")
+    .attr("class", "harvest-calculator")
     .each(function (h) {
       const self = d3.select(this);
       const [units, amount, taxableGain] = unitsRequiredFromGain(h, 100000);

@@ -196,7 +196,8 @@
 }
 
 .nested.has-dropdown {
-  &:hover > .dropdown-menu {
+  &:hover > .dropdown-menu,
+  &.is-active > .dropdown-menu {
     display: block;
   }
 

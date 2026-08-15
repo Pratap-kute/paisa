@@ -38,12 +38,18 @@
   .level-item {
     display: block !important;
     text-align: left;
-    width: 100%;
+    flex: 1 1 0%;
+    min-width: 0;
     margin: 0;
+
+    &.is-narrow {
+      flex: 0 0 auto;
+    }
 
     > div {
       width: 100%;
       text-align: left;
+      min-width: 0;
     }
   }
 

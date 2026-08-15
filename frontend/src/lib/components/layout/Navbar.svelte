@@ -258,8 +258,17 @@
                 {:else}
                   <div class="nested has-dropdown navbar-item">
                     <div
-                      class="navbar-link is-arrowless is-flex is-justify-content-space-between is-active"
+                      class="navbar-link is-arrowless is-flex is-justify-content-space-between"
                       class:is-active={normalizedPath.startsWith(href)}
+                      role="button"
+                      tabindex="0"
+                      onclick={(e) =>
+                        isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}
+                      onkeydown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.currentTarget.parentElement?.classList.toggle("is-active");
+                        }
+                      }}
                     >
                       <span>{sublink.label}</span>
                       <span class="icon is-small">
