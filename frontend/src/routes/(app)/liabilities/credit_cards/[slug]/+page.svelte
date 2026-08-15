@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import COLORS from "$lib/core/colors";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
   import DueDate from "$lib/components/finance/DueDate.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
@@ -19,6 +18,11 @@
   import _, { now } from "lodash";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   interface Props {
     data: PageData;
@@ -56,16 +60,22 @@
   });
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-3-widescreen is-4">
-        {#if creditCard}
-          <div class="is-flex mb-12">
-            <CreditCardCard {creditCard} />
-          </div>
+<Page width="fluid">
+  <PageHeader
+    title={creditCard?.account || "Credit Card Details"}
+    description="Card utilization, statement history, and transaction details"
+  />
 
-          <nav class="level grid-2">
+  <div class="paisa-credit-card-detail-layout">
+    <!-- Side Context Panel -->
+    <div class="paisa-credit-card-side">
+      {#if creditCard}
+        <div class="mb-2">
+          <CreditCardCard {creditCard} />
+        </div>
+
+        <Section title="Credit Summary">
+          <MetricStrip cols={2}>
             <LevelItem
               narrow
               small
@@ -73,7 +83,6 @@
               color={COLORS.neutral}
               value={formatCurrency(Math.max(creditCard.creditLimit - creditCard.balance, 0))}
             />
-
             <LevelItem
               narrow
               small
@@ -81,65 +90,60 @@
               color={COLORS.neutral}
               value={formatPercentage(creditCard.balance / creditCard.creditLimit, 2)}
             />
-          </nav>
-
-          <nav class="level grid-2">
             <LevelItem
               narrow
               small
-              title="Statement Count"
+              title="Statements"
               color={COLORS.neutral}
               value={creditCard.bills.length.toString()}
             />
             <LevelItem
               narrow
               small
-              title="Transaction Count"
+              title="Transactions"
               color={COLORS.neutral}
               value={_.sumBy(creditCard.bills, (b) => b.transactions.length).toString()}
             />
-          </nav>
+          </MetricStrip>
+        </Section>
 
-          <div class="box px-3 py-0">
+        <Section title="Year-wise Spends">
+          <ChartFrame type="category">
             <svg bind:this={svg} width="100%" />
-          </div>
-          <BoxLabel text="Year wise spends" />
-        {/if}
-      </div>
-      <div class="column is-9-widescreen is-8">
-        {#if currentBill}
-          <div class="is-flex is-flex-wrap-wrap gap-4 mb-4">
-            <div
-              class="box py-2 m-0 is-flex-grow-1 paisa-overflow-x-auto"
-              style="border: 1px solid transparent"
-            >
-              <div class="is-flex mr-2 is-align-items-baseline" style="min-width: fit-content">
-                <div class="ml-3 custom-icon is-size-5 paisa-nowrap">
-                  <span>{iconify(creditCard.account)}</span>
-                </div>
-                <div class="ml-3 paisa-nowrap">
-                  <span class="mr-1 is-size-7 has-text-grey">Payment</span>
-                  <span
-                    ><DueDate dueDate={currentBill.dueDate} paidDate={currentBill.paidDate} /></span
+          </ChartFrame>
+        </Section>
+      {/if}
+    </div>
+
+    <!-- Main Content Panel -->
+    <div class="paisa-credit-card-main">
+      {#if currentBill}
+        <Section>
+          <div class="paisa-bill-header-bar">
+            <div class="paisa-bill-due-meta">
+              <span class="custom-icon is-size-5 paisa-nowrap">{iconify(creditCard.account)}</span>
+              <div class="paisa-nowrap">
+                <span class="mr-1 is-size-7 has-text-grey">Payment:</span>
+                <span><DueDate dueDate={currentBill.dueDate} paidDate={currentBill.paidDate} /></span>
+              </div>
+            </div>
+
+            <div class="select is-medium">
+              <select bind:value={currentBill}>
+                {#each _.reverse(_.clone(creditCard.bills)) as bill}
+                  <option value={bill}
+                    >{bill.statementStartDate.format("DD MMM YYYY")} — {bill.statementEndDate.format(
+                      "DD MMM YYYY"
+                    )}</option
                   >
-                </div>
-              </div>
-            </div>
-            <div class="has-text-right">
-              <div class="select is-medium">
-                <select bind:value={currentBill}>
-                  {#each _.reverse(_.clone(creditCard.bills)) as bill}
-                    <option value={bill}
-                      >{bill.statementStartDate.format("DD MMM YYYY")} — {bill.statementEndDate.format(
-                        "DD MMM YYYY"
-                      )}</option
-                    >
-                  {/each}
-                </select>
-              </div>
+                {/each}
+              </select>
             </div>
           </div>
-          <nav class="level is-flex gap-4 paisa-overflow-x-auto" style="justify-content: start;">
+        </Section>
+
+        <Section title="Statement Summary">
+          <div class="paisa-bill-calc-strip">
             <LevelItem
               {small}
               narrow
@@ -147,11 +151,7 @@
               color={COLORS.neutral}
               value={formatCurrency(currentBill.openingBalance)}
             />
-            <div class="level-item is-narrow">
-              <span class="icon is-size-3">
-                <i class="fas fa-plus"></i>
-              </span>
-            </div>
+            <span class="icon is-size-4 has-text-grey"><i class="fas fa-plus"></i></span>
             <LevelItem
               {small}
               narrow
@@ -159,11 +159,7 @@
               color={COLORS.expenses}
               value={formatCurrency(currentBill.debits)}
             />
-            <div class="level-item is-narrow">
-              <span class="icon is-size-3">
-                <i class="fas fa-minus"></i>
-              </span>
-            </div>
+            <span class="icon is-size-4 has-text-grey"><i class="fas fa-minus"></i></span>
             <LevelItem
               {small}
               narrow
@@ -171,11 +167,7 @@
               color={COLORS.income}
               value={formatCurrency(currentBill.credits)}
             />
-            <div class="level-item is-narrow">
-              <span class="icon is-size-3">
-                <i class="fas fa-equals"></i>
-              </span>
-            </div>
+            <span class="icon is-size-4 has-text-grey"><i class="fas fa-equals"></i></span>
             <LevelItem
               {small}
               narrow
@@ -183,19 +175,69 @@
               color={COLORS.liabilities}
               value={formatCurrency(currentBill.closingBalance)}
             />
-          </nav>
-
-          <div>
-            <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
-              {#each currentBill.transactions as t}
-                <div class="mr-3 is-flex-grow-1">
-                  <TransactionCard {t} />
-                </div>
-              {/each}
-            </MasonryGrid>
           </div>
-        {/if}
-      </div>
+        </Section>
+
+        <Section title="Transactions">
+          <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
+            {#each currentBill.transactions as t}
+              <div class="mr-3 is-flex-grow-1">
+                <TransactionCard {t} />
+              </div>
+            {/each}
+          </MasonryGrid>
+        </Section>
+      {/if}
     </div>
   </div>
-</section>
+</Page>
+
+<style lang="scss">
+  .paisa-credit-card-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-5);
+    width: 100%;
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(280px, 1fr) minmax(0, 3fr);
+    }
+  }
+
+  .paisa-credit-card-side,
+  .paisa-credit-card-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+
+  .paisa-bill-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+    padding: var(--paisa-space-3) var(--paisa-space-4);
+    background: var(--paisa-surface-card);
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md);
+  }
+
+  .paisa-bill-due-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-3);
+  }
+
+  .paisa-bill-calc-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-3);
+    padding: var(--paisa-space-3) var(--paisa-space-4);
+    background: var(--paisa-surface-card);
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md);
+    overflow-x: auto;
+  }
+</style>

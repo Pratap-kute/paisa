@@ -1,5 +1,4 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     buildLegends,
@@ -9,6 +8,11 @@
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+
   let isEmpty = $state(false);
   let legends: Legend[] = $state([]);
 
@@ -26,43 +30,32 @@
   });
 </script>
 
-<section class="section tab-interest" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-centered">
-      <div class="column is-4 has-text-centered">
-        <article class="message">
-          <div class="message-body">
-            <strong>Hurray!</strong> You have no liabilities.
-          </div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Interest Breakdown"
+    description="Interest payments and rates across all liabilities"
+  />
 
-<section class="section tab-interest" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <LegendCard {legends} />
-      </div>
-    </div>
-  </div>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <svg id="d3-interest-overview" />
+  {#if isEmpty}
+    <Section>
+      <article class="message">
+        <div class="message-body">
+          <strong>Hurray!</strong> You have no liabilities.
         </div>
+      </article>
+    </Section>
+  {:else}
+    <Section title="Interest Overview">
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+      <ChartFrame type="timeline">
+        <svg id="d3-interest-overview" width="100%" />
+      </ChartFrame>
+    </Section>
+
+    <Section>
+      <div class="d3-interest-timeline-breakdown">
+        <div id="d3-interest-timeline-breakdown"></div>
       </div>
-    </div>
-    <BoxLabel text="Interest Overview" />
-  </div>
-</section>
-<section class="section tab-interest">
-  <div class="container is-fluid d3-interest-timeline-breakdown">
-    <div class="columns">
-      <div id="d3-interest-timeline-breakdown" class="column is-12"></div>
-    </div>
-  </div>
-</section>
+    </Section>
+  {/if}
+</Page>

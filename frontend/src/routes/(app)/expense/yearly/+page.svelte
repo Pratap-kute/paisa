@@ -11,10 +11,14 @@
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import COLORS from "$lib/core/colors";
+  import { financialColors } from "$lib/theme/chartPalette";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let groups = writable([]);
   let z: d3.ScaleOrdinal<string, string, never> = $state(),
@@ -104,84 +108,111 @@
   });
 </script>
 
-<section class="section tab-expense">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-3">
-        <div class="columns is-flex-wrap-wrap">
-          <div class="column is-full">
-            <div>
-              <nav class="level grid-2">
-                <LevelItem
-                  narrow
-                  title="Gross Income"
-                  value={income}
-                  color={COLORS.gainText}
-                  subtitle={netIncome}
-                />
-                <LevelItem
-                  narrow
-                  title="Tax"
-                  value={tax}
-                  color={COLORS.lossText}
-                  subtitle={taxRate}
-                />
-              </nav>
-            </div>
-          </div>
-          <div class="column is-full">
-            <div>
-              <nav class="level grid-2">
-                <LevelItem
-                  narrow
-                  title="Net Investment"
-                  value={investment}
-                  color={COLORS.secondary}
-                  subtitle={savingRate}
-                />
+<Page width="fluid">
+  <PageHeader
+    title="Yearly Expenses"
+    description="Yearly expense breakdown, calendar activity, and timeline"
+  />
 
-                <LevelItem
-                  narrow
-                  title="Expenses"
-                  value={expense}
-                  color={COLORS.lossText}
-                  subtitle={expenseRate}
-                />
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="column is-12 is-9-desktop">
-        <div class="columns is-flex-wrap-wrap">
-          <div class="column is-12 is-5-desktop">
-            <div class="px-3 box paisa-full-height">
-              <div id="d3-current-year-expense-calendar" class="d3-calendar">
-                <div class="months"></div>
-              </div>
-            </div>
-          </div>
-          <div class="column is-12 is-7-desktop">
-            <div class="px-3 box paisa-full-height">
-              <ZeroState item={currentYearExpenses}>
-                <strong>Hurray!</strong> You have no expenses this year.
-              </ZeroState>
-              <svg id="d3-current-year-breakdown" width="100%" />
-            </div>
-          </div>
-          <div class="column is-12">
-            <div class="box">
-              <ZeroState item={expenses}>
-                <strong>Oops!</strong> You have no expenses.
-              </ZeroState>
+  <div class="paisa-yearly-expense-layout">
+    <!-- Side Context Panel: Summary KPIs -->
+    <div class="paisa-yearly-expense-side">
+      <Section title="Summary">
+        <MetricStrip cols={2}>
+          <LevelItem
+            narrow
+            title="Gross Income"
+            value={income}
+            subtitle={netIncome}
+          />
+          <LevelItem
+            narrow
+            title="Tax"
+            value={tax}
+            color={financialColors.lossText}
+            subtitle={taxRate}
+          />
+          <LevelItem
+            narrow
+            title="Net Investment"
+            value={investment}
+            subtitle={savingRate}
+          />
+          <LevelItem
+            narrow
+            title="Expenses"
+            value={expense}
+            color={financialColors.lossText}
+            subtitle={expenseRate}
+          />
+        </MetricStrip>
+      </Section>
+    </div>
 
-              <LegendCard {legends} clazz="ml-4" />
-              <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
+    <!-- Main Analysis Panel: Calendar, Category Breakdown, Timeline -->
+    <div class="paisa-yearly-expense-main">
+      <div class="paisa-yearly-top-row">
+        <!-- Calendar -->
+        <Section title="Activity Calendar">
+          <div class="p-3">
+            <div id="d3-current-year-expense-calendar" class="d3-calendar">
+              <div class="months"></div>
             </div>
           </div>
-        </div>
-        <BoxLabel text="Yearly Expenses" />
+        </Section>
+
+        <!-- Category Breakdown -->
+        <Section title="Category Breakdown">
+          <ZeroState item={currentYearExpenses}>
+            <strong>Hurray!</strong> You have no expenses this year.
+          </ZeroState>
+          <ChartFrame type="category" rows={Math.min(8, currentYearExpenses.length || 4)}>
+            <svg id="d3-current-year-breakdown" width="100%" />
+          </ChartFrame>
+        </Section>
       </div>
+
+      <!-- Yearly Expense Timeline -->
+      <Section title="Expense Timeline">
+        <ZeroState item={expenses}>
+          <strong>Oops!</strong> You have no expenses.
+        </ZeroState>
+        <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+        <ChartFrame type="timeline">
+          <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
+        </ChartFrame>
+      </Section>
     </div>
   </div>
-</section>
+</Page>
+
+<style lang="scss">
+  .paisa-yearly-expense-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-5);
+    width: 100%;
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(280px, 1fr) minmax(0, 3fr);
+    }
+  }
+
+  .paisa-yearly-expense-side,
+  .paisa-yearly-expense-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+
+  .paisa-yearly-top-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--paisa-space-4);
+
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+  }
+</style>
