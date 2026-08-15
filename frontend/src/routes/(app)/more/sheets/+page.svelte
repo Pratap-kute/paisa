@@ -3,6 +3,9 @@
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { ajax } from "$lib/core/utils";
   import * as toast from "$lib/core/toast";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let modalOpen = $state(false);
   function openCreateModal() {
@@ -45,24 +48,25 @@
   help="Filename without any extension"
 />
 
-<section class="section">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-6 mx-auto">
-        <div class="is-flex is-align-items-center is-justify-content-center mt-5">
-          <div class="field">
-            <p class="control">
-              <button class="button is-medium is-link" onclick={(_e) => openCreateModal()}>
-                <span class="icon is-small">
-                  <i class="fas fa-file-circle-plus"></i>
-                </span>
-                <span>Create</span>
-              </button>
-            </p>
-            <p class="mt-2 has-text-grey has-text-bold">Create your first sheet</p>
-          </div>
-        </div>
+<Page width="analysis">
+  <PageHeader
+    title="Sheets"
+    description="Create and manage custom financial spreadsheets"
+  />
+
+  <Section>
+    <div class="is-flex is-align-items-center is-justify-content-center mt-5">
+      <div class="field">
+        <p class="control">
+          <button class="button is-medium is-link" onclick={(_e) => openCreateModal()}>
+            <span class="icon is-small">
+              <i class="fas fa-file-circle-plus"></i>
+            </span>
+            <span>Create</span>
+          </button>
+        </p>
+        <p class="mt-2 has-text-grey has-text-bold">Create your first sheet</p>
       </div>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>

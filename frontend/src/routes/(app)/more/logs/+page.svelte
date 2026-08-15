@@ -3,6 +3,9 @@
   import { ajax, type Log } from "$lib/core/utils";
   import VirtualList from "svelte-tiny-virtual-list";
   import _ from "lodash";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   let logs: Log[] = $state([]);
   const ITEM_SIZE = 20;
@@ -30,49 +33,46 @@
   }
 </script>
 
-<section class="section tab-price">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="columns">
-          <div class="column is-12">
-            <div class="box px-2 paisa-overflow-x-auto">
-              <VirtualList
-                width="100%"
-                height={window.innerHeight - 130}
-                itemCount={logs.length}
-                itemSize={ITEM_SIZE}
+<Page width="fluid">
+  <PageHeader
+    title="Logs"
+    description="Application log viewer with level filtering and structured fields"
+  />
+
+  <Section>
+    <div class="box px-2 paisa-overflow-x-auto">
+      <VirtualList
+        width="100%"
+        height={window.innerHeight - 130}
+        itemCount={logs.length}
+        itemSize={ITEM_SIZE}
+      >
+        <svelte:fragment slot="item" let:index let:style>
+          {@const log = logs[index]}
+          {@const fields = _.omit(log, ["time", "level", "msg"])}
+          <div {style}>
+            <div class="is-flex log is-align-items-baseline" style="min-width: 1000px;">
+              <div class="time is-size-7">{log.time.format("YYYY-MM-DD HH:mm:ss")}</div>
+              <div
+                class="is-size-7 tag is-small is-light invertable py-0 log-level {levelClass(
+                  log.level
+                )}"
               >
-                <svelte:fragment slot="item" let:index let:style>
-                  {@const log = logs[index]}
-                  {@const fields = _.omit(log, ["time", "level", "msg"])}
-                  <div {style}>
-                    <div class="is-flex log is-align-items-baseline" style="min-width: 1000px;">
-                      <div class="time is-size-7">{log.time.format("YYYY-MM-DD HH:mm:ss")}</div>
-                      <div
-                        class="is-size-7 tag is-small is-light invertable py-0 log-level {levelClass(
-                          log.level
-                        )}"
-                      >
-                        {log.level}
-                      </div>
-                      <div class="msg paisa-truncate" title={log.msg}>{log.msg}</div>
-                      <div class="fields is-size-7 paisa-truncate" title={formatFields(log)}>
-                        {#each Object.entries(fields) as [key, value]}
-                          <span class="px-1 field"><span>{key}</span>=<span>{value}</span></span>
-                        {/each}
-                      </div>
-                    </div>
-                  </div>
-                </svelte:fragment>
-              </VirtualList>
+                {log.level}
+              </div>
+              <div class="msg paisa-truncate" title={log.msg}>{log.msg}</div>
+              <div class="fields is-size-7 paisa-truncate" title={formatFields(log)}>
+                {#each Object.entries(fields) as [key, value]}
+                  <span class="px-1 field"><span>{key}</span>=<span>{value}</span></span>
+                {/each}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </svelte:fragment>
+      </VirtualList>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>
 
 <style lang="scss">
   .log {
