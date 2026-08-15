@@ -21,7 +21,7 @@ var icon []byte
 
 func main() {
 	decimal.MarshalJSONWithoutQuotes = true
-	// https://github.com/wailsapp/wails/issues/2977
+	// Set the GPU policy for Linux based on the environment variable "PAISA_GPU_POLICY"
 	linuxGpuPolicy := linux.WebviewGpuPolicyOnDemand
 
 	if gpuPolicyConfig := os.Getenv("PAISA_GPU_POLICY"); gpuPolicyConfig != "" {
