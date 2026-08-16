@@ -37,6 +37,8 @@ async function recordAndVerify(dir: string, route: string, name: string) {
   const data = await request(route);
 
   const filename = join(dir, name + ".json");
+  const regenerate = Deno.env.get("REGENERATE") === "true";
+
   let exists = true;
   try {
     Deno.statSync(filename);
@@ -44,10 +46,13 @@ async function recordAndVerify(dir: string, route: string, name: string) {
     if (error instanceof Deno.errors.NotFound) exists = false;
     else throw error;
   }
-  if (exists && Deno.env.get("REGENERATE") !== "true") {
+
+  if (exists && !regenerate) {
     const current = JSON.parse(Deno.readTextFileSync(filename));
     expect(withoutGeneratedIds(data)).toEqual(withoutGeneratedIds(current));
+    return;
   }
+
   Deno.writeTextFileSync(filename, JSON.stringify(data, null, 2));
 }
 

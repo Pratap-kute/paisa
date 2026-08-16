@@ -106,21 +106,12 @@ func ComputeBreakdown(db *gorm.DB, ps []posting.Posting, leaf bool, group string
 		}, decimal.Zero)
 	}
 
-	var xirr decimal.Decimal
-	var gainAmount decimal.Decimal
-	var absoluteReturn decimal.Decimal
-
-	if utils.IsCheckingAccount(group) {
-		xirr = decimal.Zero
-		gainAmount = decimal.Zero
-		absoluteReturn = decimal.Zero
-	} else {
-		xirr = service.XIRR(db, ps)
-		netInvestment := investmentAmount.Sub(withdrawalAmount)
-		gainAmount = marketAmount.Sub(netInvestment)
-		if !investmentAmount.IsZero() {
-			absoluteReturn = gainAmount.Div(investmentAmount)
-		}
+	xirr := service.XIRR(db, ps)
+	netInvestment := investmentAmount.Sub(withdrawalAmount)
+	gainAmount := marketAmount.Sub(netInvestment)
+	absoluteReturn := decimal.Zero
+	if !investmentAmount.IsZero() {
+		absoluteReturn = marketAmount.Sub(netInvestment).Div(investmentAmount)
 	}
 	return AssetBreakdown{
 		InvestmentAmount: investmentAmount,

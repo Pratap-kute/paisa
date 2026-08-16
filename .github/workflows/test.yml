@@ -66,6 +66,24 @@ jobs:
           retention-days: 7
           path: coverage/
 
+  integration:
+    name: API Regression Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v30
+      - uses: nix-community/cache-nix-action@v6
+        with:
+          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
+      - name: Install dependencies
+        run: nix develop --command bash -c "cd frontend && deno install"
+      - name: Build backend binary
+        run: nix develop --command bash -c "cd backend && make build"
+      - name: API regression tests
+        run: nix develop --command bash -c "cd frontend && TZ=UTC deno task test:integration"
+
   e2e:
     name: Browser E2E Tests
     runs-on: ubuntu-latest
