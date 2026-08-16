@@ -25,6 +25,7 @@
   import { page } from "$app/stores";
   import Page from "$lib/components/layout/Page.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import LedgerBalance from "$lib/components/ledger/LedgerBalance.svelte";
 
   interface Props {
     data: PageData;
@@ -241,50 +242,6 @@
   let sidebarOpen = $state(true);
   let outputOpen = $state(true);
   let copiedOutput = $state(false);
-
-  interface FormattedBalanceLine {
-    type: "divider" | "entry" | "raw";
-    amount?: string;
-    isNegative?: boolean;
-    commodity?: string;
-    isCurrency?: boolean;
-    account?: string;
-    indent?: number;
-    rawText?: string;
-  }
-
-  let parsedOutput = $derived.by(() => {
-    const raw = $editorState.output;
-    if (!raw) return [];
-    const lines = raw.split("\n");
-    return lines.map((line): FormattedBalanceLine => {
-      const trimmed = line.trim();
-      if (!trimmed) return { type: "raw", rawText: "" };
-      if (trimmed.startsWith("---") || trimmed.startsWith("===")) {
-        return { type: "divider", rawText: line };
-      }
-      const match = line.match(/^(\s*)([-+]?[0-9,]+(?:\.[0-9]+)?)\s+([A-Za-z0-9_$-]+)(?:\s+(.*))?$/);
-      if (match) {
-        const leading = match[1] || "";
-        const amount = match[2];
-        const commodity = match[3];
-        const account = match[4] ? match[4].trim() : "";
-        const isNegative = amount.startsWith("-");
-        const isCurrency = commodity.toUpperCase() === "INR" || commodity === "$" || commodity.toUpperCase() === "USD" || commodity.toUpperCase() === "EUR";
-        return {
-          type: "entry",
-          amount,
-          isNegative,
-          commodity,
-          isCurrency,
-          account,
-          indent: Math.min(Math.floor(leading.length / 2), 6),
-          rawText: line,
-        };
-      }
-      return { type: "raw", rawText: line };
-    });
-  });
 
   async function copyOutput() {
     if ($editorState.output) {
@@ -548,43 +505,8 @@
             </button>
           </div>
 
-          <div class="paisa-output-hint-bar">
-            <span class="icon is-small">
-              <i class="fa-solid fa-circle-info"></i>
-            </span>
-            <span>Non-cash holdings show <b>raw units</b>. For calculated market values, see <b>Portfolio</b>.</span>
-          </div>
-
-          <div class="paisa-pane-content paisa-output-scroll">
-            <div class="paisa-bal-table">
-              {#each parsedOutput as item}
-                {#if item.type === "divider"}
-                  <div class="paisa-bal-divider-row">
-                    <div class="paisa-bal-divider-line"></div>
-                  </div>
-                {:else if item.type === "entry"}
-                  <div class="paisa-bal-row" class:has-account={!!item.account}>
-                    <span class="paisa-bal-amount" class:is-negative={item.isNegative}>
-                      {item.amount}
-                    </span>
-                    <span class="paisa-bal-tag">
-                      {#if item.isCurrency}
-                        <span class="paisa-bal-currency">{item.commodity}</span>
-                      {:else}
-                        <span class="paisa-bal-commodity" title="Fund / Commodity units (not INR value)">{item.commodity}</span>
-                      {/if}
-                    </span>
-                    <span class="paisa-bal-account" style="padding-left: {(item.indent || 0) * 12}px">
-                      {item.account || ""}
-                    </span>
-                  </div>
-                {:else if item.rawText}
-                  <div class="paisa-bal-raw-row">
-                    <span class="paisa-bal-raw">{item.rawText}</span>
-                  </div>
-                {/if}
-              {/each}
-            </div>
+          <div class="paisa-pane-content">
+            <LedgerBalance output={$editorState.output} />
           </div>
         </section>
       {/if}
