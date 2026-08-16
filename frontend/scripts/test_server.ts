@@ -1,6 +1,6 @@
-import { join } from "@std/path";
+import { fromFileUrl, join } from "@std/path";
 
-const root = new URL("../", import.meta.url).pathname;
+const root = fromFileUrl(new URL("../", import.meta.url));
 const fixture = await Deno.makeTempDir({ prefix: "paisa-browser-" });
 const binary = join(
   fixture,

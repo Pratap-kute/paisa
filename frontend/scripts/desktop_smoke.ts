@@ -1,4 +1,4 @@
-import { basename, dirname, join } from "@std/path";
+import { basename, dirname, fromFileUrl, join } from "@std/path";
 
 const configured = Deno.env.get("PAISA_DESKTOP_BINARY");
 if (!configured) {
@@ -7,7 +7,7 @@ if (!configured) {
   );
 }
 const executable = Deno.realPathSync(configured);
-const root = new URL("../", import.meta.url).pathname;
+const root = fromFileUrl(new URL("../", import.meta.url));
 const fixture = await Deno.makeTempDir({ prefix: "paisa-desktop-" });
 await Deno.copyFile(
   join(root, "tests/fixture/inr/main.ledger"),
