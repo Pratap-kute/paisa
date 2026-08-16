@@ -1,10 +1,11 @@
 { pkgs ? import <nixpkgs> { }, hledger ? import <nixpkgs> { }
-, deno ? pkgs.deno, playwright ? pkgs.playwright-driver }:
+, deno ? pkgs.deno, playwright ? pkgs.playwright-driver
+, unstable ? pkgs }:
 
 pkgs.mkShell {
   nativeBuildInputs = [
     pkgs.go
-    pkgs.golangci-lint
+    unstable.golangci-lint
     pkgs.gotools
     pkgs.gopls
     pkgs.sqlite
