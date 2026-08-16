@@ -1,16 +1,29 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import Actions from "$lib/components/layout/Actions.svelte";
-  import { month, year, dateMax, dateMin, dateRangeOption } from "../../../store";
+  import {
+    month,
+    year,
+    dateMax,
+    dateMin,
+    dateRangeOption,
+  } from "../../../store";
   import {
     cashflowExpenseDepth,
     cashflowExpenseDepthAllowed,
     cashflowIncomeDepth,
     cashflowIncomeDepthAllowed,
-    obscure
+    obscure,
   } from "../../../persisted_store";
+  // @ts-ignore
   import _ from "lodash";
-  import { financialYear, forEachFinancialYear, helpUrl, isMobile, now } from "$lib/core/utils";
+  import {
+    financialYear,
+    forEachFinancialYear,
+    helpUrl,
+    isMobile,
+    now,
+  } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { get } from "svelte/store";
   import DateRange from "$lib/components/ui/DateRange.svelte";
@@ -20,7 +33,7 @@
   import InputRange from "$lib/components/ui/InputRange.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
   interface Props {
-    isBurger?: boolean;
+    isBurger?: boolean | null;
   }
 
   let { isBurger = $bindable(null) }: Props = $props();
@@ -36,7 +49,7 @@
     { icon: "fa-circle-check", color: "success", label: "Cleared" },
     { icon: "fa-circle-check", color: "warning-dark", label: "Cleared late" },
     { icon: "fa-exclamation-triangle", color: "danger", label: "Past due" },
-    { icon: "fa-circle-check", color: "grey", label: "Upcoming" }
+    { icon: "fa-circle-check", color: "grey", label: "Upcoming" },
   ];
 
   interface Link {
@@ -59,31 +72,40 @@
       label: "Cash Flow",
       href: "/cash_flow",
       children: [
-        { label: "Income Statement", href: "/income_statement", financialYearPicker: true },
+        {
+          label: "Income Statement",
+          href: "/income_statement",
+          financialYearPicker: true,
+        },
         { label: "Monthly", href: "/monthly", dateRangeSelector: true },
         {
           label: "Yearly",
           href: "/yearly",
           financialYearPicker: true,
-          maxDepthSelector: true
+          maxDepthSelector: true,
         },
         {
           label: "Recurring",
           href: "/recurring",
           help: "recurring",
           monthPicker: true,
-          recurringIcons: true
-        }
-      ]
+          recurringIcons: true,
+        },
+      ],
     },
     {
       label: "Expenses",
       href: "/expense",
       children: [
-        { label: "Monthly", href: "/monthly", monthPicker: true, dateRangeSelector: true },
+        {
+          label: "Monthly",
+          href: "/monthly",
+          monthPicker: true,
+          dateRangeSelector: true,
+        },
         { label: "Yearly", href: "/yearly", financialYearPicker: true },
-        { label: "Budget", href: "/budget", help: "budget", monthPicker: true }
-      ]
+        { label: "Budget", href: "/budget", help: "budget", monthPicker: true },
+      ],
     },
     {
       label: "Assets",
@@ -93,9 +115,18 @@
         { label: "Networth", href: "/networth", dateRangeSelector: true },
         { label: "Investment", href: "/investment" },
         { label: "Gain", href: "/gain" },
-        { label: "Allocation", href: "/allocation", help: "allocation-targets" },
-        { label: "Analysis", href: "/analysis", tag: "alpha", help: "analysis" }
-      ]
+        {
+          label: "Allocation",
+          href: "/allocation",
+          help: "allocation-targets",
+        },
+        {
+          label: "Analysis",
+          href: "/analysis",
+          tag: "alpha",
+          help: "analysis",
+        },
+      ],
     },
     {
       label: "Liabilities",
@@ -104,8 +135,8 @@
         { label: "Balance", href: "/balance" },
         { label: "Credit Cards", href: "/credit_cards", help: "credit-cards" },
         { label: "Repayment", href: "/repayment" },
-        { label: "Interest", href: "/interest" }
-      ]
+        { label: "Interest", href: "/interest" },
+      ],
     },
     { label: "Income", href: "/income" },
     {
@@ -113,23 +144,33 @@
       href: "/ledger",
       children: [
         { label: "Import", href: "/import", help: "import" },
-        { label: "Editor", href: "/editor", help: "editor", disablePreload: true },
+        {
+          label: "Editor",
+          href: "/editor",
+          help: "editor",
+          disablePreload: true,
+        },
         { label: "Transactions", href: "/transaction", help: "bulk-edit" },
         { label: "Postings", href: "/posting" },
-        { label: "Price", href: "/price" }
-      ]
+        { label: "Price", href: "/price" },
+      ],
     },
     {
       label: "More",
       href: "/more",
       children: [
         { label: "Configuration", href: "/config", help: "config" },
-        { label: "Sheets", href: "/sheets", help: "sheets", disablePreload: true },
+        {
+          label: "Sheets",
+          href: "/sheets",
+          help: "sheets",
+          disablePreload: true,
+        },
         { label: "Goals", href: "/goals", help: "goals" },
         { label: "Doctor", href: "/doctor" },
-        { label: "Logs", href: "/logs" }
-      ]
-    }
+        { label: "Logs", href: "/logs" },
+      ],
+    },
   ];
 
   const tax = {
@@ -143,9 +184,9 @@
         label: "Schedule AL",
         href: "/schedule_al",
         help: "schedule-al",
-        financialYearPicker: true
-      }
-    ]
+        financialYearPicker: true,
+      },
+    ],
   };
 
   if (USER_CONFIG.default_currency == "INR") {
@@ -159,11 +200,11 @@
 
   let selectedLink: Link = $derived.by(() => {
     if (!normalizedPath) return null;
-    let link = _.find(links, (l) => normalizedPath == l.href);
+    let link = _.find(links, (l: Link) => normalizedPath == l.href);
     if (!link) {
       link = _.find(
         links,
-        (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
+        (l: Link) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href),
       );
     }
     return link || null;
@@ -173,21 +214,28 @@
     if (!selectedLink || _.isEmpty(selectedLink.children)) return null;
     let sublink = _.find(
       selectedLink.children,
-      (l) => normalizedPath == selectedLink.href + l.href
+      (l: Link) => normalizedPath == selectedLink.href + l.href,
     );
     if (!sublink) {
-      sublink = _.find(selectedLink.children, (l) =>
-        normalizedPath.startsWith(selectedLink.href + l.href)
+      sublink = _.find(selectedLink.children, (l: Link) =>
+        normalizedPath.startsWith(selectedLink.href + l.href),
       );
     }
     return sublink || null;
   });
 
   let selectedSubSubLink: Link = $derived.by(() => {
-    if (!selectedLink || !selectedSubLink || _.isEmpty(selectedSubLink.children)) return null;
+    if (
+      !selectedLink ||
+      !selectedSubLink ||
+      _.isEmpty(selectedSubLink.children)
+    )
+      return null;
     return (
-      _.find(selectedSubLink.children, (l) =>
-        normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
+      _.find(selectedSubLink.children, (l: Link) =>
+        normalizedPath.startsWith(
+          selectedLink.href + selectedSubLink.href + l.href,
+        ),
       ) || null
     );
   });
@@ -231,7 +279,9 @@
             <a
               class="navbar-item"
               href={link.href}
-              data-sveltekit-preload-data={link.disablePreload ? "tap" : "hover"}
+              data-sveltekit-preload-data={link.disablePreload
+                ? "tap"
+                : "hover"}
               class:is-active={normalizedPath == link.href}>{link.label}</a
             >
           {/if}
@@ -242,7 +292,8 @@
               class="navbar-link paisa-button-reset is-fullwidth has-text-left"
               class:is-active={normalizedPath.startsWith(link.href)}
               onclick={(e) =>
-                isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}
+                isMobile() &&
+                e.currentTarget.parentElement?.classList.toggle("is-active")}
               >{link.label}</button
             >
             <div class="navbar-dropdown {!isMobile() && 'is-boxed'}">
@@ -252,32 +303,36 @@
                   <a
                     class="navbar-item"
                     {href}
-                    data-sveltekit-preload-data={sublink.disablePreload ? "tap" : "hover"}
-                    class:is-active={normalizedPath.startsWith(href)}>{sublink.label}</a
+                    data-sveltekit-preload-data={sublink.disablePreload
+                      ? "tap"
+                      : "hover"}
+                    class:is-active={normalizedPath.startsWith(href)}
+                    >{sublink.label}</a
                   >
                 {:else}
-                  <div class="nested has-dropdown navbar-item">
-                    <div
-                      class="navbar-link is-arrowless is-flex is-justify-content-space-between"
+                  <div class="nested has-dropdown">
+                    <button
+                      type="button"
+                      class="paisa-button-reset nested-menu-trigger is-flex is-align-items-center is-justify-content-space-between"
                       class:is-active={normalizedPath.startsWith(href)}
-                      role="button"
-                      tabindex="0"
+                      aria-haspopup="true"
                       onclick={(e) =>
-                        isMobile() && e.currentTarget.parentElement?.classList.toggle("is-active")}
-                      onkeydown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.currentTarget.parentElement?.classList.toggle("is-active");
-                        }
-                      }}
+                        isMobile() &&
+                        e.currentTarget.parentElement?.classList.toggle(
+                          "is-active",
+                        )}
                     >
                       <span>{sublink.label}</span>
+
                       <span class="icon is-small">
                         <i
-                          class="fas {isMobile() ? 'fa-angle-down' : 'fa-angle-right'}"
+                          class="fas {isMobile()
+                            ? 'fa-angle-down'
+                            : 'fa-angle-right'}"
                           aria-hidden="true"
                         ></i>
                       </span>
-                    </div>
+                    </button>
 
                     <div class="dropdown-menu">
                       <div class="dropdown-content">
@@ -288,9 +343,11 @@
                             data-sveltekit-preload-data={subsublink.disablePreload
                               ? "tap"
                               : "hover"}
-                            class:is-active={normalizedPath == href + subsublink.href}
-                            >{subsublink.label}</a
+                            class:is-active={normalizedPath ==
+                              href + subsublink.href}
                           >
+                            {subsublink.label}
+                          </a>
                         {/each}
                       </div>
                     </div>
@@ -325,7 +382,9 @@
   </div>
 </nav>
 
-<div class="navbar-subtoolbar is-flex is-justify-content-space-between is-align-items-center">
+<div
+  class="navbar-subtoolbar is-flex is-justify-content-space-between is-align-items-center"
+>
   {#if selectedLink}
     <nav
       class="breadcrumb has-chevron-separator mb-0 is-small"
@@ -335,7 +394,10 @@
         <li>
           <span class="is-inactive">{selectedLink.label}</span>
           {#if selectedLink.help}
-            <a class="p-0 ml-1 has-text-grey" aria-label="Help documentation" href={helpUrl(selectedLink.help)}
+            <a
+              class="p-0 ml-1 has-text-grey"
+              aria-label="Help documentation"
+              href={helpUrl(selectedLink.help)}
               ><span class="icon is-small">
                 <i class="fas fa-circle-question"></i>
               </span></a
@@ -343,7 +405,9 @@
           {/if}
 
           {#if selectedLink.tag}
-            <Badge variant="warning" rounded class="is-small">{selectedLink.tag}</Badge>
+            <Badge variant="warning" rounded class="is-small"
+              >{selectedLink.tag}</Badge
+            >
           {/if}
         </li>
         {#if selectedSubLink}
@@ -351,7 +415,10 @@
             <span class="is-inactive">{selectedSubLink.label}</span>
 
             {#if selectedSubLink.help}
-              <a class="p-0 ml-1 has-text-grey" aria-label="Sublink help documentation" href={helpUrl(selectedSubLink.help)}
+              <a
+                class="p-0 ml-1 has-text-grey"
+                aria-label="Sublink help documentation"
+                href={helpUrl(selectedSubLink.help)}
                 ><span class="icon is-small">
                   <i class="fas fa-circle-question"></i>
                 </span></a
@@ -359,7 +426,9 @@
             {/if}
 
             {#if selectedSubLink.tag}
-              <Badge variant="warning" rounded class="is-small mr-2">{selectedSubLink.tag}</Badge>
+              <Badge variant="warning" rounded class="is-small mr-2"
+                >{selectedSubLink.tag}</Badge
+              >
             {/if}
           </li>
         {/if}
@@ -371,7 +440,11 @@
             </li>
           {:else if selectedLink.href + selectedSubLink.href != normalizedPath}
             <li>
-              <span class="is-inactive">{decodeURIComponent(_.last(normalizedPath.split("/")) || "")}</span>
+              <span class="is-inactive"
+                >{decodeURIComponent(
+                  _.last(normalizedPath.split("/")) || "",
+                )}</span
+              >
             </li>
           {/if}
         {/if}
@@ -396,7 +469,11 @@
     {#if selectedSubLink?.maxDepthSelector && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
       <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
-          <button class="button is-small" aria-label="Depth settings" aria-haspopup="true">
+          <button
+            class="button is-small"
+            aria-label="Depth settings"
+            aria-haspopup="true"
+          >
             <span class="icon is-small">
               <i class="fas fa-sliders"></i>
             </span>
@@ -421,7 +498,11 @@
 
     {#if selectedSubLink?.dateRangeSelector || selectedLink?.dateRangeSelector}
       <div>
-        <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
+        <DateRange
+          bind:value={$dateRangeOption}
+          dateMin={$dateMin}
+          dateMax={$dateMax}
+        />
       </div>
     {/if}
 

@@ -30,8 +30,9 @@
     background-color: transparent !important;
     color: var(--paisa-navbar-text);
     border-radius: var(--paisa-radius-sm);
-    transition: background-color var(--paisa-transition-fast), color
-      var(--paisa-transition-fast);
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
     padding: 0.5rem 0.75rem;
 
     &:hover {
@@ -73,7 +74,7 @@
   }
 
   .navbar-item.has-dropdown.is-hoverable {
-    > button.navbar-link {
+    >button.navbar-link {
       &::after {
         border-color: var(--paisa-text-muted);
         transition: border-color var(--paisa-transition-fast);
@@ -103,8 +104,9 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--paisa-radius-full);
-    transition: background-color var(--paisa-transition-fast), color
-      var(--paisa-transition-fast);
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
     box-shadow: none !important;
 
     &:hover,
@@ -119,6 +121,7 @@
   }
 }
 
+/* Generic dropdown content */
 .dropdown-content {
   background-color: var(--paisa-dropdown-bg);
   box-shadow: var(--paisa-dropdown-shadow);
@@ -147,8 +150,9 @@
     padding: 0.5rem 1rem;
     font-size: var(--paisa-font-size-sm);
     white-space: nowrap;
-    transition: background-color var(--paisa-transition-fast), color
-      var(--paisa-transition-fast);
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
 
     &:hover {
       background-color: var(--paisa-surface-hover);
@@ -198,57 +202,152 @@
   }
 }
 
+/*
+ * Nested navbar dropdown.
+ *
+ * Important:
+ * The wrapper must NOT behave like a Bulma navbar-item.
+ * Tax is only a trigger for another dropdown, so we own its styling here.
+ */
 .nested.has-dropdown {
-  &:hover > .dropdown-menu,
-  &.is-active > .dropdown-menu {
+  position: relative;
+  width: 100%;
+
+  /*
+   * Protect against Bulma navbar-item background styles if
+   * navbar-item accidentally remains on this wrapper.
+   */
+  background-color: transparent !important;
+  color: var(--paisa-text-primary) !important;
+
+  &:hover,
+  &:focus,
+  &:focus-within,
+  &:active {
+    background-color: transparent !important;
+  }
+
+  &:hover>.dropdown-menu,
+  &.is-active>.dropdown-menu {
     display: block;
   }
 
-  > .navbar-link {
-    padding: 0;
-    width: 100%;
+  /*
+   * Tax row.
+   *
+   * Do not use Bulma's navbar-link class on this button.
+   * It should use:
+   *
+   * paisa-button-reset nested-menu-trigger
+   */
+  >.nested-menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    > span.icon {
-      float: right;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin: 0;
+
+    border: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+    outline: none;
+
+    background-color: transparent !important;
+    color: var(--paisa-text-primary) !important;
+
+    font: inherit;
+    font-size: var(--paisa-font-size-sm);
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition: color var(--paisa-transition-fast);
+
+    /*
+     * Keep the background transparent in every pointer/focus state.
+     * This prevents the persistent dark/blue Tax row.
+     */
+    &:hover,
+    &:focus,
+    &:focus-within,
+    &:active {
+      background-color: transparent !important;
+      color: var(--paisa-text-primary) !important;
+      box-shadow: none !important;
+    }
+
+    /*
+     * Keyboard-only accessibility indicator.
+     * Mouse clicking will not leave a blue background.
+     */
+    &:focus-visible {
+      outline: 1px solid var(--paisa-border-default);
+      outline-offset: -1px;
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+      flex-shrink: 0;
     }
   }
 
-  .dropdown-menu {
-    top: -15px;
-    margin-left: calc(100% - 10px);
+  /*
+   * Third-level menu.
+   * Start exactly at the right edge of the parent menu.
+   */
+  >.dropdown-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
 
-    .dropdown-content {
-      box-shadow: var(--paisa-dropdown-shadow);
-      background-color: var(--paisa-dropdown-bg);
+    margin-left: 0;
+    padding-top: 0;
+  }
 
-      a.navbar-item {
-        color: var(--paisa-text-primary) !important;
-        padding: 0.4rem 1rem;
-        transition: background-color var(--paisa-transition-fast), color
-          var(--paisa-transition-fast);
+  >.dropdown-menu>.dropdown-content {
+    background-color: var(--paisa-dropdown-bg);
+    border: 1px solid var(--paisa-dropdown-border);
+    border-radius: var(--paisa-radius-md);
+    box-shadow: var(--paisa-dropdown-shadow);
 
-        &:hover {
-          background-color: var(--paisa-surface-hover) !important;
-          color: var(--paisa-brand-primary) !important;
-        }
+    a.navbar-item {
+      color: var(--paisa-text-primary) !important;
+      padding: 0.5rem 1rem !important;
 
-        &.is-active {
-          background-color: var(--paisa-brand-primary-light) !important;
-          color: var(--paisa-brand-primary) !important;
-          font-weight: var(--paisa-font-weight-semibold);
-        }
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+        font-weight: var(--paisa-font-weight-semibold);
       }
     }
   }
 
   @media screen and (max-width: 768px) {
-    .dropdown-menu {
+    >.dropdown-menu {
       position: static;
-      margin-left: 0;
+      left: auto;
+      top: auto;
 
-      .dropdown-content {
+      margin-left: 0;
+      padding-top: 0;
+
+      >.dropdown-content {
         box-shadow: none !important;
         background-color: transparent;
+        border: 0;
       }
     }
   }
@@ -281,7 +380,7 @@ nav.breadcrumb {
     align-items: center;
     line-height: var(--paisa-line-height-normal);
 
-    & + li::before {
+    &+li::before {
       padding: 0 0.4rem;
       font-size: 0.65rem;
       vertical-align: middle;
@@ -320,7 +419,7 @@ nav.breadcrumb {
   }
 }
 
-.breadcrumb.has-chevron-separator li + li::before {
+.breadcrumb.has-chevron-separator li+li::before {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   content: "\f054";
@@ -339,6 +438,7 @@ nav.breadcrumb {
     .navbar-dropdown {
       display: none;
     }
+
     &.is-active .navbar-dropdown {
       display: block;
     }
