@@ -44,7 +44,9 @@
 </script>
 
 <div
-  class="box paisa-card {variantClasses[variant]} {paddingClasses[padding]} {interactive ? 'paisa-card-interactive' : ''} {className}"
+  class="box paisa-card {variantClasses[variant]} {paddingClasses[
+    padding
+  ]} {interactive ? 'paisa-card-interactive' : ''} {className}"
   {style}
   {...restProps}
 >
@@ -62,12 +64,16 @@
 </div>
 
 <style lang="scss">
-  .paisa-card {
+  .box.paisa-card {
     width: 100%;
+    margin-bottom: 0;
     border-radius: var(--paisa-radius-md);
     background-color: var(--paisa-surface-card);
     color: var(--paisa-text-primary);
-    transition: transform var(--paisa-transition-fast), box-shadow var(--paisa-transition-fast), border-color var(--paisa-transition-fast);
+    transition:
+      transform var(--paisa-transition-fast),
+      box-shadow var(--paisa-transition-fast),
+      border-color var(--paisa-transition-fast);
   }
 
   .paisa-card-default {
@@ -85,11 +91,21 @@
     box-shadow: none;
   }
 
-  .paisa-card-pad-none { padding: 0; }
-  .paisa-card-pad-xs { padding: var(--paisa-space-2); }
-  .paisa-card-pad-sm { padding: var(--paisa-space-3); }
-  .paisa-card-pad-md { padding: var(--paisa-space-4); }
-  .paisa-card-pad-lg { padding: var(--paisa-space-5); }
+  .paisa-card-pad-none {
+    padding: 0;
+  }
+  .paisa-card-pad-xs {
+    padding: var(--paisa-space-2);
+  }
+  .paisa-card-pad-sm {
+    padding: var(--paisa-space-3);
+  }
+  .paisa-card-pad-md {
+    padding: var(--paisa-space-4);
+  }
+  .paisa-card-pad-lg {
+    padding: var(--paisa-space-5);
+  }
 
   .paisa-card-interactive {
     cursor: pointer;
