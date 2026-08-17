@@ -32,7 +32,7 @@
 
     "playwright": "deno run -A npm:playwright@1.61.1",
 
-    "clean": "rm -rf .svelte-kit ../backend/web/static coverage playwright-report test-results"
+    "clean": "rm -rf .svelte-kit .vite node_modules/.vite ../backend/web/static coverage playwright-report test-results"
   },
   "imports": {
     "$lib": "./src/lib",

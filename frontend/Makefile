@@ -28,7 +28,7 @@ build: ## Build SvelteKit static site into backend/web/static
 watch: ## Watch and rebuild frontend assets on change
 	deno task build:watch
 
-clean: ## Clean build artifacts and static output
+clean: ## Remove frontend build output, caches, and test artifacts
 	deno task clean
 
 ##@ Testing
