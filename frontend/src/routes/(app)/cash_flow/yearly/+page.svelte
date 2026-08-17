@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import { createFlow } from "$lib/charts/cash_flow";
-  import { ajax, depth, firstName, rem, type Graph, type Legend, type Posting } from "$lib/core/utils";
+  import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, year } from "../../../../store";
   import {
     setCashflowDepthAllowed,
@@ -97,11 +97,7 @@
       preserveChildren
       onresize={(dim) => flowChart.resize(dim)}
     >
-      <svg
-        id="d3-expense-flow"
-        height={window.innerHeight - rem(210)}
-        width="100%"
-      />
+      <svg id="d3-expense-flow" width="100%" />
     </ChartFrame>
   </Section>
 </Page>

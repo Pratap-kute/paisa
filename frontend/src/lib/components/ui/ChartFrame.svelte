@@ -54,7 +54,18 @@
 
   $effect(() => {
     if (frameBody && onresize) {
-      const cleanup = observeElementSize(frameBody, onresize);
+      const body = frameBody;
+      const resize = onresize;
+      const cleanup = observeElementSize(body, (dimensions) => {
+        if (type === "timeline") {
+          const svg = body.querySelector("svg");
+          if (svg) {
+            svg.setAttribute("width", String(dimensions.width));
+            svg.setAttribute("height", String(dimensions.height));
+          }
+        }
+        resize(dimensions);
+      });
       return cleanup;
     }
   });
@@ -174,8 +185,19 @@
   }
 
   /* Semantic Types */
+  /* Analysis timelines: fill a large share of the viewport without
+     becoming a giant empty canvas on tall monitors. Dashboard charts
+     stay on dashboard-timeline and remain compact. */
   .paisa-chart-type-timeline {
-    min-height: clamp(320px, 42vh, 520px);
+    flex: 1 1 auto;
+    height: clamp(380px, 52vh, 560px);
+    min-height: 380px;
+    max-height: 560px;
+  }
+
+  .paisa-chart-type-timeline .paisa-chart-frame-body {
+    min-height: 0;
+    height: 100%;
   }
 
   .paisa-chart-type-dashboard-timeline {

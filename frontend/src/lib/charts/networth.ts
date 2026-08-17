@@ -291,6 +291,7 @@ export function createNetworthChart(
 
   function resize(dimensions: { width: number; height: number }) {
     if (dimensions.width <= 0 || dimensions.height <= 0) return;
+    svg.attr("width", dimensions.width).attr("height", dimensions.height);
     currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
     currentHeight = Math.max(
       50,
