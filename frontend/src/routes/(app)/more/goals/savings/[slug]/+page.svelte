@@ -8,7 +8,10 @@
     type Forecast,
     type Point,
     type Posting,
-    type AssetBreakdown
+    type AssetBreakdown,
+    firstName,
+    restName,
+    postingUrl,
   } from "$lib/core/utils";
   import { onMount, tick, onDestroy } from "svelte";
   import ARIMAPromise from "arima/async";
@@ -18,14 +21,13 @@
     findBreakPoints,
     project,
     solvePMTOrNper,
-    renderInvestmentTimeline
+    renderInvestmentTimeline,
   } from "$lib/domain/goals";
   import _ from "lodash";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import type { PageData } from "./$types";
-  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
   import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
-  import { iconGlyph } from "$lib/core/icon";
+  import { iconGlyph, iconify } from "$lib/core/icon";
   import dayjs from "dayjs";
   import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
@@ -41,9 +43,9 @@
 
   let { data }: Props = $props();
 
-  let svg: Element = $state();
-  let investmentTimelineSvg: Element = $state();
-  let targetDateObject: dayjs.Dayjs = $state();
+  let svg: Element | undefined = $state();
+  let investmentTimelineSvg: Element | undefined = $state();
+  let targetDateObject: dayjs.Dayjs | undefined = $state();
   let savingsTotal = $state(0),
     investmentTotal = $state(0),
     gainTotal = $state(0),
@@ -81,15 +83,15 @@
       name,
       xirr,
       paymentPerPeriod,
-      balances
-    } = await ajax("/api/goals/savings/:name", null, data));
+      balances,
+    } = await ajax("/api/goals/savings/:name", null as any, data as Record<string, string>));
 
     savingsTimeline = savingsTimeline || [];
     postings = postings || [];
     balances = balances || {};
 
     latestPostings = _.chain(postings)
-      .sortBy((p) => p.date)
+      .sortBy((p: Posting) => p.date)
       .reverse()
       .take(100)
       .value();
@@ -103,23 +105,38 @@
       rate,
       savingsTotal,
       paymentPerPeriod,
-      targetDate
+      targetDate,
     ));
 
     let predictionsTimeline: Forecast[] = [];
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
-      predictionsTimeline = project(targetSavings, rate, targetDateObject, pmt, savingsTotal);
+      predictionsTimeline = project(
+        targetSavings,
+        rate,
+        targetDateObject,
+        pmt,
+        savingsTotal,
+      );
     } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
       predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
     }
 
     await tick();
-    breakPoints = findBreakPoints(savingsTimeline.concat(predictionsTimeline), targetSavings);
-    destroyCallback = renderProgress(savingsTimeline, predictionsTimeline, breakPoints, svg, {
-      targetSavings
-    });
+    breakPoints = findBreakPoints(
+      savingsTimeline.concat(predictionsTimeline),
+      targetSavings,
+    );
+    destroyCallback = renderProgress(
+      savingsTimeline,
+      predictionsTimeline,
+      breakPoints,
+      svg,
+      {
+        targetSavings,
+      },
+    );
 
     renderInvestmentTimeline(postings, investmentTimelineSvg, pmt);
   });
@@ -151,7 +168,9 @@
       title="Target Savings"
       value={formatCurrency(targetSavings)}
       color={COLORS.primary}
-      subtitle={targetDateObject?.isValid() ? targetDateObject.format("DD MMM YYYY") : null}
+      subtitle={targetDateObject?.isValid()
+        ? targetDateObject.format("DD MMM YYYY")
+        : undefined}
     />
 
     {#if pmt > 0}
@@ -159,7 +178,9 @@
         title="Monthly Investment needed"
         value={formatCurrency(pmt)}
         color={COLORS.secondary}
-        subtitle={rate > 0 ? `Expected <b>${formatFloat(rate, 2)}</b> rate of return` : null}
+        subtitle={rate > 0
+          ? `Expected <b>${formatFloat(rate, 2)}</b> rate of return`
+          : undefined}
       />
     {/if}
   </MetricStrip>
@@ -197,16 +218,34 @@
           {#snippet children({ groupedPostings })}
             <div>
               {#each groupedPostings as posting}
-                <PostingCard
-                  {posting}
-                  color={posting.amount >= 0
-                    ? posting.account.startsWith("Income:CapitalGains")
+                <a
+                  class="paisa-posting-row"
+                  href={postingUrl(posting)}
+                  style="--paisa-row-accent: {posting.amount >= 0
+                    ? posting.account.startsWith('Income:CapitalGains')
                       ? COLORS.tertiary
                       : COLORS.secondary
-                    : posting.account.startsWith("Income:CapitalGains")
+                    : posting.account.startsWith('Income:CapitalGains')
                       ? COLORS.secondary
-                      : COLORS.tertiary}
-                />
+                      : COLORS.tertiary}"
+                >
+                  <span class="paisa-posting-main">
+                    <span class="paisa-posting-payee">{posting.payee}</span>
+                    <span class="paisa-posting-date"
+                      >{posting.date.format("DD MMM YYYY")}</span
+                    >
+                  </span>
+                  <span class="paisa-posting-meta">
+                    <span class="paisa-posting-account custom-icon">
+                      {iconify(restName(posting.account), {
+                        group: firstName(posting.account),
+                      })}
+                    </span>
+                    <span class="paisa-posting-amount"
+                      >{formatCurrency(posting.amount)}</span
+                    >
+                  </span>
+                </a>
               {/each}
             </div>
           {/snippet}
@@ -234,5 +273,66 @@
     display: flex;
     flex-direction: column;
     gap: var(--paisa-space-4);
+  }
+
+  .paisa-posting-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-1);
+    min-height: 54px;
+    padding: var(--paisa-space-2) var(--paisa-space-3);
+    border-left: 2px solid var(--paisa-row-accent);
+    border-radius: var(--paisa-radius-md);
+    border-top: 1px solid var(--paisa-border-default);
+    border-right: 1px solid var(--paisa-border-default);
+    border-bottom: 1px solid var(--paisa-border-default);
+    background: var(--paisa-surface-card);
+    color: var(--paisa-text-secondary);
+    text-decoration: none;
+    margin-bottom: var(--paisa-space-2);
+  }
+
+  .paisa-posting-row:hover {
+    border-color: var(--paisa-border-strong);
+    color: var(--paisa-text-primary);
+  }
+
+  .paisa-posting-main,
+  .paisa-posting-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--paisa-space-2);
+    min-width: 0;
+  }
+
+  .paisa-posting-payee,
+  .paisa-posting-account {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .paisa-posting-payee {
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-secondary);
+  }
+
+  .paisa-posting-date,
+  .paisa-posting-account {
+    flex: 0 0 auto;
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-muted);
+  }
+
+  .paisa-posting-account {
+    flex: 1 1 auto;
+  }
+
+  .paisa-posting-amount {
+    flex: 0 0 auto;
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-primary);
   }
 </style>

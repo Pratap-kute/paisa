@@ -4,21 +4,24 @@
   import _ from "lodash";
   import {
     ajax,
+    firstName,
     secondName,
     type Posting,
     formatCurrency,
     formatPercentage,
-    type Legend
+    type Legend,
+    postingUrl,
+    restName,
   } from "$lib/core/utils";
   import {
     renderMonthlyExpensesTimeline,
     renderCurrentExpensesBreakdown,
-    renderCalendar
+    renderCalendar,
   } from "$lib/charts/expense/monthly";
+  import { iconify } from "$lib/core/icon";
   import { financialColors } from "$lib/theme/chartPalette";
   import { dateRange, month, setAllowedDateRange } from "../../../../store";
   import { writable } from "svelte/store";
-  import PostingCard from "$lib/components/transactions/PostingCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import dayjs from "dayjs";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -29,13 +32,13 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let groups = writable([]);
-  let z: ScaleOrdinal<string, string, never> = $state(),
-    renderer: (ps: Posting[]) => void = $state(),
-    expenses: Posting[] = $state(),
-    grouped_expenses: Record<string, Posting[]> = $state(),
-    grouped_incomes: Record<string, Posting[]> = $state(),
-    grouped_investments: Record<string, Posting[]> = $state(),
-    grouped_taxes: Record<string, Posting[]> = $state(),
+  let z: ScaleOrdinal<string, string, never> | undefined = $state(),
+    renderer: ((ps: Posting[]) => void) | undefined = $state(),
+    expenses: Posting[] | undefined = $state(),
+    grouped_expenses: Record<string, Posting[]> | undefined = $state(),
+    grouped_incomes: Record<string, Posting[]> | undefined = $state(),
+    grouped_investments: Record<string, Posting[]> | undefined = $state(),
+    grouped_taxes: Record<string, Posting[]> | undefined = $state(),
     destroy: () => void;
 
   let legends: Legend[] = $state([]);
@@ -62,31 +65,38 @@
         expenses: grouped_expenses,
         incomes: grouped_incomes,
         investments: grouped_investments,
-        taxes: grouped_taxes
-      }
+        taxes: grouped_taxes,
+      },
     } = await ajax("/api/expense"));
 
-    setAllowedDateRange(_.map(expenses, (e) => e.date));
-    ({ z, destroy, legends } = renderMonthlyExpensesTimeline(expenses, groups, month, dateRange));
+    setAllowedDateRange(_.map(expenses, (e: Posting) => e.date));
+    ({ z, destroy, legends } = renderMonthlyExpensesTimeline(
+      expenses,
+      groups,
+      month,
+      dateRange,
+    ));
     renderer = renderCurrentExpensesBreakdown(z);
   });
 
   function sum(postings: Posting[], sign = 1) {
-    return sign * _.sumBy(postings, (p) => p.amount);
+    return sign * _.sumBy(postings, (p: Posting) => p.amount);
   }
 
   function sumCurrency(postings: Posting[], sign = 1) {
-    return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
+    return formatCurrency(sign * _.sumBy(postings, (p: Posting) => p.amount));
   }
 
   let current_month_expenses: Posting[] = $derived(
     _.chain((grouped_expenses && grouped_expenses[$month]) || [])
-      .filter((e) => _.includes($groups, secondName(e.account)))
-      .sortBy((e) => e.date)
+      .filter((e: Posting) => _.includes($groups, secondName(e.account)))
+      .sortBy((e: Posting) => e.date)
       .reverse()
-      .value()
+      .value(),
   );
-  let selectedMonthExpenses: Posting[] = $derived(grouped_expenses?.[$month] || []);
+  let selectedMonthExpenses: Posting[] = $derived(
+    grouped_expenses?.[$month] || [],
+  );
   let hasSelectedMonthExpenses = $derived(sum(selectedMonthExpenses) > 0);
   let hasExpenses = $derived(sum(expenses) > 0);
 
@@ -113,15 +123,20 @@
         const grossIncome = sum(incomes, -1);
         const netIncomeAmount = grossIncome - sum(taxes);
         netIncome = formatCurrency(netIncomeAmount) + " net income";
-        taxRate = grossIncome === 0
-          ? ""
-          : formatPercentage(sum(taxes) / grossIncome) + " on income";
-        expenseRate = netIncomeAmount === 0
-          ? ""
-          : formatPercentage(sum(expenses) / netIncomeAmount) + " of net income";
-        savingRate = netIncomeAmount === 0
-          ? ""
-          : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
+        taxRate =
+          grossIncome === 0
+            ? ""
+            : formatPercentage(sum(taxes) / grossIncome) + " on income";
+        expenseRate =
+          netIncomeAmount === 0
+            ? ""
+            : formatPercentage(sum(expenses) / netIncomeAmount) +
+              " of net income";
+        savingRate =
+          netIncomeAmount === 0
+            ? ""
+            : formatPercentage(sum(investments) / netIncomeAmount) +
+              " of net income";
       }
 
       renderer(expenses);
@@ -177,7 +192,29 @@
             </div>
           {:else}
             {#each current_month_expenses as exp}
-              <PostingCard posting={exp} color={z?.(secondName(exp.account)) || ""} icon={true} />
+              <a
+                class="paisa-recent-expense-row"
+                href={postingUrl(exp)}
+                style="--paisa-row-accent: {z?.(secondName(exp.account)) ||
+                  'var(--paisa-border-strong)'}"
+              >
+                <span class="paisa-recent-expense-main">
+                  <span class="paisa-recent-expense-payee">{exp.payee}</span>
+                  <span class="paisa-recent-expense-date"
+                    >{exp.date.format("DD MMM YYYY")}</span
+                  >
+                </span>
+                <span class="paisa-recent-expense-meta">
+                  <span class="paisa-recent-expense-category custom-icon">
+                    {iconify(restName(exp.account), {
+                      group: firstName(exp.account),
+                    })}
+                  </span>
+                  <span class="paisa-recent-expense-amount"
+                    >{formatCurrency(exp.amount)}</span
+                  >
+                </span>
+              </a>
             {/each}
           {/if}
         </div>
@@ -254,12 +291,75 @@
     display: flex;
     flex-direction: column;
     gap: var(--paisa-space-2);
-    max-height: calc(100vh - 380px);
+    max-height: min(720px, calc(100vh - 300px));
+    min-height: 280px;
     overflow-y: auto;
+    padding-right: var(--paisa-space-1);
 
     @media screen and (max-width: 1023px) {
       max-height: 400px;
+      min-height: 0;
     }
+  }
+
+  .paisa-recent-expense-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-1);
+    min-height: 54px;
+    padding: var(--paisa-space-2) var(--paisa-space-3);
+    border-left: 2px solid var(--paisa-row-accent);
+    border-radius: var(--paisa-radius-md);
+    border-top: 1px solid var(--paisa-border-default);
+    border-right: 1px solid var(--paisa-border-default);
+    border-bottom: 1px solid var(--paisa-border-default);
+    background: var(--paisa-surface-card);
+    color: var(--paisa-text-secondary);
+    text-decoration: none;
+  }
+
+  .paisa-recent-expense-row:hover {
+    border-color: var(--paisa-border-strong);
+    color: var(--paisa-text-primary);
+  }
+
+  .paisa-recent-expense-main,
+  .paisa-recent-expense-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--paisa-space-2);
+    min-width: 0;
+  }
+
+  .paisa-recent-expense-payee,
+  .paisa-recent-expense-category {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .paisa-recent-expense-payee {
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-secondary);
+  }
+
+  .paisa-recent-expense-date,
+  .paisa-recent-expense-category {
+    flex: 0 0 auto;
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-muted);
+  }
+
+  .paisa-recent-expense-category {
+    flex: 1 1 auto;
+  }
+
+  .paisa-recent-expense-amount {
+    flex: 0 0 auto;
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-primary);
   }
 
   .paisa-split-main {

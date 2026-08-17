@@ -15,8 +15,8 @@
     value,
     small = false,
     narrow = false,
-    color = null,
-    subtitle = null
+    color = undefined,
+    subtitle = undefined
   }: Props = $props();
 </script>
 
