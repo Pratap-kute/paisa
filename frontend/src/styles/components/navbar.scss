@@ -4,6 +4,8 @@
  */
 
 .navbar {
+  position: relative;
+  z-index: 40;
   background-color: var(--paisa-navbar-bg) !important;
   color: var(--paisa-navbar-text);
   border-bottom: 1px solid var(--paisa-border-subtle);
@@ -47,6 +49,8 @@
   }
 
   .navbar-dropdown {
+    overflow: visible;
+    z-index: 41;
     background-color: var(--paisa-dropdown-bg);
     border: 1px solid var(--paisa-dropdown-border);
     border-top: 2px solid var(--paisa-brand-primary);
@@ -307,6 +311,8 @@
     position: absolute;
     left: 100%;
     top: 0;
+    z-index: 42;
+    display: none;
 
     margin-left: 0;
     padding-top: 0;

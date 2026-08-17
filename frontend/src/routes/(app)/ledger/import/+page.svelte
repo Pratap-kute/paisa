@@ -812,14 +812,21 @@
     box-shadow: var(--paisa-shadow-sm);
   }
 
+  .paisa-import-topbar,
+  .paisa-import-statusbar {
+    flex-shrink: 0;
+  }
+
   .paisa-import-topbar {
     position: relative;
-    z-index: 30;
-    display: grid;
-    grid-template-columns: minmax(280px, 1.3fr) minmax(220px, 1fr) auto;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    align-content: flex-start;
     gap: var(--paisa-space-2);
     padding: var(--paisa-space-2);
+    min-height: fit-content;
   }
 
   .paisa-import-template-block,
@@ -838,6 +845,17 @@
   .paisa-import-file-block {
     gap: var(--paisa-space-2);
     min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .paisa-import-template-block {
+    flex: 1 1 28rem;
+    max-width: 100%;
+  }
+
+  .paisa-import-file-block {
+    flex: 1 1 12rem;
+    max-width: 100%;
   }
 
   .paisa-import-select-wrapper {
@@ -876,10 +894,19 @@
   }
 
   .paisa-import-topbar-actions,
-  .paisa-data-controls,
   .paisa-editor-card-actions {
     gap: var(--paisa-space-1);
     flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  .paisa-data-controls {
+    gap: var(--paisa-space-2);
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    align-self: center;
+    min-height: 2.5em;
   }
 
   .paisa-import-main-grid {
@@ -1212,20 +1239,13 @@
   }
 
   .color-switch {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+
     :global(.switch[type="checkbox"]:checked + label::before),
     :global(.switch[type="checkbox"]:checked + label:before) {
       background: var(--paisa-brand-primary);
-    }
-  }
-
-  @media screen and (max-width: 1100px) {
-    .paisa-import-topbar {
-      grid-template-columns: 1fr;
-    }
-
-    .paisa-import-file-block,
-    .paisa-data-controls {
-      flex-wrap: wrap;
     }
   }
 

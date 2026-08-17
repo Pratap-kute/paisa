@@ -12,7 +12,9 @@
 </script>
 
 <div class="paisa-app-shell">
-  <Navbar bind:isBurger />
+  <div class="paisa-app-header">
+    <Navbar bind:isBurger />
+  </div>
 
   <main class="paisa-main-content">
     <Spinner>
@@ -29,7 +31,13 @@
     min-height: 100dvh;
     background-color: var(--paisa-canvas-bg);
   }
+  .paisa-app-header {
+    position: relative;
+    z-index: 40;
+  }
   .paisa-main-content {
+    position: relative;
+    z-index: 0;
     flex: 1 1 auto;
     min-width: 0;
     min-height: 0;

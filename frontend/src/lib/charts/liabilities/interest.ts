@@ -43,6 +43,20 @@ export function padTimeDomain(
   return [start, end];
 }
 
+export function timelineDomain(
+  points: InterestOverview[],
+): [dayjs.Dayjs, dayjs.Dayjs] | null {
+  const dates = points.map((point) => point.date).filter(Boolean);
+  const start = _.min(dates);
+  const end = _.max(dates);
+  if (!start || !end) return null;
+  return padTimeDomain(start, end);
+}
+
+function clipUrl(id: string) {
+  return `url(#${id})`;
+}
+
 export function renderTable(interest: Interest) {
   const tbody = d3.select(this);
   const current = _.last(interest.overview_timeline);
@@ -139,7 +153,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
       left: rem(150),
     },
     { width } = plotSize(el, margin, size, {
-      minWidth: rem(900),
+      minWidth: rem(1100),
     }),
     height = gains.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
@@ -201,14 +215,12 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
     .value() || 0;
-  const textGroupWidth = rem(190);
+  const textColWidth = rem(120);
+  const textGroupWidth = textColWidth * 3;
+  const aprWidth = rem(200);
+  const aprTextWidth = rem(40);
   const aprMargin = rem(20);
-  const textGroupMargin = rem(16);
-  const aprWidth = Math.max(
-    rem(120),
-    Math.round((width - textGroupWidth - aprMargin - textGroupMargin) * 0.25),
-  );
-  const aprTextWidth = rem(35);
+  const textGroupMargin = rem(20);
   const textGroupZero = aprWidth + aprTextWidth + aprMargin;
 
   const x = d3.scaleLinear().range([
@@ -248,22 +260,22 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
   g.append("text")
     .classed("svg-text-grey", true)
     .text("Loan Drawn")
-    .attr("text-anchor", "end")
-    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 0.5)
     .attr("y", -8);
 
   g.append("text")
     .classed("svg-text-grey", true)
     .text("Interest")
-    .attr("text-anchor", "end")
-    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 1.5)
     .attr("y", -8);
 
   g.append("text")
     .classed("svg-text-grey", true)
     .text("Balance / Repaid")
-    .attr("text-anchor", "end")
-    .attr("x", textGroupZero + textGroupWidth)
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 2.5)
     .attr("y", -8);
 
   g.append("g")
@@ -304,7 +316,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     .style("fill", (g) => (getDrawnAmount(g) > 0 ? z("drawn") : "none"))
     .attr("dx", "-3")
     .attr("dy", "3")
-    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("x", textGroupZero + textColWidth)
     .attr("y", (g) => y(restName(g.account)));
 
   textGroup
@@ -322,7 +334,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     )
     .attr("dx", "-3")
     .attr("dy", "3")
-    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("x", textGroupZero + textColWidth * 2)
     .attr("y", (g) => y(restName(g.account)));
 
   textGroup
@@ -332,7 +344,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     .style("fill", (g) => (getBalanceAmount(g) > 0 ? z("balance") : "none"))
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("x", textGroupZero + textColWidth)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -349,7 +361,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     )
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("x", textGroupZero + textColWidth * 2)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -359,7 +371,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     .style("fill", (g) => (getRepaidAmount(g) > 0 ? z("repaid") : "none"))
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + textGroupWidth)
+    .attr("x", textGroupZero + textColWidth * 3)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -502,7 +514,7 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
 
 export function renderPerAccountOverview(
   interests: Interest[],
-  size: Dimensions = { width: 0, height: 0 },
+  _size: Dimensions = { width: 0, height: 0 },
 ) {
   const root = d3.select("#d3-interest-timeline-breakdown");
   interests = _.filter(interests, (g) => !_.isEmpty(g.overview_timeline));
@@ -511,22 +523,14 @@ export function renderPerAccountOverview(
     return;
   }
 
-  const dates = _.flatMap(
-    interests,
-    (g) => _.map(g.overview_timeline, (o) => o.date),
-  );
-  const start = _.min(dates),
-    end = _.max(dates);
-  if (!start || !end) {
-    root.selectAll("*").remove();
-    return;
-  }
-  const domain = padTimeDomain(start, end);
   const sorted = _.sortBy(interests, (g) => g.account);
 
   root.selectAll("*").remove();
 
   for (const interest of sorted) {
+    const domain = timelineDomain(interest.overview_timeline);
+    if (!domain) continue;
+
     const row = root.append("div").attr("class", "paisa-interest-account-row");
     const summaryCard = row
       .append("div")
@@ -551,7 +555,8 @@ export function renderPerAccountOverview(
       .attr("height", "150")
       .node();
     if (svgNode) {
-      renderOverviewSmall(interest.overview_timeline, svgNode, domain, size);
+      // Size from the chart card, not ChartFrame (which includes the summary column).
+      renderOverviewSmall(interest.overview_timeline, svgNode, domain);
     }
   }
 }
@@ -574,7 +579,7 @@ function renderOverviewSmall(
 
   const margin = { top: 5, right: 80, bottom: 20, left: 40 },
     { width } = plotSize(element, margin, size, {
-      minWidth: rem(640),
+      minWidth: rem(800),
     }),
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(
@@ -654,10 +659,7 @@ function renderOverviewSmall(
 
   layer
     .append("path")
-    .attr(
-      "clip-path",
-      `url(${new URL("#" + clipAboveID, globalThis.location.toString())})`,
-    )
+    .attr("clip-path", clipUrl(clipAboveID))
     .style("fill", z("gain"))
     .style("opacity", "0.8")
     .attr(
@@ -669,10 +671,7 @@ function renderOverviewSmall(
 
   layer
     .append("path")
-    .attr(
-      "clip-path",
-      `url(${new URL("#" + clipBelowID, globalThis.location.toString())})`,
-    )
+    .attr("clip-path", clipUrl(clipBelowID))
     .style("fill", z("loss"))
     .style("opacity", "0.8")
     .attr(

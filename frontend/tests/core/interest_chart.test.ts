@@ -5,6 +5,7 @@ import {
   createInterestPerAccountChart,
   maxOverviewY,
   renderPerAccountOverview,
+  timelineDomain,
 } from "$lib/charts/liabilities/interest";
 import type { Interest } from "$lib/core/utils";
 import fixture from "../fixture/browser/liabilities_interest.json" with { type: "json" };
@@ -40,7 +41,7 @@ describe("interest chart resize", () => {
       interests.length * 30,
     );
     expect(svg?.style.width).toMatch(/px$/);
-    expect(Number(svg?.getAttribute("width"))).toBeGreaterThanOrEqual(1070);
+    expect(Number(svg?.getAttribute("width"))).toBeGreaterThanOrEqual(1270);
   });
 
   it("overview chart svg fits plot width when container is narrower than minWidth", () => {
@@ -55,7 +56,7 @@ describe("interest chart resize", () => {
     chart.update(interests);
     chart.resize({ width: 800, height: 400 });
     const svg = document.querySelector("#d3-interest-overview");
-    const plotRight = 150 + 900;
+    const plotRight = 150 + 1100;
     expect(Number(svg?.getAttribute("width"))).toBeGreaterThanOrEqual(
       plotRight + 20,
     );
@@ -117,5 +118,86 @@ describe("interest chart resize", () => {
       ...homeloan!.overview_timeline.map((p) => p.repaid_amount),
     );
     expect(maxY).toBeGreaterThanOrEqual(peakRepaid);
+  });
+
+  it("overview headers sit in separate columns instead of overlapping", () => {
+    document.body.innerHTML = `
+      <div class="paisa-chart-frame-body" style="width:800px">
+        <div class="paisa-interest-overview-chart" style="width:800px">
+          <svg id="d3-interest-overview"></svg>
+        </div>
+      </div>`;
+    const chart = createInterestOverviewChart();
+    chart.update(parseInterests());
+    chart.resize({ width: 800, height: 400 });
+    const svg = document.querySelector("#d3-interest-overview");
+    const headerX = (label: string) => {
+      const node = Array.from(svg?.querySelectorAll("text") ?? []).find(
+        (text) => text.textContent === label,
+      );
+      return Number(node?.getAttribute("x"));
+    };
+    const loanDrawn = headerX("Loan Drawn");
+    const interest = headerX("Interest");
+    const repaid = headerX("Balance / Repaid");
+    expect(interest - loanDrawn).toBeGreaterThanOrEqual(110);
+    expect(repaid - interest).toBeGreaterThanOrEqual(110);
+  });
+
+  it("uses each account's own date domain instead of a shared timeline", () => {
+    const chit: Interest = {
+      account: "Liabilities:Chit",
+      apr: 12,
+      overview_timeline: [
+        {
+          date: dayjs("2016-06-01"),
+          drawn_amount: 100000,
+          repaid_amount: 0,
+          interest_amount: 1000,
+        },
+        {
+          date: dayjs("2017-01-01"),
+          drawn_amount: 100000,
+          repaid_amount: 20000,
+          interest_amount: 4000,
+        },
+      ],
+    };
+    const homeloan: Interest = {
+      account: "Liabilities:HomeLoan",
+      apr: 8,
+      overview_timeline: [
+        {
+          date: dayjs("2014-01-01"),
+          drawn_amount: 2500000,
+          repaid_amount: 0,
+          interest_amount: 0,
+        },
+        {
+          date: dayjs("2025-01-01"),
+          drawn_amount: 2500000,
+          repaid_amount: 1162491,
+          interest_amount: 500000,
+        },
+      ],
+    };
+    const chitDomain = timelineDomain(chit.overview_timeline);
+    const loanDomain = timelineDomain(homeloan.overview_timeline);
+    expect(chitDomain?.[0].year()).toBe(2016);
+    expect(chitDomain?.[1].year()).toBe(2017);
+    expect(loanDomain?.[0].year()).toBe(2014);
+    expect(loanDomain?.[1].year()).toBe(2025);
+    expect(chitDomain?.[1].diff(chitDomain[0], "year", true)).toBeLessThan(2);
+
+    document.body.innerHTML =
+      `<div id="d3-interest-timeline-breakdown" style="width:800px"></div>`;
+    renderPerAccountOverview([chit, homeloan]);
+    const rows = document.querySelectorAll(".paisa-interest-account-row");
+    expect(rows.length).toBe(2);
+    const chitTicks = Array.from(
+      rows[0].querySelectorAll(".axis.x text"),
+    ).map((tick) => tick.textContent ?? "");
+    expect(chitTicks.some((tick) => tick.includes("2014"))).toBe(false);
+    expect(chitTicks.some((tick) => tick.includes("2025"))).toBe(false);
   });
 });
