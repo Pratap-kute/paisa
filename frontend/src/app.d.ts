@@ -76,6 +76,11 @@ declare module "textures" {
   export default textures;
 }
 
+declare module "lodash" {
+  const _: any;
+  export default _;
+}
+
 declare module "xlsx" {
   export function read(data: any, opts?: any): any;
   export namespace utils {

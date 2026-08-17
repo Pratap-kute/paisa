@@ -5,7 +5,7 @@
     focus,
     moveToEnd,
     moveToLine,
-    updateContent
+    updateContent,
   } from "$lib/editors/editor";
   import { insertTab } from "@codemirror/commands";
   import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
@@ -35,11 +35,11 @@
   let editorDom: Element | undefined = $state();
   let editor: EditorView | undefined;
   let filesMap: Record<string, LedgerFile> = $state({});
-  let selectedFile: LedgerFile = $state(null);
+  let selectedFile: LedgerFile | null = $state(null);
   let accounts: string[] = $state([]);
   let commodities: string[] = $state([]);
   let payees: string[] = $state([]);
-  let selectedVersion: string = $state(null);
+  let selectedVersion: string | null = $state(null);
   let lineNumber = $state(0);
 
   function command(fn: Function) {
@@ -50,11 +50,11 @@
   }
 
   function undoEdit() {
-    undo(editor);
+    if (editor) undo(editor);
   }
 
   function redoEdit() {
-    redo(editor);
+    if (editor) redo(editor);
   }
 
   const keybindings: readonly KeyBinding[] = [
@@ -62,19 +62,21 @@
     {
       key: "Ctrl-s",
       run: command(save),
-      preventDefault: true
+      preventDefault: true,
     },
     {
       key: "Ctrl-I",
       run: command(pretty),
-      preventDefault: true
-    }
+      preventDefault: true,
+    },
   ];
 
   let cancelled = false;
   beforeNavigate(async ({ cancel }) => {
     if ($editorState.hasUnsavedChanges) {
-      const confirmed = confirm("You have unsaved changes. Are you sure you want to leave?");
+      const confirmed = confirm(
+        "You have unsaved changes. Are you sure you want to leave?",
+      );
       if (!confirmed) {
         cancel();
         cancelled = true;
@@ -103,15 +105,20 @@
 
   async function loadFiles(selectedFileName: string) {
     let files;
-    ({ files, accounts, commodities, payees } = await ajax("/api/editor/files"));
-    filesMap = _.fromPairs(_.map(files, (f) => [f.name, f]));
+    ({ files, accounts, commodities, payees } =
+      await ajax("/api/editor/files"));
+    filesMap = _.fromPairs(_.map(files, (f: LedgerFile) => [f.name, f]));
     if (!_.isEmpty(files)) {
-      selectedFile = _.find(files, (f) => f.name == selectedFileName) || files[0];
+      selectedFile =
+        _.find(files, (f: LedgerFile) => f.name == selectedFileName) ||
+        files[0];
     }
   }
 
   async function selectFile(file: LedgerFile) {
-    const success = await navigate(`/ledger/editor/${encodeURIComponent(file.name)}`);
+    const success = await navigate(
+      `/ledger/editor/${encodeURIComponent(file.name)}`,
+    );
     if (success) {
       selectedFile = file;
     }
@@ -121,13 +128,14 @@
     const { file } = await ajax("/api/editor/file", {
       method: "POST",
       body: JSON.stringify({ name: version }),
-      background: true
+      background: true,
     });
 
-    updateContent(editor, file.content);
+    if (editor) updateContent(editor, file.content);
   }
 
   async function pretty() {
+    if (!editor) return;
     const formatted = format(editor.state.doc.toString());
     if (formatted != editor.state.doc.toString()) {
       updateContent(editor, formatted);
@@ -135,36 +143,41 @@
   }
 
   async function deleteBackups() {
+    if (!selectedFile) return;
     const { file } = await ajax("/api/editor/file/delete_backups", {
       method: "POST",
       body: JSON.stringify({ name: selectedFile.name }),
-      background: true
+      background: true,
     });
 
     selectedFile.versions = file.versions;
   }
 
   async function save() {
+    if (!editor || !selectedFile) return;
     const doc = editor.state.doc;
     const { errors, saved, file, message } = await ajax("/api/editor/save", {
       method: "POST",
-      body: JSON.stringify({ name: selectedFile.name, content: doc.toString() }),
-      background: true
+      body: JSON.stringify({
+        name: selectedFile.name,
+        content: doc.toString(),
+      }),
+      background: true,
     });
 
     if (!saved) {
       toast.toast({
         message: `Failed to save ${selectedFile.name}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
       if (!_.isEmpty(errors)) {
-        moveToLine(editor, errors[0].line_from);
+        if (editor) moveToLine(editor, errors[0].line_from);
       }
     } else {
       toast.toast({
         message: `Saved ${selectedFile.name}`,
-        type: "is-success"
+        type: "is-success",
       });
       filesMap[file.name] = file;
       selectedFile = file;
@@ -191,8 +204,8 @@
           autocompletions: {
             string: accounts,
             strong: payees,
-            unit: commodities
-          }
+            unit: commodities,
+          },
         });
         if (lineNumber > 0) {
           moveToLine(editor, lineNumber, true);
@@ -213,20 +226,26 @@
   async function createFile(destinationFile: string) {
     const { saved, message } = await ajax("/api/editor/save", {
       method: "POST",
-      body: JSON.stringify({ name: destinationFile, content: "", operation: "create" }),
-      background: true
+      body: JSON.stringify({
+        name: destinationFile,
+        content: "",
+        operation: "create",
+      }),
+      background: true,
     });
 
     if (saved) {
       toast.toast({
         message: `Created <b><a href="/ledger/editor/${encodeURIComponent(
-          destinationFile
+          destinationFile,
         )}">${destinationFile}</a></b>`,
         type: "is-success",
-        duration: 5000
+        duration: 5000,
       });
 
-      const success = await navigate(`/ledger/editor/${encodeURIComponent(destinationFile)}`);
+      const success = await navigate(
+        `/ledger/editor/${encodeURIComponent(destinationFile)}`,
+      );
       if (success) {
         await loadFiles(destinationFile);
       }
@@ -234,7 +253,7 @@
       toast.toast({
         message: `Failed to create ${destinationFile}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
     }
   }
@@ -247,13 +266,24 @@
     if ($editorState.output) {
       await navigator.clipboard.writeText($editorState.output);
       copiedOutput = true;
-      toast.toast({ message: "Output copied to clipboard", type: "is-info", duration: 2000 });
-      setTimeout(() => { copiedOutput = false; }, 2000);
+      toast.toast({
+        message: "Output copied to clipboard",
+        type: "is-info",
+        duration: 2000,
+      });
+      setTimeout(() => {
+        copiedOutput = false;
+      }, 2000);
     }
   }
 </script>
 
-<FileModal bind:open={modalOpen} on:save={(e) => createFile(e.detail)} label="Create" help="" />
+<FileModal
+  bind:open={modalOpen}
+  on:save={(e) => createFile(e.detail)}
+  label="Create"
+  help=""
+/>
 
 <Page width="fluid">
   <Section class="paisa-pb-0">
@@ -264,7 +294,7 @@
           variant="ghost"
           size="sm"
           class="paisa-sidebar-toggle-btn"
-          onclick={() => sidebarOpen = !sidebarOpen}
+          onclick={() => (sidebarOpen = !sidebarOpen)}
           ariaLabel={sidebarOpen ? "Hide file explorer" : "Show file explorer"}
           title={sidebarOpen ? "Hide file explorer" : "Show file explorer"}
         >
@@ -277,7 +307,9 @@
           <span class="icon is-small paisa-active-file-icon">
             <i class="fa-regular fa-file-code"></i>
           </span>
-          <span class="paisa-active-file-name" title={selectedFile?.name}>{selectedFile?.name || "No file selected"}</span>
+          <span class="paisa-active-file-name" title={selectedFile?.name}
+            >{selectedFile?.name || "No file selected"}</span
+          >
           {#if $editorState.hasUnsavedChanges}
             <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
           {/if}
@@ -353,13 +385,16 @@
 
         {#if !_.isEmpty(selectedFile?.versions)}
           <div class="paisa-version-control-group">
-            <span class="icon is-small paisa-version-icon" title="File version history">
+            <span
+              class="icon is-small paisa-version-icon"
+              title="File version history"
+            >
               <i class="fas fa-clock-rotate-left"></i>
             </span>
             <div class="select is-small paisa-version-select">
               <select bind:value={selectedVersion}>
                 <option value={null} disabled selected>Select backup...</option>
-                {#each selectedFile.versions as version}
+                {#each selectedFile?.versions ?? [] as version}
                   <option value={version}>{version}</option>
                 {/each}
               </select>
@@ -368,7 +403,9 @@
               variant="outline"
               size="xs"
               disabled={!selectedVersion}
-              onclick={() => revert(selectedVersion)}
+              onclick={() => {
+                if (selectedVersion) revert(selectedVersion);
+              }}
               title="Revert to selected version"
             >
               Revert
@@ -393,11 +430,18 @@
           <button
             type="button"
             class="paisa-diag-badge error"
-            onclick={() => moveToLine(editor, $editorState.errors[0].line_from, true)}
+            onclick={() => {
+              if (editor)
+                moveToLine(editor, $editorState.errors[0].line_from, true);
+            }}
             title="Click to jump to error line"
           >
             <span class="paisa-diag-dot error"></span>
-            <span>{$editorState.errors.length} error{$editorState.errors.length > 1 ? "s" : ""}</span>
+            <span
+              >{$editorState.errors.length} error{$editorState.errors.length > 1
+                ? "s"
+                : ""}</span
+            >
           </button>
         {:else}
           <div class="paisa-diag-badge valid" title="Ledger syntax is valid">
@@ -410,7 +454,7 @@
           <Button
             variant={outputOpen ? "secondary" : "ghost"}
             size="sm"
-            onclick={() => outputOpen = !outputOpen}
+            onclick={() => (outputOpen = !outputOpen)}
             title={outputOpen ? "Hide balance panel" : "Show balance panel"}
           >
             {#snippet icon()}
@@ -452,7 +496,7 @@
               path=""
               on:select={(e) => selectFile(e.detail)}
               files={buildDirectoryTree(_.values(filesMap))}
-              selectedFileName={selectedFile?.name}
+              selectedFileName={selectedFile?.name ?? ""}
               hasUnsavedChanges={$editorState.hasUnsavedChanges}
             />
           </div>
@@ -464,9 +508,15 @@
         <div class="paisa-pane-header paisa-editor-tab-header">
           <div class="paisa-editor-tab active">
             <i class="fa-regular fa-file-lines mr-1"></i>
-            <span class="paisa-tab-filename">{selectedFile ? _.last(selectedFile.name.split("/")) : "editor"}</span>
+            <span class="paisa-tab-filename"
+              >{selectedFile
+                ? _.last(selectedFile.name.split("/"))
+                : "editor"}</span
+            >
             {#if $editorState.hasUnsavedChanges}
-              <span class="paisa-tab-dirty-indicator" title="Unsaved changes">●</span>
+              <span class="paisa-tab-dirty-indicator" title="Unsaved changes"
+                >●</span
+              >
             {/if}
           </div>
           <div class="paisa-editor-tab-actions ml-auto">
@@ -482,7 +532,10 @@
       {#if outputOpen && !_.isEmpty($editorState.output)}
         <section class="paisa-editor-output-pane">
           <div class="paisa-pane-header">
-            <span class="paisa-pane-title" title="hledger CLI validation balance report">
+            <span
+              class="paisa-pane-title"
+              title="hledger CLI validation balance report"
+            >
               <i class="fas fa-scale-balanced mr-1"></i>
               LEDGER BALANCE
             </span>
@@ -501,7 +554,8 @@
               title="Copy raw output to clipboard"
               onclick={copyOutput}
             >
-              <i class={copiedOutput ? "fas fa-check" : "fa-regular fa-copy"}></i>
+              <i class={copiedOutput ? "fas fa-check" : "fa-regular fa-copy"}
+              ></i>
             </button>
           </div>
 
@@ -643,7 +697,10 @@
   /* Main Workspace 3-Pane Layout */
   .paisa-editor-workspace {
     display: grid;
-    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(280px, 340px);
+    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(
+        280px,
+        340px
+      );
     gap: var(--paisa-space-3);
     height: calc(100vh - 136px);
     min-height: 520px;
@@ -815,121 +872,4 @@
       color: var(--paisa-text-inverse);
     }
   }
-
-  .paisa-output-hint-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    padding: 0.35rem 0.75rem;
-    font-size: 0.7rem;
-    background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-secondary);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-    line-height: 1.35;
-
-    .icon {
-      color: var(--paisa-brand-primary);
-      font-size: 0.75rem;
-      flex-shrink: 0;
-    }
-  }
-
-  /* Output Right Pane */
-  .paisa-output-scroll {
-    overflow-y: auto;
-    background-color: var(--paisa-surface-bg);
-  }
-
-  .paisa-bal-table {
-    display: grid;
-    grid-template-columns: minmax(90px, auto) minmax(70px, auto) 1fr;
-    padding: var(--paisa-space-2) 0;
-    font-family: var(--paisa-font-mono);
-    font-size: 0.75rem;
-    line-height: 1.6;
-    gap: 0;
-  }
-
-  .paisa-bal-row {
-    display: grid;
-    grid-template-columns: subgrid;
-    grid-column: 1 / -1;
-    align-items: baseline;
-    padding: 1px var(--paisa-space-3);
-    border-radius: 0;
-
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-    }
-
-    &.has-account {
-      border-bottom: 1px solid transparent;
-    }
-  }
-
-  .paisa-bal-amount {
-    text-align: right;
-    font-weight: var(--paisa-font-weight-medium);
-    color: var(--paisa-text-primary);
-    white-space: nowrap;
-    padding-right: var(--paisa-space-2);
-    font-variant-numeric: tabular-nums;
-
-    &.is-negative {
-      color: var(--paisa-brand-primary);
-    }
-  }
-
-  .paisa-bal-tag {
-    display: flex;
-    align-items: baseline;
-    white-space: nowrap;
-    padding-right: var(--paisa-space-2);
-  }
-
-  .paisa-bal-currency {
-    font-size: 0.7rem;
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-bal-commodity {
-    display: inline-block;
-    padding: 0px 5px;
-    font-size: 0.65rem;
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-brand-primary);
-    background-color: var(--paisa-brand-primary-light);
-    border-radius: var(--paisa-radius-xs);
-    line-height: 1.5;
-    letter-spacing: 0.02em;
-  }
-
-  .paisa-bal-account {
-    color: var(--paisa-text-secondary);
-    font-weight: var(--paisa-font-weight-medium);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .paisa-bal-divider-row {
-    grid-column: 1 / -1;
-    padding: var(--paisa-space-1) var(--paisa-space-3);
-  }
-
-  .paisa-bal-divider-line {
-    border-bottom: 1px dashed var(--paisa-border-default);
-  }
-
-  .paisa-bal-raw-row {
-    grid-column: 1 / -1;
-  }
-
-  .paisa-bal-raw {
-    color: var(--paisa-text-muted);
-    font-size: 0.75rem;
-    padding: 1px var(--paisa-space-3);
-  }
 </style>
-
