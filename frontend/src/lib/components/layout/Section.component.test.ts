@@ -17,6 +17,18 @@ test("renders section with title and subtitle", () => {
   unmount();
 });
 
+test("renders a fill section that can grow in a flex column", () => {
+  const { container, unmount } = render(Section, {
+    title: "Timeline",
+    fill: true,
+  });
+
+  expect(container.querySelector(".paisa-section")).toHaveClass(
+    "paisa-section-fill",
+  );
+  unmount();
+});
+
 test("renders section with title link", () => {
   const { container, unmount } = render(Section, {
     title: "Expenses",

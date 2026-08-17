@@ -5,6 +5,7 @@
     title?: string;
     subtitle?: string;
     titleHref?: string;
+    fill?: boolean;
     class?: string;
     action?: Snippet;
     children?: Snippet;
@@ -14,13 +15,14 @@
     title,
     subtitle,
     titleHref,
+    fill = false,
     class: className = "",
     action,
     children,
   }: Props = $props();
 </script>
 
-<section class="paisa-section {className}">
+<section class="paisa-section {fill ? 'paisa-section-fill' : ''} {className}">
   {#if title || action || subtitle}
     <div class="paisa-section-header">
       <div class="paisa-section-heading">
@@ -98,5 +100,20 @@
 
   .paisa-section-content {
     min-width: 0;
+  }
+
+  .paisa-section-fill {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+  }
+
+  .paisa-section-fill .paisa-section-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 </style>

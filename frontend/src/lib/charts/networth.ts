@@ -14,6 +14,7 @@ import {
   svgUrl,
   tooltip,
 } from "../core/utils";
+import { containerPlotSize } from "./resize";
 
 function networth(d: Networth) {
   return d.investmentAmount + d.gainAmount - d.withdrawalAmount;
@@ -40,15 +41,13 @@ export function createNetworthChart(
   const right = isMobile() ? 10 : 80;
   const margin = { top: 15, right, bottom: 20, left: 40 };
 
-  let currentWidth = Math.max(
-    50,
-    (element.parentElement?.clientWidth || 600) - margin.left - margin.right,
+  let { width: currentWidth, height: currentHeight } = containerPlotSize(
+    element,
+    margin,
   );
-  let currentHeight = Math.max(
-    50,
-    (element.clientHeight || Number(svg.attr("height")) || 400) - margin.top -
-      margin.bottom,
-  );
+  svg
+    .attr("width", currentWidth + margin.left + margin.right)
+    .attr("height", currentHeight + margin.top + margin.bottom);
 
   const g = svg.append("g").attr(
     "transform",

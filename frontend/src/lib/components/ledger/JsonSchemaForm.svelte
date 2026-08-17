@@ -1,6 +1,6 @@
 <script lang="ts">
   import JsonSchemaForm from "./JsonSchemaForm.svelte";
-  import sha256 from "crypto-js/sha256";
+  import { sha256Hex } from "$lib/core/crypto";
   import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
   import Select from "svelte-select";
   import _ from "lodash";
@@ -156,9 +156,10 @@
             class="input is-small"
             type="password"
             bind:value={rawValue}
-            onchange={() => {
+            onchange={async () => {
               if (!_.isEmpty(rawValue)) {
-                value = "sha256:" + sha256(sha256(rawValue).toString()).toString();
+                const inner = await sha256Hex(rawValue);
+                value = "sha256:" + await sha256Hex(inner);
               }
             }}
           />

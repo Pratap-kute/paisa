@@ -11,6 +11,29 @@ export interface ChartHandle<T = unknown> {
   destroy: () => void;
 }
 
+/** Prefer the ChartFrame body over the SVG's default ~150px height. */
+export function containerPlotSize(
+  el: Element,
+  margin: { top: number; right: number; bottom: number; left: number },
+  minPlotHeight = 300,
+): { width: number; height: number } {
+  const parent = el.parentElement;
+  const containerWidth = parent?.clientWidth || 600;
+  const svgHeight = (el as SVGElement).clientHeight || 0;
+  const containerHeight = Math.max(
+    parent?.clientHeight || 0,
+    svgHeight,
+    minPlotHeight + margin.top + margin.bottom,
+  );
+  return {
+    width: Math.max(50, containerWidth - margin.left - margin.right),
+    height: Math.max(
+      minPlotHeight,
+      containerHeight - margin.top - margin.bottom,
+    ),
+  };
+}
+
 export function plotSize(
   el: { parentElement: HTMLElement | null } | null | undefined,
   margin: { left: number; right: number; top?: number; bottom?: number },

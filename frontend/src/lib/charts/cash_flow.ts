@@ -24,7 +24,7 @@ import { willClearTippy } from "../../store";
 import COLORS, { generateColorScheme } from "../core/colors";
 import textures from "textures";
 import chroma from "chroma-js";
-import { createRedrawChart, type Dimensions } from "./resize";
+import { containerPlotSize, createRedrawChart, type Dimensions } from "./resize";
 
 export interface MonthlyFlowChart {
   update: (cashFlows: CashFlow[]) => void;
@@ -83,15 +83,13 @@ export function createMonthlyFlow(
     left: rem(40),
   };
 
-  let currentWidth = Math.max(
-    100,
-    (el.parentElement?.clientWidth || 600) - margin.left - margin.right,
+  let { width: currentWidth, height: currentHeight } = containerPlotSize(
+    el,
+    margin,
   );
-  let currentHeight = Math.max(
-    100,
-    (el.clientHeight || Number(svg.attr("height")) || 400) - margin.top -
-      margin.bottom,
-  );
+  svg
+    .attr("width", currentWidth + margin.left + margin.right)
+    .attr("height", currentHeight + margin.top + margin.bottom);
 
   const g = svg.append("g").attr(
     "transform",

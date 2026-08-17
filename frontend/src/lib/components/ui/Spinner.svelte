@@ -10,8 +10,11 @@
   let size = 90;
 </script>
 
-<div>
-  <div style={$delayedUnLoading || $delayedLoading ? "visibility: hidden" : ""}>
+<div class="paisa-spinner-shell">
+  <div
+    class="paisa-spinner-content"
+    style={$delayedUnLoading || $delayedLoading ? "visibility: hidden" : ""}
+  >
     {@render children?.()}
   </div>
   {#if $delayedLoading}
@@ -22,6 +25,15 @@
 </div>
 
 <style lang="scss">
+  .paisa-spinner-shell,
+  .paisa-spinner-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+  }
+
   .circle-container {
     margin: auto;
     position: absolute;

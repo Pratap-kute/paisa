@@ -86,7 +86,7 @@
     description="Annual income, expense, and asset transfer flows"
   />
 
-  <Section>
+  <Section fill>
     {#if !isEmpty}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
     {/if}

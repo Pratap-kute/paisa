@@ -185,19 +185,28 @@
   }
 
   /* Semantic Types */
-  /* Analysis timelines: fill a large share of the viewport without
-     becoming a giant empty canvas on tall monitors. Dashboard charts
-     stay on dashboard-timeline and remain compact. */
+  /* Analysis timelines grow into leftover viewport when a fill Section
+     is used. Dashboard charts stay compact. */
   .paisa-chart-type-timeline {
     flex: 1 1 auto;
-    height: clamp(380px, 52vh, 560px);
     min-height: 380px;
-    max-height: 560px;
+    height: 100%;
   }
 
   .paisa-chart-type-timeline .paisa-chart-frame-body {
     min-height: 0;
     height: 100%;
+  }
+
+  .paisa-chart-type-timeline .paisa-chart-frame-body :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media screen and (max-width: 768px) {
+    .paisa-chart-type-timeline {
+      min-height: 280px;
+    }
   }
 
   .paisa-chart-type-dashboard-timeline {

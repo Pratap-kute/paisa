@@ -448,25 +448,6 @@ input.switch {
   }
 }
 
-/* Svelte Carousel */
-.sc-carousel-dots__dot-container {
-  margin-top: 0.714em;
-}
-
-.sc-carousel-button.sc-carousel-dot__dot {
-  color: var(--paisa-border-default);
-
-  button {
-    color: var(--paisa-border-default);
-    &.sc-carousel-dot__dot_active {
-      color: var(--paisa-text-muted);
-      &:focus {
-        outline: none;
-      }
-    }
-  }
-}
-
 .custom-arrow {
   width: 1.5rem;
   position: absolute;

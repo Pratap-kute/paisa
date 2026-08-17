@@ -26,14 +26,12 @@ async function runVitest(
   const args = [
     "run",
     "-A",
-    "npm:vitest@^3.2.7",
+    "npm:vitest@^4",
     "run",
     "--config",
     "vitest.config.ts",
     `--project=${project}`,
-    "--pool=threads",
     "--maxWorkers=1",
-    "--minWorkers=1",
   ];
   if (coverage) args.push("--coverage");
   return await new Deno.Command(Deno.execPath(), {

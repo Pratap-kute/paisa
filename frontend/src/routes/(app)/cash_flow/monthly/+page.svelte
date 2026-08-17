@@ -62,7 +62,7 @@
     description="Monthly cash movement and checking balance"
   />
 
-  <Section>
+  <Section fill>
     {#if hasFilteredCashFlows}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
     {/if}

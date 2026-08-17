@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Carousel from "svelte-carousel";
   import Transaction from "$lib/components/transactions/Transaction.svelte";
   import { intervalText, scheduleIcon, totalRecurring } from "$lib/domain/transaction_sequence";
   import {
@@ -22,11 +21,24 @@
   const HEIGHT = 50;
   let icon = $derived(scheduleIcon(schedule));
 
-  let carousel: Carousel = $state();
-  let pageSize = $derived(_.min([20, ts.transactions.length]) ?? 1);
+  let displayedTransactions = $derived(_.reverse(_.take(ts.transactions, 20)));
+  let pageSize = $derived(displayedTransactions.length);
+  let currentIndex = $state(0);
+
+  $effect(() => {
+    currentIndex = Math.max(0, pageSize - 1);
+  });
 
   function showPage(pageIndex: number) {
-    carousel.goTo(pageSize - 1 - pageIndex);
+    currentIndex = pageSize - 1 - pageIndex;
+  }
+
+  function showPrevPage() {
+    if (currentIndex > 0) currentIndex--;
+  }
+
+  function showNextPage() {
+    if (currentIndex < pageSize - 1) currentIndex++;
   }
 
   const chart: Action<HTMLElement, { ts: TransactionSequence; next: dayjs.Dayjs }> = (
@@ -92,10 +104,8 @@
   </div>
 
   <div class="column is-8">
-    <Carousel bind:this={carousel} infinite={false} initialPageIndex={pageSize - 1}>
+    <div class="recurring-transaction-pager">
       <div
-        slot="prev"
-        let:showPrevPage
         role="button"
         tabindex="0"
         aria-label="Previous page"
@@ -105,14 +115,12 @@
       >
         <i class="fa-solid has-text-grey-light fa-angle-left"></i>
       </div>
-      {#each _.reverse(_.take(ts.transactions, 20)) as t}
+      {#if displayedTransactions[currentIndex]}
         <div class="box px-5 py-3 my-0 has-text-grey" style="box-shadow: none;">
-          <Transaction {t} compact={true} />
+          <Transaction t={displayedTransactions[currentIndex]} compact={true} />
         </div>
-      {/each}
+      {/if}
       <div
-        slot="next"
-        let:showNextPage
         role="button"
         tabindex="0"
         aria-label="Next page"
@@ -122,6 +130,12 @@
       >
         <i class="fa-solid has-text-grey-light fa-angle-right"></i>
       </div>
-    </Carousel>
+    </div>
   </div>
 </div>
+
+<style>
+  .recurring-transaction-pager {
+    position: relative;
+  }
+</style>

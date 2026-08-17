@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any -- Shared API overloads bridge heterogeneous JSON and third-party scale/texture types.
-import sha256 from "crypto-js/sha256";
+import { sha256Hex } from "./crypto";
 import dayjs from "dayjs";
 import _ from "lodash";
 import * as d3 from "d3";
@@ -883,7 +883,7 @@ export async function ajax(
 }
 
 export async function login(username: string, password: string) {
-  localStorage.setItem(tokenKey, `${username}:${sha256(password)}`);
+  localStorage.setItem(tokenKey, `${username}:${await sha256Hex(password)}`);
   return await ajax("/api/ping");
 }
 

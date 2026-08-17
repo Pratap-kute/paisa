@@ -95,7 +95,7 @@
     <LevelItem title="XIRR" value={formatFloat(xirr)} />
   </MetricStrip>
 
-  <Section>
+  <Section fill>
     {#if filteredPoints.length > 0}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
     {/if}
