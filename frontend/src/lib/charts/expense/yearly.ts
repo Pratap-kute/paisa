@@ -266,7 +266,8 @@ export function renderYearlyExpensesTimeline(
     groupsStore.set(allowedGroups);
     const sum = (p: Point) => _.sum(_.map(allowedGroups, (k) => p[k]));
     x.domain(points.map((p) => p.fy));
-    y.domain([0, d3.max(points, sum)]);
+    const maxY = d3.max(points, sum) ?? 0;
+    y.domain([0, maxY > 0 ? maxY : 1]);
 
     const t = svg.transition().duration(750);
     xAxis
@@ -421,8 +422,15 @@ export function renderCurrentExpensesBreakdown(
     const height = BAR_HEIGHT * keys.length;
     svg.attr("height", height + margin.top + margin.bottom);
 
+    if (_.isEmpty(points) || total <= 0) {
+      xAxis.selectAll("*").remove();
+      yAxis.selectAll("*").remove();
+      bar.selectAll("*").remove();
+      return;
+    }
+
     y.domain(keys);
-    x.domain([0, d3.max(points, (p) => p.total)]);
+    x.domain([0, d3.max(points, (p) => p.total) ?? 1]);
     y.range([height, 0]);
 
     const t = svg.transition().duration(750);
@@ -462,7 +470,9 @@ export function renderCurrentExpensesBreakdown(
         }),
         {
           total: formatCurrency(total),
-          header: `${financialYear(d.postings[0].date)} ${d.category}`,
+          header: `${
+            d.postings[0] ? financialYear(d.postings[0].date) : ""
+          } ${d.category}`,
         },
       );
     };
@@ -508,7 +518,7 @@ export function renderCurrentExpensesBreakdown(
 
     const rightLabel = (d: Point) =>
       `${formatCurrency(d.total)} ${
-        formatFixedWidthFloat((d.total / total) * 100, 6)
+        formatFixedWidthFloat(total > 0 ? (d.total / total) * 100 : 0, 6)
       }%`;
 
     bar

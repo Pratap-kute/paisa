@@ -5,7 +5,7 @@
     renderOverview,
     renderPerAccountOverview
   } from "$lib/charts/liabilities/interest";
-  import { ajax, type Legend } from "$lib/core/utils";
+  import { ajax, type Interest, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -16,10 +16,21 @@
   let isEmpty = $state(false);
   let legends: Legend[] = $state([]);
 
+  function hasLiabilityActivity(interests: Interest[]) {
+    return _.some(interests, (interest) =>
+      !_.isEmpty(interest.overview_timeline) &&
+      _.some(interest.overview_timeline, (point) =>
+        point.drawn_amount !== 0 ||
+        point.interest_amount !== 0 ||
+        point.repaid_amount !== 0
+      )
+    );
+  }
+
   onMount(async () => {
     const { interest_timeline_breakdown: interests } = await ajax("/api/liabilities/interest");
 
-    if (_.isEmpty(interests)) {
+    if (!hasLiabilityActivity(interests)) {
       isEmpty = true;
       return;
     }
@@ -36,26 +47,30 @@
     description="Interest payments and rates across all liabilities"
   />
 
-  {#if isEmpty}
-    <Section>
-      <article class="message">
-        <div class="message-body">
-          <strong>Hurray!</strong> You have no liabilities.
-        </div>
-      </article>
-    </Section>
-  {:else}
-    <Section title="Interest Overview">
+  <Section title="Interest Overview">
+    {#if !isEmpty}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="dynamic">
-        <svg id="d3-interest-overview" width="100%" />
-      </ChartFrame>
-    </Section>
+    {/if}
+    <ChartFrame
+      type="dynamic"
+      empty={isEmpty}
+      emptyMessage="No liability activity in this period"
+      preserveChildren
+    >
+      <svg id="d3-interest-overview" width="100%" />
+    </ChartFrame>
+  </Section>
 
-    <Section title="Per-Account Breakdown">
+  <Section title="Per-Account Breakdown">
+    <ChartFrame
+      type="dynamic"
+      empty={isEmpty}
+      emptyMessage="No liability activity in this period"
+      preserveChildren
+    >
       <div class="d3-interest-timeline-breakdown">
         <div id="d3-interest-timeline-breakdown"></div>
       </div>
-    </Section>
-  {/if}
+    </ChartFrame>
+  </Section>
 </Page>

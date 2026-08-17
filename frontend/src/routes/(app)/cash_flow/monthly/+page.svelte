@@ -4,7 +4,6 @@
   import { ajax, type CashFlow, type Legend } from "$lib/core/utils";
   import { onMount, onDestroy } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -21,9 +20,20 @@
       (c) => c.date.isSameOrBefore($dateRange.to) && c.date.isSameOrAfter($dateRange.from)
     )
   );
+  let hasFilteredCashFlows = $derived(
+    _.some(filteredCashFlows, (c) =>
+      c.income !== 0 ||
+      c.expenses !== 0 ||
+      c.liabilities !== 0 ||
+      c.tax !== 0 ||
+      c.investment !== 0 ||
+      c.checking !== 0 ||
+      c.balance !== 0
+    )
+  );
 
   $effect(() => {
-    if (chart && !_.isEmpty(cashFlows)) {
+    if (chart) {
       chart.update(filteredCashFlows);
     }
   });
@@ -53,21 +63,18 @@
   />
 
   <Section>
-    <ZeroState item={cashFlows}>
-      <strong>Oops!</strong> You have not made any transactions.
-    </ZeroState>
-
-    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {#if hasFilteredCashFlows}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {/if}
 
     <ChartFrame
       type="timeline"
+      empty={!hasFilteredCashFlows}
+      emptyMessage="No cash-flow activity in this period"
+      preserveChildren
       onresize={(dim) => chart?.resize(dim)}
     >
-      <svg
-        class:is-not-visible={_.isEmpty(cashFlows)}
-        id="d3-monthly-cash-flow"
-        width="100%"
-      />
+      <svg id="d3-monthly-cash-flow" width="100%" />
     </ChartFrame>
   </Section>
 </Page>

@@ -54,8 +54,22 @@
   let isEmpty = $state(false);
   let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
+  function hasCashFlowActivity(flows: CashFlow[]) {
+    return _.some(flows, (c) =>
+      c.income !== 0 ||
+      c.expenses !== 0 ||
+      c.liabilities !== 0 ||
+      c.tax !== 0 ||
+      c.investment !== 0 ||
+      c.checking !== 0 ||
+      c.balance !== 0
+    );
+  }
+
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
   let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
+  let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+  let hasSelectedExpenses = $derived(totalExpense > 0);
 
   $effect(() => {
     if (renderer) {
@@ -187,15 +201,17 @@
     <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
     <div class="paisa-dashboard-row paisa-dashboard-visualizations">
       <Section title="Cash Flow" titleHref="/cash_flow/monthly" class="paisa-dashboard-cell">
-        <ZeroState item={cashFlows}>
-          <strong>Oops!</strong> You have not made any transactions in the last 3 months.
-        </ZeroState>
+        {#if hasCashFlowData}
+          <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
+        {/if}
 
-        <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
-
-        <ChartFrame type="dashboard-timeline">
+        <ChartFrame
+          type="dashboard-timeline"
+          empty={!hasCashFlowData}
+          emptyMessage="No cash-flow activity in this period"
+          preserveChildren
+        >
           <svg
-            class:is-not-visible={_.isEmpty(cashFlows)}
             id="d3-current-cash-flow"
             height="250"
             width="100%"
@@ -214,10 +230,13 @@
             {formatCurrency(totalExpense)}
           </span>
         </div>
-        <ZeroState item={selectedExpenses}>
-          <strong>Hurray!</strong> You have no expenses this month.
-        </ZeroState>
-        <ChartFrame type="category" rows={Math.min(8, selectedExpenses.length || 4)}>
+        <ChartFrame
+          type="category"
+          rows={Math.min(8, selectedExpenses.length || 4)}
+          empty={!hasSelectedExpenses}
+          emptyMessage="No expenses this month"
+          preserveChildren
+        >
           <svg id="d3-current-month-breakdown" width="100%" />
         </ChartFrame>
       </Section>

@@ -12,7 +12,6 @@
   import { writable } from "svelte/store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import { financialColors } from "$lib/theme/chartPalette";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -43,6 +42,8 @@
   let currentYearExpenses: Posting[] = $derived(
     grouped_expenses ? (grouped_expenses[$year] || []) : []
   );
+  let hasCurrentYearExpenses = $derived(sum(currentYearExpenses) > 0);
+  let hasExpenses = $derived(sum(expenses) > 0);
 
   onMount(async () => {
     ({
@@ -63,7 +64,9 @@
 
     ({ z, legends } = renderYearlyExpensesTimeline(expenses, groups, year));
 
-    renderer = renderCurrentExpensesBreakdown(z);
+    if (z) {
+      renderer = renderCurrentExpensesBreakdown(z);
+    }
   });
 
   function sum(postings: Posting[], sign = 1) {
@@ -95,12 +98,18 @@
         savingRate = "";
         netIncome = "";
       } else {
-        netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
-        taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " of income";
-        expenseRate =
-          formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-        savingRate =
-          formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+        const grossIncome = sum(incomes, -1);
+        const netIncomeAmount = grossIncome - sum(taxes);
+        netIncome = formatCurrency(netIncomeAmount) + " net income";
+        taxRate = grossIncome === 0
+          ? ""
+          : formatPercentage(sum(taxes) / grossIncome) + " of income";
+        expenseRate = netIncomeAmount === 0
+          ? ""
+          : formatPercentage(sum(expenses) / netIncomeAmount) + " of net income";
+        savingRate = netIncomeAmount === 0
+          ? ""
+          : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
       }
 
       renderer(expenses);
@@ -163,10 +172,13 @@
 
         <!-- Category Breakdown -->
         <Section title="Category Breakdown">
-          <ZeroState item={currentYearExpenses}>
-            <strong>Hurray!</strong> You have no expenses this year.
-          </ZeroState>
-          <ChartFrame type="category" rows={Math.min(8, currentYearExpenses.length || 4)}>
+          <ChartFrame
+            type="category"
+            rows={Math.min(8, currentYearExpenses.length || 4)}
+            empty={!hasCurrentYearExpenses}
+            emptyMessage="No expenses this year"
+            preserveChildren
+          >
             <svg id="d3-current-year-breakdown" width="100%" />
           </ChartFrame>
         </Section>
@@ -174,11 +186,15 @@
 
       <!-- Yearly Expense Timeline -->
       <Section title="Expense Timeline">
-        <ZeroState item={expenses}>
-          <strong>Oops!</strong> You have no expenses.
-        </ZeroState>
-        <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        {#if hasExpenses}
+          <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+        {/if}
+        <ChartFrame
+          type="timeline"
+          empty={!hasExpenses}
+          emptyMessage="No expense activity in this period"
+          preserveChildren
+        >
           <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
         </ChartFrame>
       </Section>

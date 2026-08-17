@@ -20,7 +20,6 @@
   import { writable } from "svelte/store";
   import PostingCard from "$lib/components/transactions/PostingCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import dayjs from "dayjs";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -87,6 +86,9 @@
       .reverse()
       .value()
   );
+  let selectedMonthExpenses: Posting[] = $derived(grouped_expenses?.[$month] || []);
+  let hasSelectedMonthExpenses = $derived(sum(selectedMonthExpenses) > 0);
+  let hasExpenses = $derived(sum(expenses) > 0);
 
   $effect(() => {
     if (grouped_expenses && renderer) {
@@ -108,12 +110,18 @@
         savingRate = "";
         netIncome = "";
       } else {
-        netIncome = formatCurrency(sum(incomes, -1) - sum(taxes)) + " net income";
-        taxRate = formatPercentage(sum(taxes) / sum(incomes, -1)) + " on income";
-        expenseRate =
-          formatPercentage(sum(expenses) / (sum(incomes, -1) - sum(taxes))) + " of net income";
-        savingRate =
-          formatPercentage(sum(investments) / (sum(incomes, -1) - sum(taxes))) + " of net income";
+        const grossIncome = sum(incomes, -1);
+        const netIncomeAmount = grossIncome - sum(taxes);
+        netIncome = formatCurrency(netIncomeAmount) + " net income";
+        taxRate = grossIncome === 0
+          ? ""
+          : formatPercentage(sum(taxes) / grossIncome) + " on income";
+        expenseRate = netIncomeAmount === 0
+          ? ""
+          : formatPercentage(sum(expenses) / netIncomeAmount) + " of net income";
+        savingRate = netIncomeAmount === 0
+          ? ""
+          : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
       }
 
       renderer(expenses);
@@ -163,9 +171,15 @@
 
       <Section title="Recent Expenses" class="paisa-split-postings-section">
         <div class="paisa-split-postings-list">
-          {#each current_month_expenses as exp}
-            <PostingCard posting={exp} color={z(secondName(exp.account))} icon={true} />
-          {/each}
+          {#if _.isEmpty(current_month_expenses)}
+            <div class="paisa-empty-list-message has-text-grey is-size-7 p-3">
+              No recent expenses this month.
+            </div>
+          {:else}
+            {#each current_month_expenses as exp}
+              <PostingCard posting={exp} color={z?.(secondName(exp.account)) || ""} icon={true} />
+            {/each}
+          {/if}
         </div>
       </Section>
     </div>
@@ -187,10 +201,13 @@
 
         <!-- Category Breakdown -->
         <Section title="Category Breakdown">
-          <ZeroState item={grouped_expenses?.[$month]}>
-            <strong>Hurray!</strong> You have no expenses this month.
-          </ZeroState>
-          <ChartFrame type="category" rows={Math.min(8, (grouped_expenses?.[$month] || []).length || 4)}>
+          <ChartFrame
+            type="category"
+            rows={Math.min(8, selectedMonthExpenses.length || 4)}
+            empty={!hasSelectedMonthExpenses}
+            emptyMessage="No expenses this month"
+            preserveChildren
+          >
             <svg id="d3-current-month-breakdown" width="100%" />
           </ChartFrame>
         </Section>
@@ -198,11 +215,15 @@
 
       <!-- Monthly Expense Timeline -->
       <Section title="Expense Timeline">
-        <ZeroState item={expenses}>
-          <strong>Oops!</strong> You have no expenses.
-        </ZeroState>
-        <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        {#if hasExpenses}
+          <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+        {/if}
+        <ChartFrame
+          type="timeline"
+          empty={!hasExpenses}
+          emptyMessage="No expense activity in this period"
+          preserveChildren
+        >
           <svg id="d3-monthly-expense-timeline" width="100%" height="400" />
         </ChartFrame>
       </Section>

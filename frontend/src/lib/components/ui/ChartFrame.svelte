@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import ErrorState from "./ErrorState.svelte";
   import Spinner from "./Spinner.svelte";
   import ZeroState from "./ZeroState.svelte";
   import { observeElementSize, type Dimensions } from "$lib/charts/resize";
@@ -16,6 +17,10 @@
     loading?: boolean;
     empty?: boolean;
     emptyMessage?: string;
+    preserveChildren?: boolean;
+    error?: boolean;
+    errorTitle?: string;
+    errorMessage?: string;
     class?: string;
     style?: string;
     id?: string;
@@ -33,6 +38,10 @@
     loading = false,
     empty = false,
     emptyMessage = "No data available for the selected period.",
+    preserveChildren = false,
+    error = false,
+    errorTitle = "Something went wrong",
+    errorMessage = "An error occurred while loading this visualization.",
     class: className = "",
     style = "",
     id,
@@ -93,12 +102,21 @@
       <div class="paisa-chart-frame-loading">
         <Spinner />
       </div>
+    {:else if error}
+      <div class="paisa-chart-frame-error">
+        <ErrorState title={errorTitle} message={errorMessage} />
+      </div>
     {:else if empty}
       <div class="paisa-chart-frame-empty">
         <ZeroState item={false}>
           {emptyMessage}
         </ZeroState>
       </div>
+      {#if preserveChildren}
+        <div class="paisa-chart-frame-preserved" aria-hidden="true">
+          {@render children?.()}
+        </div>
+      {/if}
     {:else}
       {@render children?.()}
     {/if}
@@ -190,11 +208,19 @@
   }
 
   .paisa-chart-frame-loading,
+  .paisa-chart-frame-error,
   .paisa-chart-frame-empty {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
     min-height: 200px;
+  }
+
+  .paisa-chart-frame-preserved {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 </style>

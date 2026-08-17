@@ -32,6 +32,23 @@ export interface MonthlyFlowChart {
   legends: Legend[];
 }
 
+function paddedDomain(values: number[]): [number, number] {
+  const finiteValues = values.filter(Number.isFinite);
+  if (_.isEmpty(finiteValues)) return [0, 1];
+
+  const extent = d3.extent(finiteValues);
+  let min = extent[0] ?? 0;
+  let max = extent[1] ?? 1;
+
+  if (min === max) {
+    const pad = Math.max(Math.abs(min) * 0.1, 1);
+    min -= pad;
+    max += pad;
+  }
+
+  return [min, max];
+}
+
 export function createMonthlyFlow(
   target: string | SVGElement,
   options = {
@@ -160,7 +177,7 @@ export function createMonthlyFlow(
     positions.push(0);
 
     x.domain(_.map(cashFlows, (c) => c.date.format("MMM YYYY")));
-    y.domain(d3.extent(positions));
+    y.domain(paddedDomain(positions));
     x1.range([0, x.bandwidth()]);
 
     const duration = (!animate || firstRender) ? 0 : 500;

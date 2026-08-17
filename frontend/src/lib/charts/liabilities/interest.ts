@@ -67,6 +67,11 @@ function renderTable(interest: Interest) {
 }
 
 export function renderOverview(gains: Interest[]) {
+  if (_.isEmpty(gains)) {
+    d3.select("#d3-interest-overview").selectAll("*").remove();
+    return;
+  }
+
   gains = _.sortBy(gains, (g) => g.account);
   const BAR_HEIGHT = rem(24);
   const id = "#d3-interest-overview";
@@ -122,16 +127,19 @@ export function renderOverview(gains: Interest[]) {
   ];
   const z = d3.scaleOrdinal<string>(colors).domain(keys);
 
+  const getCurrentOverview = (g: Interest) => _.last(g.overview_timeline);
+
   const getDrawnAmount = (g: Interest) =>
-    _.last(g.overview_timeline).drawn_amount;
+    getCurrentOverview(g)?.drawn_amount ?? 0;
 
   const getInterestAmount = (g: Interest) =>
-    _.last(g.overview_timeline).interest_amount;
+    getCurrentOverview(g)?.interest_amount ?? 0;
   const getRepaidAmount = (g: Interest) =>
-    _.last(g.overview_timeline).repaid_amount;
+    getCurrentOverview(g)?.repaid_amount ?? 0;
 
   const getBalanceAmount = (g: Interest) => {
-    const current = _.last(g.overview_timeline);
+    const current = getCurrentOverview(g);
+    if (!current) return 0;
     return current.drawn_amount + current.interest_amount -
       current.repaid_amount;
   };
@@ -139,7 +147,7 @@ export function renderOverview(gains: Interest[]) {
   const maxX = _.chain(gains)
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
-    .value();
+    .value() || 0;
   const textGroupWidth = rem(140);
   const aprMargin = rem(15);
   const textGroupMargin = rem(10);
@@ -154,13 +162,13 @@ export function renderOverview(gains: Interest[]) {
     textGroupZero + textGroupWidth + textGroupMargin,
     width,
   ]);
-  x.domain([0, maxX]);
+  x.domain([0, maxX > 0 ? maxX : 1]);
   const x1 = d3
     .scaleLinear()
     .range([0, aprWidth])
     .domain([
-      _.min([_.min(_.map(gains, (g) => g.apr)), 0]),
-      _.max([0, _.max(_.map(gains, (g) => g.apr))]),
+      _.min([_.min(_.map(gains, (g) => g.apr)) ?? 0, 0]) ?? 0,
+      _.max([0, _.max(_.map(gains, (g) => g.apr)) ?? 0]) || 1,
     ]);
 
   g.append("line")
@@ -395,7 +403,8 @@ export function renderOverview(gains: Interest[]) {
     .append("rect")
     .attr("fill", "transparent")
     .attr("data-tippy-content", (g: Interest) => {
-      const current = _.last(g.overview_timeline);
+      const current = getCurrentOverview(g);
+      if (!current) return "";
       return tooltip([
         ["Account", [g.account, "has-text-weight-bold has-text-right"]],
         [
@@ -439,12 +448,22 @@ export function renderOverview(gains: Interest[]) {
 }
 
 export function renderPerAccountOverview(interests: Interest[]) {
+  const root = d3.select("#d3-interest-timeline-breakdown");
+  if (_.isEmpty(interests)) {
+    root.selectAll("*").remove();
+    return;
+  }
+
   const dates = _.flatMap(
     interests,
     (g) => _.map(g.overview_timeline, (o) => o.date),
   );
   const start = _.min(dates),
     end = _.max(dates);
+  if (!start || !end) {
+    root.selectAll("*").remove();
+    return;
+  }
 
   const divs = d3
     .select("#d3-interest-timeline-breakdown")
@@ -487,7 +506,12 @@ function renderOverviewSmall(
   element: Element,
   xDomain: [dayjs.Dayjs, dayjs.Dayjs],
 ) {
-  if (!element?.parentElement) return;
+  if (
+    !element?.parentElement || _.isEmpty(points) || !xDomain[0] || !xDomain[1]
+  ) {
+    d3.select(element).selectAll("*").remove();
+    return;
+  }
 
   const svg = d3.select(element),
     margin = { top: 5, right: 80, bottom: 20, left: 40 },
@@ -501,17 +525,16 @@ function renderOverviewSmall(
 
   svg.attr("width", width + margin.left + margin.right);
 
+  const maxY = d3.max<InterestOverview, number>(
+    points,
+    (d) => d.interest_amount + d.drawn_amount,
+  ) ?? 0;
+
   const x = d3.scaleTime().range([0, width]).domain(xDomain),
     y = d3
       .scaleLinear()
       .range([height, 0])
-      .domain([
-        0,
-        d3.max<InterestOverview, number>(
-          points,
-          (d) => d.interest_amount + d.drawn_amount,
-        ),
-      ]),
+      .domain([0, maxY > 0 ? maxY : 1]),
     z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
 
   const area = (y0: number, y1: (d: InterestOverview) => number) =>
