@@ -328,6 +328,10 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 		c.JSON(200, prediction.GetTfIdf(db))
 	})
 
+	router.GET("/api/prediction/history", func(c *gin.Context) {
+		c.JSON(200, prediction.GetHistory(db))
+	})
+
 	router.GET("/api/templates", func(c *gin.Context) {
 		c.JSON(200, gin.H{"templates": template.All()})
 	})

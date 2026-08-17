@@ -215,9 +215,16 @@ If `terms` are not provided, the entire `ROW` will be used.
 The `prefix` is optional and will be used to filter out matching accounts. If no
 match is found, `Unknown` will be returned.
 
+Prediction uses committed ledger history (not the current preview). Familiar
+merchants with a clear account become a high-confidence match. New or split
+history stays as `Unknown` or needs review. Optional `source=` is the other
+posting account in the template and is used as extra context; templates do not
+need to change. TF-IDF remains a weak fallback only.
+
 ```handlebars
 {{predictAccount prefix="Income"}}
 {{predictAccount ROW.C ROW.F prefix="Income"}}
+{{predictAccount ROW.C prefix="Expenses" source="Liabilities:CreditCard"}}
 ```
 
 !!! tip

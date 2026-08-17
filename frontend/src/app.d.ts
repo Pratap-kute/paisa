@@ -45,6 +45,9 @@ interface UserConfig {
     name: string;
     icon: string;
   }[];
+  prediction?: {
+    merchant_rules?: { merchant: string; account: string }[];
+  };
 }
 
 interface Runtime {

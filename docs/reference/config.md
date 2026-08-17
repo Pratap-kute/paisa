@@ -263,6 +263,16 @@ import_templates:
       {{/if}}
     # Should be a valid handlebar template
 
+## Prediction
+# OPTIONAL, DEFAULT: empty merchant_rules
+prediction:
+  merchant_rules:
+    - merchant: "swiggy instamart"
+      account: "Expenses:Groceries"
+    # Merchant text is matched after normalization. The import template prefix
+    # still hard-filters the account, so an Expenses rule is ignored for
+    # prefix="Income".
+
 ## Accounts: account customization
 # OPTIONAL, DEFAULT: []
 accounts:

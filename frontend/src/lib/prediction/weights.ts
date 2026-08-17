@@ -1,0 +1,58 @@
+/** Centralized scores, penalties, and confidence gates. */
+
+export const IDENTITY = {
+  RULE: 1000,
+  EXACT_MERCHANT: 55,
+  ALIAS: 45,
+  EXACT_DESCRIPTION: 40,
+  SIMILARITY_MAX: 30,
+} as const;
+
+export const CONTEXT = {
+  HISTORY_MAX: 20,
+  SUPPORT_BONUS_MAX: 10,
+  SAME_SOURCE: 10,
+  SAME_DIRECTION: 8,
+  OPPOSITE_DIRECTION: -8,
+  SAME_CURRENCY: 5,
+  CURRENCY_MISMATCH: -10,
+  AMOUNT_MAX: 7,
+  RECENCY_MAX: 5,
+} as const;
+
+export const PENALTY = {
+  GENERIC_MERCHANT: -20,
+  WEAK_FUZZY: -15,
+} as const;
+
+export const MATCH = {
+  SIMILARITY_INCLUDE: 0.5,
+  WEAK_FUZZY_BELOW: 0.85,
+  AMOUNT_RELATIVE_SCALE: 1,
+  RECENCY_FULL_DAYS: 30,
+  RECENCY_ZERO_DAYS: 365,
+  TRANSFER_DATE_WINDOW_DAYS: 3,
+  TRANSFER_AMOUNT_TOLERANCE: 0.02,
+} as const;
+
+export const CONFIDENCE = {
+  HIGH_SCORE: 80,
+  HIGH_SUPPORT: 2,
+  HIGH_MARGIN: 18,
+  UNKNOWN_SCORE: 45,
+} as const;
+
+export const GENERIC_MERCHANT_KEYS = new Set([
+  "",
+  "upi",
+  "imps",
+  "neft",
+  "rtgs",
+  "pos",
+  "atm",
+  "transfer",
+  "payment",
+  "bill",
+  "to transfer",
+  "by transfer",
+]);

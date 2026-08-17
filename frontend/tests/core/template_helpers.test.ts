@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import helpers from "../../src/lib/importing/template_helpers";
+import { predictionSession } from "../../src/lib/prediction/session";
 
 dayjs.extend(customParseFormat);
 
@@ -103,5 +104,36 @@ describe("template helpers", () => {
     expect(helpers.predictAccount(options({ prefix: "Expenses" }, {
       ROW: { A: "merchant" },
     }))).toBe("Expenses:Unknown");
+  });
+
+  test("predicts from committed history through the helper", () => {
+    predictionSession.reset();
+    predictionSession.loadHistory([
+      {
+        payee: "Starbucks Coffee",
+        categoryAccount: "Expenses:Food",
+        amount: 250,
+        absoluteAmount: 250,
+        date: "2024-01-01",
+        commodity: "INR",
+        transactionId: "a",
+      },
+      {
+        payee: "Starbucks Coffee",
+        categoryAccount: "Expenses:Food",
+        amount: 260,
+        absoluteAmount: 260,
+        date: "2024-02-01",
+        commodity: "INR",
+        transactionId: "b",
+      },
+    ]);
+    expect(
+      helpers.predictAccount(
+        "Starbucks Coffee",
+        options({ prefix: "Expenses" }),
+      ),
+    ).toBe("Expenses:Food");
+    predictionSession.reset();
   });
 });

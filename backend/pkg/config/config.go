@@ -124,6 +124,15 @@ type CreditCard struct {
 	ExpirationDate  string `json:"expiration_date" yaml:"expiration_date"`
 }
 
+type MerchantRule struct {
+	Merchant string `json:"merchant" yaml:"merchant"`
+	Account  string `json:"account" yaml:"account"`
+}
+
+type PredictionConfig struct {
+	MerchantRules []MerchantRule `json:"merchant_rules" yaml:"merchant_rules"`
+}
+
 type Config struct {
 	JournalPath                string       `json:"journal_path" yaml:"journal_path"`
 	DBPath                     string       `json:"db_path" yaml:"db_path"`
@@ -156,6 +165,8 @@ type Config struct {
 	UserAccounts []UserAccount `json:"user_accounts" yaml:"user_accounts"`
 
 	CreditCards []CreditCard `json:"credit_cards" yaml:"credit_cards"`
+
+	Prediction PredictionConfig `json:"prediction" yaml:"prediction"`
 }
 
 var (
@@ -184,6 +195,7 @@ var defaultConfig = Config{
 	Goals:                      Goals{Retirement: []RetirementGoal{}, Savings: []SavingsGoal{}},
 	UserAccounts:               []UserAccount{},
 	CreditCards:                []CreditCard{},
+	Prediction:                 PredictionConfig{MerchantRules: []MerchantRule{}},
 }
 
 var itemsUniquePropertiesMeta = jsonschema.MustCompileString("itemsUniqueProperties.json", `{

@@ -164,6 +164,18 @@ export interface AccountTfIdf {
   };
 }
 
+export interface PredictionHistoryEntry {
+  transactionId: string;
+  date: string;
+  payee: string;
+  sourceAccount?: string;
+  categoryAccount: string;
+  amount: number;
+  absoluteAmount: number;
+  direction?: "DEBIT" | "CREDIT";
+  commodity: string;
+}
+
 export interface AssetBreakdown {
   group: string;
   investmentAmount: number;
@@ -695,6 +707,9 @@ export function ajax(
 ): Promise<SavingsGoalProgress>;
 
 export function ajax(route: "/api/account/tf_idf"): Promise<AccountTfIdf>;
+export function ajax(
+  route: "/api/prediction/history",
+): Promise<{ history: PredictionHistoryEntry[] }>;
 export function ajax(
   route: "/api/templates",
   options?: RequestOptions,

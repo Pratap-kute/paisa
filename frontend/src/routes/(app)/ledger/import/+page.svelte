@@ -27,6 +27,15 @@
   import Modal from "$lib/components/ui/Modal.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
+  import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
+  import PredictionDetail from "$lib/components/prediction/PredictionDetail.svelte";
+  import {
+    predictionSession,
+    rowMatchesFilter,
+    type ConfidenceFilter,
+  } from "$lib/prediction/session";
+  import type { Confidence, PredictionResult } from "$lib/prediction/types";
 
   let templates: ImportTemplate[] = $state([]);
   let selectedTemplate: ImportTemplate = $state();
@@ -41,6 +50,36 @@
   let activeFileName = $state("");
   let templateDrawerOpen = $state(false);
   let selectedSourceRowIndex: number | null = $state(null);
+  let predictionTick = $state(0);
+  let predictionFilter: ConfidenceFilter = $state(null);
+  let predictionCounts = $state({
+    high: 0,
+    medium: 0,
+    review: 0,
+    unknown: 0,
+    transfer: 0,
+  });
+  let predictionReviewFailed = $state(false);
+  let predictionRows = $state<
+    Array<{
+      rowIndex: number;
+      confidence: Confidence;
+      possibleTransfer: boolean;
+      results: PredictionResult[];
+    }>
+  >([]);
+
+  function refreshPredictionReview() {
+    try {
+      predictionSession.finalizeCurrentImport();
+      predictionCounts = predictionSession.counts();
+      predictionRows = predictionSession.rowSummaries();
+      predictionReviewFailed = false;
+    } catch (error) {
+      console.error(error);
+      predictionReviewFailed = true;
+    }
+  }
   let renderMetadata: RenderMetadata = $state({
     content: "",
     rows: [],
@@ -64,7 +103,12 @@
   }
 
   onMount(async () => {
-    accountTfIdf.set(await ajax("/api/account/tf_idf"));
+    const [tfidf, historyResponse] = await Promise.all([
+      ajax("/api/account/tf_idf"),
+      ajax("/api/prediction/history"),
+    ]);
+    accountTfIdf.set(tfidf);
+    predictionSession.loadHistory(historyResponse.history || []);
     ({ templates } = await ajax("/api/templates"));
     if (templates.length > 0) {
       selectedTemplate = templates[0];
@@ -157,8 +201,14 @@
     const currentRows = rows;
     const currentReverse = options.reverse;
     const currentTrim = options.trim;
+    const _tick = predictionTick;
 
     if (!_.isEmpty(currentRows) && currentTemplate && previewEditor) {
+      try {
+        predictionSession.beginRender();
+      } catch (error) {
+        console.error(error);
+      }
       try {
         const generated = renderWithMetadata(currentRows, currentTemplate, {
           reverse: currentReverse,
@@ -170,10 +220,14 @@
       } catch (e) {
         console.error(e);
       }
+      refreshPredictionReview();
     } else if (_.isEmpty(currentRows) && previewEditor) {
       renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
       preview = "";
       updatePreviewContent(previewEditor, "");
+      predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
+      predictionRows = [];
+      predictionReviewFailed = false;
     }
   });
 
@@ -192,6 +246,9 @@
         data = results.data;
         rows = asRows(results);
         selectedSourceRowIndex = null;
+        predictionSession.clearPreview();
+        predictionFilter = null;
+        predictionTick += 1;
 
         columnCount = _.maxBy(data, (row) => row.length)?.length || 0;
         _.each(data, (row) => {
@@ -211,6 +268,11 @@
     rows = [];
     columnCount = 0;
     selectedSourceRowIndex = null;
+    predictionSession.clearPreview();
+    predictionFilter = null;
+    predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
+    predictionRows = [];
+    predictionReviewFailed = false;
     renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
     preview = "";
     updatePreviewContent(previewEditor, "");
@@ -227,6 +289,64 @@
     previewEditor.dispatch({
       effects: EditorView.scrollIntoView(line.from, { y: "center" })
     });
+  }
+
+  function summaryForRow(rowIndex: number) {
+    try {
+      return _.find(predictionRows, { rowIndex });
+    } catch (_error) {
+      return undefined;
+    }
+  }
+
+  function rowIsVisible(rowIndex: number) {
+    return rowMatchesFilter(summaryForRow(rowIndex), predictionFilter);
+  }
+
+  let selectedPrediction = $derived(
+    selectedSourceRowIndex == null
+      ? null
+      : (summaryForRow(selectedSourceRowIndex)?.results[0] || null)
+  );
+
+  function overrideSelected(account: string) {
+    if (selectedSourceRowIndex == null || !selectedPrediction) return;
+    predictionSession.setOverride(
+      selectedSourceRowIndex,
+      selectedPrediction.prefix,
+      account,
+      selectedPrediction.helperInvocationIndex,
+    );
+    predictionTick += 1;
+  }
+
+  function applySimilar(account: string) {
+    if (selectedSourceRowIndex == null || !selectedPrediction) return;
+    predictionSession.applyToSimilar(
+      selectedSourceRowIndex,
+      selectedPrediction.prefix,
+      account,
+      selectedPrediction.helperInvocationIndex,
+    );
+    predictionTick += 1;
+  }
+
+  function alwaysUseMerchant(account: string) {
+    if (!selectedPrediction) return;
+    predictionSession.alwaysUseMerchant(
+      selectedPrediction.merchantKey,
+      selectedPrediction.prefix,
+      account,
+    );
+    if (selectedSourceRowIndex != null) {
+      predictionSession.setOverride(
+        selectedSourceRowIndex,
+        selectedPrediction.prefix,
+        account,
+        selectedPrediction.helperInvocationIndex,
+      );
+    }
+    predictionTick += 1;
   }
 
   async function copyToClipboard() {
@@ -266,6 +386,13 @@
         type: "is-success",
         duration: 5000
       });
+      try {
+        const historyResponse = await ajax("/api/prediction/history");
+        predictionSession.loadHistory(historyResponse.history || []);
+        predictionTick += 1;
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       toast.toast({
         message: `Failed to save ${destinationFile}. reason: ${message}`,
@@ -423,6 +550,13 @@
               <span class="icon is-small has-text-link"><i class="fas fa-table-cells"></i></span>
               <span>Source Data</span>
             </div>
+            {#if !predictionReviewFailed && !_.isEmpty(data) && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
+              <PredictionReviewBar
+                counts={predictionCounts}
+                filter={predictionFilter}
+                onFilter={(next) => (predictionFilter = next)}
+              />
+            {/if}
           </div>
 
           {#if parseErrorMessage}
@@ -490,9 +624,16 @@
                   {#each data as row, ri}
                     <tr
                       class:selected={selectedSourceRowIndex === ri}
+                      class:is-filtered={!rowIsVisible(ri)}
                       onclick={() => selectSourceRow(ri)}
                     >
-                      <th class="paisa-sheet-row-header">{ri}</th>
+                      <th class="paisa-sheet-row-header">
+                        <span>{ri}</span>
+                        <PredictionRowBadge
+                          confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
+                          possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
+                        />
+                      </th>
                       {#each row as cell}
                         <td class="paisa-sheet-data-cell" title={cell || ""}>{cell || ""}</td>
                       {/each}
@@ -501,6 +642,15 @@
                 </tbody>
               </table>
             </div>
+            {#if !predictionReviewFailed}
+              <PredictionDetail
+                result={selectedPrediction}
+                accounts={predictionSession.index?.accounts || []}
+                onOverride={overrideSelected}
+                onApplySimilar={applySimilar}
+                onAlwaysUse={alwaysUseMerchant}
+              />
+            {/if}
           {/if}
         </div>
 
@@ -563,6 +713,15 @@
           {/if}
           {#if selectedSourceRowIndex !== null}
             <span class="has-text-grey">Row {selectedSourceRowIndex} selected</span>
+          {/if}
+          {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
+            <span class="has-text-grey">High {predictionCounts.high}</span>
+            <span class="has-text-grey">Medium {predictionCounts.medium}</span>
+            <span class="has-text-warning">Review {predictionCounts.review}</span>
+            <span class="has-text-danger">Unknown {predictionCounts.unknown}</span>
+            {#if predictionCounts.transfer > 0}
+              <span class="has-text-warning">Transfers {predictionCounts.transfer}</span>
+            {/if}
           {/if}
         {:else if activeFileName}
           <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
@@ -921,9 +1080,14 @@
       color: var(--paisa-table-header-text);
       border-color: var(--paisa-table-border);
       text-align: center;
-      width: 40px;
-      min-width: 40px;
+      width: 88px;
+      min-width: 88px;
       font-weight: var(--paisa-font-weight-semibold);
+      vertical-align: middle;
+    }
+
+    tbody tr.is-filtered {
+      display: none;
     }
 
     .paisa-sheet-data-cell {

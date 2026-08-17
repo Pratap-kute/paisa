@@ -1,24 +1,9 @@
 // deno-lint-ignore-file no-explicit-any -- Handlebars invokes helpers with heterogeneous positional values and option objects.
 import dayjs from "dayjs";
 import _ from "lodash";
-import { get } from "svelte/store";
-import { accountTfIdf } from "../../store";
-import { cosineSimilarity } from "../core/cosine_similarity";
+import { predictionSession } from "../prediction/session";
 
 const STOP_WORDS = ["", "fof", "growth", "direct", "plan", "the"];
-
-function tokenize(s: string) {
-  return _.mapValues(
-    _.groupBy(
-      s
-        .split(/[ .()/:]+/)
-        .map((s) => s.toLowerCase())
-        .filter((s) => s.trim() !== ""),
-      _.identity,
-    ),
-    (v) => v.length,
-  );
-}
 
 function nextChar(key: string): string {
   if (key === "Z") {
@@ -32,49 +17,6 @@ function nextChar(key: string): string {
       return butlast + String.fromCharCode(last.charCodeAt(0) + 1);
     }
   }
-}
-
-function tfidf(query: string) {
-  if (accountTfIdf === null || get(accountTfIdf) == null) {
-    return {};
-  }
-
-  const { index } = get(accountTfIdf);
-  const tokens = tokenize(query);
-  return _.chain(tokens)
-    .map((freq, token) => {
-      const tf = freq / Object.keys(tokens).length;
-      const idf = Math.log(
-        Object.keys(index.docs).length /
-          (1 + Object.keys(index.tokens[token] || []).length),
-      ) + 1;
-      return [token, tf * idf];
-    })
-    .fromPairs()
-    .value();
-}
-
-function findMatch(query: string) {
-  if (accountTfIdf === null || get(accountTfIdf) == null) {
-    return [];
-  }
-
-  const queryVector = tfidf(query);
-  const { tf_idf, index } = get(accountTfIdf);
-  const accounts = Object.keys(index.docs);
-  return _.chain(accounts)
-    .map((account) => {
-      const tokens = _.uniq(
-        _.concat(Object.keys(queryVector), Object.keys(tf_idf[account])),
-      );
-      const q = tokens.map((token) => queryVector[token] || 0);
-      const a = tokens.map((token) => tf_idf[account][token] || 0);
-      return [account, cosineSimilarity(q, a)];
-    })
-    .sortBy(([, score]) => score)
-    .filter(([, score]: [string, number]) => score > 0)
-    .reverse()
-    .value();
 }
 
 function scrubAmount(str: string) {
@@ -137,37 +79,7 @@ export default {
   },
   predictAccount(...args: any) {
     const options = args.pop();
-
-    let query: string;
-    if (args.length === 0) {
-      query = Object.values(options.data.root.ROW).join(" ");
-    } else {
-      query = _.chain(args)
-        .map((a) => {
-          if (_.isObject(a)) {
-            return Object.values(a);
-          }
-          return a;
-        })
-        .flattenDeep()
-        .value()
-        .join(" ");
-    }
-
-    const prefix: string = options.hash.prefix || "";
-    const matches = findMatch(query);
-    const match = _.find(
-      matches,
-      ([account]) => account.toString().startsWith(prefix),
-    );
-    if (match) {
-      return match[0];
-    }
-    if (prefix.endsWith(":")) {
-      return prefix + "Unknown";
-    } else {
-      return prefix + ":Unknown";
-    }
+    return predictionSession.predictFromHelper(args, options).account;
   },
   isBlank(str: string) {
     return _.isEmpty(str) || _.trim(str) === "";
