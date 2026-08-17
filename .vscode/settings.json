@@ -16,7 +16,7 @@
     "frontend/scripts",
     "frontend/playwright.config.ts",
     "frontend/vitest.config.ts",
-    "frontend/vitest.core.config.ts",
+    "frontend/vitest.shared.ts",
     "frontend/tests/browser"
   ]
 }

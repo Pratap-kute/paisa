@@ -1,6 +1,7 @@
 import { render, waitFor } from "@testing-library/svelte";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import type { JSONSchema7 } from "json-schema";
+import * as utils from "$lib/core/utils";
 import JsonSchemaForm from "./JsonSchemaForm.svelte";
 
 test("normalizes a null nested object before binding children", async () => {
@@ -58,6 +59,8 @@ test("normalizes a missing optional array to an empty list", async () => {
 });
 
 test("normalizes an empty price widget value to an object", async () => {
+  const ajaxSpy = vi.spyOn(utils, "ajax").mockResolvedValue({ providers: [] });
+
   let value: Record<string, unknown> | null = null;
   const schema: JSONSchema7 & { "ui:widget"?: string } = {
     type: "object",
@@ -83,4 +86,10 @@ test("normalizes an empty price widget value to an object", async () => {
     expect(value).toEqual({});
   });
   unmount();
+  await waitFor(() => {
+    expect(ajaxSpy).toHaveBeenCalledWith("/api/price/providers", {
+      background: true,
+    });
+  });
+  ajaxSpy.mockRestore();
 });

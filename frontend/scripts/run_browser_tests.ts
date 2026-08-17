@@ -46,7 +46,7 @@ const server = new Deno.Command(Deno.execPath(), {
 try {
   await waitForPort(5173, server.status);
   const status = await new Deno.Command(Deno.execPath(), {
-    args: ["run", "-A", "npm:playwright@1.61.1", "test", ...Deno.args],
+    args: ["task", "playwright", "test", ...Deno.args],
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",

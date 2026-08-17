@@ -16,18 +16,21 @@
     "parser-build": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar -o src/lib/search/parser/parser",
     "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar --names -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar --names -o src/lib/search/parser/parser",
 
-    "test": "deno task test:unit && deno task test:integration",
-    "test:core": "deno run -A npm:vitest@^3.2.7 run --config vitest.core.config.ts --pool=threads --maxWorkers=1 --minWorkers=1",
-    "test:component": "deno run -A npm:vitest@^3.2.7 run --config vitest.config.ts --pool=threads --maxWorkers=1 --minWorkers=1",
+    "test": "deno task test:unit && deno task test:core && deno task test:component",
+    "test:core": "deno run -A npm:vitest@^3.2.7 run --config vitest.config.ts --project=core --pool=threads --maxWorkers=1 --minWorkers=1",
+    "test:component": "deno run -A npm:vitest@^3.2.7 run --config vitest.config.ts --project=component --pool=threads --maxWorkers=1 --minWorkers=1",
+    "test:deno": "deno task test:unit && deno task test:integration",
     "test:coverage": "deno run -A scripts/coverage.ts",
     "test:coverage:report": "deno run -A scripts/coverage.ts --report-only",
     "test:desktop": "deno run --allow-env --allow-read --allow-run --allow-write scripts/desktop_smoke.ts",
     "test:e2e": "deno run -A scripts/run_browser_tests.ts --grep-invert @visual",
-    "test:frontend": "deno task test:unit && deno task test:component && deno task test:e2e && deno task test:visual && deno task test:coverage",
+    "test:frontend": "deno task test:unit && deno task test:e2e && deno task test:visual && deno task test:coverage",
     "test:integration": "deno test --no-check --allow-all --ignore=tests/core tests/",
     "test:unit": "deno test --no-check --allow-read --allow-env --allow-import --ignore=src/lib/components src/",
     "test:visual": "deno run -A scripts/run_browser_tests.ts --grep @visual",
     "test:visual:update": "deno run -A scripts/run_browser_tests.ts --grep @visual --update-snapshots",
+
+    "playwright": "deno run -A npm:playwright@1.61.1",
 
     "clean": "rm -rf .svelte-kit ../backend/web/static coverage playwright-report test-results"
   },

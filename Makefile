@@ -163,20 +163,12 @@ docs-build publish: ## Build static documentation site with MkDocs
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts node2nix regen regen-fixtures
+.PHONY: parsers parser generate-fonts regen regen-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	$(MAKE) -C frontend parsers
 
 generate-fonts: ## Download SVGs and generate custom icon font
 	$(MAKE) -C frontend generate-fonts
-
-node2nix: ## Re-generate Nix package expressions from package.json
-	npm install --lockfile-version 2
-	node2nix --development -18 --input package.json \
-		--lock package-lock.json \
-		--node-env ./flake/node-env.nix \
-		--composition ./flake/default.nix \
-		--output ./flake/node-package.nix
 
 regen regen-fixtures: build ## Re-generate integration test JSON fixtures
 	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration

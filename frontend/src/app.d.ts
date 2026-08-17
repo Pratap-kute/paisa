@@ -54,13 +54,10 @@ interface Runtime {
   BrowserOpenURL: (url: string) => void;
 }
 
-// eslint-disable-next-line no-var
 declare var runtime: Runtime;
 
-// eslint-disable-next-line no-var
 declare var USER_CONFIG: UserConfig;
 
-// eslint-disable-next-line no-var
 declare var __now: any;
 
 declare namespace App {

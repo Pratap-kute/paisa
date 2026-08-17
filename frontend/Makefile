@@ -1,5 +1,6 @@
 # ==============================================================================
 # Paisa - Frontend SvelteKit Web Application
+# Canonical commands: deno task <name> (see deno.json)
 # ==============================================================================
 
 SHELL := /usr/bin/env bash
