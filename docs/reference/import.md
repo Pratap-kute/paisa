@@ -269,6 +269,17 @@ commodity symbol. For example, `UTI Nifty Next 50 Index Growth
 Direct Plan` will
 be converted to `UNNI`
 
+#### `#!typescript oneline(str: string): string`
+
+Collapses wrapped spreadsheet text onto one line. A newline between letters is
+treated as a mid-word wrap (`GU` + `NDU` becomes `GUNDU`); other whitespace
+becomes a single space.
+
+```handlebars
+{{oneline ROW.B}}
+{{predictAccount (oneline ROW.B) prefix="Income"}}
+```
+
 #### `#!typescript trim(str: string): string`
 
 Trims the given string.

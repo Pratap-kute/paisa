@@ -1,5 +1,6 @@
 import type { PredictionInput } from "./types";
 import type { AmountDirection } from "./types";
+import { collapseWrappedText } from "./normalize";
 
 interface HelperOptions {
   hash?: Record<string, unknown>;
@@ -20,7 +21,7 @@ function flattenTerms(args: unknown[]): string {
       parts.push(String(arg));
     }
   }
-  return parts.join(" ");
+  return collapseWrappedText(parts.join(" "));
 }
 
 function parseAmount(value: unknown): number | undefined {
@@ -39,9 +40,39 @@ function parseDirection(value: unknown): AmountDirection | undefined {
   return undefined;
 }
 
-function rowText(row: Record<string, unknown>): string {
-  return Object.values(row).map((value) => value == null ? "" : String(value))
-    .join(" ");
+function isDateLike(text: string): boolean {
+  const value = text.trim();
+  if (/^\d{1,4}[-/.\s]\d{1,2}[-/.\s]\d{1,4}$/.test(value)) return true;
+  if (/^\d{1,2}\s+[A-Za-z]{3,9}\.?\s+\d{2,4}$/.test(value)) return true;
+  return false;
+}
+
+function isMostlyNumeric(text: string): boolean {
+  if (parseAmount(text) == null) return false;
+  const letters = (text.match(/[a-zA-Z]/g) || []).length;
+  return letters < 3;
+}
+
+function isTextEvidence(text: string): boolean {
+  if (!text || isDateLike(text) || isMostlyNumeric(text)) return false;
+  return /[a-zA-Z]/.test(text);
+}
+
+function rowDescriptionEvidence(row: Record<string, unknown>): string {
+  const candidates: string[] = [];
+  const fallback: string[] = [];
+  for (const [key, value] of Object.entries(row)) {
+    if (key === "index") continue;
+    if (value == null) continue;
+    const text = collapseWrappedText(String(value));
+    if (!text) continue;
+    fallback.push(text);
+    if (isTextEvidence(text)) candidates.push(text);
+  }
+  if (candidates.length === 0) return fallback.join(" ");
+  const longest = Math.max(...candidates.map((text) => text.length));
+  const minLength = Math.min(longest, Math.max(12, longest * 0.5));
+  return candidates.filter((text) => text.length >= minLength).join(" ");
 }
 
 export function adaptPredictAccountArgs(
@@ -51,9 +82,9 @@ export function adaptPredictAccountArgs(
   const hash = options.hash || {};
   const row = (options.data?.root?.ROW || {}) as Record<string, unknown>;
   const explicit = flattenTerms(args).trim();
-  const description = explicit
-    ? (rowText(row) ? `${explicit} ${rowText(row)}` : explicit)
-    : rowText(row);
+  const description = collapseWrappedText(
+    explicit || rowDescriptionEvidence(row),
+  );
 
   const prefix = typeof hash.prefix === "string" ? hash.prefix : "";
   const sourceAccount = typeof hash.source === "string"

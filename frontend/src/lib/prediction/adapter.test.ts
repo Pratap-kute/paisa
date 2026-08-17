@@ -4,12 +4,12 @@ import { adaptPredictAccountArgs } from "./adapter";
 import { accountMatchesPrefix, unknownAccount } from "./score";
 
 describe("predictAccount adapter", () => {
-  it("joins the whole ROW when no terms are passed", () => {
+  it("uses longer non-numeric ROW cells when no terms are passed", () => {
     const input = adaptPredictAccountArgs([], {
       hash: { prefix: "Expenses" },
       data: { root: { ROW: { A: "Uber", B: "200", index: 3 } } },
     });
-    expect(input.description).toContain("Uber");
+    expect(input.description).toBe("Uber");
     expect(input.prefix).toBe("Expenses");
     expect(input.rowIndex).toBe(3);
     expect(input.amount).toBeUndefined();
@@ -27,11 +27,44 @@ describe("predictAccount adapter", () => {
         },
       },
     });
-    expect(input.description).toContain("Starbucks");
+    expect(input.description).toBe("Starbucks");
     expect(input.amount).toBeUndefined();
     expect(input.commodity).toBeUndefined();
     expect(input.sourceAccount).toBeUndefined();
     expect(input.direction).toBeUndefined();
+  });
+
+  it("extracts SBI-style narration from a mixed ROW without terms", () => {
+    const input = adaptPredictAccountArgs([], {
+      hash: {},
+      data: {
+        root: {
+          ROW: {
+            A: "01/04/2026",
+            B: "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
+            C: "",
+            D: "200.00",
+            E: "",
+            F: "49487.44",
+            index: 19,
+          },
+        },
+      },
+    });
+    expect(input.description).toContain("AMAZON SELLER");
+    expect(input.description).not.toContain("200.00");
+    expect(input.description).not.toContain("01/04/2026");
+    expect(input.prefix).toBe("");
+    expect(input.rowIndex).toBe(19);
+  });
+
+  it("joins wrapped spreadsheet narration into one description", () => {
+    const input = adaptPredictAccountArgs([
+      "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*GU\nNDU REDDY*BAT   0099509044300 AT 01307 PATHARDI",
+    ], { hash: { prefix: "Income" } });
+    expect(input.description).toContain("GUNDU REDDY");
+    expect(input.description).not.toContain("GU NDU");
+    expect(input.description).not.toContain("\n");
   });
 
   it("uses explicit hash fields only for structured context", () => {
@@ -64,7 +97,8 @@ describe("predictAccount adapter", () => {
   it("preserves Unknown suffix rules", () => {
     expect(unknownAccount("Expenses:")).toBe("Expenses:Unknown");
     expect(unknownAccount("Expenses")).toBe("Expenses:Unknown");
-    expect(unknownAccount("")).toBe(":Unknown");
+    expect(unknownAccount("")).toBe("Unknown");
+    expect(unknownAccount("   ")).toBe("Unknown");
   });
 
   it("matches account prefixes on hierarchy boundaries", () => {

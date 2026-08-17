@@ -5,6 +5,16 @@ import { aliasKey, normalizeDescription, tokenize } from "./normalize";
 describe("normalizeDescription", () => {
   const cases: Array<[string, string, string]> = [
     ["UPI/SWIGGY/123456", "swiggy", "upi swiggy 123456"],
+    [
+      "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
+      "amazon",
+      "wdl tfr upi 309191771120 amazon seller services",
+    ],
+    [
+      "WDL TFR   UPI/DR/882090110936/Google P/utib/playstore1",
+      "google",
+      "wdl tfr upi dr 882090110936 google p utib playstore 1",
+    ],
     ["UPI-SWIGGY-INSTAMART", "swiggy instamart", "upi swiggy instamart"],
     ["Paytm/Swiggy", "swiggy", "paytm swiggy"],
     ["7 ELEVEN", "7 eleven", "7 eleven"],
@@ -16,6 +26,11 @@ describe("normalizeDescription", () => {
     ["", "", ""],
     ["12345", "", "12345"],
     ["Café Swiggy", "cafe swiggy", "cafe swiggy"],
+    [
+      "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*GU\nNDU REDDY*BAT   0099509044300 AT 01307 PATHARDI",
+      "gundu reddy",
+      "dep tfr neft hdfc 0000240 hdfch 00902314455 gundu reddy bat 0099509044300 at 01307 pathardi",
+    ],
   ];
 
   for (const [raw, merchantKey, full] of cases) {

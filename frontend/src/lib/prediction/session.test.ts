@@ -118,6 +118,34 @@ describe("prediction session and backtest", () => {
     ).toBe("Expenses:Keep");
   });
 
+  it("resolves an SBI UPI narration with no prefix when history exists", () => {
+    const sbiRow = {
+      A: "12/04/2026",
+      B: "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
+      C: "",
+      D: "200.00",
+      E: "",
+      F: "1200.00",
+      index: 8,
+    };
+    const options = {
+      hash: {},
+      data: { root: { ROW: sbiRow } },
+    };
+
+    expect(predictionSession.predictFromHelper([], options).account).toBe(
+      "Unknown",
+    );
+
+    predictionSession.loadHistory([
+      hist("Amazon", "Expenses:Subscriptions", "2024-01-01"),
+      hist("Amazon", "Expenses:Subscriptions", "2024-02-01"),
+    ]);
+    expect(predictionSession.predictFromHelper([], options).account).toBe(
+      "Expenses:Subscriptions",
+    );
+  });
+
   it("runs a chronological backtest without wall-clock timing", () => {
     const history = [
       hist("Uber", "Expenses:Travel", "2024-01-01"),

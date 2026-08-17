@@ -33,10 +33,12 @@ export function accountMatchesPrefix(account: string, prefix: string): boolean {
 }
 
 export function unknownAccount(prefix: string): string {
-  if (prefix.endsWith(":")) {
-    return prefix + "Unknown";
+  const normalized = (prefix || "").trim();
+  if (!normalized) return "Unknown";
+  if (normalized.endsWith(":")) {
+    return normalized + "Unknown";
   }
-  return prefix + ":Unknown";
+  return normalized + ":Unknown";
 }
 
 export function emptyBreakdown(): ScoreBreakdown {

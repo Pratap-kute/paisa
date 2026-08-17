@@ -94,6 +94,15 @@ export default {
   trim(str: string) {
     return _.trim(str);
   },
+  oneline(str: string) {
+    if (!_.isString(str)) {
+      return;
+    }
+    return str
+      .replace(/([A-Za-z0-9])\r?\n([A-Za-z0-9])/g, "$1$2")
+      .replace(/\s+/g, " ")
+      .trim();
+  },
   replace(str: string, search: string, replace: string) {
     if (!_.isString(str)) {
       return;
