@@ -87,9 +87,10 @@ export function renderOverview(gains: Interest[]) {
       bottom: rem(30),
       left: rem(150),
     },
-    width = el.parentElement.clientWidth -
-      margin.left -
-      margin.right,
+    width = Math.max(
+      rem(900),
+      el.parentElement.clientWidth - margin.left - margin.right,
+    ),
     height = gains.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
       "transform",
@@ -148,9 +149,9 @@ export function renderOverview(gains: Interest[]) {
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
     .value() || 0;
-  const textGroupWidth = rem(140);
-  const aprMargin = rem(15);
-  const textGroupMargin = rem(10);
+  const textGroupWidth = rem(190);
+  const aprMargin = rem(20);
+  const textGroupMargin = rem(16);
   const aprWidth = Math.max(
     rem(120),
     Math.round((width - textGroupWidth - aprMargin - textGroupMargin) * 0.25),
@@ -473,27 +474,24 @@ export function renderPerAccountOverview(interests: Interest[]) {
   divs.exit().remove();
 
   const rows = divs.enter().append("div")
-    .style("display", "grid")
-    .style("grid-template-columns", "minmax(160px, 200px) 1fr")
-    .style("gap", "var(--space-md)")
-    .style("align-items", "stretch")
-    .style("margin-bottom", "var(--space-lg)");
+    .attr("class", "paisa-interest-account-row");
 
   const leftColumn = rows
     .append("div")
-    .attr("class", "box")
-    .style("padding", "var(--space-sm) var(--space-md)");
+    .attr("class", "box paisa-interest-summary-card");
   leftColumn
     .append("table")
-    .attr("class", "table is-narrow is-fullwidth is-size-7")
+    .attr(
+      "class",
+      "table is-narrow is-fullwidth is-size-7 paisa-interest-summary-table",
+    )
     .append("tbody")
     .each(renderTable);
 
   const rightColumn = rows.append("div");
   rightColumn
     .append("div")
-    .attr("class", "box paisa-overflow-x-auto")
-    .style("padding", "var(--space-sm)")
+    .attr("class", "box paisa-interest-chart-card")
     .append("svg")
     .attr("height", "150")
     .each(function (gain) {
@@ -515,8 +513,10 @@ function renderOverviewSmall(
 
   const svg = d3.select(element),
     margin = { top: 5, right: 80, bottom: 20, left: 40 },
-    width = element.parentElement.clientWidth - margin.left -
-      margin.right,
+    width = Math.max(
+      rem(640),
+      element.parentElement.clientWidth - margin.left - margin.right,
+    ),
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(
       "transform",

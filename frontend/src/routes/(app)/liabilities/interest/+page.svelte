@@ -57,7 +57,9 @@
       emptyMessage="No liability activity in this period"
       preserveChildren
     >
-      <svg id="d3-interest-overview" width="100%" />
+      <div class="paisa-interest-overview-chart paisa-overflow-x-auto">
+        <svg id="d3-interest-overview" width="100%" />
+      </div>
     </ChartFrame>
   </Section>
 
@@ -74,3 +76,56 @@
     </ChartFrame>
   </Section>
 </Page>
+
+<style lang="scss">
+  .paisa-interest-overview-chart {
+    width: 100%;
+  }
+
+  .d3-interest-timeline-breakdown {
+    width: 100%;
+  }
+
+  :global(.paisa-interest-account-row) {
+    display: grid;
+    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr);
+    gap: var(--paisa-space-3);
+    align-items: stretch;
+    margin-bottom: var(--paisa-space-4);
+  }
+
+  :global(.paisa-interest-summary-card) {
+    padding: var(--paisa-space-2) var(--paisa-space-3);
+    align-self: stretch;
+  }
+
+  :global(.paisa-interest-summary-table) {
+    table-layout: fixed;
+    margin-bottom: 0;
+  }
+
+  :global(.paisa-interest-summary-table td) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.paisa-interest-chart-card) {
+    padding: var(--paisa-space-2);
+    overflow-x: auto;
+  }
+
+  :global(.paisa-interest-chart-card svg) {
+    min-width: 760px;
+  }
+
+  @media (max-width: 768px) {
+    :global(.paisa-interest-account-row) {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.paisa-interest-summary-card) {
+      max-width: 100%;
+    }
+  }
+</style>
