@@ -50,14 +50,14 @@ describe("template helpers", () => {
     expect(helpers.isDate(42 as unknown as string, "YYYY")).toBe(false);
     expect(helpers.date(" 2023-02-07 ", "YYYY-MM-DD")).toBe("2023/02/07");
     expect(helpers.trim(" value ")).toBe("value");
-    expect(helpers.oneline("DEP TFR NEFT*HDFC*\nNDU REDDY*BAT")).toBe(
-      "DEP TFR NEFT*HDFC* NDU REDDY*BAT",
+    expect(helpers.oneline("DEP TFR NEFT*HDFC*\nACME VENDOR*BAT")).toBe(
+      "DEP TFR NEFT*HDFC* ACME VENDOR*BAT",
     );
     expect(
       helpers.oneline(
-        "NEFT*HDFC0000240*HDFCH00902314455*GU\nNDU REDDY*BAT PATHARDI",
+        "NEFT*HDFC0000240*HDFCH00902314455*AC\nME VENDOR*BAT PATHARDI",
       ),
-    ).toBe("NEFT*HDFC0000240*HDFCH00902314455*GUNDU REDDY*BAT PATHARDI");
+    ).toBe("NEFT*HDFC0000240*HDFCH00902314455*ACME VENDOR*BAT PATHARDI");
     expect(helpers.oneline(2 as unknown as string)).toBeUndefined();
     expect(helpers.replace("a-b-a", "a", "x")).toBe("x-b-x");
     expect(helpers.replace(2 as unknown as string, "2", "x")).toBeUndefined();

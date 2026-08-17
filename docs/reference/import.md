@@ -272,7 +272,7 @@ be converted to `UNNI`
 #### `#!typescript oneline(str: string): string`
 
 Collapses wrapped spreadsheet text onto one line. A newline between letters is
-treated as a mid-word wrap (`GU` + `NDU` becomes `GUNDU`); other whitespace
+treated as a mid-word wrap (`AC` + `ME` becomes `ACME`); other whitespace
 becomes a single space.
 
 ```handlebars

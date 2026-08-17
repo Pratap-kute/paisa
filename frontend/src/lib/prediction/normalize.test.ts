@@ -27,9 +27,9 @@ describe("normalizeDescription", () => {
     ["12345", "", "12345"],
     ["Café Swiggy", "cafe swiggy", "cafe swiggy"],
     [
-      "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*GU\nNDU REDDY*BAT   0099509044300 AT 01307 PATHARDI",
-      "gundu reddy",
-      "dep tfr neft hdfc 0000240 hdfch 00902314455 gundu reddy bat 0099509044300 at 01307 pathardi",
+      "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*AC\nME VENDOR*BAT   0099509044300 AT 01307",
+      "acme vendor",
+      "dep tfr neft hdfc 0000240 hdfch 00902314455 acme vendor bat 0099509044300 at 01307",
     ],
   ];
 
