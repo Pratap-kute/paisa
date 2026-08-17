@@ -512,10 +512,20 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
     .attr("width", width);
 }
 
-export function renderPerAccountOverview(
-  interests: Interest[],
-  _size: Dimensions = { width: 0, height: 0 },
-) {
+function measuredHeight(node: HTMLElement | null): number {
+  if (!node) return 0;
+  return node.offsetHeight || node.getBoundingClientRect().height || 0;
+}
+
+function measuredWidth(node: HTMLElement | null): number {
+  if (!node) return 0;
+  const layoutWidth = node.clientWidth || node.getBoundingClientRect().width || 0;
+  if (layoutWidth > 0) return layoutWidth;
+  const inlineWidth = Number.parseInt(node.style.width, 10);
+  return Number.isFinite(inlineWidth) ? inlineWidth : 0;
+}
+
+export function renderPerAccountOverview(interests: Interest[]) {
   const root = d3.select("#d3-interest-timeline-breakdown");
   interests = _.filter(interests, (g) => !_.isEmpty(g.overview_timeline));
   if (_.isEmpty(interests)) {
@@ -547,18 +557,40 @@ export function renderPerAccountOverview(
       renderTable.call(tbodyNode, interest);
     }
 
-    const svgNode = row
+    const summaryNode = summaryCard.node() as HTMLElement | null;
+    const naturalSummaryHeight = measuredHeight(summaryNode);
+    const summaryHeight = naturalSummaryHeight > 0 ? naturalSummaryHeight : 150;
+    const rootWidth = measuredWidth(root.node() as HTMLElement | null);
+
+    const chartCard = row
       .append("div")
-      .append("div")
-      .attr("class", "box paisa-interest-chart-card")
-      .append("svg")
-      .attr("height", "150")
-      .node();
-    if (svgNode) {
-      // Size from the chart card, not ChartFrame (which includes the summary column).
-      renderOverviewSmall(interest.overview_timeline, svgNode, domain);
+      .attr("class", "box paisa-interest-chart-card");
+    const chartNode = chartCard.node() as HTMLElement | null;
+    const svgNode = chartCard.append("svg").node();
+    if (svgNode && summaryNode && chartNode) {
+      const chartWidth = measuredWidth(chartNode) || rootWidth;
+      renderOverviewSmall(interest.overview_timeline, svgNode, domain, {
+        width: chartWidth,
+        height: summaryHeight,
+      });
     }
   }
+}
+
+function chartCardInnerHeight(
+  chartCard: HTMLElement | null,
+  outerHeight: number,
+): number {
+  if (outerHeight <= 0) {
+    return 50;
+  }
+  if (!chartCard) {
+    return Math.max(50, outerHeight);
+  }
+  const styles = getComputedStyle(chartCard);
+  const paddingY = parseFloat(styles.paddingTop) +
+    parseFloat(styles.paddingBottom);
+  return Math.max(50, outerHeight - paddingY);
 }
 
 function renderOverviewSmall(
@@ -577,15 +609,18 @@ function renderOverviewSmall(
 
   svg.selectAll("*").remove();
 
-  const margin = { top: 5, right: 80, bottom: 20, left: 40 },
-    { width } = plotSize(element, margin, size, {
-      minWidth: rem(800),
-    }),
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
+  const margin = { top: 5, right: 80, bottom: 20, left: 40 };
+  const chartCard = element.parentElement as HTMLElement | null;
+  const innerHeight = chartCardInnerHeight(
+    chartCard,
+    size.height > 0 ? size.height : chartCard?.clientHeight ?? 150,
+  );
+  const { width } = plotSize(element, margin, size);
+  const height = Math.max(30, innerHeight - margin.top - margin.bottom);
+  const g = svg.append("g").attr(
+    "transform",
+    "translate(" + margin.left + "," + margin.top + ")",
+  );
 
   applySvgDimensions(
     svg,
@@ -756,12 +791,15 @@ export function createInterestOverviewChart(): ChartHandle<Interest[]> {
 }
 
 export function createInterestPerAccountChart(): ChartHandle<Interest[]> {
-  return createRedrawChart({
-    draw: (data, size) => {
-      renderPerAccountOverview(data, size);
+  return {
+    update(data) {
+      renderPerAccountOverview(data);
     },
-    clear: () => {
+    resize() {
+      // Per-account rows are content-sized; frame resize must not rebuild charts.
+    },
+    destroy() {
       d3.select("#d3-interest-timeline-breakdown").selectAll("*").remove();
     },
-  });
+  };
 }

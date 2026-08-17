@@ -82,7 +82,6 @@
       empty={isEmpty}
       emptyMessage="No liability activity in this period"
       preserveChildren
-      onresize={(dim) => perAccountChart?.resize(dim)}
     >
       <div class="d3-interest-timeline-breakdown">
         <div id="d3-interest-timeline-breakdown"></div>
@@ -114,9 +113,17 @@
     margin-bottom: var(--paisa-space-4);
   }
 
-  :global(.paisa-interest-summary-card) {
+  :global(.paisa-interest-summary-card),
+  :global(.paisa-interest-chart-card) {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     padding: var(--paisa-space-2) var(--paisa-space-3);
     align-self: stretch;
+  }
+
+  :global(.paisa-interest-summary-card) {
+    justify-content: center;
   }
 
   :global(.paisa-interest-summary-table) {
@@ -131,15 +138,13 @@
   }
 
   :global(.paisa-interest-chart-card) {
-    padding: var(--paisa-space-2);
     overflow-x: auto;
   }
 
   :global(.paisa-interest-chart-card svg) {
     display: block;
-    width: auto;
+    width: 100%;
     max-width: none;
-    min-width: 760px;
   }
 
   @media (max-width: 768px) {

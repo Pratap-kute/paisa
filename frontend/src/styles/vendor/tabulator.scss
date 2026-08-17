@@ -19,17 +19,22 @@
     font-weight: var(--paisa-font-weight-semibold);
 
     .tabulator-col {
+      box-sizing: border-box;
       background-color: var(--paisa-table-header-bg);
       border-right: 1px solid var(--paisa-table-border);
       padding: 0.5rem 0.75rem;
 
       .tabulator-col-content {
         padding: 0;
+        width: 100%;
+        display: flex;
 
         .tabulator-col-title-holder {
           display: flex;
           align-items: center;
           gap: 0.25rem;
+          width: 100%;
+          min-width: 0;
 
           .tabulator-col-title {
             white-space: normal;
@@ -39,14 +44,22 @@
           .tabulator-col-sorter {
             display: inline-flex;
             align-items: center;
-            margin-left: 0.25rem;
+            flex-shrink: 0;
           }
+        }
+      }
+
+      &[tabulator-header-hoz-align="left"] {
+        .tabulator-col-content .tabulator-col-title-holder {
+          justify-content: space-between;
+          text-align: left;
         }
       }
 
       &[tabulator-header-hoz-align="right"] {
         .tabulator-col-content .tabulator-col-title-holder {
-          justify-content: flex-end;
+          flex-direction: row-reverse;
+          justify-content: flex-start;
           text-align: right;
         }
       }
@@ -69,6 +82,14 @@
     .tabulator-cell {
       padding: 0.5rem 0.75rem;
       border-right: 1px solid var(--paisa-table-border);
+      box-sizing: border-box;
+
+      .tabulator-progress {
+        width: 100%;
+        min-height: 1rem;
+        display: flex;
+        align-items: center;
+      }
     }
 
     &:hover {

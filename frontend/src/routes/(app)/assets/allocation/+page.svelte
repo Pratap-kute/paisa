@@ -8,7 +8,7 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
-  import { ajax, formatPercentage, rem, type Aggregate, type Legend } from "$lib/core/utils";
+  import { ajax, formatPercentage, type Aggregate, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
@@ -25,31 +25,48 @@
   let total = 0;
 
   const columns: ColumnDefinition[] = [
-    { title: "Account", field: "account", formatter: accountName, minWidth: 200, widthGrow: 2 },
+    {
+      title: "Account",
+      field: "account",
+      formatter: accountName,
+      minWidth: 240,
+      widthGrow: 1,
+      headerHozAlign: "left",
+    },
     {
       title: "Market Value",
       field: "market_amount",
+      width: 140,
+      minWidth: 130,
+      maxWidth: 160,
       hozAlign: "right",
-      formatter: nonZeroCurrency
+      headerHozAlign: "right",
+      formatter: nonZeroCurrency,
     },
     {
       title: "Percent",
       field: "percent",
+      width: 96,
+      minWidth: 88,
+      maxWidth: 110,
       hozAlign: "right",
-      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2)
+      headerHozAlign: "right",
+      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
     },
     {
-      title: "%",
+      title: "Share",
       field: "percent",
-      hozAlign: "right",
+      minWidth: 180,
+      widthGrow: 2,
+      hozAlign: "left",
+      headerHozAlign: "left",
+      headerSort: false,
       formatter: "progress",
-      cssClass: "has-text-left",
-      minWidth: rem(250),
       formatterParams: {
         color: COLORS.assets,
-        min: 0
-      }
-    }
+        min: 0,
+      },
+    },
   ];
 
   onMount(async () => {
@@ -119,6 +136,6 @@
   </Section>
 
   <Section title="Allocation Table">
-    <Table data={aggregateLeafNodes} tree {columns} />
+    <Table data={aggregateLeafNodes} {columns} options={{ layout: "fitDataFill" }} />
   </Section>
 </Page>

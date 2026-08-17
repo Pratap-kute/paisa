@@ -79,7 +79,7 @@ describe("interest chart resize", () => {
     expect(Number(svg?.getAttribute("height"))).toBeGreaterThan(0);
   });
 
-  it("per-account chart keeps one row per account after resize redraws", () => {
+  it("per-account chart ignores frame resize to avoid redraw loops", () => {
     document.body.innerHTML = `
       <div class="paisa-chart-frame-body" style="width:800px">
         <div id="d3-interest-timeline-breakdown" style="width:800px"></div>
@@ -87,6 +87,11 @@ describe("interest chart resize", () => {
     const interests = parseInterests();
     const chart = createInterestPerAccountChart();
     chart.update(interests);
+    const widthBeforeResize = Number(
+      document.querySelector(".paisa-interest-chart-card svg")?.getAttribute(
+        "width",
+      ),
+    );
     chart.resize({ width: 800, height: 600 });
     chart.resize({ width: 600, height: 600 });
     const root = document.querySelector("#d3-interest-timeline-breakdown");
@@ -94,7 +99,8 @@ describe("interest chart resize", () => {
     expect(rows?.length).toBe(interests.length);
     const svgs = root?.querySelectorAll(".paisa-interest-chart-card svg");
     for (const svg of svgs ?? []) {
-      expect(Number(svg.getAttribute("width"))).toBeGreaterThanOrEqual(760);
+      expect(Number(svg.getAttribute("width"))).toBe(widthBeforeResize);
+      expect(Number(svg.getAttribute("width"))).toBeGreaterThan(0);
     }
   });
 
@@ -142,6 +148,23 @@ describe("interest chart resize", () => {
     const repaid = headerX("Balance / Repaid");
     expect(interest - loanDrawn).toBeGreaterThanOrEqual(110);
     expect(repaid - interest).toBeGreaterThanOrEqual(110);
+  });
+
+  it("per-account summary and chart cards share the same row height", () => {
+    document.body.innerHTML =
+      `<div id="d3-interest-timeline-breakdown" style="width:800px"></div>`;
+    renderPerAccountOverview(parseInterests());
+    const rows = document.querySelectorAll(".paisa-interest-account-row");
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const summary = row.querySelector(".paisa-interest-summary-card");
+      const chart = row.querySelector(".paisa-interest-chart-card");
+      expect(summary).toBeTruthy();
+      expect(chart).toBeTruthy();
+      const summaryHeight = summary!.getBoundingClientRect().height;
+      const chartHeight = chart!.getBoundingClientRect().height;
+      expect(Math.abs(summaryHeight - chartHeight)).toBeLessThanOrEqual(2);
+    }
   });
 
   it("uses each account's own date domain instead of a shared timeline", () => {
