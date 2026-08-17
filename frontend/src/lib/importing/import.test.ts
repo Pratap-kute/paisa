@@ -2,7 +2,13 @@
 import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
-import { asRows, columnIndexToLetter, parse, render } from "./spreadsheet";
+import {
+  asRows,
+  columnIndexToLetter,
+  parse,
+  render,
+  renderWithMetadata,
+} from "./spreadsheet";
 import helpers from "./template_helpers";
 import _ from "lodash";
 import Handlebars from "handlebars";
@@ -126,5 +132,70 @@ describe("spreadsheet column indexing", () => {
     expect(rows[0]["AA"]).toBe("val_26");
     expect(rows[0]["AB"]).toBe("val_27");
     expect(rows[0]["AD"]).toBe("val_29");
+  });
+});
+
+describe("spreadsheet render metadata", () => {
+  test("preserves render output and records generated source rows", () => {
+    const rows = asRows({
+      data: [
+        ["2026/04/01", "Coffee", "100"],
+        ["", "", ""],
+        ["2026/04/02", "Lunch", "250"],
+      ],
+    });
+    const template = Handlebars.compile(
+      "{{#if ROW.A}}{{ ROW.A }} {{ ROW.B }}\n  Expenses:Food  INR {{ ROW.C }}\n  Assets:Cash{{/if}}",
+    );
+
+    const metadata = renderWithMetadata(rows, template, { trim: true });
+
+    expect(metadata.content).toBe(render(rows, template, { trim: true }));
+    expect(metadata.generatedCount).toBe(2);
+    expect(metadata.rows.map((row) => row.sourceRowIndex)).toEqual([0, 2]);
+    expect(metadata.errors).toEqual([]);
+    expect(metadata.rows[0].lineRange).toEqual({ from: 1, to: 3 });
+    expect(metadata.rows[1].lineRange).toEqual({ from: 5, to: 7 });
+  });
+
+  test("respects reverse ordering", () => {
+    const rows = asRows({
+      data: [
+        ["2026/04/01", "Coffee", "100"],
+        ["2026/04/02", "Lunch", "250"],
+      ],
+    });
+    const template = Handlebars.compile(
+      "{{ ROW.A }} {{ ROW.B }}\n  Expenses:Food  INR {{ ROW.C }}\n  Assets:Cash",
+    );
+
+    const metadata = renderWithMetadata(rows, template, {
+      reverse: true,
+      trim: true,
+    });
+
+    expect(metadata.content).toBe(render(rows, template, {
+      reverse: true,
+      trim: true,
+    }));
+    expect(metadata.rows.map((row) => row.sourceRowIndex)).toEqual([1, 0]);
+  });
+
+  test("captures row render errors", () => {
+    const rows = asRows({ data: [["ok"], ["bad"], ["ok"]] });
+    const template = ((context: any) => {
+      if (context.ROW.A === "bad") {
+        throw new Error("bad row");
+      }
+      return `${context.ROW.A}\n`;
+    }) as Handlebars.TemplateDelegate;
+
+    const metadata = renderWithMetadata(rows, template, { trim: true });
+
+    expect(metadata.generatedCount).toBe(2);
+    expect(metadata.errors).toEqual([{
+      sourceRowIndex: 1,
+      message: "bad row",
+    }]);
   });
 });

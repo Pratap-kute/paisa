@@ -11,6 +11,28 @@ interface Result {
 
 type SpreadsheetRow = Record<string, string | number>;
 
+export interface RenderedRow {
+  sourceRowIndex: number;
+  rawRendered: string;
+  formattedRendered: string;
+  lineRange: {
+    from: number;
+    to: number;
+  } | null;
+}
+
+export interface RenderError {
+  sourceRowIndex: number;
+  message: string;
+}
+
+export interface RenderMetadata {
+  content: string;
+  rows: RenderedRow[];
+  generatedCount: number;
+  errors: RenderError[];
+}
+
 export function parse(file: File): Promise<Result> {
   let extension = file.name.split(".").pop();
   extension = extension?.toLowerCase();
@@ -81,6 +103,68 @@ export function render(
   } else {
     return format(output.join(""));
   }
+}
+
+export function renderWithMetadata(
+  rows: SpreadsheetRow[],
+  template: Handlebars.TemplateDelegate,
+  options: { reverse?: boolean; trim?: boolean } = {},
+): RenderMetadata {
+  const output: string[] = [];
+  const renderedRows: RenderedRow[] = [];
+  const errors: RenderError[] = [];
+
+  _.each(rows, (row, sourceRowIndex) => {
+    try {
+      let rendered = template(_.assign({ ROW: row, SHEET: rows }, COLUMN_REFS));
+      if (options.trim) {
+        rendered = _.trim(rendered);
+      }
+      if (!_.isEmpty(rendered)) {
+        output.push(rendered);
+        renderedRows.push({
+          sourceRowIndex,
+          rawRendered: rendered,
+          formattedRendered: format(rendered),
+          lineRange: null,
+        });
+      }
+    } catch (error) {
+      errors.push({
+        sourceRowIndex,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+
+  if (options.reverse) {
+    output.reverse();
+    renderedRows.reverse();
+  }
+
+  const separator = options.trim ? "\n\n" : "";
+  const content = format(output.join(separator));
+  let nextLine = 1;
+  const blankLinesBetweenRows = options.trim ? 1 : 0;
+
+  _.each(renderedRows, (row, index) => {
+    const lineCount = row.formattedRendered.split("\n").length;
+    row.lineRange = {
+      from: nextLine,
+      to: nextLine + lineCount - 1,
+    };
+    nextLine += lineCount;
+    if (index < renderedRows.length - 1) {
+      nextLine += blankLinesBetweenRows;
+    }
+  });
+
+  return {
+    content,
+    rows: renderedRows,
+    generatedCount: renderedRows.length,
+    errors,
+  };
 }
 
 function parseCSV(file: File): Promise<Result> {

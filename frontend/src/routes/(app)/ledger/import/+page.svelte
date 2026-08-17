@@ -10,9 +10,14 @@
     updateContent as updatePreviewContent
   } from "$lib/editors/editor";
   import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
-  import { parse, asRows, render as renderJournal } from "$lib/importing/spreadsheet";
+  import {
+    parse,
+    asRows,
+    renderWithMetadata,
+    type RenderMetadata
+  } from "$lib/importing/spreadsheet";
   import _ from "lodash";
-  import type { EditorView } from "@codemirror/view";
+  import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
   import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
@@ -34,6 +39,14 @@
   let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
   let loading = $state(false);
   let activeFileName = $state("");
+  let templateDrawerOpen = $state(false);
+  let selectedSourceRowIndex: number | null = $state(null);
+  let renderMetadata: RenderMetadata = $state({
+    content: "",
+    rows: [],
+    generatedCount: 0,
+    errors: []
+  });
 
   let templateEditorDom: Element = $state();
   let templateEditor: EditorView = $state();
@@ -62,6 +75,15 @@
   });
 
   let saveAsNameDuplicate = $derived(!!_.find(templates, { name: saveAsName, template_type: "custom" }));
+  let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
+  let templateSaveDisabled = $derived(!$templateEditorState.hasUnsavedChanges || !selectedTemplate);
+  let templateSaveTooltip = $derived(
+    !$templateEditorState.hasUnsavedChanges
+      ? "No Unsaved Changes"
+      : selectedTemplateIsBuiltin
+      ? "Save edited builtin template as custom"
+      : "Save Template"
+  );
 
   async function save() {
     const { template, saved, message } = await ajax("/api/templates/upsert", {
@@ -138,16 +160,18 @@
 
     if (!_.isEmpty(currentRows) && currentTemplate && previewEditor) {
       try {
-        const generated = renderJournal(currentRows, currentTemplate, {
+        const generated = renderWithMetadata(currentRows, currentTemplate, {
           reverse: currentReverse,
           trim: currentTrim
         });
-        preview = generated;
-        updatePreviewContent(previewEditor, generated);
+        renderMetadata = generated;
+        preview = generated.content;
+        updatePreviewContent(previewEditor, generated.content);
       } catch (e) {
         console.error(e);
       }
     } else if (_.isEmpty(currentRows) && previewEditor) {
+      renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
       preview = "";
       updatePreviewContent(previewEditor, "");
     }
@@ -167,6 +191,7 @@
         parseErrorMessage = null;
         data = results.data;
         rows = asRows(results);
+        selectedSourceRowIndex = null;
 
         columnCount = _.maxBy(data, (row) => row.length)?.length || 0;
         _.each(data, (row) => {
@@ -185,8 +210,23 @@
     data = [];
     rows = [];
     columnCount = 0;
+    selectedSourceRowIndex = null;
+    renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
     preview = "";
     updatePreviewContent(previewEditor, "");
+  }
+
+  function selectSourceRow(rowIndex: number) {
+    selectedSourceRowIndex = rowIndex;
+    const renderedRow = _.find(renderMetadata.rows, { sourceRowIndex: rowIndex });
+    if (!renderedRow?.lineRange || !previewEditor) {
+      return;
+    }
+
+    const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
+    previewEditor.dispatch({
+      effects: EditorView.scrollIntoView(line.from, { y: "center" })
+    });
   }
 
   async function copyToClipboard() {
@@ -279,13 +319,12 @@
 <Page width="fluid">
   <Section class="paisa-py-1">
     <div class="paisa-import-workspace">
-      <!-- LEFT COLUMN: Transformation Engine (Template + Output Preview) -->
-      <div class="paisa-import-left-pane">
-        <!-- Top Toolbar -->
-        <div class="paisa-import-topbar">
+      <div class="paisa-import-topbar">
+        <div class="paisa-import-template-block">
           <div class="paisa-import-select-wrapper">
             <Select
               bind:value={selectedTemplate}
+              --list-z-index="100"
               showChevron={true}
               items={templates}
               label="name"
@@ -313,32 +352,30 @@
           </div>
 
           <div class="paisa-import-topbar-actions">
+            <button class="button is-small is-link is-light" onclick={() => (templateDrawerOpen = true)}>
+              <span class="icon is-small"><i class="fas fa-code"></i></span>
+              <span>Edit Template</span>
+              {#if $templateEditorState.hasUnsavedChanges}
+                <span class="tag is-warning is-light is-small ml-1">Unsaved</span>
+              {/if}
+            </button>
             <button
               class="button is-small"
               data-tippy-content="Create New Template"
               aria-label="Create Template"
               onclick={(_e) => openTemplateCreateModal()}
             >
-              <span class="icon is-small">
-                <i class="fas fa-plus"></i>
-              </span>
+              <span class="icon is-small"><i class="fas fa-plus"></i></span>
             </button>
-
             <button
               class="button is-small"
-              data-tippy-content={$templateEditorState.hasUnsavedChanges == false
-                ? "No Unsaved Changes"
-                : builtinNotAllowed("Save", selectedTemplate)}
+              data-tippy-content={templateSaveTooltip}
               aria-label="Save Template"
               onclick={(_e) => save()}
-              disabled={$templateEditorState.hasUnsavedChanges == false ||
-                selectedTemplate?.template_type == "builtin"}
+              disabled={templateSaveDisabled}
             >
-              <span class="icon is-small">
-                <i class="fas fa-floppy-disk"></i>
-              </span>
+              <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
             </button>
-
             <button
               class="button is-small is-danger is-light"
               data-tippy-content={builtinNotAllowed("Delete", selectedTemplate)}
@@ -346,134 +383,48 @@
               onclick={(_e) => remove()}
               disabled={selectedTemplate?.template_type == "builtin"}
             >
-              <span class="icon is-small">
-                <i class="fas fa-trash-can"></i>
-              </span>
+              <span class="icon is-small"><i class="fas fa-trash-can"></i></span>
             </button>
           </div>
         </div>
 
-        <!-- Template Editor Card -->
-        <div class="paisa-editor-card">
-          <div class="paisa-editor-card-header">
-            <div class="paisa-editor-card-title">
-              <span class="icon is-small has-text-link mr-1"><i class="fas fa-code"></i></span>
-              <span>Template Definition</span>
-              <span class="tag is-small is-link is-light ml-2">Handlebars</span>
-            </div>
-            {#if $templateEditorState.hasUnsavedChanges}
-              <span class="tag is-warning is-light is-small">
-                <span class="paisa-unsaved-dot"></span> Unsaved
-              </span>
-            {/if}
-          </div>
-          <div class="paisa-editor-card-body">
-            <div class="template-editor" bind:this={templateEditorDom}></div>
-          </div>
+        <div class="paisa-import-file-block">
+          {#if activeFileName}
+            <span class="icon has-text-link"><i class="fas fa-file-csv"></i></span>
+            <span class="paisa-file-name" title={activeFileName}>{activeFileName}</span>
+            <span class="tag is-info is-light is-small">{data.length} rows</span>
+            <span class="tag is-light is-small">{columnCount} cols</span>
+            <button class="button is-small is-light" onclick={clearLoadedFile}>
+              <span class="icon is-small"><i class="fas fa-arrows-rotate"></i></span>
+              <span>Replace File</span>
+            </button>
+          {:else}
+            <span class="icon has-text-grey"><i class="fas fa-file-import"></i></span>
+            <span class="has-text-grey is-size-7">No file loaded</span>
+          {/if}
         </div>
 
-        <!-- Ledger Preview Card -->
-        <div class="paisa-editor-card">
-          <div class="paisa-editor-card-header">
-            <div class="paisa-editor-card-title">
-              <span class="icon is-small has-text-success mr-1"><i class="fas fa-file-invoice-dollar"></i></span>
-              <span>Ledger Preview</span>
-              {#if !_.isEmpty(preview)}
-                <span class="tag is-success is-light is-small ml-2">Generated</span>
-              {/if}
-            </div>
-            <div class="paisa-editor-card-actions">
-              <button
-                data-tippy-content="Copy Generated Ledger"
-                aria-label="Copy to Clipboard"
-                class="button is-small clipboard"
-                disabled={_.isEmpty(preview)}
-                onclick={copyToClipboard}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-copy"></i>
-                </span>
-                <span>Copy</span>
-              </button>
-              <button
-                data-tippy-content="Save to Ledger File"
-                aria-label="Save"
-                class="button is-small is-link save"
-                disabled={_.isEmpty(preview)}
-                onclick={openSaveModal}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-floppy-disk"></i>
-                </span>
-                <span>Save</span>
-              </button>
-            </div>
+        <div class="paisa-data-controls">
+          <div class="field color-switch mb-0">
+            <input id="import-reverse" type="checkbox" bind:checked={options.reverse} class="switch is-rounded is-small" />
+            <label for="import-reverse" class="is-size-7">Reverse</label>
           </div>
-          <div class="paisa-editor-card-body paisa-preview-body">
-            <div class="preview-editor" bind:this={previewEditorDom}></div>
-            {#if _.isEmpty(preview) && _.isEmpty(data)}
-              <div class="paisa-preview-placeholder">
-                <span class="icon has-text-grey-light mb-2"><i class="fas fa-arrow-right fa-2x"></i></span>
-                <p>Upload a statement on the right to see generated journal transactions live.</p>
-              </div>
-            {/if}
+          <div class="field color-switch mb-0">
+            <input id="trim-reverse" type="checkbox" bind:checked={options.trim} class="switch is-rounded is-small" />
+            <label for="trim-reverse" class="is-size-7">Trim</label>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Source Data Inspector & Spreadsheet Viewer -->
-      <div class="paisa-import-right-pane">
-        <!-- Source Data Card -->
-        <div class="paisa-data-card">
-          <!-- Data Card Header & Controls -->
-          <div class="paisa-data-card-header">
-            <div class="paisa-data-file-info">
-              {#if activeFileName}
-                <div class="paisa-active-file-badge">
-                  <span class="icon has-text-link mr-1"><i class="fas fa-file-csv"></i></span>
-                  <span class="paisa-file-name" title={activeFileName}>{activeFileName}</span>
-                  <span class="tag is-info is-light is-small ml-2">{data.length} rows</span>
-                  <span class="tag is-light is-small ml-1">{columnCount} cols</span>
-                  <button
-                    class="button is-small is-ghost p-1 ml-1"
-                    title="Remove file"
-                    onclick={clearLoadedFile}
-                  >
-                    <span class="icon is-small has-text-danger"><i class="fas fa-xmark"></i></span>
-                  </button>
-                </div>
-              {:else}
-                <div class="paisa-data-header-title">
-                  <span class="icon is-small has-text-link mr-1"><i class="fas fa-table-cells"></i></span>
-                  <span>Spreadsheet Source</span>
-                </div>
-              {/if}
-            </div>
-
-            <!-- Toggles (Reverse / Trim) -->
-            <div class="paisa-data-controls">
-              <div class="field color-switch mb-0">
-                <input
-                  id="import-reverse"
-                  type="checkbox"
-                  bind:checked={options.reverse}
-                  class="switch is-rounded is-small"
-                />
-                <label for="import-reverse" class="is-size-7">Reverse</label>
-              </div>
-              <div class="field color-switch mb-0">
-                <input
-                  id="trim-reverse"
-                  type="checkbox"
-                  bind:checked={options.trim}
-                  class="switch is-rounded is-small"
-                />
-                <label for="trim-reverse" class="is-size-7">Trim</label>
-              </div>
+      <div class="paisa-import-main-grid">
+        <div class="paisa-import-pane paisa-source-pane">
+          <div class="paisa-pane-header">
+            <div class="paisa-pane-title">
+              <span class="icon is-small has-text-link"><i class="fas fa-table-cells"></i></span>
+              <span>Source Data</span>
             </div>
           </div>
 
-          <!-- Error Message if parse fails -->
           {#if parseErrorMessage}
             <div class="notification is-danger is-light p-3 m-3">
               <div class="is-flex is-align-items-center">
@@ -483,7 +434,6 @@
             </div>
           {/if}
 
-          <!-- Dropzone Area -->
           <div class="paisa-dropzone-container" class:has-file={!_.isEmpty(data)}>
             <FileDropzone
               multiple={false}
@@ -512,7 +462,6 @@
             </FileDropzone>
           </div>
 
-          <!-- Loading Indicator -->
           {#if loading}
             <div class="paisa-data-loading-state">
               <span class="icon is-large has-text-link">
@@ -523,7 +472,6 @@
             </div>
           {/if}
 
-          <!-- Spreadsheet Grid Table -->
           {#if !_.isEmpty(data) && !loading}
             <div class="paisa-spreadsheet-grid-wrapper">
               <table class="table is-bordered is-size-7 is-narrow paisa-sheet-table">
@@ -540,7 +488,10 @@
                 </thead>
                 <tbody>
                   {#each data as row, ri}
-                    <tr>
+                    <tr
+                      class:selected={selectedSourceRowIndex === ri}
+                      onclick={() => selectSourceRow(ri)}
+                    >
                       <th class="paisa-sheet-row-header">{ri}</th>
                       {#each row as cell}
                         <td class="paisa-sheet-data-cell" title={cell || ""}>{cell || ""}</td>
@@ -550,76 +501,169 @@
                 </tbody>
               </table>
             </div>
-          {:else if _.isEmpty(data) && !loading}
-            <!-- Empty state guide -->
-            <div class="paisa-sheet-guide">
-              <div class="paisa-guide-card">
-                <h5 class="is-size-7 has-text-weight-bold has-text-link mb-2">
-                  <i class="fas fa-lightbulb mr-1"></i> Quick Template Guide
-                </h5>
-                <div class="columns is-mobile is-multiline is-variable is-2 is-size-7">
-                  <div class="column is-6">
-                    <code>{"{{ ROW.A }}"}</code>
-                    <p class="has-text-grey is-size-7">References Column A data</p>
-                  </div>
-                  <div class="column is-6">
-                    <code>{"{{ date ROW.A \"DD-MMM-YYYY\" }}"}</code>
-                    <p class="has-text-grey is-size-7">Formats dates into ledger format</p>
-                  </div>
-                  <div class="column is-6">
-                    <code>{"{{ predictAccount prefix=\"Expenses\" }}"}</code>
-                    <p class="has-text-grey is-size-7">Auto-classifies accounts with TF-IDF</p>
-                  </div>
-                  <div class="column is-6">
-                    <code>{"{{ findAbove B regexp=\"...\" }}"}</code>
-                    <p class="has-text-grey is-size-7">Scans preceding rows for headers</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           {/if}
         </div>
+
+        <div class="paisa-import-pane paisa-preview-pane">
+          <div class="paisa-pane-header">
+            <div class="paisa-pane-title">
+              <span class="icon is-small has-text-success"><i class="fas fa-file-invoice-dollar"></i></span>
+              <span>Ledger Preview</span>
+              {#if renderMetadata.generatedCount > 0}
+                <span class="tag is-success is-light is-small">{renderMetadata.generatedCount} generated</span>
+              {/if}
+              {#if renderMetadata.errors.length > 0}
+                <span class="tag is-danger is-light is-small">{renderMetadata.errors.length} errors</span>
+              {/if}
+            </div>
+            <div class="paisa-editor-card-actions">
+              <button
+                data-tippy-content="Copy Generated Ledger"
+                aria-label="Copy to Clipboard"
+                class="button is-small clipboard"
+                disabled={_.isEmpty(preview)}
+                onclick={copyToClipboard}
+              >
+                <span class="icon is-small"><i class="fas fa-copy"></i></span>
+                <span>Copy</span>
+              </button>
+              <button
+                data-tippy-content="Save to Ledger File"
+                aria-label="Save"
+                class="button is-small is-link save"
+                disabled={_.isEmpty(preview)}
+                onclick={openSaveModal}
+              >
+                <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
+                <span>Save</span>
+              </button>
+            </div>
+          </div>
+          <div class="paisa-preview-body">
+            <div class="preview-editor" bind:this={previewEditorDom}></div>
+            {#if _.isEmpty(preview) && _.isEmpty(data)}
+              <div class="paisa-preview-placeholder">
+                <span class="icon has-text-grey-light mb-2"><i class="fas fa-arrow-left fa-2x"></i></span>
+                <p>Upload a statement to inspect generated journal transactions.</p>
+              </div>
+            {/if}
+          </div>
+        </div>
+      </div>
+
+      <div class="paisa-import-statusbar">
+        {#if parseErrorMessage}
+          <span class="has-text-danger"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+        {:else if loading}
+          <span class="has-text-link"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data</span>
+        {:else if renderMetadata.generatedCount > 0}
+          <span class="has-text-success"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} transactions generated</span>
+          {#if renderMetadata.errors.length > 0}
+            <span class="has-text-danger"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} rows failed</span>
+          {/if}
+          {#if selectedSourceRowIndex !== null}
+            <span class="has-text-grey">Row {selectedSourceRowIndex} selected</span>
+          {/if}
+        {:else if activeFileName}
+          <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
+        {:else}
+          <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
+        {/if}
       </div>
     </div>
   </Section>
 </Page>
 
+<div class="paisa-template-drawer" class:is-open={templateDrawerOpen}>
+  <button
+    class="paisa-template-drawer-backdrop"
+    aria-label="Close Template Definition"
+    onclick={() => (templateDrawerOpen = false)}
+  ></button>
+  <aside class="paisa-template-drawer-panel" aria-label="Template Definition">
+    <div class="paisa-template-drawer-header">
+      <div class="paisa-pane-title">
+        <span class="icon is-small has-text-link"><i class="fas fa-code"></i></span>
+        <span>Template Definition</span>
+        <span class="tag is-small is-link is-light">Handlebars</span>
+      </div>
+      <div class="paisa-template-drawer-actions">
+        {#if $templateEditorState.hasUnsavedChanges}
+          <span class="tag is-warning is-light is-small">
+            <span class="paisa-unsaved-dot"></span> Unsaved
+          </span>
+        {/if}
+        <button class="button is-small is-ghost" aria-label="Close Template Definition" onclick={() => (templateDrawerOpen = false)}>
+          <span class="icon is-small"><i class="fas fa-xmark"></i></span>
+        </button>
+      </div>
+    </div>
+    <div class="paisa-template-drawer-body">
+      <div class="template-editor" bind:this={templateEditorDom}></div>
+    </div>
+    <div class="paisa-template-drawer-footer">
+      <button class="button is-small" onclick={() => (templateDrawerOpen = false)}>Cancel</button>
+      <button
+        class="button is-small is-link"
+        data-tippy-content={templateSaveTooltip}
+        onclick={save}
+        disabled={templateSaveDisabled}
+      >
+        <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
+        <span>{selectedTemplateIsBuiltin ? "Save as Custom" : "Save"}</span>
+      </button>
+    </div>
+  </aside>
+</div>
+
 <style lang="scss">
-  /* Two-Panel Workspace Grid */
   .paisa-import-workspace {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-3);
-    align-items: start;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(400px, 4.5fr) minmax(500px, 5.5fr);
-    }
-  }
-
-  /* Left Panel */
-  .paisa-import-left-pane {
     display: flex;
     flex-direction: column;
-    gap: var(--paisa-space-3);
-    min-width: 0;
+    gap: var(--paisa-space-2);
+    min-height: calc(100vh - 116px);
   }
 
-  /* Top Toolbar */
-  .paisa-import-topbar {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    padding: var(--paisa-space-2);
+  .paisa-import-topbar,
+  .paisa-import-statusbar,
+  .paisa-import-pane {
     background-color: var(--paisa-surface-card);
     border: 1px solid var(--paisa-border-default);
     border-radius: var(--paisa-radius-md);
     box-shadow: var(--paisa-shadow-sm);
   }
 
+  .paisa-import-topbar {
+    position: relative;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(280px, 1.3fr) minmax(220px, 1fr) auto;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    padding: var(--paisa-space-2);
+  }
+
+  .paisa-import-template-block,
+  .paisa-import-file-block,
+  .paisa-import-topbar-actions,
+  .paisa-data-controls,
+  .paisa-pane-title,
+  .paisa-editor-card-actions,
+  .paisa-template-drawer-actions,
+  .paisa-template-drawer-footer {
+    display: flex;
+    align-items: center;
+  }
+
+  .paisa-import-template-block,
+  .paisa-import-file-block {
+    gap: var(--paisa-space-2);
+    min-width: 0;
+  }
+
   .paisa-import-select-wrapper {
     flex: 1;
-    min-width: 0;
+    min-width: 180px;
 
     :global(.svelte-select) {
       border: 1px solid var(--paisa-border-default);
@@ -628,82 +672,93 @@
     }
   }
 
-  .paisa-select-item-rendered {
+  .paisa-select-item-rendered,
+  .paisa-select-item-option {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--paisa-space-2);
     width: 100%;
     overflow: hidden;
-
-    .paisa-template-name {
-      font-weight: var(--paisa-font-weight-semibold);
-      color: var(--paisa-text-primary);
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
   }
 
-  .paisa-select-item-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
+  .paisa-template-name,
+  .paisa-file-name {
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .paisa-import-topbar-actions {
-    display: flex;
+  .paisa-file-name {
+    max-width: 220px;
+    font-size: var(--paisa-font-size-sm);
+  }
+
+  .paisa-import-topbar-actions,
+  .paisa-data-controls,
+  .paisa-editor-card-actions {
     gap: var(--paisa-space-1);
     flex-shrink: 0;
   }
 
-  /* Editor Cards */
-  .paisa-editor-card {
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-md);
-    box-shadow: var(--paisa-shadow-sm);
+  .paisa-import-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
+    gap: var(--paisa-space-2);
+    flex: 1;
+    min-height: 0;
+  }
+
+  .paisa-import-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
     overflow: hidden;
   }
 
-  .paisa-editor-card-header {
+  .paisa-pane-header,
+  .paisa-template-drawer-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: var(--paisa-space-2);
+    min-height: 42px;
     padding: var(--paisa-space-2) var(--paisa-space-3);
     background-color: var(--paisa-surface-muted);
     border-bottom: 1px solid var(--paisa-border-subtle);
   }
 
-  .paisa-editor-card-title {
-    display: flex;
-    align-items: center;
+  .paisa-pane-title {
+    gap: var(--paisa-space-2);
+    min-width: 0;
     font-size: var(--paisa-font-size-xs);
     font-weight: var(--paisa-font-weight-semibold);
     color: var(--paisa-text-primary);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
   }
 
-  .paisa-editor-card-actions {
-    display: flex;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-editor-card-body {
+  .paisa-preview-body,
+  .paisa-template-drawer-body {
     position: relative;
-    padding: 0;
-    min-height: 220px;
-
-    :global(.cm-editor) {
-      height: clamp(200px, 32vh, 380px);
-      font-size: 0.85rem;
-    }
+    flex: 1;
+    min-height: 0;
+    background-color: var(--paisa-canvas-bg);
   }
 
   .paisa-preview-body {
-    background-color: var(--paisa-canvas-bg);
+    :global(.cm-editor) {
+      height: 100%;
+      min-height: 100%;
+      font-size: 0.85rem;
+    }
+
+    :global(.cm-scroller) {
+      height: 100%;
+    }
   }
 
   .paisa-preview-placeholder {
@@ -720,85 +775,12 @@
     pointer-events: none;
   }
 
-  .paisa-unsaved-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--paisa-warning);
-    margin-right: 4px;
-  }
-
-  /* Right Panel: Source Data Card */
-  .paisa-import-right-pane {
-    min-width: 0;
-  }
-
-  .paisa-data-card {
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-md);
-    box-shadow: var(--paisa-shadow-sm);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .paisa-data-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    background-color: var(--paisa-surface-muted);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-    gap: var(--paisa-space-3);
-  }
-
-  .paisa-data-file-info {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .paisa-active-file-badge {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-
-    .paisa-file-name {
-      font-weight: var(--paisa-font-weight-semibold);
-      font-size: var(--paisa-font-size-sm);
-      color: var(--paisa-text-primary);
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      max-width: 200px;
-    }
-  }
-
-  .paisa-data-header-title {
-    display: flex;
-    align-items: center;
-    font-size: var(--paisa-font-size-xs);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .paisa-data-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    flex-shrink: 0;
-  }
-
-  /* Dropzone Styling */
   .paisa-dropzone-container {
     padding: var(--paisa-space-3);
+    border-bottom: 1px solid var(--paisa-border-subtle);
 
     &.has-file {
       padding: var(--paisa-space-2);
-      border-bottom: 1px solid var(--paisa-border-subtle);
     }
 
     :global(.paisa-file-dropzone) {
@@ -854,11 +836,10 @@
     color: var(--paisa-text-primary);
   }
 
-  /* Spreadsheet Grid Table */
   .paisa-spreadsheet-grid-wrapper {
+    flex: 1;
+    min-height: 0;
     overflow: auto;
-    max-height: calc(100vh - 210px);
-    border-top: 1px solid var(--paisa-border-subtle);
     background-color: var(--paisa-table-bg);
   }
 
@@ -881,6 +862,29 @@
       font-size: var(--paisa-font-size-xs);
     }
 
+    tbody tr {
+      cursor: pointer;
+
+      &.selected {
+        .paisa-sheet-row-header,
+        .paisa-sheet-data-cell {
+          background-color: var(--paisa-brand-primary-light);
+          color: var(--paisa-text-primary);
+        }
+      }
+
+      &:hover {
+        .paisa-sheet-row-header {
+          background-color: var(--paisa-surface-hover);
+          color: var(--paisa-brand-primary);
+        }
+
+        .paisa-sheet-data-cell {
+          background-color: var(--paisa-table-row-hover);
+        }
+      }
+    }
+
     .paisa-sheet-corner-cell {
       position: sticky;
       left: 0;
@@ -896,16 +900,16 @@
       min-width: 110px;
 
       .paisa-col-letter {
+        display: block;
         font-weight: var(--paisa-font-weight-bold);
         font-size: var(--paisa-font-size-sm);
-        display: block;
       }
 
       .paisa-col-tag {
+        display: block;
         font-size: 0.68rem;
         color: var(--paisa-brand-primary);
         font-family: monospace;
-        display: block;
       }
     }
 
@@ -931,47 +935,129 @@
       overflow: hidden;
       text-overflow: ellipsis;
       padding: var(--paisa-space-1) var(--paisa-space-2);
-
-      &:hover {
-        background-color: var(--paisa-table-row-hover);
-      }
-    }
-
-    tbody tr:hover {
-      .paisa-sheet-row-header {
-        background-color: var(--paisa-surface-hover);
-        color: var(--paisa-brand-primary);
-      }
-      .paisa-sheet-data-cell {
-        background-color: var(--paisa-table-row-hover);
-      }
     }
   }
 
-  /* Quick Guide Card */
-  .paisa-sheet-guide {
-    padding: var(--paisa-space-3);
+  .paisa-import-statusbar {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-3);
+    min-height: 34px;
+    padding: var(--paisa-space-1) var(--paisa-space-3);
+    font-size: var(--paisa-font-size-xs);
+  }
 
-    .paisa-guide-card {
-      background-color: var(--paisa-canvas-bg);
-      border: 1px dashed var(--paisa-border-default);
-      border-radius: var(--paisa-radius-sm);
-      padding: var(--paisa-space-3);
+  .paisa-template-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+  }
 
-      code {
-        background-color: var(--paisa-surface-hover);
-        color: var(--paisa-brand-primary);
-        padding: 2px 5px;
-        border-radius: var(--paisa-radius-xs);
-        font-size: 0.75rem;
-      }
+  .paisa-template-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background-color: rgba(15, 23, 42, 0.32);
+    cursor: default;
+    opacity: 0;
+    transition: opacity var(--paisa-transition-fast);
+  }
+
+  .paisa-template-drawer-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(40vw, 560px);
+    min-width: 420px;
+    height: 100%;
+    background-color: var(--paisa-surface-card);
+    border-left: 1px solid var(--paisa-border-default);
+    box-shadow: var(--paisa-shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--paisa-transition-fast);
+  }
+
+  .paisa-template-drawer.is-open {
+    pointer-events: auto;
+
+    .paisa-template-drawer-backdrop {
+      opacity: 1;
     }
+
+    .paisa-template-drawer-panel {
+      transform: translateX(0);
+    }
+  }
+
+  .paisa-template-drawer-actions,
+  .paisa-template-drawer-footer {
+    gap: var(--paisa-space-2);
+  }
+
+  .paisa-template-drawer-body {
+    overflow: hidden;
+
+    :global(.cm-editor) {
+      height: 100%;
+      min-height: 100%;
+      font-size: 0.85rem;
+    }
+
+    :global(.cm-scroller) {
+      height: 100%;
+    }
+  }
+
+  .paisa-template-drawer-footer {
+    justify-content: flex-end;
+    padding: var(--paisa-space-2) var(--paisa-space-3);
+    border-top: 1px solid var(--paisa-border-subtle);
+  }
+
+  .paisa-unsaved-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--paisa-warning);
+    margin-right: 4px;
   }
 
   .color-switch {
     :global(.switch[type="checkbox"]:checked + label::before),
     :global(.switch[type="checkbox"]:checked + label:before) {
       background: var(--paisa-brand-primary);
+    }
+  }
+
+  @media screen and (max-width: 1100px) {
+    .paisa-import-topbar {
+      grid-template-columns: 1fr;
+    }
+
+    .paisa-import-file-block,
+    .paisa-data-controls {
+      flex-wrap: wrap;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .paisa-import-workspace {
+      min-height: auto;
+    }
+
+    .paisa-import-main-grid {
+      grid-template-columns: 1fr;
+      min-height: 900px;
+    }
+
+    .paisa-template-drawer-panel {
+      width: 100%;
+      min-width: 0;
     }
   }
 </style>
