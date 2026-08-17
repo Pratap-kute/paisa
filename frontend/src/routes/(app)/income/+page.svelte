@@ -33,13 +33,13 @@
       yearly_cards: yearlyCards
     } = await ajax("/api/income");
     charts = [
-      createClientWidthChart("#d3-income-timeline", () => {
+      createClientWidthChart("#d3-income-timeline", (_data, _size) => {
         monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(incomes);
       }),
-      createClientWidthChart("#d3-yearly-income-timeline", () => {
+      createClientWidthChart("#d3-yearly-income-timeline", (_data, _size) => {
         yearlyIncomeTimelineLegends = renderYearlyIncomeTimeline(yearlyCards);
       }),
-      createClientWidthChart("#d3-yearly-net_income-timeline", () => {
+      createClientWidthChart("#d3-yearly-net_income-timeline", (_data, _size) => {
         yearlyNetIncomeTimelineLegends = renderYearlyTimelineOf(
           "Net Income",
           "net_income",
@@ -47,7 +47,7 @@
           yearlyCards
         );
       }),
-      createClientWidthChart("#d3-yearly-net_tax-timeline", () => {
+      createClientWidthChart("#d3-yearly-net_tax-timeline", (_data, _size) => {
         yearlyNetTaxTimelineLegends = renderYearlyTimelineOf(
           "Net Tax",
           "net_tax",

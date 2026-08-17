@@ -45,10 +45,58 @@
     return window.matchMedia("(max-width: 1023px)").matches;
   }
 
-  onMount(async () => {
+  let navbarEl: HTMLElement | undefined;
+
+  function closeNavbarDropdowns(nav: ParentNode | null | undefined = navbarEl) {
+    nav?.querySelectorAll<HTMLElement>(
+      ".navbar-start > .navbar-item.has-dropdown.is-active, .nested.has-dropdown.is-active",
+    ).forEach((el) => el.classList.remove("is-active"));
+  }
+
+  function toggleTopLevelDropdown(event: MouseEvent) {
+    if (!isNavbarTouch()) return;
+    const dropdown = (event.currentTarget as HTMLElement).parentElement;
+    if (!dropdown?.classList.contains("has-dropdown")) return;
+    const wasActive = dropdown.classList.contains("is-active");
+    closeNavbarDropdowns(dropdown.closest(".navbar"));
+    if (!wasActive) {
+      dropdown.classList.add("is-active");
+    }
+  }
+
+  function toggleNestedDropdown(event: MouseEvent) {
+    if (!isNavbarTouch()) return;
+    const nested = (event.currentTarget as HTMLElement).parentElement;
+    if (!nested?.classList.contains("has-dropdown")) return;
+    const menu = nested.closest(".navbar-dropdown");
+    const wasActive = nested.classList.contains("is-active");
+    menu?.querySelectorAll<HTMLElement>(".nested.has-dropdown.is-active")
+      .forEach((el) => el.classList.remove("is-active"));
+    if (!wasActive) {
+      nested.classList.add("is-active");
+    }
+  }
+
+  $effect(() => {
+    if (isBurger !== true) {
+      closeNavbarDropdowns();
+    }
+  });
+
+  onMount(() => {
     if (get(year) == "") {
       year.set(financialYear(now()));
     }
+
+    function onDocumentClick(event: MouseEvent) {
+      if (!isNavbarTouch() || !navbarEl) return;
+      const target = event.target as Node | null;
+      if (target && navbarEl.contains(target)) return;
+      closeNavbarDropdowns();
+    }
+
+    document.addEventListener("click", onDocumentClick);
+    return () => document.removeEventListener("click", onDocumentClick);
   });
 
   const RecurringIcons = [
@@ -247,7 +295,11 @@
   });
 </script>
 
-<nav class="navbar px-2 is-transparent" aria-label="main navigation">
+<nav
+  bind:this={navbarEl}
+  class="navbar px-2 is-transparent"
+  aria-label="main navigation"
+>
   <div class="navbar-brand">
     <a
       href="/"
@@ -297,9 +349,7 @@
               type="button"
               class="navbar-link paisa-button-reset is-fullwidth has-text-left"
               class:is-active={normalizedPath.startsWith(link.href)}
-              onclick={(e) =>
-                isNavbarTouch() &&
-                e.currentTarget.parentElement?.classList.toggle("is-active")}
+              onclick={toggleTopLevelDropdown}
               >{link.label}</button
             >
             <div class="navbar-dropdown {!isNavbarTouch() && 'is-boxed'}">
@@ -322,11 +372,7 @@
                       class="paisa-button-reset nested-menu-trigger is-flex is-align-items-center is-justify-content-space-between"
                       class:is-active={normalizedPath.startsWith(href)}
                       aria-haspopup="true"
-                      onclick={(e) =>
-                        isNavbarTouch() &&
-                        e.currentTarget.parentElement?.classList.toggle(
-                          "is-active",
-                        )}
+                      onclick={toggleNestedDropdown}
                     >
                       <span>{sublink.label}</span>
 

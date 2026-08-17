@@ -19,7 +19,7 @@
     if (_.isEmpty(repayments)) {
       isEmpty = true;
     } else {
-      repaymentChart = createClientWidthChart("#d3-repayment-timeline", () => {
+      repaymentChart = createClientWidthChart("#d3-repayment-timeline", (_data, _size) => {
         legends = renderMonthlyRepaymentTimeline(repayments);
       });
       repaymentChart.update(null);

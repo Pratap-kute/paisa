@@ -67,7 +67,7 @@ export function createRedrawChart<T>(options: {
 
 export function createClientWidthChart<T>(
   selector: string,
-  render: (data: T) => void,
+  render: (data: T, size: Dimensions) => void,
 ): ChartHandle<T> {
   const clear = () => {
     const el = document.querySelector(selector);
@@ -77,9 +77,9 @@ export function createClientWidthChart<T>(
   };
 
   return createRedrawChart({
-    draw: (data) => {
+    draw: (data, size) => {
       clear();
-      render(data);
+      render(data, size);
     },
     clear,
   });

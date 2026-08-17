@@ -25,6 +25,7 @@
   let xirr = $state(0);
   let svg: SVGElement = $state() as any;
   let chart: NetworthChart | null = $state(null);
+  let boundSvg: SVGElement | null = $state(null);
   let points: Networth[] = $state([]);
   let legends: Legend[] = $state([]);
 
@@ -36,14 +37,26 @@
   );
 
   $effect(() => {
-    if (svg && !chart) {
+    if (!svg) return;
+
+    if (filteredPoints.length === 0) {
+      if (chart) {
+        chart.destroy();
+        chart = null;
+        boundSvg = null;
+      }
+      return;
+    }
+
+    // ChartFrame swaps the SVG when empty toggles (preserveChildren branch).
+    if (!chart || boundSvg !== svg) {
+      chart?.destroy();
       chart = createNetworthChart(svg);
+      boundSvg = svg;
       legends = chart.legends;
     }
 
-    if (chart && !_.isEmpty(points)) {
-      chart.update(filteredPoints);
-    }
+    chart.update(filteredPoints);
   });
 
   onDestroy(() => {

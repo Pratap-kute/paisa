@@ -336,6 +336,14 @@
   }
 
   @media screen and (max-width: 1023px) {
+    &:hover > .dropdown-menu {
+      display: none;
+    }
+
+    &.is-active > .dropdown-menu {
+      display: block;
+    }
+
     >.dropdown-menu {
       position: static;
       left: auto;
@@ -435,8 +443,8 @@ nav.breadcrumb {
   }
 
   .navbar-item.has-dropdown {
-    .navbar-dropdown {
-      display: none;
+    &:not(.is-active) .navbar-dropdown {
+      display: none !important;
     }
 
     &.is-active .navbar-dropdown {

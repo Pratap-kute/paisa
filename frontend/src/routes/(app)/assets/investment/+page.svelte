@@ -28,10 +28,10 @@
   onMount(async () => {
     const { assets: assets, yearly_cards: fetchedYearlyCards } = await ajax("/api/investment");
     yearlyCards = fetchedYearlyCards || [];
-    monthlyChart = createClientWidthChart("#d3-investment-timeline", () => {
+    monthlyChart = createClientWidthChart("#d3-investment-timeline", (_data, _size) => {
       monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(assets);
     });
-    yearlyChart = createClientWidthChart("#d3-yearly-investment-timeline", () => {
+    yearlyChart = createClientWidthChart("#d3-yearly-investment-timeline", (_data, _size) => {
       yearlyInvestmentTimelineLegends = renderYearlyInvestmentTimeline(yearlyCards);
     });
     monthlyChart.update(null);

@@ -2,10 +2,10 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     buildLegends,
-    renderOverview,
-    renderPerAccountOverview
+    createInterestOverviewChart,
+    createInterestPerAccountChart,
   } from "$lib/charts/liabilities/interest";
-  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
+  import type { ChartHandle } from "$lib/charts/resize";
   import { ajax, type Interest, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onDestroy, onMount } from "svelte";
@@ -16,8 +16,9 @@
 
   let isEmpty = $state(false);
   let legends: Legend[] = $state([]);
-  let overviewChart: ChartHandle<null> | null = $state(null);
-  let perAccountChart: ChartHandle<null> | null = $state(null);
+  let interests: Interest[] = $state([]);
+  let overviewChart: ChartHandle<Interest[]> | null = $state(null);
+  let perAccountChart: ChartHandle<Interest[]> | null = $state(null);
 
   function hasLiabilityActivity(interests: Interest[]) {
     return _.some(interests, (interest) =>
@@ -31,22 +32,19 @@
   }
 
   onMount(async () => {
-    const { interest_timeline_breakdown: interests } = await ajax("/api/liabilities/interest");
+    const { interest_timeline_breakdown: loadedInterests } = await ajax("/api/liabilities/interest");
 
-    if (!hasLiabilityActivity(interests)) {
+    if (!hasLiabilityActivity(loadedInterests)) {
       isEmpty = true;
       return;
     }
 
     legends = buildLegends();
-    overviewChart = createClientWidthChart("#d3-interest-overview", () => {
-      renderOverview(interests);
-    });
-    perAccountChart = createClientWidthChart("#d3-interest-timeline-breakdown", () => {
-      renderPerAccountOverview(interests);
-    });
-    overviewChart.update(null);
-    perAccountChart.update(null);
+    interests = loadedInterests;
+    overviewChart = createInterestOverviewChart();
+    perAccountChart = createInterestPerAccountChart();
+    overviewChart.update(interests);
+    perAccountChart.update(interests);
   });
 
   onDestroy(() => {
@@ -73,7 +71,7 @@
       onresize={(dim) => overviewChart?.resize(dim)}
     >
       <div class="paisa-interest-overview-chart paisa-overflow-x-auto">
-        <svg id="d3-interest-overview" width="100%" />
+        <svg id="d3-interest-overview" />
       </div>
     </ChartFrame>
   </Section>
@@ -96,6 +94,12 @@
 <style lang="scss">
   .paisa-interest-overview-chart {
     width: 100%;
+
+    :global(svg) {
+      display: block;
+      width: auto;
+      max-width: none;
+    }
   }
 
   .d3-interest-timeline-breakdown {
@@ -132,6 +136,9 @@
   }
 
   :global(.paisa-interest-chart-card svg) {
+    display: block;
+    width: auto;
+    max-width: none;
     min-width: 760px;
   }
 

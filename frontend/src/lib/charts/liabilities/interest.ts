@@ -16,6 +16,12 @@ import {
   skipTicks,
   tooltip,
 } from "../../core/utils";
+import {
+  createRedrawChart,
+  plotSize,
+  type ChartHandle,
+  type Dimensions,
+} from "../resize";
 import { svgRectSpan } from "../svg";
 
 const areaKeys = ["gain", "loss"];
@@ -75,19 +81,55 @@ export function renderTable(interest: Interest) {
   });
 }
 
-export function renderOverview(gains: Interest[]) {
+function applySvgDimensions(
+  svg: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>,
+  width: number,
+  height: number,
+) {
+  svg
+    .attr("width", width)
+    .attr("height", height)
+    .style("width", `${width}px`)
+    .style("height", `${height}px`);
+}
+
+function svgOuterWidth(
+  plotWidth: number,
+  margin: { left: number; right: number },
+) {
+  return plotWidth + margin.left + margin.right;
+}
+
+function svgOuterHeight(
+  plotHeight: number,
+  margin: { top: number; bottom: number },
+) {
+  return plotHeight + margin.top + margin.bottom;
+}
+
+export function maxOverviewY(points: InterestOverview[]): number {
+  return d3.max(points, (d) =>
+    Math.max(
+      d.drawn_amount + d.interest_amount,
+      d.repaid_amount,
+      d.drawn_amount + d.interest_amount - d.repaid_amount,
+    )
+  ) ?? 0;
+}
+
+export function renderOverview(gains: Interest[], size: Dimensions = { width: 0, height: 0 }) {
+  const id = "#d3-interest-overview";
+  const svg = d3.select(id);
   if (_.isEmpty(gains)) {
-    d3.select("#d3-interest-overview").selectAll("*").remove();
+    svg.selectAll("*").remove();
     return;
   }
 
   gains = _.sortBy(gains, (g) => g.account);
   const BAR_HEIGHT = rem(24);
-  const id = "#d3-interest-overview";
   const el = document.getElementById(id.substring(1));
   if (!el?.parentElement) return;
 
-  const svg = d3.select(id);
   svg.selectAll("*").remove();
 
   const margin = {
@@ -96,18 +138,19 @@ export function renderOverview(gains: Interest[]) {
       bottom: rem(30),
       left: rem(150),
     },
-    width = Math.max(
-      rem(900),
-      el.parentElement.clientWidth - margin.left - margin.right,
-    ),
+    { width } = plotSize(el, margin, size, {
+      minWidth: rem(900),
+    }),
     height = gains.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
     );
-  svg.attr("height", height + margin.top + margin.bottom);
-
-  svg.attr("width", width + margin.left + margin.right);
+  applySvgDimensions(
+    svg,
+    svgOuterWidth(width, margin),
+    svgOuterHeight(height, margin),
+  );
 
   const y = d3.scaleBand().range([0, height]).paddingInner(0.1).paddingOuter(
     0.05,
@@ -457,7 +500,10 @@ export function renderOverview(gains: Interest[]) {
     .attr("width", width);
 }
 
-export function renderPerAccountOverview(interests: Interest[]) {
+export function renderPerAccountOverview(
+  interests: Interest[],
+  size: Dimensions = { width: 0, height: 0 },
+) {
   const root = d3.select("#d3-interest-timeline-breakdown");
   interests = _.filter(interests, (g) => !_.isEmpty(g.overview_timeline));
   if (_.isEmpty(interests)) {
@@ -476,70 +522,73 @@ export function renderPerAccountOverview(interests: Interest[]) {
     return;
   }
   const domain = padTimeDomain(start, end);
+  const sorted = _.sortBy(interests, (g) => g.account);
 
-  const divs = d3
-    .select("#d3-interest-timeline-breakdown")
-    .selectAll("div")
-    .data(_.sortBy(interests, (g) => g.account));
+  root.selectAll("*").remove();
 
-  divs.exit().remove();
+  for (const interest of sorted) {
+    const row = root.append("div").attr("class", "paisa-interest-account-row");
+    const summaryCard = row
+      .append("div")
+      .attr("class", "box paisa-interest-summary-card");
+    const tbody = summaryCard
+      .append("table")
+      .attr(
+        "class",
+        "table is-narrow is-fullwidth is-size-7 paisa-interest-summary-table",
+      )
+      .append("tbody");
+    const tbodyNode = tbody.node();
+    if (tbodyNode) {
+      renderTable.call(tbodyNode, interest);
+    }
 
-  const rows = divs.enter().append("div")
-    .attr("class", "paisa-interest-account-row");
-
-  const leftColumn = rows
-    .append("div")
-    .attr("class", "box paisa-interest-summary-card");
-  leftColumn
-    .append("table")
-    .attr(
-      "class",
-      "table is-narrow is-fullwidth is-size-7 paisa-interest-summary-table",
-    )
-    .append("tbody")
-    .each(renderTable);
-
-  const rightColumn = rows.append("div");
-  rightColumn
-    .append("div")
-    .attr("class", "box paisa-interest-chart-card")
-    .append("svg")
-    .attr("height", "150")
-    .each(function (gain) {
-      renderOverviewSmall(gain.overview_timeline, this, domain);
-    });
+    const svgNode = row
+      .append("div")
+      .append("div")
+      .attr("class", "box paisa-interest-chart-card")
+      .append("svg")
+      .attr("height", "150")
+      .node();
+    if (svgNode) {
+      renderOverviewSmall(interest.overview_timeline, svgNode, domain, size);
+    }
+  }
 }
 
 function renderOverviewSmall(
   points: InterestOverview[],
   element: Element,
   xDomain: [dayjs.Dayjs, dayjs.Dayjs],
+  size: Dimensions = { width: 0, height: 0 },
 ) {
+  const svg = d3.select(element);
   if (
     !element?.parentElement || _.isEmpty(points) || !xDomain[0] || !xDomain[1]
   ) {
-    d3.select(element).selectAll("*").remove();
+    svg.selectAll("*").remove();
     return;
   }
 
-  const svg = d3.select(element),
-    margin = { top: 5, right: 80, bottom: 20, left: 40 },
-    width = Math.max(
-      rem(640),
-      element.parentElement.clientWidth - margin.left - margin.right,
-    ),
+  svg.selectAll("*").remove();
+
+  const margin = { top: 5, right: 80, bottom: 20, left: 40 },
+    { width } = plotSize(element, margin, size, {
+      minWidth: rem(640),
+    }),
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
     );
 
-  svg.attr("width", width + margin.left + margin.right);
+  applySvgDimensions(
+    svg,
+    svgOuterWidth(width, margin),
+    svgOuterHeight(height, margin),
+  );
 
-  const maxY = d3.max<InterestOverview, number>(
-    points,
-    (d) => d.interest_amount + d.drawn_amount,
-  ) ?? 0;
+  const maxY = maxOverviewY(points);
 
   const x = d3.scaleTime().range([0, width]).domain(xDomain),
     y = d3
@@ -694,4 +743,26 @@ export function buildLegends(): Legend[] {
           }) as Legend,
       ),
     );
+}
+
+export function createInterestOverviewChart(): ChartHandle<Interest[]> {
+  return createRedrawChart({
+    draw: (data, size) => {
+      renderOverview(data, size);
+    },
+    clear: () => {
+      d3.select("#d3-interest-overview").selectAll("*").remove();
+    },
+  });
+}
+
+export function createInterestPerAccountChart(): ChartHandle<Interest[]> {
+  return createRedrawChart({
+    draw: (data, size) => {
+      renderPerAccountOverview(data, size);
+    },
+    clear: () => {
+      d3.select("#d3-interest-timeline-breakdown").selectAll("*").remove();
+    },
+  });
 }

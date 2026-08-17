@@ -17,7 +17,7 @@
     const { gain_breakdown: gains } = await ajax("/api/gain");
 
     legends = buildLegends();
-    overviewChart = createClientWidthChart("#d3-gain-overview", () => {
+    overviewChart = createClientWidthChart("#d3-gain-overview", (_data, _size) => {
       renderOverview(gains);
     });
     overviewChart.update(null);
