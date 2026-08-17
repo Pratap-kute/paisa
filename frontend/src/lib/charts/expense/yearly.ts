@@ -22,6 +22,7 @@ import COLORS, { generateColorScheme } from "../../core/colors";
 import type { Writable } from "svelte/store";
 import { iconify } from "../../core/icon";
 import { byExpenseGroup, expenseGroup, pieData } from "../expense";
+import { plotSize, type ChartHandle, type Dimensions } from "../resize";
 import type { Dayjs } from "dayjs";
 
 export function renderCalendar(
@@ -167,20 +168,20 @@ export function renderYearlyExpensesTimeline(
   yearStore: Writable<string>,
 ) {
   if (_.isEmpty(postings)) {
-    return { z: null, legends: [] };
+    return { z: null, legends: [], resize: () => {} };
   }
 
   const id = "#d3-yearly-expense-timeline";
   const MAX_BAR_WIDTH = 40;
   const el = document.getElementById(id.substring(1));
-  if (!el?.parentElement) return { z: null, legends: [] };
+  if (!el?.parentElement) return { z: null, legends: [], resize: () => {} };
 
   const svg = d3.select(id),
-    margin = { top: 15, right: 30, bottom: 60, left: 40 },
-    width = el.parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
+    margin = { top: 15, right: 30, bottom: 60, left: 40 };
+  let width = el.parentElement.clientWidth -
+    margin.left -
+    margin.right;
+  const height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
@@ -374,37 +375,53 @@ export function renderYearlyExpensesTimeline(
       }) as Legend,
   );
 
-  return { z, legends };
+  const resize = (dimensions: { width: number; height: number }) => {
+    width = Math.max(0, dimensions.width - margin.left - margin.right);
+    x.range([0, width]);
+    svg.attr("width", width + margin.left + margin.right);
+    render(selectedGroups);
+  };
+
+  return { z, legends, resize };
 }
 
-export function renderCurrentExpensesBreakdown(
+export function createCurrentExpensesBreakdown(
   z: d3.ScaleOrdinal<string, string, never>,
-) {
-  const id = "#d3-current-year-breakdown";
+  id = "#d3-current-year-breakdown",
+): ChartHandle<Posting[]> {
   const BAR_HEIGHT = rem(28);
   const LABEL_GAP = rem(8);
-  const el = document.getElementById(id.substring(1));
-  if (!el?.parentElement) return () => {};
+  let postings: Posting[] = [];
+  let size: Dimensions = { width: 0, height: 0 };
 
-  const svg = d3.select(id),
-    margin = { top: 0, right: 160, bottom: 20, left: 100 },
-    width = el.parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    g = svg.append("g").attr(
+  function breakdownMargins(containerWidth: number) {
+    const narrow = containerWidth < 480;
+    return {
+      top: 0,
+      right: rem(narrow ? 72 : 160),
+      bottom: rem(20),
+      left: rem(narrow ? 56 : 100),
+    };
+  }
+
+  function draw() {
+    const el = document.getElementById(id.substring(1));
+    if (!el?.parentElement) return;
+
+    const svg = d3.select(id);
+    svg.selectAll("*").remove();
+
+    const margin = breakdownMargins(
+      size.width || el.parentElement.clientWidth,
+    );
+    const { width, containerWidth } = plotSize(el, margin, size, {
+      minWidth: rem(80),
+    });
+    const g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
     );
 
-  const x = d3.scaleLinear().range([0, width]);
-  const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
-
-  const xAxis = g.append("g").attr("class", "axis y");
-  const yAxis = g.append("g").attr("class", "axis y dark");
-
-  const bar = g.append("g");
-
-  return (postings: Posting[]) => {
     interface Point {
       category: string;
       postings: Posting[];
@@ -420,24 +437,23 @@ export function renderCurrentExpensesBreakdown(
     const total = _.sumBy(points, (p) => p.total);
 
     const height = BAR_HEIGHT * keys.length;
-    svg.attr("height", height + margin.top + margin.bottom);
+    svg
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", containerWidth);
 
     if (_.isEmpty(points) || total <= 0) {
-      xAxis.selectAll("*").remove();
-      yAxis.selectAll("*").remove();
-      bar.selectAll("*").remove();
       return;
     }
 
+    const x = d3.scaleLinear().range([0, width]);
+    const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
     y.domain(keys);
     x.domain([0, d3.max(points, (p) => p.total) ?? 1]);
     y.range([height, 0]);
 
-    const t = svg.transition().duration(750);
-
-    xAxis
+    g.append("g")
+      .attr("class", "axis y")
       .attr("transform", "translate(0," + height + ")")
-      .transition(t)
       .call(
         d3
           .axisBottom(x)
@@ -445,8 +461,8 @@ export function renderCurrentExpensesBreakdown(
           .tickFormat(skipTicks(60, x, formatCurrencyCrude)),
       );
 
-    yAxis
-      .transition(t)
+    g.append("g")
+      .attr("class", "axis y dark")
       .call(
         d3.axisLeft(y).tickFormat((g) =>
           iconify(g, { group: "Expenses", suffix: true })
@@ -454,7 +470,7 @@ export function renderCurrentExpensesBreakdown(
       );
 
     const tooltipContent = (d: Point) => {
-      const total = _.sumBy(d.postings, (p) => p.amount);
+      const pointTotal = _.sumBy(d.postings, (p) => p.amount);
       const byMonth: Record<string, number> = _.chain(d.postings)
         .groupBy((e) => e.date.format("MMM"))
         .map((ps, group) => [group, _.sumBy(ps, (p) => p.amount)])
@@ -464,12 +480,12 @@ export function renderCurrentExpensesBreakdown(
         _.map(byMonth, (amount, month) => {
           return [
             month,
-            [formatPercentage(amount / total, 1), "has-text-right"],
+            [formatPercentage(amount / pointTotal, 1), "has-text-right"],
             [formatCurrency(amount), "has-text-weight-bold has-text-right"],
           ];
         }),
         {
-          total: formatCurrency(total),
+          total: formatCurrency(pointTotal),
           header: `${
             d.postings[0] ? financialYear(d.postings[0].date) : ""
           } ${d.category}`,
@@ -477,44 +493,19 @@ export function renderCurrentExpensesBreakdown(
       );
     };
 
+    const bar = g.append("g");
     bar
       .selectAll("rect")
-      .data(points, (p: any) => p.category)
-      .join(
-        (enter) =>
-          enter
-            .append("rect")
-            .attr("fill", function (d) {
-              return z(d.category);
-            })
-            .attr("data-tippy-content", tooltipContent)
-            .attr("x", x(0))
-            .attr("y", function (d) {
-              return y(d.category) +
-                (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2;
-            })
-            .attr("width", function (d) {
-              return x(d.total);
-            })
-            .attr("height", y.bandwidth()),
-        (update) =>
-          update
-            .attr("fill", function (d) {
-              return z(d.category);
-            })
-            .attr("data-tippy-content", tooltipContent)
-            .transition(t)
-            .attr("x", x(0))
-            .attr("y", function (d) {
-              return y(d.category) +
-                (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2;
-            })
-            .attr("width", function (d) {
-              return x(d.total);
-            })
-            .attr("height", y.bandwidth()),
-        (exit) => exit.remove(),
-      );
+      .data(points)
+      .join("rect")
+      .attr("fill", (d) => z(d.category))
+      .attr("data-tippy-content", tooltipContent)
+      .attr("x", x(0))
+      .attr("y", (d) =>
+        y(d.category) +
+        (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2)
+      .attr("width", (d) => x(d.total))
+      .attr("height", y.bandwidth());
 
     const rightLabel = (d: Point) =>
       `${formatCurrency(d.total)} ${
@@ -523,35 +514,39 @@ export function renderCurrentExpensesBreakdown(
 
     bar
       .selectAll("text")
-      .data(points, (p: any) => p.category)
-      .join(
-        (enter) =>
-          enter
-            .append("text")
-            .attr("text-anchor", "start")
-            .attr("dominant-baseline", "middle")
-            .attr("y", function (d) {
-              return y(d.category) + y.bandwidth() / 2;
-            })
-            .attr("x", width + LABEL_GAP)
-            .style("white-space", "pre")
-            .style("font-size", "0.928rem")
-            .style("font-weight", "bold")
-            .style("fill", function (d) {
-              return chroma(z(d.category)).darken(0.8).hex();
-            })
-            .attr("class", "is-family-monospace")
-            .text(rightLabel),
-        (update) =>
-          update
-            .text(rightLabel)
-            .transition(t)
-            .attr("y", function (d) {
-              return y(d.category) + y.bandwidth() / 2;
-            }),
-        (exit) => exit.remove(),
-      );
+      .data(points)
+      .join("text")
+      .attr("text-anchor", "start")
+      .attr("dominant-baseline", "middle")
+      .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
+      .attr("x", width + LABEL_GAP)
+      .style("white-space", "pre")
+      .style("font-size", "0.928rem")
+      .style("font-weight", "bold")
+      .style("fill", (d) => chroma(z(d.category)).darken(0.8).hex())
+      .attr("class", "is-family-monospace")
+      .text(rightLabel);
+  }
 
-    return;
+  return {
+    update(next) {
+      postings = next;
+      draw();
+    },
+    resize(dimensions) {
+      size = dimensions;
+      draw();
+    },
+    destroy() {
+      d3.select(id).selectAll("*").remove();
+    },
   };
 }
+
+export function renderCurrentExpensesBreakdown(
+  z: d3.ScaleOrdinal<string, string, never>,
+) {
+  return createCurrentExpensesBreakdown(z).update;
+}
+
+

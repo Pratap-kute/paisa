@@ -7,9 +7,10 @@
     renderYearlyIncomeTimeline,
     renderYearlyTimelineOf
   } from "$lib/charts/income";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
   import { ajax, formatCurrency, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -23,6 +24,7 @@
   let yearlyIncomeTimelineLegends: Legend[] = $state([]);
   let yearlyNetIncomeTimelineLegends: Legend[] = $state([]);
   let yearlyNetTaxTimelineLegends: Legend[] = $state([]);
+  let charts: ChartHandle<null>[] = [];
 
   onMount(async () => {
     const {
@@ -30,23 +32,38 @@
       tax_timeline: taxes,
       yearly_cards: yearlyCards
     } = await ajax("/api/income");
-    monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(incomes);
-    yearlyIncomeTimelineLegends = renderYearlyIncomeTimeline(yearlyCards);
-    yearlyNetIncomeTimelineLegends = renderYearlyTimelineOf(
-      "Net Income",
-      "net_income",
-      COLORS.gain,
-      yearlyCards
-    );
-    yearlyNetTaxTimelineLegends = renderYearlyTimelineOf(
-      "Net Tax",
-      "net_tax",
-      COLORS.loss,
-      yearlyCards
-    );
+    charts = [
+      createClientWidthChart("#d3-income-timeline", () => {
+        monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(incomes);
+      }),
+      createClientWidthChart("#d3-yearly-income-timeline", () => {
+        yearlyIncomeTimelineLegends = renderYearlyIncomeTimeline(yearlyCards);
+      }),
+      createClientWidthChart("#d3-yearly-net_income-timeline", () => {
+        yearlyNetIncomeTimelineLegends = renderYearlyTimelineOf(
+          "Net Income",
+          "net_income",
+          COLORS.gain,
+          yearlyCards
+        );
+      }),
+      createClientWidthChart("#d3-yearly-net_tax-timeline", () => {
+        yearlyNetTaxTimelineLegends = renderYearlyTimelineOf(
+          "Net Tax",
+          "net_tax",
+          COLORS.loss,
+          yearlyCards
+        );
+      }),
+    ];
+    charts.forEach((chart) => chart.update(null));
 
     grossIncome = _.sumBy(incomes, (i) => _.sumBy(i.postings, (p) => -p.amount));
     netTax = _.sumBy(taxes, (t) => _.sumBy(t.postings, (p) => p.amount));
+  });
+
+  onDestroy(() => {
+    charts.forEach((chart) => chart.destroy());
   });
 </script>
 
@@ -63,7 +80,7 @@
 
   <Section title="Monthly Income Timeline">
     <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-    <ChartFrame type="timeline">
+    <ChartFrame type="timeline" onresize={(dim) => charts[0]?.resize(dim)}>
       <svg id="d3-income-timeline" width="100%" height="500" />
     </ChartFrame>
   </Section>
@@ -72,19 +89,19 @@
     <div class="paisa-yearly-income-grid">
       <div class="paisa-yearly-income-col">
         <LegendCard legends={yearlyIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={(dim) => charts[1]?.resize(dim)}>
           <svg id="d3-yearly-income-timeline" width="100%" />
         </ChartFrame>
       </div>
       <div class="paisa-yearly-income-col">
         <LegendCard legends={yearlyNetIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={(dim) => charts[2]?.resize(dim)}>
           <svg id="d3-yearly-net_income-timeline" width="100%" />
         </ChartFrame>
       </div>
       <div class="paisa-yearly-income-col">
         <LegendCard legends={yearlyNetTaxTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={(dim) => charts[3]?.resize(dim)}>
           <svg id="d3-yearly-net_tax-timeline" width="100%" />
         </ChartFrame>
       </div>

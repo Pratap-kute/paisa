@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
-  import { renderFlow } from "$lib/charts/cash_flow";
+  import { createFlow } from "$lib/charts/cash_flow";
   import { ajax, depth, firstName, rem, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, year } from "../../../../store";
   import {
@@ -9,16 +9,16 @@
     cashflowExpenseDepth,
     cashflowIncomeDepth
   } from "../../../../persisted_store";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let legends: Legend[] = $state([]);
   let graph: Record<string, Graph> = $state(), expenses: Posting[];
   let isEmpty = $state(false);
+  let flowChart = createFlow();
 
   function maxDepth(prefix: string) {
     if (!graph) return 1;
@@ -56,12 +56,17 @@
       if (graph[$year] == null) {
         isEmpty = true;
       } else {
-        legends = renderFlow(
+        flowChart.update(
           filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth)
         );
+        legends = flowChart.legends();
         isEmpty = false;
       }
     }
+  });
+
+  onDestroy(() => {
+    flowChart.destroy();
   });
 
   onMount(async () => {
@@ -82,14 +87,17 @@
   />
 
   <Section>
-    <ZeroState item={!isEmpty}>
-      <strong>Oops!</strong> You have not made any transactions for the selected year.
-    </ZeroState>
-
-    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-    <ChartFrame type="timeline">
+    {#if !isEmpty}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {/if}
+    <ChartFrame
+      type="timeline"
+      empty={isEmpty}
+      emptyMessage="No cash-flow activity for the selected year"
+      preserveChildren
+      onresize={(dim) => flowChart.resize(dim)}
+    >
       <svg
-        class:is-not-visible={isEmpty}
         id="d3-expense-flow"
         height={window.innerHeight - rem(210)}
         width="100%"

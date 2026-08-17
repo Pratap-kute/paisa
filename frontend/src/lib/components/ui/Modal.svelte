@@ -87,7 +87,7 @@
     border: 1px solid var(--paisa-border-default);
     border-radius: var(--paisa-radius-lg);
     box-shadow: var(--paisa-shadow-lg);
-    overflow: hidden;
+    overflow: visible;
   }
 
   .paisa-modal-head {
@@ -106,6 +106,7 @@
     background-color: var(--paisa-surface-bg);
     color: var(--paisa-text-primary);
     padding: var(--paisa-space-4);
+    overflow-y: auto;
   }
 
   .paisa-modal-foot {

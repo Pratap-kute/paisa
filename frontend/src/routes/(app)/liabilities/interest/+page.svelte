@@ -5,9 +5,10 @@
     renderOverview,
     renderPerAccountOverview
   } from "$lib/charts/liabilities/interest";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
   import { ajax, type Interest, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -15,6 +16,8 @@
 
   let isEmpty = $state(false);
   let legends: Legend[] = $state([]);
+  let overviewChart: ChartHandle<null> | null = $state(null);
+  let perAccountChart: ChartHandle<null> | null = $state(null);
 
   function hasLiabilityActivity(interests: Interest[]) {
     return _.some(interests, (interest) =>
@@ -36,8 +39,19 @@
     }
 
     legends = buildLegends();
-    renderOverview(interests);
-    renderPerAccountOverview(interests);
+    overviewChart = createClientWidthChart("#d3-interest-overview", () => {
+      renderOverview(interests);
+    });
+    perAccountChart = createClientWidthChart("#d3-interest-timeline-breakdown", () => {
+      renderPerAccountOverview(interests);
+    });
+    overviewChart.update(null);
+    perAccountChart.update(null);
+  });
+
+  onDestroy(() => {
+    overviewChart?.destroy();
+    perAccountChart?.destroy();
   });
 </script>
 
@@ -56,6 +70,7 @@
       empty={isEmpty}
       emptyMessage="No liability activity in this period"
       preserveChildren
+      onresize={(dim) => overviewChart?.resize(dim)}
     >
       <div class="paisa-interest-overview-chart paisa-overflow-x-auto">
         <svg id="d3-interest-overview" width="100%" />
@@ -69,6 +84,7 @@
       empty={isEmpty}
       emptyMessage="No liability activity in this period"
       preserveChildren
+      onresize={(dim) => perAccountChart?.resize(dim)}
     >
       <div class="d3-interest-timeline-breakdown">
         <div id="d3-interest-timeline-breakdown"></div>

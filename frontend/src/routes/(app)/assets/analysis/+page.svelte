@@ -99,14 +99,20 @@
     <!-- Side-by-Side Summary: Security Type & Security Rating -->
     <ResponsiveGrid variant="two-column">
       <Section title="Security Type">
-        <ChartFrame type="dynamic">
+        <ChartFrame type="dynamic" onresize={() => {
+          document.getElementById("d3-portfolio-security-type")?.replaceChildren();
+          securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
+        }}>
           <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-type" />
         </ChartFrame>
       </Section>
 
       <Section title="Security Rating">
-        <ChartFrame type="dynamic">
+        <ChartFrame type="dynamic" onresize={() => {
+          document.getElementById("d3-portfolio-security-rating")?.replaceChildren();
+          ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
+        }}>
           <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-rating" />
         </ChartFrame>
@@ -114,7 +120,12 @@
     </ResponsiveGrid>
 
     <Section title="Industry">
-      <ChartFrame type="dynamic">
+      <ChartFrame type="dynamic" onresize={() => {
+        document.getElementById("d3-portfolio-security-industry")?.replaceChildren();
+        industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
+          z: [genericBarColor()]
+        });
+      }}>
         <div id="d3-portfolio-security-industry-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio-security-industry" />
       </ChartFrame>
@@ -124,7 +135,10 @@
       {#if portfolioR}
         <LegendCard legends={portfolioR.legends} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
-      <ChartFrame type="dynamic">
+      <ChartFrame type="dynamic" onresize={() => {
+        document.getElementById("d3-portfolio")?.replaceChildren();
+        portfolioR = renderPortfolioBreakdown("#d3-portfolio", name_and_security_type);
+      }}>
         <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio" />
       </ChartFrame>

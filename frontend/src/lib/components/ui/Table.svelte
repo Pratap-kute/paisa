@@ -34,9 +34,9 @@
   );
 
   $effect(() => {
-    if (isBuilt && data && data.length > 0) {
+    if (isBuilt) {
       try {
-        tabulator?.setData(data);
+        tabulator?.setData(data ?? []);
       } catch (_) {}
     }
   });

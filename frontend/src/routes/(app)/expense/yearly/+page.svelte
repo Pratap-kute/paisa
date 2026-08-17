@@ -1,13 +1,14 @@
 <script lang="ts">
   import * as d3 from "d3";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import {
     renderYearlyExpensesTimeline,
-    renderCurrentExpensesBreakdown,
+    createCurrentExpensesBreakdown,
     renderCalendar
   } from "$lib/charts/expense/yearly";
+  import type { ChartHandle } from "$lib/charts/resize";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
@@ -22,11 +23,13 @@
   let groups = writable([]);
   let z: d3.ScaleOrdinal<string, string, never> = $state(),
     renderer: (ps: Posting[]) => void = $state(),
+    expenseBreakdown: ChartHandle<Posting[]> | null = $state(null),
     expenses: Posting[] = $state(),
     grouped_expenses: Record<string, Posting[]> = $state(),
     grouped_incomes: Record<string, Posting[]> = $state(),
     grouped_investments: Record<string, Posting[]> = $state(),
     grouped_taxes: Record<string, Posting[]> = $state();
+  let resizeTimeline: ((dim: { width: number; height: number }) => void) | undefined;
 
   let legends: Legend[] = $state([]);
 
@@ -42,8 +45,8 @@
   let currentYearExpenses: Posting[] = $derived(
     grouped_expenses ? (grouped_expenses[$year] || []) : []
   );
-  let hasCurrentYearExpenses = $derived(sum(currentYearExpenses) > 0);
-  let hasExpenses = $derived(sum(expenses) > 0);
+  let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
+  let hasExpenses = $derived((expenses?.length ?? 0) > 0);
 
   onMount(async () => {
     ({
@@ -62,11 +65,16 @@
       dateMax.set(end);
     }
 
-    ({ z, legends } = renderYearlyExpensesTimeline(expenses, groups, year));
+    ({ z, legends, resize: resizeTimeline } = renderYearlyExpensesTimeline(expenses, groups, year));
 
     if (z) {
-      renderer = renderCurrentExpensesBreakdown(z);
+      expenseBreakdown = createCurrentExpensesBreakdown(z);
+      renderer = expenseBreakdown.update;
     }
+  });
+
+  onDestroy(() => {
+    expenseBreakdown?.destroy();
   });
 
   function sum(postings: Posting[], sign = 1) {
@@ -178,6 +186,7 @@
             empty={!hasCurrentYearExpenses}
             emptyMessage="No expenses this year"
             preserveChildren
+            onresize={(dim) => expenseBreakdown?.resize(dim)}
           >
             <svg id="d3-current-year-breakdown" width="100%" />
           </ChartFrame>
@@ -194,6 +203,7 @@
           empty={!hasExpenses}
           emptyMessage="No expense activity in this period"
           preserveChildren
+          onresize={(dim) => resizeTimeline?.(dim)}
         >
           <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
         </ChartFrame>

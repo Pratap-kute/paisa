@@ -702,8 +702,9 @@
         340px
       );
     gap: var(--paisa-space-3);
-    height: calc(100vh - 136px);
-    min-height: 520px;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
     width: 100%;
 
     &.has-no-sidebar {

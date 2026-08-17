@@ -10,6 +10,7 @@
   import type dayjs from "dayjs";
   import type { Action } from "svelte/action";
   import { renderRecurring } from "$lib/charts/recurring";
+  import { observeElementSize } from "$lib/charts/resize";
   import _ from "lodash";
 
   interface Props {
@@ -32,8 +33,22 @@
     element,
     props
   ) => {
-    renderRecurring(element, props.ts, showPage);
-    return {};
+    let current = props;
+    const draw = () => {
+      element.querySelector("svg")?.replaceChildren();
+      renderRecurring(element, current.ts, showPage);
+    };
+    draw();
+    const stop = observeElementSize(element, () => draw());
+    return {
+      update(next) {
+        current = next;
+        draw();
+      },
+      destroy() {
+        stop();
+      },
+    };
   };
 </script>
 

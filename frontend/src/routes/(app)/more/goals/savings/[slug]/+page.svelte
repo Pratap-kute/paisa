@@ -63,7 +63,8 @@
     postings: Posting[] = [],
     latestPostings: Posting[] = $state([]),
     balances: Record<string, AssetBreakdown> = $state({}),
-    destroyCallback = () => {};
+    destroyCallback = () => {},
+    predictionsTimeline: Forecast[] = [];
 
   onDestroy(async () => {
     destroyCallback();
@@ -108,7 +109,7 @@
       targetDate,
     ));
 
-    let predictionsTimeline: Forecast[] = [];
+    predictionsTimeline = [];
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
       predictionsTimeline = project(
@@ -193,13 +194,27 @@
     <!-- Main Content Panel -->
     <div class="paisa-goal-detail-main">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={() => {
+          if (!svg) return;
+          svg.replaceChildren();
+          destroyCallback = renderProgress(
+            savingsTimeline,
+            predictionsTimeline,
+            breakPoints,
+            svg,
+            { targetSavings },
+          );
+        }}>
           <svg height="400" width="100%" bind:this={svg} />
         </ChartFrame>
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={() => {
+          if (!investmentTimelineSvg) return;
+          investmentTimelineSvg.replaceChildren();
+          renderInvestmentTimeline(postings, investmentTimelineSvg, pmt);
+        }}>
           <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
         </ChartFrame>
       </Section>

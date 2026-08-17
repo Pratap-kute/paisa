@@ -21,7 +21,6 @@
     financialYear,
     forEachFinancialYear,
     helpUrl,
-    isMobile,
     now,
   } from "$lib/core/utils";
   import { onMount } from "svelte";
@@ -38,6 +37,13 @@
 
   let { isBurger = $bindable(null) }: Props = $props();
   const readonly = USER_CONFIG.readonly;
+
+  function isNavbarTouch() {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia("(max-width: 1023px)").matches;
+  }
 
   onMount(async () => {
     if (get(year) == "") {
@@ -292,11 +298,11 @@
               class="navbar-link paisa-button-reset is-fullwidth has-text-left"
               class:is-active={normalizedPath.startsWith(link.href)}
               onclick={(e) =>
-                isMobile() &&
+                isNavbarTouch() &&
                 e.currentTarget.parentElement?.classList.toggle("is-active")}
               >{link.label}</button
             >
-            <div class="navbar-dropdown {!isMobile() && 'is-boxed'}">
+            <div class="navbar-dropdown {!isNavbarTouch() && 'is-boxed'}">
               {#each link.children as sublink}
                 {@const href = link.href + sublink.href}
                 {#if _.isEmpty(sublink.children)}
@@ -317,7 +323,7 @@
                       class:is-active={normalizedPath.startsWith(href)}
                       aria-haspopup="true"
                       onclick={(e) =>
-                        isMobile() &&
+                        isNavbarTouch() &&
                         e.currentTarget.parentElement?.classList.toggle(
                           "is-active",
                         )}
@@ -326,7 +332,7 @@
 
                       <span class="icon is-small">
                         <i
-                          class="fas {isMobile()
+                          class="fas {isNavbarTouch()
                             ? 'fa-angle-down'
                             : 'fa-angle-right'}"
                           aria-hidden="true"

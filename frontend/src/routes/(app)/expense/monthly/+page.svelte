@@ -15,9 +15,10 @@
   } from "$lib/core/utils";
   import {
     renderMonthlyExpensesTimeline,
-    renderCurrentExpensesBreakdown,
+    createCurrentExpensesBreakdown,
     renderCalendar,
   } from "$lib/charts/expense/monthly";
+  import type { ChartHandle } from "$lib/charts/resize";
   import { iconify } from "$lib/core/icon";
   import { financialColors } from "$lib/theme/chartPalette";
   import { dateRange, month, setAllowedDateRange } from "../../../../store";
@@ -34,12 +35,14 @@
   let groups = writable([]);
   let z: ScaleOrdinal<string, string, never> | undefined = $state(),
     renderer: ((ps: Posting[]) => void) | undefined = $state(),
+    expenseBreakdown: ChartHandle<Posting[]> | null = $state(null),
     expenses: Posting[] | undefined = $state(),
     grouped_expenses: Record<string, Posting[]> | undefined = $state(),
     grouped_incomes: Record<string, Posting[]> | undefined = $state(),
     grouped_investments: Record<string, Posting[]> | undefined = $state(),
     grouped_taxes: Record<string, Posting[]> | undefined = $state(),
-    destroy: () => void;
+    destroy: () => void,
+    resizeTimeline: ((dim: { width: number; height: number }) => void) | undefined;
 
   let legends: Legend[] = $state([]);
 
@@ -56,6 +59,7 @@
     if (destroy) {
       destroy();
     }
+    expenseBreakdown?.destroy();
   });
 
   onMount(async () => {
@@ -70,13 +74,14 @@
     } = await ajax("/api/expense"));
 
     setAllowedDateRange(_.map(expenses, (e: Posting) => e.date));
-    ({ z, destroy, legends } = renderMonthlyExpensesTimeline(
+    ({ z, destroy, legends, resize: resizeTimeline } = renderMonthlyExpensesTimeline(
       expenses,
       groups,
       month,
       dateRange,
     ));
-    renderer = renderCurrentExpensesBreakdown(z);
+    expenseBreakdown = createCurrentExpensesBreakdown(z);
+    renderer = expenseBreakdown.update;
   });
 
   function sum(postings: Posting[], sign = 1) {
@@ -97,8 +102,8 @@
   let selectedMonthExpenses: Posting[] = $derived(
     grouped_expenses?.[$month] || [],
   );
-  let hasSelectedMonthExpenses = $derived(sum(selectedMonthExpenses) > 0);
-  let hasExpenses = $derived(sum(expenses) > 0);
+  let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
+  let hasExpenses = $derived((expenses?.length ?? 0) > 0);
 
   $effect(() => {
     if (grouped_expenses && renderer) {
@@ -244,6 +249,7 @@
             empty={!hasSelectedMonthExpenses}
             emptyMessage="No expenses this month"
             preserveChildren
+            onresize={(dim) => expenseBreakdown?.resize(dim)}
           >
             <svg id="d3-current-month-breakdown" width="100%" />
           </ChartFrame>
@@ -260,6 +266,7 @@
           empty={!hasExpenses}
           emptyMessage="No expense activity in this period"
           preserveChildren
+          onresize={(dim) => resizeTimeline?.(dim)}
         >
           <svg id="d3-monthly-expense-timeline" width="100%" height="400" />
         </ChartFrame>

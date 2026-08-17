@@ -28,7 +28,7 @@ test("selects a nested ledger file and displays unsaved state", async () => {
     },
   });
 
-  expect(screen.getByText("unsaved")).toBeInTheDocument();
+  expect(screen.getByLabelText("Unsaved changes")).toBeInTheDocument();
   await fireEvent.click(screen.getByTitle("main.ledger"));
   expect(selected).toBe("accounts/main.ledger");
 });

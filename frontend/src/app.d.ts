@@ -79,16 +79,6 @@ declare module "textures" {
   export default textures;
 }
 
-declare module "lodash" {
-  const _: any;
-  export default _;
-}
-
-declare module "d3" {
-  const d3: any;
-  export = d3;
-}
-
 declare module "xlsx" {
   export function read(data: any, opts?: any): any;
   export namespace utils {

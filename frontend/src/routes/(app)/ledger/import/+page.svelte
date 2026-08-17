@@ -16,6 +16,11 @@
     renderWithMetadata,
     type RenderMetadata
   } from "$lib/importing/spreadsheet";
+  import {
+    commitParseOutcome,
+    displayCell,
+    emptyRenderMetadata,
+  } from "$lib/importing/import_commit";
   import _ from "lodash";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
@@ -219,6 +224,9 @@
         updatePreviewContent(previewEditor, generated.content);
       } catch (e) {
         console.error(e);
+        renderMetadata = emptyRenderMetadata;
+        preview = "";
+        updatePreviewContent(previewEditor, "");
       }
       refreshPredictionReview();
     } else if (_.isEmpty(currentRows) && previewEditor) {
@@ -235,15 +243,19 @@
     const { acceptedFiles } = e.detail;
     if (!acceptedFiles || acceptedFiles.length === 0) return;
 
-    activeFileName = acceptedFiles[0].name;
     loading = true;
+    const fileName = acceptedFiles[0].name;
     try {
       const results = await parse(acceptedFiles[0]);
-      if (results.error) {
-        parseErrorMessage = results.error;
+      const outcome = commitParseOutcome(fileName, results);
+      if (outcome.ok === false) {
+        clearLoadedFile();
+        activeFileName = outcome.fileName;
+        parseErrorMessage = outcome.error;
       } else {
         parseErrorMessage = null;
-        data = results.data;
+        activeFileName = outcome.fileName;
+        data = outcome.data;
         rows = asRows(results);
         selectedSourceRowIndex = null;
         predictionSession.clearPreview();
@@ -256,7 +268,14 @@
         });
       }
     } catch (err: any) {
-      parseErrorMessage = err?.message || "Error parsing file";
+      const outcome = commitParseOutcome(
+        fileName,
+        null,
+        err?.message || "Error parsing file",
+      );
+      clearLoadedFile();
+      activeFileName = outcome.fileName;
+      parseErrorMessage = outcome.ok === false ? outcome.error : null;
     } finally {
       loading = false;
     }
@@ -635,7 +654,7 @@
                         />
                       </th>
                       {#each row as cell}
-                        <td class="paisa-sheet-data-cell" title={cell || ""}>{cell || ""}</td>
+                        <td class="paisa-sheet-data-cell" title={displayCell(cell)}>{displayCell(cell)}</td>
                       {/each}
                     </tr>
                   {/each}
@@ -780,7 +799,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--paisa-space-2);
-    min-height: calc(100vh - 116px);
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .paisa-import-topbar,
@@ -1210,13 +1230,8 @@
   }
 
   @media screen and (max-width: 768px) {
-    .paisa-import-workspace {
-      min-height: auto;
-    }
-
     .paisa-import-main-grid {
       grid-template-columns: 1fr;
-      min-height: 900px;
     }
 
     .paisa-template-drawer-panel {

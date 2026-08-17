@@ -24,6 +24,7 @@ import { willClearTippy } from "../../store";
 import COLORS, { generateColorScheme } from "../core/colors";
 import textures from "textures";
 import chroma from "chroma-js";
+import { createRedrawChart, type Dimensions } from "./resize";
 
 export interface MonthlyFlowChart {
   update: (cashFlows: CashFlow[]) => void;
@@ -184,14 +185,17 @@ export function createMonthlyFlow(
     firstRender = false;
     const t = svg.transition().duration(duration);
 
-    const axis = (duration > 0 ? xAxis.transition(t) : xAxis)
-      .call(
-        d3
-          .axisBottom(x)
-          .ticks(5)
-          .tickFormat(skipTicks(30, x, (d) => d.toString())),
-      )
-      .selectAll("text")
+    const xAxisFormatter = d3
+      .axisBottom(x)
+      .ticks(5)
+      .tickFormat(skipTicks(30, x, (d) => d.toString()));
+    if (duration > 0) {
+      xAxis.transition(t).call(xAxisFormatter);
+    } else {
+      xAxis.call(xAxisFormatter);
+    }
+    const axis = xAxis
+      .selectAll<SVGTextElement, unknown>("text")
       .attr("y", 10)
       .attr("x", -8)
       .attr("dy", ".35em");
@@ -200,9 +204,14 @@ export function createMonthlyFlow(
       axis.attr("transform", "rotate(-45)").style("text-anchor", "end");
     }
 
-    (duration > 0 ? yAxis.transition(t) : yAxis).call(
-      d3.axisLeft(y).tickSize(-currentWidth).tickFormat(formatCurrencyCrude),
+    const yAxisFormatter = d3.axisLeft(y).tickSize(-currentWidth).tickFormat(
+      formatCurrencyCrude,
     );
+    if (duration > 0) {
+      yAxis.transition(t).call(yAxisFormatter);
+    } else {
+      yAxis.call(yAxisFormatter);
+    }
 
     const gbars = groups
       .selectAll("g.group")
@@ -214,10 +223,14 @@ export function createMonthlyFlow(
             .attr("class", "group")
             .attr("transform", (c) =>
               `translate(${x(c.date.format("MMM YYYY"))},0)`),
-        (update) =>
-          (duration > 0 ? update.transition(t) : update)
-            .attr("transform", (c) =>
-              `translate(${x(c.date.format("MMM YYYY"))},0)`),
+        (update) => {
+          const transform = (c: CashFlow) =>
+            `translate(${x(c.date.format("MMM YYYY"))},0)`;
+          if (duration > 0) {
+            return update.transition(t).attr("transform", transform);
+          }
+          return update.attr("transform", transform);
+        },
         (exit) => exit.remove(),
       );
 
@@ -265,29 +278,49 @@ export function createMonthlyFlow(
                 : x1(d[0].data.i))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH))
             .attr("y", y.range()[0])
-            .call((sel) =>
-              duration > 0 ? sel.transition(t) : sel
-            )
-            .attr("y", (d: any) => y(d[0][1]))
-            .attr("height", (d: any) => y(d[0][0]) - y(d[0][1])),
-        (update) =>
-          (duration > 0 ? update.transition(t) : update)
-            .attr("fill", (d) => {
-              if (d.key === "tax") {
-                return texture.url();
+            .call((sel) => {
+              if (duration > 0) {
+                sel.transition(t)
+                  .attr("y", (d: any) => y(d[0][1]))
+                  .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]));
+              } else {
+                sel
+                  .attr("y", (d: any) => y(d[0][1]))
+                  .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]));
               }
-              return z(d.key);
-            })
-            .attr("x", (d: any) =>
-              d[0].data.i === "0"
-                ? x1(d[0].data.i) + x1.bandwidth() -
-                  Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
-                : x1(d[0].data.i))
-            .attr("y", (d: any) =>
-              y(d[0][1]))
-            .attr("height", (d: any) =>
-              y(d[0][0]) - y(d[0][1]))
-            .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH)),
+            }),
+        (update) => {
+          const fill = (d: any) => {
+            if (d.key === "tax") {
+              return texture.url();
+            }
+            return z(d.key);
+          };
+          const xPos = (d: any) =>
+            d[0].data.i === "0"
+              ? x1(d[0].data.i) + x1.bandwidth() -
+                Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
+              : x1(d[0].data.i);
+          const yPos = (d: any) => y(d[0][1]);
+          const height = (d: any) => y(d[0][0]) - y(d[0][1]);
+          const width = Math.min(x1.bandwidth(), MAX_BAR_WIDTH);
+
+          if (duration > 0) {
+            return update
+              .transition(t)
+              .attr("fill", fill)
+              .attr("x", xPos)
+              .attr("y", yPos)
+              .attr("height", height)
+              .attr("width", width);
+          }
+          return update
+            .attr("fill", fill)
+            .attr("x", xPos)
+            .attr("y", yPos)
+            .attr("height", height)
+            .attr("width", width);
+        },
         (exit) => exit.remove(),
       );
 
@@ -408,7 +441,7 @@ export function renderMonthlyFlow(
   };
 }
 
-export function renderFlow(graph: Graph) {
+export function renderFlow(graph: Graph, dimensions?: Dimensions) {
   const id = "#d3-expense-flow";
   const el = document.getElementById(id.substring(1));
   if (!el?.parentElement) return;
@@ -421,12 +454,14 @@ export function renderFlow(graph: Graph) {
       left: rem(20),
     },
     width = Math.max(
-      el.parentElement.clientWidth,
+      dimensions?.width || el.parentElement.clientWidth,
       1000,
     ) -
       margin.left -
       margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom;
+    height = (dimensions?.height && dimensions.height > 0
+      ? dimensions.height
+      : +svg.attr("height")) - margin.top - margin.bottom;
 
   willClearTippy.update((n) => n + 1);
   svg.selectAll("*").remove();
@@ -560,6 +595,22 @@ export function renderFlow(graph: Graph) {
     shape: "square",
   }));
   return legends;
+}
+
+export function createFlow() {
+  let legends: Legend[] = [];
+  const chart = createRedrawChart<Graph>({
+    draw: (graph, size) => {
+      legends = renderFlow(graph, size) ?? [];
+    },
+    clear: () => {
+      d3.select("#d3-expense-flow").selectAll("*").remove();
+    },
+  });
+  return {
+    ...chart,
+    legends: () => legends,
+  };
 }
 
 function name(node: Node) {

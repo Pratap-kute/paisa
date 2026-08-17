@@ -26,10 +26,14 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: 100dvh;
     background-color: var(--paisa-canvas-bg);
   }
   .paisa-main-content {
     flex: 1 1 auto;
     min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 </style>

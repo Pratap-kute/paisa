@@ -12,7 +12,6 @@
   import { onMount, onDestroy } from "svelte";
   import { dateRange, setAllowedDateRange } from "../../../../store";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -84,14 +83,15 @@
   </MetricStrip>
 
   <Section>
-    <ZeroState item={points}>
-      <strong>Oops!</strong> You have no transactions.
-    </ZeroState>
-
-    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {#if filteredPoints.length > 0}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {/if}
 
     <ChartFrame
       type="timeline"
+      empty={filteredPoints.length === 0}
+      emptyMessage="No net-worth activity in this period"
+      preserveChildren
       onresize={(dim) => chart?.resize(dim)}
     >
       <svg id="d3-networth-timeline" width="100%" bind:this={svg} />

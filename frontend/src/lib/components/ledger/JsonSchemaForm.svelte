@@ -1,12 +1,13 @@
 <script lang="ts">
   import JsonSchemaForm from "./JsonSchemaForm.svelte";
   import sha256 from "crypto-js/sha256";
-  import type { JSONSchema7 } from "json-schema";
+  import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
   import Select from "svelte-select";
   import _ from "lodash";
   import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
   import { iconGlyph, iconsList } from "$lib/core/icon";
   import AccountSelect from "./AccountsSelect.svelte";
+  import { untrack } from "svelte";
 
   interface Schema extends JSONSchema7 {
     "ui:header"?: string;
@@ -44,8 +45,9 @@
     variant = "default",
   }: Props = $props();
 
-  const radioName = `${key || "field"}-${crypto.randomUUID()}`;
-  let open = $state(variant === "panel" || variant === "item");
+  const radioInstanceId = crypto.randomUUID();
+  let radioName = $derived(`${key || "field"}-${radioInstanceId}`);
+  let open = $state(untrack(() => variant === "panel" || variant === "item"));
   let title = $derived(_.startCase(key));
   let itemTitle = $derived(
     schema["ui:header"] && value && value[schema["ui:header"]]
@@ -60,12 +62,18 @@
     return {};
   }
 
+  function isSchema(definition: JSONSchema7Definition): definition is Schema {
+    return definition !== false;
+  }
+
   function isCompoundSchema(subSchema: Schema) {
     return subSchema.type === "object" || subSchema.type === "array";
   }
 
-  function sortedProperties(schema: Schema) {
-    return _.sortBy(Object.entries(schema.properties || {}), ([key, subSchema]: [string, Schema]) => {
+  function sortedProperties(schema: Schema): [string, Schema][] {
+    const entries = Object.entries(schema.properties || {})
+      .filter((entry): entry is [string, Schema] => isSchema(entry[1]));
+    return _.sortBy(entries, ([key, subSchema]) => {
       return [
         subSchema["ui:order"] || 999,
         _.includes(schema.required || [], key) ? 0 : 1,
@@ -81,6 +89,31 @@
     }
     return null;
   }
+
+  function defaultValueForSchema(s: Schema) {
+    if (s.default !== undefined) {
+      return _.cloneDeep(s.default);
+    }
+    if (s.type === "array") {
+      return [];
+    }
+    if (s.type === "object" || s["ui:widget"] === "price") {
+      return {};
+    }
+    return undefined;
+  }
+
+  $effect.pre(() => {
+    if (schema.type === "object" || schema["ui:widget"] === "price") {
+      if (value == null) {
+        value = defaultValueForSchema(schema) ?? {};
+      }
+    } else if (schema.type === "array") {
+      if (!Array.isArray(value)) {
+        value = defaultValueForSchema(schema) ?? [];
+      }
+    }
+  });
 
   async function searchIcons(text: string) {
     text = text.toLowerCase();

@@ -59,6 +59,8 @@
     "@std/path": "jsr:@std/path@^1",
     "@std/testing/bdd": "jsr:@std/testing@^1/bdd",
     "json-schema": "npm:@types/json-schema@^7.0.15",
+    "@types/d3": "npm:@types/d3@^7.4.3",
+    "@types/lodash": "npm:@types/lodash@^4.17.16",
     "@sveltejs/adapter-static": "npm:@sveltejs/adapter-static@^3.0.8",
     "@sveltejs/kit": "npm:@sveltejs/kit@^2.70.2",
     "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.3.0",

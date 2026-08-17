@@ -108,7 +108,15 @@
         </Section>
 
         <Section title="Year-wise Spends">
-          <ChartFrame type="category">
+          <ChartFrame
+            type="category"
+            onresize={() => {
+              if (svg && creditCard) {
+                svg.replaceChildren();
+                renderYearlySpends(svg, creditCard.yearlySpends);
+              }
+            }}
+          >
             <svg bind:this={svg} width="100%" />
           </ChartFrame>
         </Section>

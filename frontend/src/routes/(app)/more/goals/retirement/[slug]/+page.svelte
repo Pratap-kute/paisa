@@ -6,6 +6,7 @@
     formatFloat,
     isMobile,
     type AssetBreakdown,
+    type Forecast,
     type Point,
     type Posting,
     firstName,
@@ -59,7 +60,8 @@
     postings: Posting[] = [],
     latestPostings: Posting[] = $state([]),
     balances: Record<string, AssetBreakdown> = $state({}),
-    destroyCallback = () => {};
+    destroyCallback = () => {},
+    predictionsTimeline: Forecast[] = [];
 
   onDestroy(async () => {
     destroyCallback();
@@ -98,7 +100,7 @@
     }
 
     const ARIMA = await ARIMAPromise;
-    const predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
+    predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
     await tick();
     breakPoints = findBreakPoints(
       savingsTimeline.concat(predictionsTimeline),
@@ -165,13 +167,27 @@
     <!-- Main Content Panel -->
     <div class="paisa-goal-detail-main">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={() => {
+          if (!svg) return;
+          svg.replaceChildren();
+          destroyCallback = renderProgress(
+            savingsTimeline,
+            predictionsTimeline,
+            breakPoints,
+            svg,
+            { targetSavings },
+          );
+        }}>
           <svg height="400" width="100%" bind:this={svg} />
         </ChartFrame>
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={() => {
+          if (!investmentTimelineSvg) return;
+          investmentTimelineSvg.replaceChildren();
+          renderInvestmentTimeline(postings, investmentTimelineSvg, 0);
+        }}>
           <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
         </ChartFrame>
       </Section>

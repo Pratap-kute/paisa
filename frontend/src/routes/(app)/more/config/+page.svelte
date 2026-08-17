@@ -186,7 +186,7 @@
       if (success) {
         lastConfig = _.cloneDeep(newConfig);
         config = _.cloneDeep(newConfig);
-        globalThis.USER_CONFIG = _.cloneDeep(newConfig);
+        globalThis.USER_CONFIG = _.cloneDeep(newConfig) as UserConfig;
         configUpdated();
         refresh();
         toast.toast({

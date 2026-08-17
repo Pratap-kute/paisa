@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
   import { renderIncomeStatement } from "$lib/charts/income_statement";
+  import { observeElementSize } from "$lib/charts/resize";
   import {
     ajax,
     formatCurrency,
@@ -26,6 +27,7 @@
   let svg: Element = $state();
   let incomeStatement: IncomeStatement = $state();
   let renderer: (data: IncomeStatement) => void = $state();
+  let stopResize: (() => void) | undefined;
   let yearly: Record<string, IncomeStatement> = $state({});
   let diff: number = $state();
   let diffPercent: number = $state();
@@ -94,10 +96,23 @@
     return Array.from(accounts).sort();
   }
 
+  onDestroy(() => {
+    stopResize?.();
+  });
+
   onMount(async () => {
     ({ yearly } = await ajax("/api/income_statement"));
     const y = _.minBy(_.values(yearly), (y) => y.date);
     renderer = renderIncomeStatement(svg);
+    if (svg?.parentElement) {
+      stopResize = observeElementSize(svg.parentElement, () => {
+        svg.replaceChildren();
+        renderer = renderIncomeStatement(svg);
+        if (incomeStatement) {
+          renderer(incomeStatement);
+        }
+      });
+    }
     if (y) {
       dateMin.set(y.date);
     }

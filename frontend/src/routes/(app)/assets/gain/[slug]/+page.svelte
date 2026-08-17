@@ -266,7 +266,16 @@
 
       <Section title="Timeline">
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame type="timeline" onresize={() => {
+          document.getElementById("d3-account-timeline-breakdown")?.replaceChildren();
+          if (gain) {
+            destroyCallback = renderAccountOverview(
+              gain.networthTimeline,
+              gain.postings,
+              "d3-account-timeline-breakdown",
+            );
+          }
+        }}>
           <svg id="d3-account-timeline-breakdown" width="100%" height="450" />
         </ChartFrame>
       </Section>

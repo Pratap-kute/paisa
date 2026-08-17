@@ -21,6 +21,7 @@
   let depth = $state(2);
   let allocationTimelineLegends: Legend[] = $state([]);
   let aggregateLeafNodes: Aggregate[] = $state([]);
+  let allocationTimeline: unknown = $state(null);
   let total = 0;
 
   const columns: ColumnDefinition[] = [
@@ -72,6 +73,7 @@
     if (!_.isEmpty(allocationTargets)) {
       showAllocation = true;
     }
+    allocationTimeline = aggregatesTimeline;
     await tick();
 
     renderAllocationTarget(allocationTargets, color);
@@ -105,7 +107,13 @@
 
   <Section title="Allocation Timeline">
     <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-    <ChartFrame type="timeline">
+    <ChartFrame type="timeline" onresize={() => {
+      const el = document.getElementById("d3-allocation-timeline");
+      el?.replaceChildren();
+      if (allocationTimeline) {
+        allocationTimelineLegends = renderAllocationTimeline(allocationTimeline as never);
+      }
+    }}>
       <svg id="d3-allocation-timeline" width="100%" height="300" />
     </ChartFrame>
   </Section>

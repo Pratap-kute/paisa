@@ -21,7 +21,7 @@
     type AssetBreakdown
   } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
@@ -38,6 +38,8 @@
   import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import type { ChartHandle } from "$lib/charts/resize";
+  import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -48,6 +50,8 @@
   let xirr = $state(0);
   let networth: Networth = $state();
   let renderer: (data: Posting[]) => void = $state();
+  let expenseBreakdown: ChartHandle<Posting[]> | null = $state(null);
+  let cashflowChart: MonthlyFlowChart | null = $state(null);
   let transactions: Transaction[] = $state([]);
   let budgetsByMonth: Record<string, Budget> = {};
   let currentBudget: Budget = $state();
@@ -69,12 +73,17 @@
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
   let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
   let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
-  let hasSelectedExpenses = $derived(totalExpense > 0);
+  let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
 
   $effect(() => {
     if (renderer) {
       renderer(selectedExpenses);
     }
+  });
+
+  onDestroy(() => {
+    expenseBreakdown?.destroy();
+    cashflowChart?.destroy();
   });
 
   async function initDemo() {
@@ -104,18 +113,19 @@
 
     const postings = _.chain(expenses).values().flatten().value();
     const z = expense.colorScale(postings);
-    renderer = expense.renderCurrentExpensesBreakdown(z);
+    expenseBreakdown = expense.createCurrentExpensesBreakdown(z);
+    renderer = expenseBreakdown.update;
     currentBudget = budgetsByMonth[month];
 
-    const { renderer: cashflowRenderer, legends } = cashFlow.renderMonthlyFlow(
+    cashflowChart = cashFlow.createMonthlyFlow(
       "#d3-current-cash-flow",
       {
         rotate: false,
         balance: _.last(cashFlows)?.balance || 0
       }
     );
-    cashflowRenderer(cashFlows);
-    cashflowLegends = legends;
+    cashflowChart.update(cashFlows);
+    cashflowLegends = cashflowChart.legends;
     transactionSequences = _.take(
       sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
       16
@@ -210,6 +220,7 @@
           empty={!hasCashFlowData}
           emptyMessage="No cash-flow activity in this period"
           preserveChildren
+          onresize={(dim) => cashflowChart?.resize(dim)}
         >
           <svg
             id="d3-current-cash-flow"
@@ -236,6 +247,7 @@
           empty={!hasSelectedExpenses}
           emptyMessage="No expenses this month"
           preserveChildren
+          onresize={(dim) => expenseBreakdown?.resize(dim)}
         >
           <svg id="d3-current-month-breakdown" width="100%" />
         </ChartFrame>
@@ -315,12 +327,20 @@
     @media screen and (min-width: 1024px) {
       grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
     }
+
+    > :only-child {
+      grid-column: 1 / -1;
+    }
   }
 
   .paisa-dashboard-longterm {
     grid-template-columns: 1fr;
     @media screen and (min-width: 1024px) {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    > :only-child {
+      grid-column: 1 / -1;
     }
   }
 </style>

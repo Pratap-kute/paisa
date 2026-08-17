@@ -55,7 +55,10 @@
 <style lang="scss">
   .paisa-page-container {
     width: 100%;
-    min-height: calc(100vh - 3.5rem);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
     padding: var(--paisa-space-4) var(--paisa-space-4) var(--paisa-space-6);
 
     @media screen and (max-width: 768px) {
@@ -66,6 +69,10 @@
   .paisa-page-content {
     width: 100%;
     margin: 0 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .paisa-page-fluid {

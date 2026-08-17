@@ -1,9 +1,10 @@
 <script lang="ts">
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { renderMonthlyRepaymentTimeline } from "$lib/charts/repayment";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -11,14 +12,22 @@
 
   let isEmpty = $state(false);
   let legends: Legend[] = $state([]);
+  let repaymentChart: ChartHandle<null> | null = $state(null);
 
   onMount(async () => {
     const { repayments: repayments } = await ajax("/api/liabilities/repayment");
     if (_.isEmpty(repayments)) {
       isEmpty = true;
     } else {
-      legends = renderMonthlyRepaymentTimeline(repayments);
+      repaymentChart = createClientWidthChart("#d3-repayment-timeline", () => {
+        legends = renderMonthlyRepaymentTimeline(repayments);
+      });
+      repaymentChart.update(null);
     }
+  });
+
+  onDestroy(() => {
+    repaymentChart?.destroy();
   });
 </script>
 
@@ -37,7 +46,7 @@
   {:else}
     <Section title="Monthly Repayments">
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline">
+      <ChartFrame type="timeline" onresize={(dim) => repaymentChart?.resize(dim)}>
         <svg id="d3-repayment-timeline" width="100%" height="500" />
       </ChartFrame>
     </Section>

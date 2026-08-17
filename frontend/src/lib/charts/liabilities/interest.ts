@@ -27,9 +27,22 @@ const lineScale = d3
   .domain(lineKeys)
   .range([COLORS.primary, COLORS.secondary, COLORS.tertiary]);
 
-function renderTable(interest: Interest) {
+export function padTimeDomain(
+  start: dayjs.Dayjs,
+  end: dayjs.Dayjs,
+): [dayjs.Dayjs, dayjs.Dayjs] {
+  if (start.isSame(end)) {
+    return [start.subtract(1, "day"), end.add(1, "day")];
+  }
+  return [start, end];
+}
+
+export function renderTable(interest: Interest) {
   const tbody = d3.select(this);
   const current = _.last(interest.overview_timeline);
+  const drawn = current?.drawn_amount ?? 0;
+  const repaid = current?.repaid_amount ?? 0;
+  const interestAmount = current?.interest_amount ?? 0;
   tbody.html(function () {
     return `
 <tr>
@@ -40,23 +53,19 @@ function renderTable(interest: Interest) {
 </tr>
 <tr>
   <td>Loan Drawn</td>
-  <td class='has-text-right'>${formatCurrency(current.drawn_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(drawn)}</td>
 </tr>
 <tr>
   <td>Loan Repaid</td>
-  <td class='has-text-right'>${formatCurrency(current.repaid_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(repaid)}</td>
 </tr>
 <tr>
   <td>Interest</td>
-  <td class='has-text-right'>${formatCurrency(current.interest_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(interestAmount)}</td>
 </tr>
 <tr>
   <td>Balance</td>
-  <td class='has-text-right'>${
-      formatCurrency(
-        current.drawn_amount + current.interest_amount - current.repaid_amount,
-      )
-    }</td>
+  <td class='has-text-right'>${formatCurrency(drawn + interestAmount - repaid)}</td>
 </tr>
 <tr>
   <td>APR</td>
@@ -450,6 +459,7 @@ export function renderOverview(gains: Interest[]) {
 
 export function renderPerAccountOverview(interests: Interest[]) {
   const root = d3.select("#d3-interest-timeline-breakdown");
+  interests = _.filter(interests, (g) => !_.isEmpty(g.overview_timeline));
   if (_.isEmpty(interests)) {
     root.selectAll("*").remove();
     return;
@@ -465,6 +475,7 @@ export function renderPerAccountOverview(interests: Interest[]) {
     root.selectAll("*").remove();
     return;
   }
+  const domain = padTimeDomain(start, end);
 
   const divs = d3
     .select("#d3-interest-timeline-breakdown")
@@ -495,7 +506,7 @@ export function renderPerAccountOverview(interests: Interest[]) {
     .append("svg")
     .attr("height", "150")
     .each(function (gain) {
-      renderOverviewSmall(gain.overview_timeline, this, [start, end]);
+      renderOverviewSmall(gain.overview_timeline, this, domain);
     });
 }
 

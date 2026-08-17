@@ -35,7 +35,6 @@
   border-radius: var(--paisa-radius-md);
   box-shadow: var(--paisa-shadow-sm);
   color: var(--paisa-text-primary);
-  overflow: hidden;
   min-width: 0;
 
   &.is-selected {
@@ -59,7 +58,6 @@
   border-radius: var(--paisa-radius-md);
   box-shadow: var(--paisa-shadow-sm);
   color: var(--paisa-text-primary);
-  overflow: hidden;
 
   .card-header {
     background-color: var(--paisa-surface-muted);
