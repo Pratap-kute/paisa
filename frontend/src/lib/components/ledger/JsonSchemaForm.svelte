@@ -25,6 +25,7 @@
     disabled?: boolean;
     allAccounts?: string[];
     modalOpen?: boolean;
+    variant?: "default" | "panel" | "item";
   }
 
   const ICON_MAX_RESULTS = 200;
@@ -39,15 +40,28 @@
     deletable = null,
     disabled = false,
     allAccounts = [],
-    modalOpen = $bindable(false)
+    modalOpen = $bindable(false),
+    variant = "default",
   }: Props = $props();
 
-  // svelte-ignore state_referenced_locally
-  let open = $state(depth < 1);
+  const radioName = `${key || "field"}-${crypto.randomUUID()}`;
+  let open = $state(variant === "panel" || variant === "item");
   let title = $derived(_.startCase(key));
+  let itemTitle = $derived(
+    schema["ui:header"] && value && value[schema["ui:header"]]
+      ? String(value[schema["ui:header"]])
+      : title || "Item",
+  );
 
-  function newItem(schema: any) {
-    return _.cloneDeep(schema.default[0]);
+  function newItem(listSchema: any) {
+    if (listSchema.default?.[0] != null) {
+      return _.cloneDeep(listSchema.default[0]);
+    }
+    return {};
+  }
+
+  function isCompoundSchema(subSchema: Schema) {
+    return subSchema.type === "object" || subSchema.type === "array";
   }
 
   function sortedProperties(schema: Schema) {
@@ -96,7 +110,7 @@
 {#if schema["ui:widget"] == "hidden"}
   <div></div>
 {:else if schema["ui:widget"] == "password"}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field config-field-full">
     <div class="field-label is-small">
       <label data-tippy-content={documentation(schema)} for="" class="label">{title}</label>
     </div>
@@ -107,7 +121,6 @@
             {disabled}
             {required}
             class="input is-small"
-            style="max-width: 350px;"
             type="password"
             bind:value={rawValue}
             onchange={() => {
@@ -121,13 +134,13 @@
     </div>
   </div>
 {:else if schema["ui:widget"] == "icon"}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field">
     <div class="field-label is-small">
       <label for="" data-tippy-content={documentation(schema)} class="label">{title}</label>
     </div>
     <div class="field-body">
       <div class="field">
-        <div class="control" style="max-width: 350px">
+        <div class="control">
           <Select
             bind:justValue={value}
             class="icon-select is-small"
@@ -149,7 +162,7 @@
     </div>
   </div>
 {:else if schema["ui:widget"] == "boolean"}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field">
     <div class="field-label is-small">
       <label for="" data-tippy-content={documentation(schema)} class="label">{title}</label>
     </div>
@@ -157,11 +170,11 @@
       <div class="field">
         <div class="control">
           <label class="radio">
-            <input value="yes" bind:group={value} type="radio" name="yes" />
+            <input value="yes" bind:group={value} type="radio" name={radioName} />
             Yes
           </label>
           <label class="radio">
-            <input value="no" bind:group={value} type="radio" name="no" />
+            <input value="no" bind:group={value} type="radio" name={radioName} />
             No
           </label>
         </div>
@@ -169,7 +182,7 @@
     </div>
   </div>
 {:else if schema.type === "string" || _.isEqual(schema.type, ["string", "integer"])}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field {schema.enum && schema['ui:widget'] !== 'textarea' ? '' : 'config-field-full'}">
     <div class="field-label is-small">
       <label data-tippy-content={documentation(schema)} for="" class="label">{title}</label>
     </div>
@@ -189,7 +202,6 @@
               {disabled}
               {required}
               class="textarea is-small"
-              style="min-width: 350px;max-width: 350px; width: 350px;"
               rows="5"
               bind:value
               spellcheck="false"
@@ -200,7 +212,6 @@
               {required}
               pattern={schema.pattern}
               class="input is-small"
-              style="max-width: 350px;"
               type="text"
               bind:value
             />
@@ -210,7 +221,7 @@
     </div>
   </div>
 {:else if schema.type === "integer" || schema.type === "number"}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field">
     <div class="field-label is-small">
       <label for="" data-tippy-content={documentation(schema)} class="label">{title}</label>
     </div>
@@ -220,7 +231,6 @@
           <input
             {required}
             class="input is-small"
-            style="max-width: 350px;"
             type="number"
             min={schema.minimum}
             max={schema.maximum}
@@ -232,7 +242,7 @@
     </div>
   </div>
 {:else if schema["ui:widget"] == "accounts"}
-  <div class="field is-horizontal">
+  <div class="field is-horizontal config-field config-field-full">
     <div class="field-label is-small">
       <label for="" data-tippy-content={documentation(schema)} class="label">{title}</label>
     </div>
@@ -245,123 +255,343 @@
     </div>
   </div>
 {:else if schema["ui:widget"] == "price"}
-  <div class="config-header">
-    <button
-      type="button"
-      class="is-link"
-      data-tippy-content={documentation(schema)}
-    >
+  <div class="config-price">
+    <div class="config-price-header">
       <span>{title}</span>
-    </button>
-
-    <button
-      type="button"
-      aria-label="Edit price code"
-      onclick={() => (modalOpen = true)}
-      class="is-link"
-    >
-      <span class="icon is-small">
-        <i class="fas fa-pen-to-square"></i>
-      </span>
-    </button>
-  </div>
-
-  <PriceCodeSearchModal
-    bind:open={modalOpen}
-    on:select={(e) => {
-      value["code"] = e.detail.code;
-      value["provider"] = e.detail.provider;
-    }}
-  />
-
-  <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
-    {#each sortedProperties(schema) as [key, subSchema]}
-      <JsonSchemaForm
-        {allAccounts}
-        required={_.includes(schema.required || [], key)}
-        depth={depth + 1}
-        {key}
-        bind:value={value[key]}
-        schema={subSchema}
-        disabled={true}
-      />
-    {/each}
-  </div>
-{:else if schema.type == "object"}
-  <div class="config-header">
-    <button
-      type="button"
-      class="is-link is-light invertable"
-      data-tippy-content={documentation(schema)}
-      onclick={() => (open = !open)}
-    >
-      <span>{schema["ui:header"] ? value[schema["ui:header"]] || title : title}</span>
-      <span class="icon is-small">
-        <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-      </span>
-    </button>
-  </div>
-
-  {#if open}
-    <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
-      {#each sortedProperties(schema) as [key, subSchema]}
-        <JsonSchemaForm
-          {allAccounts}
-          required={_.includes(schema.required || [], key)}
-          depth={depth + 1}
-          {key}
-          bind:value={value[key]}
-          schema={subSchema}
-        />
-      {/each}
-    </div>
-  {/if}
-{:else if schema.type == "array"}
-  <div class="config-header">
-    <button
-      type="button"
-      class="is-link is-light invertable"
-      data-tippy-content={documentation(schema)}
-      onclick={() => (open = !open)}
-    >
-      <span>{title}</span>
-      <span class="icon is-small">
-        <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-      </span>
-    </button>
-    {#if open}
       <button
         type="button"
-        aria-label="Add item"
-        onclick={() => (value = [newItem(schema), ...value])}
+        aria-label="Edit price code"
+        onclick={() => (modalOpen = true)}
         class="config-add"
       >
         <span class="icon is-small">
-          <i class="fas fa-circle-plus"></i>
+          <i class="fas fa-pen-to-square"></i>
         </span>
       </button>
-    {/if}
+    </div>
+    <PriceCodeSearchModal
+      bind:open={modalOpen}
+      on:select={(e) => {
+        value["code"] = e.detail.code;
+        value["provider"] = e.detail.provider;
+      }}
+    />
+    <div class="config-fields">
+      {#each sortedProperties(schema) as [childKey, subSchema]}
+        <JsonSchemaForm
+          {allAccounts}
+          required={_.includes(schema.required || [], childKey)}
+          depth={depth + 1}
+          key={childKey}
+          bind:value={value[childKey]}
+          schema={subSchema}
+          disabled={true}
+          variant="item"
+        />
+      {/each}
+    </div>
   </div>
-
-  {#if open}
-    <div class="config-body {depth % 2 == 1 ? 'odd' : 'even'}">
-      {#each value as _item, i}
-        {#if schema.items && typeof schema.items === "object" && !Array.isArray(schema.items)}
+{:else if schema.type == "object"}
+  {#if variant === "panel" || variant === "item"}
+    <div class="config-fields">
+      {#each sortedProperties(schema) as [childKey, subSchema]}
+        {#if subSchema["ui:widget"] !== "hidden"}
           <JsonSchemaForm
             {allAccounts}
-            deletable={() => {
-              value.splice(i, 1);
-              value = [...value];
-            }}
+            required={_.includes(schema.required || [], childKey)}
             depth={depth + 1}
-            key=""
-            bind:value={value[i]}
-            schema={schema.items as Schema}
+            key={childKey}
+            bind:value={value[childKey]}
+            schema={subSchema}
+            variant={isCompoundSchema(subSchema) ? "panel" : "item"}
           />
         {/if}
       {/each}
     </div>
+  {:else}
+    <div class="config-section">
+      <div class="config-header">
+        <button
+          type="button"
+          class="config-toggle"
+          data-tippy-content={documentation(schema)}
+          onclick={() => (open = !open)}
+          aria-expanded={open}
+        >
+          <span>{itemTitle}</span>
+          <span class="icon is-small">
+            <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'}"></i>
+          </span>
+        </button>
+      </div>
+      {#if open}
+        <div class="config-fields config-fields-padded">
+          {#each sortedProperties(schema) as [childKey, subSchema]}
+            <JsonSchemaForm
+              {allAccounts}
+              required={_.includes(schema.required || [], childKey)}
+              depth={depth + 1}
+              key={childKey}
+              bind:value={value[childKey]}
+              schema={subSchema}
+            />
+          {/each}
+        </div>
+      {/if}
+    </div>
   {/if}
+{:else if schema.type == "array"}
+  {@const items = Array.isArray(value) ? value : []}
+  <div class="config-list config-field-full">
+    <div class="config-list-toolbar">
+      {#if title && !(variant === "panel" && depth === 0)}
+        <span class="config-list-title">{title}</span>
+      {/if}
+      <span class="config-list-count">
+        {items.length}
+        {items.length === 1 ? "item" : "items"}
+      </span>
+      <button
+        type="button"
+        class="config-add-label"
+        onclick={() => (value = [newItem(schema), ...items])}
+      >
+        <span class="icon is-small"><i class="fas fa-plus"></i></span>
+        <span>Add</span>
+      </button>
+    </div>
+    {#if items.length === 0}
+      <p class="config-empty">Nothing here yet. Add one to get started.</p>
+    {:else}
+      {#each items as _item, i}
+        {#if schema.items && typeof schema.items === "object" && !Array.isArray(schema.items)}
+          <article class="config-item">
+            <header class="config-item-header">
+              <span class="config-item-title">
+                {(schema.items as Schema)["ui:header"] &&
+                  items[i][(schema.items as Schema)["ui:header"]!]
+                  ? items[i][(schema.items as Schema)["ui:header"]!]
+                  : `${title || "Item"} ${i + 1}`}
+              </span>
+              <button
+                type="button"
+                aria-label="Delete item"
+                class="config-delete"
+                onclick={() => {
+                  const next = [...items];
+                  next.splice(i, 1);
+                  value = next;
+                }}
+              >
+                <span class="icon is-small"><i class="fas fa-trash-can"></i></span>
+              </button>
+            </header>
+            <JsonSchemaForm
+              {allAccounts}
+              depth={depth + 1}
+              key=""
+              bind:value={value[i]}
+              schema={schema.items as Schema}
+              variant="item"
+            />
+          </article>
+        {/if}
+      {/each}
+    {/if}
+  </div>
 {:else}
   <div>{JSON.stringify(schema)}</div>
 {/if}
+
+<style lang="scss">
+  .config-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--paisa-space-4) var(--paisa-space-5);
+  }
+
+  .config-fields-padded {
+    padding: var(--paisa-space-4);
+    border-top: 1px solid var(--paisa-border-subtle);
+  }
+
+  .config-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .config-field-full {
+    grid-column: 1 / -1;
+  }
+
+  .config-field :global(.field-label) {
+    flex: none;
+    text-align: left;
+    padding-top: 0;
+    margin-bottom: var(--paisa-space-1);
+  }
+
+  .config-field :global(.field-label .label) {
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-medium);
+    color: var(--paisa-text-secondary);
+  }
+
+  .config-field :global(.field-body),
+  .config-field :global(.control),
+  .config-field :global(.input),
+  .config-field :global(.textarea),
+  .config-field :global(.select),
+  .config-field :global(.select select) {
+    width: 100%;
+    max-width: none;
+  }
+
+  .config-section {
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md);
+    overflow: hidden;
+  }
+
+  .config-header {
+    display: flex;
+    align-items: center;
+  }
+
+  .config-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.5rem;
+    padding: 0 var(--paisa-space-3);
+    border: 0;
+    background: transparent;
+    color: var(--paisa-text-primary);
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-semibold);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .config-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-3);
+  }
+
+  .config-list-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+  }
+
+  .config-list-title {
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-semibold);
+    color: var(--paisa-text-primary);
+    margin-right: auto;
+  }
+
+  .config-list-count {
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-text-muted);
+    margin-left: auto;
+  }
+
+  .config-add,
+  .config-delete,
+  .config-add-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--paisa-space-1);
+    border: 0;
+    border-radius: var(--paisa-radius-sm);
+    background: transparent;
+    color: var(--paisa-text-muted);
+    cursor: pointer;
+  }
+
+  .config-add,
+  .config-delete {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .config-add-label {
+    height: 1.75rem;
+    padding: 0 var(--paisa-space-2);
+    font-size: var(--paisa-font-size-sm);
+    color: var(--paisa-brand-primary);
+    font-weight: var(--paisa-font-weight-medium);
+  }
+
+  .config-add:hover,
+  .config-add-label:hover {
+    background: var(--paisa-surface-hover);
+    color: var(--paisa-brand-primary);
+  }
+
+  .config-delete:hover {
+    background: var(--paisa-surface-hover);
+    color: var(--paisa-danger);
+  }
+
+  .config-empty {
+    margin: 0;
+    padding: var(--paisa-space-5);
+    text-align: center;
+    color: var(--paisa-text-muted);
+    font-size: var(--paisa-font-size-sm);
+    border: 1px dashed var(--paisa-border-default);
+    border-radius: var(--paisa-radius-md);
+  }
+
+  .config-item {
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md);
+    background: var(--paisa-surface-muted);
+    padding: var(--paisa-space-4);
+  }
+
+  .config-item-header {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    margin-bottom: var(--paisa-space-4);
+  }
+
+  .config-item-title {
+    font-weight: var(--paisa-font-weight-semibold);
+    font-size: var(--paisa-font-size-sm);
+    color: var(--paisa-text-primary);
+    margin-right: auto;
+  }
+
+  .config-price {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-3);
+  }
+
+  .config-price-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--paisa-font-size-sm);
+    font-weight: var(--paisa-font-weight-medium);
+    color: var(--paisa-text-secondary);
+  }
+
+  @media screen and (max-width: 768px) {
+    .config-fields {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
