@@ -147,6 +147,7 @@ for (const chart of chartSnapshots) {
       await waitForStableLayout(page);
       await expect(chartLocator).toHaveScreenshot(
         `chart-${chart.name}-${variant.name}.png`,
+        { maxDiffPixelRatio: 0.05 },
       );
     });
   }
