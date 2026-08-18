@@ -28,7 +28,7 @@ export const visualRoutes: VisualRoute[] = [
   { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
   { name: "expense-budget", path: "/expense/budget", ready: ".budget-card" },
   { name: "expense-monthly", path: "/expense/monthly" },
-  { name: "expense-yearly", path: "/expense/yearly" },
+  { name: "expense-yearly", path: "/expense/yearly", ready: "#d3-yearly-expense-timeline g" },
   { name: "income", path: "/income" },
   { name: "ledger-editor", path: "/ledger/editor" },
   { name: "ledger-editor-file", path: "/ledger/editor/main.ledger" },
