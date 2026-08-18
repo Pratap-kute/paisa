@@ -1,6 +1,6 @@
 # ==============================================================================
 # Paisa - Frontend SvelteKit Web Application
-# Canonical commands: deno task <name> (see deno.json)
+# Makefile for Paisa frontend development and deployment.
 # ==============================================================================
 
 SHELL := /usr/bin/env bash
