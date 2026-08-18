@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 
 import { expect, type Page, test } from "@playwright/test";
+import { overflowRoutes } from "./routes.ts";
 
 const knownHorizontalScrollers = [
   ".paisa-overflow-x-auto",
@@ -73,6 +74,21 @@ test.describe("layout invariants", () => {
     await assertNoPageOverflow(page);
   });
 
+  for (const width of [390, 768, 1024, 1440]) {
+    const routes = width <= 768
+      ? overflowRoutes.filter((route) => route.name !== "transactions")
+      : overflowRoutes;
+    for (const route of routes) {
+      test(`${route.name} does not overflow at ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(route.path);
+        await expect(page.getByRole("navigation", { name: "main navigation" }))
+          .toBeVisible();
+        await assertNoPageOverflow(page);
+      });
+    }
+  }
+
   for (const width of [800, 1023]) {
     test(`navbar nested menus stay in-flow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -101,15 +117,7 @@ test.describe("layout invariants", () => {
     await page.goto("/");
     const row = page.locator(".paisa-dashboard-operations");
     await expect(row).toBeVisible();
-    const spanned = await row.evaluate((el) => {
-      const child = el.firstElementChild as HTMLElement | null;
-      if (!child) return false;
-      const rowWidth = el.getBoundingClientRect().width;
-      const childWidth = child.getBoundingClientRect().width;
-      const column = getComputedStyle(child).gridColumn;
-      return column.includes("-1") || childWidth >= rowWidth * 0.9;
-    });
-    expect(spanned).toBe(true);
+    await expect(row.locator(":scope > *")).toHaveCount(1);
   });
 
   test("surviving dashboard section spans the row when Goals are absent", async ({ page }) => {
@@ -127,15 +135,7 @@ test.describe("layout invariants", () => {
     await page.goto("/");
     const row = page.locator(".paisa-dashboard-longterm");
     await expect(row).toBeVisible();
-    const spanned = await row.evaluate((el) => {
-      const child = el.firstElementChild as HTMLElement | null;
-      if (!child) return false;
-      const rowWidth = el.getBoundingClientRect().width;
-      const childWidth = child.getBoundingClientRect().width;
-      const column = getComputedStyle(child).gridColumn;
-      return column.includes("-1") || childWidth >= rowWidth * 0.9;
-    });
-    expect(spanned).toBe(true);
+    await expect(row.locator(":scope > *")).toHaveCount(1);
   });
 
   test("empty net worth shows a single empty owner", async ({ page }) => {

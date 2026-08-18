@@ -1,72 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
+import {
+  chartSnapshotVariants,
+  chartSnapshots,
+  visualRoutes,
+} from "./routes.ts";
 
-test.describe.configure({ mode: "parallel" });
-
-const pages = [
-  { name: "dashboard", path: "/", readyText: "Net worth" },
-  { name: "assets-allocation", path: "/assets/allocation" },
-  {
-    name: "assets-analysis",
-    path: "/assets/analysis",
-    ready: "#d3-portfolio-security-type > g",
-  },
-  { name: "assets-balance", path: "/assets/balance" },
-  { name: "assets-gain", path: "/assets/gain" },
-  { name: "assets-gain-detail", path: "/assets/gain/Assets%3AEquity" },
-  { name: "assets-investment", path: "/assets/investment" },
-  { name: "networth", path: "/assets/networth", readyText: "Net worth" },
-  { name: "cash-flow-income-statement", path: "/cash_flow/income_statement" },
-  { name: "cash-flow-monthly", path: "/cash_flow/monthly" },
-  {
-    name: "cash-flow-recurring",
-    path: "/cash_flow/recurring",
-    ready: ".columns.mb-4 .box",
-  },
-  { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
-  { name: "expense-budget", path: "/expense/budget", ready: ".budget-card" },
-  { name: "expense-monthly", path: "/expense/monthly" },
-  { name: "expense-yearly", path: "/expense/yearly" },
-  { name: "income", path: "/income" },
-  { name: "ledger-editor", path: "/ledger/editor" },
-  { name: "ledger-editor-file", path: "/ledger/editor/main.ledger" },
-  { name: "ledger-import", path: "/ledger/import" },
-  { name: "ledger-posting", path: "/ledger/posting" },
-  { name: "ledger-price", path: "/ledger/price" },
-  { name: "transactions", path: "/ledger/transaction", ready: "p.is-6" },
-  {
-    name: "liabilities-balance",
-    path: "/liabilities/balance",
-    readyText: "HomeLoan",
-  },
-  {
-    name: "credit-cards",
-    path: "/liabilities/credit_cards",
-    readyText: "Freedom",
-  },
-  {
-    name: "credit-card-detail",
-    path: "/liabilities/credit_cards/Liabilities%3ACreditCard%3AFreedom",
-  },
-  { name: "liabilities-interest", path: "/liabilities/interest" },
-  { name: "liabilities-repayment", path: "/liabilities/repayment" },
-  { name: "about", path: "/more/about" },
-  { name: "config", path: "/more/config" },
-  { name: "doctor", path: "/more/doctor" },
-  { name: "goals", path: "/more/goals", readyText: "Retirement" },
-  { name: "retirement-goal", path: "/more/goals/retirement/Retirement" },
-  { name: "savings-goal", path: "/more/goals/savings/House" },
-  {
-    name: "logs",
-    path: "/more/logs",
-    readyText: "paisa server started on port 7500",
-  },
-  { name: "sheets", path: "/more/sheets" },
-  { name: "sheet-detail", path: "/more/sheets/overview.paisa" },
-  { name: "tax-capital-gains", path: "/more/tax/capital_gains" },
-  { name: "tax-harvest", path: "/more/tax/harvest" },
-  { name: "tax-schedule-al", path: "/more/tax/schedule_al" },
-  { name: "login", path: "/login" },
-] as const;
+test.describe.configure({ mode: "serial" });
 
 const mockLogs = {
   logs: [
@@ -126,20 +65,35 @@ async function waitForStableLayout(page: Page) {
   );
 }
 
-for (const route of pages) {
+async function applyVariant(
+  page: Page,
+  variant: { width: number; height: number; theme: string },
+) {
+  await page.setViewportSize({
+    width: variant.width,
+    height: variant.height,
+  });
+  await page.emulateMedia({
+    colorScheme: variant.theme as "light" | "dark",
+    reducedMotion: "reduce",
+  });
+  await page.addInitScript((theme) => {
+    localStorage.setItem("theme-preference", theme);
+  }, variant.theme);
+}
+
+function routeReady(page: Page, route: (typeof visualRoutes)[number]) {
+  if (route.ready) return page.locator(route.ready);
+  if (route.readyText) {
+    return page.getByText(route.readyText, { exact: true });
+  }
+  return page.locator("body");
+}
+
+for (const route of visualRoutes) {
   for (const variant of variants) {
     test(`@visual ${route.name} ${variant.name}`, async ({ page }) => {
-      await page.setViewportSize({
-        width: variant.width,
-        height: variant.height,
-      });
-      await page.emulateMedia({
-        colorScheme: variant.theme,
-        reducedMotion: "reduce",
-      });
-      await page.addInitScript((theme) => {
-        localStorage.setItem("theme-preference", theme);
-      }, variant.theme);
+      await applyVariant(page, variant);
 
       if (route.name === "logs") {
         await page.route("**/api/logs", (r) =>
@@ -152,17 +106,37 @@ for (const route of pages) {
 
       await page.goto(route.path);
       await page.waitForLoadState("networkidle");
-      const ready = "ready" in route
-        ? page.locator(route.ready)
-        : "readyText" in route
-        ? page.getByText(route.readyText, { exact: true })
-        : page.locator("body");
-      await expect(ready.first()).toBeVisible();
+      await expect(routeReady(page, route).first()).toBeVisible();
+      if (route.name === "dashboard") {
+        await expect(page.locator("#d3-current-cash-flow")).toBeVisible();
+        await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
+      }
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
       await expect(page).toHaveScreenshot(
         `${route.name}-${variant.name}.png`,
         { fullPage: true },
+      );
+    });
+  }
+}
+
+for (const chart of chartSnapshots) {
+  for (const variant of chartSnapshotVariants) {
+    test(`@visual chart ${chart.name} ${variant.name}`, async ({ page }) => {
+      await applyVariant(page, variant);
+      await page.goto(chart.path);
+      await page.waitForLoadState("networkidle");
+      if ("readyText" in chart && chart.readyText) {
+        await expect(page.getByText(chart.readyText, { exact: true }))
+          .toBeVisible();
+      }
+      const chartLocator = page.locator(chart.locator);
+      await expect(chartLocator).toBeVisible();
+      await page.evaluate("document.fonts.ready");
+      await waitForStableLayout(page);
+      await expect(chartLocator).toHaveScreenshot(
+        `chart-${chart.name}-${variant.name}.png`,
       );
     });
   }

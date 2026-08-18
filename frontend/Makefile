@@ -33,7 +33,7 @@ clean: ## Remove frontend build output, caches, and test artifacts
 
 ##@ Testing
 
-.PHONY: test test-all test-unit test-core test-component test-integration test-e2e test-visual test-coverage
+.PHONY: test test-all test-unit test-core test-component test-integration test-e2e test-visual test-visual-update test-coverage
 test: test-unit test-core test-component ## Run frontend unit, core, and component tests
 
 test-all: test-unit test-core test-component test-integration test-e2e ## Run full frontend test suite
@@ -55,6 +55,9 @@ test-e2e: ## Run Playwright browser tests
 
 test-visual: ## Run Playwright visual snapshot tests
 	deno task test:visual
+
+test-visual-update: ## Update Playwright visual snapshot baselines
+	deno task test:visual:update
 
 test-coverage: ## Generate frontend test coverage report
 	deno task test:coverage
