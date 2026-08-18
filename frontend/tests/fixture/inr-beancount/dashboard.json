@@ -32,8 +32,6 @@
   "expenses": {
     "2022-01": [
       {
-        "id": 254,
-        "transaction_id": "b3ea48c09b1e22f9a95bf873a57fd884",
         "date": "2022-01-03T00:00:00Z",
         "payee": "Rent",
         "account": "Expenses:Rent",
@@ -44,7 +42,6 @@
         "tag_recurring": "",
         "tag_period": "",
         "transaction_begin_line": 28,
-        "transaction_end_line": 31,
         "file_name": "main.beancount",
         "forecast": false,
         "note": "",
@@ -53,8 +50,6 @@
         "balance": 0
       },
       {
-        "id": 266,
-        "transaction_id": "13200f62ae382c644639c527bd886ef2",
         "date": "2022-01-11T00:00:00Z",
         "payee": "Multi Currency Debit",
         "account": "Expenses:Charges",
@@ -65,7 +60,6 @@
         "tag_recurring": "",
         "tag_period": "",
         "transaction_begin_line": 55,
-        "transaction_end_line": 59,
         "file_name": "main.beancount",
         "forecast": false,
         "note": "",
@@ -91,13 +85,10 @@
   "transactionSequences": [],
   "transactions": [
     {
-      "id": "42f7cb0e734c2431b2a3291d816475bf",
       "date": "2022-01-31T00:00:00Z",
       "payee": "Interest",
       "postings": [
         {
-          "id": 275,
-          "transaction_id": "42f7cb0e734c2431b2a3291d816475bf",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Assets:Checking",
@@ -108,7 +99,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 69,
-          "transaction_end_line": 72,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -117,8 +107,6 @@
           "balance": 0
         },
         {
-          "id": 274,
-          "transaction_id": "42f7cb0e734c2431b2a3291d816475bf",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -129,7 +117,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 69,
-          "transaction_end_line": 72,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -141,18 +128,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 69,
-      "endLine": 72,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "5924b06558110a796c5e090b530737af",
       "date": "2022-01-29T00:00:00Z",
       "payee": "(Padding inserted for Balance of 21000 INR for difference 1072.7 INR)",
       "postings": [
         {
-          "id": 272,
-          "transaction_id": "5924b06558110a796c5e090b530737af",
           "date": "2022-01-29T00:00:00Z",
           "payee": "(Padding inserted for Balance of 21000 INR for difference 1072.7 INR)",
           "account": "Assets:Checking",
@@ -163,7 +146,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 0,
-          "transaction_end_line": 1,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -172,8 +154,6 @@
           "balance": 0
         },
         {
-          "id": 273,
-          "transaction_id": "5924b06558110a796c5e090b530737af",
           "date": "2022-01-29T00:00:00Z",
           "payee": "(Padding inserted for Balance of 21000 INR for difference 1072.7 INR)",
           "account": "Equity:OpeningBalances",
@@ -184,7 +164,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 0,
-          "transaction_end_line": 1,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -196,18 +175,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 0,
-      "endLine": 1,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "1943676087291c843cc85ee3d20eae4a",
       "date": "2022-01-12T00:00:00Z",
       "payee": "Purchased 0.00000001 BTC",
       "postings": [
         {
-          "id": 271,
-          "transaction_id": "1943676087291c843cc85ee3d20eae4a",
           "date": "2022-01-12T00:00:00Z",
           "payee": "Purchased 0.00000001 BTC",
           "account": "Assets:Checking",
@@ -218,7 +193,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 60,
-          "transaction_end_line": 63,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -227,8 +201,6 @@
           "balance": 0
         },
         {
-          "id": 270,
-          "transaction_id": "1943676087291c843cc85ee3d20eae4a",
           "date": "2022-01-12T00:00:00Z",
           "payee": "Purchased 0.00000001 BTC",
           "account": "Assets:Coinbase:BTC",
@@ -239,7 +211,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 60,
-          "transaction_end_line": 63,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -251,18 +222,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 60,
-      "endLine": 63,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "13200f62ae382c644639c527bd886ef2",
       "date": "2022-01-11T00:00:00Z",
       "payee": "Multi Currency Debit",
       "postings": [
         {
-          "id": 268,
-          "transaction_id": "13200f62ae382c644639c527bd886ef2",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -273,7 +240,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 55,
-          "transaction_end_line": 59,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -282,8 +248,6 @@
           "balance": 0
         },
         {
-          "id": 266,
-          "transaction_id": "13200f62ae382c644639c527bd886ef2",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Expenses:Charges",
@@ -294,7 +258,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 55,
-          "transaction_end_line": 59,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -303,8 +266,6 @@
           "balance": 0
         },
         {
-          "id": 269,
-          "transaction_id": "13200f62ae382c644639c527bd886ef2",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Checking",
@@ -315,7 +276,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 55,
-          "transaction_end_line": 59,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -324,8 +284,6 @@
           "balance": 0
         },
         {
-          "id": 267,
-          "transaction_id": "13200f62ae382c644639c527bd886ef2",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Checking",
@@ -336,7 +294,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 55,
-          "transaction_end_line": 59,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -348,18 +305,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 55,
-      "endLine": 59,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "d2a1480a14ff3ad93b2797fd03172d92",
       "date": "2022-01-10T00:00:00Z",
       "payee": "Sell",
       "postings": [
         {
-          "id": 265,
-          "transaction_id": "d2a1480a14ff3ad93b2797fd03172d92",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Assets:Checking",
@@ -370,7 +323,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 48,
-          "transaction_end_line": 52,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -379,8 +331,6 @@
           "balance": 0
         },
         {
-          "id": 264,
-          "transaction_id": "d2a1480a14ff3ad93b2797fd03172d92",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -391,7 +341,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 48,
-          "transaction_end_line": 52,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -400,8 +349,6 @@
           "balance": 0
         },
         {
-          "id": 263,
-          "transaction_id": "d2a1480a14ff3ad93b2797fd03172d92",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Assets:Equity:AAPL",
@@ -412,7 +359,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 48,
-          "transaction_end_line": 52,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -424,18 +370,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 48,
-      "endLine": 52,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "4088c48a5d19c85d99a5a873dcce0591",
       "date": "2022-01-09T00:00:00Z",
       "payee": "Buy Apple",
       "postings": [
         {
-          "id": 261,
-          "transaction_id": "4088c48a5d19c85d99a5a873dcce0591",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy Apple",
           "account": "Assets:Equity:AAPL",
@@ -446,7 +388,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 44,
-          "transaction_end_line": 47,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -455,8 +396,6 @@
           "balance": 0
         },
         {
-          "id": 262,
-          "transaction_id": "4088c48a5d19c85d99a5a873dcce0591",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy Apple",
           "account": "Assets:Checking",
@@ -467,7 +406,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 44,
-          "transaction_end_line": 47,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -479,18 +417,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 44,
-      "endLine": 47,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "c497a18c6deed7740ac4b37094e0fd94",
       "date": "2022-01-08T00:00:00Z",
       "payee": "Buy ABNB",
       "postings": [
         {
-          "id": 259,
-          "transaction_id": "c497a18c6deed7740ac4b37094e0fd94",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
           "account": "Assets:Equity:ABNB",
@@ -501,7 +435,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -510,8 +443,6 @@
           "balance": 0
         },
         {
-          "id": 260,
-          "transaction_id": "c497a18c6deed7740ac4b37094e0fd94",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
           "account": "Assets:Checking",
@@ -522,7 +453,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -534,18 +464,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 40,
-      "endLine": 43,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "7fcef5aec0e055a3cd8fa8c2ed11c41d",
       "date": "2022-01-07T00:00:00Z",
       "payee": "Investment",
       "postings": [
         {
-          "id": 258,
-          "transaction_id": "7fcef5aec0e055a3cd8fa8c2ed11c41d",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
           "account": "Assets:Equity:NIFTY",
@@ -556,7 +482,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 36,
-          "transaction_end_line": 39,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -565,8 +490,6 @@
           "balance": 0
         },
         {
-          "id": 257,
-          "transaction_id": "7fcef5aec0e055a3cd8fa8c2ed11c41d",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
           "account": "Assets:Checking",
@@ -577,7 +500,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 36,
-          "transaction_end_line": 39,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -589,18 +511,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 36,
-      "endLine": 39,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "7846a910936b5ec09037b94ed6f5791f",
       "date": "2022-01-06T00:00:00Z",
       "payee": "Bonus",
       "postings": [
         {
-          "id": 256,
-          "transaction_id": "7846a910936b5ec09037b94ed6f5791f",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Assets:Checking",
@@ -611,7 +529,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 35,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -620,8 +537,6 @@
           "balance": 0
         },
         {
-          "id": 255,
-          "transaction_id": "7846a910936b5ec09037b94ed6f5791f",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -632,7 +547,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 35,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -644,18 +558,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 32,
-      "endLine": 35,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "b3ea48c09b1e22f9a95bf873a57fd884",
       "date": "2022-01-03T00:00:00Z",
       "payee": "Rent",
       "postings": [
         {
-          "id": 254,
-          "transaction_id": "b3ea48c09b1e22f9a95bf873a57fd884",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
           "account": "Expenses:Rent",
@@ -666,7 +576,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 28,
-          "transaction_end_line": 31,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -675,8 +584,6 @@
           "balance": 0
         },
         {
-          "id": 253,
-          "transaction_id": "b3ea48c09b1e22f9a95bf873a57fd884",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
           "account": "Assets:Checking",
@@ -687,7 +594,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 28,
-          "transaction_end_line": 31,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -699,18 +605,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 28,
-      "endLine": 31,
       "fileName": "main.beancount",
       "note": ""
     },
     {
-      "id": "024a3ac0ed32a28565920cddd61b09ae",
       "date": "2022-01-01T00:00:00Z",
       "payee": "Salary",
       "postings": [
         {
-          "id": 252,
-          "transaction_id": "024a3ac0ed32a28565920cddd61b09ae",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Assets:Checking",
@@ -721,7 +623,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 27,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -730,8 +631,6 @@
           "balance": 0
         },
         {
-          "id": 251,
-          "transaction_id": "024a3ac0ed32a28565920cddd61b09ae",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -742,7 +641,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 27,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -754,7 +652,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 24,
-      "endLine": 27,
       "fileName": "main.beancount",
       "note": ""
     }

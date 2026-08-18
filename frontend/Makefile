@@ -79,10 +79,13 @@ format fmt: ## Format frontend source files
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts
+.PHONY: parsers parser generate-fonts normalize-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	deno task parser-build-debug
 
 generate-fonts: ## Download SVGs and generate custom icon font
 	deno run -A scripts/fonts/download-svgs.js
 	deno run -A scripts/fonts/generate-font.js
+
+normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
+	deno run -A scripts/normalize_fixture_json.ts

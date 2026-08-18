@@ -4,8 +4,6 @@
       "date": "2022-01-01T00:00:00Z",
       "postings": [
         {
-          "id": 41,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -16,7 +14,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 7,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -38,8 +35,6 @@
       "end_date": "2022-03-31T23:59:59.999999999Z",
       "postings": [
         {
-          "id": 41,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -50,7 +45,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 7,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",

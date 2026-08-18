@@ -170,7 +170,7 @@ docs-build publish: ## Build static documentation site with MkDocs
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts regen regen-fixtures
+.PHONY: parsers parser generate-fonts regen regen-fixtures normalize-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	$(MAKE) -C frontend parsers
 
@@ -179,6 +179,9 @@ generate-fonts: ## Download SVGs and generate custom icon font
 
 regen regen-fixtures: build ## Re-generate integration test JSON fixtures
 	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration
+
+normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
+	$(MAKE) -C frontend normalize-fixtures
 
 fixture/main.transactions.json: build
 	cd /tmp && ../backend/paisa init

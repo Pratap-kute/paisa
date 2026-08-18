@@ -4,8 +4,6 @@
       "date": "2022-01-01T00:00:00Z",
       "postings": [
         {
-          "id": 251,
-          "transaction_id": "024a3ac0ed32a28565920cddd61b09ae",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -16,7 +14,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 27,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -25,8 +22,6 @@
           "balance": 0
         },
         {
-          "id": 255,
-          "transaction_id": "7846a910936b5ec09037b94ed6f5791f",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -37,7 +32,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 35,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -46,8 +40,6 @@
           "balance": 0
         },
         {
-          "id": 264,
-          "transaction_id": "d2a1480a14ff3ad93b2797fd03172d92",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -58,7 +50,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 48,
-          "transaction_end_line": 52,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -67,8 +58,6 @@
           "balance": 0
         },
         {
-          "id": 274,
-          "transaction_id": "42f7cb0e734c2431b2a3291d816475bf",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -79,7 +68,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 69,
-          "transaction_end_line": 72,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -101,8 +89,6 @@
       "end_date": "2022-03-31T23:59:59.999999999Z",
       "postings": [
         {
-          "id": 251,
-          "transaction_id": "024a3ac0ed32a28565920cddd61b09ae",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -113,7 +99,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 27,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -122,8 +107,6 @@
           "balance": 0
         },
         {
-          "id": 255,
-          "transaction_id": "7846a910936b5ec09037b94ed6f5791f",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -134,7 +117,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 35,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -143,8 +125,6 @@
           "balance": 0
         },
         {
-          "id": 264,
-          "transaction_id": "d2a1480a14ff3ad93b2797fd03172d92",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -155,7 +135,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 48,
-          "transaction_end_line": 52,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",
@@ -164,8 +143,6 @@
           "balance": 0
         },
         {
-          "id": 274,
-          "transaction_id": "42f7cb0e734c2431b2a3291d816475bf",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -176,7 +153,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 69,
-          "transaction_end_line": 72,
           "file_name": "main.beancount",
           "forecast": false,
           "note": "",

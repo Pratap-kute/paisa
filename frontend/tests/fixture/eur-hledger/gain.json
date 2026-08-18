@@ -14,8 +14,6 @@
       "xirr": 2.17,
       "postings": [
         {
-          "id": 43,
-          "transaction_id": "2",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Equity:AAPL",
@@ -26,7 +24,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 14,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",

@@ -4,8 +4,6 @@
       "date": "2022-01-01T00:00:00Z",
       "postings": [
         {
-          "id": 271,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -16,7 +14,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 6,
-          "transaction_end_line": 9,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -25,8 +22,6 @@
           "balance": 0
         },
         {
-          "id": 275,
-          "transaction_id": "3",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -37,7 +32,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 14,
-          "transaction_end_line": 17,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -46,8 +40,6 @@
           "balance": 0
         },
         {
-          "id": 290,
-          "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -58,7 +50,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 42,
-          "transaction_end_line": 46,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -67,8 +58,6 @@
           "balance": 0
         },
         {
-          "id": 296,
-          "transaction_id": "12",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -79,7 +68,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 54,
-          "transaction_end_line": 59,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "Posting note\n",
@@ -101,8 +89,6 @@
       "end_date": "2022-03-31T23:59:59.999999999Z",
       "postings": [
         {
-          "id": 271,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -113,7 +99,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 6,
-          "transaction_end_line": 9,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -122,8 +107,6 @@
           "balance": 0
         },
         {
-          "id": 275,
-          "transaction_id": "3",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -134,7 +117,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 14,
-          "transaction_end_line": 17,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -143,8 +125,6 @@
           "balance": 0
         },
         {
-          "id": 290,
-          "transaction_id": "10",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -155,7 +135,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 42,
-          "transaction_end_line": 46,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -164,8 +143,6 @@
           "balance": 0
         },
         {
-          "id": 296,
-          "transaction_id": "12",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -176,7 +153,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 54,
-          "transaction_end_line": 59,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "Posting note\n",
