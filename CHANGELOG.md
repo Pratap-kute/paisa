@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### 0.8.1 (2026-08-18)
+
+- **Transaction prediction:** Smart account suggestions in journal templates based on posting history
+- **Frontend modernization:** Svelte 5 runes migration, Bulma 1.x, unified UI component library, improved chart lifecycle and layout
+- **CI & testing:** Parallelized test jobs, Nix cache warmup, stabilized Playwright visual/e2e suite, goal-page chart resize fixes
+- **Backend:** Unified asset performance calculation (checking accounts no longer excluded)
+- **Build:** golangci-lint updated to unstable nix package
+
 ### 0.8.0 (2026-08-14)
 
 - **Monorepo Architecture**: Clean isolation of `frontend/` (SvelteKit/Deno), `backend/` (Go service/CLI), and `desktop/` (Wails application) with top-level workspace coordination
