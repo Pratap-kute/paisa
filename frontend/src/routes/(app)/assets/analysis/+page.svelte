@@ -1,25 +1,29 @@
 <script lang="ts">
   import { generateColorScheme, genericBarColor } from "$lib/core/colors";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
   import { ajax, type PortfolioAggregate } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
 
-  let commodities: string[] = [];
-  let selectedCommodities: string[] = [];
-  let security_type: PortfolioAggregate[] = [];
-  let name_and_security_type: PortfolioAggregate[] = [];
-  let rating: PortfolioAggregate[] = [];
-  let industry: PortfolioAggregate[] = [];
-  let isEmpty = false;
-  let color: any;
+  let commodities: string[] = $state([]);
+  let selectedCommodities: string[] = $state([]);
+  let security_type: PortfolioAggregate[] = $state([]);
+  let name_and_security_type: PortfolioAggregate[] = $state([]);
+  let rating: PortfolioAggregate[] = $state([]);
+  let industry: PortfolioAggregate[] = $state([]);
+  let isEmpty = $state(false);
+  let color: any = $state();
 
-  let securityTypeR: any,
-    portfolioR: any,
-    industryR: any,
-    ratingR: any = null;
+  let securityTypeR: any = $state(),
+    portfolioR: any = $state(),
+    industryR: any = $state(),
+    ratingR: any = $state(null);
 
   onMount(async () => {
     ({ name_and_security_type, security_type, rating, industry, commodities } = await ajax(
@@ -34,8 +38,8 @@
     }
 
     selectedCommodities = [...commodities];
-    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type);
-    ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating);
+    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
+    ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
     industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
       z: [genericBarColor()]
     });
@@ -43,41 +47,41 @@
     color = generateColorScheme(commodities);
   });
 
-  $: if (securityTypeR) {
-    securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
-    ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);
-    industryR.renderer(filterCommodityBreakdowns(industry, selectedCommodities), color);
-    portfolioR.renderer(
-      filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-      color
-    );
-  }
+  $effect(() => {
+    if (securityTypeR && ratingR && industryR && portfolioR && color) {
+      securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
+      ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);
+      industryR.renderer(filterCommodityBreakdowns(industry, selectedCommodities), color);
+      portfolioR.renderer(
+        filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+        color
+      );
+    }
+  });
 </script>
 
-<section class="section tab-interest" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-centered">
-      <div class="column is-4 has-text-centered">
-        <article class="message">
-          <div class="message-body">
-            <strong>Oops!</strong> Looks like mutual fund portfolio data is not available<br /><br
-            />
-            Use the <strong>Update Mutual Fund Portfolios</strong> menu option at the right corner to
-            update the data.
-          </div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Portfolio Analysis"
+    description="Breakdown by security type, rating, industry, and individual holdings"
+  />
 
-<section class="section tab-portfolio" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 is-flex">
+  {#if isEmpty}
+    <Section>
+      <article class="message">
+        <div class="message-body">
+          <strong>Oops!</strong> Looks like mutual fund portfolio data is not available<br /><br />
+          Use the <strong>Update Mutual Fund Portfolios</strong> menu option at the right corner to
+          update the data.
+        </div>
+      </article>
+    </Section>
+  {:else}
+    <Section>
+      <div class="paisa-commodity-switches">
         {#each commodities as commodity}
           {@const name = `switch-${commodity}`}
-          <div class="field mr-5 color-switch" style="--color: {color(commodity)}">
+          <div class="field color-switch" style="--color: {color ? color(commodity) : ''}">
             <input
               id={name}
               type="checkbox"
@@ -90,57 +94,67 @@
           </div>
         {/each}
       </div>
-    </div>
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative" />
+    </Section>
+
+    <!-- Side-by-Side Summary: Security Type & Security Rating -->
+    <ResponsiveGrid variant="two-column">
+      <Section title="Security Type">
+        <ChartFrame type="dynamic" onresize={() => {
+          document.getElementById("d3-portfolio-security-type")?.replaceChildren();
+          securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
+        }}>
+          <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-type" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Security Type" />
+        </ChartFrame>
+      </Section>
 
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative" />
+      <Section title="Security Rating">
+        <ChartFrame type="dynamic" onresize={() => {
+          document.getElementById("d3-portfolio-security-rating")?.replaceChildren();
+          ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
+        }}>
+          <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-rating" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Security Rating" />
+        </ChartFrame>
+      </Section>
+    </ResponsiveGrid>
 
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          <div
-            id="d3-portfolio-security-industry-treemap"
-            style="width: 100%; position: relative"
-          />
-          <svg id="d3-portfolio-security-industry" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Industry" />
+    <Section title="Industry">
+      <ChartFrame type="dynamic" onresize={() => {
+        document.getElementById("d3-portfolio-security-industry")?.replaceChildren();
+        industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
+          z: [genericBarColor()]
+        });
+      }}>
+        <div id="d3-portfolio-security-industry-treemap" style="width: 100%; position: relative"></div>
+        <svg id="d3-portfolio-security-industry" />
+      </ChartFrame>
+    </Section>
 
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          {#if portfolioR}
-            <LegendCard legends={portfolioR.legends} clazz="ml-4" />
-          {/if}
-          <div id="d3-portfolio-treemap" style="width: 100%; position: relative" />
-          <svg id="d3-portfolio" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Security" />
-  </div>
-</section>
+    <Section title="Holdings">
+      {#if portfolioR}
+        <LegendCard legends={portfolioR.legends} clazz="mb-3 paisa-overflow-x-auto" />
+      {/if}
+      <ChartFrame type="dynamic" onresize={() => {
+        document.getElementById("d3-portfolio")?.replaceChildren();
+        portfolioR = renderPortfolioBreakdown("#d3-portfolio", name_and_security_type);
+      }}>
+        <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
+        <svg id="d3-portfolio" />
+      </ChartFrame>
+    </Section>
+  {/if}
+</Page>
 
 <style lang="scss">
+  .paisa-commodity-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+  }
+
   .color-switch {
+    margin-bottom: 0;
     .switch[type="checkbox"]:checked + label::before,
     .switch[type="checkbox"]:checked + label:before {
       background: var(--color);

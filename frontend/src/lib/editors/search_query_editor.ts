@@ -3,28 +3,26 @@ import type { Transaction } from "../core/utils";
 import {
   autocompletion,
   closeBrackets,
+  closeBracketsKeymap,
   completeFromList,
   type CompletionContext,
+  completionKeymap,
   type CompletionSource,
   ifIn,
 } from "@codemirror/autocomplete";
-import {
-  bracketMatching,
-  syntaxHighlighting,
-  syntaxTree,
-} from "@codemirror/language";
-import { type Diagnostic, linter } from "@codemirror/lint";
+import { bracketMatching, syntaxTree } from "@codemirror/language";
+import { type Diagnostic, linter, lintKeymap } from "@codemirror/lint";
 import type { EditorState } from "@codemirror/state";
-import { placeholder } from "@codemirror/view";
+import { EditorView, keymap, placeholder } from "@codemirror/view";
+import { history, historyKeymap } from "@codemirror/commands";
 import type { SyntaxNode } from "@lezer/common";
-import { classHighlighter } from "@lezer/highlight";
 import * as chrono from "chrono-node";
-import { EditorView, minimalSetup } from "codemirror";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { writable } from "svelte/store";
 import * as Terms from "../search/parser/parser.terms.js";
 import { queryExtension } from "../search/parser/query";
+import { baseEditorExtensions } from "./base";
 
 abstract class AST {
   readonly id: number;
@@ -691,18 +689,20 @@ export function createEditor(
 
   return new EditorView({
     extensions: [
-      minimalSetup,
-      syntaxHighlighting(classHighlighter),
+      baseEditorExtensions,
+      history(),
+      keymap.of(historyKeymap),
       bracketMatching(),
       closeBrackets(),
+      keymap.of(closeBracketsKeymap),
       EditorView.theme({
         "&": {
           fontSize: "14px",
         },
       }),
-      EditorView.contentAttributes.of({ "data-enable-grammarly": "false" }),
       queryExtension(),
       linter(lint),
+      keymap.of(lintKeymap),
       autocompletion({
         override: [
           (context: CompletionContext) => {
@@ -722,6 +722,7 @@ export function createEditor(
           ),
         ],
       }),
+      keymap.of(completionKeymap),
       placeholder(
         "(account = Expenses:Utilities OR payee =~ /Pacific Gas & Electric/i) AND [2023-04]",
       ),

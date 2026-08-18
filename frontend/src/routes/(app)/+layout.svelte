@@ -2,11 +2,17 @@
   import { afterNavigate, beforeNavigate } from "$app/navigation";
   import { followCursor, delegate, hideAll } from "tippy.js";
   import _ from "lodash";
-  import Spinner from "$lib/components/ui/Spinner.svelte";
-  import Navbar from "$lib/components/layout/Navbar.svelte";
+  import AppShell from "$lib/components/layout/AppShell.svelte";
   import { willClearTippy, willRefresh } from "../../store";
+  import type { Snippet } from "svelte";
 
-  let isBurger: boolean = null;
+  interface Props {
+    children?: Snippet;
+  }
+
+  let { children }: Props = $props();
+
+  let isBurger: boolean = $state(null);
 
   function clearTippy() {
     hideAll();
@@ -56,9 +62,7 @@
 </script>
 
 {#key $willRefresh}
-  <Navbar bind:isBurger />
-
-  <Spinner>
-    <slot />
-  </Spinner>
+  <AppShell bind:isBurger>
+    {@render children?.()}
+  </AppShell>
 {/key}

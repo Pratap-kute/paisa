@@ -12,7 +12,11 @@
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
 
-  export let creditCard: CreditCardSummary;
+  interface Props {
+    creditCard: CreditCardSummary;
+  }
+
+  let { creditCard }: Props = $props();
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
     return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
@@ -20,12 +24,12 @@
     });
   }
 
-  $: bill = lastBill(creditCard);
+  let bill = $derived(lastBill(creditCard));
 </script>
 
 <div class="credit-card box p-3 m-0 is-flex-direction-column is-justify-content-space-between">
   <div class="is-flex is-justify-content-space-between has-text-weight-bold is-size-5">
-    <div style="margin: 35px 0 0 15px;" class="is-flex is-align-items-center paisa-opacity-20">
+    <div class="credit-card-chip is-flex is-align-items-center paisa-opacity-20">
       <svg
         class="chip"
         xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +97,7 @@
   </div>
   <div class="is-flex is-justify-content-space-between is-align-items-flex-end">
     <div class="has-text-weight-bold is-size-5 is-inline-flex is-align-items-center">
-      <span class="paisa-opacity-40 is-inline-flex is-flex-direction-column mr-2" style="font-size: 0.5rem; line-height: 1;">
+      <span class="paisa-opacity-40 is-inline-flex is-flex-direction-column mr-2 credit-card-valid-thru">
         <span>VALID</span>
         <span>THRU</span>
       </span>

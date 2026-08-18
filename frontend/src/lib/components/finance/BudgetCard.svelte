@@ -5,8 +5,12 @@
   import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
   import _ from "lodash";
 
-  export let compact = false;
-  export let accountBudget: AccountBudget;
+  interface Props {
+    compact?: boolean;
+    accountBudget: AccountBudget;
+  }
+
+  let { compact = false, accountBudget }: Props = $props();
 
   function canShow(accountBudget: AccountBudget): boolean {
     return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
@@ -27,19 +31,24 @@
     return {};
   };
 
-  const tooltipContent = tooltip(
-    accountBudget.expenses.map((e) => {
-      return [
-        e.date.format("DD MMM YYYY"),
-        [e.payee, "is-clipped"],
-        [formatCurrency(e.amount), "has-text-weight-bold has-text-right"]
-      ];
-    })
+  import Card from "$lib/components/ui/Card.svelte";
+
+  let tooltipContent = $derived(
+    tooltip(
+      accountBudget.expenses.map((e) => {
+        return [
+          e.date.format("DD MMM YYYY"),
+          [e.payee, "is-clipped"],
+          [formatCurrency(e.amount), "has-text-weight-bold has-text-right"]
+        ];
+      })
+    )
   );
 </script>
 
-<div
-  class="budget-card box px-2 pt-2 pb-2 my-3 has-background-white"
+<Card
+  padding="sm"
+  class="budget-card my-3"
   data-tippy-content={_.isEmpty(accountBudget.expenses) ? null : tooltipContent}
 >
   <div class="paisa-is-flex-tablet is-justify-content-space-between">
@@ -49,10 +58,7 @@
     >
       {iconify(restName(accountBudget.account), { group: firstName(accountBudget.account) })}
     </div>
-    <div
-      class="is-flex is-justify-content-flex-end mr-2 is-align-items-center"
-      style="min-width: fit-content"
-    >
+    <div class="is-flex is-justify-content-flex-end mr-2 is-align-items-center paisa-nowrap">
       {#if !compact}
         <div class="mr-3">
           <span class="budget-label mr-1">Budget</span>
@@ -85,4 +91,4 @@
       <svg height="10" width="100%"></svg>
     </div>
   {/if}
-</div>
+</Card>

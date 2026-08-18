@@ -12,14 +12,20 @@
     nonZeroPercentageChange
   } from "$lib/tables/formatters";
 
-  export let breakdowns: Record<string, AssetBreakdown>;
-  export let indent = true;
+  interface Props {
+    breakdowns: Record<string, AssetBreakdown>;
+    indent?: boolean;
+  }
 
-  const columns: ColumnDefinition[] = [
+  let { breakdowns, indent = true }: Props = $props();
+
+  let columns: ColumnDefinition[] = $derived([
     {
       title: "Account",
       field: "group",
       formatter: indent ? indendedAssetAccountName : accountName,
+      minWidth: 220,
+      widthGrow: 2,
       frozen: true
     },
     {
@@ -50,16 +56,15 @@
       hozAlign: "right",
       formatter: nonZeroPercentageChange
     }
-  ];
+  ]);
 
-  let tree: AssetBreakdown[] = [];
-  $: if (breakdowns) {
-    tree = buildTree(Object.values(breakdowns), (i) => i.group);
-  }
+  let tree: AssetBreakdown[] = $derived(
+    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : []
+  );
 </script>
 
 {#if indent}
   <Table data={tree} tree {columns} />
 {:else}
-  <Table data={Object.values(breakdowns)} {columns} />
+  <Table data={Object.values(breakdowns || {})} {columns} />
 {/if}

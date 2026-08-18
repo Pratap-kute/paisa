@@ -1,20 +1,24 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import _ from "lodash";
-  import { renderFlow } from "$lib/charts/cash_flow";
-  import { ajax, depth, firstName, rem, type Graph, type Legend, type Posting } from "$lib/core/utils";
+  import { createFlow } from "$lib/charts/cash_flow";
+  import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, year } from "../../../../store";
   import {
     setCashflowDepthAllowed,
     cashflowExpenseDepth,
     cashflowIncomeDepth
   } from "../../../../persisted_store";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
-  let legends: Legend[] = [];
-  let graph: Record<string, Graph>, expenses: Posting[];
-  let isEmpty = false;
+  let legends: Legend[] = $state([]);
+  let graph: Record<string, Graph> = $state(), expenses: Posting[];
+  let isEmpty = $state(false);
+  let flowChart = createFlow();
 
   function maxDepth(prefix: string) {
     if (!graph) return 1;
@@ -47,16 +51,23 @@
     };
   }
 
-  $: if (graph) {
-    if (graph[$year] == null) {
-      isEmpty = true;
-    } else {
-      legends = renderFlow(
-        filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth)
-      );
-      isEmpty = false;
+  $effect(() => {
+    if (graph) {
+      if (graph[$year] == null) {
+        isEmpty = true;
+      } else {
+        flowChart.update(
+          filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth)
+        );
+        legends = flowChart.legends();
+        isEmpty = false;
+      }
     }
-  }
+  });
+
+  onDestroy(() => {
+    flowChart.destroy();
+  });
 
   onMount(async () => {
     ({ expenses, graph } = await ajax("/api/expense"));
@@ -69,23 +80,24 @@
   });
 </script>
 
-<section class="section" style="padding-bottom: 0 !important">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <ZeroState item={!isEmpty}
-            ><strong>Oops!</strong> You have not made any transactions for the selected year.</ZeroState
-          >
+<Page width="analysis">
+  <PageHeader
+    title="Yearly Cash Flow"
+    description="Annual income, expense, and asset transfer flows"
+  />
 
-          <LegendCard {legends} clazz="ml-5 mb-2" />
-          <svg
-            class:is-not-visible={isEmpty}
-            id="d3-expense-flow"
-            height={window.innerHeight - rem(210)}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+  <Section fill>
+    {#if !isEmpty}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {/if}
+    <ChartFrame
+      type="timeline"
+      empty={isEmpty}
+      emptyMessage="No cash-flow activity for the selected year"
+      preserveChildren
+      onresize={(dim) => flowChart.resize(dim)}
+    >
+      <svg id="d3-expense-flow" width="100%" />
+    </ChartFrame>
+  </Section>
+</Page>

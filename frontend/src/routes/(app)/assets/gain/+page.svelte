@@ -2,37 +2,43 @@
   import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { buildLegends, renderOverview } from "$lib/charts/gain";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
-  let legends: Legend[] = [];
+  let legends: Legend[] = $state([]);
+  let overviewChart: ChartHandle<null> | null = null;
 
   onMount(async () => {
     const { gain_breakdown: gains } = await ajax("/api/gain");
 
     legends = buildLegends();
-    renderOverview(gains);
+    overviewChart = createClientWidthChart("#d3-gain-overview", (_data, _size) => {
+      renderOverview(gains);
+    });
+    overviewChart.update(null);
+  });
+
+  onDestroy(() => {
+    overviewChart?.destroy();
   });
 </script>
 
-<section class="section tab-gain">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <LegendCard {legends} clazz="ml-4" />
-          <svg id="d3-gain-overview" />
-        </div>
-      </div>
+<Page width="analysis">
+  <Section title="Gain Overview">
+    <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="category" onresize={(dim) => overviewChart?.resize(dim)}>
+      <svg id="d3-gain-overview" />
+    </ChartFrame>
+  </Section>
+
+  <Section>
+    <div class="d3-gain-timeline-breakdown">
+      <div id="d3-gain-timeline-breakdown"></div>
     </div>
-    <BoxLabel text="Gain Overview" />
-  </div>
-</section>
-<section class="section tab-gain">
-  <div class="container is-fluid d3-gain-timeline-breakdown">
-    <div class="columns">
-      <div id="d3-gain-timeline-breakdown" class="column is-12" />
-    </div>
-  </div>
-</section>
+  </Section>
+</Page>

@@ -26,6 +26,10 @@
     }
   ];
 
+  import Card from "$lib/components/ui/Card.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+
   function externalLink(url: string) {
     if (window.runtime) {
       window.runtime.BrowserOpenURL(url);
@@ -35,34 +39,42 @@
   }
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box has-text-centered px-3 mx-auto" style="max-width: 400px;">
-          <div><Logo size={128} /></div>
-          <div class="is-size-3 is-primary-color">Paisa</div>
-          <div>
-            Version: <b>0.8.0</b>
-          </div>
+<Page width="analysis">
+  <Section>
+    <div class="paisa-about-centered">
+      <Card padding="sm" class="has-text-centered">
+        <div><Logo size={128} /></div>
+        <div class="is-size-3 is-primary-color">Paisa</div>
+        <div>
+          Version: <b>0.8.0</b>
         </div>
+      </Card>
 
-        <div class="box px-3 mx-auto" style="max-width: 400px;">
-          <h3 class="is-size-5 mb-1">Links</h3>
-          <ul>
-            {#each links as link}
-              <li>
-                <a href={link.href} on:click|preventDefault={(_e) => externalLink(link.href)}>
-                  <span class="icon is-small">
-                    <i class={link.icon} />
-                  </span>
-                  <span>{link.name}</span>
-                </a>
-              </li>
-            {/each}
-          </ul>
-        </div>
-      </div>
+      <Card padding="sm">
+        <h3 class="is-size-5 mb-1">Links</h3>
+        <ul>
+          {#each links as link}
+            <li>
+              <a href={link.href} onclick={(e) => { e.preventDefault(); externalLink(link.href); }}>
+                <span class="icon is-small">
+                  <i class={link.icon}></i>
+                </span>
+                <span>{link.name}</span>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </Card>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>
+
+<style lang="scss">
+  .paisa-about-centered {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-4);
+  }
+</style>

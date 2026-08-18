@@ -13,8 +13,6 @@
           "date": "2022-01-01T00:00:00Z",
           "expenses": [
             {
-              "id": 393,
-              "transaction_id": "928a326f-93b5-5967-96e8-fe18ad9bf45f",
               "date": "2022-01-05T00:00:00Z",
               "payee": "Groceries",
               "account": "Expenses:Food",
@@ -25,7 +23,6 @@
               "tag_recurring": "",
               "tag_period": "",
               "transaction_begin_line": 20,
-              "transaction_end_line": 22,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",
@@ -44,8 +41,6 @@
           "date": "2022-01-01T00:00:00Z",
           "expenses": [
             {
-              "id": 392,
-              "transaction_id": "9ac83c1f-ba46-515b-8e19-3ca8ab332eab",
               "date": "2022-01-03T00:00:00Z",
               "payee": "Rent",
               "account": "Expenses:Rent",
@@ -56,7 +51,6 @@
               "tag_recurring": "Rent",
               "tag_period": "1 * ?",
               "transaction_begin_line": 14,
-              "transaction_end_line": 18,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",
@@ -101,8 +95,6 @@
           "date": "2022-02-01T00:00:00Z",
           "expenses": [
             {
-              "id": 418,
-              "transaction_id": "ed92c034-33b7-58ae-a05c-7b7d0e7ef723",
               "date": "2022-02-03T00:00:00Z",
               "payee": "Rent",
               "account": "Expenses:Rent",
@@ -113,7 +105,6 @@
               "tag_recurring": "Rent",
               "tag_period": "1 * ?",
               "transaction_begin_line": 67,
-              "transaction_end_line": 71,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",

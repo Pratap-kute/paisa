@@ -16,6 +16,12 @@ import {
   skipTicks,
   tooltip,
 } from "../../core/utils";
+import {
+  createRedrawChart,
+  plotSize,
+  type ChartHandle,
+  type Dimensions,
+} from "../resize";
 import { svgRectSpan } from "../svg";
 
 const areaKeys = ["gain", "loss"];
@@ -27,9 +33,36 @@ const lineScale = d3
   .domain(lineKeys)
   .range([COLORS.primary, COLORS.secondary, COLORS.tertiary]);
 
-function renderTable(interest: Interest) {
+export function padTimeDomain(
+  start: dayjs.Dayjs,
+  end: dayjs.Dayjs,
+): [dayjs.Dayjs, dayjs.Dayjs] {
+  if (start.isSame(end)) {
+    return [start.subtract(1, "day"), end.add(1, "day")];
+  }
+  return [start, end];
+}
+
+export function timelineDomain(
+  points: InterestOverview[],
+): [dayjs.Dayjs, dayjs.Dayjs] | null {
+  const dates = points.map((point) => point.date).filter(Boolean);
+  const start = _.min(dates);
+  const end = _.max(dates);
+  if (!start || !end) return null;
+  return padTimeDomain(start, end);
+}
+
+function clipUrl(id: string) {
+  return `url(#${id})`;
+}
+
+export function renderTable(interest: Interest) {
   const tbody = d3.select(this);
   const current = _.last(interest.overview_timeline);
+  const drawn = current?.drawn_amount ?? 0;
+  const repaid = current?.repaid_amount ?? 0;
+  const interestAmount = current?.interest_amount ?? 0;
   tbody.html(function () {
     return `
 <tr>
@@ -40,23 +73,19 @@ function renderTable(interest: Interest) {
 </tr>
 <tr>
   <td>Loan Drawn</td>
-  <td class='has-text-right'>${formatCurrency(current.drawn_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(drawn)}</td>
 </tr>
 <tr>
   <td>Loan Repaid</td>
-  <td class='has-text-right'>${formatCurrency(current.repaid_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(repaid)}</td>
 </tr>
 <tr>
   <td>Interest</td>
-  <td class='has-text-right'>${formatCurrency(current.interest_amount)}</td>
+  <td class='has-text-right'>${formatCurrency(interestAmount)}</td>
 </tr>
 <tr>
   <td>Balance</td>
-  <td class='has-text-right'>${
-      formatCurrency(
-        current.drawn_amount + current.interest_amount - current.repaid_amount,
-      )
-    }</td>
+  <td class='has-text-right'>${formatCurrency(drawn + interestAmount - repaid)}</td>
 </tr>
 <tr>
   <td>APR</td>
@@ -66,28 +95,80 @@ function renderTable(interest: Interest) {
   });
 }
 
-export function renderOverview(gains: Interest[]) {
-  gains = _.sortBy(gains, (g) => g.account);
-  const BAR_HEIGHT = rem(15);
+function applySvgDimensions(
+  svg: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>,
+  width: number,
+  height: number,
+) {
+  svg
+    .attr("width", width)
+    .attr("height", height)
+    .style("width", `${width}px`)
+    .style("height", `${height}px`);
+}
+
+function svgOuterWidth(
+  plotWidth: number,
+  margin: { left: number; right: number },
+) {
+  return plotWidth + margin.left + margin.right;
+}
+
+function svgOuterHeight(
+  plotHeight: number,
+  margin: { top: number; bottom: number },
+) {
+  return plotHeight + margin.top + margin.bottom;
+}
+
+export function maxOverviewY(points: InterestOverview[]): number {
+  return d3.max(points, (d) =>
+    Math.max(
+      d.drawn_amount + d.interest_amount,
+      d.repaid_amount,
+      d.drawn_amount + d.interest_amount - d.repaid_amount,
+    )
+  ) ?? 0;
+}
+
+export function renderOverview(gains: Interest[], size: Dimensions = { width: 0, height: 0 }) {
   const id = "#d3-interest-overview";
-  const svg = d3.select(id),
-    margin = { top: rem(5), right: rem(20), bottom: rem(30), left: rem(150) },
-    width = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
-      850,
-    ) -
-      margin.left -
-      margin.right,
+  const svg = d3.select(id);
+  if (_.isEmpty(gains)) {
+    svg.selectAll("*").remove();
+    return;
+  }
+
+  gains = _.sortBy(gains, (g) => g.account);
+  const BAR_HEIGHT = rem(24);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
+  svg.selectAll("*").remove();
+
+  const margin = {
+      top: rem(25),
+      right: rem(20),
+      bottom: rem(30),
+      left: rem(150),
+    },
+    { width } = plotSize(el, margin, size, {
+      minWidth: rem(1100),
+    }),
     height = gains.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
     );
-  svg.attr("height", height + margin.top + margin.bottom);
+  applySvgDimensions(
+    svg,
+    svgOuterWidth(width, margin),
+    svgOuterHeight(height, margin),
+  );
 
-  svg.attr("width", width + margin.left + margin.right);
-
-  const y = d3.scaleBand().range([0, height]).paddingInner(0).paddingOuter(0);
+  const y = d3.scaleBand().range([0, height]).paddingInner(0.1).paddingOuter(
+    0.05,
+  );
   y.domain(gains.map((g) => restName(g.account)));
   const y1 = d3
     .scaleBand()
@@ -101,7 +182,7 @@ export function renderOverview(gains: Interest[]) {
     .range([0, y.bandwidth()])
     .domain(["0", "1"])
     .paddingInner(0.15)
-    .paddingOuter(0.6);
+    .paddingOuter(0.3);
 
   const keys = ["balance", "drawn", "repaid", "gain", "loss"];
   const colors = [
@@ -113,16 +194,19 @@ export function renderOverview(gains: Interest[]) {
   ];
   const z = d3.scaleOrdinal<string>(colors).domain(keys);
 
+  const getCurrentOverview = (g: Interest) => _.last(g.overview_timeline);
+
   const getDrawnAmount = (g: Interest) =>
-    _.last(g.overview_timeline).drawn_amount;
+    getCurrentOverview(g)?.drawn_amount ?? 0;
 
   const getInterestAmount = (g: Interest) =>
-    _.last(g.overview_timeline).interest_amount;
+    getCurrentOverview(g)?.interest_amount ?? 0;
   const getRepaidAmount = (g: Interest) =>
-    _.last(g.overview_timeline).repaid_amount;
+    getCurrentOverview(g)?.repaid_amount ?? 0;
 
   const getBalanceAmount = (g: Interest) => {
-    const current = _.last(g.overview_timeline);
+    const current = getCurrentOverview(g);
+    if (!current) return 0;
     return current.drawn_amount + current.interest_amount -
       current.repaid_amount;
   };
@@ -130,21 +214,26 @@ export function renderOverview(gains: Interest[]) {
   const maxX = _.chain(gains)
     .map((g) => getDrawnAmount(g) + _.max([getInterestAmount(g), 0]))
     .max()
-    .value();
-  const aprWidth = rem(250);
+    .value() || 0;
+  const textColWidth = rem(120);
+  const textGroupWidth = textColWidth * 3;
+  const aprWidth = rem(200);
   const aprTextWidth = rem(40);
   const aprMargin = rem(20);
-  const textGroupWidth = rem(225);
+  const textGroupMargin = rem(20);
   const textGroupZero = aprWidth + aprTextWidth + aprMargin;
 
-  const x = d3.scaleLinear().range([textGroupZero + textGroupWidth, width]);
-  x.domain([0, maxX]);
+  const x = d3.scaleLinear().range([
+    textGroupZero + textGroupWidth + textGroupMargin,
+    width,
+  ]);
+  x.domain([0, maxX > 0 ? maxX : 1]);
   const x1 = d3
     .scaleLinear()
     .range([0, aprWidth])
     .domain([
-      _.min([_.min(_.map(gains, (g) => g.apr)), 0]),
-      _.max([0, _.max(_.map(gains, (g) => g.apr))]),
+      _.min([_.min(_.map(gains, (g) => g.apr)) ?? 0, 0]) ?? 0,
+      _.max([0, _.max(_.map(gains, (g) => g.apr)) ?? 0]) || 1,
     ]);
 
   g.append("line")
@@ -166,7 +255,28 @@ export function renderOverview(gains: Interest[]) {
     .text("APR")
     .attr("text-anchor", "middle")
     .attr("x", aprWidth / 2)
-    .attr("y", height + 30);
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Loan Drawn")
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 0.5)
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Interest")
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 1.5)
+    .attr("y", -8);
+
+  g.append("text")
+    .classed("svg-text-grey", true)
+    .text("Balance / Repaid")
+    .attr("text-anchor", "middle")
+    .attr("x", textGroupZero + textColWidth * 2.5)
+    .attr("y", -8);
 
   g.append("g")
     .attr("class", "axis y")
@@ -206,7 +316,7 @@ export function renderOverview(gains: Interest[]) {
     .style("fill", (g) => (getDrawnAmount(g) > 0 ? z("drawn") : "none"))
     .attr("dx", "-3")
     .attr("dy", "3")
-    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("x", textGroupZero + textColWidth)
     .attr("y", (g) => y(restName(g.account)));
 
   textGroup
@@ -224,7 +334,7 @@ export function renderOverview(gains: Interest[]) {
     )
     .attr("dx", "-3")
     .attr("dy", "3")
-    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("x", textGroupZero + textColWidth * 2)
     .attr("y", (g) => y(restName(g.account)));
 
   textGroup
@@ -234,7 +344,7 @@ export function renderOverview(gains: Interest[]) {
     .style("fill", (g) => (getBalanceAmount(g) > 0 ? z("balance") : "none"))
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + textGroupWidth / 3)
+    .attr("x", textGroupZero + textColWidth)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -251,7 +361,7 @@ export function renderOverview(gains: Interest[]) {
     )
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + (textGroupWidth * 2) / 3)
+    .attr("x", textGroupZero + textColWidth * 2)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -261,7 +371,7 @@ export function renderOverview(gains: Interest[]) {
     .style("fill", (g) => (getRepaidAmount(g) > 0 ? z("repaid") : "none"))
     .attr("dx", "-3")
     .attr("dy", "-3")
-    .attr("x", textGroupZero + textGroupWidth)
+    .attr("x", textGroupZero + textColWidth * 3)
     .attr("y", (g) => y(restName(g.account)) + y.bandwidth());
 
   textGroup
@@ -358,7 +468,8 @@ export function renderOverview(gains: Interest[]) {
     .append("rect")
     .attr("fill", "transparent")
     .attr("data-tippy-content", (g: Interest) => {
-      const current = _.last(g.overview_timeline);
+      const current = getCurrentOverview(g);
+      if (!current) return "";
       return tooltip([
         ["Account", [g.account, "has-text-weight-bold has-text-right"]],
         [
@@ -401,73 +512,129 @@ export function renderOverview(gains: Interest[]) {
     .attr("width", width);
 }
 
+function measuredHeight(node: HTMLElement | null): number {
+  if (!node) return 0;
+  return node.offsetHeight || node.getBoundingClientRect().height || 0;
+}
+
+function measuredWidth(node: HTMLElement | null): number {
+  if (!node) return 0;
+  const layoutWidth = node.clientWidth || node.getBoundingClientRect().width || 0;
+  if (layoutWidth > 0) return layoutWidth;
+  const inlineWidth = Number.parseInt(node.style.width, 10);
+  return Number.isFinite(inlineWidth) ? inlineWidth : 0;
+}
+
 export function renderPerAccountOverview(interests: Interest[]) {
-  const dates = _.flatMap(
-    interests,
-    (g) => _.map(g.overview_timeline, (o) => o.date),
-  );
-  const start = _.min(dates),
-    end = _.max(dates);
+  const root = d3.select("#d3-interest-timeline-breakdown");
+  interests = _.filter(interests, (g) => !_.isEmpty(g.overview_timeline));
+  if (_.isEmpty(interests)) {
+    root.selectAll("*").remove();
+    return;
+  }
 
-  const divs = d3
-    .select("#d3-interest-timeline-breakdown")
-    .selectAll("div")
-    .data(_.sortBy(interests, (g) => g.account));
+  const sorted = _.sortBy(interests, (g) => g.account);
 
-  divs.exit().remove();
+  root.selectAll("*").remove();
 
-  const columns = divs.enter().append("div").attr("class", "columns");
+  for (const interest of sorted) {
+    const domain = timelineDomain(interest.overview_timeline);
+    if (!domain) continue;
 
-  const leftColumn = columns
-    .append("div")
-    .attr("class", "column is-4 is-3-desktop is-2-fullhd")
-    .append("div")
-    .attr("class", "box px-3 py-5");
-  leftColumn
-    .append("table")
-    .attr("class", "table is-narrow is-fullwidth is-size-7")
-    .append("tbody")
-    .each(renderTable);
+    const row = root.append("div").attr("class", "paisa-interest-account-row");
+    const summaryCard = row
+      .append("div")
+      .attr("class", "box paisa-interest-summary-card");
+    const tbody = summaryCard
+      .append("table")
+      .attr(
+        "class",
+        "table is-narrow is-fullwidth is-size-7 paisa-interest-summary-table",
+      )
+      .append("tbody");
+    const tbodyNode = tbody.node();
+    if (tbodyNode) {
+      renderTable.call(tbodyNode, interest);
+    }
 
-  const rightColumn = columns.append("div").attr("class", "column");
-  rightColumn
-    .append("div")
-    .attr("class", "box paisa-overflow-x-auto")
-    .append("svg")
-    .attr("height", "150")
-    .each(function (gain) {
-      renderOverviewSmall(gain.overview_timeline, this, [start, end]);
-    });
+    const summaryNode = summaryCard.node() as HTMLElement | null;
+    const naturalSummaryHeight = measuredHeight(summaryNode);
+    const summaryHeight = naturalSummaryHeight > 0 ? naturalSummaryHeight : 150;
+    const rootWidth = measuredWidth(root.node() as HTMLElement | null);
+
+    const chartCard = row
+      .append("div")
+      .attr("class", "box paisa-interest-chart-card");
+    const chartNode = chartCard.node() as HTMLElement | null;
+    const svgNode = chartCard.append("svg").node();
+    if (svgNode && summaryNode && chartNode) {
+      const chartWidth = measuredWidth(chartNode) || rootWidth;
+      renderOverviewSmall(interest.overview_timeline, svgNode, domain, {
+        width: chartWidth,
+        height: summaryHeight,
+      });
+    }
+  }
+}
+
+function chartCardInnerHeight(
+  chartCard: HTMLElement | null,
+  outerHeight: number,
+): number {
+  if (outerHeight <= 0) {
+    return 50;
+  }
+  if (!chartCard) {
+    return Math.max(50, outerHeight);
+  }
+  const styles = getComputedStyle(chartCard);
+  const paddingY = parseFloat(styles.paddingTop) +
+    parseFloat(styles.paddingBottom);
+  return Math.max(50, outerHeight - paddingY);
 }
 
 function renderOverviewSmall(
   points: InterestOverview[],
   element: Element,
   xDomain: [dayjs.Dayjs, dayjs.Dayjs],
+  size: Dimensions = { width: 0, height: 0 },
 ) {
-  const svg = d3.select(element),
-    margin = { top: 5, right: 80, bottom: 20, left: 40 },
-    width = Math.max(element.parentElement.clientWidth, 800) - margin.left -
-      margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
+  const svg = d3.select(element);
+  if (
+    !element?.parentElement || _.isEmpty(points) || !xDomain[0] || !xDomain[1]
+  ) {
+    svg.selectAll("*").remove();
+    return;
+  }
 
-  svg.attr("width", width + margin.left + margin.right);
+  svg.selectAll("*").remove();
+
+  const margin = { top: 5, right: 80, bottom: 20, left: 40 };
+  const chartCard = element.parentElement as HTMLElement | null;
+  const innerHeight = chartCardInnerHeight(
+    chartCard,
+    size.height > 0 ? size.height : chartCard?.clientHeight ?? 150,
+  );
+  const { width } = plotSize(element, margin, size);
+  const height = Math.max(30, innerHeight - margin.top - margin.bottom);
+  const g = svg.append("g").attr(
+    "transform",
+    "translate(" + margin.left + "," + margin.top + ")",
+  );
+
+  applySvgDimensions(
+    svg,
+    svgOuterWidth(width, margin),
+    svgOuterHeight(height, margin),
+  );
+
+  const maxY = maxOverviewY(points);
 
   const x = d3.scaleTime().range([0, width]).domain(xDomain),
     y = d3
       .scaleLinear()
       .range([height, 0])
-      .domain([
-        0,
-        d3.max<InterestOverview, number>(
-          points,
-          (d) => d.interest_amount + d.drawn_amount,
-        ),
-      ]),
+      .domain([0, maxY > 0 ? maxY : 1]),
     z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
 
   const area = (y0: number, y1: (d: InterestOverview) => number) =>
@@ -527,10 +694,7 @@ function renderOverviewSmall(
 
   layer
     .append("path")
-    .attr(
-      "clip-path",
-      `url(${new URL("#" + clipAboveID, globalThis.location.toString())})`,
-    )
+    .attr("clip-path", clipUrl(clipAboveID))
     .style("fill", z("gain"))
     .style("opacity", "0.8")
     .attr(
@@ -542,10 +706,7 @@ function renderOverviewSmall(
 
   layer
     .append("path")
-    .attr(
-      "clip-path",
-      `url(${new URL("#" + clipBelowID, globalThis.location.toString())})`,
-    )
+    .attr("clip-path", clipUrl(clipBelowID))
     .style("fill", z("loss"))
     .style("opacity", "0.8")
     .attr(
@@ -616,4 +777,29 @@ export function buildLegends(): Legend[] {
           }) as Legend,
       ),
     );
+}
+
+export function createInterestOverviewChart(): ChartHandle<Interest[]> {
+  return createRedrawChart({
+    draw: (data, size) => {
+      renderOverview(data, size);
+    },
+    clear: () => {
+      d3.select("#d3-interest-overview").selectAll("*").remove();
+    },
+  });
+}
+
+export function createInterestPerAccountChart(): ChartHandle<Interest[]> {
+  return {
+    update(data) {
+      renderPerAccountOverview(data);
+    },
+    resize() {
+      // Per-account rows are content-sized; frame resize must not rebuild charts.
+    },
+    destroy() {
+      d3.select("#d3-interest-timeline-breakdown").selectAll("*").remove();
+    },
+  };
 }

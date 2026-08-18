@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Paisa: Develop (Full Stack)",
+      "type": "shell",
+      "command": "make dev",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Paisa: Serve Backend Only",
+      "type": "shell",
+      "command": "make serve",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Paisa: Frontend Dev (Vite)",
+      "type": "shell",
+      "command": "make -C frontend dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Paisa: Run Linters",
+      "type": "shell",
+      "command": "make lint",
+      "problemMatcher": ["$go"]
+    },
+    {
+      "label": "Paisa: Run Backend Tests",
+      "type": "shell",
+      "command": "make test-backend",
+      "group": "test",
+      "problemMatcher": ["$go"]
+    }
+  ]
+}

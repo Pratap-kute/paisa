@@ -2,18 +2,19 @@
   import { formatCurrency, type Posting } from "$lib/core/utils";
   import _ from "lodash";
 
-  export let postings: Posting[];
-  export let groupFormat: string;
+  interface Props {
+    postings: Posting[];
+    groupFormat: string;
+    children?: import('svelte').Snippet<[any]>;
+  }
+
+  let { postings, groupFormat, children }: Props = $props();
 
   interface GroupedPosting {
     key: string;
     postings: Posting[];
     total: number;
   }
-
-  let groupedPostings: GroupedPosting[] = [];
-  $: groupedPostings = group(postings);
-  $: isGrouped = _.some(groupedPostings, (groupedPosting) => groupedPosting.postings.length > 1);
 
   function group(ps: Posting[]) {
     let groupedPostings: GroupedPosting[] = [];
@@ -43,6 +44,9 @@
 
     return groupedPostings;
   }
+
+  let groupedPostings: GroupedPosting[] = $derived(group(postings));
+  let isGrouped = $derived(_.some(groupedPostings, (groupedPosting) => groupedPosting.postings.length > 1));
 </script>
 
 <div>
@@ -56,7 +60,7 @@
           <div>{formatCurrency(groupedPosting.total)}</div>
         </div>
       {/if}
-      <slot groupedPostings={groupedPosting.postings} />
+      {@render children?.({ groupedPostings: groupedPosting.postings, })}
     </div>
   {/each}
 </div>

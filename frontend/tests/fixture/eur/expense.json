@@ -4,23 +4,18 @@
     "2021 - 22": {
       "nodes": [
         {
-          "id": 1,
           "name": "Assets:Checking"
         },
         {
-          "id": 5,
           "name": "Assets:Equity:AAPL"
         },
         {
-          "id": 2,
           "name": "Income"
         },
         {
-          "id": 3,
           "name": "Income:Salary"
         },
         {
-          "id": 4,
           "name": "Income:Salary:Acme"
         }
       ],
@@ -53,8 +48,6 @@
     "incomes": {
       "2022-01": [
         {
-          "id": 41,
-          "transaction_id": "d84b6999-200b-5b90-9a3e-f94dc8a177da",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -65,7 +58,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 6,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -78,8 +70,6 @@
     "investments": {
       "2022-01": [
         {
-          "id": 43,
-          "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Equity:AAPL",
@@ -90,7 +80,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 13,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -107,8 +96,6 @@
     "incomes": {
       "2021 - 22": [
         {
-          "id": 41,
-          "transaction_id": "d84b6999-200b-5b90-9a3e-f94dc8a177da",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -119,7 +106,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 6,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -132,8 +118,6 @@
     "investments": {
       "2021 - 22": [
         {
-          "id": 43,
-          "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Equity:AAPL",
@@ -144,7 +128,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 13,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",

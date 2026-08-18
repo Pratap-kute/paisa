@@ -1,0 +1,156 @@
+/**
+ * Table Component Styling
+ * Tables, sticky headers/columns, and financial data grids
+ */
+
+.table {
+  background-color: var(--paisa-table-bg);
+  color: var(--paisa-text-primary);
+  font-size: var(--paisa-font-size-sm);
+
+  th {
+    color: var(--paisa-table-header-text);
+    font-weight: var(--paisa-font-weight-semibold);
+  }
+
+  &.is-light-border tbody {
+    td,
+    th {
+      border-bottom: 1px solid var(--paisa-border-subtle);
+    }
+  }
+
+  tr.is-sub-header {
+    background-color: var(--paisa-surface-hover);
+
+    th,
+    td {
+      color: var(--paisa-brand-primary);
+      font-weight: var(--paisa-font-weight-bold);
+      background-color: var(--paisa-surface-hover);
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-top: 1px solid var(--paisa-border-default);
+      border-bottom: 1px solid var(--paisa-border-subtle);
+    }
+  }
+
+  tr.is-account-row {
+    td,
+    th {
+      color: var(--paisa-text-secondary);
+      font-size: var(--paisa-font-size-xs);
+    }
+  }
+
+  tfoot {
+    border-top: 2px solid var(--paisa-border-strong);
+
+    tr.is-summary-row {
+      background-color: var(--paisa-surface-default);
+
+      th,
+      td {
+        font-weight: var(--paisa-font-weight-bold);
+        background-color: var(--paisa-surface-default);
+        color: var(--paisa-text-primary);
+        border-bottom: 1px solid var(--paisa-border-subtle);
+      }
+    }
+  }
+}
+
+.tab-journal .table td {
+  border: 1px solid var(--paisa-border-subtle);
+}
+
+.table.has-sticky-column,
+.table.has-sticky-footer,
+.table.has-sticky-header {
+  border-collapse: separate;
+
+  tbody,
+  thead {
+    td,
+    th {
+      border-top-width: 0;
+    }
+  }
+
+  &.is-bordered {
+    border: 1px solid var(--paisa-table-border);
+
+    td,
+    th {
+      border-left-width: 0;
+
+      &:last-child {
+        border-right-width: 0;
+      }
+    }
+
+    tbody tr:last-child,
+    tfoot tr:last-child {
+      td,
+      th {
+        border-bottom-width: 0;
+      }
+    }
+  }
+}
+
+.table.has-sticky-header {
+  thead th {
+    background-color: var(--paisa-table-header-bg);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+}
+
+.table.has-sticky-column {
+  tfoot th:first-child,
+  thead th:first-child {
+    background-color: var(--paisa-table-header-bg);
+    position: sticky;
+    left: 0;
+    z-index: 6;
+  }
+
+  tbody th:first-child {
+    background-color: var(--paisa-table-bg);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+  }
+
+  tbody tr.is-selected th:first-child {
+    background-color: var(--paisa-table-row-selected);
+  }
+
+  &.is-hoverable {
+    tbody tr:not(.is-selected):hover th:first-child {
+      background-color: var(--paisa-table-row-hover);
+    }
+  }
+
+  &.is-striped {
+    tbody tr:not(.is-selected):nth-child(even) th:first-child {
+      background-color: var(--paisa-surface-muted);
+    }
+  }
+
+  &.is-striped.is-hoverable {
+    tbody tr:not(.is-selected):nth-child(even):hover th:first-child {
+      background-color: var(--paisa-table-row-hover);
+    }
+  }
+}
+
+.table.has-sticky-column tbody tr.is-sub-header th:first-child {
+  background-color: var(--paisa-surface-muted);
+}
+
+.table.has-sticky-column tbody tr.is-summary-row th:first-child {
+  background-color: var(--paisa-surface-default);
+}

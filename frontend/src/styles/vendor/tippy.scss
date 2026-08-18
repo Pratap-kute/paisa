@@ -1,0 +1,98 @@
+@use "tippy.js/dist/tippy.css" as *;
+@use "tippy.js/themes/light.css" as *;
+
+[data-tippy-root] {
+  font-family: var(--paisa-font-sans);
+  z-index: 99999 !important;
+}
+
+.tippy-box,
+.tippy-box[data-theme~="light"] {
+  background-color: var(--paisa-tooltip-bg) !important;
+  color: var(--paisa-tooltip-text) !important;
+  border-radius: var(--paisa-radius-md) !important;
+  font-size: var(--paisa-font-size-xs) !important;
+  box-shadow: var(--paisa-shadow-lg) !important;
+  border: 1px solid var(--paisa-tooltip-border) !important;
+  padding: 0 !important;
+
+  .tippy-content {
+    padding: 0.35rem 0.6rem !important;
+    color: var(--paisa-tooltip-text) !important;
+  }
+
+  /* Arrows */
+  &[data-placement^="top"] > .tippy-arrow:before {
+    border-top-color: var(--paisa-tooltip-bg) !important;
+  }
+  &[data-placement^="bottom"] > .tippy-arrow:before {
+    border-bottom-color: var(--paisa-tooltip-bg) !important;
+  }
+  &[data-placement^="left"] > .tippy-arrow:before {
+    border-left-color: var(--paisa-tooltip-bg) !important;
+  }
+  &[data-placement^="right"] > .tippy-arrow:before {
+    border-right-color: var(--paisa-tooltip-bg) !important;
+  }
+  > .tippy-backdrop {
+    background-color: var(--paisa-tooltip-bg) !important;
+  }
+  > .tippy-svg-arrow {
+    fill: var(--paisa-tooltip-bg) !important;
+  }
+
+  /* Tooltip Tables (.popup-table and generic table) */
+  table,
+  table.popup-table,
+  table.table {
+    background-color: transparent !important;
+    color: var(--paisa-tooltip-text) !important;
+    margin: 0 !important;
+    border: none !important;
+    border-collapse: collapse !important;
+    font-size: var(--paisa-font-size-xs) !important;
+
+    tbody {
+      background-color: transparent !important;
+    }
+
+    tr {
+      background-color: transparent !important;
+      border: none !important;
+    }
+
+    td,
+    th {
+      background-color: transparent !important;
+      color: var(--paisa-tooltip-text) !important;
+      border: none !important;
+      padding: 0.15rem 0.4rem !important;
+      line-height: 1.35 !important;
+      white-space: nowrap;
+
+      &.has-text-weight-bold {
+        color: var(--paisa-tooltip-text) !important;
+        font-weight: var(--paisa-font-weight-bold) !important;
+      }
+
+      &.has-text-grey,
+      &.has-text-grey-light,
+      &.has-text-muted {
+        color: var(--paisa-tooltip-muted) !important;
+      }
+
+      &.has-text-right {
+        text-align: right !important;
+      }
+
+      &.has-text-centered {
+        text-align: center !important;
+      }
+    }
+  }
+
+  p {
+    color: var(--paisa-tooltip-text) !important;
+    margin: 0 !important;
+  }
+}

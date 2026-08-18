@@ -4,9 +4,13 @@
   import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
 
-  let isEmpty = false;
-  let creditCards: CreditCardSummary[] = [];
+  let isEmpty = $state(false);
+  let creditCards: CreditCardSummary[] = $state([]);
 
   onMount(async () => {
     ({ creditCards } = await ajax("/api/credit_cards"));
@@ -16,24 +20,22 @@
   });
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-12">
-        <div class="credit-card-container">
-          {#each creditCards as creditCard}
-            <CreditCardCard {creditCard} />
-          {/each}
-        </div>
-      </div>
-    </div>
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-12">
-        <ZeroState item={!isEmpty}>
-          <strong>Oops!</strong> You haven't configured any credit cards yet. Checkout the
-          <a href={helpUrl("credit-card")}>docs</a> page to get started.
-        </ZeroState>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="fluid">
+  <PageHeader
+    title="Credit Cards"
+    description="Credit card balances, utilization, and billing statements"
+  />
+
+  <Section>
+    <ZeroState item={!isEmpty}>
+      <strong>Oops!</strong> You haven't configured any credit cards yet. Checkout the
+      <a href={helpUrl("credit-card")}>docs</a> page to get started.
+    </ZeroState>
+
+    <ResponsiveGrid variant="cards">
+      {#each creditCards as creditCard}
+        <CreditCardCard {creditCard} />
+      {/each}
+    </ResponsiveGrid>
+  </Section>
+</Page>

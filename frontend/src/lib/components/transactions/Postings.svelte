@@ -13,23 +13,25 @@
     }
   };
 
-  export let postings: Posting[];
+  interface Props {
+    postings: Posting[];
+  }
+
+  let { postings }: Props = $props();
 </script>
 
-<div style="margin: 4px 0;">
+<div class="paisa-postings-grid">
   {#each postings as p}
-    <div class="is-flex is-justify-content-space-between is-hoverable" style="margin: 1px 0;">
-      <div class="paisa-truncate custom-icon" style="min-width: 100px;" title={p.account}>
+    <div class="paisa-postings-row is-hoverable">
+      <div class="paisa-truncate custom-icon" title={p.account}>
         <span style={accountColorStyle(firstName(p.account))}>{iconText(p.account)}</span>
         {p.account}
       </div>
-      <div class="is-flex is-align-items-baseline is-justify-content-right">
-        <div class="has-text-right has-text-grey is-size-7 mr-2 paisa-truncate">
-          {unlessDefaultCurrency(p)}
-        </div>
-        <div class="has-text-right" style="min-width: 50px;">
-          {formatCurrency(p.amount, 2)}
-        </div>
+      <div class="has-text-right has-text-grey is-size-7 paisa-truncate">
+        {unlessDefaultCurrency(p)}
+      </div>
+      <div class="has-text-right">
+        {formatCurrency(p.amount, 2)}
       </div>
     </div>
   {/each}

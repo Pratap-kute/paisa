@@ -2,20 +2,26 @@
   import { formatPercentage } from "$lib/core/utils";
   import { dropRight, floor, range } from "lodash";
 
-  export let small: boolean = false;
-  export let progressPercent: number;
-  export let showPercent: boolean = true;
-  $: times = range(0, floor(progressPercent / 100));
-  $: remainder = progressPercent % 100;
-
-  $: if (remainder == 0) {
-    times = dropRight(times, 1);
-    if (progressPercent == 0) {
-      remainder = 0;
-    } else {
-      remainder = 100;
-    }
+  interface Props {
+    small?: boolean;
+    progressPercent: number;
+    showPercent?: boolean;
   }
+
+  let { small = false, progressPercent, showPercent = true }: Props = $props();
+
+  let computed = $derived.by(() => {
+    let rawTimes = range(0, floor(progressPercent / 100));
+    let rawRemainder = progressPercent % 100;
+    if (rawRemainder === 0) {
+      rawTimes = dropRight(rawTimes, 1);
+      rawRemainder = progressPercent === 0 ? 0 : 100;
+    }
+    return { times: rawTimes, remainder: rawRemainder };
+  });
+
+  let times = $derived(computed.times);
+  let remainder = $derived(computed.remainder);
 </script>
 
 <div>

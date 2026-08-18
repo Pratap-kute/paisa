@@ -215,9 +215,16 @@ If `terms` are not provided, the entire `ROW` will be used.
 The `prefix` is optional and will be used to filter out matching accounts. If no
 match is found, `Unknown` will be returned.
 
+Prediction uses committed ledger history (not the current preview). Familiar
+merchants with a clear account become a high-confidence match. New or split
+history stays as `Unknown` or needs review. Optional `source=` is the other
+posting account in the template and is used as extra context; templates do not
+need to change. TF-IDF remains a weak fallback only.
+
 ```handlebars
 {{predictAccount prefix="Income"}}
 {{predictAccount ROW.C ROW.F prefix="Income"}}
+{{predictAccount ROW.C prefix="Expenses" source="Liabilities:CreditCard"}}
 ```
 
 !!! tip
@@ -261,6 +268,17 @@ Returns the acronym of the given string that is suitable to be used as a
 commodity symbol. For example, `UTI Nifty Next 50 Index Growth
 Direct Plan` will
 be converted to `UNNI`
+
+#### `#!typescript oneline(str: string): string`
+
+Collapses wrapped spreadsheet text onto one line. A newline between letters is
+treated as a mid-word wrap (`AC` + `ME` becomes `ACME`); other whitespace
+becomes a single space.
+
+```handlebars
+{{oneline ROW.B}}
+{{predictAccount (oneline ROW.B) prefix="Income"}}
+```
 
 #### `#!typescript trim(str: string): string`
 

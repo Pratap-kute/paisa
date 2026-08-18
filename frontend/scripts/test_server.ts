@@ -1,7 +1,9 @@
-import { join } from "@std/path";
+import { fromFileUrl, join } from "@std/path";
+import { copyFixtureSourceToTemp } from "../tests/fixture_utils.ts";
 
-const root = new URL("../", import.meta.url).pathname;
-const fixture = await Deno.makeTempDir({ prefix: "paisa-browser-" });
+const root = fromFileUrl(new URL("../", import.meta.url));
+const sourceDir = join(root, "tests/fixture/browser");
+const fixture = await copyFixtureSourceToTemp(sourceDir);
 const binary = join(
   fixture,
   Deno.build.os === "windows" ? "paisa.exe" : "paisa",
@@ -61,20 +63,27 @@ for (
 }
 
 try {
-  await Deno.copyFile(
-    join(root, "tests/fixture/browser/main.ledger"),
-    join(fixture, "main.ledger"),
-  );
-  await Deno.copyFile(
-    join(root, "tests/fixture/browser/paisa.yaml"),
+  const staticIndex = join(root, "../backend/web/static/index.html");
+  const serverIndex = join(root, ".svelte-kit/output/server/index.js");
+  let hasStatic = false;
+  try {
+    Deno.statSync(staticIndex);
+    Deno.statSync(serverIndex);
+    hasStatic = true;
+  } catch (_) {
+    // Static assets or preview server build not ready yet
+  }
+  if (!hasStatic || Deno.env.get("PAISA_REBUILD_FRONTEND") === "true") {
+    await run(Deno.execPath(), ["task", "build"]);
+  }
+  await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
+  await run(binary, [
+    "--config",
     join(fixture, "paisa.yaml"),
-  );
-  // Start browser tests from the committed fixture state. This keeps visual
-  // baselines deterministic even when the optional Ledger CLI is unavailable.
-  await Deno.copyFile(
-    join(root, "tests/fixture/browser/paisa.db"),
-    join(fixture, "paisa.db"),
-  );
+    "--now",
+    "2022-02-07",
+    "update",
+  ], fixture);
   // Portfolio holdings normally come from an external provider, so journal
   // synchronization cannot recreate them in CI. Seed a small deterministic
   // portfolio to keep the assets-analysis browser fixture self-contained.
@@ -92,11 +101,6 @@ try {
        ('mutualfund', '120716', 'GOI2032', 'Government Bond 2032', 'debt', 'Sovereign', 'Government', '12'),
        ('mutualfund', '120716', 'CORPAAA', 'AAA Corporate Bond', 'debt', 'AAA', 'Financial Services', '8');`,
   ]);
-  await Deno.mkdir(join(fixture, "sheets"), { recursive: true });
-  await Deno.copyFile(
-    join(root, "tests/fixture/browser/sheets/overview.paisa"),
-    join(fixture, "sheets/overview.paisa"),
-  );
   // Source checkouts intentionally contain only a release placeholder for the
   // bundled Ledger binary. Let editor validation succeed in browser tests,
   // while making synchronization fail before it can replace fixture DB rows.
@@ -106,20 +110,6 @@ try {
     '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
     { mode: 0o750 },
   );
-  const staticIndex = join(root, "../backend/web/static/index.html");
-  const serverIndex = join(root, ".svelte-kit/output/server/index.js");
-  let hasStatic = false;
-  try {
-    Deno.statSync(staticIndex);
-    Deno.statSync(serverIndex);
-    hasStatic = true;
-  } catch (_) {
-    // Static assets or preview server build not ready yet
-  }
-  if (!hasStatic || Deno.env.get("PAISA_REBUILD_FRONTEND") === "true") {
-    await run(Deno.execPath(), ["task", "build"]);
-  }
-  await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
 
   const backend = new Deno.Command(binary, {
     args: [

@@ -24,8 +24,9 @@ build-windows: ensure-static ## Cross-compile Go binary for Windows (amd64)
 install: ensure-static ## Install binary to GOBIN
 	go install
 
-clean: ## Clean built backend binary
+clean: ## Remove backend binaries and Go test cache
 	rm -f paisa paisa.exe
+	go clean -testcache
 
 ##@ Testing & Code Quality
 

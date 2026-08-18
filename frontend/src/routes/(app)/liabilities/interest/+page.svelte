@@ -1,68 +1,159 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     buildLegends,
-    renderOverview,
-    renderPerAccountOverview
+    createInterestOverviewChart,
+    createInterestPerAccountChart,
   } from "$lib/charts/liabilities/interest";
-  import { ajax, type Legend } from "$lib/core/utils";
+  import type { ChartHandle } from "$lib/charts/resize";
+  import { ajax, type Interest, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
-  let isEmpty = false;
-  let legends: Legend[] = [];
+  import { onDestroy, onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+
+  let isEmpty = $state(false);
+  let legends: Legend[] = $state([]);
+  let interests: Interest[] = $state([]);
+  let overviewChart: ChartHandle<Interest[]> | null = $state(null);
+  let perAccountChart: ChartHandle<Interest[]> | null = $state(null);
+
+  function hasLiabilityActivity(interests: Interest[]) {
+    return _.some(interests, (interest) =>
+      !_.isEmpty(interest.overview_timeline) &&
+      _.some(interest.overview_timeline, (point) =>
+        point.drawn_amount !== 0 ||
+        point.interest_amount !== 0 ||
+        point.repaid_amount !== 0
+      )
+    );
+  }
 
   onMount(async () => {
-    const { interest_timeline_breakdown: interests } = await ajax("/api/liabilities/interest");
+    const { interest_timeline_breakdown: loadedInterests } = await ajax("/api/liabilities/interest");
 
-    if (_.isEmpty(interests)) {
+    if (!hasLiabilityActivity(loadedInterests)) {
       isEmpty = true;
       return;
     }
 
     legends = buildLegends();
-    renderOverview(interests);
-    renderPerAccountOverview(interests);
+    interests = loadedInterests;
+    overviewChart = createInterestOverviewChart();
+    perAccountChart = createInterestPerAccountChart();
+    overviewChart.update(interests);
+    perAccountChart.update(interests);
+  });
+
+  onDestroy(() => {
+    overviewChart?.destroy();
+    perAccountChart?.destroy();
   });
 </script>
 
-<section class="section tab-interest" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-centered">
-      <div class="column is-4 has-text-centered">
-        <article class="message">
-          <div class="message-body">
-            <strong>Hurray!</strong> You have no liabilities.
-          </div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Interest Breakdown"
+    description="Interest payments and rates across all liabilities"
+  />
 
-<section class="section tab-interest" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <LegendCard {legends} />
+  <Section title="Interest Overview">
+    {#if !isEmpty}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+    {/if}
+    <ChartFrame
+      type="dynamic"
+      empty={isEmpty}
+      emptyMessage="No liability activity in this period"
+      preserveChildren
+      onresize={(dim) => overviewChart?.resize(dim)}
+    >
+      <div class="paisa-interest-overview-chart paisa-overflow-x-auto">
+        <svg id="d3-interest-overview" />
       </div>
-    </div>
-  </div>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <svg id="d3-interest-overview" />
-        </div>
+    </ChartFrame>
+  </Section>
+
+  <Section title="Per-Account Breakdown">
+    <ChartFrame
+      type="dynamic"
+      empty={isEmpty}
+      emptyMessage="No liability activity in this period"
+      preserveChildren
+    >
+      <div class="d3-interest-timeline-breakdown">
+        <div id="d3-interest-timeline-breakdown"></div>
       </div>
-    </div>
-    <BoxLabel text="Interest Overview" />
-  </div>
-</section>
-<section class="section tab-interest">
-  <div class="container is-fluid d3-interest-timeline-breakdown">
-    <div class="columns">
-      <div id="d3-interest-timeline-breakdown" class="column is-12" />
-    </div>
-  </div>
-</section>
+    </ChartFrame>
+  </Section>
+</Page>
+
+<style lang="scss">
+  .paisa-interest-overview-chart {
+    width: 100%;
+
+    :global(svg) {
+      display: block;
+      width: auto;
+      max-width: none;
+    }
+  }
+
+  .d3-interest-timeline-breakdown {
+    width: 100%;
+  }
+
+  :global(.paisa-interest-account-row) {
+    display: grid;
+    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr);
+    gap: var(--paisa-space-3);
+    align-items: stretch;
+    margin-bottom: var(--paisa-space-4);
+  }
+
+  :global(.paisa-interest-summary-card),
+  :global(.paisa-interest-chart-card) {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: var(--paisa-space-2) var(--paisa-space-3);
+    align-self: stretch;
+  }
+
+  :global(.paisa-interest-summary-card) {
+    justify-content: center;
+  }
+
+  :global(.paisa-interest-summary-table) {
+    table-layout: fixed;
+    margin-bottom: 0;
+  }
+
+  :global(.paisa-interest-summary-table td) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.paisa-interest-chart-card) {
+    overflow-x: auto;
+  }
+
+  :global(.paisa-interest-chart-card svg) {
+    display: block;
+    width: 100%;
+    max-width: none;
+  }
+
+  @media (max-width: 768px) {
+    :global(.paisa-interest-account-row) {
+      grid-template-columns: 1fr;
+    }
+
+    :global(.paisa-interest-summary-card) {
+      max-width: 100%;
+    }
+  }
+</style>

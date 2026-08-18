@@ -20,12 +20,15 @@
   import _ from "lodash";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
-  let files: LedgerFile[] = [];
-  let accounts: string[] = [];
-  let commodities: string[] = [];
+  let files: LedgerFile[] = $state([]);
+  let accounts: string[] = $state([]);
+  let commodities: string[] = $state([]);
 
-  let filteredPostings: Posting[] = [];
+  let filteredPostings: Posting[] = $state([]);
   let rows: { posting: Posting; transaction: Transaction }[] = [];
 
   function handleInputRaw(predicate: (t: Transaction) => boolean) {
@@ -67,95 +70,86 @@
   }
 </script>
 
-<section class="section tab-journal">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <nav class="level">
-          <div class="level-left">
-            <div class="level-item">
-              <div class="field">
-                <div class="control">
-                  <SearchQuery
-                    autocomplete={{
-                      account: accounts,
-                      commodity: commodities,
-                      filename: files.map((f) => f.name)
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
+<Page width="fluid">
+  <PageHeader
+    title="Postings"
+    description="Search postings, filter by account or commodity, and inspect balances"
+  />
+
+  <Section>
+    <div class="field mb-3">
+      <div class="control">
+        <SearchQuery
+          autocomplete={{
+            account: accounts,
+            commodity: commodities,
+            filename: files.map((f) => f.name)
+          }}
+        />
       </div>
     </div>
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto" style="max-width: 98rem;">
-          <div style="width: 98rem;">
-            <div
-              class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline has-text-weight-bold"
-            >
-              <div>Date</div>
-              <div>Description</div>
-              <div>Account</div>
-              <div class="has-text-right">Amount</div>
-              <div class="has-text-right">Balance</div>
-              <div class="has-text-right">Units</div>
-              <div class="has-text-right">Unit Price</div>
-              <div class="has-text-right">Market Value</div>
-              <div class="has-text-right">Change</div>
-              <div class="has-text-right">CAGR</div>
-            </div>
-            <VirtualList
-              height={window.innerHeight - 245}
-              itemCount={filteredPostings.length}
-              itemSize={27}
-            >
-              <div
-                slot="item"
-                class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline is-hoverable"
-                let:index
-                let:style
-                {style}
-              >
-                {@const p = filteredPostings[index]}
-                {@const c = change(p)}
-                <div>{p.date.format("DD MMM YYYY")}</div>
-                <div class="is-size-7 paisa-truncate" title={p.payee}>
-                  <PostingStatus posting={p} />
-                  <PostingNote posting={p} />
-                  <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
-                </div>
-                <div class="custom-icon paisa-truncate" title={p.account}>
-                  <div class="is-flex">
-                    <span class="mr-1" style={accountColorStyle(firstName(p.account))}
-                      >{iconText(p.account)}</span
-                    >
-                    {p.account}
-                  </div>
-                </div>
-                <div class="has-text-right">{formatCurrency(p.amount, 2)}</div>
-                <div class="has-text-right">{formatCurrency(p.balance, 2)}</div>
-                <div class="has-text-right">{unlessDefault(p, formatFloat(p.quantity, 4))}</div>
-                <div class="has-text-right">
-                  {unlessDefault(p, formatCurrency(Math.abs(p.amount / p.quantity), 4))}
-                </div>
-                <div class="has-text-right">
-                  {unlessDefault(p, unlessZero(c.days, formatCurrency(p.market_amount)))}
-                </div>
-                <div class="has-text-right {c.class}">
-                  {unlessZero(c.value, formatCurrency(c.value))}
-                </div>
-                <div class="has-text-right {c.class}">
-                  {unlessZero(c.percentage, formatFloat(c.percentage))}
-                </div>
-              </div>
-            </VirtualList>
-          </div>
+
+    <div class="box paisa-posting-table-container p-0">
+      <div class="paisa-posting-table">
+        <div
+          class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline has-text-weight-bold"
+        >
+          <div>Date</div>
+          <div>Description</div>
+          <div>Account</div>
+          <div class="has-text-right">Amount</div>
+          <div class="has-text-right">Balance</div>
+          <div class="has-text-right">Units</div>
+          <div class="has-text-right">Unit Price</div>
+          <div class="has-text-right">Market Value</div>
+          <div class="has-text-right">Change</div>
+          <div class="has-text-right">CAGR</div>
         </div>
+        <VirtualList
+          height={window.innerHeight - 260}
+          itemCount={filteredPostings.length}
+          itemSize={27}
+        >
+          <svelte:fragment slot="item" let:index let:style>
+            {@const p = filteredPostings[index]}
+            {@const c = change(p)}
+            <div
+              class="px-3 pt-1 paisa-grid gap-1 posting-row is-align-items-baseline is-hoverable"
+              {style}
+            >
+              <div>{p.date.format("DD MMM YYYY")}</div>
+              <div class="is-size-7 paisa-truncate" title={p.payee}>
+                <PostingStatus posting={p} />
+                <PostingNote posting={p} />
+                <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
+              </div>
+              <div class="custom-icon paisa-truncate" title={p.account}>
+                <div class="is-flex">
+                  <span class="mr-1" style={accountColorStyle(firstName(p.account))}
+                    >{iconText(p.account)}</span
+                  >
+                  {p.account}
+                </div>
+              </div>
+              <div class="has-text-right">{formatCurrency(p.amount, 2)}</div>
+              <div class="has-text-right">{formatCurrency(p.balance, 2)}</div>
+              <div class="has-text-right">{unlessDefault(p, formatFloat(p.quantity, 4))}</div>
+              <div class="has-text-right">
+                {unlessDefault(p, formatCurrency(Math.abs(p.amount / p.quantity), 4))}
+              </div>
+              <div class="has-text-right">
+                {unlessDefault(p, unlessZero(c.days, formatCurrency(p.market_amount)))}
+              </div>
+              <div class="has-text-right {c.class}">
+                {unlessZero(c.value, formatCurrency(c.value))}
+              </div>
+              <div class="has-text-right {c.class}">
+                {unlessZero(c.percentage, formatFloat(c.percentage))}
+              </div>
+            </div>
+          </svelte:fragment>
+        </VirtualList>
       </div>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>

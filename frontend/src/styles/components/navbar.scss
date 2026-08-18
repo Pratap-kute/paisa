@@ -1,0 +1,460 @@
+/**
+ * Navbar & Navigation Styling
+ * Clean token-driven styling for the application navigation bar, dropdowns, and breadcrumbs
+ */
+
+.navbar {
+  position: relative;
+  z-index: 40;
+  background-color: var(--paisa-navbar-bg) !important;
+  color: var(--paisa-navbar-text);
+  border-bottom: 1px solid var(--paisa-border-subtle);
+
+  .navbar-brand {
+    align-items: center;
+
+    a.navbar-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: var(--paisa-font-weight-medium);
+      color: var(--paisa-navbar-text);
+
+      &:hover {
+        background-color: transparent !important;
+        color: var(--paisa-brand-primary);
+      }
+    }
+  }
+
+  a.navbar-item,
+  button.navbar-link {
+    background-color: transparent !important;
+    color: var(--paisa-navbar-text);
+    border-radius: var(--paisa-radius-sm);
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
+    padding: 0.5rem 0.75rem;
+
+    &:hover {
+      background-color: var(--paisa-surface-hover) !important;
+      color: var(--paisa-brand-primary);
+    }
+
+    &.is-active {
+      color: var(--paisa-brand-primary);
+      font-weight: var(--paisa-font-weight-semibold);
+    }
+  }
+
+  .navbar-dropdown {
+    overflow: visible;
+    z-index: 41;
+    background-color: var(--paisa-dropdown-bg);
+    border: 1px solid var(--paisa-dropdown-border);
+    border-top: 2px solid var(--paisa-brand-primary);
+    box-shadow: var(--paisa-dropdown-shadow);
+    border-radius: 0 0 var(--paisa-radius-md) var(--paisa-radius-md);
+    padding: 0.25rem 0;
+
+    a.navbar-item {
+      padding: 0.5rem 1rem !important;
+      border-radius: 0 !important;
+      font-size: var(--paisa-font-size-sm);
+      color: var(--paisa-text-primary) !important;
+
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+        font-weight: var(--paisa-font-weight-semibold);
+      }
+    }
+  }
+
+  .navbar-item.has-dropdown.is-hoverable {
+    >button.navbar-link {
+      &::after {
+        border-color: var(--paisa-text-muted);
+        transition: border-color var(--paisa-transition-fast);
+      }
+
+      &:hover::after {
+        border-color: var(--paisa-brand-primary);
+      }
+    }
+  }
+}
+
+/* Navbar action / more button */
+.dropdown-trigger.dropdown-icon {
+  display: flex;
+  align-items: center;
+
+  button {
+    height: 2.25rem;
+    width: 2.25rem;
+    padding: 0;
+    border: none !important;
+    background: transparent !important;
+    color: var(--paisa-navbar-text) !important;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--paisa-radius-full);
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--paisa-surface-hover) !important;
+      color: var(--paisa-brand-primary) !important;
+    }
+
+    .icon {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+/* Generic dropdown content */
+.dropdown-content {
+  background-color: var(--paisa-dropdown-bg);
+  box-shadow: var(--paisa-dropdown-shadow);
+  border: 1px solid var(--paisa-dropdown-border);
+  border-radius: var(--paisa-radius-md);
+  padding: 0.35rem 0;
+  min-width: max-content;
+
+  .dropdown-divider {
+    background-color: var(--paisa-border-subtle);
+    margin: 0.25rem 0;
+  }
+
+  button.dropdown-item {
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: none;
+    font: inherit;
+    color: var(--paisa-text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    padding: 0.5rem 1rem;
+    font-size: var(--paisa-font-size-sm);
+    white-space: nowrap;
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
+
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+      color: var(--paisa-brand-primary);
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      margin: 0 !important;
+    }
+  }
+
+  .dropdown-item {
+    color: var(--paisa-text-primary);
+    padding: 0.5rem 1rem;
+    font-size: var(--paisa-font-size-sm);
+    white-space: nowrap;
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      margin: 0 !important;
+    }
+
+    label.paisa-clickable {
+      display: flex;
+      align-items: center;
+      gap: var(--paisa-space-2);
+      color: var(--paisa-text-primary);
+      cursor: pointer;
+      width: 100%;
+      white-space: nowrap;
+
+      &:hover {
+        color: var(--paisa-brand-primary);
+      }
+    }
+  }
+}
+
+/*
+ * Nested navbar dropdown.
+ *
+ * Important:
+ * The wrapper must NOT behave like a Bulma navbar-item.
+ * Tax is only a trigger for another dropdown, so we own its styling here.
+ */
+.nested.has-dropdown {
+  position: relative;
+  width: 100%;
+
+  /*
+   * Protect against Bulma navbar-item background styles if
+   * navbar-item accidentally remains on this wrapper.
+   */
+  background-color: transparent !important;
+  color: var(--paisa-text-primary) !important;
+
+  &:hover,
+  &:focus,
+  &:focus-within,
+  &:active {
+    background-color: transparent !important;
+  }
+
+  &:hover>.dropdown-menu,
+  &.is-active>.dropdown-menu {
+    display: block;
+  }
+
+  /*
+   * Tax row.
+   *
+   * Do not use Bulma's navbar-link class on this button.
+   * It should use:
+   *
+   * paisa-button-reset nested-menu-trigger
+   */
+  >.nested-menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin: 0;
+
+    border: 0;
+    border-radius: 0;
+    box-shadow: none !important;
+    outline: none;
+
+    background-color: transparent !important;
+    color: var(--paisa-text-primary) !important;
+
+    font: inherit;
+    font-size: var(--paisa-font-size-sm);
+    font-weight: normal;
+    line-height: 1.5;
+    text-align: left;
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition: color var(--paisa-transition-fast);
+
+    /*
+     * Keep the background transparent in every pointer/focus state.
+     * This prevents the persistent dark/blue Tax row.
+     */
+    &:hover,
+    &:focus,
+    &:focus-within,
+    &:active {
+      background-color: transparent !important;
+      color: var(--paisa-text-primary) !important;
+      box-shadow: none !important;
+    }
+
+    /*
+     * Keyboard-only accessibility indicator.
+     * Mouse clicking will not leave a blue background.
+     */
+    &:focus-visible {
+      outline: 1px solid var(--paisa-border-default);
+      outline-offset: -1px;
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+  }
+
+  /*
+   * Third-level menu.
+   * Start exactly at the right edge of the parent menu.
+   */
+  >.dropdown-menu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    z-index: 42;
+    display: none;
+
+    margin-left: 0;
+    padding-top: 0;
+  }
+
+  >.dropdown-menu>.dropdown-content {
+    background-color: var(--paisa-dropdown-bg);
+    border: 1px solid var(--paisa-dropdown-border);
+    border-radius: var(--paisa-radius-md);
+    box-shadow: var(--paisa-dropdown-shadow);
+
+    a.navbar-item {
+      color: var(--paisa-text-primary) !important;
+      padding: 0.5rem 1rem !important;
+
+      &:hover {
+        background-color: var(--paisa-surface-hover) !important;
+        color: var(--paisa-brand-primary) !important;
+      }
+
+      &.is-active {
+        background-color: var(--paisa-brand-primary-light) !important;
+        color: var(--paisa-brand-primary) !important;
+        font-weight: var(--paisa-font-weight-semibold);
+      }
+    }
+  }
+
+  @media screen and (max-width: 1023px) {
+    &:hover > .dropdown-menu {
+      display: none;
+    }
+
+    &.is-active > .dropdown-menu {
+      display: block;
+    }
+
+    >.dropdown-menu {
+      position: static;
+      left: auto;
+      top: auto;
+
+      margin-left: 0;
+      padding-top: 0;
+
+      >.dropdown-content {
+        box-shadow: none !important;
+        background-color: transparent;
+        border: 0;
+      }
+    }
+  }
+}
+
+/* Secondary sub-toolbar below navbar (breadcrumbs, date range, year selectors) */
+.navbar-subtoolbar {
+  padding: 0.5rem 1.25rem;
+  margin-bottom: 0.5rem;
+  min-height: 44px;
+  background-color: var(--paisa-surface-default);
+  border-bottom: 1px solid var(--paisa-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--paisa-space-4);
+  flex-wrap: wrap;
+}
+
+/* Breadcrumb bar below navbar */
+nav.breadcrumb {
+  ul {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    line-height: var(--paisa-line-height-normal);
+
+    &+li::before {
+      padding: 0 0.4rem;
+      font-size: 0.65rem;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+
+  a.is-inactive,
+  span.is-inactive {
+    align-items: center;
+    color: var(--paisa-breadcrumb-muted);
+    cursor: default;
+    display: inline-flex;
+    justify-content: center;
+    padding: 0 0.35rem;
+    pointer-events: none;
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+  }
+
+  li:first-child a.is-inactive,
+  li:first-child span.is-inactive {
+    padding-left: 0;
+  }
+
+  li a span.icon {
+    margin-top: -1px;
+    font-size: var(--paisa-font-size-xs);
+  }
+
+  .paisa-badge {
+    margin-left: var(--paisa-space-1);
+    font-size: 0.625rem;
+    vertical-align: middle;
+  }
+}
+
+.breadcrumb.has-chevron-separator li+li::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  content: "\f054";
+  font-size: 0.55rem;
+  color: var(--paisa-breadcrumb-separator);
+  opacity: 0.7;
+}
+
+@media screen and (max-width: 1023px) {
+  .navbar-menu {
+    box-shadow: var(--paisa-shadow-lg) !important;
+    background-color: var(--paisa-navbar-bg) !important;
+  }
+
+  .navbar-item.has-dropdown {
+    &:not(.is-active) .navbar-dropdown {
+      display: none !important;
+    }
+
+    &.is-active .navbar-dropdown {
+      display: block;
+    }
+  }
+}

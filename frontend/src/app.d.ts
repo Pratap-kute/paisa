@@ -1,10 +1,8 @@
 // deno-lint-ignore-file no-explicit-any no-var -- Ambient browser globals and untyped third-party modules require declaration syntax.
 /// <reference types="@sveltejs/kit" />
-// https://github.com/oven-sh/bun/issues/5134
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 /// <reference lib="esnext" />
-/// <reference lib="webworker" />
 
 declare type Item = import("svelte-dnd-action").Item;
 declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<
@@ -13,10 +11,10 @@ declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<
 declare namespace svelteHTML {
   interface HTMLAttributes<T> {
     "on:consider"?: (
-      event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T },
+      event: CustomEvent<DndEvent> & { target: EventTarget & T },
     ) => void;
     "on:finalize"?: (
-      event: CustomEvent<DndEvent<ItemType>> & { target: EventTarget & T },
+      event: CustomEvent<DndEvent> & { target: EventTarget & T },
     ) => void;
   }
 }
@@ -47,19 +45,19 @@ interface UserConfig {
     name: string;
     icon: string;
   }[];
+  prediction?: {
+    merchant_rules?: { merchant: string; account: string }[];
+  };
 }
 
 interface Runtime {
   BrowserOpenURL: (url: string) => void;
 }
 
-// eslint-disable-next-line no-var
 declare var runtime: Runtime;
 
-// eslint-disable-next-line no-var
 declare var USER_CONFIG: UserConfig;
 
-// eslint-disable-next-line no-var
 declare var __now: any;
 
 declare namespace App {
@@ -76,6 +74,15 @@ declare namespace App {
 declare module "textures" {
   const textures: any;
   export default textures;
+}
+
+declare module "xlsx" {
+  export function read(data: any, opts?: any): any;
+  export namespace utils {
+    export function sheet_to_json<T = any>(sheet: any, opts?: any): T[];
+  }
+  const all: any;
+  export default all;
 }
 
 declare module "xlsx-populate/browser/xlsx-populate.js" {
@@ -102,103 +109,4 @@ declare module "d3-sankey-circular" {
 
 declare module "d3-path-arrows" {
   export function pathArrows(): any;
-}
-
-declare module "svelte-carousel" {
-  import type { SvelteComponentTyped } from "svelte";
-
-  interface CarouselProps {
-    /**
-     * Enables next/prev arrows
-     */
-    arrows?: boolean;
-    /**
-     * Infinite looping
-     */
-    infinite?: boolean;
-    /**
-     * Page to start on
-     */
-    initialPageIndex?: number;
-    /**
-     * Transition duration (ms)
-     */
-    duration?: number;
-    /**
-     * Enables autoplay of pages
-     */
-    autoplay?: boolean;
-    /**
-     *  Autoplay change interval (ms)
-     */
-    autoplayDuration?: number;
-    /**
-     *  Autoplay change direction (next or prev)
-     */
-    autoplayDirection?: "next" | "prev";
-    /**
-     * 	Pauses on focus (for touchable devices - tap the carousel to toggle the autoplay, for non-touchable devices - hover over the carousel to pause the autoplay)
-     */
-    pauseOnFocus?: boolean;
-    /**
-     * Shows autoplay duration progress indicator
-     */
-    autoplayProgressVisible?: boolean;
-    /**
-     * 	Current indicator dots
-     */
-    dots?: boolean;
-    /**
-     * CSS animation timing function
-     */
-    timingFunction?: string;
-    /**
-     * 	swiping
-     */
-    swiping?: boolean;
-    /**
-     *  Number elements to show
-     */
-    particlesToShow?: number;
-    /**
-     * Number of elements to scroll
-     */
-    particlesToScroll?: number;
-  }
-
-  interface CarouselEvents {
-    pageChange: CustomEvent<number>;
-  }
-
-  interface CarouselSlots {
-    prev: {
-      showPrevPage: () => void;
-    };
-    next: {
-      showNextPage: () => void;
-    };
-    dots: {
-      showPage: (pageIndex: number) => void;
-      currentPageIndex: number;
-      pagesCount: number;
-    };
-    default: {
-      showPrevPage: () => void;
-      showNextPage: () => void;
-      currentPageIndex: number;
-      pagesCount: number;
-      showPage: (pageIndex: number) => void;
-      loaded: number[];
-    };
-  }
-
-  export default class Carousel extends SvelteComponentTyped<
-    CarouselProps,
-    CarouselEvents,
-    CarouselSlots
-  > {
-    goTo(pageIndex: number, options?: { animated?: boolean }): Promise<void>;
-    goToPrev(options?: { animated?: boolean }): Promise<void>;
-    goToNext(options?: { animated?: boolean }): Promise<void>;
-  }
 }

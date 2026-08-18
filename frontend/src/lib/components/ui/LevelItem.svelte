@@ -1,21 +1,32 @@
 <script lang="ts">
   import _ from "lodash";
 
-  export let title: string;
-  export let value: string;
-  export let small: boolean = false;
-  export let narrow: boolean = false;
-  export let color: string = null;
-  export let subtitle: string = null;
+  interface Props {
+    title: string;
+    value: string;
+    small?: boolean;
+    narrow?: boolean;
+    color?: string;
+    subtitle?: string;
+  }
+
+  let {
+    title,
+    value,
+    small = false,
+    narrow = false,
+    color = undefined,
+    subtitle = undefined
+  }: Props = $props();
 </script>
 
-<div class="level-item {narrow && 'is-narrow'} has-text-left" class:small>
+<div class="level-item {narrow ? 'is-narrow' : ''} has-text-left" class:small>
   <div>
     <p class="heading">{title}</p>
     {#if color}
-      <p class="title" style="padding: 5px; color: {color};">{value}</p>
+      <p class="title" style="color: {color};">{value}</p>
     {:else}
-      <p class="title has-text-grey-dark">{value}</p>
+      <p class="title paisa-level-value">{value}</p>
     {/if}
     {#if !_.isEmpty(subtitle)}
       <div class="sub-title">{@html subtitle}</div>
@@ -24,48 +35,58 @@
 </div>
 
 <style lang="scss">
-  @import "bulma/sass/utilities/_all.sass";
+  .level-item {
+    display: block !important;
+    text-align: left;
+    flex: 1 1 0%;
+    min-width: 0;
+    margin: 0;
 
-  .level-item.small {
-    .title {
-      font-size: 1.25rem !important;
-      line-height: 1.5rem !important;
+    &.is-narrow {
+      flex: 0 0 auto;
+    }
+
+    > div {
+      width: 100%;
+      text-align: left;
+      min-width: 0;
     }
   }
 
   .heading {
-    font-weight: 400 !important;
-    font-size: 1rem !important;
-    text-transform: capitalize !important;
-    letter-spacing: normal !important;
-    margin-bottom: 0 !important;
+    color: var(--paisa-text-secondary);
+    font-weight: var(--paisa-font-weight-medium);
+    font-size: var(--paisa-font-size-sm);
+    text-transform: capitalize;
+    letter-spacing: normal;
+    margin-bottom: var(--paisa-space-1);
   }
 
   .title {
-    font-weight: 800 !important;
-    font-size: 1.75rem !important;
-    line-height: 2rem !important;
-    padding-left: 0 !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
+    color: var(--paisa-text-primary);
+    font-weight: var(--paisa-font-weight-bold);
+    font-size: clamp(1rem, 2.4vw, var(--paisa-font-size-metric));
+    font-variant-numeric: tabular-nums;
+    line-height: var(--paisa-line-height-tight);
+    padding: 0.125rem 0;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
-  @include widescreen {
-    .title {
-      font-size: 2.25rem !important;
-      line-height: 2.5rem !important;
-    }
+  .paisa-level-value {
+    color: var(--paisa-text-primary);
+  }
 
-    .level-item.small {
-      .title {
-        font-size: 1.5rem !important;
-        line-height: 1.75rem !important;
-      }
-    }
+  .level-item.small .title {
+    font-size: clamp(0.95rem, 2vw, var(--paisa-font-size-xl));
+    line-height: var(--paisa-line-height-tight);
   }
 
   .sub-title {
-    font-weight: normal !important;
-    font-size: 0.75rem !important;
+    color: var(--paisa-text-muted);
+    font-weight: var(--paisa-font-weight-normal);
+    font-size: var(--paisa-font-size-xs);
+    margin-top: var(--paisa-space-1);
   }
 </style>

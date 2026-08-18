@@ -6,8 +6,11 @@
   import _ from "lodash";
   import { onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
-  let prices: Record<string, Price[]> = {};
+  let prices: Record<string, Price[]> = $state({});
 
   const ITEM_SIZE = 18;
 
@@ -53,63 +56,64 @@
   });
 </script>
 
-<section class="section tab-price">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-12">
-        <div class="box p-3">
-          <div class="field has-addons mb-0">
-            <p class="control">
-              <button
-                class="button is-small is-link invertable is-light is-danger"
-                on:click={(_e) => clearPriceCache()}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-trash-can" />
-                </span>
-                <span>Clear Price Cache</span>
-              </button>
-            </p>
-          </div>
-        </div>
+<Page width="fluid">
+  <PageHeader
+    title="Commodity Prices"
+    description="Latest prices, historical changes, and market trends"
+  />
+
+  <Section>
+    <div class="box p-3 mb-3">
+      <div class="field has-addons mb-0">
+        <p class="control">
+          <button
+            class="button is-small is-link invertable is-light is-danger"
+            onclick={(_e) => clearPriceCache()}
+          >
+            <span class="icon is-small">
+              <i class="fas fa-trash-can"></i>
+            </span>
+            <span>Clear Price Cache</span>
+          </button>
+        </p>
       </div>
-      <div class="column is-12">
-        <div class="box paisa-overflow-x-auto">
-          <table class="table is-narrow is-fullwidth is-light-border is-hoverable">
-            <thead>
-              <tr>
-                <th />
-                <th>Commodity Name</th>
-                <th>Last Date</th>
-                <th class="has-text-right">Last Price</th>
-                <th class="has-text-right">1 Day</th>
-                <th class="has-text-right">1 Week</th>
-                <th class="has-text-right">4 Weeks</th>
-                <th class="has-text-right">1 Year</th>
-                <th class="has-text-right">3 Years</th>
-                <th class="has-text-right">5 Years</th>
-                <th>Commodity Type</th>
-                <th>Commodity ID</th>
-              </tr>
-            </thead>
-            <tbody class="has-text-grey-dark">
-              {#each Object.keys(prices) as commodity}
-                {@const p = prices[commodity][0]}
-                <Toggleable>
+    </div>
+
+    <div class="box paisa-overflow-x-auto p-0">
+      <table class="table is-narrow is-fullwidth is-light-border is-hoverable mb-0">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Commodity Name</th>
+            <th>Last Date</th>
+            <th class="has-text-right">Last Price</th>
+            <th class="has-text-right">1 Day</th>
+            <th class="has-text-right">1 Week</th>
+            <th class="has-text-right">4 Weeks</th>
+            <th class="has-text-right">1 Year</th>
+            <th class="has-text-right">3 Years</th>
+            <th class="has-text-right">5 Years</th>
+            <th>Commodity Type</th>
+            <th>Commodity ID</th>
+          </tr>
+        </thead>
+        <tbody class="has-text-grey-dark">
+          {#each Object.keys(prices) as commodity}
+            {@const p = prices[commodity]?.[0]}
+            {#if p}
+              <Toggleable>
+                {#snippet toggle({ active, onclick })}
                   <tr
                     class={active ? "is-active" : ""}
                     style="cursor: pointer;"
-                    slot="toggle"
-                    let:active
-                    let:onclick
-                    on:click={(e) => onclick(e)}
+                    onclick={(e) => onclick(e)}
                   >
                     <td>
                       <span class="icon has-text-link">
                         <i
                           class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
                           aria-hidden="true"
-                        />
+                        ></i>
                       </span>
                     </td>
 
@@ -137,8 +141,10 @@
                     <td>{p.commodity_type}</td>
                     <td>{p.commodity_id}</td>
                   </tr>
-                  <tr slot="content">
-                    <td colspan="10" />
+                {/snippet}
+                {#snippet content()}
+                  <tr>
+                    <td colspan="10"></td>
                     <td colspan="2" class="p-0">
                       <div>
                         <VirtualList
@@ -147,29 +153,30 @@
                           itemCount={prices[commodity].length}
                           itemSize={ITEM_SIZE}
                         >
-                          <div
-                            slot="item"
-                            let:index
-                            let:style
-                            {style}
-                            class="small-box is-flex is-flex-wrap-wrap is-justify-content-space-between is-size-7"
-                          >
-                            {@const p = prices[commodity][index]}
-                            <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
-                            <div class="pr-1 has-text-right">
-                              {formatCurrency(p.value, 4)}
+                          <svelte:fragment slot="item" let:index let:style>
+                            {@const p = prices[commodity]?.[index]}
+                            <div
+                              {style}
+                              class="small-box is-flex is-flex-wrap-wrap is-justify-content-space-between is-size-7"
+                            >
+                              {#if p}
+                                <div class="pl-1">{p.date.format("DD MMM YYYY")}</div>
+                                <div class="pr-1 has-text-right">
+                                  {formatCurrency(p.value, 4)}
+                                </div>
+                              {/if}
                             </div>
-                          </div>
+                          </svelte:fragment>
                         </VirtualList>
                       </div>
                     </td>
                   </tr>
-                </Toggleable>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                {/snippet}
+              </Toggleable>
+            {/if}
+          {/each}
+        </tbody>
+      </table>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>

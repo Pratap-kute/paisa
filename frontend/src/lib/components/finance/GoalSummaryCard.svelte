@@ -8,9 +8,13 @@
   import dayjs from "dayjs";
   import type { Action } from "svelte/action";
 
-  export let goal: GoalSummary;
-  export let small = false;
-  export let action: Action = null;
+  interface Props {
+    goal: GoalSummary;
+    small?: boolean;
+    action?: Action;
+  }
+
+  let { goal, small = false, action = null }: Props = $props();
 
   function formatDate(date: string) {
     const d = dayjs(date, "YYYY-MM-DD", true);
@@ -28,15 +32,15 @@
     return (goal.current / goal.target) * 100;
   }
 
-  $: completed = percentComplete(goal);
+  let completed = $derived(percentComplete(goal));
 </script>
 
 <div class="box p-3 goal-summary-card" class:mb-3={small}>
-  <div class="is-flex is-justify-content-space-between mb-4">
-    <div class="is-flex">
+  <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+    <div class="is-flex is-align-items-center">
       {#if action}
-        <span use:action class="icon is-size-4 mr-1 mt-1 has-text-grey-light">
-          <i class="fas fa-grip-vertical" />
+        <span use:action class="icon is-size-5 mr-2 has-text-grey-light paisa-clickable">
+          <i class="fas fa-grip-vertical"></i>
         </span>
       {/if}
       <a
@@ -47,7 +51,7 @@
       </a>
     </div>
     {#if !_.isEmpty(goal.icon)}
-      <span class="{small ? 'is-size-3' : 'is-size-2'} custom-icon">{iconGlyph(goal.icon)}</span>
+      <span class="{small ? 'is-size-3' : 'is-size-2'} custom-icon is-inline-flex is-align-items-center">{iconGlyph(goal.icon)}</span>
     {/if}
   </div>
   <nav class="level grid-2">

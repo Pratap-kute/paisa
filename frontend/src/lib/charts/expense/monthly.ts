@@ -26,6 +26,7 @@ import {
 } from "svelte/store";
 import { iconify } from "../../core/icon";
 import { byExpenseGroup, expenseGroup, pieData } from "../expense";
+import { plotSize, type ChartHandle, type Dimensions } from "../resize";
 
 export function renderCalendar(
   month: string,
@@ -76,10 +77,12 @@ export function renderCalendar(
     );
   };
 
+  const width = 36;
+  const height = 36;
+
   const dayDiv = dayDivs
     .join("div")
-    .attr("class", "date p-1")
-    .style("position", "relative")
+    .attr("class", "date")
     .attr("data-tippy-content", tooltipContent)
     .style(
       "visibility",
@@ -87,44 +90,32 @@ export function renderCalendar(
         d.isBefore(monthStart) || d.isAfter(monthEnd) ? "hidden" : "visible",
     );
 
-  dayDiv
-    .selectAll("span.day")
-    .data((d) => [d])
-    .join("span")
-    .attr("class", "day has-text-grey-light")
-    .style("position", "absolute")
-    .text((d) => d.date().toString());
-
-  dayDiv
-    .selectAll("span.total")
-    .data((d) => [d])
-    .join("span")
-    .attr("class", "total is-size-7 has-text-weight-bold")
-    .style("position", "absolute")
-    .style("bottom", "-5px")
-    .style("color", (d) =>
-      chroma(COLORS.lossText)
-        .alpha(alpha(expensesByDayTotal[d.format("YYYY-MM-DD")]))
-        .hex())
-    .text((d) => {
-      const total = expensesByDayTotal[d.format("YYYY-MM-DD")];
-      if (total > 0) {
-        return formatCurrencyCrude(total);
-      }
-      return "";
-    });
-
-  const width = 35;
-  const height = 50;
-
-  dayDiv
-    .selectAll("svg")
+  const svg = dayDiv
+    .selectAll("svg.donut-svg")
     .data((d) => [d])
     .join("svg")
+    .attr("class", "donut-svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
+    .attr("viewBox", [-width / 2, -height / 2, width, height]);
+
+  // Subtle background ring for days without expenses
+  svg
+    .selectAll("circle.bg-ring")
+    .data((d) => [d])
+    .join("circle")
+    .attr("class", "bg-ring")
+    .attr("r", 15)
+    .attr("fill", "none")
+    .attr("stroke", "var(--paisa-border-subtle)")
+    .attr("stroke-width", 2)
+    .attr(
+      "opacity",
+      (d) => (expensesByDayTotal[d.format("YYYY-MM-DD")] > 0 ? 0 : 0.4),
+    );
+
+  // Donut slices
+  svg
     .selectAll("path")
     .data((d) => pieData(expensesByDay[d.format("YYYY-MM-DD")]))
     .join("path")
@@ -133,6 +124,35 @@ export function renderCalendar(
     })
     .attr("d", (arc) => {
       return d3.arc().innerRadius(13).outerRadius(17)(arc as any);
+    });
+
+  // Date number centered inside donut circle
+  svg
+    .selectAll("text.day-text")
+    .data((d) => [d])
+    .join("text")
+    .attr("class", "day-text")
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
+    .attr("x", 0)
+    .attr("y", 0)
+    .style("font-size", "0.75rem")
+    .style("font-weight", "500")
+    .style("fill", "var(--paisa-text-primary)")
+    .text((d) => d.date().toString());
+
+  // Total amount below donut
+  dayDiv
+    .selectAll("span.total")
+    .data((d) => [d])
+    .join("span")
+    .attr("class", "total")
+    .text((d) => {
+      const total = expensesByDayTotal[d.format("YYYY-MM-DD")];
+      if (total > 0) {
+        return formatCurrencyCrude(total);
+      }
+      return "";
     });
 }
 
@@ -150,16 +170,27 @@ export function renderMonthlyExpensesTimeline(
   z: d3.ScaleOrdinal<string, string, never>;
   destroy: Unsubscriber;
   legends: Legend[];
+  resize: (dimensions: { width: number; height: number }) => void;
 } {
   const id = "#d3-monthly-expense-timeline";
   const timeFormat = "MMM-YYYY";
   const MAX_BAR_WIDTH = rem(40);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) {
+    return {
+      z: d3.scaleOrdinal<string, string, never>(),
+      destroy: () => {},
+      legends: [],
+      resize: () => {},
+    };
+  }
+
   const svg = d3.select(id),
-    margin = { top: rem(15), right: rem(30), bottom: rem(60), left: rem(40) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
+    margin = { top: rem(15), right: rem(30), bottom: rem(60), left: rem(40) };
+  let width = el.parentElement.clientWidth -
+    margin.left -
+    margin.right;
+  const height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
@@ -183,6 +214,7 @@ export function renderMonthlyExpensesTimeline(
         // void
       },
       legends: [],
+      resize: () => {},
     };
   }
 
@@ -304,7 +336,8 @@ export function renderMonthlyExpensesTimeline(
     );
     const sum = (p: Point) => _.sum(_.map(allowedGroups, (k) => p[k]));
     x.domain(allowedPoints.map((p) => p.month));
-    y.domain([0, d3.max(allowedPoints, sum)]);
+    const maxY = d3.max(allowedPoints, sum) ?? 0;
+    y.domain([0, maxY > 0 ? maxY : 1]);
 
     const t = svg.transition().duration(firstRender ? 0 : 750);
     firstRender = false;
@@ -441,34 +474,53 @@ export function renderMonthlyExpensesTimeline(
       }) as Legend,
   );
 
-  return { z: z, destroy: destroy, legends };
+  const resize = (dimensions: { width: number; height: number }) => {
+    width = Math.max(0, dimensions.width - margin.left - margin.right);
+    x.range([0, width]);
+    svg.attr("width", width + margin.left + margin.right);
+    render(selectedGroups, get(dateRangeStore));
+  };
+
+  return { z: z, destroy: destroy, legends, resize };
 }
 
-export function renderCurrentExpensesBreakdown(
+export function createCurrentExpensesBreakdown(
   z: d3.ScaleOrdinal<string, string, never>,
-) {
-  const id = "#d3-current-month-breakdown";
-  const BAR_HEIGHT = rem(20);
+  id = "#d3-current-month-breakdown",
+): ChartHandle<Posting[]> {
+  const BAR_HEIGHT = rem(28);
   const LABEL_GAP = rem(8);
-  const svg = d3.select(id),
-    margin = { top: 0, right: rem(160), bottom: rem(20), left: rem(100) },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    g = svg.append("g").attr(
+  let postings: Posting[] = [];
+  let size: Dimensions = { width: 0, height: 0 };
+
+  function breakdownMargins(containerWidth: number) {
+    const narrow = containerWidth < 480;
+    return {
+      top: 0,
+      right: rem(narrow ? 72 : 160),
+      bottom: rem(20),
+      left: rem(narrow ? 56 : 100),
+    };
+  }
+
+  function draw() {
+    const el = document.getElementById(id.substring(1));
+    if (!el?.parentElement) return;
+
+    const svg = d3.select(id);
+    svg.selectAll("*").remove();
+
+    const margin = breakdownMargins(
+      size.width || el.parentElement.clientWidth,
+    );
+    const { width, containerWidth } = plotSize(el, margin, size, {
+      minWidth: rem(80),
+    });
+    const g = svg.append("g").attr(
       "transform",
       "translate(" + margin.left + "," + margin.top + ")",
     );
 
-  const x = d3.scaleLinear().range([0, width]);
-  const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
-
-  const xAxis = g.append("g").attr("class", "axis y");
-  const yAxis = g.append("g").attr("class", "axis y dark");
-
-  const bar = g.append("g");
-
-  return (postings: Posting[]) => {
     interface Point {
       category: string;
       postings: Posting[];
@@ -485,17 +537,23 @@ export function renderCurrentExpensesBreakdown(
     const total = _.sumBy(points, (p) => p.total);
 
     const height = BAR_HEIGHT * keys.length;
-    svg.attr("height", height + margin.top + margin.bottom);
+    svg
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", containerWidth);
 
+    if (_.isEmpty(points) || total <= 0) {
+      return;
+    }
+
+    const x = d3.scaleLinear().range([0, width]);
+    const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
     y.domain(keys);
-    x.domain([0, d3.max(points, (p) => p.total)]);
+    x.domain([0, d3.max(points, (p) => p.total) ?? 1]);
     y.range([height, 0]);
 
-    const t = svg.transition().duration(750);
-
-    xAxis
+    g.append("g")
+      .attr("class", "axis y")
       .attr("transform", "translate(0," + height + ")")
-      .transition(t)
       .call(
         d3
           .axisBottom(x)
@@ -503,8 +561,8 @@ export function renderCurrentExpensesBreakdown(
           .tickFormat(skipTicks(60, x, formatCurrencyCrude)),
       );
 
-    yAxis
-      .transition(t)
+    g.append("g")
+      .attr("class", "axis y dark")
       .call(
         d3.axisLeft(y).tickFormat((g) =>
           iconify(g, { group: "Expenses", suffix: true })
@@ -512,7 +570,7 @@ export function renderCurrentExpensesBreakdown(
       );
 
     const tooltipContent = (d: Point) => {
-      const total = _.sumBy(d.postings, (p) => p.amount);
+      const pointTotal = _.sumBy(d.postings, (p) => p.amount);
       return tooltip(
         d.postings.map((p) => {
           return [
@@ -522,87 +580,66 @@ export function renderCurrentExpensesBreakdown(
           ];
         }),
         {
-          total: formatCurrency(total),
-          header: `${d.postings[0].date.format("MMM YYYY")} ${d.category}`,
+          total: formatCurrency(pointTotal),
+          header: `${
+            d.postings[0]?.date.format("MMM YYYY") || ""
+          } ${d.category}`,
         },
       );
     };
 
+    const bar = g.append("g");
     bar
       .selectAll("rect")
-      .data(points, (p: any) => p.category)
-      .join(
-        (enter) =>
-          enter
-            .append("rect")
-            .attr("fill", function (d) {
-              return z(d.category);
-            })
-            .attr("data-tippy-content", tooltipContent)
-            .attr("x", x(0))
-            .attr("y", function (d) {
-              return y(d.category) +
-                (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2;
-            })
-            .attr("width", function (d) {
-              return x(d.total);
-            })
-            .attr("height", y.bandwidth()),
-        (update) =>
-          update
-            .attr("fill", function (d) {
-              return z(d.category);
-            })
-            .attr("data-tippy-content", tooltipContent)
-            .transition(t)
-            .attr("x", x(0))
-            .attr("y", function (d) {
-              return y(d.category) +
-                (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2;
-            })
-            .attr("width", function (d) {
-              return x(d.total);
-            })
-            .attr("height", y.bandwidth()),
-        (exit) => exit.remove(),
-      );
+      .data(points)
+      .join("rect")
+      .attr("fill", (d) => z(d.category))
+      .attr("data-tippy-content", tooltipContent)
+      .attr("x", x(0))
+      .attr("y", (d) =>
+        y(d.category) +
+        (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2)
+      .attr("width", (d) => x(d.total))
+      .attr("height", y.bandwidth());
 
     const rightLabel = (d: Point) =>
       `${formatCurrency(d.total)} ${
-        formatFixedWidthFloat((d.total / total) * 100, 6)
+        formatFixedWidthFloat(total > 0 ? (d.total / total) * 100 : 0, 6)
       }%`;
 
     bar
       .selectAll("text")
-      .data(points, (p: any) => p.category)
-      .join(
-        (enter) =>
-          enter
-            .append("text")
-            .attr("text-anchor", "start")
-            .attr("dominant-baseline", "middle")
-            .attr("y", function (d) {
-              return y(d.category) + y.bandwidth() / 2;
-            })
-            .attr("x", width + LABEL_GAP)
-            .style("white-space", "pre")
-            .style("font-size", "0.928rem")
-            .style("font-weight", "bold")
-            .style("fill", function (d) {
-              return chroma(z(d.category)).darken(0.8).hex();
-            })
-            .attr("class", "is-family-monospace")
-            .text(rightLabel),
-        (update) =>
-          update
-            .text(rightLabel)
-            .transition(t)
-            .attr("y", function (d) {
-              return y(d.category) + y.bandwidth() / 2;
-            }),
-        (exit) => exit.remove(),
-      );
+      .data(points)
+      .join("text")
+      .attr("text-anchor", "start")
+      .attr("dominant-baseline", "middle")
+      .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
+      .attr("x", width + LABEL_GAP)
+      .style("white-space", "pre")
+      .style("font-size", "0.928rem")
+      .style("font-weight", "bold")
+      .style("fill", (d) => chroma(z(d.category)).darken(0.8).hex())
+      .attr("class", "is-family-monospace")
+      .text(rightLabel);
+  }
 
-    return;
+  return {
+    update(next) {
+      postings = next;
+      draw();
+    },
+    resize(dimensions) {
+      size = dimensions;
+      draw();
+    },
+    destroy() {
+      d3.select(id).selectAll("*").remove();
+    },
   };
+}
+
+export function renderCurrentExpensesBreakdown(
+  z: d3.ScaleOrdinal<string, string, never>,
+) {
+  return createCurrentExpensesBreakdown(z).update;
 }

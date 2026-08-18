@@ -5,47 +5,68 @@
     renderAllocationTimeline
   } from "$lib/charts/allocation";
   import COLORS, { generateColorScheme } from "$lib/core/colors";
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
-  import { ajax, formatPercentage, rem, type Aggregate, type Legend } from "$lib/core/utils";
+  import { ajax, formatPercentage, type Aggregate, type Legend } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
-  let showAllocation = false;
-  let depth = 2;
-  let allocationTimelineLegends: Legend[] = [];
-  let aggregateLeafNodes: Aggregate[] = [];
+  let showAllocation = $state(false);
+  let depth = $state(2);
+  let allocationTimelineLegends: Legend[] = $state([]);
+  let aggregateLeafNodes: Aggregate[] = $state([]);
+  let allocationTimeline: unknown = $state(null);
   let total = 0;
 
   const columns: ColumnDefinition[] = [
-    { title: "Account", field: "account", formatter: accountName },
+    {
+      title: "Account",
+      field: "account",
+      formatter: accountName,
+      minWidth: 240,
+      widthGrow: 1,
+      headerHozAlign: "left",
+    },
     {
       title: "Market Value",
       field: "market_amount",
+      width: 140,
+      minWidth: 130,
+      maxWidth: 160,
       hozAlign: "right",
-      formatter: nonZeroCurrency
+      headerHozAlign: "right",
+      formatter: nonZeroCurrency,
     },
     {
       title: "Percent",
       field: "percent",
+      width: 96,
+      minWidth: 88,
+      maxWidth: 110,
       hozAlign: "right",
-      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2)
+      headerHozAlign: "right",
+      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
     },
     {
-      title: "%",
+      title: "Share",
       field: "percent",
-      hozAlign: "right",
+      minWidth: 180,
+      widthGrow: 2,
+      hozAlign: "left",
+      headerHozAlign: "left",
+      headerSort: false,
       formatter: "progress",
-      cssClass: "has-text-left",
-      minWidth: rem(250),
       formatterParams: {
         color: COLORS.assets,
-        min: 0
-      }
-    }
+        min: 0,
+      },
+    },
   ];
 
   onMount(async () => {
@@ -69,6 +90,7 @@
     if (!_.isEmpty(allocationTargets)) {
       showAllocation = true;
     }
+    allocationTimeline = aggregatesTimeline;
     await tick();
 
     renderAllocationTarget(allocationTargets, color);
@@ -77,59 +99,43 @@
   });
 </script>
 
-<section class="section tab-allocation" style={showAllocation ? "" : "display: none"}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div class="box paisa-overflow-x-auto">
-          <div id="d3-allocation-target-treemap" style="width: 100%; position: relative" />
-          <svg id="d3-allocation-target" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation Targets" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px" />
-      </div>
-    </div>
-    <BoxLabel text="Allocation by category" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 has-text-centered">
-        <div id="d3-allocation-value" style="width: 100%; height: 300px" />
-      </div>
-    </div>
-    <BoxLabel text="Allocation by value" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box">
-          <LegendCard legends={allocationTimelineLegends} clazz="ml-4" />
-          <svg id="d3-allocation-timeline" width="100%" height="300" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Allocation Timeline" />
-  </div>
-</section>
-<section class="section tab-allocation">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <Table data={aggregateLeafNodes} tree {columns} />
-      </div>
-    </div>
-    <BoxLabel text="Allocation Table" />
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Asset Allocation"
+    description="Asset class distribution, targets, and historical allocation"
+  />
+
+  {#if showAllocation}
+    <Section title="Allocation Targets">
+      <ChartFrame type="dynamic">
+        <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
+        <svg id="d3-allocation-target" />
+      </ChartFrame>
+    </Section>
+  {/if}
+
+  <Section title="Allocation by category">
+    <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px"></div>
+  </Section>
+
+  <Section title="Allocation by value">
+    <div id="d3-allocation-value" style="width: 100%; height: 300px"></div>
+  </Section>
+
+  <Section title="Allocation Timeline">
+    <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline" onresize={() => {
+      const el = document.getElementById("d3-allocation-timeline");
+      el?.replaceChildren();
+      if (allocationTimeline) {
+        allocationTimelineLegends = renderAllocationTimeline(allocationTimeline as never);
+      }
+    }}>
+      <svg id="d3-allocation-timeline" width="100%" height="300" />
+    </ChartFrame>
+  </Section>
+
+  <Section title="Allocation Table">
+    <Table data={aggregateLeafNodes} {columns} options={{ layout: "fitDataFill" }} />
+  </Section>
+</Page>

@@ -7,30 +7,36 @@
     tooltip,
     type TransactionSchedule
   } from "$lib/core/utils";
-  export let schedule: TransactionSchedule;
+  interface Props {
+    schedule: TransactionSchedule;
+  }
 
-  const icon = scheduleIcon(schedule);
+  let { schedule }: Props = $props();
 
-  const tooltipHtml = tooltip(
-    [
+  let icon = $derived(scheduleIcon(schedule));
+
+  let tooltipHtml = $derived(
+    tooltip(
       [
-        "Due Date",
-        [schedule.scheduled.format("DD MMM YYYY"), "has-text-weight-bold has-text-right"]
+        [
+          "Due Date",
+          [schedule.scheduled.format("DD MMM YYYY"), "has-text-weight-bold has-text-right"]
+        ],
+        [
+          "Cleared On",
+          [schedule.actual?.format("DD MMM YYYY") || "", "has-text-weight-bold has-text-right"]
+        ],
+        ["Amount", [formatCurrency(schedule.amount), "has-text-weight-bold has-text-right"]]
       ],
-      [
-        "Cleared On",
-        [schedule.actual?.format("DD MMM YYYY") || "", "has-text-weight-bold has-text-right"]
-      ],
-      ["Amount", [formatCurrency(schedule.amount), "has-text-weight-bold has-text-right"]]
-    ],
-    { header: schedule.key }
+      { header: schedule.key }
+    )
   );
 </script>
 
 <div class="px-2 is-flex is-size-6 is-justify-content-space-between gap-2" data-tippy-content={tooltipHtml}>
   <div class="paisa-truncate" title={schedule.key}>
     <span class="icon is-small {icon.color}">
-      <i class="fas {icon.icon}" />
+      <i class="fas {icon.icon}"></i>
     </span>
     <span class="ml-1">
       {#if schedule.actual}

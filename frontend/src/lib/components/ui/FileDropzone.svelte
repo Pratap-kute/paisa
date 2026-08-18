@@ -1,10 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
-  export let accept = "";
-  export let multiple = false;
-  let input: HTMLInputElement;
-  let dragging = false;
+  interface Props {
+    accept?: string;
+    multiple?: boolean;
+    children?: Snippet;
+  }
+
+  let { accept = "", multiple = false, children }: Props = $props();
+  let input: HTMLInputElement = $state();
+  let dragging = $state(false);
   const dispatch = createEventDispatcher<{ drop: { acceptedFiles: File[]; rejectedFiles: File[] } }>();
 
   function accepted(file: File) {
@@ -26,15 +32,32 @@
   type="button"
   class="dropzone paisa-file-dropzone"
   class:is-dragging={dragging}
-  on:click={() => input.click()}
-  on:dragenter|preventDefault={() => (dragging = true)}
-  on:dragover|preventDefault={() => (dragging = true)}
-  on:dragleave|preventDefault={() => (dragging = false)}
-  on:drop|preventDefault={(event) => {
+  onclick={() => input.click()}
+  ondragenter={(e) => {
+    e.preventDefault();
+    dragging = true;
+  }}
+  ondragover={(e) => {
+    e.preventDefault();
+    dragging = true;
+  }}
+  ondragleave={(e) => {
+    e.preventDefault();
     dragging = false;
-    select(event.dataTransfer?.files || null);
+  }}
+  ondrop={(e: DragEvent) => {
+    e.preventDefault();
+    dragging = false;
+    select(e.dataTransfer?.files || null);
   }}
 >
-  <slot />
+  {@render children?.()}
 </button>
-<input bind:this={input} class="is-hidden" type="file" {accept} {multiple} on:change={(event) => select(event.currentTarget.files)} />
+<input
+  bind:this={input}
+  class="is-hidden"
+  type="file"
+  {accept}
+  {multiple}
+  onchange={(event) => select(event.currentTarget.files)}
+/>

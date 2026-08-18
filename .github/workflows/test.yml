@@ -19,44 +19,46 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  VITE_CONFIG_NATIVE_IGNORE_WARNING: true
+
 jobs:
-  lint:
-    name: Lint & Type-Check
+  nix-warmup:
+    name: Nix & Deno Warmup
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: nixbuild/nix-quick-install-action@v30
-      - uses: nix-community/cache-nix-action@v6
+      - uses: ./.github/actions/ci-setup
         with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
-      - name: Install dependencies
-        run: nix develop --command bash -c "cd frontend && deno install"
+          save-nix-cache: "true"
+
+  lint:
+    name: Lint & Type-Check
+    needs: nix-warmup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ci-setup
       - name: Lint and type-check
         run: nix develop --command make lint
 
   unit-coverage:
     name: Backend & Frontend Coverage
+    needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: nixbuild/nix-quick-install-action@v30
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
-      - name: Install dependencies
-        run: nix develop --command bash -c "cd frontend && deno install"
-      - name: Sync SvelteKit generated types
-        run: nix develop --command bash -c "cd frontend && deno run -A npm:@sveltejs/kit sync"
-      - name: Backend tests
-        run: nix develop --command make test-backend
-      - name: Frontend unit tests
-        run: nix develop --command make test-unit
-      - name: Core coverage gate and component coverage report
-        run: nix develop --command make test-coverage
+      - uses: ./.github/actions/ci-setup
+      - name: Backend and frontend coverage
+        run: |
+          nix develop --command bash -c "
+            cd frontend && deno run -A npm:@sveltejs/kit sync
+            cd ..
+            make test-backend test-unit test-coverage
+          "
       - name: Upload coverage artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -66,56 +68,39 @@ jobs:
           retention-days: 7
           path: coverage/
 
-  e2e:
-    name: Browser E2E Tests
+  integration:
+    name: API Regression Tests
+    needs: nix-warmup
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: nixbuild/nix-quick-install-action@v30
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
-      - name: Install dependencies
-        run: nix develop --command bash -c "cd frontend && deno install"
-      - name: Build frontend static assets
-        run: nix develop --command make build-frontend
-      - name: Browser E2E tests
-        run: nix develop --command make test-e2e
-      - name: Upload E2E test reports on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-test-reports-${{ github.run_attempt }}
-          if-no-files-found: ignore
-          retention-days: 7
-          path: |
-            playwright-report/
-            test-results/
+      - uses: ./.github/actions/ci-setup
+      - name: API regression tests
+        run: |
+          nix develop --command bash -c "
+            cd backend && make build
+            cd ../frontend && TZ=UTC deno task test:integration
+          "
 
-  visual:
-    name: Visual Regression Tests
+  browser:
+    name: Browser E2E & Visual Tests
+    needs: nix-warmup
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
-      - uses: nixbuild/nix-quick-install-action@v30
-      - uses: nix-community/cache-nix-action@v6
-        with:
-          primary-key: nix-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-          restore-prefixes-first-match: nix-${{ runner.os }}-${{ runner.arch }}
-      - name: Install dependencies
-        run: nix develop --command bash -c "cd frontend && deno install"
-      - name: Build frontend static assets
-        run: nix develop --command make build-frontend
-      - name: Visual snapshot tests
-        run: nix develop --command make test-visual
-      - name: Upload visual test reports on failure
+      - uses: ./.github/actions/ci-setup
+      - name: Browser E2E and visual tests
+        run: |
+          nix develop --command bash -c "
+            make build-frontend test-e2e test-visual
+          "
+      - name: Upload browser test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-test-reports-${{ github.run_attempt }}
+          name: browser-test-reports-${{ github.run_attempt }}
           if-no-files-found: ignore
           retention-days: 7
           path: |

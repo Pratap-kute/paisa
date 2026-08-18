@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as cashFlow from "$lib/charts/cash_flow";
-  import COLORS from "$lib/core/colors";
+  import { financialColors } from "$lib/theme/chartPalette";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
   import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
   import * as expense from "$lib/charts/expense/monthly";
@@ -21,42 +21,70 @@
     type AssetBreakdown
   } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
   import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
   import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { MasonryGrid } from "@egjs/svelte-grid";
   import { refresh } from "../../store";
   import UpcomingCard from "$lib/components/finance/UpcomingCard.svelte";
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import BalanceCard from "$lib/components/finance/BalanceCard.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import type { ChartHandle } from "$lib/charts/resize";
+  import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
 
-  let UntypedMasonryGrid = MasonryGrid as any;
-
-  let cashflowLegends: Legend[] = [];
-  let month = now().format("YYYY-MM");
-  let goalSummaries: GoalSummary[] = [];
-  let transactionSequences: TransactionSequence[] = [];
-  let cashFlows: CashFlow[] = [];
-  let expenses: { [key: string]: Posting[] } = {};
-  let xirr = 0;
-  let networth: Networth;
-  let renderer: (data: Posting[]) => void;
-  let totalExpense = 0;
-  let transactions: Transaction[] = [];
+  let cashflowLegends: Legend[] = $state([]);
+  let month = $state(now().format("YYYY-MM"));
+  let goalSummaries: GoalSummary[] = $state([]);
+  let transactionSequences: TransactionSequence[] = $state([]);
+  let cashFlows: CashFlow[] = $state([]);
+  let expenses: { [key: string]: Posting[] } = $state({});
+  let xirr = $state(0);
+  let networth: Networth = $state();
+  let renderer: (data: Posting[]) => void = $state();
+  let expenseBreakdown: ChartHandle<Posting[]> | null = $state(null);
+  let cashflowChart: MonthlyFlowChart | null = $state(null);
+  let transactions: Transaction[] = $state([]);
   let budgetsByMonth: Record<string, Budget> = {};
-  let currentBudget: Budget;
-  let selectedExpenses: Posting[] = [];
-  let isEmpty = false;
-  let checkingBalances: Record<string, AssetBreakdown> = {};
+  let currentBudget: Budget = $state();
+  let isEmpty = $state(false);
+  let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
-  $: if (renderer) {
-    selectedExpenses = expenses[month] || [];
-    renderer(selectedExpenses);
-    totalExpense = _.sumBy(selectedExpenses, (p) => p.amount);
+  function hasCashFlowActivity(flows: CashFlow[]) {
+    return _.some(flows, (c) =>
+      c.income !== 0 ||
+      c.expenses !== 0 ||
+      c.liabilities !== 0 ||
+      c.tax !== 0 ||
+      c.investment !== 0 ||
+      c.checking !== 0 ||
+      c.balance !== 0
+    );
   }
+
+  let selectedExpenses: Posting[] = $derived(expenses[month] || []);
+  let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
+  let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+  let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
+
+  $effect(() => {
+    if (renderer) {
+      renderer(selectedExpenses);
+    }
+  });
+
+  onDestroy(() => {
+    expenseBreakdown?.destroy();
+    cashflowChart?.destroy();
+  });
 
   async function initDemo() {
     await ajax("/api/init", { method: "POST" });
@@ -85,18 +113,19 @@
 
     const postings = _.chain(expenses).values().flatten().value();
     const z = expense.colorScale(postings);
-    renderer = expense.renderCurrentExpensesBreakdown(z);
+    expenseBreakdown = expense.createCurrentExpensesBreakdown(z);
+    renderer = expenseBreakdown.update;
     currentBudget = budgetsByMonth[month];
 
-    const { renderer: cashflowRenderer, legends } = cashFlow.renderMonthlyFlow(
+    cashflowChart = cashFlow.createMonthlyFlow(
       "#d3-current-cash-flow",
       {
         rotate: false,
         balance: _.last(cashFlows)?.balance || 0
       }
     );
-    cashflowRenderer(cashFlows);
-    cashflowLegends = legends;
+    cashflowChart.update(cashFlows);
+    cashflowLegends = cashflowChart.legends;
     transactionSequences = _.take(
       sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
       16
@@ -104,258 +133,214 @@
   });
 </script>
 
-<section class="section" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <ZeroState item={!isEmpty}>
-          <div class="has-text-left" style="max-width: 640px;">
-            <p class="mb-2">
-              Looks like you are new here, you can either get started or look at a demo setup
-            </p>
-            <div>
-              <p class="is-size-4">I want to get started</p>
-              <ol class="ml-5 mt-2 mb-4">
-                <li>
-                  Go to <a href="/more/config">configuration</a> page and set your default currency and
-                  locale.
-                </li>
-                <li>
-                  Go to <a href="/ledger/editor">editor</a> page and start adding transactions to your
-                  journal.
-                </li>
-              </ol>
-              <p class="is-size-4">I want to view a Demo</p>
-              <p class="ml-3"></p>
-              <ol class="ml-5 mt-2 mb-4">
-                <li>
-                  Click the button below to load a demo setup. This will load a demo journal with
-                  relevant config.
-                </li>
-                <li>
-                  Once you are done playing around, you can go to <a href="/ledger/editor">editor</a
-                  > page and select all the content and delete them.
-                </li>
-                <li>
-                  Go to <a href="/more/config">configuration</a> page and click the reset to defaults
-                  button.
-                </li>
-              </ol>
+{#if isEmpty}
+  <Page width="standard">
+    <Card padding="lg">
+      <ZeroState item={false}>
+        <div class="has-text-left">
+          <p class="mb-3">
+            Looks like you are new here, you can either get started or look at a demo setup
+          </p>
+          <div class="mb-4">
+            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to get started</h2>
+            <ol class="ml-5 mb-4">
+              <li>
+                Go to <a href="/more/config">configuration</a> page and set your default currency and locale.
+              </li>
+              <li>
+                Go to <a href="/ledger/editor">editor</a> page and start adding transactions to your journal.
+              </li>
+            </ol>
+            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to view a Demo</h2>
+            <ol class="ml-5 mb-4">
+              <li>
+                Click the button below to load a demo setup. This will load a demo journal with relevant config.
+              </li>
+              <li>
+                Once you are done playing around, you can go to <a href="/ledger/editor">editor</a> page and select all the content and delete them.
+              </li>
+              <li>
+                Go to <a href="/more/config">configuration</a> page and click the reset to defaults button.
+              </li>
+            </ol>
 
-              <a on:click={(_e) => initDemo()} class="button is-link">Setup Demo</a>
-            </div>
+            <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
           </div>
-        </ZeroState>
-      </div>
+        </div>
+      </ZeroState>
+    </Card>
+  </Page>
+{:else}
+  <Page width="fluid">
+    <!-- Row 1: Primary Financial KPIs -->
+    {#if networth}
+      <Section title="Assets" titleHref="/assets/networth">
+        <MetricStrip cols={4}>
+          <LevelItem
+            narrow
+            title="Net worth"
+            value={formatCurrency(networth.balanceAmount)}
+          />
+          <LevelItem
+            narrow
+            title="Net Investment"
+            value={formatCurrency(networth.netInvestmentAmount)}
+          />
+          <LevelItem
+            narrow
+            title="Gain / Loss"
+            color={networth.gainAmount >= 0 ? financialColors.gainText : financialColors.lossText}
+            value={formatCurrency(networth.gainAmount)}
+          />
+          <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
+        </MetricStrip>
+      </Section>
+    {/if}
+
+    <!-- Row 1B: Checking Balance Snapshot -->
+    {#if !_.isEmpty(checkingBalances)}
+      <Section title="Checking Balance" titleHref="/assets/balance">
+        <ResponsiveGrid cols="auto-fit" minColWidth="160px" gap={2}>
+          {#each _.values(checkingBalances) as assetBreakdown}
+            <BalanceCard {assetBreakdown} />
+          {/each}
+        </ResponsiveGrid>
+      </Section>
+    {/if}
+
+    <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-visualizations">
+      <Section title="Cash Flow" titleHref="/cash_flow/monthly" class="paisa-dashboard-cell">
+        {#if hasCashFlowData}
+          <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
+        {/if}
+
+        <ChartFrame
+          type="dashboard-timeline"
+          empty={!hasCashFlowData}
+          emptyMessage="No cash-flow activity in this period"
+          preserveChildren
+          onresize={(dim) => cashflowChart?.resize(dim)}
+        >
+          <svg
+            id="d3-current-cash-flow"
+            height="250"
+            width="100%"
+          />
+        </ChartFrame>
+      </Section>
+
+      <Section title="Expenses" titleHref="/expense/monthly">
+        {#snippet action()}
+          <LastNMonths n={3} bind:value={month} />
+        {/snippet}
+
+        <div class="mb-3 is-flex is-align-items-center">
+          <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
+          <span class="is-size-5 has-text-weight-bold" style="color: {financialColors.expenses}">
+            {formatCurrency(totalExpense)}
+          </span>
+        </div>
+        <ChartFrame
+          type="category"
+          rows={Math.min(8, selectedExpenses.length || 4)}
+          empty={!hasSelectedExpenses}
+          emptyMessage="No expenses this month"
+          preserveChildren
+          onresize={(dim) => expenseBreakdown?.resize(dim)}
+        >
+          <svg id="d3-current-month-breakdown" width="100%" />
+        </ChartFrame>
+      </Section>
     </div>
-  </div>
-</section>
 
-<section class="section tab-networth" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="tile is-ancestor is-align-items-start">
-      <div class="tile is-4 is-vertical">
-        <div class="tile is-parent">
-          <div class="tile is-child">
-            <div class="content">
-              <p class="subtitle">
-                <a class="secondary-link has-text-grey" href="/assets/networth">Assets</a>
-              </p>
-              <div class="content">
-                <div>
-                  {#if networth}
-                    <nav class="level grid-2">
-                      <LevelItem
-                        narrow
-                        title="Net worth"
-                        color={COLORS.primary}
-                        value={formatCurrency(networth.balanceAmount)}
-                      />
-
-                      <LevelItem
-                        narrow
-                        title="Net Investment"
-                        color={COLORS.secondary}
-                        value={formatCurrency(networth.netInvestmentAmount)}
-                      />
-                    </nav>
-                    <nav class="level grid-2">
-                      <LevelItem
-                        narrow
-                        title="Gain / Loss"
-                        color={networth.gainAmount >= 0 ? COLORS.gainText : COLORS.lossText}
-                        value={formatCurrency(networth.gainAmount)}
-                      />
-
-                      <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
-                    </nav>
-                  {/if}
-                </div>
-              </div>
-            </div>
+    <!-- Row 3: Operational Data (Budget ~35% + Recent Transactions ~65%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-operations">
+      {#if currentBudget}
+        <Section title="Budget" titleHref="/expense/budget">
+          <div class="paisa-dashboard-budget-list">
+            {#each currentBudget.accounts as accountBudget (accountBudget)}
+              <BudgetCard compact {accountBudget} />
+            {/each}
           </div>
-        </div>
+        </Section>
+      {/if}
 
-        {#if !_.isEmpty(checkingBalances)}
-          <div class="tile is-parent">
-            <article class="tile is-child">
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/assets/balance">Checking Balance</a
-                  >
-                </p>
-                <div class="content">
-                  <UntypedMasonryGrid gap={10} maxStretchColumnSize={400} align="stretch">
-                    {#each _.values(checkingBalances) as assetBreakdown}
-                      <div class="is-flex-grow-1">
-                        <BalanceCard {assetBreakdown} />
-                      </div>
-                    {/each}
-                  </UntypedMasonryGrid>
-                </div>
-              </div>
-            </article>
-          </div>
-        {/if}
-
-        <div class="tile is-parent">
-          <article class="tile is-child paisa-min-width-0">
-            <p class="subtitle">
-              <a class="secondary-link has-text-grey" href="/cash_flow/monthly">Cash Flow</a>
-            </p>
-            <div class="content box px-2 pb-0">
-              <ZeroState item={cashFlows}>
-                <strong>Oops!</strong> You have not made any transactions in the last 3 months.
-              </ZeroState>
-
-              <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
-
-              <svg
-                class:is-not-visible={_.isEmpty(cashFlows)}
-                id="d3-current-cash-flow"
-                height="250"
-                width="100%"
-              />
-            </div>
-          </article>
-        </div>
-        {#if currentBudget}
-          <div class="tile is-parent">
-            <div class="tile is-child">
-              <div class="content">
-                <p class="subtitle">
-                  <a class="secondary-link has-text-grey" href="/expense/budget">Budget</a>
-                </p>
-                <div class="content">
-                  <div>
-                    {#each currentBudget.accounts as accountBudget (accountBudget)}
-                      <BudgetCard compact {accountBudget} />
-                    {/each}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        {/if}
-        {#if !_.isEmpty(goalSummaries)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
-                <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/more/goals">Goals</a>
-                  </p>
-                  <div class="content">
-                    {#each goalSummaries as goal}
-                      <GoalSummaryCard {goal} small />
-                    {/each}
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        {/if}
-      </div>
-      <div class="tile is-vertical">
-        <div class="tile is-parent is-12">
-          <article class="tile is-child">
-            <p class="subtitle is-flex is-justify-content-space-between is-align-items-end">
-              <span
-                ><a class="secondary-link has-text-grey" href="/expense/monthly">Expenses</a>
-                <span class="is-size-5 has-text-weight-bold px-2" style="color: {COLORS.expenses}"
-                  >{formatCurrency(totalExpense)}</span
-                ></span
-              >
-              <LastNMonths n={3} bind:value={month} />
-            </p>
-            <div class="content box px-3">
-              <ZeroState item={selectedExpenses}>
-                <strong>Hurray!</strong> You have no expenses this month.
-              </ZeroState>
-              <svg id="d3-current-month-breakdown" width="100%" />
-            </div>
-          </article>
-        </div>
-        {#if !_.isEmpty(transactionSequences)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
-                <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/cash_flow/recurring">Recurring</a
-                    >
-                  </p>
-                  <div class="content box">
-                    <div
-                      class="paisa-grid dashboard-recurring-grid paisa-overflow-hidden"
-                      style="grid-auto-rows: 0px; grid-template-columns: repeat(auto-fit, minmax(130px, 150px));"
-                    >
-                      {#each transactionSequences as ts (ts)}
-                        <UpcomingCard transactionSequece={ts} />
-                      {/each}
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        {/if}
-        {#if !_.isEmpty(transactions)}
-          <div class="tile">
-            <div class="tile is-parent is-12">
-              <article class="tile is-child">
-                <div class="content">
-                  <p class="subtitle">
-                    <a class="secondary-link has-text-grey" href="/ledger/transaction"
-                      >Recent Transactions</a
-                    >
-                  </p>
-                  <div>
-                    <UntypedMasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
-                      {#each _.take(transactions, 20) as t}
-                        <div class="mr-3 is-flex-grow-1">
-                          <TransactionCard {t} />
-                        </div>
-                      {/each}
-                    </UntypedMasonryGrid>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        {/if}
-      </div>
+      {#if !_.isEmpty(transactions)}
+        <Section title="Recent Transactions" titleHref="/ledger/transaction">
+          <ResponsiveGrid variant="transactions" gap={2}>
+            {#each _.take(transactions, 12) as t}
+              <TransactionCard {t} />
+            {/each}
+          </ResponsiveGrid>
+        </Section>
+      {/if}
     </div>
-  </div>
-</section>
+
+    <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
+    <div class="paisa-dashboard-row paisa-dashboard-longterm">
+      {#if !_.isEmpty(goalSummaries)}
+        <Section title="Goals" titleHref="/more/goals">
+          <div class="paisa-dashboard-goals-list">
+            {#each goalSummaries as goal}
+              <GoalSummaryCard {goal} small />
+            {/each}
+          </div>
+        </Section>
+      {/if}
+
+      {#if !_.isEmpty(transactionSequences)}
+        <Section title="Recurring" titleHref="/cash_flow/recurring">
+          <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
+            {#each transactionSequences as ts (ts)}
+              <UpcomingCard transactionSequece={ts} />
+            {/each}
+          </div>
+        </Section>
+      {/if}
+    </div>
+  </Page>
+{/if}
 
 <style lang="scss">
-  p.subtitle {
-    margin-bottom: 0.5rem !important;
+  .paisa-dashboard-row {
+    display: grid;
+    gap: var(--paisa-space-4);
+    width: 100%;
+    margin-bottom: var(--paisa-space-5);
+
+    > :global(*) {
+      min-width: 0;
+      margin-bottom: 0;
+    }
   }
 
-  p.subtitle a.secondary-link {
-    text-transform: uppercase;
-    font-size: 1rem;
+  .paisa-dashboard-visualizations {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+    }
+  }
+
+  .paisa-dashboard-operations {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+    }
+
+    > :only-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .paisa-dashboard-longterm {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    > :only-child {
+      grid-column: 1 / -1;
+    }
   }
 </style>

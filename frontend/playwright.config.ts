@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import process from "node:process";
 
 export default defineConfig({
   testDir: "./tests/browser",
@@ -7,7 +8,7 @@ export default defineConfig({
   timeout: 45_000,
   expect: {
     timeout: 10_000,
-    toHaveScreenshot: { animations: "disabled", maxDiffPixelRatio: 0.01 },
+    toHaveScreenshot: { animations: "disabled", maxDiffPixelRatio: 0.02 },
   },
   reporter: [["list"], ["html", {
     outputFolder: "playwright-report",

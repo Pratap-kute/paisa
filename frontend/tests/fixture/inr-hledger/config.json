@@ -38,7 +38,10 @@
       "savings": []
     },
     "user_accounts": [],
-    "credit_cards": []
+    "credit_cards": [],
+    "prediction": {
+      "merchant_rules": []
+    }
   },
   "now": "2022-02-07T00:00:00Z",
   "schema": {
@@ -550,6 +553,36 @@
         "description": "The locale used to format numbers. The list of locales supported depends on your browser. It's known to work well with en-US and en-IN.",
         "pattern": "^[a-z]{2}-[A-Z]{2}$",
         "type": "string"
+      },
+      "prediction": {
+        "additionalProperties": false,
+        "description": "Account prediction settings used when importing statements.",
+        "properties": {
+          "merchant_rules": {
+            "default": [],
+            "description": "Explicit merchant to account mappings. Prefix filters from the import template still apply.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "account": {
+                  "description": "Ledger account to use when the merchant matches",
+                  "type": "string"
+                },
+                "merchant": {
+                  "description": "Merchant text to match after normalization, for example swiggy instamart",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "merchant",
+                "account"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
       },
       "readonly": {
         "description": "Run in readonly mode.",

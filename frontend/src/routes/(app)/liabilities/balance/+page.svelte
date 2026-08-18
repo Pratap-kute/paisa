@@ -9,9 +9,12 @@
   import _ from "lodash";
   import { onMount } from "svelte";
   import type { ColumnDefinition } from "tabulator-tables";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
-  let breakdowns: LiabilityBreakdown[] = [];
-  let isEmpty = false;
+  let breakdowns: LiabilityBreakdown[] = $state([]);
+  let isEmpty = $state(false);
 
   onMount(async () => {
     ({ liability_breakdowns: breakdowns } = await ajax("/api/liabilities/balance"));
@@ -26,6 +29,8 @@
       title: "Account",
       field: "group",
       formatter: indendedLiabilityAccountName,
+      minWidth: 220,
+      widthGrow: 2,
       frozen: true
     },
     {
@@ -56,32 +61,28 @@
     { title: "APR", field: "apr", hozAlign: "right", formatter: nonZeroFloatChange }
   ];
 
-  let tree: LiabilityBreakdown[] = [];
-  $: if (breakdowns) {
-    tree = buildTree(Object.values(breakdowns), (i) => i.group);
-  }
+  let tree: LiabilityBreakdown[] = $derived(
+    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : []
+  );
 </script>
 
-<section class="section" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-centered">
-      <div class="column is-4 has-text-centered">
-        <article class="message">
-          <div class="message-body">
-            <strong>Hurray!</strong> You have no liabilities.
-          </div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="fluid">
+  <PageHeader
+    title="Liabilities Balance"
+    description="Outstanding debts, loans, and credit lines"
+  />
 
-<section class="section pb-0" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 pb-0">
-        <Table data={tree} tree {columns} />
-      </div>
-    </div>
-  </div>
-</section>
+  {#if isEmpty}
+    <Section>
+      <article class="message">
+        <div class="message-body">
+          <strong>Hurray!</strong> You have no liabilities.
+        </div>
+      </article>
+    </Section>
+  {:else}
+    <Section>
+      <Table data={tree} tree {columns} />
+    </Section>
+  {/if}
+</Page>

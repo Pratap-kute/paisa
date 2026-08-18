@@ -4,19 +4,25 @@
   import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
   import Toggleable from "$lib/components/ui/Toggleable.svelte";
 
-  export let financialYear: string;
-  export let capitalGains: CapitalGain[];
+  interface Props {
+    financialYear: string;
+    capitalGains: CapitalGain[];
+  }
 
-  const fyGains: FYCapitalGain[] = _.flatMap(capitalGains, (cg) => cg.fy[financialYear] || []);
+  let { financialYear, capitalGains }: Props = $props();
 
-  const total = {
+  let fyGains: FYCapitalGain[] = $derived(
+    _.flatMap(capitalGains, (cg) => cg.fy[financialYear] || [])
+  );
+
+  let total = $derived({
     withdrawn: _.sumBy(fyGains, (fy) => fy.sell_price),
     gain: _.sumBy(fyGains, (fy) => fy.tax.gain),
     taxableGain: _.sumBy(fyGains, (fy) => fy.tax.taxable),
     shortTermTax: _.sumBy(fyGains, (fy) => fy.tax.short_term),
     longTermTax: _.sumBy(fyGains, (fy) => fy.tax.long_term),
     slab: _.sumBy(fyGains, (fy) => fy.tax.slab)
-  };
+  });
 </script>
 
 <div class="column is-12">
@@ -74,7 +80,7 @@
             <table class="table is-narrow is-fullwidth is-hoverable">
               <thead>
                 <tr>
-                  <th />
+                  <th ></th>
                   <th>Account</th>
                   <th>Tax Category</th>
                   <th class="has-text-right">Sold Units</th>
@@ -94,53 +100,56 @@
                   {#if cg.fy[financialYear]}
                     {@const fy = cg.fy[financialYear]}
                     <Toggleable>
-                      <tr
-                        class={active ? "is-active has-background-white-ter" : ""}
-                        style="cursor: pointer;"
-                        slot="toggle"
-                        let:active
-                        let:onclick
-                        on:click={(e) => onclick(e)}
-                      >
-                        <td>
-                          <span class="icon has-text-link">
-                            <i
-                              class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </td>
-                        <td>{cg.account}</td>
-                        <td>{cg.tax_category}</td>
-                        <td class="has-text-right">{formatFloat(fy.units)}</td>
-                        <td class="has-text-right">{formatCurrency(fy.purchase_price)}</td>
-                        <td class="has-text-right"
-                          >{formatCurrency(fy.purchase_price / fy.units, 4)}</td
+                      {#snippet toggle({ active, onclick })}
+                                            <tr
+                          class={active ? "is-active has-background-white-ter" : ""}
+                          style="cursor: pointer;"
+                          
+                          
+                          
+                          onclick={(e) => onclick(e)}
                         >
-                        <td class="has-text-right">{formatCurrency(fy.sell_price)}</td>
-                        <td class="has-text-right">{formatCurrency(fy.sell_price / fy.units, 4)}</td
-                        >
-                        <td class="has-text-right has-text-weight-bold"
-                          >{formatCurrency(fy.tax.gain)}</td
-                        >
-                        <td class="has-text-right has-text-weight-bold"
-                          >{formatCurrency(fy.tax.taxable)}</td
-                        >
-                        <td class="has-text-right has-text-weight-bold"
-                          >{formatCurrency(fy.tax.short_term)}</td
-                        >
-                        <td class="has-text-right has-text-weight-bold"
-                          >{formatCurrency(fy.tax.long_term)}</td
-                        >
-                        <td class="has-text-right has-text-weight-bold"
-                          >{formatCurrency(fy.tax.slab)}</td
-                        >
-                      </tr>
-                      <tr slot="content">
-                        <td colspan="13" class="p-0">
-                          <CapitalGainDetailCard fyCapitalGain={fy} />
-                        </td>
-                      </tr>
+                          <td>
+                            <span class="icon has-text-link">
+                              <i
+                                class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'}"
+                                aria-hidden="true"></i>
+                            </span>
+                          </td>
+                          <td>{cg.account}</td>
+                          <td>{cg.tax_category}</td>
+                          <td class="has-text-right">{formatFloat(fy.units)}</td>
+                          <td class="has-text-right">{formatCurrency(fy.purchase_price)}</td>
+                          <td class="has-text-right"
+                            >{formatCurrency(fy.purchase_price / fy.units, 4)}</td
+                          >
+                          <td class="has-text-right">{formatCurrency(fy.sell_price)}</td>
+                          <td class="has-text-right">{formatCurrency(fy.sell_price / fy.units, 4)}</td
+                          >
+                          <td class="has-text-right has-text-weight-bold"
+                            >{formatCurrency(fy.tax.gain)}</td
+                          >
+                          <td class="has-text-right has-text-weight-bold"
+                            >{formatCurrency(fy.tax.taxable)}</td
+                          >
+                          <td class="has-text-right has-text-weight-bold"
+                            >{formatCurrency(fy.tax.short_term)}</td
+                          >
+                          <td class="has-text-right has-text-weight-bold"
+                            >{formatCurrency(fy.tax.long_term)}</td
+                          >
+                          <td class="has-text-right has-text-weight-bold"
+                            >{formatCurrency(fy.tax.slab)}</td
+                          >
+                        </tr>
+                                          {/snippet}
+                      {#snippet content()}
+                                            <tr >
+                          <td colspan="13" class="p-0">
+                            <CapitalGainDetailCard fyCapitalGain={fy} />
+                          </td>
+                        </tr>
+                                          {/snippet}
                     </Toggleable>
                   {/if}
                 {/each}

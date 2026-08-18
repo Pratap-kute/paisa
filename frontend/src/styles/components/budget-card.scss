@@ -1,0 +1,45 @@
+/**
+ * Budget Card Styling
+ */
+
+.budget-card {
+  .budget-label {
+    width: 80px;
+    text-align: right;
+    color: var(--paisa-text-muted);
+  }
+
+  .budget-amount {
+    width: 80px;
+    text-align: right;
+    font-weight: var(--paisa-font-weight-bold);
+
+    &.info {
+      padding: 2px 10px;
+      background: var(--paisa-info-light);
+      color: var(--paisa-info);
+      border-radius: var(--paisa-radius-full);
+    }
+
+    &.success {
+      padding: 2px 10px;
+      background: var(--paisa-success-light);
+      color: var(--paisa-success);
+      border-radius: var(--paisa-radius-full);
+    }
+
+    &.danger {
+      padding: 2px 10px;
+      background: var(--paisa-danger-light);
+      color: var(--paisa-danger);
+      border-radius: var(--paisa-radius-full);
+    }
+
+    &.warn {
+      padding: 2px 10px;
+      background: var(--paisa-warning-light);
+      color: var(--paisa-warning);
+      border-radius: var(--paisa-radius-full);
+    }
+  }
+}

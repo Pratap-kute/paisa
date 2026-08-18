@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Carousel from "svelte-carousel";
   import Transaction from "$lib/components/transactions/Transaction.svelte";
   import { intervalText, scheduleIcon, totalRecurring } from "$lib/domain/transaction_sequence";
   import {
@@ -10,26 +9,58 @@
   import type dayjs from "dayjs";
   import type { Action } from "svelte/action";
   import { renderRecurring } from "$lib/charts/recurring";
+  import { observeElementSize } from "$lib/charts/resize";
   import _ from "lodash";
 
-  export let ts: TransactionSequence;
-  export let schedule: TransactionSchedule;
-  const HEIGHT = 50;
-  const icon = scheduleIcon(schedule);
+  interface Props {
+    ts: TransactionSequence;
+    schedule: TransactionSchedule;
+  }
 
-  let carousel: Carousel;
-  let pageSize = _.min([20, ts.transactions.length]);
+  let { ts, schedule }: Props = $props();
+  const HEIGHT = 50;
+  let icon = $derived(scheduleIcon(schedule));
+
+  let displayedTransactions = $derived(_.reverse(_.take(ts.transactions, 20)));
+  let pageSize = $derived(displayedTransactions.length);
+  let currentIndex = $state(0);
+
+  $effect(() => {
+    currentIndex = Math.max(0, pageSize - 1);
+  });
 
   function showPage(pageIndex: number) {
-    carousel.goTo(pageSize - 1 - pageIndex);
+    currentIndex = pageSize - 1 - pageIndex;
+  }
+
+  function showPrevPage() {
+    if (currentIndex > 0) currentIndex--;
+  }
+
+  function showNextPage() {
+    if (currentIndex < pageSize - 1) currentIndex++;
   }
 
   const chart: Action<HTMLElement, { ts: TransactionSequence; next: dayjs.Dayjs }> = (
     element,
     props
   ) => {
-    renderRecurring(element, props.ts, showPage);
-    return {};
+    let current = props;
+    const draw = () => {
+      element.querySelector("svg")?.replaceChildren();
+      renderRecurring(element, current.ts, showPage);
+    };
+    draw();
+    const stop = observeElementSize(element, () => draw());
+    return {
+      update(next) {
+        current = next;
+        draw();
+      },
+      destroy() {
+        stop();
+      },
+    };
   };
 </script>
 
@@ -46,7 +77,7 @@
       >
         <span class="icon-text">
           <span class="icon {icon.color}">
-            <i class="fas {icon.icon}" />
+            <i class="fas {icon.icon}"></i>
           </span>
           <span class="has-text-grey">{formatCurrencyCrude(totalRecurring(ts))} due</span><span
             ><b>&nbsp;{schedule.scheduled.fromNow()}</b></span
@@ -55,7 +86,7 @@
         <div class="has-text-grey">
           <span class="tag">{intervalText(ts)}</span>
           <span class="icon has-text-grey-light">
-            <i class="fas fa-calendar" />
+            <i class="fas fa-calendar"></i>
           </span>
           {schedule.scheduled.format("DD MMM YYYY")}
         </div>
@@ -73,28 +104,38 @@
   </div>
 
   <div class="column is-8">
-    <Carousel bind:this={carousel} infinite={false} initialPageIndex={pageSize - 1}>
+    <div class="recurring-transaction-pager">
       <div
-        slot="prev"
-        let:showPrevPage
-        on:click={showPrevPage}
+        role="button"
+        tabindex="0"
+        aria-label="Previous page"
+        onclick={showPrevPage}
+        onkeydown={(e) => e.key === "Enter" && showPrevPage()}
         class="custom-arrow custom-arrow-prev"
       >
-        <i class="fa-solid has-text-grey-light fa-angle-left" />
+        <i class="fa-solid has-text-grey-light fa-angle-left"></i>
       </div>
-      {#each _.reverse(_.take(ts.transactions, 20)) as t}
+      {#if displayedTransactions[currentIndex]}
         <div class="box px-5 py-3 my-0 has-text-grey" style="box-shadow: none;">
-          <Transaction {t} compact={true} />
+          <Transaction t={displayedTransactions[currentIndex]} compact={true} />
         </div>
-      {/each}
+      {/if}
       <div
-        slot="next"
-        let:showNextPage
-        on:click={showNextPage}
+        role="button"
+        tabindex="0"
+        aria-label="Next page"
+        onclick={showNextPage}
+        onkeydown={(e) => e.key === "Enter" && showNextPage()}
         class="custom-arrow custom-arrow-next"
       >
-        <i class="fa-solid has-text-grey-light fa-angle-right" />
+        <i class="fa-solid has-text-grey-light fa-angle-right"></i>
       </div>
-    </Carousel>
+    </div>
   </div>
 </div>
+
+<style>
+  .recurring-transaction-pager {
+    position: relative;
+  }
+</style>

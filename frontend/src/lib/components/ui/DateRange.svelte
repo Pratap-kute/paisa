@@ -3,31 +3,35 @@
   import BoxedTabs from "./BoxedTabs.svelte";
   import { isMobile } from "$lib/core/utils";
 
-  export let value: number;
-  export let dateMin: dayjs.Dayjs;
-  export let dateMax: dayjs.Dayjs;
+  interface Props {
+    value: number;
+    dateMin: dayjs.Dayjs;
+    dateMax: dayjs.Dayjs;
+  }
 
-  let options: { label: string; value: number }[] = [];
+  let { value = $bindable(), dateMin, dateMax }: Props = $props();
 
-  $: {
-    options = [{ label: "All", value: -1 }];
+  let options: { label: string; value: number }[] = $derived.by(() => {
+    const list = [{ label: "All", value: -1 }];
+    if (!dateMax || !dateMin) return list;
     const diff = dateMax.diff(dateMin, "year");
     if (diff >= 10 && !isMobile()) {
-      options.push({ label: "10 years", value: 10 });
+      list.push({ label: "10 years", value: 10 });
     }
 
     if (diff >= 5 && !isMobile()) {
-      options.push({ label: "5 years", value: 5 });
+      list.push({ label: "5 years", value: 5 });
     }
 
     if (diff >= 3) {
-      options.push({ label: "3 years", value: 3 });
+      list.push({ label: "3 years", value: 3 });
     }
 
     if (diff >= 1) {
-      options.push({ label: "1 year", value: 1 });
+      list.push({ label: "1 year", value: 1 });
     }
-  }
+    return list;
+  });
 </script>
 
 {#if options.length > 1}

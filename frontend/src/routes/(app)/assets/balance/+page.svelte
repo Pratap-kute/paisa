@@ -3,20 +3,15 @@
   import { ajax, type AssetBreakdown } from "$lib/core/utils";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
 
-  let breakdowns: Record<string, AssetBreakdown> = {};
+  let breakdowns: Record<string, AssetBreakdown> = $state({});
 
   onMount(async () => {
     ({ asset_breakdowns: breakdowns } = await ajax("/api/assets/balance"));
   });
 </script>
 
-<section class="section pb-0">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12 pb-0">
-        <AssetsBalance {breakdowns} />
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="fluid">
+  <AssetsBalance {breakdowns} />
+</Page>

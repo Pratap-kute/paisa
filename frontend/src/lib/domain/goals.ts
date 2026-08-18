@@ -162,6 +162,9 @@ export function findBreakPoints(points: Point[], target: number): Point[] {
   let i = 1;
   while (i <= 4 && !isEmpty(points)) {
     const p = points.shift();
+    if (!p) {
+      continue;
+    }
     if (p.value >= target * (i / 4)) {
       result.push(p);
       i++;
@@ -178,8 +181,15 @@ export function renderProgress(
   element: Element,
   { targetSavings }: { targetSavings: number },
 ) {
-  const start = first(points).date,
-    end = (last(predictions) || last(points)).date;
+  if (!element?.parentElement) {
+    return () => {};
+  }
+
+  const start = first(points)?.date ?? first(predictions)?.date;
+  const end = last(predictions)?.date ?? last(points)?.date;
+  if (!start || !end) {
+    return () => {};
+  }
   const positions = _.map(points.concat(predictions), (p) => p.value);
 
   const svg = d3.select(element),

@@ -1,46 +1,54 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { renderMonthlyRepaymentTimeline } from "$lib/charts/repayment";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
   import { ajax, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
-  let isEmpty = false;
-  let legends: Legend[] = [];
+  let isEmpty = $state(false);
+  let legends: Legend[] = $state([]);
+  let repaymentChart: ChartHandle<null> | null = $state(null);
 
   onMount(async () => {
     const { repayments: repayments } = await ajax("/api/liabilities/repayment");
     if (_.isEmpty(repayments)) {
       isEmpty = true;
     } else {
-      legends = renderMonthlyRepaymentTimeline(repayments);
+      repaymentChart = createClientWidthChart("#d3-repayment-timeline", (_data, _size) => {
+        legends = renderMonthlyRepaymentTimeline(repayments);
+      });
+      repaymentChart.update(null);
     }
+  });
+
+  onDestroy(() => {
+    repaymentChart?.destroy();
   });
 </script>
 
-<section class="section" class:is-hidden={!isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns is-centered">
-      <div class="column is-4 has-text-centered">
-        <article class="message">
-          <div class="message-body">You haven't repaid any liabilities.</div>
-        </article>
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Repayment Timeline"
+    description="Monthly liability repayments and debt reduction"
+  />
 
-<section class="section" class:is-hidden={isEmpty}>
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box">
-          <LegendCard {legends} clazz="ml-4" />
-          <svg id="d3-repayment-timeline" width="100%" height="500" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Monthly Repayment Timeline" />
-  </div>
-</section>
+  {#if isEmpty}
+    <Section>
+      <article class="message">
+        <div class="message-body">You haven't repaid any liabilities.</div>
+      </article>
+    </Section>
+  {:else}
+    <Section title="Monthly Repayments">
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+      <ChartFrame type="timeline" onresize={(dim) => repaymentChart?.resize(dim)}>
+        <svg id="d3-repayment-timeline" width="100%" height="500" />
+      </ChartFrame>
+    </Section>
+  {/if}
+</Page>

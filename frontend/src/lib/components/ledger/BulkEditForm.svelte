@@ -3,18 +3,22 @@
   import { createEventDispatcher } from "svelte";
   import Select from "svelte-select";
 
-  export let accounts: string[];
+  interface Props {
+    accounts: string[];
+  }
 
-  $: selectItems = _.map(accounts, (account) => {
+  let { accounts }: Props = $props();
+
+  let selectItems = $derived(_.map(accounts, (account) => {
     return { id: account, name: account };
-  });
+  }));
 
-  let selectedItem: { id: string; name: string };
+  let selectedItem: { id: string; name: string } = $state();
 
   const OPERATIONS = [{ id: "rename_account", label: "Rename Account" }];
-  let selectedOperation = OPERATIONS[0].id;
+  let selectedOperation = $state(OPERATIONS[0].id);
 
-  let args = { oldAccountName: "", newAccountName: "" };
+  let args = $state({ oldAccountName: "", newAccountName: "" });
 
   const dispatch = createEventDispatcher();
 </script>
@@ -55,10 +59,11 @@
     </div>
   {/if}
   <p class="control">
-    <a
+    <button
+      type="button"
       class="button is-link"
-      on:click={(_e) => dispatch("preview", { operation: selectedOperation, args: args })}
-      >Preview</a
+      onclick={(_e) => dispatch("preview", { operation: selectedOperation, args: args })}
+      >Preview</button
     >
   </p>
 </div>

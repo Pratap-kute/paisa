@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import helpers from "../../src/lib/importing/template_helpers";
+import { predictionSession } from "../../src/lib/prediction/session";
 
 dayjs.extend(customParseFormat);
 
@@ -49,6 +50,15 @@ describe("template helpers", () => {
     expect(helpers.isDate(42 as unknown as string, "YYYY")).toBe(false);
     expect(helpers.date(" 2023-02-07 ", "YYYY-MM-DD")).toBe("2023/02/07");
     expect(helpers.trim(" value ")).toBe("value");
+    expect(helpers.oneline("DEP TFR NEFT*HDFC*\nACME VENDOR*BAT")).toBe(
+      "DEP TFR NEFT*HDFC* ACME VENDOR*BAT",
+    );
+    expect(
+      helpers.oneline(
+        "NEFT*HDFC0000240*HDFCH00902314455*AC\nME VENDOR*BAT PATHARDI",
+      ),
+    ).toBe("NEFT*HDFC0000240*HDFCH00902314455*ACME VENDOR*BAT PATHARDI");
+    expect(helpers.oneline(2 as unknown as string)).toBeUndefined();
     expect(helpers.replace("a-b-a", "a", "x")).toBe("x-b-x");
     expect(helpers.replace(2 as unknown as string, "2", "x")).toBeUndefined();
     expect(helpers.acronym("The Axis Growth Direct Plan")).toBe("A");
@@ -98,10 +108,80 @@ describe("template helpers", () => {
   });
 
   test("falls back to an unknown predicted account", () => {
+    predictionSession.reset();
     expect(helpers.predictAccount("merchant", options({ prefix: "Expenses:" })))
       .toBe("Expenses:Unknown");
     expect(helpers.predictAccount(options({ prefix: "Expenses" }, {
       ROW: { A: "merchant" },
     }))).toBe("Expenses:Unknown");
+    expect(helpers.predictAccount(options({}, {
+      ROW: {
+        A: "01/04/2026",
+        B: "WDL TFR UPI/309191771120/AMAZON SELLER",
+        D: "200.00",
+        index: 4,
+      },
+    }))).toBe("Unknown");
+  });
+
+  test("predicts from committed history through the helper", () => {
+    predictionSession.reset();
+    predictionSession.loadHistory([
+      {
+        payee: "Starbucks Coffee",
+        categoryAccount: "Expenses:Food",
+        amount: 250,
+        absoluteAmount: 250,
+        date: "2024-01-01",
+        commodity: "INR",
+        transactionId: "a",
+      },
+      {
+        payee: "Starbucks Coffee",
+        categoryAccount: "Expenses:Food",
+        amount: 260,
+        absoluteAmount: 260,
+        date: "2024-02-01",
+        commodity: "INR",
+        transactionId: "b",
+      },
+    ]);
+    expect(
+      helpers.predictAccount(
+        "Starbucks Coffee",
+        options({ prefix: "Expenses" }),
+      ),
+    ).toBe("Expenses:Food");
+    predictionSession.loadHistory([
+      {
+        payee: "Amazon",
+        categoryAccount: "Expenses:Subscriptions",
+        amount: 200,
+        absoluteAmount: 200,
+        date: "2024-01-01",
+        commodity: "INR",
+        transactionId: "amz-1",
+      },
+      {
+        payee: "Amazon",
+        categoryAccount: "Expenses:Subscriptions",
+        amount: 210,
+        absoluteAmount: 210,
+        date: "2024-02-01",
+        commodity: "INR",
+        transactionId: "amz-2",
+      },
+    ]);
+    expect(
+      helpers.predictAccount(options({}, {
+        ROW: {
+          A: "01/04/2026",
+          B: "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
+          D: "200.00",
+          index: 9,
+        },
+      })),
+    ).toBe("Expenses:Subscriptions");
+    predictionSession.reset();
   });
 });

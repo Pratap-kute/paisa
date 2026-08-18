@@ -48,7 +48,7 @@ sample: build ## Initialize and update demo sample data
 
 ##@ Build & Installation
 
-.PHONY: build build-frontend build-backend build-windows install clean jsbuild windows
+.PHONY: build build-frontend build-backend build-windows install clean distclean jsbuild windows
 build: build-frontend build-backend ## Build both frontend assets and backend binary
 
 build-frontend jsbuild: ## Build SvelteKit static assets into backend/web/static
@@ -63,10 +63,17 @@ build-windows windows: ## Cross-compile Go binary for Windows (amd64)
 install: build-frontend ## Build frontend and install backend binary to GOBIN
 	$(MAKE) -C backend install
 
-clean: ## Clean build artifacts, static files, and temporary databases
+clean: ## Remove build artifacts, caches, and test outputs (preserves user data and dependencies)
 	$(MAKE) -C frontend clean
 	$(MAKE) -C backend clean
-	rm -rf test-results playwright-report /tmp/ledger_bin /tmp/paisa-*
+	$(MAKE) -C desktop clean
+	rm -rf coverage graphify-out site build package test-results playwright-report
+	rm -f paisa paisa.exe
+	rm -f frontend/vite.config.js.timestamp-* frontend/vite.config.ts.timestamp-*
+	@shopt -s nullglob; rm -rf /tmp/ledger_bin /tmp/paisa-*
+
+distclean: clean ## Remove everything clean removes, plus node_modules directories
+	rm -rf frontend/node_modules node_modules desktop/node_modules
 
 # ------------------------------------------------------------------------------
 # Testing
@@ -163,23 +170,18 @@ docs-build publish: ## Build static documentation site with MkDocs
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts node2nix regen regen-fixtures
+.PHONY: parsers parser generate-fonts regen regen-fixtures normalize-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	$(MAKE) -C frontend parsers
 
 generate-fonts: ## Download SVGs and generate custom icon font
 	$(MAKE) -C frontend generate-fonts
 
-node2nix: ## Re-generate Nix package expressions from package.json
-	npm install --lockfile-version 2
-	node2nix --development -18 --input package.json \
-		--lock package-lock.json \
-		--node-env ./flake/node-env.nix \
-		--composition ./flake/default.nix \
-		--output ./flake/node-package.nix
-
 regen regen-fixtures: build ## Re-generate integration test JSON fixtures
 	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration
+
+normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
+	$(MAKE) -C frontend normalize-fixtures
 
 fixture/main.transactions.json: build
 	cd /tmp && ../backend/paisa init

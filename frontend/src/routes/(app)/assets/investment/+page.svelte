@@ -1,52 +1,76 @@
 <script lang="ts">
-  import BoxLabel from "$lib/components/ui/BoxLabel.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
     renderMonthlyInvestmentTimeline,
-    renderYearlyCards,
     renderYearlyInvestmentTimeline
   } from "$lib/charts/investment";
-  import { ajax, type Legend } from "$lib/core/utils";
+  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
+  import { ajax, type InvestmentYearlyCard as InvestmentYearlyCardType, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import InvestmentYearlyCard from "$lib/components/finance/InvestmentYearlyCard.svelte";
 
-  let monthlyInvestmentTimelineLegends: Legend[] = [];
-  let yearlyInvestmentTimelineLegends: Legend[] = [];
+  let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
+  let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
+  let yearlyCards: InvestmentYearlyCardType[] = $state([]);
+  let monthlyChart: ChartHandle<null> | null = $state(null);
+  let yearlyChart: ChartHandle<null> | null = $state(null);
+
+  let sortedYearlyCards = $derived(
+    _.orderBy(yearlyCards, (c) => c.start_date.valueOf(), "desc")
+  );
 
   onMount(async () => {
-    const { assets: assets, yearly_cards: yearlyCards } = await ajax("/api/investment");
-    monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(assets);
-    yearlyInvestmentTimelineLegends = renderYearlyInvestmentTimeline(yearlyCards);
-    renderYearlyCards(yearlyCards);
+    const { assets: assets, yearly_cards: fetchedYearlyCards } = await ajax("/api/investment");
+    yearlyCards = fetchedYearlyCards || [];
+    monthlyChart = createClientWidthChart("#d3-investment-timeline", (_data, _size) => {
+      monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(assets);
+    });
+    yearlyChart = createClientWidthChart("#d3-yearly-investment-timeline", (_data, _size) => {
+      yearlyInvestmentTimelineLegends = renderYearlyInvestmentTimeline(yearlyCards);
+    });
+    monthlyChart.update(null);
+    yearlyChart.update(null);
+  });
+
+  onDestroy(() => {
+    monthlyChart?.destroy();
+    yearlyChart?.destroy();
   });
 </script>
 
-<section class="section tab-investment">
-  <div class="container is-fluid">
-    <div class="columns">
-      <div class="column is-12">
-        <div class="box">
-          <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="ml-4" />
-          <svg id="d3-investment-timeline" width="100%" height="500" />
-        </div>
-      </div>
-    </div>
-    <BoxLabel text="Monthly Investment Timeline" />
-  </div>
-</section>
-<section class="section tab-investment">
-  <div class="container is-fluid">
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-full-tablet is-half-fullhd">
-        <div class="box px-2">
-          <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="ml-4" />
-          <svg id="d3-yearly-investment-timeline" width="100%" />
-        </div>
-        <BoxLabel text="Financial Year Investment Timeline" />
-      </div>
-      <div class="column is-full-tablet is-half-fullhd">
-        <div class="columns is-flex-wrap-wrap" id="d3-yearly-investment-cards" />
-      </div>
-    </div>
-  </div>
-</section>
+<Page width="analysis">
+  <PageHeader
+    title="Investment"
+    description="Monthly and yearly investment timeline & breakdowns"
+  />
+
+  <Section title="Monthly Investment Timeline">
+    <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline" onresize={(dim) => monthlyChart?.resize(dim)}>
+      <svg id="d3-investment-timeline" width="100%" height="450" />
+    </ChartFrame>
+  </Section>
+
+  <Section title="Financial Year Investment Timeline">
+    <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+    <ChartFrame type="timeline" onresize={(dim) => yearlyChart?.resize(dim)}>
+      <svg id="d3-yearly-investment-timeline" width="100%" />
+    </ChartFrame>
+  </Section>
+
+  {#if sortedYearlyCards.length > 0}
+    <Section title="Annual Breakdown">
+      <ResponsiveGrid variant="cards">
+        {#each sortedYearlyCards as card (card.start_date.valueOf())}
+          <InvestmentYearlyCard {card} />
+        {/each}
+      </ResponsiveGrid>
+    </Section>
+  {/if}
+</Page>

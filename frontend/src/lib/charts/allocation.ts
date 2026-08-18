@@ -31,12 +31,12 @@ export function renderAllocationTarget(
   }
   allocationTargets = _.sortBy(allocationTargets, (t) => t.name);
   const BAR_HEIGHT = rem(25);
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
   const svg = d3.select(id),
     margin = { top: rem(20), right: rem(20), bottom: rem(10), left: rem(150) },
-    fullWidth = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
-      1000,
-    ),
+    fullWidth = el.parentElement.clientWidth,
     width = fullWidth - margin.left - margin.right,
     height = allocationTargets.length * BAR_HEIGHT * 2,
     g = svg.append("g").attr(
@@ -72,10 +72,18 @@ export function renderAllocationTarget(
     .flatMap((t) => [t.current, t.target])
     .max()
     .value();
-  const targetWidth = rem(400);
-  const targetMargin = rem(20);
+  const hasTreemap = _.some(allocationTargets, (t) => !_.isEmpty(t.aggregates));
   const textGroupWidth = rem(150);
-  const textGroupMargin = rem(20);
+  const targetMargin = rem(15);
+  const textGroupMargin = rem(15);
+  const targetWidth = hasTreemap
+    ? Math.max(
+      rem(300),
+      Math.round(
+        (width - textGroupWidth - targetMargin - textGroupMargin) * 0.5,
+      ),
+    )
+    : Math.max(rem(300), width - textGroupWidth - targetMargin);
   const textGroupZero = targetWidth + targetMargin;
 
   const x = d3.scaleLinear().range([
@@ -120,7 +128,7 @@ export function renderAllocationTarget(
       d3
         .axisBottom(x1)
         .tickSize(-height)
-        .tickFormat(skipTicks(40, x, (n: number) => formatFloat(n, 0))),
+        .tickFormat(skipTicks(40, x1, (n: number) => formatFloat(n, 0))),
     );
 
   g.append("g").attr("class", "axis y dark").call(d3.axisLeft(y));
@@ -209,7 +217,9 @@ export function renderAllocationTarget(
     .attr("fill", z("target"));
 
   const paddingTop = (y1.range()[1] - y1.bandwidth() * 2) / 2;
-  d3.select("#d3-allocation-target-treemap")
+  const targetTreemap = d3.select("#d3-allocation-target-treemap");
+  targetTreemap.selectAll("*").remove();
+  targetTreemap
     .append("div")
     .style("height", height + margin.top + margin.bottom + "px")
     .style("position", "absolute")
@@ -237,18 +247,16 @@ export function renderAllocation(
   aggregates: Record<string, Aggregate>,
   color: d3.ScaleOrdinal<string, string>,
 ) {
-  renderPartition(
-    document.getElementById("d3-allocation-category"),
-    aggregates,
-    d3.partition(),
-    color,
-  );
-  renderPartition(
-    document.getElementById("d3-allocation-value"),
-    aggregates,
-    d3.treemap(),
-    color,
-  );
+  const catEl = document.getElementById("d3-allocation-category");
+  if (catEl) {
+    catEl.innerHTML = "";
+    renderPartition(catEl, aggregates, d3.partition(), color);
+  }
+  const valEl = document.getElementById("d3-allocation-value");
+  if (valEl) {
+    valEl.innerHTML = "";
+    renderPartition(valEl, aggregates, d3.treemap(), color);
+  }
 }
 
 function renderPartition(
@@ -262,8 +270,11 @@ function renderPartition(
     return;
   }
 
-  const div = d3.select(element),
-    margin = options.margin,
+  const div = d3.select(element);
+  div.selectAll("*").remove();
+  div.style("position", "relative");
+
+  const margin = options.margin,
     width = element.parentElement.clientWidth - margin.left - margin.right,
     height = +div.style("height").replace("px", "") - margin.top -
       margin.bottom;
@@ -303,10 +314,11 @@ function renderPartition(
         ["Percentage", [percent(d), "has-text-weight-bold has-text-right"]],
       ]);
     })
+    .style("position", "absolute")
     .style("top", (d: any) => d.y0 + "px")
     .style("left", (d: any) => d.x0 + "px")
-    .style("width", (d: any) => d.x1 - d.x0 + "px")
-    .style("height", (d: any) => d.y1 - d.y0 + "px")
+    .style("width", (d: any) => Math.max(d.x1 - d.x0, 0) + "px")
+    .style("height", (d: any) => Math.max(d.y1 - d.y0, 0) + "px")
     .style("background", (d) => color(d.id))
     .style("color", (d) => darkenOrLighten(color(d.id)));
 
@@ -382,10 +394,12 @@ export function renderAllocationTimeline(
     );
   });
 
+  const el = document.getElementById("d3-allocation-timeline");
+  if (!el?.parentElement) return [];
+
   const svg = d3.select("#d3-allocation-timeline"),
     margin = { top: 40, right: 60, bottom: 20, left: 35 },
-    width = document.getElementById("d3-allocation-timeline").parentElement
-      .clientWidth -
+    width = el.parentElement.clientWidth -
       margin.left -
       margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,

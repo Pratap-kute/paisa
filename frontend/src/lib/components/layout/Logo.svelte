@@ -2,9 +2,13 @@
   import COLORS from "$lib/core/colors";
   import _ from "lodash";
 
-  export let size = 256;
-  export let thickness = 4;
-  export let animation = false;
+  interface Props {
+    size?: number;
+    thickness?: number;
+    animation?: boolean;
+  }
+
+  let { size = 256, thickness = 4, animation = false }: Props = $props();
 
   let colors = [COLORS.income, COLORS.expenses, COLORS.equity, COLORS.liabilities, COLORS.assets];
   let dotColor = COLORS.primary;

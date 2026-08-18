@@ -5,8 +5,12 @@
   import PostingStatus from "$lib/components/transactions/PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
-  export let compact: boolean = false;
-  export let t: Transaction;
+  interface Props {
+    compact?: boolean;
+    t: Transaction;
+  }
+
+  let { compact = false, t }: Props = $props();
   const debits = (t: Transaction) => {
     return _.filter(t.postings, (p) => p.amount < 0);
   };
@@ -59,8 +63,6 @@
 </div>
 
 <style lang="scss">
-  @import "bulma/sass/utilities/_all.sass";
-
   .description {
     display: inline-block;
     white-space: nowrap;

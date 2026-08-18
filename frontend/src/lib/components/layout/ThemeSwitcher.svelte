@@ -37,7 +37,7 @@
 </script>
 
 <button
-  on:click={toggle}
+  onclick={toggle}
   class="theme-toggle p-1"
   title="Toggles light & dark"
   aria-label="auto"

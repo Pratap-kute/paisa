@@ -1,0 +1,35 @@
+name: CI Setup
+description: Install Nix, restore caches, and install Deno dependencies
+
+inputs:
+  save-nix-cache:
+    description: Whether this job should save the Nix store
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Nix
+      uses: nixbuild/nix-quick-install-action@v30
+
+    - name: Restore or save Nix store
+      uses: nix-community/cache-nix-action@v6
+      with:
+        primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
+        restore-prefixes-first-match: nix-${{ runner.os }}-
+        gc-max-store-size-linux: 2G
+        save: ${{ inputs.save-nix-cache }}
+
+    - name: Restore Deno cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/deno
+          frontend/node_modules
+        key: deno-${{ runner.os }}-${{ hashFiles('frontend/deno.lock') }}
+        restore-keys: deno-${{ runner.os }}-
+
+    - name: Install frontend dependencies
+      shell: bash
+      run: nix develop --command bash -c "cd frontend && deno install"

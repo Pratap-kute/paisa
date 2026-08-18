@@ -231,24 +231,34 @@
 }
 
 .theme-toggle {
-  --size: 29px;
-  --icon-fill: hsl(210 10% 30%);
-  --icon-fill-hover: hsl(210 10% 15%);
+  --size: 32px;
+  --icon-fill: var(--paisa-navbar-text);
+  --icon-fill-hover: var(--paisa-brand-primary);
 
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.25rem;
 
   inline-size: var(--size);
   block-size: var(--size);
   aspect-ratio: 1;
-  border-radius: 50%;
+  border-radius: var(--paisa-radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--paisa-transition-fast), color
+    var(--paisa-transition-fast);
 
-  outline-offset: 5px;
+  &:hover,
+  &:focus-visible {
+    background-color: var(--paisa-surface-hover);
+  }
+
+  outline-offset: 2px;
 
   svg {
     inline-size: 100%;
@@ -258,6 +268,6 @@
 }
 
 [data-theme="dark"] .theme-toggle {
-  --icon-fill: hsl(210 10% 70%);
-  --icon-fill-hover: hsl(210 15% 90%);
+  --icon-fill: var(--paisa-navbar-text);
+  --icon-fill-hover: var(--paisa-brand-primary);
 }

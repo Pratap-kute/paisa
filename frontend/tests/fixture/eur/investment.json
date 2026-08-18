@@ -1,8 +1,6 @@
 {
   "assets": [
     {
-      "id": 43,
-      "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
       "date": "2022-01-05T00:00:00Z",
       "payee": "Buy stock",
       "account": "Assets:Equity:AAPL",
@@ -13,7 +11,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "transaction_begin_line": 11,
-      "transaction_end_line": 13,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -28,8 +25,6 @@
       "end_date": "2022-03-31T23:59:59.999999999Z",
       "postings": [
         {
-          "id": 43,
-          "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Equity:AAPL",
@@ -40,7 +35,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 13,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",

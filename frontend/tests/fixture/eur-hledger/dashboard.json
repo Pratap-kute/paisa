@@ -46,13 +46,10 @@
   "transactionSequences": [],
   "transactions": [
     {
-      "id": "2",
       "date": "2022-01-05T00:00:00Z",
       "payee": "Buy stock",
       "postings": [
         {
-          "id": 43,
-          "transaction_id": "2",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Equity:AAPL",
@@ -63,7 +60,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 14,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -72,8 +68,6 @@
           "balance": 0
         },
         {
-          "id": 44,
-          "transaction_id": "2",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Buy stock",
           "account": "Assets:Checking",
@@ -84,7 +78,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 11,
-          "transaction_end_line": 14,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -96,18 +89,14 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 11,
-      "endLine": 14,
       "fileName": "main.ledger",
       "note": ""
     },
     {
-      "id": "1",
       "date": "2022-01-01T00:00:00Z",
       "payee": "Salary",
       "postings": [
         {
-          "id": 42,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Assets:Checking",
@@ -118,7 +107,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 7,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -127,8 +115,6 @@
           "balance": 0
         },
         {
-          "id": 41,
-          "transaction_id": "1",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -139,7 +125,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 4,
-          "transaction_end_line": 7,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -151,7 +136,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "beginLine": 4,
-      "endLine": 7,
       "fileName": "main.ledger",
       "note": ""
     }

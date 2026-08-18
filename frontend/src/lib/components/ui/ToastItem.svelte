@@ -2,8 +2,13 @@
   import { onDestroy, onMount } from "svelte";
   import { dismissToast, type ToastMessage } from "$lib/core/toast";
 
-  export let item: ToastMessage;
+  interface Props {
+    item: ToastMessage;
+  }
+
+  let { item }: Props = $props();
   let timer: number;
+  // svelte-ignore state_referenced_locally
   let remaining = item.duration ?? 2000;
   let started = 0;
 
@@ -24,12 +29,19 @@
 <div
   class="notification {item.type || ''} {item.extraClasses || ''}"
   role={item.type === "is-danger" ? "alert" : "status"}
-  on:mouseenter={() => item.pauseOnHover && pause()}
-  on:mouseleave={() => item.pauseOnHover && resume()}
-  on:click={() => item.closeOnClick !== false && dismissToast(item.id)}
+  onmouseenter={() => item.pauseOnHover && pause()}
+  onmouseleave={() => item.pauseOnHover && resume()}
+  onclick={() => item.closeOnClick !== false && dismissToast(item.id)}
 >
   {#if item.dismissible}
-    <button class="delete" aria-label="Dismiss notification" on:click|stopPropagation={() => dismissToast(item.id)} />
+    <button
+      class="delete"
+      aria-label="Dismiss notification"
+      onclick={(e) => {
+        e.stopPropagation();
+        dismissToast(item.id);
+      }}
+    ></button>
   {/if}
   {@html item.message}
 </div>

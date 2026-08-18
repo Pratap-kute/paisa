@@ -2,16 +2,20 @@
   import { dueDateIcon } from "$lib/core/utils";
   import dayjs from "dayjs";
 
-  export let dueDate: dayjs.Dayjs;
-  export let paidDate: dayjs.Dayjs;
-  export let amountDue: number = undefined;
+  interface Props {
+    dueDate: dayjs.Dayjs;
+    paidDate: dayjs.Dayjs;
+    amountDue?: number;
+  }
 
-  $: icon = dueDateIcon(dueDate, paidDate, amountDue);
+  let { dueDate, paidDate, amountDue = undefined }: Props = $props();
+
+  let icon = $derived(dueDateIcon(dueDate, paidDate, amountDue));
 </script>
 
 <span title="due on {dueDate.format('DD MMM YYYY')}">
   <span class="icon is-small {icon.color}">
-    <i class="fas {icon.icon}" />
+    <i class="fas {icon.icon}"></i>
   </span>
   {#if amountDue !== undefined && amountDue <= 0}
     <span>no dues</span>

@@ -29,9 +29,22 @@ Enter `nix develop` before running browser tests. The shell supplies the
 Chromium build matching Playwright 1.61.1 through `PLAYWRIGHT_BROWSERS_PATH`;
 browser downloads are not required.
 
-The browser server copies the INR fixture into a temporary directory, uses UTC
-and the fixed date `2022-02-07`, and removes the temporary database after the
-run.
+The browser server copies the browser fixture journal and config into a
+temporary directory, builds `paisa.db` with `paisa update`, seeds portfolio
+holdings, uses UTC and the fixed date `2022-02-07`, and removes the temporary
+database after the run.
+
+## API regression fixtures
+
+Integration tests under `frontend/tests/fixture/` keep committed JSON API
+baselines plus journal/config source files. `paisa.db` files are not versioned;
+each test run copies source files to a temporary directory and rebuilds the
+database from the journal during sync.
+
+`make regen-fixtures` rewrites JSON baselines when API output changes. Regen
+writes id-stripped JSON, so diffs show only meaningful schema or value changes.
+`make normalize-fixtures` can strip generated ids from existing baselines without
+re-running the server.
 
 ## Updating visual baselines
 

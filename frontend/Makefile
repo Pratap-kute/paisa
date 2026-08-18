@@ -1,5 +1,6 @@
 # ==============================================================================
 # Paisa - Frontend SvelteKit Web Application
+# Makefile for Paisa frontend development and deployment.
 # ==============================================================================
 
 SHELL := /usr/bin/env bash
@@ -27,12 +28,12 @@ build: ## Build SvelteKit static site into backend/web/static
 watch: ## Watch and rebuild frontend assets on change
 	deno task build:watch
 
-clean: ## Clean build artifacts and static output
+clean: ## Remove frontend build output, caches, and test artifacts
 	deno task clean
 
 ##@ Testing
 
-.PHONY: test test-all test-unit test-core test-component test-integration test-e2e test-visual test-coverage
+.PHONY: test test-all test-unit test-core test-component test-integration test-e2e test-visual test-visual-update test-coverage
 test: test-unit test-core test-component ## Run frontend unit, core, and component tests
 
 test-all: test-unit test-core test-component test-integration test-e2e ## Run full frontend test suite
@@ -55,6 +56,9 @@ test-e2e: ## Run Playwright browser tests
 test-visual: ## Run Playwright visual snapshot tests
 	deno task test:visual
 
+test-visual-update: ## Update Playwright visual snapshot baselines
+	deno task test:visual:update
+
 test-coverage: ## Generate frontend test coverage report
 	deno task test:coverage
 
@@ -75,10 +79,13 @@ format fmt: ## Format frontend source files
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts
+.PHONY: parsers parser generate-fonts normalize-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	deno task parser-build-debug
 
 generate-fonts: ## Download SVGs and generate custom icon font
 	deno run -A scripts/fonts/download-svgs.js
-	node scripts/fonts/generate-font.js
+	deno run -A scripts/fonts/generate-font.js
+
+normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
+	deno run -A scripts/normalize_fixture_json.ts

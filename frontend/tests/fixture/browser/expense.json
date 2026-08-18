@@ -1,8 +1,6 @@
 {
   "expenses": [
     {
-      "id": 392,
-      "transaction_id": "9ac83c1f-ba46-515b-8e19-3ca8ab332eab",
       "date": "2022-01-03T00:00:00Z",
       "payee": "Rent",
       "account": "Expenses:Rent",
@@ -13,7 +11,6 @@
       "tag_recurring": "Rent",
       "tag_period": "1 * ?",
       "transaction_begin_line": 14,
-      "transaction_end_line": 18,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -22,8 +19,6 @@
       "balance": 0
     },
     {
-      "id": 393,
-      "transaction_id": "928a326f-93b5-5967-96e8-fe18ad9bf45f",
       "date": "2022-01-05T00:00:00Z",
       "payee": "Groceries",
       "account": "Expenses:Food",
@@ -34,7 +29,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "transaction_begin_line": 20,
-      "transaction_end_line": 22,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -43,8 +37,6 @@
       "balance": 0
     },
     {
-      "id": 406,
-      "transaction_id": "47401a0a-4e6a-51cb-bb14-df103a1f73cb",
       "date": "2022-01-11T00:00:00Z",
       "payee": "Multi Currency Debit",
       "account": "Expenses:Charges",
@@ -55,7 +47,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "transaction_begin_line": 45,
-      "transaction_end_line": 48,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -64,8 +55,6 @@
       "balance": 0
     },
     {
-      "id": 415,
-      "transaction_id": "1e3be8f3-dc75-5644-825f-3e8c78248316",
       "date": "2022-02-02T00:00:00Z",
       "payee": "Home loan payment",
       "account": "Expenses:Interest:HomeLoan",
@@ -76,7 +65,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "transaction_begin_line": 62,
-      "transaction_end_line": 65,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -85,8 +73,6 @@
       "balance": 0
     },
     {
-      "id": 418,
-      "transaction_id": "ed92c034-33b7-58ae-a05c-7b7d0e7ef723",
       "date": "2022-02-03T00:00:00Z",
       "payee": "Rent",
       "account": "Expenses:Rent",
@@ -97,7 +83,6 @@
       "tag_recurring": "Rent",
       "tag_period": "1 * ?",
       "transaction_begin_line": 67,
-      "transaction_end_line": 71,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -106,8 +91,6 @@
       "balance": 0
     },
     {
-      "id": 419,
-      "transaction_id": "b03c12f8-e188-5218-91e0-ef63aa438d36",
       "date": "2022-02-05T00:00:00Z",
       "payee": "Shopping",
       "account": "Expenses:Shopping",
@@ -118,7 +101,6 @@
       "tag_recurring": "",
       "tag_period": "",
       "transaction_begin_line": 73,
-      "transaction_end_line": 75,
       "file_name": "main.ledger",
       "forecast": false,
       "note": "",
@@ -131,95 +113,72 @@
     "2021 - 22": {
       "nodes": [
         {
-          "id": 1,
           "name": "Assets:Checking"
         },
         {
-          "id": 17,
           "name": "Assets:Dollar"
         },
         {
-          "id": 13,
           "name": "Assets:Equity:AAPL"
         },
         {
-          "id": 12,
           "name": "Assets:Equity:ABNB"
         },
         {
-          "id": 11,
           "name": "Assets:Equity:NIFTY"
         },
         {
-          "id": 5,
           "name": "Assets:House"
         },
         {
-          "id": 7,
           "name": "Expenses"
         },
         {
-          "id": 18,
           "name": "Expenses:Charges"
         },
         {
-          "id": 9,
           "name": "Expenses:Food"
         },
         {
-          "id": 21,
           "name": "Expenses:Interest"
         },
         {
-          "id": 22,
           "name": "Expenses:Interest:HomeLoan"
         },
         {
-          "id": 8,
           "name": "Expenses:Rent"
         },
         {
-          "id": 23,
           "name": "Expenses:Shopping"
         },
         {
-          "id": 2,
           "name": "Income"
         },
         {
-          "id": 14,
           "name": "Income:CapitalGains"
         },
         {
-          "id": 15,
           "name": "Income:CapitalGains:Equity"
         },
         {
-          "id": 16,
           "name": "Income:CapitalGains:Equity:AAPL"
         },
         {
-          "id": 19,
           "name": "Income:Interest"
         },
         {
-          "id": 20,
           "name": "Income:Interest:Checking"
         },
         {
-          "id": 3,
           "name": "Income:Salary"
         },
         {
-          "id": 4,
           "name": "Income:Salary:Acme"
         },
         {
-          "id": 10,
           "name": "Liabilities:CreditCard:Freedom"
         },
         {
-          "id": 6,
           "name": "Liabilities:HomeLoan"
         }
       ],
@@ -351,8 +310,6 @@
     "expenses": {
       "2022-01": [
         {
-          "id": 392,
-          "transaction_id": "9ac83c1f-ba46-515b-8e19-3ca8ab332eab",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
           "account": "Expenses:Rent",
@@ -363,7 +320,6 @@
           "tag_recurring": "Rent",
           "tag_period": "1 * ?",
           "transaction_begin_line": 14,
-          "transaction_end_line": 18,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -372,8 +328,6 @@
           "balance": 0
         },
         {
-          "id": 393,
-          "transaction_id": "928a326f-93b5-5967-96e8-fe18ad9bf45f",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Groceries",
           "account": "Expenses:Food",
@@ -384,7 +338,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 20,
-          "transaction_end_line": 22,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -393,8 +346,6 @@
           "balance": 0
         },
         {
-          "id": 406,
-          "transaction_id": "47401a0a-4e6a-51cb-bb14-df103a1f73cb",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Expenses:Charges",
@@ -405,7 +356,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 45,
-          "transaction_end_line": 48,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -416,8 +366,6 @@
       ],
       "2022-02": [
         {
-          "id": 415,
-          "transaction_id": "1e3be8f3-dc75-5644-825f-3e8c78248316",
           "date": "2022-02-02T00:00:00Z",
           "payee": "Home loan payment",
           "account": "Expenses:Interest:HomeLoan",
@@ -428,7 +376,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 62,
-          "transaction_end_line": 65,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -437,8 +384,6 @@
           "balance": 0
         },
         {
-          "id": 418,
-          "transaction_id": "ed92c034-33b7-58ae-a05c-7b7d0e7ef723",
           "date": "2022-02-03T00:00:00Z",
           "payee": "Rent",
           "account": "Expenses:Rent",
@@ -449,7 +394,6 @@
           "tag_recurring": "Rent",
           "tag_period": "1 * ?",
           "transaction_begin_line": 67,
-          "transaction_end_line": 71,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -458,8 +402,6 @@
           "balance": 0
         },
         {
-          "id": 419,
-          "transaction_id": "b03c12f8-e188-5218-91e0-ef63aa438d36",
           "date": "2022-02-05T00:00:00Z",
           "payee": "Shopping",
           "account": "Expenses:Shopping",
@@ -470,7 +412,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 73,
-          "transaction_end_line": 75,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -483,8 +424,6 @@
     "incomes": {
       "2022-01": [
         {
-          "id": 387,
-          "transaction_id": "d84b6999-200b-5b90-9a3e-f94dc8a177da",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -495,7 +434,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 6,
-          "transaction_end_line": 8,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -504,8 +442,6 @@
           "balance": 0
         },
         {
-          "id": 395,
-          "transaction_id": "c4ee69cc-e6bc-56a4-b573-e5519afb2a45",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -516,7 +452,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 26,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -525,8 +460,6 @@
           "balance": 0
         },
         {
-          "id": 404,
-          "transaction_id": "14447dea-6f63-5c6b-8bd9-0a781dd04c62",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -537,7 +470,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -546,8 +478,6 @@
           "balance": 0
         },
         {
-          "id": 412,
-          "transaction_id": "fdf2fb59-4d5b-5413-b379-ebd0c3ae95f4",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -558,7 +488,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 56,
-          "transaction_end_line": 60,
           "file_name": "main.ledger",
           "forecast": false,
           "note": " Posting note",
@@ -571,8 +500,6 @@
     "investments": {
       "2022-01": [
         {
-          "id": 389,
-          "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
           "date": "2022-01-02T00:00:00Z",
           "payee": "Home purchase",
           "account": "Assets:House",
@@ -583,7 +510,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 10,
-          "transaction_end_line": 12,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -592,8 +518,6 @@
           "balance": 0
         },
         {
-          "id": 398,
-          "transaction_id": "608fccf0-e80c-570e-87df-63a9a959c59a",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
           "account": "Assets:Equity:NIFTY",
@@ -604,7 +528,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 28,
-          "transaction_end_line": 30,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -613,8 +536,6 @@
           "balance": 0
         },
         {
-          "id": 399,
-          "transaction_id": "b2e50492-9dc7-5845-8ed9-9f4590b301a8",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
           "account": "Assets:Equity:ABNB",
@@ -625,7 +546,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 34,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -634,8 +554,6 @@
           "balance": 0
         },
         {
-          "id": 401,
-          "transaction_id": "7251bc9c-e5cb-5e08-99aa-a06e95702836",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy Apple",
           "account": "Assets:Equity:AAPL",
@@ -646,7 +564,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 36,
-          "transaction_end_line": 38,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -655,8 +572,6 @@
           "balance": 0
         },
         {
-          "id": 403,
-          "transaction_id": "14447dea-6f63-5c6b-8bd9-0a781dd04c62",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Assets:Equity:AAPL",
@@ -667,7 +582,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -676,8 +590,6 @@
           "balance": 0
         },
         {
-          "id": 407,
-          "transaction_id": "47401a0a-4e6a-51cb-bb14-df103a1f73cb",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -688,7 +600,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 45,
-          "transaction_end_line": 48,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -704,8 +615,6 @@
     "expenses": {
       "2021 - 22": [
         {
-          "id": 392,
-          "transaction_id": "9ac83c1f-ba46-515b-8e19-3ca8ab332eab",
           "date": "2022-01-03T00:00:00Z",
           "payee": "Rent",
           "account": "Expenses:Rent",
@@ -716,7 +625,6 @@
           "tag_recurring": "Rent",
           "tag_period": "1 * ?",
           "transaction_begin_line": 14,
-          "transaction_end_line": 18,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -725,8 +633,6 @@
           "balance": 0
         },
         {
-          "id": 393,
-          "transaction_id": "928a326f-93b5-5967-96e8-fe18ad9bf45f",
           "date": "2022-01-05T00:00:00Z",
           "payee": "Groceries",
           "account": "Expenses:Food",
@@ -737,7 +643,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 20,
-          "transaction_end_line": 22,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -746,8 +651,6 @@
           "balance": 0
         },
         {
-          "id": 406,
-          "transaction_id": "47401a0a-4e6a-51cb-bb14-df103a1f73cb",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Expenses:Charges",
@@ -758,7 +661,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 45,
-          "transaction_end_line": 48,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -767,8 +669,6 @@
           "balance": 0
         },
         {
-          "id": 415,
-          "transaction_id": "1e3be8f3-dc75-5644-825f-3e8c78248316",
           "date": "2022-02-02T00:00:00Z",
           "payee": "Home loan payment",
           "account": "Expenses:Interest:HomeLoan",
@@ -779,7 +679,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 62,
-          "transaction_end_line": 65,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -788,8 +687,6 @@
           "balance": 0
         },
         {
-          "id": 418,
-          "transaction_id": "ed92c034-33b7-58ae-a05c-7b7d0e7ef723",
           "date": "2022-02-03T00:00:00Z",
           "payee": "Rent",
           "account": "Expenses:Rent",
@@ -800,7 +697,6 @@
           "tag_recurring": "Rent",
           "tag_period": "1 * ?",
           "transaction_begin_line": 67,
-          "transaction_end_line": 71,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -809,8 +705,6 @@
           "balance": 0
         },
         {
-          "id": 419,
-          "transaction_id": "b03c12f8-e188-5218-91e0-ef63aa438d36",
           "date": "2022-02-05T00:00:00Z",
           "payee": "Shopping",
           "account": "Expenses:Shopping",
@@ -821,7 +715,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 73,
-          "transaction_end_line": 75,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -834,8 +727,6 @@
     "incomes": {
       "2021 - 22": [
         {
-          "id": 387,
-          "transaction_id": "d84b6999-200b-5b90-9a3e-f94dc8a177da",
           "date": "2022-01-01T00:00:00Z",
           "payee": "Salary",
           "account": "Income:Salary:Acme",
@@ -846,7 +737,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 6,
-          "transaction_end_line": 8,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -855,8 +745,6 @@
           "balance": 0
         },
         {
-          "id": 395,
-          "transaction_id": "c4ee69cc-e6bc-56a4-b573-e5519afb2a45",
           "date": "2022-01-06T00:00:00Z",
           "payee": "Bonus",
           "account": "Income:Salary:Acme",
@@ -867,7 +755,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 24,
-          "transaction_end_line": 26,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -876,8 +763,6 @@
           "balance": 0
         },
         {
-          "id": 404,
-          "transaction_id": "14447dea-6f63-5c6b-8bd9-0a781dd04c62",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Income:CapitalGains:Equity:AAPL",
@@ -888,7 +773,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -897,8 +781,6 @@
           "balance": 0
         },
         {
-          "id": 412,
-          "transaction_id": "fdf2fb59-4d5b-5413-b379-ebd0c3ae95f4",
           "date": "2022-01-31T00:00:00Z",
           "payee": "Interest",
           "account": "Income:Interest:Checking",
@@ -909,7 +791,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 56,
-          "transaction_end_line": 60,
           "file_name": "main.ledger",
           "forecast": false,
           "note": " Posting note",
@@ -922,8 +803,6 @@
     "investments": {
       "2021 - 22": [
         {
-          "id": 389,
-          "transaction_id": "67f44c92-c138-550d-9ae2-84034aca39d3",
           "date": "2022-01-02T00:00:00Z",
           "payee": "Home purchase",
           "account": "Assets:House",
@@ -934,7 +813,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 10,
-          "transaction_end_line": 12,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -943,8 +821,6 @@
           "balance": 0
         },
         {
-          "id": 398,
-          "transaction_id": "608fccf0-e80c-570e-87df-63a9a959c59a",
           "date": "2022-01-07T00:00:00Z",
           "payee": "Investment",
           "account": "Assets:Equity:NIFTY",
@@ -955,7 +831,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 28,
-          "transaction_end_line": 30,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -964,8 +839,6 @@
           "balance": 0
         },
         {
-          "id": 399,
-          "transaction_id": "b2e50492-9dc7-5845-8ed9-9f4590b301a8",
           "date": "2022-01-08T00:00:00Z",
           "payee": "Buy ABNB",
           "account": "Assets:Equity:ABNB",
@@ -976,7 +849,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 32,
-          "transaction_end_line": 34,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -985,8 +857,6 @@
           "balance": 0
         },
         {
-          "id": 401,
-          "transaction_id": "7251bc9c-e5cb-5e08-99aa-a06e95702836",
           "date": "2022-01-09T00:00:00Z",
           "payee": "Buy Apple",
           "account": "Assets:Equity:AAPL",
@@ -997,7 +867,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 36,
-          "transaction_end_line": 38,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -1006,8 +875,6 @@
           "balance": 0
         },
         {
-          "id": 403,
-          "transaction_id": "14447dea-6f63-5c6b-8bd9-0a781dd04c62",
           "date": "2022-01-10T00:00:00Z",
           "payee": "Sell",
           "account": "Assets:Equity:AAPL",
@@ -1018,7 +885,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 40,
-          "transaction_end_line": 43,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",
@@ -1027,8 +893,6 @@
           "balance": 0
         },
         {
-          "id": 407,
-          "transaction_id": "47401a0a-4e6a-51cb-bb14-df103a1f73cb",
           "date": "2022-01-11T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -1039,7 +903,6 @@
           "tag_recurring": "",
           "tag_period": "",
           "transaction_begin_line": 45,
-          "transaction_end_line": 48,
           "file_name": "main.ledger",
           "forecast": false,
           "note": "",

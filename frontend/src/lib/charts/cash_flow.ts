@@ -2,6 +2,7 @@
 import {
   type CashFlow,
   formatCurrencyCrude,
+  getColorPreference,
   type Graph,
   lastName,
   type Legend,
@@ -23,57 +24,113 @@ import { willClearTippy } from "../../store";
 import COLORS, { generateColorScheme } from "../core/colors";
 import textures from "textures";
 import chroma from "chroma-js";
+import { containerPlotSize, createRedrawChart, type Dimensions } from "./resize";
 
-export function renderMonthlyFlow(
-  id: string,
+export interface MonthlyFlowChart {
+  update: (cashFlows: CashFlow[]) => void;
+  resize: (dimensions: { width: number; height: number }) => void;
+  destroy: () => void;
+  legends: Legend[];
+}
+
+function paddedDomain(values: number[]): [number, number] {
+  const finiteValues = values.filter(Number.isFinite);
+  if (_.isEmpty(finiteValues)) return [0, 1];
+
+  const extent = d3.extent(finiteValues);
+  let min = extent[0] ?? 0;
+  let max = extent[1] ?? 1;
+
+  if (min === max) {
+    const pad = Math.max(Math.abs(min) * 0.1, 1);
+    min -= pad;
+    max += pad;
+  }
+
+  return [min, max];
+}
+
+export function createMonthlyFlow(
+  target: string | SVGElement,
   options = {
     rotate: true,
     balance: 0,
   },
-) {
+): MonthlyFlowChart {
   const MAX_BAR_WIDTH = rem(20);
-  const svg = d3.select(id),
-    margin = {
-      top: rem(15),
-      right: rem(30),
-      bottom: options.rotate ? rem(50) : rem(20),
-      left: rem(40),
-    },
-    width = document.getElementById(id.substring(1)).parentElement.clientWidth -
-      margin.left -
-      margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
+  const el = typeof target === "string"
+    ? document.getElementById(
+      target.startsWith("#") ? target.substring(1) : target,
+    )
+    : target;
 
+  if (!el) {
+    return {
+      update: () => {},
+      resize: () => {},
+      destroy: () => {},
+      legends: [],
+    };
+  }
+
+  const svg = d3.select(el as any);
+  svg.selectAll("*").remove();
+
+  const margin = {
+    top: rem(15),
+    right: rem(30),
+    bottom: options.rotate ? rem(50) : rem(20),
+    left: rem(40),
+  };
+
+  let { width: currentWidth, height: currentHeight } = containerPlotSize(
+    el,
+    margin,
+  );
+  svg
+    .attr("width", currentWidth + margin.left + margin.right)
+    .attr("height", currentHeight + margin.top + margin.bottom);
+
+  const g = svg.append("g").attr(
+    "transform",
+    "translate(" + margin.left + "," + margin.top + ")",
+  );
+
+  const darkMode = getColorPreference() === "dark";
   const texture = textures
     .lines()
     .strokeWidth(1)
-    .size(4)
+    .size(darkMode ? 5 : 4)
     .orientation("vertical")
-    .background(chroma(COLORS.expenses).brighten(1.5).hex())
-    .stroke(COLORS.expenses);
+    .background(
+      darkMode
+        ? chroma(COLORS.expenses).darken(0.8).hex()
+        : chroma(COLORS.expenses).brighten(1.5).hex(),
+    )
+    .stroke(
+      darkMode ? chroma(COLORS.expenses).brighten(0.2).hex() : COLORS.expenses,
+    );
   svg.call(texture);
 
   const areaKeys = ["income", "expenses", "liabilities", "tax", "investment"];
   const colors = [
-    COLORS.income,
-    COLORS.expenses,
-    COLORS.liabilities,
-    COLORS.expenses,
-    COLORS.assets,
+    darkMode ? chroma(COLORS.income).brighten(0.2).hex() : COLORS.income,
+    darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
+    darkMode
+      ? chroma(COLORS.liabilities).brighten(0.15).hex()
+      : COLORS.liabilities,
+    darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
+    darkMode ? chroma(COLORS.assets).brighten(0.15).hex() : COLORS.assets,
   ];
 
   const lineKeys = ["balance"];
   const lineScale = d3.scaleOrdinal<string>().domain(lineKeys).range([
-    COLORS.primary,
+    darkMode ? "#7dd3fc" : COLORS.primary,
   ]);
 
-  const x = d3.scaleBand().range([0, width]).paddingInner(0.1),
-    y = d3.scaleLinear().range([height, 0]),
-    z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
+  const x = d3.scaleBand().range([0, currentWidth]).paddingInner(0.1);
+  const y = d3.scaleLinear().range([currentHeight, 0]);
+  const z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
 
   const x1 = d3.scaleBand().domain(["0", "1"]).paddingInner(0.1).paddingOuter(
     0.1,
@@ -82,10 +139,9 @@ export function renderMonthlyFlow(
   const xAxis = g
     .append("g")
     .attr("class", "axis x")
-    .attr("transform", "translate(0," + height + ")");
+    .attr("transform", "translate(0," + currentHeight + ")");
 
   const yAxis = g.append("g").attr("class", "axis y");
-
   const groups = g.append("g");
 
   const line = g
@@ -96,9 +152,18 @@ export function renderMonthlyFlow(
 
   const tooltipRects = g.append("g");
 
+  let currentData: CashFlow[] = [];
   let firstRender = true;
 
-  const renderer = function (cashFlows: CashFlow[]) {
+  function render(cashFlows: CashFlow[], animate = true) {
+    currentData = cashFlows;
+    if (_.isEmpty(cashFlows)) {
+      groups.selectAll("*").remove();
+      line.attr("d", null);
+      tooltipRects.selectAll("*").remove();
+      return;
+    }
+
     const positions = _.flatMap(cashFlows, (c) => [
       c.income + (c.investment < 0 ? -c.investment : 0) +
       (c.liabilities > 0 ? c.liabilities : 0),
@@ -111,21 +176,24 @@ export function renderMonthlyFlow(
     positions.push(0);
 
     x.domain(_.map(cashFlows, (c) => c.date.format("MMM YYYY")));
-    y.domain(d3.extent(positions));
+    y.domain(paddedDomain(positions));
     x1.range([0, x.bandwidth()]);
 
-    const t = svg.transition().duration(firstRender ? 0 : 750);
+    const duration = (!animate || firstRender) ? 0 : 500;
     firstRender = false;
+    const t = svg.transition().duration(duration);
 
+    const xAxisFormatter = d3
+      .axisBottom(x)
+      .ticks(5)
+      .tickFormat(skipTicks(30, x, (d) => d.toString()));
+    if (duration > 0) {
+      xAxis.transition(t).call(xAxisFormatter);
+    } else {
+      xAxis.call(xAxisFormatter);
+    }
     const axis = xAxis
-      .transition(t)
-      .call(
-        d3
-          .axisBottom(x)
-          .ticks(5)
-          .tickFormat(skipTicks(30, x, (d) => d.toString())),
-      )
-      .selectAll("text")
+      .selectAll<SVGTextElement, unknown>("text")
       .attr("y", 10)
       .attr("x", -8)
       .attr("dy", ".35em");
@@ -134,9 +202,14 @@ export function renderMonthlyFlow(
       axis.attr("transform", "rotate(-45)").style("text-anchor", "end");
     }
 
-    yAxis.transition(t).call(
-      d3.axisLeft(y).tickSize(-width).tickFormat(formatCurrencyCrude),
+    const yAxisFormatter = d3.axisLeft(y).tickSize(-currentWidth).tickFormat(
+      formatCurrencyCrude,
     );
+    if (duration > 0) {
+      yAxis.transition(t).call(yAxisFormatter);
+    } else {
+      yAxis.call(yAxisFormatter);
+    }
 
     const gbars = groups
       .selectAll("g.group")
@@ -148,11 +221,14 @@ export function renderMonthlyFlow(
             .attr("class", "group")
             .attr("transform", (c) =>
               `translate(${x(c.date.format("MMM YYYY"))},0)`),
-        (update) =>
-          update
-            .transition(t)
-            .attr("transform", (c) =>
-              `translate(${x(c.date.format("MMM YYYY"))},0)`),
+        (update) => {
+          const transform = (c: CashFlow) =>
+            `translate(${x(c.date.format("MMM YYYY"))},0)`;
+          if (duration > 0) {
+            return update.transition(t).attr("transform", transform);
+          }
+          return update.attr("transform", transform);
+        },
         (exit) => exit.remove(),
       );
 
@@ -181,9 +257,7 @@ export function renderMonthlyFlow(
       ])
       .join("g")
       .selectAll("rect")
-      .data((d) => {
-        return d;
-      })
+      .data((d) => d)
       .join(
         (enter) =>
           enter
@@ -202,30 +276,49 @@ export function renderMonthlyFlow(
                 : x1(d[0].data.i))
             .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH))
             .attr("y", y.range()[0])
-            .transition(t)
-            .attr("y", (d: any) =>
-              y(d[0][1]))
-            .attr("height", (d: any) =>
-              y(d[0][0]) - y(d[0][1])),
-        (update) =>
-          update
-            .transition(t)
-            .attr("fill", (d) => {
-              if (d.key === "tax") {
-                return texture.url();
+            .call((sel) => {
+              if (duration > 0) {
+                sel.transition(t)
+                  .attr("y", (d: any) => y(d[0][1]))
+                  .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]));
+              } else {
+                sel
+                  .attr("y", (d: any) => y(d[0][1]))
+                  .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]));
               }
-              return z(d.key);
-            })
-            .attr("x", (d: any) =>
-              d[0].data.i === "0"
-                ? x1(d[0].data.i) + x1.bandwidth() -
-                  Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
-                : x1(d[0].data.i))
-            .attr("y", (d: any) =>
-              y(d[0][1]))
-            .attr("height", (d: any) =>
-              y(d[0][0]) - y(d[0][1]))
-            .attr("width", Math.min(x1.bandwidth(), MAX_BAR_WIDTH)),
+            }),
+        (update) => {
+          const fill = (d: any) => {
+            if (d.key === "tax") {
+              return texture.url();
+            }
+            return z(d.key);
+          };
+          const xPos = (d: any) =>
+            d[0].data.i === "0"
+              ? x1(d[0].data.i) + x1.bandwidth() -
+                Math.min(x1.bandwidth(), MAX_BAR_WIDTH)
+              : x1(d[0].data.i);
+          const yPos = (d: any) => y(d[0][1]);
+          const height = (d: any) => y(d[0][0]) - y(d[0][1]);
+          const width = Math.min(x1.bandwidth(), MAX_BAR_WIDTH);
+
+          if (duration > 0) {
+            return update
+              .transition(t)
+              .attr("fill", fill)
+              .attr("x", xPos)
+              .attr("y", yPos)
+              .attr("height", height)
+              .attr("width", width);
+          }
+          return update
+            .attr("fill", fill)
+            .attr("x", xPos)
+            .attr("y", yPos)
+            .attr("height", height)
+            .attr("width", width);
+        },
         (exit) => exit.remove(),
       );
 
@@ -234,7 +327,7 @@ export function renderMonthlyFlow(
       d3
         .line<CashFlow>()
         .curve(d3.curveMonotoneX)
-        .x((c) => x(c.date.format("MMM YYYY")) + x.bandwidth() / 2)
+        .x((c) => (x(c.date.format("MMM YYYY")) || 0) + x.bandwidth() / 2)
         .y((c) => y(c.balance))(cashFlows),
     );
 
@@ -278,11 +371,28 @@ export function renderMonthlyFlow(
           { header: c.date.format("MMM YYYY") },
         );
       })
-      .attr("x", (c) => x(c.date.format("MMM YYYY")))
+      .attr("x", (c) => x(c.date.format("MMM YYYY")) || 0)
       .attr("y", 0)
-      .attr("height", height)
+      .attr("height", currentHeight)
       .attr("width", x.bandwidth());
-  };
+  }
+
+  function resize(dimensions: { width: number; height: number }) {
+    if (dimensions.width <= 0 || dimensions.height <= 0) return;
+    svg.attr("width", dimensions.width).attr("height", dimensions.height);
+    currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
+    currentHeight = Math.max(
+      50,
+      dimensions.height - margin.top - margin.bottom,
+    );
+
+    x.range([0, currentWidth]);
+    y.range([currentHeight, 0]);
+    x1.range([0, x.bandwidth()]);
+
+    xAxis.attr("transform", "translate(0," + currentHeight + ")");
+    render(currentData, false);
+  }
 
   const legends: Legend[] = _.map(_.without(areaKeys, "tax"), (k) => ({
     label: k,
@@ -304,25 +414,53 @@ export function renderMonthlyFlow(
     shape: "line",
   });
 
-  return { renderer, legends };
+  return {
+    update: render,
+    resize,
+    destroy: () => {
+      svg.selectAll("*").remove();
+    },
+    legends,
+  };
 }
 
-export function renderFlow(graph: Graph) {
+export function renderMonthlyFlow(
+  id: string,
+  options = {
+    rotate: true,
+    balance: 0,
+  },
+) {
+  const chart = createMonthlyFlow(id, options);
+  return {
+    renderer: chart.update,
+    resize: chart.resize,
+    destroy: chart.destroy,
+    legends: chart.legends,
+  };
+}
+
+export function renderFlow(graph: Graph, dimensions?: Dimensions) {
   const id = "#d3-expense-flow";
-  const svg = d3.select(id);
-  const margin = {
-      top: rem(60),
+  const el = document.getElementById(id.substring(1));
+  if (!el?.parentElement) return;
+
+  const svg = d3.select(id),
+    margin = {
+      top: rem(20),
       right: rem(20),
       bottom: rem(40),
       left: rem(20),
     },
     width = Math.max(
-      document.getElementById(id.substring(1)).parentElement.clientWidth,
+      dimensions?.width || el.parentElement.clientWidth,
       1000,
     ) -
       margin.left -
       margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom;
+    height = (dimensions?.height && dimensions.height > 0
+      ? dimensions.height
+      : +svg.attr("height")) - margin.top - margin.bottom;
 
   willClearTippy.update((n) => n + 1);
   svg.selectAll("*").remove();
@@ -456,6 +594,22 @@ export function renderFlow(graph: Graph) {
     shape: "square",
   }));
   return legends;
+}
+
+export function createFlow() {
+  let legends: Legend[] = [];
+  const chart = createRedrawChart<Graph>({
+    draw: (graph, size) => {
+      legends = renderFlow(graph, size) ?? [];
+    },
+    clear: () => {
+      d3.select("#d3-expense-flow").selectAll("*").remove();
+    },
+  });
+  return {
+    ...chart,
+    legends: () => legends,
+  };
 }
 
 function name(node: Node) {

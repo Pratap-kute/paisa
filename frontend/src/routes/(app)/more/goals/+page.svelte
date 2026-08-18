@@ -9,12 +9,15 @@
   import * as toast from "$lib/core/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
 
   const goalDndzone = dndzone;
 
-  let isEmpty = false;
+  let isEmpty = $state(false);
   let config: UserConfig;
-  let goals: GoalSummary[] = [];
+  let goals: GoalSummary[] = $state([]);
   const dragDisabled = writable(true);
 
   function handleConsider(event: CustomEvent<DndEvent<GoalSummary>>) {
@@ -107,8 +110,13 @@
   };
 </script>
 
-<section class="section">
-  <div class="container is-fluid">
+<Page width="fluid">
+  <PageHeader
+    title="Financial Goals"
+    description="Prioritize and track progress towards retirement, savings, and custom targets"
+  />
+
+  <Section>
     <div
       class="columns is-flex-wrap-wrap"
       use:goalDndzone={{
@@ -117,8 +125,8 @@
         flipDurationMs: 300,
         dragDisabled: $dragDisabled
       }}
-      on:consider={handleConsider}
-      on:finalize={handleFinalize}
+      onconsider={handleConsider}
+      onfinalize={handleFinalize}
     >
       {#each goals as goal (goal.id)}
         <div animate:flip={{ duration: 300 }} class="column is-6 is-one-third-widescreen">
@@ -126,13 +134,12 @@
         </div>
       {/each}
     </div>
-    <div class="columns is-flex-wrap-wrap">
-      <div class="column is-12">
-        <ZeroState item={!isEmpty}>
-          <strong>Oops!</strong> You haven't configured any goals yet. Checkout the
-          <a href={helpUrl("goals")}>docs</a> page to get started.
-        </ZeroState>
-      </div>
+
+    <div class="mt-4">
+      <ZeroState item={!isEmpty}>
+        <strong>Oops!</strong> You haven't configured any goals yet. Checkout the
+        <a href={helpUrl("goals")}>docs</a> page to get started.
+      </ZeroState>
     </div>
-  </div>
-</section>
+  </Section>
+</Page>

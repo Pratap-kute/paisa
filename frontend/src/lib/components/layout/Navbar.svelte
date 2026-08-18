@@ -1,16 +1,28 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import Actions from "$lib/components/layout/Actions.svelte";
-  import { month, year, dateMax, dateMin, dateRangeOption } from "../../../store";
+  import {
+    month,
+    year,
+    dateMax,
+    dateMin,
+    dateRangeOption,
+  } from "../../../store";
   import {
     cashflowExpenseDepth,
     cashflowExpenseDepthAllowed,
     cashflowIncomeDepth,
     cashflowIncomeDepthAllowed,
-    obscure
+    obscure,
   } from "../../../persisted_store";
+  // @ts-ignore
   import _ from "lodash";
-  import { financialYear, forEachFinancialYear, helpUrl, isMobile, now } from "$lib/core/utils";
+  import {
+    financialYear,
+    forEachFinancialYear,
+    helpUrl,
+    now,
+  } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { get } from "svelte/store";
   import DateRange from "$lib/components/ui/DateRange.svelte";
@@ -18,20 +30,80 @@
   import MonthPicker from "$lib/components/ui/MonthPicker.svelte";
   import Logo from "./Logo.svelte";
   import InputRange from "$lib/components/ui/InputRange.svelte";
-  export let isBurger: boolean = null;
+  import Badge from "$lib/components/ui/Badge.svelte";
+  interface Props {
+    isBurger?: boolean | null;
+  }
+
+  let { isBurger = $bindable(null) }: Props = $props();
   const readonly = USER_CONFIG.readonly;
 
-  onMount(async () => {
+  function isNavbarTouch() {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia("(max-width: 1023px)").matches;
+  }
+
+  let navbarEl: HTMLElement | undefined;
+
+  function closeNavbarDropdowns(nav: ParentNode | null | undefined = navbarEl) {
+    nav?.querySelectorAll<HTMLElement>(
+      ".navbar-start > .navbar-item.has-dropdown.is-active, .nested.has-dropdown.is-active",
+    ).forEach((el) => el.classList.remove("is-active"));
+  }
+
+  function toggleTopLevelDropdown(event: MouseEvent) {
+    if (!isNavbarTouch()) return;
+    const dropdown = (event.currentTarget as HTMLElement).parentElement;
+    if (!dropdown?.classList.contains("has-dropdown")) return;
+    const wasActive = dropdown.classList.contains("is-active");
+    closeNavbarDropdowns(dropdown.closest(".navbar"));
+    if (!wasActive) {
+      dropdown.classList.add("is-active");
+    }
+  }
+
+  function toggleNestedDropdown(event: MouseEvent) {
+    if (!isNavbarTouch()) return;
+    const nested = (event.currentTarget as HTMLElement).parentElement;
+    if (!nested?.classList.contains("has-dropdown")) return;
+    const menu = nested.closest(".navbar-dropdown");
+    const wasActive = nested.classList.contains("is-active");
+    menu?.querySelectorAll<HTMLElement>(".nested.has-dropdown.is-active")
+      .forEach((el) => el.classList.remove("is-active"));
+    if (!wasActive) {
+      nested.classList.add("is-active");
+    }
+  }
+
+  $effect(() => {
+    if (isBurger !== true) {
+      closeNavbarDropdowns();
+    }
+  });
+
+  onMount(() => {
     if (get(year) == "") {
       year.set(financialYear(now()));
     }
+
+    function onDocumentClick(event: MouseEvent) {
+      if (!isNavbarTouch() || !navbarEl) return;
+      const target = event.target as Node | null;
+      if (target && navbarEl.contains(target)) return;
+      closeNavbarDropdowns();
+    }
+
+    document.addEventListener("click", onDocumentClick);
+    return () => document.removeEventListener("click", onDocumentClick);
   });
 
   const RecurringIcons = [
     { icon: "fa-circle-check", color: "success", label: "Cleared" },
     { icon: "fa-circle-check", color: "warning-dark", label: "Cleared late" },
     { icon: "fa-exclamation-triangle", color: "danger", label: "Past due" },
-    { icon: "fa-circle-check", color: "grey", label: "Upcoming" }
+    { icon: "fa-circle-check", color: "grey", label: "Upcoming" },
   ];
 
   interface Link {
@@ -54,31 +126,40 @@
       label: "Cash Flow",
       href: "/cash_flow",
       children: [
-        { label: "Income Statement", href: "/income_statement", financialYearPicker: true },
+        {
+          label: "Income Statement",
+          href: "/income_statement",
+          financialYearPicker: true,
+        },
         { label: "Monthly", href: "/monthly", dateRangeSelector: true },
         {
           label: "Yearly",
           href: "/yearly",
           financialYearPicker: true,
-          maxDepthSelector: true
+          maxDepthSelector: true,
         },
         {
           label: "Recurring",
           href: "/recurring",
           help: "recurring",
           monthPicker: true,
-          recurringIcons: true
-        }
-      ]
+          recurringIcons: true,
+        },
+      ],
     },
     {
       label: "Expenses",
       href: "/expense",
       children: [
-        { label: "Monthly", href: "/monthly", monthPicker: true, dateRangeSelector: true },
+        {
+          label: "Monthly",
+          href: "/monthly",
+          monthPicker: true,
+          dateRangeSelector: true,
+        },
         { label: "Yearly", href: "/yearly", financialYearPicker: true },
-        { label: "Budget", href: "/budget", help: "budget", monthPicker: true }
-      ]
+        { label: "Budget", href: "/budget", help: "budget", monthPicker: true },
+      ],
     },
     {
       label: "Assets",
@@ -88,9 +169,18 @@
         { label: "Networth", href: "/networth", dateRangeSelector: true },
         { label: "Investment", href: "/investment" },
         { label: "Gain", href: "/gain" },
-        { label: "Allocation", href: "/allocation", help: "allocation-targets" },
-        { label: "Analysis", href: "/analysis", tag: "alpha", help: "analysis" }
-      ]
+        {
+          label: "Allocation",
+          href: "/allocation",
+          help: "allocation-targets",
+        },
+        {
+          label: "Analysis",
+          href: "/analysis",
+          tag: "alpha",
+          help: "analysis",
+        },
+      ],
     },
     {
       label: "Liabilities",
@@ -99,8 +189,8 @@
         { label: "Balance", href: "/balance" },
         { label: "Credit Cards", href: "/credit_cards", help: "credit-cards" },
         { label: "Repayment", href: "/repayment" },
-        { label: "Interest", href: "/interest" }
-      ]
+        { label: "Interest", href: "/interest" },
+      ],
     },
     { label: "Income", href: "/income" },
     {
@@ -108,23 +198,33 @@
       href: "/ledger",
       children: [
         { label: "Import", href: "/import", help: "import" },
-        { label: "Editor", href: "/editor", help: "editor", disablePreload: true },
+        {
+          label: "Editor",
+          href: "/editor",
+          help: "editor",
+          disablePreload: true,
+        },
         { label: "Transactions", href: "/transaction", help: "bulk-edit" },
         { label: "Postings", href: "/posting" },
-        { label: "Price", href: "/price" }
-      ]
+        { label: "Price", href: "/price" },
+      ],
     },
     {
       label: "More",
       href: "/more",
       children: [
         { label: "Configuration", href: "/config", help: "config" },
-        { label: "Sheets", href: "/sheets", help: "sheets", disablePreload: true },
+        {
+          label: "Sheets",
+          href: "/sheets",
+          help: "sheets",
+          disablePreload: true,
+        },
         { label: "Goals", href: "/goals", help: "goals" },
         { label: "Doctor", href: "/doctor" },
-        { label: "Logs", href: "/logs" }
-      ]
-    }
+        { label: "Logs", href: "/logs" },
+      ],
+    },
   ];
 
   const tax = {
@@ -138,9 +238,9 @@
         label: "Schedule AL",
         href: "/schedule_al",
         help: "schedule-al",
-        financialYearPicker: true
-      }
-    ]
+        financialYearPicker: true,
+      },
+    ],
   };
 
   if (USER_CONFIG.default_currency == "INR") {
@@ -150,43 +250,56 @@
   const about = { label: "About", href: "/about" };
   _.last(links).children.push(about);
 
-  let selectedLink: Link = null;
-  let selectedSubLink: Link = null;
-  let selectedSubSubLink: Link = null;
+  let normalizedPath = $derived($page.url.pathname?.replace(/(.+)\/$/, ""));
 
-  $: normalizedPath = $page.url.pathname?.replace(/(.+)\/$/, "");
-
-  $: if (normalizedPath) {
-    selectedSubLink = null;
-    selectedSubSubLink = null;
-    selectedLink = _.find(links, (l) => normalizedPath == l.href);
-    if (!selectedLink) {
-      selectedLink = _.find(
+  let selectedLink: Link = $derived.by(() => {
+    if (!normalizedPath) return null;
+    let link = _.find(links, (l: Link) => normalizedPath == l.href);
+    if (!link) {
+      link = _.find(
         links,
-        (l) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href)
+        (l: Link) => !_.isEmpty(l.children) && normalizedPath.startsWith(l.href),
       );
-
-      selectedSubLink = _.find(
-        selectedLink.children,
-        (l) => normalizedPath == selectedLink.href + l.href
-      );
-
-      if (!selectedSubLink) {
-        selectedSubLink = _.find(selectedLink.children, (l) =>
-          normalizedPath.startsWith(selectedLink.href + l.href)
-        );
-
-        if (!_.isEmpty(selectedSubLink.children)) {
-          selectedSubSubLink = _.find(selectedSubLink.children, (l) =>
-            normalizedPath.startsWith(selectedLink.href + selectedSubLink.href + l.href)
-          );
-        }
-      }
     }
-  }
+    return link || null;
+  });
+
+  let selectedSubLink: Link = $derived.by(() => {
+    if (!selectedLink || _.isEmpty(selectedLink.children)) return null;
+    let sublink = _.find(
+      selectedLink.children,
+      (l: Link) => normalizedPath == selectedLink.href + l.href,
+    );
+    if (!sublink) {
+      sublink = _.find(selectedLink.children, (l: Link) =>
+        normalizedPath.startsWith(selectedLink.href + l.href),
+      );
+    }
+    return sublink || null;
+  });
+
+  let selectedSubSubLink: Link = $derived.by(() => {
+    if (
+      !selectedLink ||
+      !selectedSubLink ||
+      _.isEmpty(selectedSubLink.children)
+    )
+      return null;
+    return (
+      _.find(selectedSubLink.children, (l: Link) =>
+        normalizedPath.startsWith(
+          selectedLink.href + selectedSubLink.href + l.href,
+        ),
+      ) || null
+    );
+  });
 </script>
 
-<nav class="navbar px-2 is-transparent" aria-label="main navigation">
+<nav
+  bind:this={navbarEl}
+  class="navbar px-2 is-transparent"
+  aria-label="main navigation"
+>
   <div class="navbar-brand">
     <a
       href="/"
@@ -195,26 +308,25 @@
     >
       {#if $obscure}
         <span class="icon is-small is-size-5">
-          <i class="fas fa-user-secret" />
+          <i class="fas fa-user-secret"></i>
         </span><span class="ml-2 is-primary-color">Paisa</span>
       {:else}
         <Logo size={22} /><span class="ml-1 is-primary-color">Paisa</span>
       {/if}
     </a>
-    <a
-      role="button"
-      tabindex="-1"
+    <button
+      type="button"
       class="navbar-burger"
       class:is-active={isBurger === true}
-      on:click|preventDefault={(_e) => (isBurger = !isBurger)}
+      onclick={(_e) => (isBurger = !isBurger)}
       aria-label="menu"
-      aria-expanded="false"
+      aria-expanded={isBurger}
       data-target="navbarBasicExample"
     >
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-      <span aria-hidden="true" />
-    </a>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
   </div>
 
   <div class="navbar-menu" class:is-active={isBurger === true}>
@@ -225,43 +337,54 @@
             <a
               class="navbar-item"
               href={link.href}
-              data-sveltekit-preload-data={link.disablePreload ? "tap" : "hover"}
+              data-sveltekit-preload-data={link.disablePreload
+                ? "tap"
+                : "hover"}
               class:is-active={normalizedPath == link.href}>{link.label}</a
             >
           {/if}
         {:else}
           <div class="navbar-item has-dropdown is-hoverable">
-            <a
-              class="navbar-link"
+            <button
+              type="button"
+              class="navbar-link paisa-button-reset is-fullwidth has-text-left"
               class:is-active={normalizedPath.startsWith(link.href)}
-              on:click|preventDefault={(e) =>
-                isMobile() && e.currentTarget.parentElement.classList.toggle("is-active")}
-              >{link.label}</a
+              onclick={toggleTopLevelDropdown}
+              >{link.label}</button
             >
-            <div class="navbar-dropdown {!isMobile() && 'is-boxed'}">
+            <div class="navbar-dropdown {!isNavbarTouch() && 'is-boxed'}">
               {#each link.children as sublink}
                 {@const href = link.href + sublink.href}
                 {#if _.isEmpty(sublink.children)}
                   <a
                     class="navbar-item"
                     {href}
-                    data-sveltekit-preload-data={sublink.disablePreload ? "tap" : "hover"}
-                    class:is-active={normalizedPath.startsWith(href)}>{sublink.label}</a
+                    data-sveltekit-preload-data={sublink.disablePreload
+                      ? "tap"
+                      : "hover"}
+                    class:is-active={normalizedPath.startsWith(href)}
+                    >{sublink.label}</a
                   >
                 {:else}
-                  <div class="nested has-dropdown navbar-item">
-                    <a
-                      class="navbar-link is-arrowless is-flex is-justify-content-space-between is-active"
+                  <div class="nested has-dropdown">
+                    <button
+                      type="button"
+                      class="paisa-button-reset nested-menu-trigger is-flex is-align-items-center is-justify-content-space-between"
                       class:is-active={normalizedPath.startsWith(href)}
+                      aria-haspopup="true"
+                      onclick={toggleNestedDropdown}
                     >
                       <span>{sublink.label}</span>
+
                       <span class="icon is-small">
                         <i
-                          class="fas {isMobile() ? 'fa-angle-down' : 'fa-angle-right'}"
+                          class="fas {isNavbarTouch()
+                            ? 'fa-angle-down'
+                            : 'fa-angle-right'}"
                           aria-hidden="true"
                         ></i>
                       </span>
-                    </a>
+                    </button>
 
                     <div class="dropdown-menu">
                       <div class="dropdown-content">
@@ -272,9 +395,11 @@
                             data-sveltekit-preload-data={subsublink.disablePreload
                               ? "tap"
                               : "hover"}
-                            class:is-active={normalizedPath == href + subsublink.href}
-                            >{subsublink.label}</a
+                            class:is-active={normalizedPath ==
+                              href + subsublink.href}
                           >
+                            {subsublink.label}
+                          </a>
                         {/each}
                       </div>
                     </div>
@@ -291,10 +416,9 @@
         <div class="field is-grouped">
           {#if readonly}
             <p class="control">
-              <span
-                class="mt-1 tag is-rounded is-danger is-light invertable"
-                data-tippy-content="<p>Paisa is in readonly mode</p>">readonly</span
-              >
+              <span data-tippy-content="<p>Paisa is in readonly mode</p>">
+                <Badge variant="danger" rounded class="mt-1">readonly</Badge>
+              </span>
             </p>
           {/if}
 
@@ -310,45 +434,52 @@
   </div>
 </nav>
 
-<div class="mt-3 px-3 is-flex is-justify-content-space-between">
+<div
+  class="navbar-subtoolbar is-flex is-justify-content-space-between is-align-items-center"
+>
   {#if selectedLink}
     <nav
-      style="margin-left: 0.73rem;"
       class="breadcrumb has-chevron-separator mb-0 is-small"
       aria-label="breadcrumbs"
     >
       <ul>
         <li>
-          <a class="is-inactive">{selectedLink.label}</a>
+          <span class="is-inactive">{selectedLink.label}</span>
           {#if selectedLink.help}
-            <a style="margin-left: -10px;" class="p-0" href={helpUrl(selectedLink.help)}
+            <a
+              class="p-0 ml-1 has-text-grey"
+              aria-label="Help documentation"
+              href={helpUrl(selectedLink.help)}
               ><span class="icon is-small">
-                <i class="fas fa-question fa-border" />
+                <i class="fas fa-circle-question"></i>
               </span></a
             >
           {/if}
 
           {#if selectedLink.tag}
-            <span style="font-size: 0.6rem" class="tag is-rounded is-warning"
-              >{selectedLink.tag}</span
+            <Badge variant="warning" rounded class="is-small"
+              >{selectedLink.tag}</Badge
             >
           {/if}
         </li>
         {#if selectedSubLink}
           <li>
-            <a class="is-inactive">{selectedSubLink.label}</a>
+            <span class="is-inactive">{selectedSubLink.label}</span>
 
             {#if selectedSubLink.help}
-              <a style="margin-left: -10px;" class="p-0" href={helpUrl(selectedSubLink.help)}
+              <a
+                class="p-0 ml-1 has-text-grey"
+                aria-label="Sublink help documentation"
+                href={helpUrl(selectedSubLink.help)}
                 ><span class="icon is-small">
-                  <i class="fas fa-question fa-border" />
+                  <i class="fas fa-circle-question"></i>
                 </span></a
               >
             {/if}
 
             {#if selectedSubLink.tag}
-              <span style="font-size: 0.6rem" class="tag is-rounded is-warning mr-2"
-                >{selectedSubLink.tag}</span
+              <Badge variant="warning" rounded class="is-small mr-2"
+                >{selectedSubLink.tag}</Badge
               >
             {/if}
           </li>
@@ -357,11 +488,15 @@
         {#if selectedSubLink}
           {#if selectedSubSubLink}
             <li>
-              <a class="is-inactive">{selectedSubSubLink.label}</a>
+              <span class="is-inactive">{selectedSubSubLink.label}</span>
             </li>
           {:else if selectedLink.href + selectedSubLink.href != normalizedPath}
             <li>
-              <a class="is-inactive">{decodeURIComponent(_.last(normalizedPath.split("/")))}</a>
+              <span class="is-inactive"
+                >{decodeURIComponent(
+                  _.last(normalizedPath.split("/")) || "",
+                )}</span
+              >
             </li>
           {/if}
         {/if}
@@ -369,13 +504,13 @@
     </nav>
   {/if}
 
-  <div class="mr-3 is-flex" style="gap: 12px">
+  <div class="is-flex is-align-items-center" style="gap: 12px">
     {#if selectedSubLink?.recurringIcons}
       <div class="is-flex gap-5 is-align-items-center has-text-grey">
         {#each RecurringIcons as icon}
           <div data-tippy-content="<p>{icon.label}</p>">
             <span class="icon is-small has-text-{icon.color}">
-              <i class={"fas " + icon.icon} />
+              <i class={"fas " + icon.icon}></i>
             </span>
             <span class="is-hidden-mobile">{icon.label}</span>
           </div>
@@ -386,9 +521,13 @@
     {#if selectedSubLink?.maxDepthSelector && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
       <div class="dropdown is-right is-hoverable">
         <div class="dropdown-trigger">
-          <button class="button is-small" aria-haspopup="true">
+          <button
+            class="button is-small"
+            aria-label="Depth settings"
+            aria-haspopup="true"
+          >
             <span class="icon is-small">
-              <i class="fas fa-sliders" />
+              <i class="fas fa-sliders"></i>
             </span>
           </button>
         </div>
@@ -411,7 +550,11 @@
 
     {#if selectedSubLink?.dateRangeSelector || selectedLink?.dateRangeSelector}
       <div>
-        <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
+        <DateRange
+          bind:value={$dateRangeOption}
+          dateMin={$dateMin}
+          dateMax={$dateMax}
+        />
       </div>
     {/if}
 
@@ -432,9 +575,3 @@
     {/if}
   </div>
 </div>
-
-<style lang="scss">
-  li a span.icon {
-    margin-top: -5px;
-  }
-</style>
