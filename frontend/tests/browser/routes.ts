@@ -56,8 +56,8 @@ export const visualRoutes: VisualRoute[] = [
   { name: "config", path: "/more/config" },
   { name: "doctor", path: "/more/doctor" },
   { name: "goals", path: "/more/goals", readyText: "Retirement" },
-  { name: "retirement-goal", path: "/more/goals/retirement/Retirement", ready: ".paisa-goal-detail-main svg g.axis" },
-  { name: "savings-goal", path: "/more/goals/savings/House", ready: ".paisa-goal-detail-main svg g.axis" },
+  { name: "retirement-goal", path: "/more/goals/retirement/Retirement" },
+  { name: "savings-goal", path: "/more/goals/savings/House" },
   {
     name: "logs",
     path: "/more/logs",

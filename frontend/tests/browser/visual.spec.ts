@@ -113,6 +113,14 @@ for (const route of visualRoutes) {
         await expect(page.locator("#d3-current-cash-flow")).toBeVisible();
         await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
       }
+      if (route.name === "savings-goal" || route.name === "retirement-goal") {
+        await expect(page.locator(".paisa-goal-detail-main svg").nth(0).locator("g").first())
+          .toBeVisible({ timeout: 15_000 });
+        await expect(page.locator(".paisa-goal-detail-main svg").nth(1).locator("g").first())
+          .toBeVisible({ timeout: 15_000 });
+        await expect(page.locator(".paisa-goal-detail-side .paisa-posting-row").first())
+          .toBeVisible();
+      }
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
       await expect(page).toHaveScreenshot(
