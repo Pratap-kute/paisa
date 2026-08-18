@@ -245,7 +245,7 @@ test("posting search filters fixture postings", async ({ page }) => {
   const search = page.locator(".search-query-editor .cm-content");
   await search.click();
   await page.keyboard.type('payee = "Rent"');
-  await expect.poll(async () => payeeLinks.count(), { timeout: 5000 })
+  await expect.poll(() => payeeLinks.count(), { timeout: 5000 })
     .toBeLessThan(before);
   await expect(payeeLinks.first()).toContainText("Rent");
 });
