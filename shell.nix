@@ -1,4 +1,5 @@
-{ pkgs ? import <nixpkgs> { }, hledger ? import <nixpkgs> { } }:
+{ pkgs ? import <nixpkgs> { }, hledger ? import <nixpkgs> { }
+, unstable ? pkgs }:
 
 pkgs.mkShell {
   nativeBuildInputs = [
