@@ -67,6 +67,25 @@
     destroyCallback();
   });
 
+  function repaintProgressChart() {
+    if (!svg || _.isEmpty(savingsTimeline)) return;
+    destroyCallback();
+    svg.replaceChildren();
+    destroyCallback = renderProgress(
+      savingsTimeline,
+      predictionsTimeline,
+      breakPoints,
+      svg,
+      { targetSavings },
+    );
+  }
+
+  function repaintInvestmentChart() {
+    if (!investmentTimelineSvg || _.isEmpty(postings)) return;
+    investmentTimelineSvg.replaceChildren();
+    renderInvestmentTimeline(postings, investmentTimelineSvg, 0);
+  }
+
   onMount(async () => {
     ({
       savingsTotal,
@@ -106,17 +125,8 @@
       savingsTimeline.concat(predictionsTimeline),
       targetSavings,
     );
-    destroyCallback = renderProgress(
-      savingsTimeline,
-      predictionsTimeline,
-      breakPoints,
-      svg,
-      {
-        targetSavings,
-      },
-    );
-
-    renderInvestmentTimeline(postings, investmentTimelineSvg, 0);
+    repaintProgressChart();
+    repaintInvestmentChart();
   });
 </script>
 
@@ -167,27 +177,13 @@
     <!-- Main Content Panel -->
     <div class="paisa-goal-detail-main">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline" onresize={() => {
-          if (!svg) return;
-          svg.replaceChildren();
-          destroyCallback = renderProgress(
-            savingsTimeline,
-            predictionsTimeline,
-            breakPoints,
-            svg,
-            { targetSavings },
-          );
-        }}>
+        <ChartFrame type="timeline" onresize={repaintProgressChart}>
           <svg height="400" width="100%" bind:this={svg} />
         </ChartFrame>
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline" onresize={() => {
-          if (!investmentTimelineSvg) return;
-          investmentTimelineSvg.replaceChildren();
-          renderInvestmentTimeline(postings, investmentTimelineSvg, 0);
-        }}>
+        <ChartFrame type="timeline" onresize={repaintInvestmentChart}>
           <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
         </ChartFrame>
       </Section>
