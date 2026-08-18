@@ -3,7 +3,7 @@
 pkgs.mkShell {
   nativeBuildInputs = [
     pkgs.go
-    pkgs.golangci-lint
+    unstable.golangci-lint
     pkgs.gotools
     pkgs.gopls
     pkgs.sqlite
