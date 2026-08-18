@@ -50,6 +50,7 @@ const variants = [
 ] as const;
 
 async function waitForStableLayout(page: Page) {
+  await page.evaluate("globalThis.scrollTo(0, 0)");
   await page.waitForFunction(
     `() => {
       const height = document.documentElement.scrollHeight;
@@ -58,11 +59,12 @@ async function waitForStableLayout(page: Page) {
         height,
         stableChecks: previous?.height === height ? previous.stableChecks + 1 : 0,
       };
-      return globalThis.__visualLayout.stableChecks >= 2;
+      return globalThis.__visualLayout.stableChecks >= 4;
     }`,
     null,
     { polling: 100 },
   );
+  await page.waitForTimeout(100);
 }
 
 async function applyVariant(

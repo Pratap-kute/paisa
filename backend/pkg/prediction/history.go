@@ -52,7 +52,8 @@ func strPtr(value string) *string {
 func uniqueAccounts(postings []posting.Posting, keep func(string) bool) []string {
 	seen := map[string]bool{}
 	var accounts []string
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		account := strings.TrimSpace(p.Account)
 		if account == "" || !keep(account) || seen[account] {
 			continue
@@ -65,7 +66,8 @@ func uniqueAccounts(postings []posting.Posting, keep func(string) bool) []string
 
 func sourceAmount(postings []posting.Posting, source string) float64 {
 	total := 0.0
-	for _, p := range postings {
+	for i := range postings {
+		p := &postings[i]
 		if strings.TrimSpace(p.Account) == source {
 			total += p.Amount.InexactFloat64()
 		}
@@ -111,7 +113,8 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 
 	for _, txnPostings := range grouped {
 		var usable []posting.Posting
-		for _, p := range txnPostings {
+		for i := range txnPostings {
+			p := txnPostings[i]
 			if usablePosting(p) {
 				usable = append(usable, p)
 			}
@@ -129,7 +132,8 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 		}
 
 		var category []posting.Posting
-		for _, p := range usable {
+		for i := range usable {
+			p := usable[i]
 			if isCategoryKind(p.Account) {
 				category = append(category, p)
 			}
@@ -141,8 +145,8 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 			direction = nil
 		}
 
-		for _, p := range emit {
-			entries = append(entries, entryFromPosting(p, source, direction))
+		for i := range emit {
+			entries = append(entries, entryFromPosting(emit[i], source, direction))
 		}
 	}
 
