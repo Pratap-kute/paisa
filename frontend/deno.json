@@ -139,5 +139,5 @@
   },
   "unstable": ["sloppy-imports"],
   "nodeModulesDir": "auto",
-  "allowScripts": ["npm:@parcel/watcher@2"]
+  "allowScripts": ["npm:@parcel/watcher@2", "npm:rolldown@1.2.4"]
 }

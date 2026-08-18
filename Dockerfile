@@ -1,8 +1,9 @@
-FROM --platform=$BUILDPLATFORM denoland/deno:alpine AS web
+FROM --platform=$BUILDPLATFORM denoland/deno:latest AS web
 WORKDIR /usr/src/paisa/frontend
 COPY frontend/deno.json frontend/deno.lock* ./
-RUN deno install
+RUN deno install --allow-scripts
 COPY frontend ./
+RUN deno install --allow-scripts
 RUN deno task build
 
 FROM golang:1.26-alpine AS go
