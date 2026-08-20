@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 const apiProxy = {
@@ -45,7 +46,7 @@ export default defineConfig({
     target: "es2021",
     chunkSizeWarningLimit: 700,
   },
-  plugins: [sveltekit(), fixVendorEvalPlugin()],
+  plugins: [tailwindcss(), sveltekit(), fixVendorEvalPlugin()],
   server: {
     // The backend proxy is tied to this development server. Starting on an
     // arbitrary fallback port hides stale `make develop` processes and leaves

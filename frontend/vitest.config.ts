@@ -51,7 +51,7 @@ const componentProject = defineConfig({
     environment: "happy-dom",
     server: {
       deps: {
-        inline: [/svelte/, /@testing-library/],
+        inline: [/svelte/, /@testing-library/, /bits-ui/, /runed/],
       },
     },
     include: ["src/**/*.component.test.ts"],
