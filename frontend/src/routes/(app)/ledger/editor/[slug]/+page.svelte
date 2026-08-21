@@ -697,8 +697,8 @@
   /* Main Workspace 3-Pane Layout */
   .paisa-editor-workspace {
     display: grid;
-    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr) minmax(
-        280px,
+    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(
+        260px,
         340px
       );
     gap: var(--paisa-space-3);
@@ -708,11 +708,11 @@
     width: 100%;
 
     &.has-no-sidebar {
-      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
     }
 
     &.has-no-output {
-      grid-template-columns: minmax(220px, 240px) minmax(0, 1fr);
+      grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
     }
 
     &.has-no-sidebar.has-no-output {
@@ -720,18 +720,31 @@
     }
 
     @media screen and (max-width: 1024px) {
-      grid-template-columns: minmax(200px, 220px) minmax(0, 1fr);
+      grid-template-columns: minmax(180px, 200px) minmax(0, 1fr) minmax(
+          220px,
+          280px
+        );
 
-      .paisa-editor-output-pane {
-        display: none;
+      &.has-no-sidebar {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+      }
+
+      &.has-no-output {
+        grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+      }
+
+      &.has-no-sidebar.has-no-output {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
     @media screen and (max-width: 768px) {
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
 
-      .paisa-editor-sidebar-pane {
-        display: none;
+      .paisa-editor-sidebar-pane,
+      .paisa-editor-output-pane {
+        max-height: 280px;
       }
     }
   }

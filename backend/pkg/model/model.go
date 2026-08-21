@@ -77,6 +77,7 @@ func SyncCommodities(db *gorm.DB) error {
 	AutoMigrate(db)
 	log.Info("Fetching commodities price history")
 	commodities := slices.Clone(commodity.All())
+	//nolint:gosec // weak random is sufficient for shuffling commodities
 	rand.Shuffle(len(commodities), func(i, j int) {
 		commodities[i], commodities[j] = commodities[j], commodities[i]
 	})

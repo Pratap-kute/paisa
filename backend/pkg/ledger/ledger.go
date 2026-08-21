@@ -65,20 +65,20 @@ func (LedgerCLI) ValidateFile(journalPath string) ([]LedgerFileError, string, er
 		return errors, "", err
 	}
 
-	var output, error bytes.Buffer
+	var output, errBuf bytes.Buffer
 	args := []string{"--args-only"}
 	if config.GetConfig().Strict == config.Yes {
 		args = append(args, "--pedantic")
 	}
 	args = append(args, "-f", journalPath, "balance")
-	err = utils.Exec(ledgerPath, &output, &error, args...)
+	err = utils.Exec(ledgerPath, &output, &errBuf, args...)
 	if err == nil {
 		return errors, utils.Dos2Unix(output.String()), nil
 	}
 
 	re := regexp.MustCompile(`(?m)While parsing file "[^"]+", line ([0-9]+):\s*\n(?:(?:While|>).*\n)*((?:.*\n)*?Error: .*\n)`)
 
-	matches := re.FindAllStringSubmatch(utils.Dos2Unix(error.String()), -1)
+	matches := re.FindAllStringSubmatch(utils.Dos2Unix(errBuf.String()), -1)
 
 	for _, match := range matches {
 		line, _ := strconv.ParseUint(match[1], 10, 64)
@@ -115,10 +115,10 @@ func (LedgerCLI) Prices(journalPath string) ([]price.Price, error) {
 		return prices, err
 	}
 
-	var output, error bytes.Buffer
-	err = utils.Exec(ledgerPath, &output, &error, "--args-only", "-f", journalPath, "pricesdb", "--pricedb-format", "P %(datetime) %(display_account) %(quantity(scrub(display_amount))) %(commodity(scrub(display_amount)))\n")
+	var output, errBuf bytes.Buffer
+	err = utils.Exec(ledgerPath, &output, &errBuf, "--args-only", "-f", journalPath, "pricesdb", "--pricedb-format", "P %(datetime) %(display_account) %(quantity(scrub(display_amount))) %(commodity(scrub(display_amount)))\n")
 	if err != nil {
-		log.Error(error.String())
+		log.Error(errBuf.String())
 		return prices, err
 	}
 
@@ -132,19 +132,19 @@ func (HLedgerCLI) ValidateFile(journalPath string) ([]LedgerFileError, string, e
 		return errors, "", err
 	}
 
-	var output, error bytes.Buffer
+	var output, errBuf bytes.Buffer
 	args := []string{"-f", journalPath, "--auto"}
 	if config.GetConfig().Strict == config.Yes {
 		args = append(args, "--strict")
 	}
 	args = append(args, "balance")
-	err = utils.Exec(path, &output, &error, args...)
+	err = utils.Exec(path, &output, &errBuf, args...)
 	if err == nil {
 		return errors, utils.Dos2Unix(output.String()), nil
 	}
 
 	re := regexp.MustCompile(`(?m)hledger: Error: [^:]*:([0-9:-]+)\n((?:.*\n)*)`)
-	matches := re.FindAllStringSubmatch(utils.Dos2Unix(error.String()), -1)
+	matches := re.FindAllStringSubmatch(utils.Dos2Unix(errBuf.String()), -1)
 
 	for _, match := range matches {
 		lineRange := match[1]
