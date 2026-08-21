@@ -3,18 +3,18 @@
   import {
     createEditor as createTemplateEditor,
     editorState as templateEditorState,
-    updateContent as updateTemplateContent
+    updateContent as updateTemplateContent,
   } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
-    updateContent as updatePreviewContent
+    updateContent as updatePreviewContent,
   } from "$lib/editors/editor";
   import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
   import {
     parse,
     asRows,
     renderWithMetadata,
-    type RenderMetadata
+    type RenderMetadata,
   } from "$lib/importing/spreadsheet";
   import {
     commitParseOutcome,
@@ -43,14 +43,17 @@
   import type { Confidence, PredictionResult } from "$lib/prediction/types";
 
   let templates: ImportTemplate[] = $state([]);
-  let selectedTemplate: ImportTemplate = $state();
-  let saveAsName: string = $state();
+  let selectedTemplate: ImportTemplate | undefined = $state();
+  let saveAsName: string = $state("");
   let preview = $state("");
-  let parseErrorMessage: string = $state(null);
+  let parseErrorMessage: string | null = $state(null);
   let columnCount: number = $state(0);
   let data: any[][] = $state([]);
   let rows: Array<Record<string, any>> = $state([]);
-  let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
+  let options: { reverse: boolean; trim: boolean } = $state({
+    reverse: false,
+    trim: true,
+  });
   let loading = $state(false);
   let activeFileName = $state("");
   let templateDrawerOpen = $state(false);
@@ -89,14 +92,14 @@
     content: "",
     rows: [],
     generatedCount: 0,
-    errors: []
+    errors: [],
   });
 
-  let templateEditorDom: Element = $state();
-  let templateEditor: EditorView = $state();
+  let templateEditorDom: Element | undefined = $state();
+  let templateEditor: EditorView | undefined = $state();
 
-  let previewEditorDom: Element = $state();
-  let previewEditor: EditorView = $state();
+  let previewEditorDom: Element | undefined = $state();
+  let previewEditor: EditorView | undefined = $state();
 
   function onSelectTemplate(tmpl: ImportTemplate) {
     if (!tmpl) return;
@@ -118,20 +121,35 @@
     if (templates.length > 0) {
       selectedTemplate = templates[0];
       saveAsName = selectedTemplate.name;
-      templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+      if (templateEditorDom) {
+        templateEditor = createTemplateEditor(
+          selectedTemplate.content,
+          templateEditorDom,
+        );
+      }
     }
-    previewEditor = createPreviewEditor(preview, previewEditorDom, { readonly: true });
+    if (previewEditorDom) {
+      previewEditor = createPreviewEditor(preview, previewEditorDom, {
+        readonly: true,
+      });
+    }
   });
 
-  let saveAsNameDuplicate = $derived(!!_.find(templates, { name: saveAsName, template_type: "custom" }));
-  let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
-  let templateSaveDisabled = $derived(!$templateEditorState.hasUnsavedChanges || !selectedTemplate);
+  let saveAsNameDuplicate = $derived(
+    !!_.find(templates, { name: saveAsName, template_type: "custom" }),
+  );
+  let selectedTemplateIsBuiltin = $derived(
+    selectedTemplate?.template_type == "builtin",
+  );
+  let templateSaveDisabled = $derived(
+    !$templateEditorState.hasUnsavedChanges || !selectedTemplate,
+  );
   let templateSaveTooltip = $derived(
     !$templateEditorState.hasUnsavedChanges
       ? "No Unsaved Changes"
       : selectedTemplateIsBuiltin
-      ? "Save edited builtin template as custom"
-      : "Save Template"
+        ? "Save edited builtin template as custom"
+        : "Save Template",
   );
 
   async function save() {
@@ -139,16 +157,16 @@
       method: "POST",
       body: JSON.stringify({
         name: saveAsName,
-        content: templateEditor.state.doc.toString()
+        content: templateEditor ? templateEditor.state.doc.toString() : "",
       }),
-      background: true
+      background: true,
     });
 
     if (!saved) {
       toast.toast({
         message: `Failed to save ${saveAsName}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
       return;
     }
@@ -160,31 +178,38 @@
     }
     toast.toast({
       message: `Saved ${saveAsName}`,
-      type: "is-success"
+      type: "is-success",
     });
 
-    $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
+    $templateEditorState = _.assign({}, $templateEditorState, {
+      hasUnsavedChanges: false,
+    });
   }
 
   async function remove() {
+    if (!selectedTemplate) {
+      return;
+    }
     const oldName = selectedTemplate.name;
-    const confirmed = confirm(`Are you sure you want to delete ${oldName} template?`);
+    const confirmed = confirm(
+      `Are you sure you want to delete ${oldName} template?`,
+    );
     if (!confirmed) {
       return;
     }
     const { success, message } = await ajax("/api/templates/delete", {
       method: "POST",
       body: JSON.stringify({
-        name: selectedTemplate.name
+        name: selectedTemplate.name,
       }),
-      background: true
+      background: true,
     });
 
     if (!success) {
       toast.toast({
         message: `Failed to remove ${oldName}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
       return;
     }
@@ -195,10 +220,12 @@
     }
     toast.toast({
       message: `Removed ${oldName}`,
-      type: "is-success"
+      type: "is-success",
     });
 
-    $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
+    $templateEditorState = _.assign({}, $templateEditorState, {
+      hasUnsavedChanges: false,
+    });
   }
 
   $effect(() => {
@@ -217,7 +244,7 @@
       try {
         const generated = renderWithMetadata(currentRows, currentTemplate, {
           reverse: currentReverse,
-          trim: currentTrim
+          trim: currentTrim,
         });
         renderMetadata = generated;
         preview = generated.content;
@@ -233,7 +260,13 @@
       renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
       preview = "";
       updatePreviewContent(previewEditor, "");
-      predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
+      predictionCounts = {
+        high: 0,
+        medium: 0,
+        review: 0,
+        unknown: 0,
+        transfer: 0,
+      };
       predictionRows = [];
       predictionReviewFailed = false;
     }
@@ -289,24 +322,34 @@
     selectedSourceRowIndex = null;
     predictionSession.clearPreview();
     predictionFilter = null;
-    predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
+    predictionCounts = {
+      high: 0,
+      medium: 0,
+      review: 0,
+      unknown: 0,
+      transfer: 0,
+    };
     predictionRows = [];
     predictionReviewFailed = false;
     renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
     preview = "";
-    updatePreviewContent(previewEditor, "");
+    if (previewEditor) {
+      updatePreviewContent(previewEditor, "");
+    }
   }
 
   function selectSourceRow(rowIndex: number) {
     selectedSourceRowIndex = rowIndex;
-    const renderedRow = _.find(renderMetadata.rows, { sourceRowIndex: rowIndex });
+    const renderedRow = _.find(renderMetadata.rows, {
+      sourceRowIndex: rowIndex,
+    });
     if (!renderedRow?.lineRange || !previewEditor) {
       return;
     }
 
     const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
     previewEditor.dispatch({
-      effects: EditorView.scrollIntoView(line.from, { y: "center" })
+      effects: EditorView.scrollIntoView(line.from, { y: "center" }),
     });
   }
 
@@ -325,7 +368,7 @@
   let selectedPrediction = $derived(
     selectedSourceRowIndex == null
       ? null
-      : (summaryForRow(selectedSourceRowIndex)?.results[0] || null)
+      : summaryForRow(selectedSourceRowIndex)?.results[0] || null,
   );
 
   function overrideSelected(account: string) {
@@ -373,13 +416,13 @@
       await navigator.clipboard.writeText(preview);
       toast.toast({
         message: "Copied to clipboard",
-        type: "is-success"
+        type: "is-success",
       });
     } catch (e) {
       console.log(e);
       toast.toast({
         message: "Failed to copy to clipboard",
-        type: "is-danger"
+        type: "is-danger",
       });
     }
   }
@@ -393,17 +436,21 @@
     destinationFile = ensureFileExtension(destinationFile, ".ledger");
     const { saved, message } = await ajax("/api/editor/save", {
       method: "POST",
-      body: JSON.stringify({ name: destinationFile, content: preview, operation: "overwrite" }),
-      background: true
+      body: JSON.stringify({
+        name: destinationFile,
+        content: preview,
+        operation: "overwrite",
+      }),
+      background: true,
     });
 
     if (saved) {
       toast.toast({
         message: `Saved <b><a href="/ledger/editor/${encodeURIComponent(
-          destinationFile
+          destinationFile,
         )}">${destinationFile}</a></b>`,
         type: "is-success",
-        duration: 5000
+        duration: 5000,
       });
       try {
         const historyResponse = await ajax("/api/prediction/history");
@@ -416,12 +463,15 @@
       toast.toast({
         message: `Failed to save ${destinationFile}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000
+        duration: 10000,
       });
     }
   }
 
-  function builtinNotAllowed(action: string, template: ImportTemplate) {
+  function builtinNotAllowed(
+    action: string,
+    template: ImportTemplate | undefined,
+  ) {
     if (template?.template_type == "builtin") {
       return `Not allowed to ${action.toLowerCase()} builtin template`;
     }
@@ -437,15 +487,23 @@
 <Modal bind:active={templateCreateModalOpen}>
   {#snippet head({ close })}
     <p class="modal-card-title">Create Template</p>
-    <button class="delete" aria-label="close" onclick={(e) => close(e)}></button>
+    <button class="delete" aria-label="close" onclick={(e) => close(e)}
+    ></button>
   {/snippet}
   {#snippet body()}
     <div class="field">
       <label class="label" for="save-filename">Template Name</label>
       <div class="control" id="save-filename">
-        <input class="input" type="text" bind:value={saveAsName} placeholder="e.g. HDFC Bank Statement" />
+        <input
+          class="input"
+          type="text"
+          bind:value={saveAsName}
+          placeholder="e.g. HDFC Bank Statement"
+        />
         {#if saveAsNameDuplicate}
-          <p class="help is-danger">Template with the same name already exists</p>
+          <p class="help is-danger">
+            Template with the same name already exists
+          </p>
         {/if}
       </div>
     </div>
@@ -454,7 +512,10 @@
     <button
       class="button is-success"
       disabled={_.isEmpty(saveAsName) || saveAsNameDuplicate}
-      onclick={(e) => save() && close(e)}>Create</button
+      onclick={async (e) => {
+        await save();
+        close(e);
+      }}>Create</button
     >
     <button class="button" onclick={(e) => close(e)}>Cancel</button>
   {/snippet}
@@ -482,15 +543,27 @@
                 onSelectTemplate(e.detail);
               }}
             >
-              <div slot="selection" let:selection class="paisa-select-item-rendered">
+              <div
+                slot="selection"
+                let:selection
+                class="paisa-select-item-rendered"
+              >
                 <span class="paisa-template-name">{selection.name}</span>
-                <span class="tag is-small {selection.template_type === 'builtin' ? 'is-info is-light' : 'is-success is-light'}">
+                <span
+                  class="tag is-small {selection.template_type === 'builtin'
+                    ? 'is-info is-light'
+                    : 'is-success is-light'}"
+                >
                   {selection.template_type}
                 </span>
               </div>
               <div slot="item" let:item class="paisa-select-item-option">
                 <span class="name">{item.name}</span>
-                <span class="tag is-small {item.template_type === 'builtin' ? 'is-info is-light' : 'is-success is-light'}">
+                <span
+                  class="tag is-small {item.template_type === 'builtin'
+                    ? 'is-info is-light'
+                    : 'is-success is-light'}"
+                >
                   {item.template_type}
                 </span>
               </div>
@@ -498,11 +571,16 @@
           </div>
 
           <div class="paisa-import-topbar-actions">
-            <button class="button is-small is-link is-light" onclick={() => (templateDrawerOpen = true)}>
+            <button
+              class="button is-small is-link is-light"
+              onclick={() => (templateDrawerOpen = true)}
+            >
               <span class="icon is-small"><i class="fas fa-code"></i></span>
               <span>Edit Template</span>
               {#if $templateEditorState.hasUnsavedChanges}
-                <span class="tag is-warning is-light is-small ml-1">Unsaved</span>
+                <span class="tag is-warning is-light is-small ml-1"
+                  >Unsaved</span
+                >
               {/if}
             </button>
             <button
@@ -520,43 +598,66 @@
               onclick={(_e) => save()}
               disabled={templateSaveDisabled}
             >
-              <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
+              <span class="icon is-small"
+                ><i class="fas fa-floppy-disk"></i></span
+              >
             </button>
             <button
               class="button is-small is-danger is-light"
               data-tippy-content={builtinNotAllowed("Delete", selectedTemplate)}
               aria-label="Delete Template"
               onclick={(_e) => remove()}
-              disabled={selectedTemplate?.template_type == "builtin"}
+              disabled={!selectedTemplate ||
+                selectedTemplate.template_type == "builtin"}
             >
-              <span class="icon is-small"><i class="fas fa-trash-can"></i></span>
+              <span class="icon is-small"><i class="fas fa-trash-can"></i></span
+              >
             </button>
           </div>
         </div>
 
         <div class="paisa-import-file-block">
           {#if activeFileName}
-            <span class="icon has-text-link"><i class="fas fa-file-csv"></i></span>
-            <span class="paisa-file-name" title={activeFileName}>{activeFileName}</span>
-            <span class="tag is-info is-light is-small">{data.length} rows</span>
+            <span class="icon has-text-link"
+              ><i class="fas fa-file-csv"></i></span
+            >
+            <span class="paisa-file-name" title={activeFileName}
+              >{activeFileName}</span
+            >
+            <span class="tag is-info is-light is-small">{data.length} rows</span
+            >
             <span class="tag is-light is-small">{columnCount} cols</span>
             <button class="button is-small is-light" onclick={clearLoadedFile}>
-              <span class="icon is-small"><i class="fas fa-arrows-rotate"></i></span>
+              <span class="icon is-small"
+                ><i class="fas fa-arrows-rotate"></i></span
+              >
               <span>Replace File</span>
             </button>
           {:else}
-            <span class="icon has-text-grey"><i class="fas fa-file-import"></i></span>
+            <span class="icon has-text-grey"
+              ><i class="fas fa-file-import"></i></span
+            >
             <span class="has-text-grey is-size-7">No file loaded</span>
           {/if}
         </div>
 
         <div class="paisa-data-controls">
           <div class="field color-switch mb-0">
-            <input id="import-reverse" type="checkbox" bind:checked={options.reverse} class="switch is-rounded is-small" />
+            <input
+              id="import-reverse"
+              type="checkbox"
+              bind:checked={options.reverse}
+              class="switch is-rounded is-small"
+            />
             <label for="import-reverse" class="is-size-7">Reverse</label>
           </div>
           <div class="field color-switch mb-0">
-            <input id="trim-reverse" type="checkbox" bind:checked={options.trim} class="switch is-rounded is-small" />
+            <input
+              id="trim-reverse"
+              type="checkbox"
+              bind:checked={options.trim}
+              class="switch is-rounded is-small"
+            />
             <label for="trim-reverse" class="is-size-7">Trim</label>
           </div>
         </div>
@@ -566,10 +667,12 @@
         <div class="paisa-import-pane paisa-source-pane">
           <div class="paisa-pane-header">
             <div class="paisa-pane-title">
-              <span class="icon is-small has-text-link"><i class="fas fa-table-cells"></i></span>
+              <span class="icon is-small has-text-link"
+                ><i class="fas fa-table-cells"></i></span
+              >
               <span>Source Data</span>
             </div>
-            {#if !predictionReviewFailed && !_.isEmpty(data) && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
+            {#if !predictionReviewFailed && !_.isEmpty(data) && predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
               <PredictionReviewBar
                 counts={predictionCounts}
                 filter={predictionFilter}
@@ -581,13 +684,21 @@
           {#if parseErrorMessage}
             <div class="notification is-danger is-light p-3 m-3">
               <div class="is-flex is-align-items-center">
-                <span class="icon mr-2"><i class="fas fa-triangle-exclamation"></i></span>
-                <div class="is-size-7"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
+                <span class="icon mr-2"
+                  ><i class="fas fa-triangle-exclamation"></i></span
+                >
+                <div class="is-size-7">
+                  <strong>Failed to parse document:</strong>
+                  {parseErrorMessage}
+                </div>
               </div>
             </div>
           {/if}
 
-          <div class="paisa-dropzone-container" class:has-file={!_.isEmpty(data)}>
+          <div
+            class="paisa-dropzone-container"
+            class:has-file={!_.isEmpty(data)}
+          >
             <FileDropzone
               multiple={false}
               accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
@@ -598,8 +709,12 @@
                   <div class="paisa-dropzone-icon-circle">
                     <i class="fas fa-cloud-arrow-up fa-2x"></i>
                   </div>
-                  <h4 class="title is-6 mb-1">Drag & drop your bank / broker statement</h4>
-                  <p class="subtitle is-7 has-text-grey mb-3">Supports CSV, TXT, XLS, XLSX, and PDF</p>
+                  <h4 class="title is-6 mb-1">
+                    Drag & drop your bank / broker statement
+                  </h4>
+                  <p class="subtitle is-7 has-text-grey mb-3">
+                    Supports CSV, TXT, XLS, XLSX, and PDF
+                  </p>
                   <div class="tags are-small is-centered mb-0">
                     <span class="tag is-rounded is-light">CSV</span>
                     <span class="tag is-rounded is-light">XLS / XLSX</span>
@@ -608,8 +723,12 @@
                 </div>
               {:else}
                 <div class="paisa-dropzone-compact">
-                  <span class="icon is-small mr-2"><i class="fas fa-arrows-rotate"></i></span>
-                  <span class="is-size-7">Drop a different file to replace current data</span>
+                  <span class="icon is-small mr-2"
+                    ><i class="fas fa-arrows-rotate"></i></span
+                  >
+                  <span class="is-size-7"
+                    >Drop a different file to replace current data</span
+                  >
                 </div>
               {/if}
             </FileDropzone>
@@ -620,21 +739,31 @@
               <span class="icon is-large has-text-link">
                 <i class="fas fa-spinner fa-pulse fa-2x"></i>
               </span>
-              <p class="is-size-6 mt-2 has-text-weight-semibold">Parsing Spreadsheet Data…</p>
-              <p class="is-size-7 has-text-grey">Extracting tabular rows and columns</p>
+              <p class="is-size-6 mt-2 has-text-weight-semibold">
+                Parsing Spreadsheet Data…
+              </p>
+              <p class="is-size-7 has-text-grey">
+                Extracting tabular rows and columns
+              </p>
             </div>
           {/if}
 
           {#if !_.isEmpty(data) && !loading}
             <div class="paisa-spreadsheet-grid-wrapper">
-              <table class="table is-bordered is-size-7 is-narrow paisa-sheet-table">
+              <table
+                class="table is-bordered is-size-7 is-narrow paisa-sheet-table"
+              >
                 <thead>
                   <tr>
                     <th class="paisa-sheet-corner-cell">#</th>
                     {#each _.range(0, columnCount) as ci}
                       <th class="paisa-sheet-col-header">
-                        <span class="paisa-col-letter">{String.fromCharCode(65 + ci)}</span>
-                        <span class="paisa-col-tag">ROW.{String.fromCharCode(65 + ci)}</span>
+                        <span class="paisa-col-letter"
+                          >{String.fromCharCode(65 + ci)}</span
+                        >
+                        <span class="paisa-col-tag"
+                          >ROW.{String.fromCharCode(65 + ci)}</span
+                        >
                       </th>
                     {/each}
                   </tr>
@@ -649,12 +778,19 @@
                       <th class="paisa-sheet-row-header">
                         <span>{ri}</span>
                         <PredictionRowBadge
-                          confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
-                          possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
+                          confidence={predictionReviewFailed
+                            ? null
+                            : summaryForRow(ri)?.confidence}
+                          possibleTransfer={predictionReviewFailed
+                            ? false
+                            : summaryForRow(ri)?.possibleTransfer}
                         />
                       </th>
                       {#each row as cell}
-                        <td class="paisa-sheet-data-cell" title={displayCell(cell)}>{displayCell(cell)}</td>
+                        <td
+                          class="paisa-sheet-data-cell"
+                          title={displayCell(cell)}>{displayCell(cell)}</td
+                        >
                       {/each}
                     </tr>
                   {/each}
@@ -676,13 +812,19 @@
         <div class="paisa-import-pane paisa-preview-pane">
           <div class="paisa-pane-header">
             <div class="paisa-pane-title">
-              <span class="icon is-small has-text-success"><i class="fas fa-file-invoice-dollar"></i></span>
+              <span class="icon is-small has-text-success"
+                ><i class="fas fa-file-invoice-dollar"></i></span
+              >
               <span>Ledger Preview</span>
               {#if renderMetadata.generatedCount > 0}
-                <span class="tag is-success is-light is-small">{renderMetadata.generatedCount} generated</span>
+                <span class="tag is-success is-light is-small"
+                  >{renderMetadata.generatedCount} generated</span
+                >
               {/if}
               {#if renderMetadata.errors.length > 0}
-                <span class="tag is-danger is-light is-small">{renderMetadata.errors.length} errors</span>
+                <span class="tag is-danger is-light is-small"
+                  >{renderMetadata.errors.length} errors</span
+                >
               {/if}
             </div>
             <div class="paisa-editor-card-actions">
@@ -703,7 +845,9 @@
                 disabled={_.isEmpty(preview)}
                 onclick={openSaveModal}
               >
-                <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
+                <span class="icon is-small"
+                  ><i class="fas fa-floppy-disk"></i></span
+                >
                 <span>Save</span>
               </button>
             </div>
@@ -712,8 +856,12 @@
             <div class="preview-editor" bind:this={previewEditorDom}></div>
             {#if _.isEmpty(preview) && _.isEmpty(data)}
               <div class="paisa-preview-placeholder">
-                <span class="icon has-text-grey-light mb-2"><i class="fas fa-arrow-left fa-2x"></i></span>
-                <p>Upload a statement to inspect generated journal transactions.</p>
+                <span class="icon has-text-grey-light mb-2"
+                  ><i class="fas fa-arrow-left fa-2x"></i></span
+                >
+                <p>
+                  Upload a statement to inspect generated journal transactions.
+                </p>
               </div>
             {/if}
           </div>
@@ -722,30 +870,52 @@
 
       <div class="paisa-import-statusbar">
         {#if parseErrorMessage}
-          <span class="has-text-danger"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+          <span class="has-text-danger"
+            ><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span
+          >
         {:else if loading}
-          <span class="has-text-link"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data</span>
+          <span class="has-text-link"
+            ><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data</span
+          >
         {:else if renderMetadata.generatedCount > 0}
-          <span class="has-text-success"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} transactions generated</span>
+          <span class="has-text-success"
+            ><i class="fas fa-circle-check mr-1"></i>
+            {renderMetadata.generatedCount} transactions generated</span
+          >
           {#if renderMetadata.errors.length > 0}
-            <span class="has-text-danger"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} rows failed</span>
+            <span class="has-text-danger"
+              ><i class="fas fa-triangle-exclamation mr-1"></i>
+              {renderMetadata.errors.length} rows failed</span
+            >
           {/if}
           {#if selectedSourceRowIndex !== null}
-            <span class="has-text-grey">Row {selectedSourceRowIndex} selected</span>
+            <span class="has-text-grey"
+              >Row {selectedSourceRowIndex} selected</span
+            >
           {/if}
           {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
             <span class="has-text-grey">High {predictionCounts.high}</span>
             <span class="has-text-grey">Medium {predictionCounts.medium}</span>
-            <span class="has-text-warning">Review {predictionCounts.review}</span>
-            <span class="has-text-danger">Unknown {predictionCounts.unknown}</span>
+            <span class="has-text-warning"
+              >Review {predictionCounts.review}</span
+            >
+            <span class="has-text-danger"
+              >Unknown {predictionCounts.unknown}</span
+            >
             {#if predictionCounts.transfer > 0}
-              <span class="has-text-warning">Transfers {predictionCounts.transfer}</span>
+              <span class="has-text-warning"
+                >Transfers {predictionCounts.transfer}</span
+              >
             {/if}
           {/if}
         {:else if activeFileName}
-          <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
+          <span class="has-text-grey"
+            ><i class="fas fa-circle-info mr-1"></i> No transactions generated</span
+          >
         {:else}
-          <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
+          <span class="has-text-grey"
+            ><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span
+          >
         {/if}
       </div>
     </div>
@@ -761,7 +931,9 @@
   <aside class="paisa-template-drawer-panel" aria-label="Template Definition">
     <div class="paisa-template-drawer-header">
       <div class="paisa-pane-title">
-        <span class="icon is-small has-text-link"><i class="fas fa-code"></i></span>
+        <span class="icon is-small has-text-link"
+          ><i class="fas fa-code"></i></span
+        >
         <span>Template Definition</span>
         <span class="tag is-small is-link is-light">Handlebars</span>
       </div>
@@ -771,7 +943,11 @@
             <span class="paisa-unsaved-dot"></span> Unsaved
           </span>
         {/if}
-        <button class="button is-small is-ghost" aria-label="Close Template Definition" onclick={() => (templateDrawerOpen = false)}>
+        <button
+          class="button is-small is-ghost"
+          aria-label="Close Template Definition"
+          onclick={() => (templateDrawerOpen = false)}
+        >
           <span class="icon is-small"><i class="fas fa-xmark"></i></span>
         </button>
       </div>
@@ -780,7 +956,10 @@
       <div class="template-editor" bind:this={templateEditorDom}></div>
     </div>
     <div class="paisa-template-drawer-footer">
-      <button class="button is-small" onclick={() => (templateDrawerOpen = false)}>Cancel</button>
+      <button
+        class="button is-small"
+        onclick={() => (templateDrawerOpen = false)}>Cancel</button
+      >
       <button
         class="button is-small is-link"
         data-tippy-content={templateSaveTooltip}
@@ -819,7 +998,7 @@
 
   .paisa-import-topbar {
     position: relative;
-    z-index: 2;
+    z-index: 20;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
