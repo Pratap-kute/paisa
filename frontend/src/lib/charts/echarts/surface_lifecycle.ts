@@ -54,6 +54,7 @@ export function createEChartSurfaceController(options: {
   ) => EChartSurfaceEngine;
   onresize?: (dimensions: Dimensions) => void;
   onready?: () => void;
+  onreadinesschange?: (ready: boolean) => void;
   eventHandlers?: PaisaChartEventHandler[];
   requestFrame?: RequestFrame;
   cancelFrame?: CancelFrame;
@@ -98,6 +99,7 @@ export function createEChartSurfaceController(options: {
     generation += 1;
     isReady = false;
     options.element.dataset.chartReady = "false";
+    options.onreadinesschange?.(false);
     clearReadyFrame();
   }
 
@@ -106,6 +108,7 @@ export function createEChartSurfaceController(options: {
     if (isReady) return;
     isReady = true;
     options.element.dataset.chartReady = "true";
+    options.onreadinesschange?.(true);
     options.onready?.();
   }
 
@@ -160,7 +163,7 @@ export function createEChartSurfaceController(options: {
         width: nextDimensions.width,
         height: nextDimensions.height,
       });
-      options.onresize?.(nextDimensions);
+      if (changed) options.onresize?.(nextDimensions);
       scheduleReady();
     },
     setEventHandlers(handlers) {
@@ -179,6 +182,7 @@ export function createEChartSurfaceController(options: {
       dimensions = undefined;
       generation += 1;
       isReady = false;
+      options.onreadinesschange?.(false);
       delete options.element.dataset.chartReady;
     },
     chart() {

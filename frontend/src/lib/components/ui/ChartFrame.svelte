@@ -190,12 +190,10 @@
   .paisa-chart-type-timeline {
     flex: 1 1 auto;
     min-height: 380px;
-    height: 100%;
   }
 
   .paisa-chart-type-timeline .paisa-chart-frame-body {
     min-height: 0;
-    height: 100%;
   }
 
   .paisa-chart-type-timeline .paisa-chart-frame-body :global(svg) {

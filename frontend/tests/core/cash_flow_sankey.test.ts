@@ -92,6 +92,15 @@ describe("cash-flow Sankey ECharts adapter", () => {
       [2, 3],
       [3, 1],
     ]]);
+
+    const option = buildCashFlowSankeyOption(data);
+    expect(option.series[0].type).toBe("graph");
+    expect(option.series[0].data.map((node) => node.nodeId)).toEqual([1, 2, 3]);
+    expect(option.series[0].links.map((link) => ({
+      source: link.sourceId,
+      target: link.targetId,
+      value: link.value,
+    }))).toEqual(cycleGraph.links);
   });
 
   it("reports no true directed cycles in the real browser cash-flow fixture", () => {

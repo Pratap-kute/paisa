@@ -92,11 +92,13 @@
     }
 
     const ARIMA = await ARIMAPromise;
-    predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
-    breakPoints = findBreakPoints(
-      savingsTimeline.concat(predictionsTimeline),
+    const nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
+    const nextBreakPoints = findBreakPoints(
+      savingsTimeline.concat(nextPredictions),
       targetSavings,
     );
+    predictionsTimeline = nextPredictions;
+    breakPoints = nextBreakPoints;
   });
 </script>
 

@@ -147,8 +147,10 @@ export function buildPeriodSeriesOption(
   };
   const valueAxis = {
     type: "value",
+    splitNumber: mobile ? 3 : 5,
     axisLabel: {
       color: mutedColor,
+      hideOverlap: true,
       formatter: (value: number) =>
         formatValue(value, data.valueFormat ?? "compactCurrency"),
     },

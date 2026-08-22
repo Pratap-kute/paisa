@@ -1,5 +1,6 @@
 import {
   BarChart,
+  GraphChart,
   HeatmapChart,
   LineChart,
   SankeyChart,
@@ -20,6 +21,7 @@ import { type ECharts, init, use } from "echarts/core";
 use([
   CanvasRenderer,
   BarChart,
+  GraphChart,
   CalendarComponent,
   GridComponent,
   HeatmapChart,

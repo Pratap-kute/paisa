@@ -41,6 +41,7 @@ describe("ECharts surface lifecycle controller", () => {
     };
     const initChart = vi.fn(() => chart as never);
     const onresize = vi.fn();
+    const onreadinesschange = vi.fn();
     const element = document.createElement("div");
     const initialOption = { series: [{ type: "sankey", data: [] }] };
     const updatedOption = {
@@ -53,6 +54,7 @@ describe("ECharts surface lifecycle controller", () => {
       renderer: "canvas",
       initChart,
       onresize,
+      onreadinesschange,
     });
 
     controller.init();
@@ -60,6 +62,7 @@ describe("ECharts surface lifecycle controller", () => {
     expect(chart.on).toHaveBeenCalledWith("finished", expect.any(Function));
     expect(chart.setOption).toHaveBeenCalledWith(initialOption, true);
     expect(element.dataset.chartReady).toBe("false");
+    expect(onreadinesschange).toHaveBeenLastCalledWith(false);
 
     controller.update(updatedOption);
     expect(chart.setOption).toHaveBeenCalledWith(updatedOption, true);
@@ -67,10 +70,13 @@ describe("ECharts surface lifecycle controller", () => {
     controller.resize({ width: 640, height: 360 });
     expect(chart.resize).toHaveBeenCalledWith({ width: 640, height: 360 });
     expect(onresize).toHaveBeenCalledWith({ width: 640, height: 360 });
+    controller.resize({ width: 640, height: 360 });
+    expect(onresize).toHaveBeenCalledTimes(1);
 
     controller.markReady();
     expect(controller.ready()).toBe(true);
     expect(element.dataset.chartReady).toBe("true");
+    expect(onreadinesschange).toHaveBeenLastCalledWith(true);
 
     controller.dispose();
     expect(chart.off).toHaveBeenCalledWith("finished", expect.any(Function));
@@ -78,6 +84,7 @@ describe("ECharts surface lifecycle controller", () => {
     expect(controller.chart()).toBeUndefined();
     expect(controller.ready()).toBe(false);
     expect(element.dataset.chartReady).toBeUndefined();
+    expect(onreadinesschange).toHaveBeenLastCalledWith(false);
   });
 
   it("keeps the latest option when update occurs before initialization", () => {

@@ -110,10 +110,10 @@
       targetDate,
     ));
 
-    predictionsTimeline = [];
+    let nextPredictions: Forecast[] = [];
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
-      predictionsTimeline = project(
+      nextPredictions = project(
         targetSavings,
         rate,
         targetDateObject,
@@ -122,13 +122,15 @@
       );
     } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
-      predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
+      nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
     }
 
-    breakPoints = findBreakPoints(
-      savingsTimeline.concat(predictionsTimeline),
+    const nextBreakPoints = findBreakPoints(
+      savingsTimeline.concat(nextPredictions),
       targetSavings,
     );
+    predictionsTimeline = nextPredictions;
+    breakPoints = nextBreakPoints;
   });
 </script>
 

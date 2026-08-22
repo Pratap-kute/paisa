@@ -9,6 +9,7 @@
   } from "$lib/charts/echarts/surface_lifecycle";
   import { theme } from "../../../store";
   import type { EChartsCoreOption } from "echarts/core";
+  import { untrack } from "svelte";
 
   interface Props {
     option: EChartsCoreOption;
@@ -34,6 +35,7 @@
 
   let element: HTMLDivElement | undefined = $state();
   let controller: EChartSurfaceController | undefined = $state();
+  let chartReady = $state(false);
   let pendingDimensions: Dimensions | undefined;
   let currentTheme = $derived($theme);
 
@@ -49,6 +51,9 @@
       initChart: echarts.initChart,
       onresize,
       onready,
+      onreadinesschange: (ready) => {
+        chartReady = ready;
+      },
       eventHandlers: events,
     });
     controller.init();
@@ -72,7 +77,7 @@
       if (!controller) return;
       controller.resize(dimensions);
     });
-    ensureChart();
+    untrack(() => ensureChart());
 
     return () => {
       disposed = true;
@@ -100,7 +105,7 @@
   bind:this={element}
   class="paisa-echart-surface {className}"
   data-testid={testId}
-  data-chart-ready="false"
+  data-chart-ready={chartReady ? "true" : "false"}
   role="img"
   aria-label={ariaLabel}
 ></div>

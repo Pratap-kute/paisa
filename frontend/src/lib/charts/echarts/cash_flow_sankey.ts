@@ -1,7 +1,6 @@
 import type { Graph, Legend } from "$lib/core/utils";
 import { firstName } from "$lib/core/utils";
 import { generateColorScheme } from "$lib/core/colors";
-import { iconify } from "$lib/core/icon";
 import type { FlowLink, FlowNode } from "$lib/charts/echarts/flow";
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
@@ -28,12 +27,8 @@ export interface CashFlowSankeyOptions {
   theme?: PaisaChartTheme;
 }
 
-function displayName(account: string): string {
-  return iconify(account).replace(/<[^>]*>/g, "");
-}
-
 function labelName(name: string): string {
-  return displayName(name);
+  return name;
 }
 
 export function findDirectedCycles(graph: Graph): number[][] {
@@ -188,39 +183,100 @@ export function buildCashFlowSankeyOption(
   const textColor = options.theme?.textColor ?? "currentColor";
   const mutedColor = options.theme?.mutedColor ?? textColor;
   const borderColor = options.theme?.borderColor ?? textColor;
+  const tooltip = {
+    trigger: "item",
+    confine: true,
+    borderColor,
+    backgroundColor: options.theme?.tooltipSurfaceColor,
+    textStyle: {
+      color: textColor,
+    },
+    formatter: (
+      params: { dataType?: string; data?: Record<string, unknown> },
+    ) => {
+      const item = params.data ?? {};
+      if (params.dataType === "edge") {
+        return [
+          `<strong>${String(item.sourceName ?? item.source ?? "")}</strong>`,
+          `to ${String(item.targetName ?? item.target ?? "")}`,
+          chartFormatters.currency(Number(item.value ?? 0)),
+        ].join("<br/>");
+      }
+
+      return [
+        `<strong>${String(item.tooltipName ?? item.name ?? "")}</strong>`,
+        chartFormatters.currency(Number(item.value ?? 0)),
+      ].join("<br/>");
+    },
+  };
+
+  if (data.hasCircularLinks) {
+    const maxValue = Math.max(...data.nodes.map((node) => node.value), 1);
+    return {
+      backgroundColor: "transparent",
+      animationDuration: 300,
+      color: options.theme?.seriesColors,
+      tooltip,
+      series: [{
+        type: "graph",
+        name: "Cash Flow",
+        layout: "circular",
+        circular: { rotateLabel: true },
+        left: mobile ? 12 : 48,
+        right: mobile ? 12 : 48,
+        top: mobile ? 12 : 24,
+        bottom: mobile ? 12 : 24,
+        roam: true,
+        symbolSize: (value: number) =>
+          12 + 28 * Math.sqrt(Math.max(value, 0) / maxValue),
+        edgeSymbol: ["none", "arrow"],
+        edgeSymbolSize: [0, mobile ? 7 : 9],
+        emphasis: { focus: "adjacency" },
+        label: {
+          show: true,
+          color: textColor,
+          fontSize: mobile ? 10 : 12,
+          overflow: "truncate",
+          width: mobile ? 76 : 150,
+        },
+        lineStyle: {
+          color: "target",
+          opacity: options.darkMode ? 0.5 : 0.4,
+          curveness: 0.12,
+        },
+        data: data.nodes.map((node) => ({
+          id: String(node.id),
+          name: node.label,
+          nodeId: node.id,
+          tooltipName: node.label,
+          value: node.value,
+          itemStyle: { color: node.color, borderColor, borderWidth: 1 },
+        })),
+        links: data.links.map((link) => ({
+          source: link.sourceName,
+          target: link.targetName,
+          sourceId: link.source,
+          targetId: link.target,
+          sourceName: link.sourceName,
+          targetName: link.targetName,
+          value: link.value,
+          lineStyle: {
+            color: data.nodes.find((node) => node.id === link.target)?.color,
+          },
+        })),
+      }],
+      textStyle: {
+        color: mutedColor,
+        fontFamily: "var(--paisa-font-sans)",
+      },
+    };
+  }
 
   return {
     backgroundColor: "transparent",
     animationDuration: 300,
     color: options.theme?.seriesColors,
-    tooltip: {
-      trigger: "item",
-      confine: true,
-      borderColor,
-      backgroundColor: options.theme?.tooltipSurfaceColor,
-      textStyle: {
-        color: textColor,
-      },
-      formatter: (
-        params: { dataType?: string; data?: Record<string, unknown> },
-      ) => {
-        const item = params.data ?? {};
-        if (params.dataType === "edge") {
-          return [
-            `<strong>${
-              displayName(String(item.sourceName ?? item.source ?? ""))
-            }</strong>`,
-            `to ${displayName(String(item.targetName ?? item.target ?? ""))}`,
-            chartFormatters.currency(Number(item.value ?? 0)),
-          ].join("<br/>");
-        }
-
-        return [
-          `<strong>${displayName(String(item.name ?? ""))}</strong>`,
-          chartFormatters.currency(Number(item.value ?? 0)),
-        ].join("<br/>");
-      },
-    },
+    tooltip,
     series: [
       {
         type: "sankey",
@@ -259,6 +315,7 @@ export function buildCashFlowSankeyOption(
           id: String(node.id),
           name: String(node.id),
           label: node.label,
+          tooltipName: node.label,
           value: node.value,
           itemStyle: {
             color: node.color,
