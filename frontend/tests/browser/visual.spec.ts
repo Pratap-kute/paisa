@@ -121,6 +121,9 @@ for (const route of visualRoutes) {
 
       await page.goto(route.path);
       await page.waitForLoadState("networkidle");
+      if (route.name === "cash-flow-yearly") {
+        await page.getByRole("combobox").selectOption({ label: "2021 - 22" });
+      }
       await expect(routeReady(page, route).first()).toBeVisible();
       if (route.name === "dashboard") {
         await expect(page.locator("#d3-current-cash-flow")).toBeVisible();

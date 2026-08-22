@@ -1,26 +1,19 @@
 import { SankeyChart } from "echarts/charts";
 import {
-  GridComponent,
-  TitleComponent,
   TooltipComponent,
-  TransformComponent,
 } from "echarts/components";
-import { CanvasRenderer, SVGRenderer } from "echarts/renderers";
+import { CanvasRenderer } from "echarts/renderers";
 import { type ECharts, init, use } from "echarts/core";
 
 use([
   CanvasRenderer,
-  SVGRenderer,
-  GridComponent,
   SankeyChart,
-  TitleComponent,
   TooltipComponent,
-  TransformComponent,
 ]);
 
 export function initChart(
   element: HTMLDivElement,
-  renderer: "canvas" | "svg" = "canvas",
+  renderer: "canvas" = "canvas",
 ): ECharts {
   return init(element, undefined, {
     renderer,

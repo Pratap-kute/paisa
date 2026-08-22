@@ -1,25 +1,13 @@
-import { formatCurrency, type Graph, type Legend } from "$lib/core/utils";
+import type { Graph, Legend } from "$lib/core/utils";
 import { firstName } from "$lib/core/utils";
 import { generateColorScheme } from "$lib/core/colors";
 import { iconify } from "$lib/core/icon";
+import type { FlowLink, FlowNode } from "$lib/charts/echarts/flow";
+import { chartFormatters } from "$lib/charts/echarts/formatters";
+import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
 
-export interface CashFlowSankeyNode {
-  id: number;
-  name: string;
-  label: string;
-  group: string;
-  value: number;
-  color: string;
-}
-
-export interface CashFlowSankeyLink {
-  source: number;
-  target: number;
-  sourceName: string;
-  targetName: string;
-  value: number;
-  cycle: boolean;
-}
+export interface CashFlowSankeyNode extends FlowNode {}
+export interface CashFlowSankeyLink extends FlowLink {}
 
 export interface CashFlowSankeyData {
   nodes: CashFlowSankeyNode[];
@@ -37,9 +25,7 @@ export interface CashFlowSankeyData {
 export interface CashFlowSankeyOptions {
   width?: number;
   darkMode?: boolean;
-  textColor?: string;
-  mutedColor?: string;
-  borderColor?: string;
+  theme?: PaisaChartTheme;
 }
 
 function displayName(account: string): string {
@@ -199,17 +185,19 @@ export function buildCashFlowSankeyOption(
   options: CashFlowSankeyOptions = {},
 ) {
   const mobile = (options.width ?? 0) > 0 && (options.width ?? 0) < 640;
-  const textColor = options.textColor ?? "currentColor";
-  const mutedColor = options.mutedColor ?? textColor;
-  const borderColor = options.borderColor ?? textColor;
+  const textColor = options.theme?.textColor ?? "currentColor";
+  const mutedColor = options.theme?.mutedColor ?? textColor;
+  const borderColor = options.theme?.borderColor ?? textColor;
 
   return {
     backgroundColor: "transparent",
     animationDuration: 300,
+    color: options.theme?.seriesColors,
     tooltip: {
       trigger: "item",
       confine: true,
       borderColor,
+      backgroundColor: options.theme?.tooltipSurfaceColor,
       textStyle: {
         color: textColor,
       },
@@ -223,13 +211,13 @@ export function buildCashFlowSankeyOption(
               displayName(String(item.sourceName ?? item.source ?? ""))
             }</strong>`,
             `to ${displayName(String(item.targetName ?? item.target ?? ""))}`,
-            formatCurrency(Number(item.value ?? 0)),
+            chartFormatters.currency(Number(item.value ?? 0)),
           ].join("<br/>");
         }
 
         return [
           `<strong>${displayName(String(item.name ?? ""))}</strong>`,
-          formatCurrency(Number(item.value ?? 0)),
+          chartFormatters.currency(Number(item.value ?? 0)),
         ].join("<br/>");
       },
     },
@@ -258,7 +246,7 @@ export function buildCashFlowSankeyOption(
             const label = params.data?.label ?? "";
             if (mobile) return label;
             return `${label} ${
-              formatCurrency(Number(params.data?.value ?? 0))
+              chartFormatters.currency(Number(params.data?.value ?? 0))
             }`;
           },
         },

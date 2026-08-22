@@ -29,7 +29,11 @@ export const visualRoutes: VisualRoute[] = [
     path: "/cash_flow/recurring",
     readyText: "Recurring Transactions",
   },
-  { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
+  {
+    name: "cash-flow-yearly",
+    path: "/cash_flow/yearly",
+    ready: "[data-testid='cash-flow-yearly-echart'][data-chart-ready='true']",
+  },
   { name: "expense-budget", path: "/expense/budget", readyText: "All Budgets" },
   { name: "expense-monthly", path: "/expense/monthly" },
   {

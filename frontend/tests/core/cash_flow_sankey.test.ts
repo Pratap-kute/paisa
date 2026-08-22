@@ -110,9 +110,20 @@ describe("cash-flow Sankey ECharts adapter", () => {
     const data = buildCashFlowSankeyData(graph);
     const option = buildCashFlowSankeyOption(data, {
       width: 390,
-      textColor: "rgb(1, 2, 3)",
-      mutedColor: "rgb(4, 5, 6)",
-      borderColor: "rgb(7, 8, 9)",
+      theme: {
+        textColor: "rgb(1, 2, 3)",
+        mutedColor: "rgb(4, 5, 6)",
+        borderColor: "rgb(7, 8, 9)",
+        gridColor: "rgb(7, 8, 9)",
+        surfaceColor: "rgb(10, 11, 12)",
+        tooltipSurfaceColor: "rgb(13, 14, 15)",
+        primaryColor: "rgb(16, 17, 18)",
+        positiveColor: "rgb(19, 20, 21)",
+        negativeColor: "rgb(22, 23, 24)",
+        warningColor: "rgb(25, 26, 27)",
+        neutralColor: "rgb(28, 29, 30)",
+        seriesColors: ["red", "green"],
+      },
     });
     const series = option.series[0];
 

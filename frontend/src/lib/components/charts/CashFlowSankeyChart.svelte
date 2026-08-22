@@ -1,6 +1,6 @@
 <script lang="ts">
   import { buildCashFlowSankeyData, buildCashFlowSankeyOption } from "$lib/charts/echarts/cash_flow_sankey";
-  import { readEChartTokenTheme } from "$lib/charts/echarts/theme";
+  import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
   import type { Graph } from "$lib/core/utils";
   import EChartSurface from "./EChartSurface.svelte";
   import { theme } from "../../../store";
@@ -12,12 +12,12 @@
 
   let { graph, width = 0 }: Props = $props();
   let chartWidth = $state(0);
-  let tokenTheme = $state(readEChartTokenTheme());
+  let tokenTheme = $state(readPaisaChartTheme());
   const sankeyData = $derived(buildCashFlowSankeyData(graph));
   const option = $derived(buildCashFlowSankeyOption(sankeyData, {
     width: chartWidth,
     darkMode: $theme === "dark",
-    ...tokenTheme,
+    theme: tokenTheme,
   }));
 
   $effect(() => {
@@ -26,13 +26,14 @@
 
   $effect(() => {
     $theme;
-    tokenTheme = readEChartTokenTheme();
+    tokenTheme = readPaisaChartTheme();
   });
 </script>
 
 <EChartSurface
   {option}
   ariaLabel="Yearly cash flow Sankey chart"
+  testId="cash-flow-yearly-echart"
   onresize={(dimensions) => {
     chartWidth = dimensions.width;
   }}

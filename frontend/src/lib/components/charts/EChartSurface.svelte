@@ -4,16 +4,21 @@
   import {
     createEChartSurfaceController,
     type EChartSurfaceController,
+    type EChartRenderer,
+    type PaisaChartEventHandler,
   } from "$lib/charts/echarts/surface_lifecycle";
   import { theme } from "../../../store";
   import type { EChartsCoreOption } from "echarts/core";
 
   interface Props {
     option: EChartsCoreOption;
-    renderer?: "canvas" | "svg";
+    renderer?: EChartRenderer;
     class?: string;
     ariaLabel?: string;
+    testId?: string;
+    events?: PaisaChartEventHandler[];
     onresize?: (dimensions: Dimensions) => void;
+    onready?: () => void;
   }
 
   let {
@@ -21,7 +26,10 @@
     renderer = "canvas",
     class: className = "",
     ariaLabel = "Chart",
+    testId = "paisa-echart-surface",
+    events = [],
     onresize,
+    onready,
   }: Props = $props();
 
   let element: HTMLDivElement | undefined = $state();
@@ -38,6 +46,8 @@
       renderer,
       initChart: echarts.initChart,
       onresize,
+      onready,
+      eventHandlers: events,
     });
     controller.init();
   }
@@ -68,11 +78,17 @@
     currentTheme;
     controller?.update(option);
   });
+
+  $effect(() => {
+    controller?.setEventHandlers(events);
+  });
 </script>
 
 <div
   bind:this={element}
   class="paisa-echart-surface {className}"
+  data-testid={testId}
+  data-chart-ready="false"
   role="img"
   aria-label={ariaLabel}
 ></div>
