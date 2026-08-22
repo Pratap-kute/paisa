@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import Modal from "$lib/components/ui/Modal.svelte";
+  import Dialog from "$lib/components/ui/Dialog.svelte";
   import { createDiffEditor } from "$lib/editors/editor";
   import type { LedgerFile } from "$lib/core/utils";
   let editorDom: Element = $state();
@@ -50,14 +50,13 @@
   });
 </script>
 
-<Modal
-  bind:active={open}
+<Dialog
+  bind:open
   width="min(1300px, 96vw)"
   bodyClass="p-0 min-h-[500px]"
-  headerClass="p-0"
   footerClass="p-0"
 >
-  {#snippet head({ close })}
+  {#snippet header({ close })}
     <div class="paisa-diff-header">
       <div class="paisa-diff-title-area">
         <div class="paisa-diff-filename">
@@ -82,7 +81,7 @@
             type="button"
             class="paisa-nav-btn"
             disabled={selectedFileIndex <= 0}
-            onclick={(_e) => selectedFileIndex--}
+            onclick={() => selectedFileIndex--}
             title="Previous changed file"
           >
             <i class="fas fa-chevron-left text-xs mr-1"></i>
@@ -92,7 +91,7 @@
             type="button"
             class="paisa-nav-btn"
             disabled={selectedFileIndex >= changedNewFiles.length - 1}
-            onclick={(_e) => selectedFileIndex++}
+            onclick={() => selectedFileIndex++}
             title="Next changed file"
           >
             <span>Next</span>
@@ -103,7 +102,7 @@
           type="button"
           class="paisa-diff-close-btn"
           aria-label="close"
-          onclick={(e) => close(e)}
+          onclick={() => close()}
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -111,7 +110,7 @@
     </div>
   {/snippet}
 
-  {#snippet body()}
+  {#snippet children()}
     <div class="paisa-diff-body">
       <div class="diff-editor" bind:this={editorDom}></div>
       {#if changedOldFiles.length === 0}
@@ -124,18 +123,18 @@
     </div>
   {/snippet}
 
-  {#snippet foot({ close })}
+  {#snippet footer({ close })}
     <div class="paisa-diff-footer">
-      <button type="button" class="paisa-cancel-btn" onclick={(e) => close(e)}>
+      <button type="button" class="paisa-cancel-btn" onclick={() => close()}>
         Cancel
       </button>
       {#if changedOldFiles.length > 0}
         <button
           type="button"
           class="paisa-save-btn"
-          onclick={(e) => {
+          onclick={() => {
             dispatch("save", changedNewFiles);
-            close(e);
+            close();
           }}
         >
           <i class="fa-solid fa-check mr-1.5 text-xs"></i>
@@ -144,9 +143,9 @@
       {/if}
     </div>
   {/snippet}
-</Modal>
+</Dialog>
 
-<style lang="scss">
+<style>
   .paisa-diff-header {
     display: flex;
     align-items: center;
@@ -217,19 +216,19 @@
     display: inline-flex;
     align-items: center;
     transition: background-color var(--paisa-transition-fast);
+  }
 
-    &:last-child {
-      border-right: none;
-    }
+  .paisa-nav-btn:last-child {
+    border-right: none;
+  }
 
-    &:hover:not(:disabled) {
-      background-color: var(--paisa-surface-hover);
-    }
+  .paisa-nav-btn:hover:not(:disabled) {
+    background-color: var(--paisa-surface-hover);
+  }
 
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+  .paisa-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   .paisa-diff-close-btn {
@@ -245,11 +244,11 @@
     cursor: pointer;
     font-size: 1rem;
     transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+  }
 
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-      color: var(--paisa-foreground);
-    }
+  .paisa-diff-close-btn:hover {
+    background-color: var(--paisa-surface-hover);
+    color: var(--paisa-foreground);
   }
 
   .paisa-diff-body {
@@ -291,10 +290,10 @@
     border-radius: var(--paisa-radius-md, 0.375rem);
     cursor: pointer;
     transition: background-color var(--paisa-transition-fast);
+  }
 
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-    }
+  .paisa-cancel-btn:hover {
+    background-color: var(--paisa-surface-hover);
   }
 
   .paisa-save-btn {
@@ -310,9 +309,9 @@
     border-radius: var(--paisa-radius-md, 0.375rem);
     cursor: pointer;
     transition: filter var(--paisa-transition-fast);
+  }
 
-    &:hover {
-      filter: brightness(1.08);
-    }
+  .paisa-save-btn:hover {
+    filter: brightness(1.08);
   }
 </style>

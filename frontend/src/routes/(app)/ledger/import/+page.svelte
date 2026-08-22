@@ -29,13 +29,13 @@
   import * as toast from "$lib/core/toast";
   import { ensureFileExtension } from "$lib/ledger/file";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
-  import Modal from "$lib/components/ui/Modal.svelte";
+  import Dialog from "$lib/components/ui/Dialog.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import Drawer from "$lib/components/ui/Drawer.svelte";
   import Switch from "$lib/components/ui/Switch.svelte";
   import Button from "$lib/components/ui/Button.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
-  import Field from "$lib/components/ui/Field.svelte";
+  import FormField from "$lib/components/layout/FormField.svelte";
   import Input from "$lib/components/ui/Input.svelte";
   import IconButton from "$lib/components/ui/IconButton.svelte";
   import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
@@ -872,10 +872,10 @@
             {/if}
             {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
               <span class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> {predictionCounts.high}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> {predictionCounts.medium}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> {predictionCounts.review}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> {predictionCounts.unknown}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown}</span>
               </span>
             {/if}
           {:else if activeFileName}
@@ -972,57 +972,61 @@
 <FileModal bind:open={showFileModal} onsave={saveToFile} />
 
 <!-- TEMPLATE CREATE MODAL -->
-{#if showSaveAsModal}
-  <Modal
-    active={showSaveAsModal}
-    title="Create Import Template"
-    onclose={() => (showSaveAsModal = false)}
-  >
-    {#snippet body()}
-      <Field label="Template Name" labelFor="template-name-input" error={saveAsNameDuplicate ? "A custom template with this name already exists." : undefined}>
+<Dialog
+  bind:open={showSaveAsModal}
+  title="Create Import Template"
+  onclose={() => (showSaveAsModal = false)}
+>
+  {#snippet children()}
+    <FormField
+      id="template-name-input"
+      label="Template Name"
+      error={saveAsNameDuplicate ? "A custom template with this name already exists." : undefined}
+    >
+      {#snippet children()}
         <Input
           id="template-name-input"
           size="sm"
           bind:value={saveAsName}
           placeholder="e.g. HDFC Bank Statement"
         />
-      </Field>
-    {/snippet}
-    {#snippet foot({ close })}
-      <div class="flex w-full justify-end gap-2">
-        <Button variant="ghost" size="sm" onclick={close}>Cancel</Button>
-        <Button
-          variant="primary"
-          size="sm"
-          disabled={!saveAsName || saveAsNameDuplicate}
-          onclick={async () => {
-            close();
-            const { template, saved, message } = await ajax("/api/templates/upsert", {
-              method: "POST",
-              body: JSON.stringify({
-                name: saveAsName,
-                content: selectedTemplate?.content || ""
-              }),
-              background: true
+      {/snippet}
+    </FormField>
+  {/snippet}
+  {#snippet footer({ close })}
+    <div class="flex w-full justify-end gap-2">
+      <Button variant="ghost" size="sm" onclick={() => close()}>Cancel</Button>
+      <Button
+        variant="primary"
+        size="sm"
+        disabled={!saveAsName || saveAsNameDuplicate}
+        onclick={async () => {
+          close();
+          const { template, saved, message } = await ajax("/api/templates/upsert", {
+            method: "POST",
+            body: JSON.stringify({
+              name: saveAsName,
+              content: selectedTemplate?.content || ""
+            }),
+            background: true
+          });
+          if (saved) {
+            ({ templates } = await ajax("/api/templates", { background: true }));
+            onSelectTemplate(template);
+            toast.toast({
+              message: `Created template ${saveAsName}`,
+              type: "is-success"
             });
-            if (saved) {
-              ({ templates } = await ajax("/api/templates", { background: true }));
-              onSelectTemplate(template);
-              toast.toast({
-                message: `Created template ${saveAsName}`,
-                type: "is-success"
-              });
-            } else {
-              toast.toast({
-                message: `Failed to create template: ${message}`,
-                type: "is-danger"
-              });
-            }
-          }}
-        >
-          Create
-        </Button>
-      </div>
-    {/snippet}
-  </Modal>
-{/if}
+          } else {
+            toast.toast({
+              message: `Failed to create template: ${message}`,
+              type: "is-danger"
+            });
+          }
+        }}
+      >
+        Create
+      </Button>
+    </div>
+  {/snippet}
+</Dialog>
