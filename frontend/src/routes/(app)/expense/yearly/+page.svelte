@@ -1,75 +1,87 @@
 <script lang="ts">
-  import * as d3 from "d3";
-  import { onDestroy, onMount } from "svelte";
+  import type { ScaleOrdinal } from "d3";
+  import { onDestroy, onMount, tick } from "svelte";
   import _ from "lodash";
   import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import {
     renderYearlyExpensesTimeline,
     createCurrentExpensesBreakdown,
-    renderCalendar
+    renderCalendar,
   } from "$lib/charts/expense/yearly";
   import type { ChartHandle } from "$lib/charts/resize";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import { financialColors } from "$lib/theme/chartPalette";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
+  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
+  import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
 
-  let groups = writable([]);
-  let z: d3.ScaleOrdinal<string, string, never> = $state(),
-    renderer: (ps: Posting[]) => void = $state(),
+  let groups = writable<string[]>([]);
+  let z: ScaleOrdinal<string, string, never> | undefined = $state(),
+    renderer: ((ps: Posting[]) => void) | undefined = $state(),
     expenseBreakdown: ChartHandle<Posting[]> | null = $state(null),
-    expenses: Posting[] = $state(),
-    grouped_expenses: Record<string, Posting[]> = $state(),
-    grouped_incomes: Record<string, Posting[]> = $state(),
-    grouped_investments: Record<string, Posting[]> = $state(),
-    grouped_taxes: Record<string, Posting[]> = $state();
+    expenses: Posting[] = $state([]),
+    grouped_expenses: Record<string, Posting[]> = $state({}),
+    grouped_incomes: Record<string, Posting[]> = $state({}),
+    grouped_investments: Record<string, Posting[]> = $state({}),
+    grouped_taxes: Record<string, Posting[]> = $state({});
   let resizeTimeline: ((dim: { width: number; height: number }) => void) | undefined;
 
   let legends: Legend[] = $state([]);
+  let isLoading = $state(true);
 
   let income = $state(""),
     netIncome = $state(""),
     taxRate = $state(""),
     tax = $state(""),
     expenseRate = $state(""),
+    expenseRateValue = $state(""),
     expense = $state(""),
     investment = $state(""),
     savingRate = $state("");
 
-  let currentYearExpenses: Posting[] = $derived(
-    grouped_expenses ? (grouped_expenses[$year] || []) : []
-  );
-  let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
-  let hasExpenses = $derived((expenses?.length ?? 0) > 0);
+  function initializeCharts() {
+    if (!expenses?.length || !z) return;
+
+    expenseBreakdown?.destroy();
+    expenseBreakdown = createCurrentExpensesBreakdown(z);
+    renderer = expenseBreakdown.update;
+  }
 
   onMount(async () => {
-    ({
-      expenses: expenses,
-      year_wise: {
-        expenses: grouped_expenses,
-        incomes: grouped_incomes,
-        investments: grouped_investments,
-        taxes: grouped_taxes
+    try {
+      ({
+        expenses: expenses,
+        year_wise: {
+          expenses: grouped_expenses,
+          incomes: grouped_incomes,
+          investments: grouped_investments,
+          taxes: grouped_taxes,
+        },
+      } = await ajax("/api/expense"));
+
+      const dates = _.map(expenses, (e) => e.date);
+      if (dates.length > 0) {
+        dateMin.set(_.minBy(dates, (d) => d.valueOf())!);
+        dateMax.set(_.maxBy(dates, (d) => d.valueOf())!);
       }
-    } = await ajax("/api/expense"));
 
-    const [start, end] = d3.extent(_.map(expenses, (e) => e.date));
-    if (start) {
-      dateMin.set(start);
-      dateMax.set(end);
-    }
-
-    ({ z, legends, resize: resizeTimeline } = renderYearlyExpensesTimeline(expenses, groups, year));
-
-    if (z) {
-      expenseBreakdown = createCurrentExpensesBreakdown(z);
-      renderer = expenseBreakdown.update;
+      await tick();
+      ({ z, legends, resize: resizeTimeline } = renderYearlyExpensesTimeline(
+        expenses,
+        groups,
+        year,
+      ));
+      initializeCharts();
+    } finally {
+      isLoading = false;
     }
   });
 
@@ -85,23 +97,34 @@
     return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
   }
 
+  let currentYearExpenses: Posting[] = $derived(
+    grouped_expenses[$year] || [],
+  );
+  let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
+  let hasExpenses = $derived(expenses.length > 0);
+  let postingCountSubtitle = $derived(
+    hasCurrentYearExpenses
+      ? `${currentYearExpenses.length} postings in ${$year}`
+      : "No expenses recorded",
+  );
+
   $effect(() => {
-    if (grouped_expenses && renderer) {
+    if (grouped_expenses && renderer && z) {
       renderCalendar(currentYearExpenses, z, $groups);
 
-      const expenses = grouped_expenses[$year] || [];
+      const yearExpenses = grouped_expenses[$year] || [];
       const incomes = grouped_incomes[$year] || [];
       const taxes = grouped_taxes[$year] || [];
       const investments = grouped_investments[$year] || [];
 
       income = sumCurrency(incomes, -1);
-
       tax = sumCurrency(taxes);
-      expense = sumCurrency(expenses);
+      expense = sumCurrency(yearExpenses);
       investment = sumCurrency(investments);
 
       if (_.isEmpty(incomes)) {
         expenseRate = "";
+        expenseRateValue = "";
         taxRate = "";
         savingRate = "";
         netIncome = "";
@@ -111,134 +134,149 @@
         netIncome = formatCurrency(netIncomeAmount) + " net income";
         taxRate = grossIncome === 0
           ? ""
-          : formatPercentage(sum(taxes) / grossIncome) + " of income";
+          : formatPercentage(sum(taxes) / grossIncome) + " on income";
+        expenseRateValue = netIncomeAmount === 0
+          ? ""
+          : formatPercentage(sum(yearExpenses) / netIncomeAmount);
         expenseRate = netIncomeAmount === 0
           ? ""
-          : formatPercentage(sum(expenses) / netIncomeAmount) + " of net income";
+          : expenseRateValue + " of net income";
         savingRate = netIncomeAmount === 0
           ? ""
           : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
       }
 
-      renderer(expenses);
+      renderer(yearExpenses);
     }
   });
 </script>
 
-<Page width="fluid">
+<svelte:head>
+  <title>Yearly Expenses - {$year} - Paisa</title>
+</svelte:head>
+
+<Page width="analysis">
   <PageHeader
     title="Yearly Expenses"
-    description="Yearly expense breakdown, calendar activity, and timeline"
-  />
-
-  <div class="paisa-yearly-expense-layout">
-    <!-- Side Context Panel: Summary KPIs -->
-    <div class="paisa-yearly-expense-side">
-      <Section title="Summary">
-        <MetricStrip cols={2}>
-          <LevelItem
-            narrow
-            title="Gross Income"
-            value={income}
-            subtitle={netIncome}
-          />
-          <LevelItem
-            narrow
-            title="Tax"
-            value={tax}
-            color={financialColors.lossText}
-            subtitle={taxRate}
-          />
-          <LevelItem
-            narrow
-            title="Net Investment"
-            value={investment}
-            subtitle={savingRate}
-          />
-          <LevelItem
-            narrow
-            title="Expenses"
-            value={expense}
-            color={financialColors.lossText}
-            subtitle={expenseRate}
-          />
-        </MetricStrip>
-      </Section>
-    </div>
-
-    <!-- Main Analysis Panel: Calendar, Category Breakdown, Timeline -->
-    <div class="paisa-yearly-expense-main">
-      <div class="paisa-yearly-top-row">
-        <!-- Calendar -->
-        <Section title="Activity Calendar">
-          <div class="p-3">
-            <div id="d3-current-year-expense-calendar" class="d3-calendar">
-              <div class="months"></div>
-            </div>
-          </div>
-        </Section>
-
-        <!-- Category Breakdown -->
-        <Section title="Category Breakdown">
-          <ChartFrame
-            type="category"
-            rows={Math.min(8, currentYearExpenses.length || 4)}
-            empty={!hasCurrentYearExpenses}
-            emptyMessage="No expenses this year"
-            preserveChildren
-            onresize={(dim) => expenseBreakdown?.resize(dim)}
-          >
-            <svg id="d3-current-year-breakdown" width="100%" />
-          </ChartFrame>
-        </Section>
+    description="Multi-year annual expense trends and category comparisons"
+  >
+    {#snippet actions()}
+      <div class="paisa-page-toolbar-mobile">
+        <FinancialYearPicker bind:value={$year} dateMin={$dateMin} dateMax={$dateMax} />
       </div>
+    {/snippet}
+  </PageHeader>
 
-      <!-- Yearly Expense Timeline -->
-      <Section title="Expense Timeline">
-        {#if hasExpenses}
-          <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        {/if}
-        <ChartFrame
-          type="timeline"
-          empty={!hasExpenses}
-          emptyMessage="No expense activity in this period"
-          preserveChildren
-          onresize={(dim) => resizeTimeline?.(dim)}
-        >
-          <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
-        </ChartFrame>
-      </Section>
-    </div>
+  <div class="paisa-top-financial-context">
+    <MetricStrip cols={2}>
+      <Metric
+        label="Total Expenses"
+        value={expense || "—"}
+        status="negative"
+        secondary={postingCountSubtitle}
+        loading={isLoading}
+      />
+      <Metric
+        label="% of Net Income"
+        value={expenseRateValue || "—"}
+        secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
+        loading={isLoading}
+        class="paisa-metric-rate"
+      />
+    </MetricStrip>
+
+    <IncomeContextStrip
+      {income}
+      {tax}
+      {taxRate}
+      savings={investment}
+      savingsRate={savingRate}
+      {netIncome}
+    />
   </div>
+
+  <ResponsiveGrid variant="analysis">
+    <Section
+      title="Category Breakdown"
+      subtitle="Distribution across spending categories"
+    >
+      <ChartFrame
+        type="category"
+        class="paisa-breakdown-chart"
+        rows={Math.min(8, currentYearExpenses.length || 4)}
+        empty={!isLoading && !hasCurrentYearExpenses}
+        emptyMessage="No expenses recorded for {$year}"
+        preserveChildren
+        onresize={(dim) => expenseBreakdown?.resize(dim)}
+      >
+        <svg id="d3-current-year-breakdown" width="100%" />
+      </ChartFrame>
+    </Section>
+
+    <Section
+      title="Activity Calendar"
+      subtitle="Monthly expense frequency and activity"
+    >
+      <div id="d3-current-year-expense-calendar" class="d3-calendar">
+        <div class="months"></div>
+      </div>
+    </Section>
+  </ResponsiveGrid>
+
+  <Section
+    title="Expense Timeline"
+    subtitle="Historical yearly expenses by category"
+  >
+    {#if hasExpenses}
+      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+      <ChartFrame
+        type="timeline"
+        size="dynamic"
+        preserveChildren
+        onresize={(dim) => resizeTimeline?.(dim)}
+      >
+        <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
+      </ChartFrame>
+    {:else}
+      <ZeroState item={[]}>
+        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+          No expense activity in this period.
+        </p>
+      </ZeroState>
+    {/if}
+  </Section>
 </Page>
 
 <style lang="scss">
-  .paisa-yearly-expense-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-5);
-    width: 100%;
+  .paisa-page-toolbar-mobile {
+    display: inline-flex;
+    align-items: center;
 
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    @media screen and (min-width: 640px) {
+      display: none;
     }
   }
 
-  .paisa-yearly-expense-side,
-  .paisa-yearly-expense-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
+  .paisa-top-financial-context {
+    margin-bottom: var(--paisa-space-5);
   }
 
-  .paisa-yearly-top-row {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-4);
+  :global(.paisa-metric-rate .paisa4-metric-value) {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.15;
+  }
 
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    }
+  :global(.paisa-metric-rate .paisa4-metric-meta) {
+    white-space: normal;
+  }
+
+  :global(.paisa-breakdown-chart.paisa-chart-frame) {
+    overflow: visible;
+  }
+
+  :global(.paisa-breakdown-chart .paisa-chart-frame-body) {
+    overflow: visible;
   }
 </style>
