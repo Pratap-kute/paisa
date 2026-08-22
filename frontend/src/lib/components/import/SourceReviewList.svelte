@@ -125,16 +125,16 @@
   let visibleItems = $derived(reviewItems.filter((item) => item.isVisible));
 
   function indicatorClass(confidence: Confidence | null, possibleTransfer: boolean) {
-    if (possibleTransfer) return "bg-violet-500";
+    if (possibleTransfer) return "bg-[var(--paisa-prediction-transfer)]";
     switch (confidence) {
       case "HIGH":
-        return "bg-[var(--paisa-success)]";
+        return "bg-[var(--paisa-prediction-high)]";
       case "MEDIUM":
-        return "bg-[var(--paisa-info)]";
+        return "bg-[var(--paisa-prediction-medium)]";
       case "NEEDS_REVIEW":
-        return "bg-[var(--paisa-warning)]";
+        return "bg-[var(--paisa-prediction-review)]";
       default:
-        return "bg-[var(--paisa-danger)]";
+        return "bg-[var(--paisa-prediction-unknown)]";
     }
   }
 </script>

@@ -126,7 +126,7 @@
           class="paisa-action-btn"
           onclick={() => onApplySimilar?.(selectedAccount)}
         >
-          <span class="icon is-small"><i class="fas fa-layer-group"></i></span>
+          <span class="inline-flex items-center text-xs"><i class="fas fa-layer-group"></i></span>
           <span>Apply to similar rows in this import</span>
         </button>
         <button
@@ -134,7 +134,7 @@
           class="paisa-action-btn paisa-action-btn-subtle"
           onclick={() => onAlwaysUse?.(selectedAccount)}
         >
-          <span class="icon is-small"><i class="fas fa-bookmark"></i></span>
+          <span class="inline-flex items-center text-xs"><i class="fas fa-bookmark"></i></span>
           <span>Always use this account for this merchant</span>
         </button>
       </div>
@@ -146,7 +146,7 @@
           onclick={() => onConfirmNext?.()}
         >
           <span>Confirm & Next Review</span>
-          <span class="icon is-small"><i class="fas fa-arrow-right"></i></span>
+          <span class="inline-flex items-center text-xs"><i class="fas fa-arrow-right"></i></span>
         </button>
       {/if}
     </div>

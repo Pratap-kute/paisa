@@ -89,9 +89,9 @@ describe("posting and recurring transactions", () => {
   });
 
   test("annualizes gains and losses", () => {
-    expect(change(posting() as never).class).toBe("has-text-success");
+    expect(change(posting() as never).class).toBe("paisa-text-success");
     expect(change(posting({ market_amount: 80 }) as never).class)
-      .toBe("has-text-danger");
+      .toBe("paisa-text-danger");
     expect(change(posting({ commodity: "INR" }) as never).value).toBe(0);
     expect(change(posting({ quantity: 0 }) as never).percentage).toBe(0);
   });
@@ -134,7 +134,7 @@ describe("posting and recurring transactions", () => {
       ),
     )
       .toBe(8);
-    expect(scheduleIcon(unpaid as never).color).toBe("has-text-danger");
+    expect(scheduleIcon(unpaid as never).color).toBe("paisa-text-danger");
   });
 
   test("sorts sequences by proximity to now", () => {

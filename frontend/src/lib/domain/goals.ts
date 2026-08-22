@@ -315,13 +315,13 @@ export function renderProgress(
           ["Date", d.date.format("DD MMM YYYY")],
           ["Savings", [
             formatCurrency(d.value),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ]],
           [
             "",
             [
               formatFloat((d.value / targetSavings) * 100) + "%",
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ],
           ],
         ]),
@@ -472,7 +472,7 @@ export function renderInvestmentTimeline(
         _.sortBy(
           _.map(group, (amount, account) => [
             iconify(account),
-            [formatCurrency(amount), "has-text-weight-bold has-text-right"],
+            [formatCurrency(amount), "paisa-text-bold paisa-text-right"],
           ]),
           (r) => r[0],
         ),

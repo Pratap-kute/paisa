@@ -1009,8 +1009,8 @@ export function tooltip(
 ) {
   if (options.total && rows.length > 0) {
     const totalRow: Array<string | string[]> = [
-      ["Total", "has-text-weight-bold"],
-      [options.total, "has-text-weight-bold has-text-right"],
+      ["Total", "paisa-text-bold"],
+      [options.total, "paisa-text-bold paisa-text-right"],
     ];
 
     for (let i = 2; i < rows[0].length; i++) {
@@ -1024,7 +1024,7 @@ export function tooltip(
     const headerRow: Array<string | string[]> = [
       [
         options.header,
-        "has-text-weight-bold has-text-centered",
+        "paisa-text-bold paisa-text-centered",
         rows[0].length.toString(),
       ],
     ];
@@ -1049,7 +1049,7 @@ export function tooltip(
       return `<tr>${cells}</tr>`;
     })
     .join("\n");
-  return `<table class='table is-narrow is-size-7 popup-table'><tbody>${trs}</tbody></table>`;
+  return `<table class='paisa-popup-table popup-table'><tbody>${trs}</tbody></table>`;
 }
 
 export function isMobile() {
@@ -1207,7 +1207,7 @@ export function dueDateIcon(
 ) {
   let icon = "fa-circle-check";
   let glyph = iconGlyph("fa6-solid:circle-check");
-  let color = "has-text-success";
+  let color = "paisa-text-success";
   let svgColor = "svg-text-success";
 
   if (amountDue !== undefined && amountDue <= 0) {
@@ -1216,20 +1216,20 @@ export function dueDateIcon(
 
   if (!clearedDate) {
     if (dueDate.isBefore(now(), "day")) {
-      color = "has-text-danger";
+      color = "paisa-text-danger";
       icon = "fa-exclamation-triangle";
       glyph = iconGlyph("fa6-solid:triangle-exclamation");
       svgColor = "svg-text-danger";
     } else {
-      color = "has-text-grey";
+      color = "paisa-text-muted";
       svgColor = "svg-text-grey";
     }
   } else {
     if (clearedDate.isSameOrBefore(dueDate, "day")) {
-      color = "has-text-success";
+      color = "paisa-text-success";
       svgColor = "svg-text-success";
     } else {
-      color = "has-text-warning-dark";
+      color = "paisa-text-warning";
       svgColor = "svg-text-warning-dark";
     }
   }

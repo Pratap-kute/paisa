@@ -23,7 +23,7 @@
 <div class="paisa-prediction-review-bar" data-testid="prediction-review-bar">
   <button
     type="button"
-    class="tag paisa-review-chip is-success is-light is-small"
+    class="paisa-review-chip"
     class:is-active={filter === "HIGH"}
     onclick={() => toggle("HIGH")}
   >
@@ -32,7 +32,7 @@
   </button>
   <button
     type="button"
-    class="tag paisa-review-chip is-info is-light is-small"
+    class="paisa-review-chip"
     class:is-active={filter === "MEDIUM"}
     onclick={() => toggle("MEDIUM")}
   >
@@ -41,7 +41,7 @@
   </button>
   <button
     type="button"
-    class="tag paisa-review-chip is-warning is-light is-small"
+    class="paisa-review-chip"
     class:is-active={filter === "NEEDS_REVIEW"}
     onclick={() => toggle("NEEDS_REVIEW")}
   >
@@ -50,7 +50,7 @@
   </button>
   <button
     type="button"
-    class="tag paisa-review-chip is-danger is-light is-small"
+    class="paisa-review-chip"
     class:is-active={filter === "UNKNOWN"}
     onclick={() => toggle("UNKNOWN")}
   >
@@ -60,7 +60,7 @@
   {#if counts.transfer > 0 || filter === "TRANSFER"}
     <button
       type="button"
-      class="tag paisa-review-chip is-warning is-light is-small"
+      class="paisa-review-chip"
       class:is-active={filter === "TRANSFER"}
       onclick={() => toggle("TRANSFER")}
     >
@@ -84,7 +84,7 @@
     }
   }
 
-  button.tag.paisa-review-chip {
+  button.paisa-review-chip {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
