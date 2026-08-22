@@ -90,7 +90,7 @@ test("import produces a preview without saving", async ({ page }) => {
     : "fixture/import/Paytm/statement.csv";
   await page.goto("/ledger/import");
   await page.locator('input[type="file"]').setInputFiles(fixturePath);
-  await expect(page.locator("table")).toBeVisible();
+  await expect(page.locator(".paisa-source-pane, table").first()).toBeVisible();
   await expect(page.locator("button.save")).toBeVisible();
 });
 
