@@ -1,7 +1,5 @@
 <script lang="ts">
-  import {
-    renderAllocationTimeline,
-  } from "$lib/charts/allocation";
+  import { buildAllocationTimelineSeries } from "$lib/charts/mixed_period_data";
   import { buildAllocationHierarchy } from "$lib/charts/hierarchy_data";
   import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
   import COLORS from "$lib/core/colors";
@@ -25,6 +23,7 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});
@@ -37,6 +36,7 @@
   let hasAllocationData = $derived(!_.isEmpty(aggregates));
   let allocationTargetData = $derived(buildAllocationTargetComparison(allocationTargets));
   let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
+  let allocationTimelineData = $derived(buildAllocationTimelineSeries(allocationTimeline));
 
   const columns: ColumnDefinition[] = [
     {
@@ -83,13 +83,6 @@
     },
   ];
 
-  function renderTimelineChart() {
-    document.getElementById("d3-allocation-timeline")?.replaceChildren();
-    if (!_.isEmpty(allocationTimeline)) {
-      allocationTimelineLegends = renderAllocationTimeline(allocationTimeline);
-    }
-  }
-
   onMount(async () => {
     try {
       const {
@@ -112,7 +105,7 @@
       (_.last(columns).formatterParams as ProgressBarParams).max = max;
       isLoading = false;
       await tick();
-      renderTimelineChart();
+      allocationTimelineLegends = allocationTimelineData.legends ?? [];
     } catch {
       isLoading = false;
     }
@@ -179,8 +172,12 @@
 
       <Section title="Allocation Timeline" subtitle="Historical allocation by asset class">
         <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline" onresize={renderTimelineChart}>
-          <svg id="d3-allocation-timeline" width="100%" height="300" />
+        <ChartFrame type="timeline">
+          <TimeSeriesChart
+            data={allocationTimelineData}
+            ariaLabel="Historical allocation percentages by asset class"
+            testId="allocation-timeline-echart"
+          />
         </ChartFrame>
       </Section>
 

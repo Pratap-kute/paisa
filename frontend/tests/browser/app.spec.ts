@@ -110,7 +110,11 @@ test("networth chart renders on analytics page", async ({ page }) => {
 
 test("cash flow monthly chart renders", async ({ page }) => {
   await page.goto("/cash_flow/monthly");
-  await expect(page.locator("#d3-monthly-cash-flow")).toBeVisible();
+  await expect(
+    page.locator(
+      "[data-testid='monthly-cash-flow-echart'][data-chart-ready='true']",
+    ),
+  ).toBeVisible();
 });
 
 test("bulk edit form opens and displays account selection", async ({ page }) => {

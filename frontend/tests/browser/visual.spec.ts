@@ -126,7 +126,11 @@ for (const route of visualRoutes) {
       }
       await expect(routeReady(page, route).first()).toBeVisible();
       if (route.name === "dashboard") {
-        await expect(page.locator("#d3-current-cash-flow")).toBeVisible();
+        await expect(
+          page.locator(
+            "[data-testid='dashboard-cash-flow-echart'][data-chart-ready='true']",
+          ),
+        ).toBeVisible();
         await expect(
           page.locator(
             "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",

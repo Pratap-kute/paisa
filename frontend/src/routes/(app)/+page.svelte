@@ -1,7 +1,6 @@
 <script lang="ts">
-  import * as cashFlow from "$lib/charts/cash_flow";
+  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
@@ -12,6 +11,7 @@
   import Button from "$lib/components/ui/Button.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
   import { refresh } from "../../store";
   import {
     enrichTrantionSequence,
@@ -41,7 +41,7 @@
   } from "$lib/core/utils";
   import _ from "lodash";
   import dayjs from "dayjs";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -51,7 +51,6 @@
   let expenses: { [key: string]: Posting[] } = $state({});
   let xirr = $state(0);
   let networth: Networth | undefined = $state();
-  let cashflowChart: MonthlyFlowChart | null = $state(null);
   let transactions: Transaction[] = $state([]);
   let budgetsByMonth: Record<string, Budget> = $state({});
   let isEmpty = $state(false);
@@ -77,11 +76,8 @@
     buildExpenseBreakdownComparison(selectedExpenses),
   );
   let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+  let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
   let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
-
-  onDestroy(() => {
-    cashflowChart?.destroy();
-  });
 
   async function initDemo() {
     await ajax("/api/init", { method: "POST" });
@@ -109,15 +105,7 @@
         isEmpty = false;
       }
 
-      cashflowChart = cashFlow.createMonthlyFlow(
-        "#d3-current-cash-flow",
-        {
-          rotate: false,
-          balance: _.last(cashFlows)?.balance || 0
-        }
-      );
-      cashflowChart.update(cashFlows);
-      cashflowLegends = cashflowChart.legends;
+      cashflowLegends = cashFlowData.legends ?? [];
       transactionSequences = _.take(
         sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
         8
@@ -251,10 +239,12 @@
           type="dashboard-timeline"
           empty={!hasCashFlowData}
           emptyMessage="No cash-flow activity in this period"
-          preserveChildren
-          onresize={(dim) => cashflowChart?.resize(dim)}
         >
-          <svg id="d3-current-cash-flow" height="250" width="100%"></svg>
+          <TimeSeriesChart
+            data={cashFlowData}
+            ariaLabel="Current cash flow and checking balance"
+            testId="dashboard-cash-flow-echart"
+          />
         </ChartFrame>
       </div>
 

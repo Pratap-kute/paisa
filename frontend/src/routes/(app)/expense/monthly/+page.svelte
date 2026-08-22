@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import _ from "lodash";
   import dayjs from "dayjs";
   import {
@@ -12,9 +12,7 @@
     postingUrl,
     restName,
   } from "$lib/core/utils";
-  import {
-    renderMonthlyExpensesTimeline,
-  } from "$lib/charts/expense/monthly";
+  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
@@ -35,16 +33,14 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let groups = writable<string[]>([]);
-  let z: ((category: string) => string) | undefined = $state(),
-    expenses: Posting[] | undefined = $state(),
+  let expenses: Posting[] | undefined = $state(),
     grouped_expenses: Record<string, Posting[]> | undefined = $state(),
     grouped_incomes: Record<string, Posting[]> | undefined = $state(),
     grouped_investments: Record<string, Posting[]> | undefined = $state(),
-    grouped_taxes: Record<string, Posting[]> | undefined = $state(),
-    destroy: (() => void) | undefined,
-    resizeTimeline: ((dim: { width: number; height: number }) => void) | undefined;
+    grouped_taxes: Record<string, Posting[]> | undefined = $state();
 
   let legends: Legend[] = $state([]);
   let isLoading = $state(true);
@@ -59,23 +55,6 @@
     savingRate = $state(""),
     income = $state("");
 
-  function initializeCharts() {
-    if (!expenses?.length) return;
-
-    destroy?.();
-
-    ({ z, destroy, legends, resize: resizeTimeline } = renderMonthlyExpensesTimeline(
-      expenses,
-      groups,
-      month,
-      dateRange,
-    ));
-  }
-
-  onDestroy(async () => {
-    destroy?.();
-  });
-
   onMount(async () => {
     try {
       ({
@@ -89,8 +68,11 @@
       } = await ajax("/api/expense"));
 
       setAllowedDateRange(_.map(expenses, (e: Posting) => e.date));
-      await tick();
-      initializeCharts();
+      const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
+      groups.set(allGroups);
+      legends = categoryLegends(allGroups, (group) => {
+        groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
+      });
     } finally {
       isLoading = false;
     }
@@ -121,9 +103,10 @@
   );
   let selectedMonthBreakdownData = $derived(
     buildExpenseBreakdownComparison(selectedMonthExpenses, {
-      color: (category) => z?.(category) || "var(--paisa-primary)",
+      color: categoryColor,
     }),
   );
+  let expenseTimelineData = $derived(buildMonthlyExpenseTimelineSeries(expenses ?? [], $groups, $dateRange));
   let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
   let hasExpenses = $derived((expenses?.length ?? 0) > 0);
   let hasTrendInRange = $derived(
@@ -156,7 +139,7 @@
   );
 
   $effect(() => {
-    if (grouped_expenses && z) {
+    if (grouped_expenses) {
       const expenses = grouped_expenses[$month] || [];
       const incomes = grouped_incomes?.[$month] || [];
       const taxes = grouped_taxes?.[$month] || [];
@@ -287,10 +270,12 @@
         type="timeline"
         size="dynamic"
         empty={false}
-        preserveChildren
-        onresize={(dim) => resizeTimeline?.(dim)}
       >
-        <svg id="d3-monthly-expense-timeline" width="100%" height="380" />
+        <TimeSeriesChart
+          data={expenseTimelineData}
+          ariaLabel="Historical monthly expenses by category and cumulative total"
+          testId="monthly-expense-timeline-echart"
+        />
       </ChartFrame>
     {:else}
       <ZeroState item={[]}>
@@ -328,7 +313,7 @@
           <a
             class="flex items-center gap-[var(--paisa-space-3)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-[var(--paisa-space-3)] py-[var(--paisa-space-2)] no-underline transition-colors last:border-b-0 hover:bg-[var(--paisa-surface-hover)]"
             href={postingUrl(exp)}
-            style="--paisa-category-color: {z?.(expenseGroup(exp)) || 'var(--paisa-border-strong)'}"
+            style="--paisa-category-color: {categoryColor(expenseGroup(exp))}"
           >
             <div class="w-[3px] shrink-0 self-stretch rounded-[var(--paisa-radius-full)] bg-[var(--paisa-category-color)]"></div>
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">

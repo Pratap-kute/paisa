@@ -164,7 +164,7 @@ export const chartSnapshots = [
   {
     name: "cash-flow-monthly",
     path: "/cash_flow/monthly",
-    locator: "#d3-monthly-cash-flow",
+    locator: "[data-testid='monthly-cash-flow-echart']",
   },
   {
     name: "assets-analysis",

@@ -1,7 +1,10 @@
 import dayjs from "dayjs";
 import type { Legend } from "$lib/core/utils";
 import { chartFormatters } from "$lib/charts/echarts/formatters";
-import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
+import {
+  categorySeriesColor,
+  type PaisaChartTheme,
+} from "$lib/charts/echarts/theme";
 
 export type PeriodSeriesIntent = "line" | "area" | "bar" | "stacked-bar";
 export type PeriodAxis = "time" | "category" | "value";
@@ -25,6 +28,8 @@ export interface PeriodSeriesDefinition {
   intent: PeriodSeriesIntent;
   valueFormat?: PeriodValueFormat;
   color?: string;
+  categoryKey?: string;
+  decal?: boolean;
   stack?: string;
   dashed?: boolean;
   smooth?: boolean;
@@ -72,6 +77,9 @@ function seriesColor(
   index: number,
 ) {
   return series.color ??
+    (series.categoryKey && theme
+      ? categorySeriesColor(series.categoryKey, theme.seriesColors)
+      : undefined) ??
     theme?.seriesColors[index % (theme.seriesColors.length || 1)] ??
     "currentColor";
 }
@@ -219,6 +227,18 @@ export function buildPeriodSeriesOption(
             if (raw >= 0 && series.positiveColor) return series.positiveColor;
             return color;
           },
+          decal: series.decal
+            ? {
+              symbol: "rect",
+              dashArrayX: [1, 0],
+              dashArrayY: [4, 3],
+              rotation: Math.PI / 4,
+              color: theme?.textColor ?? color,
+              backgroundColor: color,
+              maxTileWidth: 32,
+              maxTileHeight: 32,
+            }
+            : undefined,
         },
         lineStyle: bar ? undefined : {
           color,

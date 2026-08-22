@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import _ from "lodash";
   import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
-  import {
-    renderYearlyExpensesTimeline,
-  } from "$lib/charts/expense/yearly";
+  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
+  import { expenseGroup } from "$lib/charts/expense";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -22,15 +21,14 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let groups = writable<string[]>([]);
-  let z: ((category: string) => string) | undefined = $state(),
-    expenses: Posting[] = $state([]),
+  let expenses: Posting[] = $state([]),
     grouped_expenses: Record<string, Posting[]> = $state({}),
     grouped_incomes: Record<string, Posting[]> = $state({}),
     grouped_investments: Record<string, Posting[]> = $state({}),
     grouped_taxes: Record<string, Posting[]> = $state({});
-  let resizeTimeline: ((dim: { width: number; height: number }) => void) | undefined;
 
   let legends: Legend[] = $state([]);
   let isLoading = $state(true);
@@ -44,10 +42,6 @@
     expense = $state(""),
     investment = $state(""),
     savingRate = $state("");
-
-  function initializeCharts() {
-    if (!expenses?.length || !z) return;
-  }
 
   onMount(async () => {
     try {
@@ -70,19 +64,14 @@
         if (!$year) year.set(financialYear(maximum));
       }
 
-      await tick();
-      ({ z, legends, resize: resizeTimeline } = renderYearlyExpensesTimeline(
-        expenses,
-        groups,
-        year,
-      ));
-      initializeCharts();
+      const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
+      groups.set(allGroups);
+      legends = categoryLegends(allGroups, (group) => {
+        groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
+      });
     } finally {
       isLoading = false;
     }
-  });
-
-  onDestroy(() => {
   });
 
   function sum(postings: Posting[], sign = 1) {
@@ -101,9 +90,10 @@
   );
   let currentYearBreakdownData = $derived(
     buildExpenseBreakdownComparison(currentYearExpenses, {
-      color: (category) => z?.(category) || "var(--paisa-primary)",
+      color: categoryColor,
     }),
   );
+  let expenseTimelineData = $derived(buildYearlyExpenseTimelineSeries(expenses, $groups));
   let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
   let hasExpenses = $derived(expenses.length > 0);
   let postingCountSubtitle = $derived(
@@ -113,7 +103,7 @@
   );
 
   $effect(() => {
-    if (grouped_expenses && z) {
+    if (grouped_expenses) {
       const yearExpenses = grouped_expenses[$year] || [];
       const incomes = grouped_incomes[$year] || [];
       const taxes = grouped_taxes[$year] || [];
@@ -238,10 +228,12 @@
       <ChartFrame
         type="timeline"
         size="dynamic"
-        preserveChildren
-        onresize={(dim) => resizeTimeline?.(dim)}
       >
-        <svg id="d3-yearly-expense-timeline" width="100%" height="500" />
+        <TimeSeriesChart
+          data={expenseTimelineData}
+          ariaLabel="Historical yearly expenses by category"
+          testId="yearly-expense-timeline-echart"
+        />
       </ChartFrame>
     {:else}
       <ZeroState item={[]}>

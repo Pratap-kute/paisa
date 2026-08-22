@@ -1,8 +1,8 @@
 <script lang="ts">
   import _ from "lodash";
-  import { createMonthlyFlow, type MonthlyFlowChart } from "$lib/charts/cash_flow";
-  import { ajax, type CashFlow, type Legend } from "$lib/core/utils";
-  import { onMount, onDestroy, tick } from "svelte";
+  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
+  import { ajax, type CashFlow } from "$lib/core/utils";
+  import { onMount } from "svelte";
   import { dateMin, dateMax, dateRange, dateRangeOption, setAllowedDateRange } from "../../../../store";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import DateRange from "$lib/components/ui/DateRange.svelte";
@@ -11,10 +11,9 @@
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
-  let legends: Legend[] = $state([]);
   let cashFlows: CashFlow[] = $state([]);
-  let chart: MonthlyFlowChart | null = $state(null);
   let isLoading = $state(true);
 
   let filteredCashFlows = $derived(
@@ -34,31 +33,13 @@
       c.balance !== 0
     ),
   );
-
-  $effect(() => {
-    if (chart) {
-      chart.update(filteredCashFlows);
-    }
-  });
-
-  onDestroy(() => {
-    chart?.destroy();
-  });
+  let cashFlowData = $derived(buildCashFlowSeries(filteredCashFlows));
 
   onMount(async () => {
     try {
       ({ cash_flows: cashFlows } = await ajax("/api/cash_flow"));
       setAllowedDateRange(_.map(cashFlows, (c) => c.date));
       isLoading = false;
-      await tick();
-      chart = createMonthlyFlow("#d3-monthly-cash-flow", {
-        rotate: true,
-        balance: _.last(cashFlows)?.balance || 0,
-      });
-      legends = chart.legends;
-      if (!_.isEmpty(cashFlows)) {
-        chart.update(filteredCashFlows);
-      }
     } catch {
       isLoading = false;
     }
@@ -93,15 +74,17 @@
       </ZeroState>
     {:else}
       {#if !isLoading && hasFilteredCashFlows}
-        <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+        <LegendCard legends={cashFlowData.legends ?? []} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
       <ChartFrame
         type="timeline"
         size="dynamic"
-        preserveChildren
-        onresize={(dim) => chart?.resize(dim)}
       >
-        <svg id="d3-monthly-cash-flow" width="100%" />
+        <TimeSeriesChart
+          data={cashFlowData}
+          ariaLabel="Monthly cash flow and checking balance"
+          testId="monthly-cash-flow-echart"
+        />
       </ChartFrame>
     {/if}
   </Section>
