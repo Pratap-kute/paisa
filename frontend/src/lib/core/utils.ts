@@ -2,7 +2,6 @@
 import { sha256Hex } from "./crypto";
 import dayjs from "dayjs";
 import _ from "lodash";
-import * as d3 from "d3";
 import { loading } from "../../store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
@@ -963,38 +962,10 @@ export function depth(account: string) {
   return account.split(":").length;
 }
 
-export function skipTicks<Domain>(
-  minWidth: number,
-  scale: d3.AxisScale<Domain>,
-  cb: (data: d3.AxisDomain, index: number) => string,
-  points?: number,
-) {
-  const range = scale.range();
-  const width = Math.abs(range[1] - range[0]);
-  const s = scale as any;
-  points = points || (s.ticks ? s.ticks().length : s.domain().length);
-  return function (data: d3.AxisDomain, index: number) {
-    let skip = Math.round((minWidth * points) / width);
-    skip = Math.max(1, skip);
-
-    return index % skip === 0 ? cb(data, index) : null;
-  };
-}
-
-export function rainbowScale(keys: string[]) {
-  const x = d3
-    .scaleLinear()
-    .domain([0, _.size(keys) - 1])
-    .range([0, 0.9]);
-  return d3.scaleOrdinal(
-    _.map(keys, (_value, i) => d3.interpolateRainbow(x(i))),
-  ).domain(keys);
-}
-
 export function darkenOrLighten(backgroundColor: string, intensity = 2) {
-  const color = d3.rgb(backgroundColor);
+  const [red, green, blue] = chroma(backgroundColor).rgb();
   // http://www.w3.org/TR/AERT#color-contrast
-  const brightness = (color.r * 299 + color.g * 587 + color.b) / 1000;
+  const brightness = (red * 299 + green * 587 + blue) / 1000;
   if (brightness > 125) {
     return chroma(backgroundColor).darken(intensity).hex();
   }
@@ -1139,19 +1110,6 @@ export function prefixMinutesSeconds(cronExpression: string) {
     .split("|")
     .map((cron) => "0 0 " + cron)
     .join("|");
-}
-
-export function svgTruncate(width: number) {
-  return function () {
-    const self = d3.select(this);
-    let textLength = self.node().getComputedTextLength(),
-      text = self.text();
-    while (textLength > width && text.length > 0) {
-      text = text.slice(0, -1);
-      self.text(text + "...");
-      textLength = self.node().getComputedTextLength();
-    }
-  };
 }
 
 export function sumPostings(postings: Posting[]) {

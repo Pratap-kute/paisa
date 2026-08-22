@@ -6,7 +6,6 @@
 import chroma from "chroma-js";
 import _ from "lodash";
 import { getColorPreference } from "../core/utils";
-import * as d3 from "d3";
 
 export const MaterialUI = {
   red: {
@@ -352,7 +351,31 @@ export const chartColors = {
 
 export default chartColors;
 
-export function generateColorScheme(domain: string[]) {
+export type CategoryColorResolver = (key: string) => string;
+
+function sinebowColor(t: number): string {
+  const angle = (0.5 - t) * Math.PI;
+  const third = Math.PI / 3;
+  const channel = (offset: number) => {
+    const value = Math.sin(angle + offset);
+    return Math.round(255 * value * value);
+  };
+  return chroma.rgb(channel(0), channel(third), channel(2 * third))
+    .desaturate(1.5)
+    .hex();
+}
+
+function stableColorIndex(key: string, colorCount: number): number {
+  if (colorCount <= 0) return 0;
+  let hash = 2166136261;
+  for (const character of key.normalize("NFKC").trim().toLowerCase()) {
+    hash ^= character.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) % colorCount;
+}
+
+export function generateColorScheme(domain: string[]): CategoryColorResolver {
   let colors: string[];
   const n = domain.length;
 
@@ -363,7 +386,7 @@ export function generateColorScheme(domain: string[]) {
     );
   } else {
     if (n <= 12) {
-      colors = {
+      colors = ({
         1: ["#7570b3"],
         2: ["#7fc97f", "#fdc086"],
         3: ["#66c2a5", "#fc8d62", "#8da0cb"],
@@ -439,17 +462,22 @@ export function generateColorScheme(domain: string[]) {
           "#ccebc5",
           "#ffed6f",
         ],
-      }[n];
+      } as Record<number, string[]>)[n] ?? [];
     } else {
-      const z = d3
-        .scaleSequential()
-        .domain([0, n - 1])
-        .interpolator(d3.interpolateSinebow);
-      colors = _.map(_.range(0, n), (n) => chroma(z(n)).desaturate(1.5).hex());
+      const normalize = 1 / (n - 1);
+      colors = _.map(_.range(0, n), (index) => sinebowColor(index * normalize));
     }
   }
 
-  return d3.scaleOrdinal<string>().domain(domain).range(colors);
+  const byKey = new Map<string, string>();
+  domain.forEach((key, index) => {
+    if (!byKey.has(key)) byKey.set(key, colors[index % colors.length]);
+  });
+
+  return (key: string) =>
+    byKey.get(key) ??
+      colors[stableColorIndex(key, colors.length)] ??
+      chartColors.neutral;
 }
 
 export function genericBarColor() {

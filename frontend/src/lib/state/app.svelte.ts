@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import * as d3 from "d3";
 import type { AccountTfIdf } from "../core/utils";
+import { dayjsExtent } from "../formatters/date";
 
 interface GlobalWithNow {
   __now?: dayjs.Dayjs;
@@ -37,7 +37,7 @@ class AppState {
   });
 
   setAllowedDateRange(dates: dayjs.Dayjs[]) {
-    const [start, end] = d3.extent(dates);
+    const [start, end] = dayjsExtent(dates);
     if (start && end) {
       this.dateMin = start;
       this.dateMax = end;

@@ -1,7 +1,7 @@
 import { derived, get, writable } from "svelte/store";
-import * as d3 from "d3";
 
 import dayjs from "dayjs";
+import { dayjsExtent } from "./lib/formatters/date";
 import type {
   AccountTfIdf,
   LedgerFileError,
@@ -129,7 +129,7 @@ export const willClearTippy = writable(0);
 export const accountTfIdf = writable<AccountTfIdf>(null);
 
 export function setAllowedDateRange(dates: dayjs.Dayjs[]) {
-  const [start, end] = d3.extent(dates);
+  const [start, end] = dayjsExtent(dates);
   if (start) {
     dateMin.set(start);
     dateMax.set(end);
