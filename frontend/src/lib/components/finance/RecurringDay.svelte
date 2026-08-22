@@ -11,18 +11,27 @@
 
   let { month, day, schedules }: Props = $props();
   let isToday = $derived(day.isSame(now(), "day"));
+  let isCurrentMonth = $derived(day.format("YYYY-MM") === month);
 </script>
 
-<div class="box m-0 p-0 {day.format('YYYY-MM') != month && 'is-invisible is-hidden-mobile'}">
-  <div class="has-text-centered has-text-weight-bold mt-1 mb-1">
+<div
+  class="min-h-[4.5rem] rounded-md border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-1 {isCurrentMonth
+    ? ''
+    : 'invisible max-md:hidden'}"
+>
+  <div class="mb-1 mt-1 text-center text-sm font-semibold">
     <span
-      class="is-size-6 px-2 py-1 {isToday
-        ? 'rounded-full is-bordered is-link has-text-link'
-        : 'has-text-grey'}">{day.format(isMobile() ? "ddd D" : "D")}</span
+      class="inline-flex min-w-[1.75rem] items-center justify-center px-2 py-1 {isToday
+        ? 'rounded-full border border-[var(--paisa-primary)] text-[var(--paisa-primary)]'
+        : 'text-[var(--paisa-muted-foreground)]'}"
     >
+      {day.format(isMobile() ? "ddd D" : "D")}
+    </span>
   </div>
 
-  {#each schedules as schedule (schedule)}
-    <RecurringSchedule {schedule} />
-  {/each}
+  <div class="space-y-1">
+    {#each schedules as schedule (schedule)}
+      <RecurringSchedule {schedule} />
+    {/each}
+  </div>
 </div>

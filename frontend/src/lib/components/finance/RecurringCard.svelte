@@ -1,141 +1,57 @@
 <script lang="ts">
-  import Transaction from "$lib/components/transactions/Transaction.svelte";
-  import { intervalText, scheduleIcon, totalRecurring } from "$lib/domain/transaction_sequence";
+  import { intervalText, totalRecurring } from "$lib/domain/transaction_sequence";
   import {
     formatCurrencyCrude,
+    now,
     type TransactionSchedule,
-    type TransactionSequence
+    type TransactionSequence,
   } from "$lib/core/utils";
-  import type dayjs from "dayjs";
-  import type { Action } from "svelte/action";
-  import { renderRecurring } from "$lib/charts/recurring";
-  import { observeElementSize } from "$lib/charts/resize";
-  import _ from "lodash";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import RecurringSchedule from "./RecurringSchedule.svelte";
 
   interface Props {
     ts: TransactionSequence;
     schedule: TransactionSchedule;
+    compact?: boolean;
   }
 
-  let { ts, schedule }: Props = $props();
-  const HEIGHT = 50;
-  let icon = $derived(scheduleIcon(schedule));
+  let { ts, schedule, compact = true }: Props = $props();
 
-  let displayedTransactions = $derived(_.reverse(_.take(ts.transactions, 20)));
-  let pageSize = $derived(displayedTransactions.length);
-  let currentIndex = $state(0);
-
-  $effect(() => {
-    currentIndex = Math.max(0, pageSize - 1);
-  });
-
-  function showPage(pageIndex: number) {
-    currentIndex = pageSize - 1 - pageIndex;
-  }
-
-  function showPrevPage() {
-    if (currentIndex > 0) currentIndex--;
-  }
-
-  function showNextPage() {
-    if (currentIndex < pageSize - 1) currentIndex++;
-  }
-
-  const chart: Action<HTMLElement, { ts: TransactionSequence; next: dayjs.Dayjs }> = (
-    element,
-    props
-  ) => {
-    let current = props;
-    const draw = () => {
-      element.querySelector("svg")?.replaceChildren();
-      renderRecurring(element, current.ts, showPage);
-    };
-    draw();
-    const stop = observeElementSize(element, () => draw());
-    return {
-      update(next) {
-        current = next;
-        draw();
-      },
-      destroy() {
-        stop();
-      },
-    };
-  };
+  let isPastDue = $derived(schedule?.scheduled ? schedule.scheduled.isBefore(now(), "day") : false);
+  let dueAmount = $derived(formatCurrencyCrude(totalRecurring(ts)));
 </script>
 
-<div class="columns mb-0">
-  <div class="column is-12 py-0">
-    <div class="is-size-5 has-text-grey">{ts.key}</div>
-  </div>
-</div>
-<div class="columns mb-4">
-  <div class="column is-4">
-    <div class="box p-2">
-      <div
-        class="is-flex is-flex-wrap-wrap is-align-items-baseline is-justify-content-space-between"
-      >
-        <span class="icon-text">
-          <span class="icon {icon.color}">
-            <i class="fas {icon.icon}"></i>
-          </span>
-          <span class="has-text-grey">{formatCurrencyCrude(totalRecurring(ts))} due</span><span
-            ><b>&nbsp;{schedule.scheduled.fromNow()}</b></span
-          >
+{#if compact}
+  <div
+    class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3 transition-colors hover:bg-[var(--paisa-surface-hover)]"
+  >
+    <RecurringSchedule {schedule} amount={dueAmount} />
+    <div class="mt-1.5 flex flex-wrap items-center gap-2 px-2 text-xs text-[var(--paisa-muted-foreground)]">
+      <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
+      {#if schedule?.scheduled}
+        <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
+        <span aria-hidden="true">·</span>
+        <span class={isPastDue ? "font-medium text-[var(--paisa-negative)]" : ""}>
+          {isPastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}
         </span>
-        <div class="has-text-grey">
-          <span class="tag">{intervalText(ts)}</span>
-          <span class="icon has-text-grey-light">
-            <i class="fas fa-calendar"></i>
-          </span>
-          {schedule.scheduled.format("DD MMM YYYY")}
-        </div>
-      </div>
-      <hr class="my-1" />
-      <div use:chart={{ ts: ts, next: schedule.scheduled }}>
-        <svg height={HEIGHT} width="100%" />
-      </div>
-      <div class="has-text-grey-light is-size-7">
-        <span>{ts.key} started on</span>
-        {_.last(ts.transactions).date.format("DD MMM YYYY")}, with a total of
-        {ts.transactions.length} transactions so far.
-      </div>
-    </div>
-  </div>
-
-  <div class="column is-8">
-    <div class="recurring-transaction-pager">
-      <div
-        role="button"
-        tabindex="0"
-        aria-label="Previous page"
-        onclick={showPrevPage}
-        onkeydown={(e) => e.key === "Enter" && showPrevPage()}
-        class="custom-arrow custom-arrow-prev"
-      >
-        <i class="fa-solid has-text-grey-light fa-angle-left"></i>
-      </div>
-      {#if displayedTransactions[currentIndex]}
-        <div class="box px-5 py-3 my-0 has-text-grey" style="box-shadow: none;">
-          <Transaction t={displayedTransactions[currentIndex]} compact={true} />
-        </div>
       {/if}
-      <div
-        role="button"
-        tabindex="0"
-        aria-label="Next page"
-        onclick={showNextPage}
-        onkeydown={(e) => e.key === "Enter" && showNextPage()}
-        class="custom-arrow custom-arrow-next"
-      >
-        <i class="fa-solid has-text-grey-light fa-angle-right"></i>
-      </div>
     </div>
   </div>
-</div>
-
-<style>
-  .recurring-transaction-pager {
-    position: relative;
-  }
-</style>
+{:else}
+  <div
+    class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-4"
+  >
+    <div class="mb-3 text-base font-semibold text-[var(--paisa-muted-foreground)]">{ts.key}</div>
+    <RecurringSchedule {schedule} amount={dueAmount} />
+    <div class="mt-2 flex flex-wrap items-center gap-2 px-2 text-xs text-[var(--paisa-muted-foreground)]">
+      <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
+      {#if schedule?.scheduled}
+        <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
+        <span aria-hidden="true">·</span>
+        <span class={isPastDue ? "font-medium text-[var(--paisa-negative)]" : ""}>
+          {isPastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}
+        </span>
+      {/if}
+    </div>
+  </div>
+{/if}
