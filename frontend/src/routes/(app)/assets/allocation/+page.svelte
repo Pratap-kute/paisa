@@ -190,7 +190,7 @@
       </Section>
 
       <Section title="Allocation Table" subtitle="Leaf accounts with share of portfolio">
-        <div class="paisa-allocation-table-wrap">
+        <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
           <Table data={aggregateLeafNodes} {columns} options={{ layout: "fitDataFill" }} />
         </div>
       </Section>
@@ -203,12 +203,3 @@
     {/if}
   {/if}
 </Page>
-
-<style lang="scss">
-  .paisa-allocation-table-wrap {
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    overflow: auto;
-    max-width: 100%;
-  }
-</style>

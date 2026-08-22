@@ -125,19 +125,19 @@
       subtitle="Yearly gross income, net income, and tax comparison"
     >
       <ResponsiveGrid variant="cards" cols={3}>
-        <div class="paisa-income-chart-col">
+        <div class="min-w-0">
           <LegendCard legends={yearlyIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
           <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[1]?.resize(dim)}>
             <svg id="d3-yearly-income-timeline" width="100%" />
           </ChartFrame>
         </div>
-        <div class="paisa-income-chart-col">
+        <div class="min-w-0">
           <LegendCard legends={yearlyNetIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
           <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[2]?.resize(dim)}>
             <svg id="d3-yearly-net_income-timeline" width="100%" />
           </ChartFrame>
         </div>
-        <div class="paisa-income-chart-col">
+        <div class="min-w-0">
           <LegendCard legends={yearlyNetTaxTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
           <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[3]?.resize(dim)}>
             <svg id="d3-yearly-net_tax-timeline" width="100%" />
@@ -147,9 +147,3 @@
     </Section>
   {/if}
 </Page>
-
-<style lang="scss">
-  .paisa-income-chart-col {
-    min-width: 0;
-  }
-</style>

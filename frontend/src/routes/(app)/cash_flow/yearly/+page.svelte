@@ -113,12 +113,14 @@
     description="Annual income, expense, and asset transfer flows"
   >
     {#snippet actions()}
-      <div class="paisa-page-toolbar-mobile">
+      <div class="inline-flex flex-wrap items-center gap-[var(--paisa-space-2)] sm:hidden">
         <FinancialYearPicker bind:value={$year} dateMin={$dateMin} dateMax={$dateMax} />
         {#if showDepthControls}
-          <details class="paisa-depth-disclosure">
-            <summary class="paisa-depth-summary">Depth</summary>
-            <div class="paisa-depth-panel">
+          <details class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)]">
+            <summary class="cursor-pointer list-none px-2 py-1 text-xs font-semibold text-[var(--paisa-muted-foreground)] [&::-webkit-details-marker]:hidden">
+              Depth
+            </summary>
+            <div class="min-w-[180px] border-t border-[var(--paisa-border-subtle)] px-2 pb-2">
               <InputRange
                 label="Expenses"
                 bind:value={$cashflowExpenseDepth}
@@ -161,41 +163,3 @@
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-page-toolbar-mobile {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    flex-wrap: wrap;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-
-  .paisa-depth-disclosure {
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    background-color: var(--paisa-surface);
-  }
-
-  .paisa-depth-summary {
-    padding: var(--paisa-space-1) var(--paisa-space-2);
-    font-size: var(--paisa-font-size-xs);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-muted-foreground);
-    cursor: pointer;
-    list-style: none;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
-
-  .paisa-depth-panel {
-    padding: 0 var(--paisa-space-2) var(--paisa-space-2);
-    border-top: 1px solid var(--paisa-border-subtle);
-    min-width: 180px;
-  }
-</style>

@@ -183,7 +183,7 @@
     description="Yearly profit and loss statement across all accounts"
   >
     {#snippet actions()}
-      <div class="paisa-page-toolbar-mobile">
+      <div class="inline-flex items-center sm:hidden">
         <FinancialYearPicker bind:value={$year} dateMin={$dateMin} dateMax={$dateMax} />
       </div>
     {/snippet}
@@ -208,7 +208,7 @@
         secondary={incomeStatement ? formatPercentage(diffPercent, 2) : undefined}
         status={diff >= 0 ? "positive" : "negative"}
         loading={isLoading}
-        class="paisa-metric-rate"
+        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal"
       />
     </MetricStrip>
   {/if}
@@ -234,29 +234,35 @@
     title="Detailed Statement"
     subtitle="Multi-year account comparison"
   >
-    <div class="paisa-statement-table-wrap">
+    <div class="max-h-[calc(100vh-440px)] min-h-[260px] max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
       {#if isLoading}
-        <div class="paisa-statement-loading" aria-hidden="true">
+        <div class="flex flex-col gap-[var(--paisa-space-2)] p-[var(--paisa-space-4)]" aria-hidden="true">
           {#each Array(8) as _}
-            <div class="paisa-statement-loading-row"></div>
+            <div class="h-5 animate-pulse rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-hover)]"></div>
           {/each}
         </div>
       {:else}
-        <table class="table is-narrow is-hoverable is-fullwidth has-sticky-header has-sticky-column mb-0 paisa-statement-table">
+        <table class="mb-0 w-full border-separate border-spacing-0 text-sm text-[var(--paisa-text-primary)]">
           <thead>
             <tr>
-              <th class="py-2">Account</th>
+              <th class="sticky left-0 top-0 z-[6] bg-[var(--paisa-table-header-bg)] py-2 text-left font-semibold text-[var(--paisa-table-header-text)]">
+                Account
+              </th>
               {#each years as y}
-                <th class="py-2 has-text-right paisa-tabular-nums">{y}</th>
+                <th class="sticky top-0 z-[5] bg-[var(--paisa-table-header-bg)] py-2 text-right font-semibold tabular-nums text-[var(--paisa-table-header-text)]">
+                  {y}
+                </th>
               {/each}
             </tr>
           </thead>
           <tbody>
             {#each accountGroups as group}
-              <tr class="has-text-weight-bold is-sub-header">
-                <th>{group.label}</th>
+              <tr class="bg-[var(--paisa-surface-hover)]">
+                <th class="border-b border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-2 py-2 text-left font-bold text-[var(--paisa-brand-primary)]">
+                  {group.label}
+                </th>
                 {#each years as y}
-                  <td class="has-text-right paisa-tabular-nums">
+                  <td class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-hover)] px-2 py-2 text-right font-bold tabular-nums text-[var(--paisa-brand-primary)]">
                     {#if yearly[y]?.[group.key]}
                       {formatUnlessZero(sum(yearly[y][group.key]) * group.multiplier)}
                     {/if}
@@ -264,14 +270,14 @@
                 {/each}
               </tr>
               {#each group.accounts as account}
-                <tr class="is-account-row">
-                  <th class="custom-icon paisa-nowrap">
-                    <span class="pl-4 has-text-weight-normal">
+                <tr>
+                  <th class="custom-icon sticky left-0 z-[1] whitespace-nowrap bg-[var(--paisa-surface)] px-2 py-1 text-left text-xs font-normal text-[var(--paisa-text-secondary)]">
+                    <span class="pl-4">
                       {iconify(restName(account), { group: firstName(account) })}
                     </span>
                   </th>
                   {#each years as y}
-                    <td class="has-text-right paisa-tabular-nums">
+                    <td class="whitespace-nowrap px-2 py-1 text-right text-xs tabular-nums text-[var(--paisa-text-secondary)]">
                       {#if yearly[y]?.[group.key]?.[account]}
                         {formatUnlessZero(yearly[y][group.key][account] * group.multiplier)}
                       {/if}
@@ -281,35 +287,35 @@
               {/each}
             {/each}
           </tbody>
-          <tfoot>
-            <tr class="has-text-weight-bold is-summary-row is-summary-first">
-              <th>Change</th>
+          <tfoot class="border-t-2 border-[var(--paisa-border-strong)]">
+            <tr class="bg-[var(--paisa-surface-default)]">
+              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">Change</th>
               {#each years as y}
                 {#if yearly[y]}
                   {@const yearDiff = yearly[y].endingBalance - yearly[y].startingBalance}
-                  <td class="has-text-right paisa-tabular-nums {changeClass(yearDiff)}">
+                  <td class="px-2 py-2 text-right font-bold tabular-nums {changeClass(yearDiff)}">
                     <div>{formatCurrency(yearDiff)}</div>
-                    <div class="is-size-7">{formatPercentage(yearDiff / yearly[y].startingBalance)}</div>
+                    <div class="text-xs">{formatPercentage(yearDiff / yearly[y].startingBalance)}</div>
                   </td>
                 {:else}
                   <td></td>
                 {/if}
               {/each}
             </tr>
-            <tr class="has-text-weight-bold is-summary-row">
-              <th>End Balance</th>
+            <tr class="bg-[var(--paisa-surface-default)]">
+              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">End Balance</th>
               {#each years as y}
-                <td class="has-text-right paisa-tabular-nums">
+                <td class="px-2 py-2 text-right font-bold tabular-nums">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].endingBalance)}
                   {/if}
                 </td>
               {/each}
             </tr>
-            <tr class="has-text-weight-bold is-summary-row">
-              <th>Start Balance</th>
+            <tr class="bg-[var(--paisa-surface-default)]">
+              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">Start Balance</th>
               {#each years as y}
-                <td class="has-text-right paisa-tabular-nums">
+                <td class="px-2 py-2 text-right font-bold tabular-nums">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].startingBalance)}
                   {/if}
@@ -322,71 +328,3 @@
     </div>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-page-toolbar-mobile {
-    display: inline-flex;
-    align-items: center;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-value) {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-meta) {
-    white-space: normal;
-  }
-
-  .paisa-statement-table-wrap {
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    overflow: auto;
-    max-height: calc(100vh - 440px);
-    min-height: 260px;
-  }
-
-  :global(.paisa-tabular-nums) {
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  :global(.paisa-statement-table td),
-  :global(.paisa-statement-table th) {
-    white-space: nowrap;
-  }
-
-  .paisa-statement-loading {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-2);
-    padding: var(--paisa-space-4);
-  }
-
-  .paisa-statement-loading-row {
-    height: 1.25rem;
-    border-radius: var(--paisa-radius-sm);
-    background: linear-gradient(
-      90deg,
-      var(--paisa-surface-hover) 25%,
-      var(--paisa-surface) 50%,
-      var(--paisa-surface-hover) 75%
-    );
-    background-size: 200% 100%;
-    animation: paisa-shimmer 1.2s ease-in-out infinite;
-  }
-
-  @keyframes paisa-shimmer {
-    0% {
-      background-position: 100% 0;
-    }
-    100% {
-      background-position: -100% 0;
-    }
-  }
-</style>

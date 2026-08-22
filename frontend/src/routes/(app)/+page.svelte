@@ -247,7 +247,7 @@
     {/if}
 
     <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
-    <div class="paisa-dashboard-row paisa-dashboard-visualizations">
+    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0">
       <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
         <div class="flex items-center justify-between mb-3">
           <a href="/cash_flow/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
@@ -297,7 +297,7 @@
     </div>
 
     <!-- Row 3: Operational Data (Budget ~40% + Recent Transactions ~60%) -->
-    <div class="paisa-dashboard-row paisa-dashboard-operations">
+    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] [&>*]:mb-0 [&>*]:min-w-0 [&>:only-child]:col-span-full">
       {#if currentBudget && currentBudget.accounts && currentBudget.accounts.length > 0}
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
@@ -374,7 +374,7 @@
     </div>
 
     <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
-    <div class="paisa-dashboard-row paisa-dashboard-longterm">
+    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:mb-0 [&>*]:min-w-0 [&>:only-child]:col-span-full">
       {#if !_.isEmpty(goalSummaries)}
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
@@ -453,45 +453,3 @@
     </div>
   </div>
 {/if}
-
-<style lang="scss">
-  .paisa-dashboard-row {
-    display: grid;
-    gap: var(--paisa-space-5);
-    width: 100%;
-
-    > :global(*) {
-      min-width: 0;
-      margin-bottom: 0;
-    }
-  }
-
-  .paisa-dashboard-visualizations {
-    grid-template-columns: 1fr;
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    }
-  }
-
-  .paisa-dashboard-operations {
-    grid-template-columns: 1fr;
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    }
-
-    > :only-child {
-      grid-column: 1 / -1;
-    }
-  }
-
-  .paisa-dashboard-longterm {
-    grid-template-columns: 1fr;
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    > :only-child {
-      grid-column: 1 / -1;
-    }
-  }
-</style>

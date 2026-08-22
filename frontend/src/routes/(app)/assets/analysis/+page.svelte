@@ -133,10 +133,13 @@
   >
     {#snippet actions()}
       {#if !isEmpty && commodities.length > 0}
-        <div class="paisa-commodity-toolbar">
+        <div class="flex max-w-[min(100vw-2rem,520px)] flex-wrap gap-[var(--paisa-space-2)]">
           {#each commodities as commodity}
             {@const name = `switch-${commodity}`}
-            <label class="paisa-commodity-toggle" style="--commodity-color: {color ? color(commodity) : ''}">
+            <label
+              class="inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-[var(--paisa-border-subtle)] px-2 py-0.5 text-xs text-[var(--paisa-muted-foreground)] has-[:checked]:border-[var(--commodity-color,var(--paisa-primary))] has-[:checked]:bg-[var(--paisa-surface-hover)] has-[:checked]:text-[var(--paisa-foreground)]"
+              style="--commodity-color: {color ? color(commodity) : ''}"
+            >
               <input
                 id={name}
                 type="checkbox"
@@ -204,35 +207,3 @@
     </Section>
   {/if}
 </Page>
-
-<style lang="scss">
-  .paisa-commodity-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-2);
-    max-width: min(100vw - 2rem, 520px);
-  }
-
-  .paisa-commodity-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-full);
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-muted-foreground);
-    cursor: pointer;
-    user-select: none;
-
-    input {
-      accent-color: var(--commodity-color, var(--paisa-primary));
-    }
-
-    &:has(input:checked) {
-      border-color: var(--commodity-color, var(--paisa-primary));
-      color: var(--paisa-foreground);
-      background-color: var(--paisa-surface-hover);
-    }
-  }
-</style>

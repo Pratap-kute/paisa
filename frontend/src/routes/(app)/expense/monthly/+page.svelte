@@ -211,13 +211,13 @@
     description="Where your money went this month"
   >
     {#snippet actions()}
-      <div class="paisa-month-picker-mobile">
+      <div class="inline-flex items-center sm:hidden">
         <MonthPicker bind:value={$month} min={$dateMin} max={$dateMax} />
       </div>
     {/snippet}
   </PageHeader>
 
-  <div class="paisa-top-financial-context">
+  <div class="mb-[var(--paisa-space-5)]">
     <MetricStrip cols={2}>
       <Metric
         label="Total Expenses"
@@ -231,7 +231,7 @@
         value={expenseRateValue ? `${expenseRateValue}%` : "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="paisa-metric-rate"
+        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -252,7 +252,7 @@
     >
       <ChartFrame
         type="category"
-        class="paisa-breakdown-chart"
+        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, selectedMonthExpenses.length || 4)}
         empty={!hasSelectedMonthExpenses}
         emptyMessage="No expenses recorded for {formattedCurrentMonth}"
@@ -324,19 +324,19 @@
         </p>
       </ZeroState>
     {:else}
-      <div class="paisa-expense-list">
+      <div class="flex flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
         {#each current_month_expenses as exp}
           <a
-            class="paisa-expense-row"
+            class="flex items-center gap-[var(--paisa-space-3)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-[var(--paisa-space-3)] py-[var(--paisa-space-2)] no-underline transition-colors last:border-b-0 hover:bg-[var(--paisa-surface-hover)]"
             href={postingUrl(exp)}
             style="--paisa-category-color: {z?.(expenseGroup(exp)) || 'var(--paisa-border-strong)'}"
           >
-            <div class="paisa-expense-indicator"></div>
-            <div class="paisa-expense-main">
-              <span class="paisa-expense-payee" title={exp.payee}>{exp.payee}</span>
-              <span class="paisa-expense-meta">
-                <span class="paisa-expense-date">{exp.date.format("DD MMM YYYY")}</span>
-                <span class="paisa-expense-dot">·</span>
+            <div class="w-[3px] shrink-0 self-stretch rounded-[var(--paisa-radius-full)] bg-[var(--paisa-category-color)]"></div>
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span class="truncate text-sm font-semibold text-[var(--paisa-foreground)]" title={exp.payee}>{exp.payee}</span>
+              <span class="flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs text-[var(--paisa-muted-foreground)]">
+                <span class="shrink-0">{exp.date.format("DD MMM YYYY")}</span>
+                <span class="shrink-0">·</span>
                 <Badge variant="neutral" size="sm">
                   <span class="custom-icon">
                     {iconify(restName(exp.account), {
@@ -344,130 +344,13 @@
                     })}
                   </span>
                 </Badge>
-                <span class="paisa-expense-account" title={exp.account}>{exp.account}</span>
+                <span class="truncate" title={exp.account}>{exp.account}</span>
               </span>
             </div>
-            <span class="paisa-expense-amount">{formatCurrency(exp.amount)}</span>
+            <span class="shrink-0 text-right text-sm font-semibold tabular-nums text-[var(--paisa-negative)]">{formatCurrency(exp.amount)}</span>
           </a>
         {/each}
       </div>
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-month-picker-mobile {
-    display: inline-flex;
-    align-items: center;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-
-  .paisa-top-financial-context {
-    margin-bottom: var(--paisa-space-5);
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-value) {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
-    line-height: 1.15;
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-meta) {
-    white-space: normal;
-  }
-
-  :global(.paisa-breakdown-chart.paisa-chart-frame) {
-    overflow: visible;
-  }
-
-  :global(.paisa-breakdown-chart .paisa-chart-frame-body) {
-    overflow: visible;
-  }
-
-  .paisa-expense-list {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    overflow: hidden;
-  }
-
-  .paisa-expense-row {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    text-decoration: none;
-    background-color: var(--paisa-surface);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-    transition: background-color var(--paisa-transition-fast);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-    }
-  }
-
-  .paisa-expense-indicator {
-    width: 3px;
-    align-self: stretch;
-    flex-shrink: 0;
-    border-radius: var(--paisa-radius-full);
-    background-color: var(--paisa-category-color);
-  }
-
-  .paisa-expense-main {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 0;
-    gap: 0.125rem;
-  }
-
-  .paisa-expense-payee {
-    font-size: var(--paisa-font-size-sm);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-foreground);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-expense-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-muted-foreground);
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .paisa-expense-date,
-  .paisa-expense-dot {
-    flex-shrink: 0;
-  }
-
-  .paisa-expense-account {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-expense-amount {
-    flex-shrink: 0;
-    font-size: var(--paisa-font-size-sm);
-    font-weight: var(--paisa-font-weight-semibold);
-    font-variant-numeric: tabular-nums;
-    color: var(--paisa-negative);
-    text-align: right;
-  }
-</style>
