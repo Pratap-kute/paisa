@@ -1,28 +1,21 @@
 <script lang="ts">
-  import { renderHarvestables } from "$lib/charts/harvest";
-  import { ajax } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount, tick } from "svelte";
+  import { filterHarvestables } from "$lib/charts/harvest_data";
+  import { ajax, type Harvestable } from "$lib/core/utils";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import HarvestCard from "$lib/components/tax/HarvestCard.svelte";
 
-  let isEmpty = $state(false);
   let isLoading = $state(true);
+  let harvestables: Harvestable[] = $state([]);
+  const isEmpty = $derived(!isLoading && harvestables.length === 0);
 
   onMount(async () => {
     try {
-      const { harvestables: harvestables } = await ajax("/api/harvest");
-      const values = Object.values(harvestables);
-      if (_.isEmpty(values) || !_.some(values, (h) => h.harvestable_units > 0)) {
-        isEmpty = true;
-        return;
-      }
-
-      isLoading = false;
-      await tick();
-      renderHarvestables(values);
+      const response = await ajax("/api/harvest");
+      harvestables = filterHarvestables(Object.values(response.harvestables));
     } finally {
       isLoading = false;
     }
@@ -45,12 +38,12 @@
       loading={isLoading}
       empty={!isLoading && isEmpty}
       emptyMessage="No harvestable tax-loss opportunities found"
-      preserveChildren
     >
-      <div
-        id="d3-harvestables"
-        class="flex w-full flex-wrap text-[var(--paisa-muted-foreground)]"
-      ></div>
+      <div class="flex w-full flex-col gap-3" data-testid="harvestables">
+        {#each harvestables as harvestable (harvestable.account)}
+          <HarvestCard {harvestable} />
+        {/each}
+      </div>
     </ChartFrame>
   </Section>
 </Page>

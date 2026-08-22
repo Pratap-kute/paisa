@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { renderBreakdowns } from "$lib/charts/schedule_al";
+  import { scheduleALTotal } from "$lib/charts/schedule_al_data";
   import _ from "lodash";
-  import { ajax, type ScheduleAL } from "$lib/core/utils";
+  import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -12,12 +12,7 @@
     scheduleAls ? scheduleAls[$year] ?? null : null
   );
   let hasEntries = $derived((selectedScheduleAl?.entries?.length ?? 0) > 0);
-
-  $effect(() => {
-    if (selectedScheduleAl) {
-      renderBreakdowns(selectedScheduleAl.entries);
-    }
-  });
+  let total = $derived(scheduleALTotal(selectedScheduleAl?.entries ?? []));
 
   onMount(async () => {
     ({ schedule_als: scheduleAls } = await ajax("/api/schedule_al"));
@@ -61,7 +56,23 @@
                 <th class="px-3 py-2.5 text-right">Amount</th>
               </tr>
             </thead>
-            <tbody class="d3-schedule-al text-[var(--paisa-foreground)]"></tbody>
+            <tbody class="text-[var(--paisa-foreground)]">
+              {#each selectedScheduleAl?.entries ?? [] as entry (`${entry.section.code}-${entry.section.section}-${entry.section.details}`)}
+                <tr class="border-b border-[var(--paisa-border-subtle)]">
+                  <td class="px-3 py-2.5">{entry.section.code}</td>
+                  <td class="px-3 py-2.5">{entry.section.section}</td>
+                  <td class="px-3 py-2.5">{entry.section.details}</td>
+                  <td class="px-3 py-2.5 text-right font-semibold">{formatCurrency(entry.amount)}</td>
+                </tr>
+              {/each}
+            </tbody>
+            <tfoot>
+              <tr class="bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-foreground)]">
+                <td class="px-3 py-2.5" colspan="2"></td>
+                <th class="px-3 py-2.5 text-left" scope="row">Total</th>
+                <td class="px-3 py-2.5 text-right" data-testid="schedule-al-total">{formatCurrency(total)}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       {:else}
