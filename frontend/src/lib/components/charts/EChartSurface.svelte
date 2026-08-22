@@ -34,6 +34,7 @@
 
   let element: HTMLDivElement | undefined = $state();
   let controller: EChartSurfaceController | undefined = $state();
+  let pendingDimensions: Dimensions | undefined;
   let currentTheme = $derived($theme);
 
   async function ensureChart() {
@@ -51,6 +52,14 @@
       eventHandlers: events,
     });
     controller.init();
+    const rect = element.getBoundingClientRect();
+    const dimensions = pendingDimensions ?? {
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    };
+    if (dimensions.width > 0 && dimensions.height > 0) {
+      controller.resize(dimensions);
+    }
   }
 
   $effect(() => {
@@ -59,7 +68,9 @@
     let disposed = false;
     ensureChart();
     const cleanup = observeElementSize(element, (dimensions) => {
-      if (disposed || !controller) return;
+      if (disposed) return;
+      pendingDimensions = dimensions;
+      if (!controller) return;
       controller.resize(dimensions);
     });
 

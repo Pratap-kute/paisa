@@ -12,7 +12,7 @@ export function buildIncomeStatementWaterfallOption(
     delta >= 0
       ? theme?.positiveColor ?? "#16a34a"
       : theme?.negativeColor ?? "#dc2626";
-  return {
+  const baseOption = {
     animationDuration: 250,
     grid: {
       top: 24,
@@ -49,10 +49,19 @@ export function buildIncomeStatementWaterfallOption(
       data: data.steps.map((step) => step.label),
       axisLabel: {
         color: theme?.mutedColor,
-        rotate: mobile ? 42 : 18,
+        rotate: mobile ? 45 : 18,
         interval: 0,
+        hideOverlap: true,
         overflow: "truncate",
-        width: mobile ? 62 : 100,
+        width: mobile ? 42 : 100,
+        formatter: (label: string) =>
+          ({
+            "Starting balance": "Start",
+            "Gain / Loss": "P/L",
+            "Liabilities": "Liab.",
+            "Expenses": "Expense",
+            "Ending balance": "End",
+          })[label] ?? label,
       },
     },
     yAxis: {
@@ -94,7 +103,7 @@ export function buildIncomeStatementWaterfallOption(
           itemStyle: { color: colorFor(step.delta), opacity: 0.82 },
         })),
         label: {
-          show: !mobile,
+          show: false,
           position: "top",
           color: theme?.textColor,
           formatter: (params: { dataIndex: number }) =>
@@ -102,7 +111,10 @@ export function buildIncomeStatementWaterfallOption(
               data.steps[params.dataIndex]?.delta ?? 0,
             ),
         },
+        labelLayout: { hideOverlap: true },
       },
     ],
   };
+
+  return baseOption;
 }

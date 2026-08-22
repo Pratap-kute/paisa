@@ -10,13 +10,13 @@ export const visualRoutes: VisualRoute[] = [
     name: "dashboard",
     path: "/",
     ready:
-      "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
+      "[data-testid='dashboard-cash-flow-echart'][data-chart-ready='true']",
   },
   {
     name: "assets-allocation",
     path: "/assets/allocation",
     ready:
-      "[data-testid='allocation-category-echart'][data-chart-ready='true']",
+      "[data-testid='allocation-timeline-echart'][data-chart-ready='true']",
   },
   {
     name: "assets-analysis",
@@ -47,8 +47,17 @@ export const visualRoutes: VisualRoute[] = [
     path: "/assets/networth",
     ready: "[data-testid='networth-timeline-echart'][data-chart-ready='true']",
   },
-  { name: "cash-flow-income-statement", path: "/cash_flow/income_statement" },
-  { name: "cash-flow-monthly", path: "/cash_flow/monthly" },
+  {
+    name: "cash-flow-income-statement",
+    path: "/cash_flow/income_statement",
+    ready:
+      "[data-testid='income-statement-waterfall-echart'][data-chart-ready='true']",
+  },
+  {
+    name: "cash-flow-monthly",
+    path: "/cash_flow/monthly",
+    ready: "[data-testid='monthly-cash-flow-echart'][data-chart-ready='true']",
+  },
   {
     name: "cash-flow-recurring",
     path: "/cash_flow/recurring",
@@ -64,13 +73,13 @@ export const visualRoutes: VisualRoute[] = [
     name: "expense-monthly",
     path: "/expense/monthly",
     ready:
-      "[data-testid='monthly-expense-calendar-echart'][data-chart-ready='true']",
+      "[data-testid='monthly-expense-timeline-echart'][data-chart-ready='true']",
   },
   {
     name: "expense-yearly",
     path: "/expense/yearly",
     ready:
-      "[data-testid='yearly-expense-calendar-echart'][data-chart-ready='true']",
+      "[data-testid='yearly-expense-timeline-echart'][data-chart-ready='true']",
   },
   {
     name: "income",
@@ -107,7 +116,11 @@ export const visualRoutes: VisualRoute[] = [
     ready:
       "[data-testid='credit-card-yearly-spends-echart'][data-chart-ready='true']",
   },
-  { name: "liabilities-interest", path: "/liabilities/interest" },
+  {
+    name: "liabilities-interest",
+    path: "/liabilities/interest",
+    ready: "[data-testid='interest-overview-echart'][data-chart-ready='true']",
+  },
   {
     name: "liabilities-repayment",
     path: "/liabilities/repayment",

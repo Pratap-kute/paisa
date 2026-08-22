@@ -93,9 +93,18 @@
   onMount(async () => {
     try {
       ({ yearly } = await ajax("/api/income_statement"));
-      const y = _.minBy(_.values(yearly), (y) => y.date);
-      if (y) {
-        dateMin.set(y.date);
+      const statements = _.values(yearly);
+      const earliest = _.minBy(statements, (statement) => statement.date);
+      const latest = _.maxBy(statements, (statement) => statement.date);
+      if (earliest) {
+        dateMin.set(earliest.date);
+      }
+      if (latest) {
+        dateMax.set(latest.date);
+      }
+      if (!$year) {
+        const latestYear = _.chain(_.keys(yearly)).sort().last().value();
+        if (latestYear) year.set(latestYear);
       }
 
       const rawGroups: AccountGroup[] = [
