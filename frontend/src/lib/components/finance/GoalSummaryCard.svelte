@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Card from "$lib/components/ui/Card.svelte";
   import { iconGlyph } from "$lib/core/icon";
   import { formatCurrency, formatPercentage, type GoalSummary } from "$lib/core/utils";
   import _ from "lodash";
@@ -35,26 +36,32 @@
   let completed = $derived(percentComplete(goal));
 </script>
 
-<div class="box p-3 goal-summary-card" class:mb-3={small}>
-  <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-    <div class="is-flex is-align-items-center">
+<Card padding="sm" class={small ? "mb-3" : ""}>
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center min-w-0">
       {#if action}
-        <span use:action class="icon is-size-5 mr-2 has-text-grey-light paisa-clickable">
+        <span
+          use:action
+          class="mr-2 text-lg text-[var(--paisa-muted-foreground)] paisa-clickable shrink-0"
+        >
           <i class="fas fa-grip-vertical"></i>
         </span>
       {/if}
       <a
-        class="secondary-link has-text-grey"
+        class="secondary-link text-[var(--paisa-muted-foreground)] min-w-0"
         href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
       >
-        <h4 class="is-size-4 has-text-grey">{goal.name}</h4>
+        <h4 class="text-xl text-[var(--paisa-muted-foreground)] truncate">{goal.name}</h4>
       </a>
     </div>
     {#if !_.isEmpty(goal.icon)}
-      <span class="{small ? 'is-size-3' : 'is-size-2'} custom-icon is-inline-flex is-align-items-center">{iconGlyph(goal.icon)}</span>
+      <span
+        class="{small ? 'text-2xl' : 'text-3xl'} custom-icon inline-flex items-center shrink-0"
+        >{iconGlyph(goal.icon)}</span
+      >
     {/if}
   </div>
-  <nav class="level grid-2">
+  <div class="grid grid-cols-2 gap-3 mb-3">
     <LevelItem
       {small}
       narrow
@@ -70,10 +77,10 @@
       color={COLORS.primary}
       value={formatCurrency(goal.target)}
     />
-  </nav>
+  </div>
   <Progress small showPercent={false} progressPercent={completed} />
-  <div class="is-flex is-justify-content-space-between has-text-grey">
+  <div class="flex justify-between text-[var(--paisa-muted-foreground)] text-sm mt-1">
     <div>{formatPercentage(completed / 100, 2)}</div>
     <div>{formatDate(goal.targetDate)}</div>
   </div>
-</div>
+</Card>
