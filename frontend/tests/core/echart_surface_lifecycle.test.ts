@@ -1,6 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEChartSurfaceController } from "$lib/charts/echarts/surface_lifecycle";
 
+function createFrameScheduler() {
+  let nextId = 0;
+  const callbacks = new Map<number, FrameRequestCallback>();
+  return {
+    request: vi.fn((callback: FrameRequestCallback) => {
+      const id = ++nextId;
+      callbacks.set(id, callback);
+      return id;
+    }),
+    cancel: vi.fn((id: number) => callbacks.delete(id)),
+    flush() {
+      const pending = [...callbacks.entries()];
+      callbacks.clear();
+      pending.forEach(([, callback]) => callback(performance.now()));
+    },
+    pending: () => callbacks.size,
+  };
+}
+
+function chartEngine() {
+  return {
+    setOption: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  };
+}
+
 describe("ECharts surface lifecycle controller", () => {
   it("initializes, updates, resizes, and disposes through the Paisa boundary", () => {
     const chart = {
@@ -108,5 +137,132 @@ describe("ECharts surface lifecycle controller", () => {
 
     controller.dispose();
     expect(chart.off).toHaveBeenCalledWith("mouseover", onHover);
+  });
+
+  it("waits for a positive size that is stable across two frames", () => {
+    const chart = chartEngine();
+    const frames = createFrameScheduler();
+    const element = document.createElement("div");
+    vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+      width: 640,
+      height: 360,
+    } as DOMRect);
+    const onready = vi.fn();
+    const controller = createEChartSurfaceController({
+      element,
+      option: { series: [] },
+      renderer: "canvas",
+      initChart: () => chart as never,
+      requestFrame: frames.request,
+      cancelFrame: frames.cancel,
+      onready,
+    });
+
+    controller.init();
+    const finished = chart.on.mock.calls.find(([event]) => event === "finished")
+      ?.[1] as (() => void);
+    finished();
+    frames.flush();
+    frames.flush();
+    expect(controller.ready()).toBe(false);
+
+    controller.resize({ width: 640, height: 360 });
+    frames.flush();
+    expect(controller.ready()).toBe(false);
+    frames.flush();
+    expect(controller.ready()).toBe(true);
+    expect(element.dataset.chartReady).toBe("true");
+    expect(onready).toHaveBeenCalledTimes(1);
+  });
+
+  it("invalidates readiness and cancels stale frames on update and resize", () => {
+    const chart = chartEngine();
+    const frames = createFrameScheduler();
+    const element = document.createElement("div");
+    const rect = { width: 640, height: 360 };
+    vi.spyOn(element, "getBoundingClientRect").mockImplementation(() =>
+      rect as DOMRect
+    );
+    const controller = createEChartSurfaceController({
+      element,
+      option: { series: [] },
+      renderer: "canvas",
+      initChart: () => chart as never,
+      requestFrame: frames.request,
+      cancelFrame: frames.cancel,
+    });
+
+    controller.init();
+    controller.resize({ width: 640, height: 360 });
+    frames.flush();
+    controller.update({ series: [{ type: "line", data: [1] }] });
+    expect(controller.ready()).toBe(false);
+    expect(frames.cancel).toHaveBeenCalled();
+    frames.flush();
+    frames.flush();
+    expect(controller.ready()).toBe(true);
+
+    rect.width = 480;
+    controller.resize({ width: 480, height: 360 });
+    expect(element.dataset.chartReady).toBe("false");
+    frames.flush();
+    frames.flush();
+    expect(controller.ready()).toBe(true);
+  });
+
+  it("reconciles the final element rect before publishing readiness", () => {
+    const chart = chartEngine();
+    const frames = createFrameScheduler();
+    const element = document.createElement("div");
+    const rect = { width: 640, height: 360 };
+    vi.spyOn(element, "getBoundingClientRect").mockImplementation(() =>
+      rect as DOMRect
+    );
+    const controller = createEChartSurfaceController({
+      element,
+      option: { series: [] },
+      renderer: "canvas",
+      initChart: () => chart as never,
+      requestFrame: frames.request,
+      cancelFrame: frames.cancel,
+    });
+
+    controller.init();
+    controller.resize({ width: 640, height: 360 });
+    frames.flush();
+    rect.width = 520;
+    frames.flush();
+    expect(controller.ready()).toBe(false);
+    expect(chart.resize).toHaveBeenLastCalledWith({ width: 520, height: 360 });
+    frames.flush();
+    frames.flush();
+    expect(controller.ready()).toBe(true);
+  });
+
+  it("cancels pending readiness work when disposed", () => {
+    const chart = chartEngine();
+    const frames = createFrameScheduler();
+    const element = document.createElement("div");
+    vi.spyOn(element, "getBoundingClientRect").mockReturnValue({
+      width: 640,
+      height: 360,
+    } as DOMRect);
+    const controller = createEChartSurfaceController({
+      element,
+      option: { series: [] },
+      renderer: "canvas",
+      initChart: () => chart as never,
+      requestFrame: frames.request,
+      cancelFrame: frames.cancel,
+    });
+
+    controller.init();
+    controller.resize({ width: 640, height: 360 });
+    expect(frames.pending()).toBe(1);
+    controller.dispose();
+    expect(frames.pending()).toBe(0);
+    frames.flush();
+    expect(element.dataset.chartReady).toBeUndefined();
+    expect(controller.ready()).toBe(false);
   });
 });

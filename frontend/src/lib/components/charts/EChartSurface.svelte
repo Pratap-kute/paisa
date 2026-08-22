@@ -66,13 +66,13 @@
     if (!element || typeof window === "undefined") return;
 
     let disposed = false;
-    ensureChart();
     const cleanup = observeElementSize(element, (dimensions) => {
       if (disposed) return;
       pendingDimensions = dimensions;
       if (!controller) return;
       controller.resize(dimensions);
     });
+    ensureChart();
 
     return () => {
       disposed = true;

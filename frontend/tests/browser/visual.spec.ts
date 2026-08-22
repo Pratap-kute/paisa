@@ -176,7 +176,9 @@ for (const chart of chartSnapshots) {
         await expect(page.getByText(chart.readyText, { exact: true }))
           .toBeVisible();
       }
-      const chartLocator = page.locator(chart.locator);
+      const chartLocator = page.locator(
+        `${chart.locator}[data-chart-ready='true']`,
+      );
       await expect(chartLocator).toBeVisible();
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
