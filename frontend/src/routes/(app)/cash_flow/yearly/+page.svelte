@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount, tick } from "svelte";
   import _ from "lodash";
-  import { createFlow } from "$lib/charts/cash_flow";
+  import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
+  import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, dateMax, year } from "../../../../store";
   import {
@@ -25,7 +26,7 @@
   let expenses: Posting[] = $state([]);
   let isEmpty = $state(false);
   let isLoading = $state(true);
-  let flowChart = createFlow();
+  let selectedGraph: Graph | undefined = $state();
 
   let showDepthControls = $derived(
     $cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1,
@@ -68,10 +69,8 @@
       isEmpty = true;
       return;
     }
-    flowChart.update(
-      filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth),
-    );
-    legends = flowChart.legends();
+    selectedGraph = filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth);
+    legends = buildCashFlowSankeyData(selectedGraph).legends;
     isEmpty = false;
   }
 
@@ -79,10 +78,6 @@
     if (graph) {
       updateChart();
     }
-  });
-
-  onDestroy(() => {
-    flowChart.destroy();
   });
 
   onMount(async () => {
@@ -152,13 +147,10 @@
       {#if !isLoading && !isEmpty}
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
-      <ChartFrame
-        type="timeline"
-        size="dynamic"
-        preserveChildren
-        onresize={(dim) => flowChart.resize(dim)}
-      >
-        <svg id="d3-expense-flow" width="100%" />
+      <ChartFrame type="timeline" size="dynamic" preserveChildren>
+        {#if selectedGraph}
+          <CashFlowSankeyChart graph={selectedGraph} />
+        {/if}
       </ChartFrame>
     {/if}
   </Section>
