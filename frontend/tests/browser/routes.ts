@@ -30,7 +30,7 @@ export const visualRoutes: VisualRoute[] = [
     ready: ".paisa-recurring-cards-list",
   },
   { name: "cash-flow-yearly", path: "/cash_flow/yearly" },
-  { name: "expense-budget", path: "/expense/budget", ready: ".budget-card" },
+  { name: "expense-budget", path: "/expense/budget", readyText: "All Budgets" },
   { name: "expense-monthly", path: "/expense/monthly" },
   { name: "expense-yearly", path: "/expense/yearly", ready: "#d3-yearly-expense-timeline g" },
   { name: "income", path: "/income" },
@@ -39,7 +39,7 @@ export const visualRoutes: VisualRoute[] = [
   { name: "ledger-import", path: "/ledger/import" },
   { name: "ledger-posting", path: "/ledger/posting" },
   { name: "ledger-price", path: "/ledger/price" },
-  { name: "transactions", path: "/ledger/transaction", ready: "p.is-6" },
+  { name: "transactions", path: "/ledger/transaction", readyText: "transaction(s)" },
   {
     name: "liabilities-balance",
     path: "/liabilities/balance",

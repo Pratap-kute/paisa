@@ -69,7 +69,14 @@ test.describe("layout invariants", () => {
     for (const route of routes) {
       test(`${route.name} does not overflow at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
-        await page.goto(route.path);
+        if (route.path === "/ledger/price") {
+          await Promise.all([
+            page.waitForResponse((response) => response.url().endsWith("/api/price")),
+            page.goto(route.path),
+          ]);
+        } else {
+          await page.goto(route.path);
+        }
         await assertNavigationVisible(page);
         await assertNoPageOverflow(page);
       });

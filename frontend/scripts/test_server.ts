@@ -11,10 +11,16 @@ const binary = join(
 const children: Deno.ChildProcess[] = [];
 let stopping = false;
 
-async function run(command: string, args: string[], cwd = root) {
+async function run(
+  command: string,
+  args: string[],
+  cwd = root,
+  env: Record<string, string> = {},
+) {
   const status = await new Deno.Command(command, {
     args,
     cwd,
+    env: { ...Deno.env.toObject(), ...env },
     stdin: "null",
     stdout: "inherit",
     stderr: "inherit",
@@ -74,7 +80,9 @@ try {
     // Static assets or preview server build not ready yet
   }
   if (!hasStatic || Deno.env.get("PAISA_REBUILD_FRONTEND") === "true") {
-    await run(Deno.execPath(), ["task", "build"]);
+    await run(Deno.execPath(), ["task", "build"], root, {
+      VITE_PAISA_E2E_DEV_UI: "true",
+    });
   }
   await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
   await run(binary, [

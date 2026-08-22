@@ -62,7 +62,7 @@ test("transaction search filters fixture transactions", async ({ page }) => {
   const count = page.getByText(/\d+ transaction\(s\)/);
   await expect(count).toBeVisible();
   const before = await count.textContent();
-  const search = page.locator(".search-query-editor .cm-content");
+  const search = page.getByRole("searchbox", { name: "Filter query" });
   await search.click();
   await page.keyboard.type('payee = "Rent"');
   await expect(count).not.toHaveText(before ?? "");
@@ -97,7 +97,7 @@ test("import produces a preview without saving", async ({ page }) => {
     : "fixture/import/Paytm/statement.csv";
   await page.goto("/ledger/import");
   await page.locator('input[type="file"]').setInputFiles(fixturePath);
-  await expect(page.locator("button.save")).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("button", { name: "Save to Ledger" })).toBeVisible({ timeout: 15000 });
 });
 
 test("networth chart renders on analytics page", async ({ page }) => {
@@ -153,7 +153,7 @@ test("interactive sheets editor loads calculations", async ({ page }) => {
 
 test("theme toggle switches document theme between light and dark", async ({ page }) => {
   await page.goto("/");
-  const toggle = page.locator("button.theme-toggle");
+  const toggle = page.getByRole("button", { name: "auto" });
   await expect(toggle).toBeVisible();
 
   const html = page.locator("html");
@@ -241,10 +241,10 @@ test("posting search filters fixture postings", async ({ page }) => {
     page.waitForResponse((response) => response.url().endsWith("/api/ledger")),
     page.goto("/ledger/posting"),
   ]);
-  const payeeLinks = page.locator(".paisa-posting-table .secondary-link");
+  const payeeLinks = page.locator(".paisa-posting-table").getByRole("link");
   await expect(payeeLinks.first()).toBeVisible();
   const before = await payeeLinks.count();
-  const search = page.locator(".search-query-editor .cm-content");
+  const search = page.getByRole("searchbox", { name: "Filter query" });
   await search.click();
   await page.keyboard.type('payee = "Rent"');
   await expect.poll(() => payeeLinks.count(), { timeout: 5000 })
@@ -286,7 +286,7 @@ test("budget page renders account budget cards", async ({ page }) => {
     page.waitForResponse((response) => response.url().endsWith("/api/budget")),
     page.goto("/expense/budget"),
   ]);
-  await expect(page.locator(".budget-card").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "All Budgets" })).toBeVisible();
 });
 
 test("goals page renders fixture goals", async ({ page }) => {
