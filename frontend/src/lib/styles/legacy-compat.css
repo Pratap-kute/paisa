@@ -1,0 +1,227 @@
+/**
+ * Legacy Bulma class bridges and shared utilities retained after SCSS removal.
+ */
+
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--paisa-font-sans, var(--paisa-font-ui));
+    font-size: var(--paisa-font-size-sm, 0.875rem);
+    line-height: var(--paisa-line-height-normal, 1.5);
+    color: var(--paisa-text-primary, var(--paisa-foreground));
+    background-color: var(--paisa-canvas-bg, var(--paisa-canvas));
+    min-height: 100vh;
+  }
+
+  a {
+    color: var(--paisa-brand-primary, var(--paisa-primary));
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--paisa-brand-primary-hover, var(--paisa-primary));
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--paisa-font-mono);
+  }
+}
+
+.secondary-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.secondary-link:hover {
+  color: var(--paisa-brand-primary, var(--paisa-primary));
+  text-decoration: underline;
+}
+
+.paisa-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paisa-nowrap {
+  white-space: nowrap;
+}
+
+.paisa-negative-mb-1 {
+  margin-bottom: -0.25rem;
+}
+
+.paisa-opacity-20 {
+  opacity: 0.2;
+}
+
+.is-clipped {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paisa-toast-container {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  right: 0;
+  display: flex;
+  width: 100%;
+  padding: 15px;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.paisa-toast-container.is-bottom {
+  top: auto;
+  bottom: 0;
+}
+
+.paisa-toast-container.is-center {
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.paisa-posting-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.paisa-posting-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.radial-progress {
+  --value: 0;
+  --size: 5rem;
+  --thickness: 0.25rem;
+  display: inline-grid;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  place-content: center;
+  border-radius: 50%;
+}
+
+.radial-progress::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(currentColor calc(var(--value) * 1%), transparent 0);
+  content: "";
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--thickness)),
+    #000 calc(100% - var(--thickness) + 1px)
+  );
+}
+
+.icon.is-small {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.is-size-6 {
+  font-size: 1rem !important;
+}
+
+.is-size-7 {
+  font-size: 0.75rem !important;
+}
+
+.has-text-weight-bold {
+  font-weight: 700 !important;
+}
+
+.has-text-weight-medium {
+  font-weight: 500 !important;
+}
+
+.has-text-right {
+  text-align: right !important;
+}
+
+.has-text-centered {
+  text-align: center !important;
+}
+
+.has-text-success {
+  color: var(--paisa-success, var(--paisa-positive)) !important;
+}
+
+.has-text-danger {
+  color: var(--paisa-danger, var(--paisa-negative)) !important;
+}
+
+.has-text-warning,
+.has-text-warning-dark {
+  color: var(--paisa-warning) !important;
+}
+
+.has-text-info {
+  color: var(--paisa-info, var(--paisa-primary)) !important;
+}
+
+.has-text-primary {
+  color: var(--paisa-brand-primary, var(--paisa-primary)) !important;
+}
+
+.has-text-link {
+  color: var(--paisa-brand-primary, var(--paisa-primary)) !important;
+}
+
+.has-text-grey {
+  color: var(--paisa-text-secondary, var(--paisa-muted-foreground)) !important;
+}
+
+.has-text-grey-light,
+.has-text-grey-lighter {
+  color: var(--paisa-text-muted, var(--paisa-muted-foreground)) !important;
+}
+
+.has-text-grey-dark {
+  color: var(--paisa-text-primary, var(--paisa-foreground)) !important;
+}
+
+.table {
+  width: 100%;
+  background-color: var(--paisa-table-bg, var(--paisa-surface));
+  color: var(--paisa-text-primary, var(--paisa-foreground));
+  font-size: var(--paisa-font-size-sm, 0.875rem);
+  border-collapse: collapse;
+}
+
+.table th {
+  color: var(--paisa-table-header-text, var(--paisa-muted-foreground));
+  font-weight: var(--paisa-font-weight-semibold, 600);
+}
+
+.table.is-narrow th,
+.table.is-narrow td {
+  padding: 0.25rem 0.5rem;
+}
+
+.table.is-fullwidth {
+  width: 100%;
+}
+
+.table.is-hoverable tbody tr:hover {
+  background-color: var(--paisa-table-row-hover, var(--paisa-surface-hover));
+}

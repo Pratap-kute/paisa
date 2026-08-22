@@ -25,7 +25,7 @@
     return {};
   };
 
-  let selectedLegend: Legend = $state();
+  let selectedLegend: Legend | null = $state(null);
 
   function onClick(legend: Legend) {
     if (!legend.onClick) {
@@ -34,75 +34,73 @@
 
     legend.onClick(legend);
     if (selectedLegend == legend) {
-      // toggle
       legend.selected = false;
       selectedLegend = null;
     } else {
-      selectedLegend && (selectedLegend.selected = false);
+      if (selectedLegend) selectedLegend.selected = false;
       legend.selected = true;
       selectedLegend = legend;
     }
   }
 </script>
 
-<div class="is-flex is-flex-wrap-wrap is-align-items-center gap-2 mb-2 {clazz}">
+<div class="flex flex-wrap items-center gap-2 mb-2 {clazz}">
   {#each legends as legend}
     {#if legend.onClick}
       <button
         type="button"
-        class="is-inline-flex is-align-items-center gap-2 px-2 py-1 legend-box paisa-clickable"
-        style="border: none; background: transparent; margin: 0; font: inherit; color: inherit; text-align: inherit;"
-        onclick={(_e) => onClick(legend)}
+        class="legend-box inline-flex items-center gap-2 px-2 py-1 rounded-[var(--paisa-radius-sm)] border-0 bg-transparent m-0 font-inherit text-inherit text-left cursor-pointer hover:bg-[var(--paisa-surface-hover)]"
+        onclick={() => onClick(legend)}
         class:selected={selectedLegend == legend}
       >
         {#if legend.texture}
           <svg
             use:texture={{ texture: legend.texture }}
-            class="is-flex-shrink-0"
+            class="shrink-0"
             height="0.875rem"
             width="0.875rem"
             viewBox="0 0 {textureScale} {textureScale}"
           ></svg>
         {:else if legend.shape == "square"}
           <div
-            class="is-flex-shrink-0"
-            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem; border-radius: var(--paisa-radius-xs);"
+            class="shrink-0 rounded-[var(--paisa-radius-sm)]"
+            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem;"
           ></div>
         {:else if legend.shape == "line"}
           <div
-            class="is-flex-shrink-0"
+            class="shrink-0"
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label paisa-whitespace-pre is-size-7 has-text-grey custom-icon">
+        <div class="legend-label whitespace-pre text-xs text-[var(--paisa-muted-foreground)] custom-icon">
           {legend.label}
         </div>
       </button>
     {:else}
       <div
-        class="is-inline-flex is-align-items-center gap-2 px-2 py-1 legend-box"
+        class="legend-box inline-flex items-center gap-2 px-2 py-1"
         class:selected={selectedLegend == legend}
       >
         {#if legend.texture}
           <svg
             use:texture={{ texture: legend.texture }}
-            class="is-flex-shrink-0"
+            class="shrink-0"
             height="0.875rem"
             width="0.875rem"
             viewBox="0 0 {textureScale} {textureScale}"
           ></svg>
         {:else if legend.shape == "square"}
           <div
-            class="is-flex-shrink-0"
-            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem; border-radius: var(--paisa-radius-xs);"
+            class="shrink-0 rounded-[var(--paisa-radius-sm)]"
+            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem;"
           ></div>
         {:else if legend.shape == "line"}
           <div
-            class="is-flex-shrink-0"
+            class="shrink-0"
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label paisa-whitespace-pre is-size-7 has-text-grey custom-icon">
+        <div class="legend-label whitespace-pre text-xs text-[var(--paisa-muted-foreground)] custom-icon">
           {legend.label}
         </div>
       </div>

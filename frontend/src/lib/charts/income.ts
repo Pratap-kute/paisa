@@ -155,7 +155,7 @@ function renderIncomeTimeline(
         _.sortBy(
           postings.map((p) => [
             restName(p.account),
-            [formatCurrency(-p.amount), "has-text-weight-bold has-text-right"],
+            [formatCurrency(-p.amount), "paisa-text-bold paisa-text-right"],
           ]),
           (r) => r[0],
         ),
@@ -303,7 +303,7 @@ export function renderYearlyIncomeTimeline(
             grandTotal += total;
             return [[k, [
               formatCurrency(total),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]]];
           }),
           (r) => r[0],
@@ -397,7 +397,7 @@ export function renderYearlyTimelineOf(
     .attr("data-tippy-content", (d) => {
       return tooltip([[label, [
         formatCurrency(d.value),
-        "has-text-weight-bold has-text-right",
+        "paisa-text-bold paisa-text-right",
       ]]]);
     })
     .attr("x", x(0))

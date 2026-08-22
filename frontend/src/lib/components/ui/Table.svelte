@@ -49,9 +49,9 @@
       dataTreeBranchElement: false,
       dataTreeChildIndent: rem(30),
       dataTreeCollapseElement:
-        "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-up'></i></span>",
+        "<span class='paisa-tabulator-tree-toggle mr-3'><i class='fas fa-angle-up'></i></span>",
       dataTreeExpandElement:
-        "<span class='has-text-link icon is-small mr-3'><i class='fas fa-angle-down'></i></span>",
+        "<span class='paisa-tabulator-tree-toggle mr-3'><i class='fas fa-angle-down'></i></span>",
       data: data || [],
       columns: processedColumns,
       layout: "fitColumns",
@@ -67,4 +67,4 @@
   });
 </script>
 
-<div class="paisa-overflow-x-auto box py-0 {className}" style="max-width: 100%;" bind:this={tableComponent}></div>
+<div class="paisa-overflow-x-auto paisa-table-host py-0 {className}" style="max-width: 100%;" bind:this={tableComponent}></div>

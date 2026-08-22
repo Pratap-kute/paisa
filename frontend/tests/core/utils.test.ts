@@ -224,13 +224,13 @@ describe("core utilities", () => {
     expect(isZero(0.00001)).toBe(true);
     expect(isZero(0.1)).toBe(false);
     expect(dueDateIcon(dayjs("2024-01-01"), null).color).toBe(
-      "has-text-danger",
+      "paisa-text-danger",
     );
-    expect(dueDateIcon(dayjs("2024-02-01"), null).color).toBe("has-text-grey");
+    expect(dueDateIcon(dayjs("2024-02-01"), null).color).toBe("paisa-text-muted");
     expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-01")).color)
-      .toBe("has-text-success");
+      .toBe("paisa-text-success");
     expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-02")).color)
-      .toBe("has-text-warning-dark");
+      .toBe("paisa-text-warning");
   });
 
   test("tracks authentication token state", () => {

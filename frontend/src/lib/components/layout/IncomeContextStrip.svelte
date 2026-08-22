@@ -71,7 +71,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-income-context {
     min-width: 0;
   }

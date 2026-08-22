@@ -259,7 +259,7 @@ export function renderIncomeStatement(element: Element) {
             iconify(label),
             [
               formatCurrency(value * d.multiplier),
-              "has-text-right has-text-weight-bold",
+              "paisa-text-right paisa-text-bold",
             ],
           ]),
           { header: d.label, total: formatCurrency(d.value) },
@@ -342,7 +342,7 @@ export function renderIncomeStatement(element: Element) {
       .join("text")
       .attr("dy", "0.3rem")
       .attr("text-anchor", "middle")
-      .attr("class", "svg-text-black-ter has-text-weight-bold")
+      .attr("class", "svg-text-black-ter paisa-text-bold")
       .transition(t)
       .attr("x", function (d) {
         return (x(d.start) + x(d.end)) / 2;

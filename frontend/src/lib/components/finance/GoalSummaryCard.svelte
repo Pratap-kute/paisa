@@ -3,9 +3,8 @@
   import { iconGlyph } from "$lib/core/icon";
   import { formatCurrency, formatPercentage, type GoalSummary } from "$lib/core/utils";
   import _ from "lodash";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import Progress from "$lib/components/ui/Progress.svelte";
-  import COLORS from "$lib/core/colors";
   import dayjs from "dayjs";
   import type { Action } from "svelte/action";
 
@@ -62,21 +61,8 @@
     {/if}
   </div>
   <div class="grid grid-cols-2 gap-3 mb-3">
-    <LevelItem
-      {small}
-      narrow
-      title="Current"
-      color={COLORS.gainText}
-      value={formatCurrency(goal.current)}
-    />
-
-    <LevelItem
-      {small}
-      narrow
-      title="Target"
-      color={COLORS.primary}
-      value={formatCurrency(goal.target)}
-    />
+    <Metric label="Current" value={formatCurrency(goal.current)} status="positive" />
+    <Metric label="Target" value={formatCurrency(goal.target)} status="primary" />
   </div>
   <Progress small showPercent={false} progressPercent={completed} />
   <div class="flex justify-between text-[var(--paisa-muted-foreground)] text-sm mt-1">

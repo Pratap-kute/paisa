@@ -113,7 +113,7 @@ export function renderProgress(
     )
     .attr("data-tippy-content", (d, i) => {
       return `
-<div class='has-text-centered'>${formatCurrencyCrude(d.value)} (${
+<div class='paisa-text-centered'>${formatCurrencyCrude(d.value)} (${
         (i + 1) * 25
       }%)<br />${d.date.format("DD MMM YYYY")}</div>
 `;
@@ -158,13 +158,13 @@ export function renderProgress(
           ["Date", d.date.format("DD MMM YYYY")],
           ["Savings", [
             formatCurrency(d.value),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ]],
           [
             "",
             [
               formatFloat((d.value / targetSavings) * 100) + "%",
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ],
           ],
         ]),

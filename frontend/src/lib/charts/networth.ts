@@ -262,18 +262,18 @@ export function createNetworthChart(
               ["Date", d.date.format("DD MMM YYYY")],
               ["Net Worth", [
                 formatCurrency(networth(d)),
-                "has-text-weight-bold has-text-right",
+                "paisa-text-bold paisa-text-right",
               ]],
               [
                 "Net Investment",
                 [
                   formatCurrency(investment(d)),
-                  "has-text-weight-bold has-text-right",
+                  "paisa-text-bold paisa-text-right",
                 ],
               ],
               ["Gain / Loss", [
                 formatCurrency(d.gainAmount),
-                "has-text-weight-bold has-text-right",
+                "paisa-text-bold paisa-text-right",
               ]],
             ]),
           });

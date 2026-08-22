@@ -10,7 +10,18 @@
 </script>
 
 {#if item == null || item == false || (item != true && _.isEmpty(item))}
-  <div class="has-text-centered p-6">
+  <div class="paisa-zero-state">
     {@render children?.()}
   </div>
 {/if}
+
+<style>
+  .paisa-zero-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--paisa-space-6, 2rem);
+    text-align: center;
+  }
+</style>

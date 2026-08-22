@@ -38,7 +38,7 @@
     </ZeroState>
 
     {#if !isEmpty}
-      <div class="credit-card-container">
+      <div class="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(19rem,25rem))]">
         {#each creditCards as creditCard}
           <CreditCardCard {creditCard} />
         {/each}

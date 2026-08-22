@@ -13,16 +13,16 @@
 </script>
 
 <Card padding="sm" interactive>
-  <div class="my-1 is-flex is-justify-content-space-between is-align-items-center">
-    <div class="has-text-grey paisa-truncate custom-icon mr-2" title={assetBreakdown.group}>
+  <div class="my-1 flex items-center justify-between">
+    <div class="mr-2 truncate text-[var(--paisa-muted-foreground)] custom-icon" title={assetBreakdown.group}>
       <span style={accountColorStyle(firstName(assetBreakdown.group))}
         >{iconText(assetBreakdown.group)}</span
       >
-      <a class="secondary-link" href="/assets/gain/{assetBreakdown.group}">
+      <a class="text-[var(--paisa-primary)] hover:underline" href="/assets/gain/{assetBreakdown.group}">
         {restName(restName(assetBreakdown.group))}</a
       >
     </div>
-    <div class="has-text-weight-bold is-size-6 paisa-nowrap">
+    <div class="text-base font-bold paisa-nowrap tabular-nums">
       {formatCurrency(assetBreakdown.marketAmount)}
     </div>
   </div>

@@ -9,9 +9,9 @@ test("renders card with variant, padding, and interactive classes", () => {
     interactive: true,
   });
 
-  const box = container.querySelector(".box");
-  expect(box).toHaveClass("is-bordered");
-  expect(box).toHaveClass("p-3");
-  expect(box).toHaveClass("paisa-card-interactive");
+  const card = container.querySelector(".paisa-card");
+  expect(card).toHaveClass("paisa-card-bordered");
+  expect(card).toHaveClass("paisa-card-pad-sm");
+  expect(card).toHaveClass("paisa-card-interactive");
   unmount();
 });

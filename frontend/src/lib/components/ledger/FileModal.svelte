@@ -1,7 +1,8 @@
 <script lang="ts">
-  import Modal from "$lib/components/ui/Modal.svelte";
+  import Dialog from "$lib/components/ui/Dialog.svelte";
   import Input from "$lib/components/ui/Input.svelte";
   import Button from "$lib/components/ui/Button.svelte";
+  import FormField from "$lib/components/layout/FormField.svelte";
   import _ from "lodash";
   import { createEventDispatcher } from "svelte";
 
@@ -33,44 +34,42 @@
   }
 </script>
 
-<Modal bind:active={open} title={label} width="min(460px, 95vw)">
-  {#snippet body()}
+<Dialog bind:open title={label} width="min(460px, 95vw)">
+  {#snippet children({ close })}
     <form
       onsubmit={(e) => {
         e.preventDefault();
         if (!_.isEmpty(destinationFile)) {
           handleSave(e);
-          open = false;
+          close();
         }
       }}
     >
-      <div class="field mb-0">
-        <label class="label paisa-form-label" for="save-filename">File Name</label>
-        <Input
-          id="save-filename"
-          size="md"
-          {placeholder}
-          bind:value={destinationFile}
-          class="paisa-font-mono"
-          onkeydown={(e) => {
-            if (e.key === "Enter" && !_.isEmpty(destinationFile)) {
-              e.preventDefault();
-              handleSave(e);
-              open = false;
-            }
-          }}
-        >
-          {#snippet prefixIcon()}
-            <i class="fa-regular fa-file-lines"></i>
-          {/snippet}
-        </Input>
-        {#if help}
-          <p class="help paisa-form-help mt-2 mb-0">{help}</p>
-        {/if}
-      </div>
+      <FormField id="save-filename" label="File Name" description={help}>
+        {#snippet children()}
+          <Input
+            id="save-filename"
+            size="md"
+            {placeholder}
+            bind:value={destinationFile}
+            class="paisa-font-mono"
+            onkeydown={(e) => {
+              if (e.key === "Enter" && !_.isEmpty(destinationFile)) {
+                e.preventDefault();
+                handleSave(e);
+                close();
+              }
+            }}
+          >
+            {#snippet prefixIcon()}
+              <i class="fa-regular fa-file-lines"></i>
+            {/snippet}
+          </Input>
+        {/snippet}
+      </FormField>
     </form>
   {/snippet}
-  {#snippet foot({ close })}
+  {#snippet footer({ close })}
     <div class="paisa-modal-button-group">
       <Button
         variant="primary"
@@ -78,35 +77,17 @@
         disabled={_.isEmpty(destinationFile)}
         onclick={(e) => {
           handleSave(e);
-          close(e);
+          close();
         }}
       >
         {label}
       </Button>
-      <Button
-        variant="ghost"
-        size="md"
-        onclick={(e) => close(e)}
-      >
-        Cancel
-      </Button>
+      <Button variant="ghost" size="md" onclick={() => close()}>Cancel</Button>
     </div>
   {/snippet}
-</Modal>
+</Dialog>
 
-<style lang="scss">
-  .paisa-form-label {
-    font-size: var(--paisa-font-size-sm);
-    font-weight: var(--paisa-font-weight-medium);
-    color: var(--paisa-text-primary);
-    margin-bottom: var(--paisa-space-2);
-  }
-
-  .paisa-form-help {
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-muted);
-  }
-
+<style>
   .paisa-modal-button-group {
     display: flex;
     align-items: center;
@@ -114,4 +95,3 @@
     width: 100%;
   }
 </style>
-

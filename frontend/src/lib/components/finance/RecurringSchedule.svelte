@@ -17,25 +17,18 @@
 
   let icon = $derived(scheduleIcon(schedule));
 
-  const iconColorClasses: Record<string, string> = {
-    "has-text-success": "text-[var(--paisa-positive)]",
-    "has-text-danger": "text-[var(--paisa-negative)]",
-    "has-text-grey": "text-[var(--paisa-muted-foreground)]",
-    "has-text-warning-dark": "text-[var(--paisa-warning)]",
-  };
-
   let tooltipHtml = $derived(
     tooltip(
       [
         [
           "Due Date",
-          [schedule.scheduled.format("DD MMM YYYY"), "has-text-weight-bold has-text-right"],
+          [schedule.scheduled.format("DD MMM YYYY"), "paisa-text-bold paisa-text-right"],
         ],
         [
           "Cleared On",
-          [schedule.actual?.format("DD MMM YYYY") || "", "has-text-weight-bold has-text-right"],
+          [schedule.actual?.format("DD MMM YYYY") || "", "paisa-text-bold paisa-text-right"],
         ],
-        ["Amount", [formatCurrency(schedule.amount), "has-text-weight-bold has-text-right"]],
+        ["Amount", [formatCurrency(schedule.amount), "paisa-text-bold paisa-text-right"]],
       ],
       { header: schedule.key },
     ),
@@ -49,12 +42,15 @@
   data-tippy-content={tooltipHtml}
 >
   <div class="min-w-0 truncate" title={schedule.key}>
-    <span class="inline-flex items-center {iconColorClasses[icon.color] || ''}">
+    <span class="inline-flex items-center {icon.color}">
       <i class="fas {icon.icon}" aria-hidden="true"></i>
     </span>
     <span class="ml-1 text-[var(--paisa-foreground)]">
       {#if schedule.actual}
-        <a class="secondary-link hover:text-[var(--paisa-primary)]" href={postingUrl(schedule.transaction.postings[0])}>
+        <a
+          class="text-[var(--paisa-primary)] hover:underline"
+          href={postingUrl(schedule.transaction.postings[0])}
+        >
           {schedule.key}
         </a>
       {:else}

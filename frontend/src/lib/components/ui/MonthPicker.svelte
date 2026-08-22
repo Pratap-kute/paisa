@@ -32,8 +32,8 @@
     }
   });
 
-  function isAllowed(date: dayjs.Dayjs, min: dayjs.Dayjs, max: dayjs.Dayjs) {
-    return date.isSameOrAfter(min.startOf("month")) && date.isSameOrBefore(max.endOf("month"));
+  function isAllowed(date: dayjs.Dayjs, minDate: dayjs.Dayjs, maxDate: dayjs.Dayjs) {
+    return date.isSameOrAfter(minDate.startOf("month")) && date.isSameOrBefore(maxDate.endOf("month"));
   }
 
   function select(date: dayjs.Dayjs) {
@@ -52,131 +52,147 @@
   }
 
   const MONTHS = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
 </script>
 
-<div class="is-flex">
+<div class="inline-flex items-stretch">
   <button
-    class="button is-small border-left"
+    type="button"
+    class="paisa-month-nav border-r border-[var(--paisa-border-subtle)]"
     aria-label="Previous month"
     disabled={!isAllowed(valueDate.add(-1, "month"), min, max)}
-    onclick={(_e) => select(valueDate.add(-1, "month"))}
+    onclick={() => select(valueDate.add(-1, "month"))}
   >
-    <span class="icon">
-      <i class="fas fa-chevron-left"></i>
-    </span>
+    <i class="fas fa-chevron-left" aria-hidden="true"></i>
   </button>
-  <div class="dropdown is-right month-picker is-small" class:is-active={open}>
-    <div class="dropdown-trigger">
+
+  <div class="relative">
+    <button
+      type="button"
+      class="paisa-month-trigger"
+      aria-label="Select month and year"
+      aria-haspopup="listbox"
+      aria-expanded={open}
+      onclick={() => (open = !open)}
+    >
+      <span class="font-semibold">{valueDate.format("MMM YYYY")}</span>
+      <i class="fas fa-angle-down text-xs" aria-hidden="true"></i>
+    </button>
+
+    {#if open}
       <button
-        class="button is-small border-none"
-        aria-label="Select month and year"
-        aria-haspopup="true"
-        aria-controls="dropdown-menu2"
-        onclick={(_e) => (open = !open)}
+        type="button"
+        class="fixed inset-0 z-40 cursor-default border-0 bg-transparent p-0"
+        aria-label="Close month picker"
+        onclick={() => (open = false)}
+      ></button>
+      <div
+        class="absolute left-0 top-full z-50 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-lg)]"
+        role="listbox"
       >
-        <span class="has-text-weight-bold">{valueDate.format("MMM YYYY")}</span>
-        <span class="icon">
-          <i class="fas fa-angle-down" aria-hidden="true"></i>
-        </span>
-      </button>
-    </div>
-    <div class="dropdown-menu" id="dropdown-menu2" role="menu">
-      <div class="dropdown-content p-0">
-        <div class="dropdown-item">
-          <div class="is-flex is-justify-content-space-between is-align-items-center py-0 my-0">
+        <div class="border-b border-[var(--paisa-border-subtle)] p-2">
+          <div class="flex items-center justify-between gap-2">
             <button
-              class="button is-small"
+              type="button"
+              class="paisa-month-nav"
               aria-label="Previous year"
               disabled={selectedYear - 1 < min.year()}
-              onclick={(_e) => selectedYear--}
+              onclick={() => selectedYear--}
             >
-              <span class="icon">
-                <i class="fas fa-chevron-left"></i>
-              </span>
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>
             </button>
-            <div class="select">
-              <select
-                class="has-text-weight-bold"
-                aria-label="Select year"
-                value={selectedYear}
-                onchange={(e) => selectYear(e)}
-              >
-                {#each allowedYears as year}
-                  <option value={year}>{year}</option>
-                {/each}
-              </select>
-            </div>
+            <select
+              class="paisa-month-year-select"
+              aria-label="Select year"
+              value={selectedYear}
+              onchange={(e) => selectYear(e)}
+            >
+              {#each allowedYears as year}
+                <option value={year}>{year}</option>
+              {/each}
+            </select>
             <button
-              class="button is-small"
+              type="button"
+              class="paisa-month-nav"
               aria-label="Next year"
               disabled={selectedYear + 1 > max.year()}
-              onclick={(_e) => selectedYear++}
+              onclick={() => selectedYear++}
             >
-              <span class="icon">
-                <i class="fas fa-chevron-right"></i>
-              </span>
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
         </div>
-        <hr class="dropdown-divider m-0" />
-        <div class="dropdown-item">
-          <div class="months is-flex is-flex-wrap-wrap is-justify-content-space-between">
-            {#each MONTHS as month, i}
-              <div class="month is-size-6 py-2">
-                {#if isAllowed(dayjs(`${selectedYear}-${i + 1}`, "YYYY-M"), min, max)}
-                  <button
-                    type="button"
-                    class="button is-ghost p-0 {valueDate.year() == selectedYear && valueDate.month() == i
-                      ? 'is-link has-text-weight-bold'
-                      : 'has-text-black-ter'}"
-                    onclick={(_e) => selectMonth(i)}>{month}</button
-                  >
-                {:else}
-                  <span class="has-text-grey-light">{month}</span>
-                {/if}
-              </div>
-            {/each}
-          </div>
+        <div class="grid grid-cols-3 gap-1 p-2">
+          {#each MONTHS as month, i}
+            {#if isAllowed(dayjs(`${selectedYear}-${i + 1}`, "YYYY-M"), min, max)}
+              <button
+                type="button"
+                class="rounded-[var(--paisa-radius-sm)] px-2 py-2 text-sm transition-colors hover:bg-[var(--paisa-surface-hover)] {valueDate.year() == selectedYear && valueDate.month() == i ? 'bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'text-[var(--paisa-foreground)]'}"
+                onclick={() => selectMonth(i)}
+              >{month}</button>
+            {:else}
+              <span class="px-2 py-2 text-center text-sm text-[var(--paisa-muted-foreground)] opacity-50">{month}</span>
+            {/if}
+          {/each}
         </div>
       </div>
-    </div>
+    {/if}
   </div>
+
   <button
-    class="button is-small border-right"
+    type="button"
+    class="paisa-month-nav border-l border-[var(--paisa-border-subtle)]"
     aria-label="Next month"
     disabled={!isAllowed(valueDate.add(1, "month"), min, max)}
-    onclick={(_e) => select(valueDate.add(1, "month"))}
+    onclick={() => select(valueDate.add(1, "month"))}
   >
-    <span class="icon">
-      <i class="fas fa-chevron-right"></i>
-    </span>
+    <i class="fas fa-chevron-right" aria-hidden="true"></i>
   </button>
 </div>
 
-<style lang="scss">
-  .button,
-  .select select {
-    border: none;
-    box-shadow: none;
+<style>
+  .paisa-month-nav,
+  .paisa-month-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    height: 2rem;
+    min-width: 2rem;
+    padding: 0 0.5rem;
+    border: 0;
+    background: var(--paisa-surface);
+    color: var(--paisa-foreground);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
 
-    &:hover,
-    &:focus {
-      border: none;
-      box-shadow: none;
-      outline: none;
-    }
+  .paisa-month-nav:hover:not(:disabled),
+  .paisa-month-trigger:hover {
+    background: var(--paisa-surface-hover);
+  }
+
+  .paisa-month-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .paisa-month-trigger {
+    min-width: 7.5rem;
+    padding: 0 0.75rem;
+  }
+
+  .paisa-month-year-select {
+    appearance: none;
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-sm);
+    background: var(--paisa-surface);
+    color: var(--paisa-foreground);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
   }
 </style>

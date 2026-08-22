@@ -53,7 +53,7 @@
 <Select
   --list-z-index="5"
   multiple
-  class="is-small is-expandable custom-icon"
+  class="paisa-select-expandable custom-icon"
   items={allAccountItems}
   value={accountItems}
   showChevron={true}
@@ -72,3 +72,10 @@
     {iconify(item.label)}
   </div>
 </Select>
+
+<style>
+  :global(.paisa-select-expandable) {
+    --max-height: 200px;
+  }
+</style>
+

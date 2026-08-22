@@ -34,9 +34,9 @@
     </div>
   </div>
 
-  <div class="paisa-bulk-edit-controls field is-grouped">
+  <div class="paisa-bulk-edit-controls flex flex-wrap items-end gap-3">
     <!-- Operation Pill -->
-    <div class="paisa-control-item field">
+    <div class="paisa-control-item">
       <span class="paisa-control-label">Operation</span>
       <div class="paisa-op-badge">
         <i class="fa-solid fa-arrows-rotate text-[var(--paisa-primary)] mr-1.5 text-xs"></i>
@@ -92,7 +92,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-bulk-edit-card {
     background-color: var(--paisa-surface-raised);
     border: 1px solid var(--paisa-border);
@@ -183,29 +183,20 @@
 
   .paisa-svelte-select-wrap {
     :global(.svelte-select) {
-      min-height: 2.25rem !important;
-      height: 2.25rem !important;
-      background: var(--paisa-surface) !important;
-      border: 1px solid var(--paisa-border) !important;
-      border-radius: var(--paisa-radius-md, 0.375rem) !important;
-      color: var(--paisa-foreground) !important;
-      font-size: 0.8125rem !important;
-    }
-
-    :global(.svelte-select-list) {
-      background: var(--paisa-surface) !important;
-      border: 1px solid var(--paisa-border) !important;
-      color: var(--paisa-foreground) !important;
-      box-shadow: var(--paisa-shadow-lg) !important;
-    }
-
-    :global(.svelte-select .item) {
-      color: var(--paisa-foreground) !important;
-      font-size: 0.8125rem !important;
-    }
-
-    :global(.svelte-select .item.hover) {
-      background: var(--paisa-surface-hover) !important;
+      --height: 2.25rem;
+      --max-height: 2.25rem;
+      --background: var(--paisa-surface);
+      --border: 1px solid var(--paisa-border);
+      --border-radius: var(--paisa-radius-md, 0.375rem);
+      --font-size: 0.8125rem;
+      --item-color: var(--paisa-foreground);
+      --input-color: var(--paisa-foreground);
+      --selected-item-color: var(--paisa-foreground);
+      --list-background: var(--paisa-surface);
+      --list-border: 1px solid var(--paisa-border);
+      --list-shadow: var(--paisa-shadow-lg);
+      --item-hover-bg: var(--paisa-surface-hover);
+      --item-hover-color: var(--paisa-foreground);
     }
   }
 

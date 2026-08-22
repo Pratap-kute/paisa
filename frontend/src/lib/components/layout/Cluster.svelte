@@ -44,30 +44,30 @@
   };
 
   const alignClasses: Record<AlignOption, string> = {
-    start: "is-align-items-flex-start",
-    center: "is-align-items-center",
-    end: "is-align-items-flex-end",
-    baseline: "is-align-items-baseline",
+    start: "items-start",
+    center: "items-center",
+    end: "items-end",
+    baseline: "items-baseline",
   };
 
   const justifyClasses: Record<JustifyOption, string> = {
-    start: "is-justify-content-flex-start",
-    center: "is-justify-content-center",
-    end: "is-justify-content-flex-end",
-    "space-between": "is-justify-content-space-between",
-    "space-around": "is-justify-content-space-around",
+    start: "justify-start",
+    center: "justify-center",
+    end: "justify-end",
+    "space-between": "justify-between",
+    "space-around": "justify-around",
   };
 </script>
 
 <div
-  class="paisa-cluster {wrap ? 'is-flex-wrap-wrap' : 'is-flex-wrap-nowrap'} {gapClasses[gap] || 'gap-2'} {alignClasses[align]} {justifyClasses[justify]} {className}"
+  class="paisa-cluster {wrap ? 'flex-wrap' : 'flex-nowrap'} {gapClasses[gap] || 'gap-2'} {alignClasses[align]} {justifyClasses[justify]} {className}"
   {style}
   {...restProps}
 >
   {@render children?.()}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-cluster {
     display: flex;
   }

@@ -18,9 +18,9 @@ export function change(p: Posting): Change {
     if (p.quantity > 0 && days > 0) {
       changeAmount = p.market_amount - p.amount;
       if (changeAmount > 0) {
-        changeClass = "has-text-success";
+        changeClass = "paisa-text-success";
       } else if (changeAmount < 0) {
-        changeClass = "has-text-danger";
+        changeClass = "paisa-text-danger";
       }
       const perYear = 365 / days;
       changePercentage = (changeAmount / p.amount) * 100 * perYear;

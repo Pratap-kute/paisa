@@ -23,101 +23,93 @@
   }: Props = $props();
 
   const variantClasses: Record<BadgeVariant, string> = {
-    primary: "is-link is-light invertable paisa-badge-primary",
-    success: "is-success is-light paisa-badge-success",
-    warning: "is-warning is-light paisa-badge-warning",
-    danger: "is-danger is-light paisa-badge-danger",
-    info: "is-info is-light paisa-badge-info",
-    neutral: "is-light paisa-badge-neutral",
+    primary: "paisa-badge-primary",
+    success: "paisa-badge-success",
+    warning: "paisa-badge-warning",
+    danger: "paisa-badge-danger",
+    info: "paisa-badge-info",
+    neutral: "paisa-badge-neutral",
   };
 
   const sizeClasses: Record<BadgeSize, string> = {
-    sm: "is-small paisa-badge-sm",
-    md: "is-normal paisa-badge-md",
-    lg: "is-medium paisa-badge-lg",
+    sm: "paisa-badge-sm",
+    md: "paisa-badge-md",
+    lg: "paisa-badge-lg",
   };
 </script>
 
 <span
-  class="tag paisa-badge {variantClasses[variant]} {sizeClasses[size]} {rounded ? 'is-rounded' : ''} {className}"
+  class="paisa-badge {variantClasses[variant]} {sizeClasses[size]} {rounded ? 'paisa-badge-rounded' : ''} {className}"
 >
   {#if dot}
-    <span
-      class="paisa-badge-dot mr-1"
-      class:dot-success={variant === "success"}
-      class:dot-danger={variant === "danger"}
-      class:dot-warning={variant === "warning"}
-      class:dot-primary={variant === "primary"}
-      class:dot-info={variant === "info"}
-    ></span>
+    <span class="paisa-badge-dot paisa-badge-dot-{variant}"></span>
   {/if}
   {@render children?.()}
 </span>
 
-<style lang="scss">
+<style>
   .paisa-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--paisa-font-sans);
-    font-weight: var(--paisa-font-weight-medium);
-    border-radius: var(--paisa-radius-sm);
+    gap: 0.25rem;
+    font-family: var(--paisa-font-ui, inherit);
+    font-weight: 500;
+    border-radius: var(--paisa-radius-sm, 4px);
     line-height: 1;
     white-space: nowrap;
-
-    &.is-rounded {
-      border-radius: var(--paisa-radius-full);
-    }
   }
 
-  /* Sizes */
+  .paisa-badge-rounded {
+    border-radius: var(--paisa-radius-full, 9999px);
+  }
+
   .paisa-badge-sm {
-    font-size: var(--paisa-font-size-xs);
+    font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
-    height: 1.35rem;
+    min-height: 1.35rem;
   }
 
   .paisa-badge-md {
-    font-size: var(--paisa-font-size-sm);
+    font-size: 0.875rem;
     padding: 0.25rem 0.625rem;
-    height: 1.6rem;
+    min-height: 1.6rem;
   }
 
   .paisa-badge-lg {
-    font-size: var(--paisa-font-size-base);
+    font-size: 1rem;
     padding: 0.35rem 0.75rem;
-    height: 2rem;
+    min-height: 2rem;
   }
 
-  /* Variants */
   .paisa-badge-primary {
-    background-color: var(--paisa-brand-primary-light);
-    color: var(--paisa-brand-primary);
+    background-color: var(--paisa-primary-subtle);
+    color: var(--paisa-primary);
   }
 
   .paisa-badge-success {
-    background-color: var(--paisa-success-light);
-    color: var(--paisa-success);
+    background-color: var(--paisa-positive-subtle);
+    color: var(--paisa-positive);
   }
 
   .paisa-badge-warning {
-    background-color: var(--paisa-warning-light);
+    background-color: var(--paisa-warning-subtle);
     color: var(--paisa-warning);
   }
 
   .paisa-badge-danger {
-    background-color: var(--paisa-danger-light);
-    color: var(--paisa-danger);
+    background-color: var(--paisa-negative-subtle);
+    color: var(--paisa-negative);
   }
 
   .paisa-badge-info {
-    background-color: var(--paisa-info-light);
-    color: var(--paisa-info);
+    background-color: var(--paisa-primary-subtle);
+    color: var(--paisa-primary);
   }
 
   .paisa-badge-neutral {
     background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-secondary);
+    color: var(--paisa-muted-foreground);
   }
 
   .paisa-badge-dot {
@@ -126,11 +118,25 @@
     height: 6px;
     border-radius: 50%;
     background-color: currentColor;
+  }
 
-    &.dot-primary { background-color: var(--paisa-brand-primary); }
-    &.dot-success { background-color: var(--paisa-success); }
-    &.dot-warning { background-color: var(--paisa-warning); }
-    &.dot-danger { background-color: var(--paisa-danger); }
-    &.dot-info { background-color: var(--paisa-info); }
+  .paisa-badge-dot-primary {
+    background-color: var(--paisa-primary);
+  }
+
+  .paisa-badge-dot-success {
+    background-color: var(--paisa-positive);
+  }
+
+  .paisa-badge-dot-warning {
+    background-color: var(--paisa-warning);
+  }
+
+  .paisa-badge-dot-danger {
+    background-color: var(--paisa-negative);
+  }
+
+  .paisa-badge-dot-info {
+    background-color: var(--paisa-primary);
   }
 </style>

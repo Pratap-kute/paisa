@@ -61,7 +61,7 @@ export function renderYearlySpends(
         _.map(d.breakdown, (value, month) => {
           return [month, [
             formatCurrency(value),
-            "has-text-right has-text-weight-bold",
+            "paisa-text-right paisa-text-bold",
           ]];
         }),
         { total: formatCurrency(d.value), header: d.year },

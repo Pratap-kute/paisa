@@ -112,12 +112,16 @@
   </div>
 </Card>
 
-<style lang="scss">
-  :global(.box.paisa-card.credit-card) {
+<style>
+  :global(.paisa-card.credit-card) {
     aspect-ratio: 3.375 / 2.125;
     max-width: 25rem;
     min-width: 19rem;
     width: 100%;
+    flex: 1;
+    border-radius: var(--paisa-radius-lg, 0.7rem);
+    border: 1px solid var(--paisa-border-subtle);
+    box-shadow: var(--paisa-shadow-md);
     background: linear-gradient(
       345deg,
       var(--paisa-surface-bg) 0%,
@@ -129,6 +133,22 @@
       var(--paisa-border-strong) calc(95% + 1px),
       var(--paisa-border-strong) 100%
     );
-    box-shadow: var(--paisa-shadow-md);
+  }
+
+  .credit-card-chip {
+    margin: 2.25rem 0 0 1rem;
+  }
+
+  .credit-card-valid-thru {
+    font-size: 0.5rem;
+    line-height: 1;
+  }
+
+  .chip {
+    color: var(--paisa-warning);
+  }
+
+  .nfc {
+    color: var(--paisa-text-primary);
   }
 </style>

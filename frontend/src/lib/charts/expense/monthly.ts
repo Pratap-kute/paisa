@@ -65,8 +65,8 @@ export function renderCalendar(
       es.map((p) => {
         return [
           [iconify(restName(p.account), { group: firstName(p.account) })],
-          [p.payee, "is-clipped"],
-          [formatCurrency(p.amount), "has-text-weight-bold has-text-right"],
+          [p.payee, "paisa-truncate"],
+          [formatCurrency(p.amount), "paisa-text-bold paisa-text-right"],
         ];
       }),
       {
@@ -287,7 +287,7 @@ export function renderMonthlyExpensesTimeline(
             return [
               [
                 iconify(key, { group: "Expenses" }),
-                [formatCurrency(total), "has-text-weight-bold has-text-right"],
+                [formatCurrency(total), "paisa-text-bold paisa-text-right"],
               ],
             ];
           }
@@ -580,8 +580,8 @@ export function createCurrentExpensesBreakdown(
         d.postings.map((p) => {
           return [
             p.date.format("DD MMM YYYY"),
-            [p.payee, "is-clipped"],
-            [formatCurrency(p.amount), "has-text-weight-bold has-text-right"],
+            [p.payee, "paisa-truncate"],
+            [formatCurrency(p.amount), "paisa-text-bold paisa-text-right"],
           ];
         }),
         {
@@ -624,7 +624,7 @@ export function createCurrentExpensesBreakdown(
       .style("font-size", narrow ? "0.75rem" : "0.875rem")
       .style("font-weight", "600")
       .style("fill", "var(--paisa-chart-text)")
-      .attr("class", "is-family-monospace")
+      .attr("class", "paisa-font-mono")
       .text(rightLabel);
   }
 

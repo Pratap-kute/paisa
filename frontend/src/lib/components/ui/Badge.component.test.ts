@@ -7,16 +7,16 @@ test("renders badge variant classes properly", () => {
     variant: "success",
     rounded: true,
   });
-  const span = container.querySelector(".tag");
-  expect(span).toHaveClass("is-success");
-  expect(span).toHaveClass("is-rounded");
+  const span = container.querySelector(".paisa-badge");
+  expect(span).toHaveClass("paisa-badge-success");
+  expect(span).toHaveClass("paisa-badge-rounded");
   unmount();
 
   const warning = render(Badge, {
     variant: "warning",
     dot: true,
   });
-  expect(warning.container.querySelector(".tag")).toHaveClass("is-warning");
+  expect(warning.container.querySelector(".paisa-badge")).toHaveClass("paisa-badge-warning");
   expect(warning.container.querySelector(".paisa-badge-dot"))
     .toBeInTheDocument();
 });

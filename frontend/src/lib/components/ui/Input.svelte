@@ -51,7 +51,7 @@
   };
 </script>
 
-<div class="control paisa-input-wrapper {prefixIcon ? 'has-icons-left' : ''} {suffixIcon ? 'has-icons-right' : ''}">
+<div class="paisa-input-wrapper {prefixIcon ? 'paisa-input-has-prefix' : ''} {suffixIcon ? 'paisa-input-has-suffix' : ''}">
   <input
     {id}
     {name}
@@ -61,7 +61,7 @@
     {disabled}
     {readonly}
     {required}
-    class="input paisa-input {sizeClasses[size]} {className}"
+    class="paisa-input {sizeClasses[size]} {className}"
     {oninput}
     {onchange}
     {onkeydown}
@@ -69,68 +69,99 @@
     {onblur}
   />
   {#if prefixIcon}
-    <span class="icon is-small is-left">
+    <span class="paisa-input-affix paisa-input-affix-prefix">
       {@render prefixIcon()}
     </span>
   {/if}
   {#if suffixIcon}
-    <span class="icon is-small is-right">
+    <span class="paisa-input-affix paisa-input-affix-suffix">
       {@render suffixIcon()}
     </span>
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-input-wrapper {
+    position: relative;
     width: 100%;
   }
 
   .paisa-input {
     width: 100%;
-    font-family: var(--paisa-font-sans);
-    background-color: var(--paisa-input-bg);
-    border: 1px solid var(--paisa-input-border);
-    border-radius: var(--paisa-radius-md);
-    color: var(--paisa-input-text);
+    margin: 0;
+    box-sizing: border-box;
+    appearance: none;
+    font: inherit;
+    background-color: var(--paisa-surface);
+    border: 1px solid var(--paisa-border-strong);
+    border-radius: var(--paisa-radius-md, 6px);
+    color: var(--paisa-foreground);
     box-shadow: none;
-    transition: border-color var(--paisa-transition-fast), box-shadow var(--paisa-transition-fast);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
 
-    &::placeholder {
-      color: var(--paisa-input-placeholder);
-    }
+  .paisa-input::placeholder {
+    color: var(--paisa-muted-foreground);
+  }
 
-    &:hover:not(:disabled) {
-      border-color: var(--paisa-input-border-hover);
-    }
+  .paisa-input:hover:not(:disabled) {
+    border-color: var(--paisa-border);
+  }
 
-    &:focus {
-      border-color: var(--paisa-input-border-focus);
-      box-shadow: var(--paisa-focus-ring);
-      outline: none;
-    }
+  .paisa-input:focus {
+    border-color: var(--paisa-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--paisa-primary) 25%, transparent);
+    outline: none;
+  }
 
-    &:disabled {
-      background-color: var(--paisa-input-disabled-bg);
-      color: var(--paisa-input-disabled-text);
-      cursor: not-allowed;
-    }
+  .paisa-input:disabled {
+    background-color: var(--paisa-surface-raised);
+    color: var(--paisa-muted-foreground);
+    cursor: not-allowed;
   }
 
   .paisa-input-sm {
     height: 32px;
-    font-size: var(--paisa-font-size-sm);
-    padding: 0 var(--paisa-space-3);
+    font-size: 0.875rem;
+    padding: 0 0.75rem;
   }
 
   .paisa-input-md {
     height: 36px;
-    font-size: var(--paisa-font-size-sm);
-    padding: 0 var(--paisa-space-4);
+    font-size: 0.875rem;
+    padding: 0 1rem;
   }
 
   .paisa-input-lg {
     height: 40px;
-    font-size: var(--paisa-font-size-base);
-    padding: 0 var(--paisa-space-5);
+    font-size: 1rem;
+    padding: 0 1.25rem;
+  }
+
+  .paisa-input-has-prefix .paisa-input {
+    padding-left: 2.25rem;
+  }
+
+  .paisa-input-has-suffix .paisa-input {
+    padding-right: 2.25rem;
+  }
+
+  .paisa-input-affix {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    color: var(--paisa-muted-foreground);
+    pointer-events: none;
+    font-size: 0.875rem;
+  }
+
+  .paisa-input-affix-prefix {
+    left: 0.75rem;
+  }
+
+  .paisa-input-affix-suffix {
+    right: 0.75rem;
   }
 </style>

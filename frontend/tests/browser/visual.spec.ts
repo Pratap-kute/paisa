@@ -1,7 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  chartSnapshotVariants,
   chartSnapshots,
+  chartSnapshotVariants,
   visualRoutes,
 } from "./routes.ts";
 
@@ -105,6 +105,19 @@ for (const route of visualRoutes) {
             body: JSON.stringify(mockLogs),
           }));
       }
+      if (route.name === "ledger-price") {
+        await page.route("**/api/price", async (apiRoute) => {
+          if (new URL(apiRoute.request().url()).pathname === "/api/price") {
+            await apiRoute.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({ prices: {} }),
+            });
+            return;
+          }
+          await apiRoute.continue();
+        });
+      }
 
       await page.goto(route.path);
       await page.waitForLoadState("networkidle");
@@ -114,11 +127,19 @@ for (const route of visualRoutes) {
         await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
       }
       if (route.name === "savings-goal" || route.name === "retirement-goal") {
-        await expect(page.locator(".paisa-goal-detail-main svg").nth(0).locator("g").first())
+        await expect(
+          page.locator(".paisa-goal-detail-main svg").nth(0).locator("g")
+            .first(),
+        )
           .toBeVisible({ timeout: 15_000 });
-        await expect(page.locator(".paisa-goal-detail-main svg").nth(1).locator("g").first())
+        await expect(
+          page.locator(".paisa-goal-detail-main svg").nth(1).locator("g")
+            .first(),
+        )
           .toBeVisible({ timeout: 15_000 });
-        await expect(page.locator(".paisa-goal-detail-side .paisa-posting-row").first())
+        await expect(
+          page.locator(".paisa-goal-detail-side .paisa-posting-row").first(),
+        )
           .toBeVisible();
       }
       await page.evaluate("document.fonts.ready");
@@ -137,7 +158,7 @@ for (const chart of chartSnapshots) {
       await applyVariant(page, variant);
       await page.goto(chart.path);
       await page.waitForLoadState("networkidle");
-      if ("readyText" in chart && chart.readyText) {
+      if ("readyText" in chart && typeof chart.readyText === "string") {
         await expect(page.getByText(chart.readyText, { exact: true }))
           .toBeVisible();
       }

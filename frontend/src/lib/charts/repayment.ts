@@ -132,7 +132,7 @@ export function renderMonthlyRepaymentTimeline(postings: Posting[]): Legend[] {
         _.sortBy(
           postings.map((p) => [
             _.drop(p.account.split(":")).join(":"),
-            [formatCurrency(p.amount), "has-text-weight-bold has-text-right"],
+            [formatCurrency(p.amount), "paisa-text-bold paisa-text-right"],
           ]),
           (r) => r[0],
         ),

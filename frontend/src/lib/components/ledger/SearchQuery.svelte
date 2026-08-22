@@ -22,10 +22,15 @@
   <div class="paisa-search-query-icon">
     <i class="fa-solid fa-magnifying-glass text-xs"></i>
   </div>
-  <div class="search-query-editor paisa-search-query-input" bind:this={editorDom}></div>
+  <div
+    class="search-query-editor"
+    bind:this={editorDom}
+    role="searchbox"
+    aria-label="Filter query"
+  ></div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-search-query-container {
     position: relative;
     display: flex;
@@ -54,19 +59,5 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-  }
-
-  .paisa-search-query-input {
-    flex: 1 1 auto;
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 0.25rem 0.5rem !important;
-    min-height: 2.25rem;
-    display: flex;
-    align-items: center;
-    overflow-x: auto;
   }
 </style>

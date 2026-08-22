@@ -31,7 +31,7 @@ test("filters counts from the review bar", () => {
   });
   expect(container.textContent).toContain("High 2");
   expect(container.textContent).toContain("Unknown 4");
-  const buttons = container.querySelectorAll("button.tag");
+  const buttons = container.querySelectorAll("button.paisa-review-chip");
   (buttons[0] as HTMLButtonElement).click();
   expect(onFilter).toHaveBeenCalledWith("HIGH");
 });
