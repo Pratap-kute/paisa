@@ -3,7 +3,11 @@ import { expect, type Page, test } from "@playwright/test";
 const routes = [
   { name: "dashboard", path: "/", readyText: "Net worth" },
   { name: "expense-monthly", path: "/expense/monthly" },
-  { name: "transactions", path: "/ledger/transaction", readyText: "Transactions" },
+  {
+    name: "transactions",
+    path: "/ledger/transaction",
+    readyText: "Transactions",
+  },
   { name: "ledger-import", path: "/ledger/import" },
   { name: "config", path: "/more/config" },
   { name: "ledger-editor", path: "/ledger/editor" },
@@ -34,6 +38,10 @@ for (const route of routes) {
 }
 
 test("/dev/ui is not available in preview production mode", async ({ page }) => {
+  test.skip(
+    process.env.PAISA_E2E_DEV_UI === "1",
+    "E2E preview builds enable /dev/ui for component smoke tests",
+  );
   await page.goto("/dev/ui");
   await expect(page.getByRole("heading", { name: "Paisa UI Lab" })).toHaveCount(
     0,

@@ -828,7 +828,7 @@
                 variant="primary"
                 size="sm"
                 title="Save to Ledger File"
-                ariaLabel="Save"
+                ariaLabel="Save to Ledger"
                 class="save"
                 disabled={_.isEmpty(preview)}
                 onclick={openSaveModal}

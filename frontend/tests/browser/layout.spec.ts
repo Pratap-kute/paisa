@@ -2,6 +2,7 @@
 
 import { expect, type Page, test } from "@playwright/test";
 import { overflowRoutes } from "./routes.ts";
+import { assertNavigationVisible } from "./navigation.ts";
 
 const knownHorizontalScrollers = [
   ".paisa-overflow-x-auto",
@@ -30,19 +31,12 @@ async function assertNoPageOverflow(page: Page) {
   ).toBeLessThanOrEqual(1);
 }
 
-async function assertNavigationVisible(page: Page) {
-  const mobileMenu = page.getByRole("button", { name: "Open navigation menu" });
-  if (await mobileMenu.isVisible()) {
-    await expect(mobileMenu).toBeVisible();
-    return;
-  }
-  await expect(page.locator('aside nav[aria-label="main navigation"]')).toBeVisible();
-}
-
 test.describe("layout invariants", () => {
   test.describe.configure({ timeout: 90_000 });
   test.beforeAll(async ({ request }) => {
-    const response = await request.post("/api/sync", { data: { journal: true } });
+    const response = await request.post("/api/sync", {
+      data: { journal: true },
+    });
     expect(response.ok()).toBeTruthy();
   });
 
@@ -70,10 +64,21 @@ test.describe("layout invariants", () => {
       test(`${route.name} does not overflow at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         if (route.path === "/ledger/price") {
-          await Promise.all([
-            page.waitForResponse((response) => response.url().endsWith("/api/price")),
-            page.goto(route.path),
-          ]);
+          await page.route("**/api/price", async (apiRoute) => {
+            if (new URL(apiRoute.request().url()).pathname === "/api/price") {
+              await apiRoute.fulfill({
+                status: 200,
+                contentType: "application/json",
+                body: JSON.stringify({ prices: {} }),
+              });
+              return;
+            }
+            await apiRoute.continue();
+          });
+          await page.goto(route.path);
+          await expect(page.getByRole("heading", { name: "Commodity Prices" }))
+            .toBeVisible();
+          await expect(page.getByText(/commodity\(ies\)/)).toBeVisible();
         } else {
           await page.goto(route.path);
         }
@@ -88,8 +93,11 @@ test.describe("layout invariants", () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       await assertNavigationVisible(page);
-      await page.locator('aside').getByRole("button", { name: "Cash Flow" }).click();
-      await expect(page.locator('aside').getByRole("link", { name: "Monthly" }).first()).toBeVisible();
+      await page.locator("aside").getByRole("button", { name: "Cash Flow" })
+        .click();
+      await expect(
+        page.locator("aside").getByRole("link", { name: "Monthly" }).first(),
+      ).toBeVisible();
     });
   }
 
@@ -106,7 +114,9 @@ test.describe("layout invariants", () => {
       });
     });
     await page.goto("/");
-    const row = page.locator("div.grid").filter({ has: page.getByRole("link", { name: "Recent Activity" }) });
+    const row = page.locator("div.grid").filter({
+      has: page.getByRole("link", { name: "Recent Activity" }),
+    });
     await expect(row).toBeVisible();
     await expect(row.locator(":scope > *")).toHaveCount(1);
   });
@@ -124,7 +134,9 @@ test.describe("layout invariants", () => {
       });
     });
     await page.goto("/");
-    const row = page.locator("div.grid").filter({ has: page.getByRole("link", { name: "Upcoming / Recurring" }) });
+    const row = page.locator("div.grid").filter({
+      has: page.getByRole("link", { name: "Upcoming / Recurring" }),
+    });
     await expect(row).toBeVisible();
     await expect(row.locator(":scope > *")).toHaveCount(1);
   });
