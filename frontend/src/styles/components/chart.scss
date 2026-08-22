@@ -158,6 +158,10 @@ svg text,
     gap: 0.35rem;
     text-align: center;
 
+    @media screen and (max-width: 480px) {
+      gap: 0.2rem;
+    }
+
     .date {
       display: flex;
       flex-direction: column;
@@ -172,6 +176,11 @@ svg text,
       gap: 0.15rem;
       transition: background-color var(--paisa-transition-fast), border-color
         var(--paisa-transition-fast);
+
+      @media screen and (max-width: 480px) {
+        min-height: 52px;
+        padding: 0.2rem 0.0625rem 0.15rem;
+      }
 
       &:hover {
         background-color: var(--paisa-surface-hover);

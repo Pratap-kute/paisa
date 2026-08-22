@@ -1,7 +1,6 @@
 // deno-lint-ignore-file no-explicit-any -- D3 stack and arc callback datum types are augmented at runtime.
 import * as d3 from "d3";
 import type { Dayjs } from "dayjs";
-import chroma from "chroma-js";
 import _ from "lodash";
 import {
   firstName,
@@ -138,7 +137,7 @@ export function renderCalendar(
     .attr("y", 0)
     .style("font-size", "0.75rem")
     .style("font-weight", "500")
-    .style("fill", "var(--paisa-text-primary)")
+    .style("fill", "var(--paisa-chart-text)")
     .text((d) => d.date().toString());
 
   // Total amount below donut
@@ -493,13 +492,18 @@ export function createCurrentExpensesBreakdown(
   let postings: Posting[] = [];
   let size: Dimensions = { width: 0, height: 0 };
 
-  function breakdownMargins(containerWidth: number) {
+  function breakdownMargins(containerWidth: number, keys: string[]) {
     const narrow = containerWidth < 480;
+    const longest = _.maxBy(keys, (k) => k.length)?.length ?? 0;
+    const left = Math.max(
+      rem(narrow ? 72 : 96),
+      rem(Math.ceil(longest * (narrow ? 6.5 : 7.5)) + (narrow ? 16 : 20)),
+    );
     return {
       top: 0,
-      right: rem(narrow ? 116 : 160),
+      right: rem(narrow ? 108 : 132),
       bottom: rem(20),
-      left: rem(narrow ? 56 : 100),
+      left,
     };
   }
 
@@ -510,16 +514,8 @@ export function createCurrentExpensesBreakdown(
     const svg = d3.select(id);
     svg.selectAll("*").remove();
 
-    const margin = breakdownMargins(
-      size.width || el.parentElement.clientWidth,
-    );
-    const { width, containerWidth } = plotSize(el, margin, size, {
-      minWidth: rem(80),
-    });
-    const g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
+    const containerW = size.width || el.parentElement.clientWidth;
+    const narrow = containerW < 480;
 
     interface Point {
       category: string;
@@ -532,6 +528,15 @@ export function createCurrentExpensesBreakdown(
       .sortBy((c) => c.total)
       .map((c) => c.category)
       .value();
+
+    const margin = breakdownMargins(containerW, keys);
+    const { width, containerWidth } = plotSize(el, margin, size, {
+      minWidth: rem(80),
+    });
+    const g = svg.append("g").attr(
+      "transform",
+      "translate(" + margin.left + "," + margin.top + ")",
+    );
 
     const points = _.values(categories);
     const total = _.sumBy(points, (p) => p.total);
@@ -616,9 +621,9 @@ export function createCurrentExpensesBreakdown(
       .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
       .attr("x", width + LABEL_GAP)
       .style("white-space", "pre")
-      .style("font-size", "0.928rem")
-      .style("font-weight", "bold")
-      .style("fill", (d) => chroma(z(d.category)).darken(0.8).hex())
+      .style("font-size", narrow ? "0.75rem" : "0.875rem")
+      .style("font-weight", "600")
+      .style("fill", "var(--paisa-chart-text)")
       .attr("class", "is-family-monospace")
       .text(rightLabel);
   }
