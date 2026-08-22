@@ -50,3 +50,32 @@ export function readPaisaChartTheme(): PaisaChartTheme {
 }
 
 export const readEChartTokenTheme = readPaisaChartTheme;
+
+export function normalizeCategoryKey(key?: string): string {
+  const normalized = key?.normalize("NFKC").trim().toLowerCase();
+  return normalized || "uncategorized";
+}
+
+export function categorySeriesIndex(
+  key: string | undefined,
+  colorCount: number,
+): number {
+  if (colorCount <= 0) return 0;
+
+  let hash = 2166136261;
+  for (const character of normalizeCategoryKey(key)) {
+    hash ^= character.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0) % colorCount;
+}
+
+export function categorySeriesColor(
+  key: string | undefined,
+  colors: readonly string[],
+  fallback = "currentColor",
+): string {
+  if (colors.length === 0) return fallback;
+  return colors[categorySeriesIndex(key, colors.length)] ?? fallback;
+}

@@ -6,6 +6,8 @@ import {
   buildExpenseBreakdownComparison,
   buildGainOverviewComparison,
 } from "$lib/charts/bar_comparison_data";
+import { buildComparisonBarOption } from "$lib/charts/echarts/bar_comparison";
+import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
 import type { AllocationTarget, Gain, Posting } from "$lib/core/utils";
 
 function posting(
@@ -36,9 +38,32 @@ describe("bar/comparison ECharts adapters", () => {
 
     expect(food?.value).toBe(150);
     expect(food?.secondaryValue).toBe(75);
+    expect(food?.categoryKey).toBe("Food");
     expect(food?.color).toBe("color-Food");
     expect(travel?.value).toBe(50);
     expect(data.points.reduce((sum, point) => sum + point.value, 0)).toBe(200);
+  });
+
+  it("uses deterministic category colors while preserving explicit semantic colors", () => {
+    const data = buildExpenseBreakdownComparison([
+      posting("Expenses:Food:Groceries", 100),
+      posting("Expenses:Travel:Taxi", 50),
+    ]);
+    data.sort = "input";
+    data.points[0].color = "semantic-override";
+
+    const theme = {
+      primaryColor: "primary",
+      seriesColors: ["series-1", "series-2", "series-3", "series-4"],
+    } as PaisaChartTheme;
+    const option = buildComparisonBarOption(data, { theme }) as {
+      series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
+    };
+
+    expect(option.series[0].data[0].itemStyle.color).toBe("semantic-override");
+    expect(theme.seriesColors).toContain(
+      option.series[0].data[1].itemStyle.color,
+    );
   });
 
   it("preserves yearly credit-card totals and month breakdowns", () => {

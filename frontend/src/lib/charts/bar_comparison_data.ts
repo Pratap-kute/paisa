@@ -2,8 +2,8 @@ import _ from "lodash";
 import COLORS, { generateColorScheme } from "$lib/core/colors";
 import { iconify } from "$lib/core/icon";
 import {
-  financialYear,
   type AllocationTarget,
+  financialYear,
   type Gain,
   type Posting,
   restName,
@@ -20,8 +20,6 @@ export function buildExpenseBreakdownComparison(
 ): ComparisonBarChartData {
   const categories = byExpenseGroup(postings);
   const total = _.sumBy(_.values(categories), (point) => point.total);
-  const color = options.color ?? ((category: string) => generateColorScheme([category])(category));
-
   return {
     valueFormat: "currency",
     valueLabel: "Expenses",
@@ -37,11 +35,12 @@ export function buildExpenseBreakdownComparison(
         .value();
       return {
         key: point.category,
+        categoryKey: point.category,
         label: iconify(point.category, { group: "Expenses", suffix: true }),
         value: point.total,
         secondaryValue: total > 0 ? (point.total / total) * 100 : 0,
         secondaryLabel: "Share %",
-        color: color(point.category),
+        color: options.color?.(point.category),
         tooltipRows: [
           {
             label: "Total",
@@ -112,7 +111,9 @@ export function buildAllocationTargetComparison(
     valueLabel: "Current",
     targetLabel: "Target",
     sort: "input",
-    points: _.sortBy(allocationTargets, (target) => target.name).map((target) => ({
+    points: _.sortBy(allocationTargets, (target) => target.name).map((
+      target,
+    ) => ({
       key: target.name,
       label: target.name,
       value: target.current,
@@ -123,13 +124,19 @@ export function buildAllocationTargetComparison(
       tooltipRows: [
         { label: "Target", value: target.target, format: "number" },
         { label: "Current", value: target.current, format: "number" },
-        { label: "Diff", value: target.current - target.target, format: "number" },
+        {
+          label: "Diff",
+          value: target.current - target.target,
+          format: "number",
+        },
       ],
     })),
   };
 }
 
-export function buildGainOverviewComparison(gains: Gain[]): ComparisonBarChartData {
+export function buildGainOverviewComparison(
+  gains: Gain[],
+): ComparisonBarChartData {
   return {
     valueFormat: "currency",
     valueLabel: "Balance",
@@ -144,10 +151,22 @@ export function buildGainOverviewComparison(gains: Gain[]): ComparisonBarChartDa
         secondaryLabel: "XIRR",
         color: current.gainAmount >= 0 ? COLORS.gain : COLORS.loss,
         tooltipRows: [
-          { label: "Investment", value: current.investmentAmount, format: "currency" },
-          { label: "Withdrawal", value: current.withdrawalAmount, format: "currency" },
+          {
+            label: "Investment",
+            value: current.investmentAmount,
+            format: "currency",
+          },
+          {
+            label: "Withdrawal",
+            value: current.withdrawalAmount,
+            format: "currency",
+          },
           { label: "Gain", value: current.gainAmount, format: "currency" },
-          { label: "Balance", value: current.balanceAmount, format: "currency" },
+          {
+            label: "Balance",
+            value: current.balanceAmount,
+            format: "currency",
+          },
           { label: "XIRR", value: gain.xirr, format: "number" },
         ],
       };
@@ -161,7 +180,9 @@ export function buildYearlyExpenseTimelineComparisonInput(postings: Posting[]) {
     .mapValues((yearPostings) =>
       _.chain(yearPostings)
         .groupBy(expenseGroup)
-        .mapValues((groupPostings) => _.sumBy(groupPostings, (posting) => posting.amount))
+        .mapValues((groupPostings) =>
+          _.sumBy(groupPostings, (posting) => posting.amount)
+        )
         .value()
     )
     .value();

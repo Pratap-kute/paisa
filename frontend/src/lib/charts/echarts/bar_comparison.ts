@@ -1,7 +1,14 @@
 import { chartFormatters } from "$lib/charts/echarts/formatters";
-import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
+import {
+  categorySeriesColor,
+  type PaisaChartTheme,
+} from "$lib/charts/echarts/theme";
 
-export type ComparisonValueFormat = "currency" | "compactCurrency" | "number" | "percentage";
+export type ComparisonValueFormat =
+  | "currency"
+  | "compactCurrency"
+  | "number"
+  | "percentage";
 
 export interface ComparisonTooltipRow {
   label: string;
@@ -14,6 +21,7 @@ export interface ComparisonDatum {
   label: string;
   value: number;
   color?: string;
+  categoryKey?: string;
   target?: number;
   secondaryValue?: number;
   secondaryLabel?: string;
@@ -34,7 +42,10 @@ export interface ComparisonBarOptions {
   darkMode?: boolean;
 }
 
-function formatValue(value: number, format: ComparisonValueFormat = "currency") {
+function formatValue(
+  value: number,
+  format: ComparisonValueFormat = "currency",
+) {
   return chartFormatters[format](value);
 }
 
@@ -54,34 +65,34 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
   const point = orderedPoints(data)[dataIndex];
   if (!point) return "";
 
-  const rows = point.tooltipRows?.length
-    ? point.tooltipRows
-    : [
-      {
-        label: data.valueLabel ?? "Value",
-        value: point.value,
+  const rows = point.tooltipRows?.length ? point.tooltipRows : [
+    {
+      label: data.valueLabel ?? "Value",
+      value: point.value,
+      format: data.valueFormat,
+    },
+    ...(typeof point.target === "number"
+      ? [{
+        label: data.targetLabel ?? "Target",
+        value: point.target,
         format: data.valueFormat,
-      },
-      ...(typeof point.target === "number"
-        ? [{
-          label: data.targetLabel ?? "Target",
-          value: point.target,
-          format: data.valueFormat,
-        }]
-        : []),
-      ...(typeof point.secondaryValue === "number"
-        ? [{
-          label: point.secondaryLabel ?? "Difference",
-          value: point.secondaryValue,
-          format: data.valueFormat,
-        }]
-        : []),
-    ];
+      }]
+      : []),
+    ...(typeof point.secondaryValue === "number"
+      ? [{
+        label: point.secondaryLabel ?? "Difference",
+        value: point.secondaryValue,
+        format: data.valueFormat,
+      }]
+      : []),
+  ];
 
   return [
     `<strong>${point.label}</strong>`,
     ...rows.map((row) =>
-      `${row.label}: <strong>${formatValue(row.value, row.format ?? data.valueFormat)}</strong>`
+      `${row.label}: <strong>${
+        formatValue(row.value, row.format ?? data.valueFormat)
+      }</strong>`
     ),
   ].join("<br/>");
 }
@@ -121,7 +132,8 @@ export function buildComparisonBarOption(
       type: "value",
       axisLabel: {
         color: mutedColor,
-        formatter: (value: number) => formatValue(value, data.valueFormat ?? "compactCurrency"),
+        formatter: (value: number) =>
+          formatValue(value, data.valueFormat ?? "compactCurrency"),
       },
       splitLine: {
         lineStyle: {
@@ -138,7 +150,9 @@ export function buildComparisonBarOption(
         overflow: "truncate",
         width: mobile ? 72 : 118,
         formatter: (label: string) =>
-          label.length > maxLabelLength ? `${label.slice(0, maxLabelLength - 1)}...` : label,
+          label.length > maxLabelLength
+            ? `${label.slice(0, maxLabelLength - 1)}...`
+            : label,
       },
       axisTick: { alignWithLabel: true },
     },
@@ -153,7 +167,16 @@ export function buildComparisonBarOption(
         barMaxWidth: mobile ? 22 : 28,
         data: points.map((point) => ({
           value: point.value,
-          itemStyle: { color: point.color ?? defaultColor },
+          itemStyle: {
+            color: point.color ??
+              (point.categoryKey
+                ? categorySeriesColor(
+                  point.categoryKey,
+                  theme?.seriesColors ?? [],
+                  defaultColor,
+                )
+                : defaultColor),
+          },
         })),
         label: {
           show: !mobile,
@@ -162,9 +185,14 @@ export function buildComparisonBarOption(
           formatter: (params: { dataIndex: number }) => {
             const point = points[params.dataIndex];
             if (!point) return "";
-            const formatted = formatValue(point.value, data.valueFormat ?? "currency");
+            const formatted = formatValue(
+              point.value,
+              data.valueFormat ?? "currency",
+            );
             if (typeof point.secondaryValue === "number") {
-              return `${formatted} (${formatValue(point.secondaryValue, "number")})`;
+              return `${formatted} (${
+                formatValue(point.secondaryValue, "number")
+              })`;
             }
             return formatted;
           },

@@ -91,6 +91,12 @@
   --paisa-chart-text: #0f172a;
   --paisa-chart-muted: #64748b;
   --paisa-chart-grid: #e2e8f0;
+  --paisa-chart-series-1: #4e79a7;
+  --paisa-chart-series-2: #59a14f;
+  --paisa-chart-series-3: #e15759;
+  --paisa-chart-series-4: #f28e2c;
+  --paisa-chart-series-5: #af7aa1;
+  --paisa-chart-series-6: #76b7b2;
 
   /* Borders & Dividers */
   --paisa-border-subtle: #f1f5f9;
@@ -206,6 +212,12 @@ html[data-theme="dark"] {
   --paisa-chart-text: #cbd5e1;
   --paisa-chart-muted: #94a3b8;
   --paisa-chart-grid: #334155;
+  --paisa-chart-series-1: #7aa6d8;
+  --paisa-chart-series-2: #7bc96f;
+  --paisa-chart-series-3: #ff7b7d;
+  --paisa-chart-series-4: #ffad5c;
+  --paisa-chart-series-5: #d49acb;
+  --paisa-chart-series-6: #86d4ce;
 
   /* Dark Borders & Dividers */
   --paisa-border-subtle: #1e293b;

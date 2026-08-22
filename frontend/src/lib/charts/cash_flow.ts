@@ -24,7 +24,11 @@ import { willClearTippy } from "../../store";
 import COLORS, { generateColorScheme } from "../core/colors";
 import textures from "textures";
 import chroma from "chroma-js";
-import { containerPlotSize, createRedrawChart, type Dimensions } from "./resize";
+import {
+  containerPlotSize,
+  createRedrawChart,
+  type Dimensions,
+} from "./resize";
 
 export interface MonthlyFlowChart {
   update: (cashFlows: CashFlow[]) => void;
@@ -283,8 +287,10 @@ export function createMonthlyFlow(
             .call((sel) => {
               if (duration > 0) {
                 sel.transition(t)
-                  .attr("y", (d: any) => y(d[0][1]))
-                  .attr("height", (d: any) => y(d[0][0]) - y(d[0][1]));
+                  .attr("y", (d: any) =>
+                    y(d[0][1]))
+                  .attr("height", (d: any) =>
+                    y(d[0][0]) - y(d[0][1]));
               } else {
                 sel
                   .attr("y", (d: any) => y(d[0][1]))
@@ -383,7 +389,9 @@ export function createMonthlyFlow(
 
   function resize(dimensions: { width: number; height: number }) {
     if (dimensions.width <= 0 || dimensions.height <= 0) return;
-    const targetHeight = options.rotate ? dimensions.height : Math.min(280, dimensions.height);
+    const targetHeight = options.rotate
+      ? dimensions.height
+      : Math.min(280, dimensions.height);
     svg.attr("width", dimensions.width).attr("height", targetHeight);
     currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
     currentHeight = Math.max(
@@ -409,7 +417,7 @@ export function createMonthlyFlow(
     label: "tax",
     color: z("tax"),
     shape: "square",
-    texture: texture,
+    symbol: "diagonal-stripe",
   });
 
   legends.unshift({
@@ -463,9 +471,10 @@ export function renderFlow(graph: Graph, dimensions?: Dimensions) {
     ) -
       margin.left -
       margin.right,
-    height = (dimensions?.height && dimensions.height > 0
-      ? dimensions.height
-      : +svg.attr("height")) - margin.top - margin.bottom;
+    height =
+      (dimensions?.height && dimensions.height > 0
+        ? dimensions.height
+        : +svg.attr("height")) - margin.top - margin.bottom;
 
   willClearTippy.update((n) => n + 1);
   svg.selectAll("*").remove();

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { chartFormatters } from "$lib/charts/echarts/formatters";
-import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
+import {
+  categorySeriesColor,
+  categorySeriesIndex,
+  normalizeCategoryKey,
+  readPaisaChartTheme,
+} from "$lib/charts/echarts/theme";
 import {
   formatCurrency,
   formatCurrencyCrude,
@@ -20,6 +25,7 @@ describe("ECharts foundation helpers", () => {
     root.style.setProperty("--paisa-positive", "rgb(19, 20, 21)");
     root.style.setProperty("--paisa-negative", "rgb(22, 23, 24)");
     root.style.setProperty("--paisa-warning", "rgb(25, 26, 27)");
+    root.style.setProperty("--paisa-chart-series-1", "rgb(31, 32, 33)");
 
     const theme = readPaisaChartTheme();
 
@@ -34,6 +40,28 @@ describe("ECharts foundation helpers", () => {
     expect(theme.negativeColor).toBe("rgb(22, 23, 24)");
     expect(theme.warningColor).toBe("rgb(25, 26, 27)");
     expect(theme.seriesColors).toHaveLength(6);
+    expect(theme.seriesColors[0]).toBe("rgb(31, 32, 33)");
+  });
+
+  it("maps normalized category identities deterministically", () => {
+    const colors = ["one", "two", "three", "four", "five", "six"];
+
+    expect(normalizeCategoryKey("  Housing ")).toBe("housing");
+    expect(normalizeCategoryKey("   ")).toBe("uncategorized");
+    expect(categorySeriesIndex("Housing", colors.length)).toBe(
+      categorySeriesIndex(" housing ", colors.length),
+    );
+    expect(categorySeriesColor("Housing", colors)).toBe(
+      categorySeriesColor("Housing", [...colors].reverse().reverse()),
+    );
+    expect(
+      new Set(
+        ["Housing", "Food", "Travel", "Utilities"].map((key) =>
+          categorySeriesColor(key, colors)
+        ),
+      ).size,
+    ).toBeGreaterThan(1);
+    expect(categorySeriesColor(undefined, [])).toBe("currentColor");
   });
 
   it("delegates chart number formatting to existing Paisa formatters", () => {
