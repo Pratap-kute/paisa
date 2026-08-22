@@ -21,13 +21,14 @@
   />
 
   <Section>
-    <div class="has-text-centered mb-4">
+    <div class="mb-4 text-center text-sm text-[var(--paisa-muted-foreground)]">
       <b
-        class="p-1 has-text-white"
+        class="inline-block rounded-[var(--paisa-radius-sm)] px-2 py-0.5 text-white"
         style="background-color: {issues.length > 0 ? COLORS.lossText : COLORS.gainText}"
         >{issues.length}</b
-      > potential issue(s) found.
+      >
+      potential issue(s) found.
     </div>
-    <div class="columns is-flex-wrap-wrap" id="d3-diagnosis"></div>
+    <div class="-m-2 flex flex-wrap" id="d3-diagnosis"></div>
   </Section>
 </Page>
