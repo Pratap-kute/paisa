@@ -20,7 +20,7 @@ Date: 2026-08-22
 | CP10           | `3881d49` | test(ui): finalize redesigned application regression coverage |
 | Report         | `9e1fd06` | docs(design): add phase 7 final audit report                  |
 | CP10 follow-up | `4de4ae7` | test(ui): stabilize final regression coverage                 |
-| Final cleanup  | `45cfd0f` | chore(ui): remove remaining scoped scss                       |
+| Final cleanup  | `3ec6355` | chore(ui): remove remaining scoped scss                       |
 
 ## Primitive migration / deletion inventory
 
