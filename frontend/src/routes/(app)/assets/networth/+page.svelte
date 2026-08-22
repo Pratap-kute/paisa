@@ -6,9 +6,8 @@
     type Legend,
     type Networth,
   } from "$lib/core/utils";
-  import { createNetworthChart, type NetworthChart } from "$lib/charts/networth";
   import _ from "lodash";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import {
     dateMin,
     dateMax,
@@ -24,15 +23,14 @@
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import NetworthTimelineChart from "$lib/components/charts/NetworthTimelineChart.svelte";
+  import { buildNetworthSeries } from "$lib/charts/time_series_data";
 
   let networth = $state(0);
   let investment = $state(0);
   let gain = $state(0);
   let xirr = $state(0);
   let isLoading = $state(true);
-  let svg: SVGElement = $state() as SVGElement;
-  let chart: NetworthChart | null = $state(null);
-  let boundSvg: SVGElement | null = $state(null);
   let points: Networth[] = $state([]);
   let legends: Legend[] = $state([]);
 
@@ -44,29 +42,7 @@
   );
 
   $effect(() => {
-    if (!svg) return;
-
-    if (filteredPoints.length === 0) {
-      if (chart) {
-        chart.destroy();
-        chart = null;
-        boundSvg = null;
-      }
-      return;
-    }
-
-    if (!chart || boundSvg !== svg) {
-      chart?.destroy();
-      chart = createNetworthChart(svg);
-      boundSvg = svg;
-      legends = chart.legends;
-    }
-
-    chart.update(filteredPoints);
-  });
-
-  onDestroy(() => {
-    chart?.destroy();
+    legends = buildNetworthSeries(filteredPoints).legends ?? [];
   });
 
   onMount(async () => {
@@ -142,9 +118,8 @@
       empty={!isLoading && filteredPoints.length === 0}
       emptyMessage="No net-worth activity in this period"
       preserveChildren
-      onresize={(dim) => chart?.resize(dim)}
     >
-      <svg id="d3-networth-timeline" width="100%" bind:this={svg} />
+      <NetworthTimelineChart points={filteredPoints} />
     </ChartFrame>
   </Section>
 </Page>

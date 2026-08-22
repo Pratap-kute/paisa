@@ -3,7 +3,7 @@
     generateColorScheme,
     genericBarColor,
   } from "$lib/core/colors";
-  import { renderAccountOverview, buildLegends } from "$lib/charts/gain";
+  import { buildLegends } from "$lib/charts/gain";
   import {
     filterCommodityBreakdowns,
     renderPortfolioBreakdown,
@@ -24,7 +24,7 @@
     postingUrl,
   } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
   import { iconify } from "$lib/core/icon";
@@ -35,6 +35,7 @@
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -59,17 +60,12 @@
   let assetBreakdown: AssetBreakdown = $state();
   let legends = buildLegends();
 
-  let destroyCallback = () => {};
   let postings: Posting[] = $state([]);
 
   let securityTypeR: any = $state(),
     portfolioR: any = $state(),
     industryR: any = $state(),
     ratingR: any = $state(null);
-
-  onDestroy(async () => {
-    destroyCallback();
-  });
 
   onMount(async () => {
     ({
@@ -90,12 +86,6 @@
       .reverse()
       .take(100)
       .value();
-    destroyCallback = renderAccountOverview(
-      gain.networthTimeline,
-      gain.postings,
-      "d3-account-timeline-breakdown",
-    );
-
     selectedCommodities = [...commodities];
     ({ renderer: securityTypeR } = renderPortfolioBreakdown(
       "#d3-portfolio-security-type",
@@ -284,22 +274,10 @@
 
       <Section title="Timeline">
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame
-          type="timeline"
-          onresize={() => {
-            document
-              .getElementById("d3-account-timeline-breakdown")
-              ?.replaceChildren();
-            if (gain) {
-              destroyCallback = renderAccountOverview(
-                gain.networthTimeline,
-                gain.postings,
-                "d3-account-timeline-breakdown",
-              );
-            }
-          }}
-        >
-          <svg id="d3-account-timeline-breakdown" width="100%" height="450" />
+        <ChartFrame type="timeline">
+          {#if gain}
+            <GainAccountTimelineChart points={gain.networthTimeline} />
+          {/if}
         </ChartFrame>
       </Section>
 

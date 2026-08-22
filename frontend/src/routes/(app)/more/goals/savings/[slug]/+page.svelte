@@ -12,15 +12,13 @@
     restName,
     postingUrl,
   } from "$lib/core/utils";
-  import { onMount, tick, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
     forecast,
-    renderProgress,
     findBreakPoints,
     project,
     solvePMTOrNper,
-    renderInvestmentTimeline,
   } from "$lib/domain/goals";
   import _ from "lodash";
   import type { PageData } from "./$types";
@@ -35,6 +33,8 @@
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
 
   interface Props {
     data: PageData;
@@ -42,8 +42,6 @@
 
   let { data }: Props = $props();
 
-  let svg: Element | undefined = $state();
-  let investmentTimelineSvg: Element | undefined = $state();
   let targetDateObject: dayjs.Dayjs | undefined = $state();
   let savingsTotal = $state(0),
     investmentTotal = $state(0),
@@ -58,12 +56,11 @@
     icon = $state(""),
     progressPercent = $state(0),
     breakPoints: Point[] = $state([]),
-    savingsTimeline: Point[] = [],
-    postings: Posting[] = [],
+    savingsTimeline: Point[] = $state([]),
+    postings: Posting[] = $state([]),
     latestPostings: Posting[] = $state([]),
     balances: Record<string, AssetBreakdown> = $state({}),
-    destroyCallback = () => {},
-    predictionsTimeline: Forecast[] = [];
+    predictionsTimeline: Forecast[] = $state([]);
 
   let remainingAmount = $derived(Math.max(targetSavings - savingsTotal, 0));
   let projectedCompletion = $derived(
@@ -73,29 +70,6 @@
         ? "Based on monthly target"
         : "Not projected",
   );
-
-  onDestroy(async () => {
-    destroyCallback();
-  });
-
-  function repaintProgressChart() {
-    if (!svg || _.isEmpty(savingsTimeline)) return;
-    destroyCallback();
-    svg.replaceChildren();
-    destroyCallback = renderProgress(
-      savingsTimeline,
-      predictionsTimeline,
-      breakPoints,
-      svg,
-      { targetSavings },
-    );
-  }
-
-  function repaintInvestmentChart() {
-    if (!investmentTimelineSvg || _.isEmpty(postings)) return;
-    investmentTimelineSvg.replaceChildren();
-    renderInvestmentTimeline(postings, investmentTimelineSvg, pmt);
-  }
 
   onMount(async () => {
     ({
@@ -151,13 +125,10 @@
       predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
     }
 
-    await tick();
     breakPoints = findBreakPoints(
       savingsTimeline.concat(predictionsTimeline),
       targetSavings,
     );
-    repaintProgressChart();
-    repaintInvestmentChart();
   });
 </script>
 
@@ -239,14 +210,25 @@
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline" onresize={repaintProgressChart}>
-          <svg height="400" width="100%" bind:this={svg} />
+        <ChartFrame type="timeline">
+          <GoalProgressChart
+            points={savingsTimeline}
+            predictions={predictionsTimeline}
+            {breakPoints}
+            {targetSavings}
+            ariaLabel="{name} savings goal progress timeline"
+            testId="savings-goal-progress-echart"
+          />
         </ChartFrame>
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline" onresize={repaintInvestmentChart}>
-          <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
+        <ChartFrame type="timeline">
+          <GoalInvestmentChart
+            {postings}
+            {pmt}
+            testId="savings-goal-investment-echart"
+          />
         </ChartFrame>
       </Section>
 

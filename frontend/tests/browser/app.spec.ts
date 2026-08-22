@@ -101,7 +101,11 @@ test("import produces a preview without saving", async ({ page }) => {
 test("networth chart renders on analytics page", async ({ page }) => {
   await page.goto("/assets/networth");
   await expect(page.getByRole("heading", { name: "Net Worth" })).toBeVisible();
-  await expect(page.locator("#d3-networth-timeline g").first()).toBeVisible();
+  await expect(
+    page.locator(
+      "[data-testid='networth-timeline-echart'][data-chart-ready='true']",
+    ),
+  ).toBeVisible();
 });
 
 test("cash flow monthly chart renders", async ({ page }) => {

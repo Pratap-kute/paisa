@@ -2,9 +2,7 @@
 import { goto } from "$app/navigation";
 import chroma from "chroma-js";
 import * as d3 from "d3";
-import { Delaunay } from "d3";
 import _ from "lodash";
-import tippy from "tippy.js";
 import COLORS from "../core/colors";
 import {
   formatCurrency,
@@ -12,13 +10,9 @@ import {
   formatFloat,
   type Gain,
   type Legend,
-  type Networth,
-  now,
-  type Posting,
   rem,
   restName,
   skipTicks,
-  svgUrl,
   tooltip,
 } from "../core/utils";
 
@@ -51,7 +45,10 @@ export function renderOverview(gains: Gain[]) {
     );
   svg.attr("height", height + margin.top + margin.bottom);
 
-  svg.attr("width", Math.max(containerWidth, width + margin.left + margin.right));
+  svg.attr(
+    "width",
+    Math.max(containerWidth, width + margin.left + margin.right),
+  );
 
   const y = d3.scaleBand().range([0, height]).paddingInner(0).paddingOuter(0);
   y.domain(gains.map((g) => restName(g.account)));
@@ -352,267 +349,6 @@ export function renderOverview(gains: Gain[]) {
     .attr("y", (g) => y(restName(g.account)))
     .attr("height", y.bandwidth())
     .attr("width", width);
-}
-
-export function renderAccountOverview(
-  points: Networth[],
-  postings: Posting[],
-  id: string,
-) {
-  const start = _.min(_.map(points, (p) => p.date)),
-    end = now();
-
-  const element = document.getElementById(id);
-
-  const svg = d3.select(element),
-    margin = { top: 5, right: 50, bottom: 20, left: 40 },
-    width = element.parentElement.clientWidth - margin.left - margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom,
-    g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
-
-  const areaKeys = ["gain", "loss"];
-  const colors = [COLORS.gain, COLORS.loss];
-
-  const lineKeys = ["balance", "investment"];
-  const lineScale = d3
-    .scaleOrdinal<string>()
-    .domain(lineKeys)
-    .range([COLORS.primary, COLORS.secondary]);
-
-  const positions = _.flatMap(
-    points,
-    (p) => [p.balanceAmount, p.netInvestmentAmount],
-  );
-  positions.push(0);
-
-  const x = d3.scaleTime().range([0, width]).domain([start, end]),
-    y = d3.scaleLinear().range([height, 0]).domain(d3.extent(positions)),
-    z = d3.scaleOrdinal<string>(colors).domain(areaKeys);
-
-  const area = (y0: number, y1: (d: Networth) => number) =>
-    d3
-      .area<Networth>()
-      .curve(d3.curveMonotoneX)
-      .x((d) => x(d.date))
-      .y0(y0)
-      .y1(y1);
-
-  g.append("g")
-    .attr("class", "axis x")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x));
-
-  g.append("g")
-    .attr("class", "axis y")
-    .attr("transform", `translate(${width},0)`)
-    .call(
-      d3.axisRight(y).ticks(5).tickPadding(5).tickFormat(formatCurrencyCrude),
-    );
-
-  g.append("g")
-    .attr("class", "axis y")
-    .call(
-      d3.axisLeft(y).ticks(5).tickSize(-width).tickFormat(formatCurrencyCrude),
-    );
-
-  const postingsG = g.append("g").attr("class", "postings");
-
-  postingsG
-    .selectAll("circle")
-    .data(postings)
-    .join("circle")
-    .attr("data-tippy-content", (p) => {
-      return tooltip(
-        [
-          ["Date", p.date.format("DD MMM YYYY")],
-          ["Amount", [
-            formatCurrency(p.amount),
-            "paisa-text-bold paisa-text-right",
-          ]],
-        ],
-        { header: p.payee },
-      );
-    })
-    .attr("cx", (d) => x(d.date))
-    .attr("cy", height + 3)
-    .attr("r", 3)
-    .attr("opacity", 0.5)
-    .attr(
-      "fill",
-      (
-        d,
-      ) => (d.amount >= 0 ? typeScale("investment") : typeScale("withdrawal")),
-    );
-
-  const layer = g.selectAll(".layer").data([points]).enter().append("g").attr(
-    "class",
-    "layer",
-  );
-
-  const clipAboveID = _.uniqueId("clip-above");
-  layer
-    .append("clipPath")
-    .attr("id", clipAboveID)
-    .append("path")
-    .attr(
-      "d",
-      area(height, (d) => {
-        return y(d.gainAmount + d.investmentAmount - d.withdrawalAmount);
-      }),
-    );
-
-  const clipBelowID = _.uniqueId("clip-below");
-  layer
-    .append("clipPath")
-    .attr("id", clipBelowID)
-    .append("path")
-    .attr(
-      "d",
-      area(0, (d) => {
-        return y(d.gainAmount + d.investmentAmount - d.withdrawalAmount);
-      }),
-    );
-
-  layer
-    .append("path")
-    .attr("clip-path", svgUrl(clipAboveID))
-    .style("fill", z("gain"))
-    .style("opacity", "0.2")
-    .attr(
-      "d",
-      area(0, (d) => {
-        return y(d.investmentAmount - d.withdrawalAmount);
-      }),
-    );
-
-  layer
-    .append("path")
-    .attr("clip-path", svgUrl(clipBelowID))
-    .style("fill", z("loss"))
-    .style("opacity", "0.2")
-    .attr(
-      "d",
-      area(height, (d) => {
-        return y(d.investmentAmount - d.withdrawalAmount);
-      }),
-    );
-
-  layer
-    .append("path")
-    .style("stroke", lineScale("investment"))
-    .style("stroke-width", "1.5")
-    .style("fill", "none")
-    .attr(
-      "d",
-      d3
-        .line<Networth>()
-        .curve(d3.curveMonotoneX)
-        .x((d) => x(d.date))
-        .y((d) => y(d.netInvestmentAmount)),
-    );
-
-  layer
-    .append("path")
-    .style("stroke", lineScale("balance"))
-    .style("stroke-width", "1.5")
-    .style("fill", "none")
-    .attr(
-      "d",
-      d3
-        .line<Networth>()
-        .curve(d3.curveMonotoneX)
-        .x((d) => x(d.date))
-        .y((d) => y(d.balanceAmount)),
-    );
-
-  const hoverCircle = layer.append("circle").attr("r", "3").attr(
-    "fill",
-    "none",
-  );
-  const t = tippy(hoverCircle.node() as Element, {
-    theme: "light",
-    delay: 0,
-    allowHTML: true,
-  });
-
-  const balanceVoronoiPoints: Delaunay.Point[] = _.map(points, (d) => [
-    x(d.date),
-    y(d.balanceAmount),
-  ]);
-  const investmentVoronoiPoints: Delaunay.Point[] = _.map(points, (d) => [
-    x(d.date),
-    y(d.netInvestmentAmount),
-  ]);
-  const voronoi = Delaunay.from(
-    balanceVoronoiPoints.concat(investmentVoronoiPoints),
-  ).voronoi([
-    0,
-    0,
-    width,
-    height,
-  ]);
-
-  layer
-    .append("g")
-    .selectAll("path")
-    .data(
-      points.map((p) => ["balance", p]).concat(
-        points.map((p) => ["investment", p]),
-      ) as [
-        string,
-        Networth,
-      ][],
-    )
-    .enter()
-    .append("path")
-    .style("pointer-events", "all")
-    .style("fill", "none")
-    .attr("d", (_, i) => {
-      return voronoi.renderCell(i);
-    })
-    .on("mouseover", (_, [pointType, d]) => {
-      hoverCircle
-        .attr("cx", x(d.date))
-        .attr(
-          "cy",
-          y(pointType == "balance" ? d.balanceAmount : d.netInvestmentAmount),
-        )
-        .attr("fill", lineScale(pointType));
-
-      t.setProps({
-        placement: pointType == "balance" ? "top" : "bottom",
-        content: tooltip([
-          ["Date", d.date.format("DD MMM YYYY")],
-          ["Balance", [
-            formatCurrency(d.balanceAmount),
-            "paisa-text-bold paisa-text-right",
-          ]],
-          [
-            "Net Investment",
-            [
-              formatCurrency(d.netInvestmentAmount),
-              "paisa-text-bold paisa-text-right",
-            ],
-          ],
-          ["Gain / Loss", [
-            formatCurrency(d.gainAmount),
-            "paisa-text-bold paisa-text-right",
-          ]],
-        ]),
-      });
-      t.show();
-    })
-    .on("mouseout", () => {
-      t.hide();
-      hoverCircle.attr("fill", "none");
-    });
-
-  return () => {
-    t.destroy();
-  };
 }
 
 export function buildLegends(): Legend[] {

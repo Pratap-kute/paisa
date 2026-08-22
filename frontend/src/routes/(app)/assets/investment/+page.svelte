@@ -1,10 +1,9 @@
 <script lang="ts">
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
-    renderMonthlyInvestmentTimeline,
-    renderYearlyInvestmentTimeline,
-  } from "$lib/charts/investment";
-  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
+    buildMonthlyInvestmentSeries,
+    buildYearlyInvestmentSeries,
+  } from "$lib/charts/time_series_data";
   import {
     ajax,
     formatCurrency,
@@ -13,7 +12,7 @@
     type Posting,
   } from "$lib/core/utils";
   import _ from "lodash";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -23,11 +22,13 @@
   import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
   import InvestmentYearlyCard from "$lib/components/finance/InvestmentYearlyCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import MonthlyInvestmentChart from "$lib/components/charts/MonthlyInvestmentChart.svelte";
+  import YearlyInvestmentChart from "$lib/components/charts/YearlyInvestmentChart.svelte";
 
   let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
   let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
   let yearlyCards: InvestmentYearlyCardType[] = $state([]);
-  let charts: ChartHandle<null>[] = [];
+  let postings: Posting[] = $state([]);
   let isLoading = $state(true);
   let hasData = $state(false);
   let totalInvested = $state(0);
@@ -42,7 +43,7 @@
     try {
       const { assets, yearly_cards: fetchedYearlyCards } = await ajax("/api/investment");
       yearlyCards = fetchedYearlyCards || [];
-      const postings = assets as Posting[];
+      postings = assets as Posting[];
 
       totalInvested = _.sumBy(yearlyCards, (c) => c.net_investment);
       const latest = sortedYearlyCards[0];
@@ -52,25 +53,13 @@
       }
 
       hasData = !_.isEmpty(postings) || !_.isEmpty(yearlyCards);
+      monthlyInvestmentTimelineLegends = buildMonthlyInvestmentSeries(postings).legends ?? [];
+      yearlyInvestmentTimelineLegends = buildYearlyInvestmentSeries(yearlyCards).legends ?? [];
 
       isLoading = false;
-      await tick();
-      charts = [
-        createClientWidthChart("#d3-investment-timeline", (_data, _size) => {
-          monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(postings);
-        }),
-        createClientWidthChart("#d3-yearly-investment-timeline", (_data, _size) => {
-          yearlyInvestmentTimelineLegends = renderYearlyInvestmentTimeline(yearlyCards);
-        }),
-      ];
-      charts.forEach((chart) => chart.update(null));
     } catch {
       isLoading = false;
     }
-  });
-
-  onDestroy(() => {
-    charts.forEach((chart) => chart.destroy());
   });
 </script>
 
@@ -110,8 +99,8 @@
       subtitle="Capital invested by month and account"
     >
       <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[0]?.resize(dim)}>
-        <svg id="d3-investment-timeline" width="100%" height="450" />
+      <ChartFrame type="timeline" size="dynamic">
+        <MonthlyInvestmentChart {postings} />
       </ChartFrame>
     </Section>
 
@@ -120,8 +109,8 @@
       subtitle="Yearly invested capital comparison"
     >
       <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[1]?.resize(dim)}>
-        <svg id="d3-yearly-investment-timeline" width="100%" />
+      <ChartFrame type="timeline" size="dynamic">
+        <YearlyInvestmentChart {yearlyCards} />
       </ChartFrame>
     </Section>
 

@@ -15,12 +15,21 @@ export const visualRoutes: VisualRoute[] = [
   },
   { name: "assets-balance", path: "/assets/balance" },
   { name: "assets-gain", path: "/assets/gain" },
-  { name: "assets-gain-detail", path: "/assets/gain/Assets%3AEquity" },
-  { name: "assets-investment", path: "/assets/investment" },
+  {
+    name: "assets-gain-detail",
+    path: "/assets/gain/Assets%3AEquity",
+    ready:
+      "[data-testid='gain-account-timeline-echart'][data-chart-ready='true']",
+  },
+  {
+    name: "assets-investment",
+    path: "/assets/investment",
+    ready: "[data-testid='investment-monthly-echart'][data-chart-ready='true']",
+  },
   {
     name: "networth",
     path: "/assets/networth",
-    ready: "#d3-networth-timeline g",
+    ready: "[data-testid='networth-timeline-echart'][data-chart-ready='true']",
   },
   { name: "cash-flow-income-statement", path: "/cash_flow/income_statement" },
   { name: "cash-flow-monthly", path: "/cash_flow/monthly" },
@@ -41,7 +50,11 @@ export const visualRoutes: VisualRoute[] = [
     path: "/expense/yearly",
     ready: "#d3-yearly-expense-timeline g",
   },
-  { name: "income", path: "/income" },
+  {
+    name: "income",
+    path: "/income",
+    ready: "[data-testid='income-monthly-echart'][data-chart-ready='true']",
+  },
   { name: "ledger-editor", path: "/ledger/editor" },
   { name: "ledger-editor-file", path: "/ledger/editor/main.ledger" },
   { name: "ledger-import", path: "/ledger/import" },
@@ -71,13 +84,27 @@ export const visualRoutes: VisualRoute[] = [
     path: "/liabilities/credit_cards/Liabilities%3ACreditCard%3AFreedom",
   },
   { name: "liabilities-interest", path: "/liabilities/interest" },
-  { name: "liabilities-repayment", path: "/liabilities/repayment" },
+  {
+    name: "liabilities-repayment",
+    path: "/liabilities/repayment",
+    ready: "[data-testid='repayment-timeline-echart'][data-chart-ready='true']",
+  },
   { name: "about", path: "/more/about" },
   { name: "config", path: "/more/config" },
   { name: "doctor", path: "/more/doctor" },
   { name: "goals", path: "/more/goals", readyText: "Retirement" },
-  { name: "retirement-goal", path: "/more/goals/retirement/Retirement" },
-  { name: "savings-goal", path: "/more/goals/savings/House" },
+  {
+    name: "retirement-goal",
+    path: "/more/goals/retirement/Retirement",
+    ready:
+      "[data-testid='retirement-goal-progress-echart'][data-chart-ready='true']",
+  },
+  {
+    name: "savings-goal",
+    path: "/more/goals/savings/House",
+    ready:
+      "[data-testid='savings-goal-progress-echart'][data-chart-ready='true']",
+  },
   {
     name: "logs",
     path: "/more/logs",
@@ -108,7 +135,7 @@ export const chartSnapshots = [
   {
     name: "networth",
     path: "/assets/networth",
-    locator: "#d3-networth-timeline",
+    locator: "[data-testid='networth-timeline-echart']",
   },
   {
     name: "cash-flow-monthly",

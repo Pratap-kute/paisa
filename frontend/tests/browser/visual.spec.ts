@@ -130,14 +130,17 @@ for (const route of visualRoutes) {
         await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
       }
       if (route.name === "savings-goal" || route.name === "retirement-goal") {
+        const prefix = route.name === "savings-goal" ? "savings" : "retirement";
         await expect(
-          page.locator(".paisa-goal-detail-main svg").nth(0).locator("g")
-            .first(),
+          page.locator(
+            `[data-testid='${prefix}-goal-progress-echart'][data-chart-ready='true']`,
+          ),
         )
           .toBeVisible({ timeout: 15_000 });
         await expect(
-          page.locator(".paisa-goal-detail-main svg").nth(1).locator("g")
-            .first(),
+          page.locator(
+            `[data-testid='${prefix}-goal-investment-echart'][data-chart-ready='true']`,
+          ),
         )
           .toBeVisible({ timeout: 15_000 });
         await expect(

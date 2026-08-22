@@ -293,49 +293,6 @@ svg text,
   border-radius: var(--paisa-radius-sm);
 }
 
-#d3-yearly-investment-cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--paisa-space-3);
-}
-
-@media screen and (max-width: 768px) {
-  #d3-yearly-investment-cards {
-    grid-template-columns: 1fr;
-  }
-}
-
-.paisa-d3-yearly-card {
-  border: 1px solid var(--paisa-border-subtle);
-  border-radius: var(--paisa-radius-md);
-  background-color: var(--paisa-surface-card);
-  overflow: hidden;
-}
-
-.paisa-d3-yearly-card-header {
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid var(--paisa-border-subtle);
-}
-
-.paisa-d3-yearly-card-title {
-  margin: 0;
-  font-size: var(--paisa-font-size-sm);
-  font-weight: var(--paisa-font-weight-semibold);
-  color: var(--paisa-muted-foreground);
-}
-
-.paisa-d3-yearly-card-body {
-  padding: 0.25rem;
-}
-
-.paisa-d3-yearly-table {
-  color: var(--paisa-muted-foreground);
-}
-
-.paisa-d3-yearly-table td:last-child {
-  color: var(--paisa-foreground);
-}
-
 #d3-harvestables .paisa-d3-harvest-card {
   border: 1px solid var(--paisa-border-subtle);
   border-radius: var(--paisa-radius-md);
@@ -419,4 +376,3 @@ svg text,
 .paisa-font-mono {
   font-family: var(--paisa-font-mono);
 }
-

@@ -1,14 +1,13 @@
 <script lang="ts">
   import {
-    renderMonthlyInvestmentTimeline,
-    renderYearlyIncomeTimeline,
-    renderYearlyTimelineOf,
-  } from "$lib/charts/income";
-  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
+    buildMonthlyIncomeSeries,
+    buildYearlyIncomeSeries,
+    buildYearlyIncomeValueSeries,
+  } from "$lib/charts/time_series_data";
   import { financialColors } from "$lib/theme/chartPalette";
-  import { ajax, formatCurrency, type Legend } from "$lib/core/utils";
+  import { ajax, formatCurrency, type Income, type IncomeYearlyCard, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -18,6 +17,9 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import MonthlyIncomeChart from "$lib/components/charts/MonthlyIncomeChart.svelte";
+  import YearlyIncomeChart from "$lib/components/charts/YearlyIncomeChart.svelte";
+  import YearlyIncomeValueChart from "$lib/components/charts/YearlyIncomeValueChart.svelte";
 
   let grossIncome = $state(0);
   let netTax = $state(0);
@@ -28,53 +30,39 @@
   let yearlyIncomeTimelineLegends: Legend[] = $state([]);
   let yearlyNetIncomeTimelineLegends: Legend[] = $state([]);
   let yearlyNetTaxTimelineLegends: Legend[] = $state([]);
-  let charts: ChartHandle<null>[] = [];
+  let incomes: Income[] = $state([]);
+  let yearlyCards: IncomeYearlyCard[] = $state([]);
 
   onMount(async () => {
     try {
       const {
-        income_timeline: incomes,
+        income_timeline: fetchedIncomes,
         tax_timeline: taxes,
-        yearly_cards: yearlyCards,
+        yearly_cards: fetchedYearlyCards,
       } = await ajax("/api/income");
 
+      incomes = fetchedIncomes ?? [];
+      yearlyCards = fetchedYearlyCards ?? [];
       grossIncome = _.sumBy(incomes, (i) => _.sumBy(i.postings, (p) => -p.amount));
       netTax = _.sumBy(taxes, (t) => _.sumBy(t.postings, (p) => p.amount));
       hasIncomeData = grossIncome !== 0 || netTax !== 0 || !_.isEmpty(yearlyCards);
-
-      await tick();
-      charts = [
-        createClientWidthChart("#d3-income-timeline", (_data, _size) => {
-          monthlyInvestmentTimelineLegends = renderMonthlyInvestmentTimeline(incomes);
-        }),
-        createClientWidthChart("#d3-yearly-income-timeline", (_data, _size) => {
-          yearlyIncomeTimelineLegends = renderYearlyIncomeTimeline(yearlyCards);
-        }),
-        createClientWidthChart("#d3-yearly-net_income-timeline", (_data, _size) => {
-          yearlyNetIncomeTimelineLegends = renderYearlyTimelineOf(
-            "Net Income",
-            "net_income",
-            financialColors.gainText,
-            yearlyCards,
-          );
-        }),
-        createClientWidthChart("#d3-yearly-net_tax-timeline", (_data, _size) => {
-          yearlyNetTaxTimelineLegends = renderYearlyTimelineOf(
-            "Net Tax",
-            "net_tax",
-            financialColors.lossText,
-            yearlyCards,
-          );
-        }),
-      ];
-      charts.forEach((chart) => chart.update(null));
+      monthlyInvestmentTimelineLegends = buildMonthlyIncomeSeries(incomes).legends ?? [];
+      yearlyIncomeTimelineLegends = buildYearlyIncomeSeries(yearlyCards).legends ?? [];
+      yearlyNetIncomeTimelineLegends = buildYearlyIncomeValueSeries(
+        "Net Income",
+        "net_income",
+        financialColors.gainText,
+        yearlyCards,
+      ).legends ?? [];
+      yearlyNetTaxTimelineLegends = buildYearlyIncomeValueSeries(
+        "Net Tax",
+        "net_tax",
+        financialColors.lossText,
+        yearlyCards,
+      ).legends ?? [];
     } finally {
       isLoading = false;
     }
-  });
-
-  onDestroy(() => {
-    charts.forEach((chart) => chart.destroy());
   });
 </script>
 
@@ -115,8 +103,8 @@
       subtitle="Income and investment activity by month"
     >
       <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[0]?.resize(dim)}>
-        <svg id="d3-income-timeline" width="100%" height="500" />
+      <ChartFrame type="timeline" size="dynamic">
+        <MonthlyIncomeChart {incomes} />
       </ChartFrame>
     </Section>
 
@@ -127,20 +115,32 @@
       <ResponsiveGrid variant="cards" cols={3}>
         <div class="min-w-0">
           <LegendCard legends={yearlyIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-          <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[1]?.resize(dim)}>
-            <svg id="d3-yearly-income-timeline" width="100%" />
+          <ChartFrame type="timeline" size="dynamic">
+            <YearlyIncomeChart {yearlyCards} />
           </ChartFrame>
         </div>
         <div class="min-w-0">
           <LegendCard legends={yearlyNetIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-          <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[2]?.resize(dim)}>
-            <svg id="d3-yearly-net_income-timeline" width="100%" />
+          <ChartFrame type="timeline" size="dynamic">
+            <YearlyIncomeValueChart
+              label="Net Income"
+              seriesKey="net_income"
+              color={financialColors.gainText}
+              {yearlyCards}
+              testId="income-yearly-net-income-echart"
+            />
           </ChartFrame>
         </div>
         <div class="min-w-0">
           <LegendCard legends={yearlyNetTaxTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-          <ChartFrame type="timeline" size="dynamic" onresize={(dim) => charts[3]?.resize(dim)}>
-            <svg id="d3-yearly-net_tax-timeline" width="100%" />
+          <ChartFrame type="timeline" size="dynamic">
+            <YearlyIncomeValueChart
+              label="Net Tax"
+              seriesKey="net_tax"
+              color={financialColors.lossText}
+              {yearlyCards}
+              testId="income-yearly-net-tax-echart"
+            />
           </ChartFrame>
         </div>
       </ResponsiveGrid>

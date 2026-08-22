@@ -1,42 +1,34 @@
 <script lang="ts">
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import { renderMonthlyRepaymentTimeline } from "$lib/charts/repayment";
-  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
-  import { ajax, type Legend } from "$lib/core/utils";
+  import { buildRepaymentSeries } from "$lib/charts/time_series_data";
+  import { ajax, type Legend, type Posting } from "$lib/core/utils";
   import _ from "lodash";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import RepaymentTimelineChart from "$lib/components/charts/RepaymentTimelineChart.svelte";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
   let legends: Legend[] = $state([]);
-  let repaymentChart: ChartHandle<null> | null = $state(null);
+  let repayments: Posting[] = $state([]);
 
   onMount(async () => {
     try {
-      const { repayments: repayments } = await ajax("/api/liabilities/repayment");
+      ({ repayments } = await ajax("/api/liabilities/repayment"));
       if (_.isEmpty(repayments)) {
         isEmpty = true;
         return;
       }
 
+      legends = buildRepaymentSeries(repayments).legends ?? [];
       isLoading = false;
-      await tick();
-      repaymentChart = createClientWidthChart("#d3-repayment-timeline", (_data, _size) => {
-        legends = renderMonthlyRepaymentTimeline(repayments);
-      });
-      repaymentChart.update(null);
     } finally {
       isLoading = false;
     }
-  });
-
-  onDestroy(() => {
-    repaymentChart?.destroy();
   });
 </script>
 
@@ -66,8 +58,8 @@
       </ZeroState>
     {:else}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" onresize={(dim) => repaymentChart?.resize(dim)}>
-        <svg id="d3-repayment-timeline" width="100%" height="500" />
+      <ChartFrame type="timeline">
+        <RepaymentTimelineChart {repayments} />
       </ChartFrame>
     {/if}
   </Section>
