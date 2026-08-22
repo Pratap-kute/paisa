@@ -40,10 +40,8 @@ export function renderOverview(gains: Gain[]) {
 
   const svg = d3.select(id),
     margin = { top: rem(25), right: rem(20), bottom: rem(10), left: rem(150) },
-    width = Math.max(
-      el.parentElement.clientWidth,
-      1000,
-    ) -
+    containerWidth = el.parentElement.clientWidth,
+    width = Math.max(containerWidth, margin.left + margin.right + 1) -
       margin.left -
       margin.right,
     height = gains.length * BAR_HEIGHT * 2,
@@ -53,7 +51,7 @@ export function renderOverview(gains: Gain[]) {
     );
   svg.attr("height", height + margin.top + margin.bottom);
 
-  svg.attr("width", width + margin.left + margin.right);
+  svg.attr("width", Math.max(containerWidth, width + margin.left + margin.right));
 
   const y = d3.scaleBand().range([0, height]).paddingInner(0).paddingOuter(0);
   y.domain(gains.map((g) => restName(g.account)));

@@ -4,12 +4,13 @@
   import { filterCommodityBreakdowns, renderPortfolioBreakdown } from "$lib/charts/portfolio";
   import { ajax, type PortfolioAggregate } from "$lib/core/utils";
   import _ from "lodash";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);
@@ -18,127 +19,185 @@
   let rating: PortfolioAggregate[] = $state([]);
   let industry: PortfolioAggregate[] = $state([]);
   let isEmpty = $state(false);
-  let color: any = $state();
+  let isLoading = $state(true);
+  let color: d3.ScaleOrdinal<string, string> | undefined = $state();
 
-  let securityTypeR: any = $state(),
-    portfolioR: any = $state(),
-    industryR: any = $state(),
-    ratingR: any = $state(null);
+  let securityTypeR: ReturnType<typeof renderPortfolioBreakdown> | null = $state(null);
+  let portfolioR: ReturnType<typeof renderPortfolioBreakdown> | null = $state(null);
+  let industryR: ReturnType<typeof renderPortfolioBreakdown> | null = $state(null);
+  let ratingR: ReturnType<typeof renderPortfolioBreakdown> | null = $state(null);
 
-  onMount(async () => {
-    ({ name_and_security_type, security_type, rating, industry, commodities } = await ajax(
-      "/api/portfolio_allocation"
-    ));
+  let hasFilteredData = $derived(
+    !isEmpty &&
+      selectedCommodities.length > 0 &&
+      _.some(
+        [
+          ...filterCommodityBreakdowns(security_type, selectedCommodities),
+          ...filterCommodityBreakdowns(rating, selectedCommodities),
+          ...filterCommodityBreakdowns(industry, selectedCommodities),
+          ...filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+        ],
+        (row) => row.amount > 0,
+      ),
+  );
 
-    if (_.isEmpty(commodities)) {
-      isEmpty = true;
-      return;
-    } else {
-      isEmpty = false;
-    }
-
-    selectedCommodities = [...commodities];
-    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
+  function initCharts() {
+    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, {
+      small: true,
+    });
     ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
     industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
-      z: [genericBarColor()]
+      z: [genericBarColor()],
     });
     portfolioR = renderPortfolioBreakdown("#d3-portfolio", name_and_security_type);
-    color = generateColorScheme(commodities);
+  }
+
+  function refreshCharts() {
+    if (!color || !securityTypeR || !ratingR || !industryR || !portfolioR) return;
+    securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
+    ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);
+    industryR.renderer(filterCommodityBreakdowns(industry, selectedCommodities), color);
+    portfolioR.renderer(
+      filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+      color,
+    );
+  }
+
+  function resizeSecurityType() {
+    document.getElementById("d3-portfolio-security-type")?.replaceChildren();
+    securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, {
+      small: true,
+    });
+    refreshCharts();
+  }
+
+  function resizeRating() {
+    document.getElementById("d3-portfolio-security-rating")?.replaceChildren();
+    ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
+    refreshCharts();
+  }
+
+  function resizeIndustry() {
+    document.getElementById("d3-portfolio-security-industry")?.replaceChildren();
+    industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
+      z: [genericBarColor()],
+    });
+    refreshCharts();
+  }
+
+  function resizePortfolio() {
+    document.getElementById("d3-portfolio")?.replaceChildren();
+    portfolioR = renderPortfolioBreakdown("#d3-portfolio", name_and_security_type);
+    refreshCharts();
+  }
+
+  onMount(async () => {
+    try {
+      ({ name_and_security_type, security_type, rating, industry, commodities } = await ajax(
+        "/api/portfolio_allocation",
+      ));
+
+      if (_.isEmpty(commodities)) {
+        isEmpty = true;
+        return;
+      }
+
+      selectedCommodities = [...commodities];
+      color = generateColorScheme(commodities);
+      isLoading = false;
+      await tick();
+      initCharts();
+      refreshCharts();
+    } catch {
+      isEmpty = true;
+    } finally {
+      isLoading = false;
+    }
   });
 
   $effect(() => {
     if (securityTypeR && ratingR && industryR && portfolioR && color) {
-      securityTypeR.renderer(filterCommodityBreakdowns(security_type, selectedCommodities), color);
-      ratingR.renderer(filterCommodityBreakdowns(rating, selectedCommodities), color);
-      industryR.renderer(filterCommodityBreakdowns(industry, selectedCommodities), color);
-      portfolioR.renderer(
-        filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-        color
-      );
+      refreshCharts();
     }
   });
 </script>
+
+<svelte:head>
+  <title>Portfolio Analysis - Paisa</title>
+</svelte:head>
 
 <Page width="analysis">
   <PageHeader
     title="Portfolio Analysis"
     description="Breakdown by security type, rating, industry, and individual holdings"
-  />
-
-  {#if isEmpty}
-    <Section>
-      <article class="message">
-        <div class="message-body">
-          <strong>Oops!</strong> Looks like mutual fund portfolio data is not available<br /><br />
-          Use the <strong>Update Mutual Fund Portfolios</strong> menu option at the right corner to
-          update the data.
+  >
+    {#snippet actions()}
+      {#if !isEmpty && commodities.length > 0}
+        <div class="paisa-commodity-toolbar">
+          {#each commodities as commodity}
+            {@const name = `switch-${commodity}`}
+            <label class="paisa-commodity-toggle" style="--commodity-color: {color ? color(commodity) : ''}">
+              <input
+                id={name}
+                type="checkbox"
+                bind:group={selectedCommodities}
+                name="commodities"
+                value={commodity}
+              />
+              <span>{commodity}</span>
+            </label>
+          {/each}
         </div>
-      </article>
-    </Section>
-  {:else}
-    <Section>
-      <div class="paisa-commodity-switches">
-        {#each commodities as commodity}
-          {@const name = `switch-${commodity}`}
-          <div class="field color-switch" style="--color: {color ? color(commodity) : ''}">
-            <input
-              id={name}
-              type="checkbox"
-              bind:group={selectedCommodities}
-              name="commodities"
-              class="switch is-rounded"
-              value={commodity}
-            />
-            <label for={name}>{commodity}</label>
-          </div>
-        {/each}
-      </div>
-    </Section>
+      {/if}
+    {/snippet}
+  </PageHeader>
 
-    <!-- Side-by-Side Summary: Security Type & Security Rating -->
+  {#if isLoading}
+    <Section title="Loading portfolio data">
+      <ChartFrame type="dynamic" />
+    </Section>
+  {:else if isEmpty}
+    <ZeroState item={[]}>
+      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        Mutual fund portfolio data is not available. Use
+        <strong>Update Mutual Fund Portfolios</strong> from the actions menu to refresh holdings.
+      </p>
+    </ZeroState>
+  {:else if !hasFilteredData}
+    <ZeroState item={[]}>
+      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        Select at least one commodity to view portfolio breakdown.
+      </p>
+    </ZeroState>
+  {:else}
     <ResponsiveGrid variant="two-column">
-      <Section title="Security Type">
-        <ChartFrame type="dynamic" onresize={() => {
-          document.getElementById("d3-portfolio-security-type")?.replaceChildren();
-          securityTypeR = renderPortfolioBreakdown("#d3-portfolio-security-type", security_type, { small: true });
-        }}>
+      <Section title="Security Type" subtitle="Composition by fund category">
+        <ChartFrame type="dynamic" onresize={resizeSecurityType}>
           <div id="d3-portfolio-security-type-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-type" />
         </ChartFrame>
       </Section>
 
-      <Section title="Security Rating">
-        <ChartFrame type="dynamic" onresize={() => {
-          document.getElementById("d3-portfolio-security-rating")?.replaceChildren();
-          ratingR = renderPortfolioBreakdown("#d3-portfolio-security-rating", rating, { small: true });
-        }}>
+      <Section title="Security Rating" subtitle="Credit quality distribution">
+        <ChartFrame type="dynamic" onresize={resizeRating}>
           <div id="d3-portfolio-security-rating-treemap" style="width: 100%; position: relative"></div>
           <svg id="d3-portfolio-security-rating" />
         </ChartFrame>
       </Section>
     </ResponsiveGrid>
 
-    <Section title="Industry">
-      <ChartFrame type="dynamic" onresize={() => {
-        document.getElementById("d3-portfolio-security-industry")?.replaceChildren();
-        industryR = renderPortfolioBreakdown("#d3-portfolio-security-industry", industry, {
-          z: [genericBarColor()]
-        });
-      }}>
+    <Section title="Industry" subtitle="Sector exposure breakdown">
+      <ChartFrame type="dynamic" onresize={resizeIndustry}>
         <div id="d3-portfolio-security-industry-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio-security-industry" />
       </ChartFrame>
     </Section>
 
-    <Section title="Holdings">
+    <Section title="Holdings" subtitle="Individual security composition">
       {#if portfolioR}
         <LegendCard legends={portfolioR.legends} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
-      <ChartFrame type="dynamic" onresize={() => {
-        document.getElementById("d3-portfolio")?.replaceChildren();
-        portfolioR = renderPortfolioBreakdown("#d3-portfolio", name_and_security_type);
-      }}>
+      <ChartFrame type="dynamic" onresize={resizePortfolio}>
         <div id="d3-portfolio-treemap" style="width: 100%; position: relative"></div>
         <svg id="d3-portfolio" />
       </ChartFrame>
@@ -147,17 +206,33 @@
 </Page>
 
 <style lang="scss">
-  .paisa-commodity-switches {
+  .paisa-commodity-toolbar {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--paisa-space-3);
+    gap: var(--paisa-space-2);
+    max-width: min(100vw - 2rem, 520px);
   }
 
-  .color-switch {
-    margin-bottom: 0;
-    .switch[type="checkbox"]:checked + label::before,
-    .switch[type="checkbox"]:checked + label:before {
-      background: var(--color);
+  .paisa-commodity-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-full);
+    font-size: var(--paisa-font-size-xs);
+    color: var(--paisa-muted-foreground);
+    cursor: pointer;
+    user-select: none;
+
+    input {
+      accent-color: var(--commodity-color, var(--paisa-primary));
+    }
+
+    &:has(input:checked) {
+      border-color: var(--commodity-color, var(--paisa-primary));
+      color: var(--paisa-foreground);
+      background-color: var(--paisa-surface-hover);
     }
   }
 </style>
