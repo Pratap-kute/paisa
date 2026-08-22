@@ -33,14 +33,7 @@ export default defineConfig({
     },
   },
   css: {
-    preprocessorOptions: {
-      sass: {
-        api: "modern-compiler",
-      },
-      scss: {
-        api: "modern-compiler",
-      },
-    },
+    preprocessorOptions: {},
   },
   build: {
     target: "es2021",
