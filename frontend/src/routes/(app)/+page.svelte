@@ -1,45 +1,47 @@
 <script lang="ts">
   import * as cashFlow from "$lib/charts/cash_flow";
-  import { financialColors } from "$lib/theme/chartPalette";
-  import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
-  import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
   import * as expense from "$lib/charts/expense/monthly";
-  import { enrichTrantionSequence, sortTrantionSequence } from "$lib/domain/transaction_sequence";
+  import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
+  import type { ChartHandle } from "$lib/charts/resize";
+  import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
+  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import { refresh } from "../../store";
+  import {
+    enrichTrantionSequence,
+    intervalText,
+    nextUnpaidSchedule,
+    sortTrantionSequence,
+    totalRecurring
+  } from "$lib/domain/transaction_sequence";
   import {
     ajax,
     formatCurrency,
+    formatCurrencyCrude,
     formatFloat,
+    formatPercentage,
+    now,
+    postingUrl,
+    restName,
+    type AssetBreakdown,
     type Budget,
     type CashFlow,
+    type GoalSummary,
+    type Legend,
     type Networth,
     type Posting,
     type Transaction,
-    type TransactionSequence,
-    type Legend,
-    now,
-    type GoalSummary,
-    type AssetBreakdown
+    type TransactionSequence
   } from "$lib/core/utils";
   import _ from "lodash";
+  import dayjs from "dayjs";
   import { onDestroy, onMount } from "svelte";
-
-  import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { refresh } from "../../store";
-  import UpcomingCard from "$lib/components/finance/UpcomingCard.svelte";
-  import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import BalanceCard from "$lib/components/finance/BalanceCard.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import type { ChartHandle } from "$lib/charts/resize";
-  import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -48,14 +50,14 @@
   let cashFlows: CashFlow[] = $state([]);
   let expenses: { [key: string]: Posting[] } = $state({});
   let xirr = $state(0);
-  let networth: Networth = $state();
-  let renderer: (data: Posting[]) => void = $state();
+  let networth: Networth | undefined = $state();
+  let renderer: ((data: Posting[]) => void) | undefined = $state();
   let expenseBreakdown: ChartHandle<Posting[]> | null = $state(null);
   let cashflowChart: MonthlyFlowChart | null = $state(null);
   let transactions: Transaction[] = $state([]);
-  let budgetsByMonth: Record<string, Budget> = {};
-  let currentBudget: Budget = $state();
+  let budgetsByMonth: Record<string, Budget> = $state({});
   let isEmpty = $state(false);
+  let isLoading = $state(true);
   let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
   function hasCashFlowActivity(flows: CashFlow[]) {
@@ -70,6 +72,7 @@
     );
   }
 
+  let currentBudget = $derived(budgetsByMonth[month]);
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
   let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
   let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
@@ -92,125 +95,165 @@
   }
 
   onMount(async () => {
-    ({
-      expenses,
-      cashFlows,
-      goalSummaries,
-      budget: { budgetsByMonth },
-      transactionSequences,
-      networth: { networth, xirr },
-      checkingBalances: { asset_breakdowns: checkingBalances },
-      transactions
-    } = await ajax("/api/dashboard"));
+    try {
+      ({
+        expenses,
+        cashFlows,
+        goalSummaries,
+        budget: { budgetsByMonth },
+        transactionSequences,
+        networth: { networth, xirr },
+        checkingBalances: { asset_breakdowns: checkingBalances },
+        transactions
+      } = await ajax("/api/dashboard"));
 
-    goalSummaries = _.sortBy(goalSummaries, (g) => -g.priority);
+      goalSummaries = _.sortBy(goalSummaries, (g) => -g.priority);
 
-    if (_.isEmpty(transactions)) {
-      isEmpty = true;
-    } else {
-      isEmpty = false;
-    }
-
-    const postings = _.chain(expenses).values().flatten().value();
-    const z = expense.colorScale(postings);
-    expenseBreakdown = expense.createCurrentExpensesBreakdown(z);
-    renderer = expenseBreakdown.update;
-    currentBudget = budgetsByMonth[month];
-
-    cashflowChart = cashFlow.createMonthlyFlow(
-      "#d3-current-cash-flow",
-      {
-        rotate: false,
-        balance: _.last(cashFlows)?.balance || 0
+      if (_.isEmpty(transactions)) {
+        isEmpty = true;
+      } else {
+        isEmpty = false;
       }
-    );
-    cashflowChart.update(cashFlows);
-    cashflowLegends = cashflowChart.legends;
-    transactionSequences = _.take(
-      sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
-      16
-    );
+
+      const postings = _.chain(expenses).values().flatten().value();
+      const z = expense.colorScale(postings);
+      expenseBreakdown = expense.createCurrentExpensesBreakdown(z);
+      renderer = expenseBreakdown.update;
+
+      cashflowChart = cashFlow.createMonthlyFlow(
+        "#d3-current-cash-flow",
+        {
+          rotate: false,
+          balance: _.last(cashFlows)?.balance || 0
+        }
+      );
+      cashflowChart.update(cashFlows);
+      cashflowLegends = cashflowChart.legends;
+      transactionSequences = _.take(
+        sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
+        8
+      );
+    } finally {
+      isLoading = false;
+    }
   });
 </script>
 
 {#if isEmpty}
-  <Page width="standard">
-    <Card padding="lg">
+  <div class="max-w-3xl mx-auto py-8">
+    <div class="p-6 sm:p-8 rounded-xl bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
       <ZeroState item={false}>
-        <div class="has-text-left">
-          <p class="mb-3">
+        <div class="text-left space-y-4">
+          <p class="text-sm text-[var(--paisa-muted-foreground)]">
             Looks like you are new here, you can either get started or look at a demo setup
           </p>
-          <div class="mb-4">
-            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to get started</h2>
-            <ol class="ml-5 mb-4">
+          <div>
+            <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to get started</h2>
+            <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2">
               <li>
-                Go to <a href="/more/config">configuration</a> page and set your default currency and locale.
+                Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and set your default currency and locale.
               </li>
               <li>
-                Go to <a href="/ledger/editor">editor</a> page and start adding transactions to your journal.
+                Go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and start adding transactions to your journal.
               </li>
             </ol>
-            <h2 class="is-size-5 has-text-weight-bold mb-2">I want to view a Demo</h2>
-            <ol class="ml-5 mb-4">
+          </div>
+          <div>
+            <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to view a Demo</h2>
+            <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2 mb-4">
               <li>
                 Click the button below to load a demo setup. This will load a demo journal with relevant config.
               </li>
               <li>
-                Once you are done playing around, you can go to <a href="/ledger/editor">editor</a> page and select all the content and delete them.
+                Once you are done playing around, you can go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and select all the content and delete them.
               </li>
               <li>
-                Go to <a href="/more/config">configuration</a> page and click the reset to defaults button.
+                Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and click the reset to defaults button.
               </li>
             </ol>
-
             <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
           </div>
         </div>
       </ZeroState>
-    </Card>
-  </Page>
+    </div>
+  </div>
 {:else}
-  <Page width="fluid">
-    <!-- Row 1: Primary Financial KPIs -->
-    {#if networth}
-      <Section title="Assets" titleHref="/assets/networth">
+  <div class="w-full flex flex-col space-y-6">
+    <!-- Header -->
+    <PageHeader
+      title="Dashboard"
+      description="Your financial position at a glance"
+    />
+
+    <!-- Row 1: Primary Financial Metric Strip -->
+    {#if networth || isLoading}
+      <div class="py-2 mb-2">
         <MetricStrip cols={4}>
-          <LevelItem
-            narrow
-            title="Net worth"
-            value={formatCurrency(networth.balanceAmount)}
+          <Metric
+            label="Net worth"
+            value={networth ? formatCurrency(networth.balanceAmount) : "₹0"}
+            loading={isLoading}
           />
-          <LevelItem
-            narrow
-            title="Net Investment"
-            value={formatCurrency(networth.netInvestmentAmount)}
+          <Metric
+            label="Net Investment"
+            value={networth ? formatCurrency(networth.netInvestmentAmount) : "₹0"}
+            loading={isLoading}
           />
-          <LevelItem
-            narrow
-            title="Gain / Loss"
-            color={networth.gainAmount >= 0 ? financialColors.gainText : financialColors.lossText}
-            value={formatCurrency(networth.gainAmount)}
+          <Metric
+            label="Gain / Loss"
+            value={networth ? (networth.gainAmount >= 0 ? `+${formatCurrency(networth.gainAmount)}` : formatCurrency(networth.gainAmount)) : "₹0"}
+            status={networth ? (networth.gainAmount >= 0 ? "positive" : "negative") : "neutral"}
+            loading={isLoading}
           />
-          <LevelItem narrow title="XIRR" value={formatFloat(xirr)} />
+          <Metric
+            label="XIRR"
+            value={networth ? `${formatFloat(xirr)}%` : "0%"}
+            status={xirr > 0 ? "positive" : (xirr < 0 ? "negative" : "neutral")}
+            loading={isLoading}
+          />
         </MetricStrip>
-      </Section>
+      </div>
     {/if}
 
-    <!-- Row 1B: Checking Balance Snapshot -->
+    <!-- Row 1B: Checking / Cash Accounts Summary -->
     {#if !_.isEmpty(checkingBalances)}
-      <Section title="Checking Balance" titleHref="/assets/balance">
-        <ResponsiveGrid cols="auto-fit" minColWidth="160px" gap={2}>
+      <div class="rounded-xl p-4 sm:p-5 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Cash Accounts</span>
+          <a href="/assets/balance" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">
+            View All
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {#each _.values(checkingBalances) as assetBreakdown}
-            <BalanceCard {assetBreakdown} />
+            {@const name = restName(restName(assetBreakdown.group)) || restName(assetBreakdown.group) || assetBreakdown.group}
+            <a
+              href="/assets/gain/{encodeURIComponent(assetBreakdown.group)}"
+              class="flex items-center justify-between p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] transition-colors"
+            >
+              <div class="flex items-center gap-2.5 min-w-0 pr-2">
+                <i class="fa-solid fa-wallet text-xs text-[var(--paisa-muted-foreground)]"></i>
+                <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate" title={assetBreakdown.group}>
+                  {name}
+                </span>
+              </div>
+              <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
+                {formatCurrency(assetBreakdown.marketAmount)}
+              </span>
+            </a>
           {/each}
-        </ResponsiveGrid>
-      </Section>
+        </div>
+      </div>
     {/if}
 
     <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
     <div class="paisa-dashboard-row paisa-dashboard-visualizations">
-      <Section title="Cash Flow" titleHref="/cash_flow/monthly" class="paisa-dashboard-cell">
+      <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+        <div class="flex items-center justify-between mb-3">
+          <a href="/cash_flow/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+            Cash Flow
+          </a>
+        </div>
         {#if hasCashFlowData}
           <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
         {/if}
@@ -222,22 +265,21 @@
           preserveChildren
           onresize={(dim) => cashflowChart?.resize(dim)}
         >
-          <svg
-            id="d3-current-cash-flow"
-            height="250"
-            width="100%"
-          />
+          <svg id="d3-current-cash-flow" height="250" width="100%"></svg>
         </ChartFrame>
-      </Section>
+      </div>
 
-      <Section title="Expenses" titleHref="/expense/monthly">
-        {#snippet action()}
+      <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+        <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+          <a href="/expense/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+            Expenses
+          </a>
           <LastNMonths n={3} bind:value={month} />
-        {/snippet}
+        </div>
 
-        <div class="mb-3 is-flex is-align-items-center">
-          <span class="has-text-grey is-size-7 mr-2">Total Monthly:</span>
-          <span class="is-size-5 has-text-weight-bold" style="color: {financialColors.expenses}">
+        <div class="mb-3 flex items-baseline gap-2">
+          <span class="text-xs text-[var(--paisa-muted-foreground)]">Total Monthly:</span>
+          <span class="text-base font-semibold text-[var(--paisa-foreground)] tabular-nums">
             {formatCurrency(totalExpense)}
           </span>
         </div>
@@ -249,65 +291,174 @@
           preserveChildren
           onresize={(dim) => expenseBreakdown?.resize(dim)}
         >
-          <svg id="d3-current-month-breakdown" width="100%" />
+          <svg id="d3-current-month-breakdown" width="100%"></svg>
         </ChartFrame>
-      </Section>
+      </div>
     </div>
 
-    <!-- Row 3: Operational Data (Budget ~35% + Recent Transactions ~65%) -->
+    <!-- Row 3: Operational Data (Budget ~40% + Recent Transactions ~60%) -->
     <div class="paisa-dashboard-row paisa-dashboard-operations">
-      {#if currentBudget}
-        <Section title="Budget" titleHref="/expense/budget">
-          <div class="paisa-dashboard-budget-list">
-            {#each currentBudget.accounts as accountBudget (accountBudget)}
-              <BudgetCard compact {accountBudget} />
+      {#if currentBudget && currentBudget.accounts && currentBudget.accounts.length > 0}
+        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/expense/budget" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+              Needs Attention
+            </a>
+          </div>
+          <div class="space-y-3">
+            {#each currentBudget.accounts as accountBudget (accountBudget.account)}
+              {@const isOverspent = accountBudget.available < 0}
+              {@const percent = accountBudget.forecast > 0 ? (accountBudget.actual / accountBudget.forecast) * 100 : 0}
+              <div class="p-3 rounded-lg bg-[var(--paisa-surface-raised)] border border-[var(--paisa-border-subtle)]">
+                <div class="flex items-center justify-between mb-1.5 gap-2">
+                  <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate" title={accountBudget.account}>
+                    {restName(accountBudget.account)}
+                  </span>
+                  <span class="text-xs font-semibold tabular-nums whitespace-nowrap {isOverspent ? 'text-[var(--paisa-negative)]' : 'text-[var(--paisa-positive)]'}">
+                    {isOverspent ? 'Over by ' : 'Available '}{formatCurrency(Math.abs(accountBudget.available))}
+                  </span>
+                </div>
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] mb-1.5">
+                  <div
+                    class="h-full rounded-full transition-all {isOverspent ? 'bg-[var(--paisa-negative)]' : (percent > 85 ? 'bg-[var(--paisa-warning)]' : 'bg-[var(--paisa-positive)]')}"
+                    style="width: {Math.min(100, Math.max(0, percent))}%"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-[var(--paisa-muted-foreground)] tabular-nums">
+                  <span>Spent {formatCurrency(accountBudget.actual)}</span>
+                  <span>Budget {formatCurrency(accountBudget.forecast)}</span>
+                </div>
+              </div>
             {/each}
           </div>
-        </Section>
+        </div>
       {/if}
 
       {#if !_.isEmpty(transactions)}
-        <Section title="Recent Transactions" titleHref="/ledger/transaction">
-          <ResponsiveGrid variant="transactions" gap={2}>
-            {#each _.take(transactions, 12) as t}
-              <TransactionCard {t} />
+        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/ledger/transaction" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+              Recent Activity
+            </a>
+            <a href="/ledger/transaction" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">
+              View All
+            </a>
+          </div>
+          <div class="divide-y divide-[var(--paisa-border-subtle)]">
+            {#each _.take(transactions, 8) as t}
+              {@const posting = t.postings[0]}
+              <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-[var(--paisa-surface-hover)] -mx-2 px-2 rounded-md transition-colors">
+                <div class="min-w-0 flex-1 pr-3">
+                  <a
+                    href={postingUrl(posting)}
+                    class="text-sm font-medium text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)] truncate block"
+                  >
+                    {posting.payee || "Unknown"}
+                  </a>
+                  <div class="text-xs text-[var(--paisa-muted-foreground)] flex items-center gap-2 mt-0.5">
+                    <span>{restName(posting.account)}</span>
+                    <span>·</span>
+                    <span class="tabular-nums">{posting.date.format("DD MMM YYYY")}</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
+                    {formatCurrency(posting.amount)}
+                  </span>
+                </div>
+              </div>
             {/each}
-          </ResponsiveGrid>
-        </Section>
+          </div>
+        </div>
       {/if}
     </div>
 
     <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
     <div class="paisa-dashboard-row paisa-dashboard-longterm">
       {#if !_.isEmpty(goalSummaries)}
-        <Section title="Goals" titleHref="/more/goals">
-          <div class="paisa-dashboard-goals-list">
-            {#each goalSummaries as goal}
-              <GoalSummaryCard {goal} small />
+        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/more/goals" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+              Goals
+            </a>
+          </div>
+          <div class="space-y-3">
+            {#each goalSummaries as goal (goal.name)}
+              {@const completed = goal.target > 0 ? (goal.current / goal.target) * 100 : 0}
+              <a
+                href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
+                class="block p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] transition-colors"
+              >
+                <div class="flex items-center justify-between mb-1.5 gap-2">
+                  <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{goal.name}</span>
+                  <span class="text-xs font-semibold text-[var(--paisa-foreground)] tabular-nums">
+                    {formatPercentage(completed / 100, 1)}
+                  </span>
+                </div>
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] mb-1.5">
+                  <div
+                    class="h-full rounded-full bg-[var(--paisa-primary)] transition-all"
+                    style="width: {Math.min(100, Math.max(0, completed))}%"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-[var(--paisa-muted-foreground)] tabular-nums">
+                  <span>{formatCurrency(goal.current)} of {formatCurrency(goal.target)}</span>
+                  {#if goal.targetDate && dayjs(goal.targetDate).isValid()}
+                    <span>{dayjs(goal.targetDate).fromNow()}</span>
+                  {/if}
+                </div>
+              </a>
             {/each}
           </div>
-        </Section>
+        </div>
       {/if}
 
       {#if !_.isEmpty(transactionSequences)}
-        <Section title="Recurring" titleHref="/cash_flow/recurring">
-          <div class="paisa-dashboard-recurring-grid paisa-overflow-hidden">
-            {#each transactionSequences as ts (ts)}
-              <UpcomingCard transactionSequece={ts} />
+        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
+              Upcoming / Recurring
+            </a>
+          </div>
+          <div class="divide-y divide-[var(--paisa-border-subtle)]">
+            {#each transactionSequences as ts (ts.key)}
+              {@const schedule = nextUnpaidSchedule(ts)}
+              {@const isPastDue = schedule?.scheduled ? schedule.scheduled.isBefore(now()) : false}
+              <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-[var(--paisa-surface-hover)] -mx-2 px-2 rounded-md transition-colors">
+                <div class="min-w-0 flex-1 pr-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{ts.key}</span>
+                    <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
+                  </div>
+                  {#if schedule?.scheduled}
+                    <div class="text-xs text-[var(--paisa-muted-foreground)] flex items-center gap-2 mt-0.5">
+                      <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
+                      <span>·</span>
+                      <span class={isPastDue ? 'text-[var(--paisa-negative)] font-medium' : ''}>
+                        {isPastDue ? 'Past due' : `Due ${schedule.scheduled.fromNow()}`}
+                      </span>
+                    </div>
+                  {/if}
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
+                    {formatCurrencyCrude(totalRecurring(ts))}
+                  </span>
+                </div>
+              </div>
             {/each}
           </div>
-        </Section>
+        </div>
       {/if}
     </div>
-  </Page>
+  </div>
 {/if}
 
 <style lang="scss">
   .paisa-dashboard-row {
     display: grid;
-    gap: var(--paisa-space-4);
+    gap: var(--paisa-space-5);
     width: 100%;
-    margin-bottom: var(--paisa-space-5);
 
     > :global(*) {
       min-width: 0;
@@ -318,14 +469,14 @@
   .paisa-dashboard-visualizations {
     grid-template-columns: 1fr;
     @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     }
   }
 
   .paisa-dashboard-operations {
     grid-template-columns: 1fr;
     @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     }
 
     > :only-child {
@@ -336,7 +487,7 @@
   .paisa-dashboard-longterm {
     grid-template-columns: 1fr;
     @media screen and (min-width: 1024px) {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     > :only-child {

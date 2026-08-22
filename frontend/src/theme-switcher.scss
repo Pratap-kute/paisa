@@ -231,18 +231,20 @@
 }
 
 .theme-toggle {
-  --size: 32px;
-  --icon-fill: var(--paisa-navbar-text);
-  --icon-fill-hover: var(--paisa-brand-primary);
+  --size: 44px;
+  --icon-fill: var(--paisa-muted-foreground);
+  --icon-fill-hover: var(--paisa-foreground);
 
   background: none;
   border: none;
-  padding: 0.25rem;
+  padding: 0;
 
   inline-size: var(--size);
   block-size: var(--size);
+  min-width: 44px;
+  min-height: 44px;
   aspect-ratio: 1;
-  border-radius: var(--paisa-radius-full);
+  border-radius: var(--paisa-radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -253,21 +255,24 @@
   transition: background-color var(--paisa-transition-fast), color
     var(--paisa-transition-fast);
 
-  &:hover,
-  &:focus-visible {
+  &:hover {
     background-color: var(--paisa-surface-hover);
   }
 
-  outline-offset: 2px;
+  &:focus-visible {
+    background-color: var(--paisa-surface-hover);
+    outline: 2px solid var(--paisa-primary);
+    outline-offset: 2px;
+  }
 
   svg {
-    inline-size: 100%;
-    block-size: 100%;
+    inline-size: 20px;
+    block-size: 20px;
     stroke-linecap: round;
   }
 }
 
 [data-theme="dark"] .theme-toggle {
-  --icon-fill: var(--paisa-navbar-text);
-  --icon-fill-hover: var(--paisa-brand-primary);
+  --icon-fill: var(--paisa-muted-foreground);
+  --icon-fill-hover: var(--paisa-foreground);
 }
