@@ -471,7 +471,7 @@
     class="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-3 lg:left-64 lg:max-w-[calc(100vw-16rem)] lg:px-6"
   >
     <div class="flex min-w-0 items-center gap-3">
-      <nav class="flex items-center gap-3 lg:hidden" aria-label="main navigation">
+      <div class="flex items-center gap-3 lg:hidden">
         <button
           type="button"
           onclick={() => (mobileDrawerOpen = true)}
@@ -487,7 +487,7 @@
           </div>
           <span class="text-base font-bold tracking-tight text-[var(--paisa-foreground)]">Paisa</span>
         </div>
-      </nav>
+      </div>
 
       <div
         class="hidden w-64 max-w-full cursor-pointer items-center gap-2 rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-3 py-1.5 text-xs text-[var(--paisa-muted-foreground)] transition-colors hover:border-[var(--paisa-border-strong)] lg:flex"

@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 const routes = [
   { name: "dashboard", path: "/", readyText: "Net worth" },
   { name: "expense-monthly", path: "/expense/monthly" },
-  { name: "transactions", path: "/ledger/transaction", ready: "p.is-6" },
+  { name: "transactions", path: "/ledger/transaction", readyText: "Transactions" },
   { name: "ledger-import", path: "/ledger/import" },
   { name: "config", path: "/more/config" },
   { name: "ledger-editor", path: "/ledger/editor" },
@@ -18,7 +18,6 @@ async function applySmokeViewport(page: Page) {
 }
 
 function readyLocator(page: Page, route: (typeof routes)[number]) {
-  if ("ready" in route && route.ready) return page.locator(route.ready);
   if ("readyText" in route && route.readyText) {
     return page.getByText(route.readyText, { exact: true });
   }
