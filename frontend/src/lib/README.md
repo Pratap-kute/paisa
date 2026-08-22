@@ -1,7 +1,9 @@
 # Frontend library structure
 
 - `api/`: API workflows that coordinate backend requests and UI feedback.
-- `charts/`: D3 renderers and report-specific visualization logic.
+- `charts/`: renderer-independent financial adapters and internal ECharts option
+  builders. Paisa chart components render through `EChartSurface`; ordinary UI
+  uses Svelte, HTML, and CSS.
 - `components/`: Svelte components grouped as `layout`, `ui`, `ledger`,
   `transactions`, and `finance`.
 - `core/`: broadly shared browser utilities, colors, icons, persistence, and

@@ -1,6 +1,6 @@
 /**
  * Paisa Financial Visualization & Chart Palette
- * Dedicated color palettes and generators for D3 SVG charts and data visualizations.
+ * Engine-neutral color palettes and resolvers for financial visualizations.
  */
 
 import chroma from "chroma-js";

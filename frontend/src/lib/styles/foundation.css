@@ -8,6 +8,10 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+.paisa-font-mono {
+  font-family: var(--paisa-font-mono);
+}
+
 :root {
   --paisa-canvas: #f8fafc;
   --paisa-surface: #ffffff;

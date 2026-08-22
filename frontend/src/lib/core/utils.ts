@@ -1167,10 +1167,9 @@ export function dueDateIcon(
   let icon = "fa-circle-check";
   let glyph = iconGlyph("fa6-solid:circle-check");
   let color = "paisa-text-success";
-  let svgColor = "svg-text-success";
 
   if (amountDue !== undefined && amountDue <= 0) {
-    return { icon, color, svgColor, glyph };
+    return { icon, color, glyph };
   }
 
   if (!clearedDate) {
@@ -1178,22 +1177,18 @@ export function dueDateIcon(
       color = "paisa-text-danger";
       icon = "fa-exclamation-triangle";
       glyph = iconGlyph("fa6-solid:triangle-exclamation");
-      svgColor = "svg-text-danger";
     } else {
       color = "paisa-text-muted";
-      svgColor = "svg-text-grey";
     }
   } else {
     if (clearedDate.isSameOrBefore(dueDate, "day")) {
       color = "paisa-text-success";
-      svgColor = "svg-text-success";
     } else {
       color = "paisa-text-warning";
-      svgColor = "svg-text-warning-dark";
     }
   }
 
-  return { icon, color, svgColor, glyph };
+  return { icon, color, glyph };
 }
 
 export function buildTree<I>(

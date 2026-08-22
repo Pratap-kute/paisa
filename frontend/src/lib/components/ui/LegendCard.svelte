@@ -51,7 +51,7 @@
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label whitespace-pre text-xs text-[var(--paisa-muted-foreground)] custom-icon">
+        <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
           {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
         </div>
@@ -75,7 +75,7 @@
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label whitespace-pre text-xs text-[var(--paisa-muted-foreground)] custom-icon">
+        <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
           {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
         </div>
@@ -85,6 +85,29 @@
 </div>
 
 <style>
+  .legend-label {
+    color: var(--paisa-chart-text);
+    font-family: var(--paisa-font-sans);
+    font-size: var(--paisa-font-size-sm);
+    text-transform: capitalize;
+    text-align: center;
+    line-height: var(--paisa-line-height-normal);
+  }
+
+  .legend-box {
+    border-radius: var(--paisa-radius-sm);
+    transition: background-color var(--paisa-transition-fast);
+  }
+
+  .legend-box:hover {
+    background-color: var(--paisa-surface-hover);
+  }
+
+  .legend-box.selected {
+    background-color: var(--paisa-surface-active);
+    box-shadow: inset 0 0 0 1px var(--paisa-brand-primary);
+  }
+
   .legend-pattern-diagonal {
     background-image: repeating-linear-gradient(
       135deg,
