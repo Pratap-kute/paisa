@@ -497,7 +497,7 @@ export function createCurrentExpensesBreakdown(
     const narrow = containerWidth < 480;
     return {
       top: 0,
-      right: rem(narrow ? 72 : 160),
+      right: rem(narrow ? 116 : 160),
       bottom: rem(20),
       left: rem(narrow ? 56 : 100),
     };

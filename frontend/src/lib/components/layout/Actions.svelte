@@ -47,13 +47,13 @@
 
 <div
   bind:this={dropdownEl}
-  class="dropdown ml-2 {isMobile() ? 'is-left' : 'is-right'}"
+  class="dropdown {isMobile() ? 'is-left' : 'is-right'}"
   class:is-active={open}
 >
   <div class="dropdown-trigger dropdown-icon">
     <button
       type="button"
-      class="button is-large"
+      class="paisa-action-btn"
       aria-label="More actions"
       aria-haspopup="true"
       aria-expanded={open}
@@ -62,7 +62,7 @@
         open = !open;
       }}
     >
-      <span class="icon">
+      <span class="icon is-small">
         <i class="fas fa-ellipsis-vertical"></i>
       </span>
     </button>
@@ -121,3 +121,33 @@
     </div>
   </div>
 </div>
+
+<style lang="scss">
+  .paisa-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: var(--paisa-radius-md, 0.375rem);
+    border: none;
+    background: transparent;
+    color: var(--paisa-muted-foreground);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color var(--paisa-transition-fast), color var(--paisa-transition-fast);
+
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+      color: var(--paisa-foreground);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--paisa-primary);
+      outline-offset: 2px;
+    }
+  }
+</style>

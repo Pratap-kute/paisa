@@ -86,7 +86,11 @@ export function createMonthlyFlow(
   let { width: currentWidth, height: currentHeight } = containerPlotSize(
     el,
     margin,
+    options.rotate ? 300 : 220,
   );
+  if (!options.rotate) {
+    currentHeight = Math.min(240, currentHeight);
+  }
   svg
     .attr("width", currentWidth + margin.left + margin.right)
     .attr("height", currentHeight + margin.top + margin.bottom);
@@ -379,11 +383,12 @@ export function createMonthlyFlow(
 
   function resize(dimensions: { width: number; height: number }) {
     if (dimensions.width <= 0 || dimensions.height <= 0) return;
-    svg.attr("width", dimensions.width).attr("height", dimensions.height);
+    const targetHeight = options.rotate ? dimensions.height : Math.min(280, dimensions.height);
+    svg.attr("width", dimensions.width).attr("height", targetHeight);
     currentWidth = Math.max(50, dimensions.width - margin.left - margin.right);
     currentHeight = Math.max(
       50,
-      dimensions.height - margin.top - margin.bottom,
+      targetHeight - margin.top - margin.bottom,
     );
 
     x.range([0, currentWidth]);

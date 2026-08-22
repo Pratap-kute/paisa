@@ -283,7 +283,7 @@
     width: 100%;
 
     @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(280px, 1fr) minmax(0, 3fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
     }
   }
 
