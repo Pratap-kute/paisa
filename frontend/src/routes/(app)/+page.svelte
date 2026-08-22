@@ -1,8 +1,7 @@
 <script lang="ts">
   import * as cashFlow from "$lib/charts/cash_flow";
-  import * as expense from "$lib/charts/expense/monthly";
+  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import type { MonthlyFlowChart } from "$lib/charts/cash_flow";
-  import type { ChartHandle } from "$lib/charts/resize";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
@@ -12,6 +11,7 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import Button from "$lib/components/ui/Button.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import { refresh } from "../../store";
   import {
     enrichTrantionSequence,
@@ -51,8 +51,6 @@
   let expenses: { [key: string]: Posting[] } = $state({});
   let xirr = $state(0);
   let networth: Networth | undefined = $state();
-  let renderer: ((data: Posting[]) => void) | undefined = $state();
-  let expenseBreakdown: ChartHandle<Posting[]> | null = $state(null);
   let cashflowChart: MonthlyFlowChart | null = $state(null);
   let transactions: Transaction[] = $state([]);
   let budgetsByMonth: Record<string, Budget> = $state({});
@@ -75,17 +73,13 @@
   let currentBudget = $derived(budgetsByMonth[month]);
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
   let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
+  let selectedExpenseBreakdownData = $derived(
+    buildExpenseBreakdownComparison(selectedExpenses),
+  );
   let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
   let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
 
-  $effect(() => {
-    if (renderer) {
-      renderer(selectedExpenses);
-    }
-  });
-
   onDestroy(() => {
-    expenseBreakdown?.destroy();
     cashflowChart?.destroy();
   });
 
@@ -114,11 +108,6 @@
       } else {
         isEmpty = false;
       }
-
-      const postings = _.chain(expenses).values().flatten().value();
-      const z = expense.colorScale(postings);
-      expenseBreakdown = expense.createCurrentExpensesBreakdown(z);
-      renderer = expenseBreakdown.update;
 
       cashflowChart = cashFlow.createMonthlyFlow(
         "#d3-current-cash-flow",
@@ -288,10 +277,12 @@
           rows={Math.min(8, selectedExpenses.length || 4)}
           empty={!hasSelectedExpenses}
           emptyMessage="No expenses this month"
-          preserveChildren
-          onresize={(dim) => expenseBreakdown?.resize(dim)}
         >
-          <svg id="d3-current-month-breakdown" width="100%"></svg>
+          <ComparisonBarChart
+            data={selectedExpenseBreakdownData}
+            ariaLabel="Dashboard monthly expense breakdown"
+            testId="dashboard-expense-breakdown-echart"
+          />
         </ChartFrame>
       </div>
     </div>

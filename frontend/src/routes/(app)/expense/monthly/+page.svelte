@@ -15,11 +15,10 @@
   } from "$lib/core/utils";
   import {
     renderMonthlyExpensesTimeline,
-    createCurrentExpensesBreakdown,
     renderCalendar,
   } from "$lib/charts/expense/monthly";
+  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
-  import type { ChartHandle } from "$lib/charts/resize";
   import { iconify } from "$lib/core/icon";
   import { dateRange, month, dateMin, dateMax, setAllowedDateRange } from "../../../../store";
   import { writable } from "svelte/store";
@@ -35,11 +34,10 @@
   import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let groups = writable<string[]>([]);
   let z: ScaleOrdinal<string, string, never> | undefined = $state(),
-    renderer: ((ps: Posting[]) => void) | undefined = $state(),
-    expenseBreakdown: ChartHandle<Posting[]> | null = $state(null),
     expenses: Posting[] | undefined = $state(),
     grouped_expenses: Record<string, Posting[]> | undefined = $state(),
     grouped_incomes: Record<string, Posting[]> | undefined = $state(),
@@ -65,7 +63,6 @@
     if (!expenses?.length) return;
 
     destroy?.();
-    expenseBreakdown?.destroy();
 
     ({ z, destroy, legends, resize: resizeTimeline } = renderMonthlyExpensesTimeline(
       expenses,
@@ -73,13 +70,10 @@
       month,
       dateRange,
     ));
-    expenseBreakdown = createCurrentExpensesBreakdown(z);
-    renderer = expenseBreakdown.update;
   }
 
   onDestroy(async () => {
     destroy?.();
-    expenseBreakdown?.destroy();
   });
 
   onMount(async () => {
@@ -122,6 +116,11 @@
   let selectedMonthExpenses: Posting[] = $derived(
     grouped_expenses?.[$month] || [],
   );
+  let selectedMonthBreakdownData = $derived(
+    buildExpenseBreakdownComparison(selectedMonthExpenses, {
+      color: (category) => z?.(category) || "var(--paisa-primary)",
+    }),
+  );
   let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
   let hasExpenses = $derived((expenses?.length ?? 0) > 0);
   let hasTrendInRange = $derived(
@@ -154,7 +153,7 @@
   );
 
   $effect(() => {
-    if (grouped_expenses && renderer && z) {
+    if (grouped_expenses && z) {
       renderCalendar($month, grouped_expenses[$month], z, $groups);
 
       const expenses = grouped_expenses[$month] || [];
@@ -195,8 +194,6 @@
             : formatPercentage(sum(investments) / netIncomeAmount) +
               " of net income";
       }
-
-      renderer(expenses);
     }
   });
 </script>
@@ -256,10 +253,12 @@
         rows={Math.min(8, selectedMonthExpenses.length || 4)}
         empty={!hasSelectedMonthExpenses}
         emptyMessage="No expenses recorded for {formattedCurrentMonth}"
-        preserveChildren
-        onresize={(dim) => expenseBreakdown?.resize(dim)}
       >
-        <svg id="d3-current-month-breakdown" width="100%" />
+        <ComparisonBarChart
+          data={selectedMonthBreakdownData}
+          ariaLabel="Monthly expense category breakdown"
+          testId="monthly-expense-breakdown-echart"
+        />
       </ChartFrame>
     </Section>
 

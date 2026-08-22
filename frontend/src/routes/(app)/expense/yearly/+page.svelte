@@ -5,10 +5,9 @@
   import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import {
     renderYearlyExpensesTimeline,
-    createCurrentExpensesBreakdown,
     renderCalendar,
   } from "$lib/charts/expense/yearly";
-  import type { ChartHandle } from "$lib/charts/resize";
+  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -22,11 +21,10 @@
   import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
   import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let groups = writable<string[]>([]);
   let z: ScaleOrdinal<string, string, never> | undefined = $state(),
-    renderer: ((ps: Posting[]) => void) | undefined = $state(),
-    expenseBreakdown: ChartHandle<Posting[]> | null = $state(null),
     expenses: Posting[] = $state([]),
     grouped_expenses: Record<string, Posting[]> = $state({}),
     grouped_incomes: Record<string, Posting[]> = $state({}),
@@ -49,10 +47,6 @@
 
   function initializeCharts() {
     if (!expenses?.length || !z) return;
-
-    expenseBreakdown?.destroy();
-    expenseBreakdown = createCurrentExpensesBreakdown(z);
-    renderer = expenseBreakdown.update;
   }
 
   onMount(async () => {
@@ -86,7 +80,6 @@
   });
 
   onDestroy(() => {
-    expenseBreakdown?.destroy();
   });
 
   function sum(postings: Posting[], sign = 1) {
@@ -100,6 +93,11 @@
   let currentYearExpenses: Posting[] = $derived(
     grouped_expenses[$year] || [],
   );
+  let currentYearBreakdownData = $derived(
+    buildExpenseBreakdownComparison(currentYearExpenses, {
+      color: (category) => z?.(category) || "var(--paisa-primary)",
+    }),
+  );
   let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
   let hasExpenses = $derived(expenses.length > 0);
   let postingCountSubtitle = $derived(
@@ -109,7 +107,7 @@
   );
 
   $effect(() => {
-    if (grouped_expenses && renderer && z) {
+    if (grouped_expenses && z) {
       renderCalendar(currentYearExpenses, z, $groups);
 
       const yearExpenses = grouped_expenses[$year] || [];
@@ -145,8 +143,6 @@
           ? ""
           : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
       }
-
-      renderer(yearExpenses);
     }
   });
 </script>
@@ -206,10 +202,12 @@
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
         emptyMessage="No expenses recorded for {$year}"
-        preserveChildren
-        onresize={(dim) => expenseBreakdown?.resize(dim)}
       >
-        <svg id="d3-current-year-breakdown" width="100%" />
+        <ComparisonBarChart
+          data={currentYearBreakdownData}
+          ariaLabel="Yearly expense category breakdown"
+          testId="yearly-expense-breakdown-echart"
+        />
       </ChartFrame>
     </Section>
 

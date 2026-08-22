@@ -127,7 +127,11 @@ for (const route of visualRoutes) {
       await expect(routeReady(page, route).first()).toBeVisible();
       if (route.name === "dashboard") {
         await expect(page.locator("#d3-current-cash-flow")).toBeVisible();
-        await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
+        await expect(
+          page.locator(
+            "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
+          ),
+        ).toBeVisible();
       }
       if (route.name === "savings-goal" || route.name === "retirement-goal") {
         const prefix = route.name === "savings-goal" ? "savings" : "retirement";

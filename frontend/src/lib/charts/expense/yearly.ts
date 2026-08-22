@@ -8,12 +8,10 @@ import {
   formatCurrency,
   formatCurrencyCrude,
   formatCurrencyCrudeWithPrecision,
-  formatFixedWidthFloat,
   formatPercentage,
   type Legend,
   now,
   type Posting,
-  rem,
   secondName,
   skipTicks,
   tooltip,
@@ -21,8 +19,7 @@ import {
 import COLORS, { generateColorScheme } from "../../core/colors";
 import type { Writable } from "svelte/store";
 import { iconify } from "../../core/icon";
-import { byExpenseGroup, expenseGroup, pieData } from "../expense";
-import { plotSize, type ChartHandle, type Dimensions } from "../resize";
+import { expenseGroup, pieData } from "../expense";
 import type { Dayjs } from "dayjs";
 
 export function renderCalendar(
@@ -384,175 +381,3 @@ export function renderYearlyExpensesTimeline(
 
   return { z, legends, resize };
 }
-
-export function createCurrentExpensesBreakdown(
-  z: d3.ScaleOrdinal<string, string, never>,
-  id = "#d3-current-year-breakdown",
-): ChartHandle<Posting[]> {
-  const BAR_HEIGHT = rem(28);
-  const LABEL_GAP = rem(8);
-  let postings: Posting[] = [];
-  let size: Dimensions = { width: 0, height: 0 };
-
-  function breakdownMargins(containerWidth: number, keys: string[]) {
-    const narrow = containerWidth < 480;
-    const longest = _.maxBy(keys, (k) => k.length)?.length ?? 0;
-    const left = Math.max(
-      rem(narrow ? 72 : 96),
-      rem(Math.ceil(longest * (narrow ? 6.5 : 7.5)) + (narrow ? 16 : 20)),
-    );
-    return {
-      top: 0,
-      right: rem(narrow ? 108 : 132),
-      bottom: rem(20),
-      left,
-    };
-  }
-
-  function draw() {
-    const el = document.getElementById(id.substring(1));
-    if (!el?.parentElement) return;
-
-    const svg = d3.select(id);
-    svg.selectAll("*").remove();
-
-    const containerW = size.width || el.parentElement.clientWidth;
-    const narrow = containerW < 480;
-
-    interface Point {
-      category: string;
-      postings: Posting[];
-      total: number;
-    }
-    const categories = byExpenseGroup(postings);
-    const keys = _.chain(categories)
-      .sortBy((c) => c.total)
-      .map((c) => c.category)
-      .value();
-
-    const margin = breakdownMargins(containerW, keys);
-    const { width, containerWidth } = plotSize(el, margin, size, {
-      minWidth: rem(80),
-    });
-    const g = svg.append("g").attr(
-      "transform",
-      "translate(" + margin.left + "," + margin.top + ")",
-    );
-
-    const points = _.values(categories);
-    const total = _.sumBy(points, (p) => p.total);
-
-    const height = BAR_HEIGHT * keys.length;
-    svg
-      .attr("height", height + margin.top + margin.bottom)
-      .attr("width", containerWidth);
-
-    if (_.isEmpty(points) || total <= 0) {
-      return;
-    }
-
-    const x = d3.scaleLinear().range([0, width]);
-    const y = d3.scaleBand().paddingInner(0.1).paddingOuter(0);
-    y.domain(keys);
-    x.domain([0, d3.max(points, (p) => p.total) ?? 1]);
-    y.range([height, 0]);
-
-    g.append("g")
-      .attr("class", "axis y")
-      .attr("transform", "translate(0," + height + ")")
-      .call(
-        d3
-          .axisBottom(x)
-          .tickSize(-height)
-          .tickFormat(skipTicks(60, x, formatCurrencyCrude)),
-      );
-
-    g.append("g")
-      .attr("class", "axis y dark")
-      .call(
-        d3.axisLeft(y).tickFormat((g) =>
-          iconify(g, { group: "Expenses", suffix: true })
-        ),
-      );
-
-    const tooltipContent = (d: Point) => {
-      const pointTotal = _.sumBy(d.postings, (p) => p.amount);
-      const byMonth: Record<string, number> = _.chain(d.postings)
-        .groupBy((e) => e.date.format("MMM"))
-        .map((ps, group) => [group, _.sumBy(ps, (p) => p.amount)])
-        .fromPairs()
-        .value();
-      return tooltip(
-        _.map(byMonth, (amount, month) => {
-          return [
-            month,
-            [formatPercentage(amount / pointTotal, 1), "paisa-text-right"],
-            [formatCurrency(amount), "paisa-text-bold paisa-text-right"],
-          ];
-        }),
-        {
-          total: formatCurrency(pointTotal),
-          header: `${
-            d.postings[0] ? financialYear(d.postings[0].date) : ""
-          } ${d.category}`,
-        },
-      );
-    };
-
-    const bar = g.append("g");
-    bar
-      .selectAll("rect")
-      .data(points)
-      .join("rect")
-      .attr("fill", (d) => z(d.category))
-      .attr("data-tippy-content", tooltipContent)
-      .attr("x", x(0))
-      .attr("y", (d) =>
-        y(d.category) +
-        (y.bandwidth() - Math.min(y.bandwidth(), BAR_HEIGHT)) / 2)
-      .attr("width", (d) => x(d.total))
-      .attr("height", y.bandwidth());
-
-    const rightLabel = (d: Point) =>
-      `${formatCurrency(d.total)} ${
-        formatFixedWidthFloat(total > 0 ? (d.total / total) * 100 : 0, 6)
-      }%`;
-
-    bar
-      .selectAll("text")
-      .data(points)
-      .join("text")
-      .attr("text-anchor", "start")
-      .attr("dominant-baseline", "middle")
-      .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
-      .attr("x", width + LABEL_GAP)
-      .style("white-space", "pre")
-      .style("font-size", narrow ? "0.75rem" : "0.875rem")
-      .style("font-weight", "600")
-      .style("fill", "var(--paisa-chart-text)")
-      .attr("class", "paisa-font-mono")
-      .text(rightLabel);
-  }
-
-  return {
-    update(next) {
-      postings = next;
-      draw();
-    },
-    resize(dimensions) {
-      size = dimensions;
-      draw();
-    },
-    destroy() {
-      d3.select(id).selectAll("*").remove();
-    },
-  };
-}
-
-export function renderCurrentExpensesBreakdown(
-  z: d3.ScaleOrdinal<string, string, never>,
-) {
-  return createCurrentExpensesBreakdown(z).update;
-}
-
-

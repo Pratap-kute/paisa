@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import DueDate from "$lib/components/finance/DueDate.svelte";
   import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
-  import { renderYearlySpends } from "$lib/charts/credit_cards";
+  import { buildCreditCardYearlySpendsComparison } from "$lib/charts/bar_comparison_data";
   import { iconify } from "$lib/core/icon";
   import {
     ajax,
@@ -21,17 +21,16 @@
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import Select from "$lib/components/ui/Select.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   interface Props {
     data: PageData;
   }
 
   let { data }: Props = $props();
-  let svg: SVGElement = $state();
 
   let creditCard: CreditCardSummary = $state();
   let found = false;
-  let rendered = $state(false);
   let selectedBillIndex = $state(0);
 
   let billOptions = $derived(
@@ -42,6 +41,9 @@
     creditCard && creditCard.creditLimit > 0
       ? creditCard.balance / creditCard.creditLimit
       : 0,
+  );
+  let yearlySpendsData = $derived(
+    creditCard ? buildCreditCardYearlySpendsComparison(creditCard.yearlySpends) : undefined,
   );
 
   function lastBillIndex(creditCard: CreditCardSummary): number {
@@ -57,13 +59,6 @@
     if (bill.paidDate) return `Paid ${bill.paidDate.format("DD MMM YYYY")}`;
     return `Due ${bill.dueDate.fromNow()}`;
   }
-
-  $effect(() => {
-    if (creditCard && svg && !rendered) {
-      renderYearlySpends(svg, creditCard.yearlySpends);
-      rendered = true;
-    }
-  });
 
   $effect(() => {
     if (billOptions.length > 0 && selectedBillIndex >= billOptions.length) {
@@ -202,16 +197,14 @@
     </Section>
 
     <Section title="Spending Trend">
-      <ChartFrame
-        type="category"
-        onresize={() => {
-          if (svg && creditCard) {
-            svg.replaceChildren();
-            renderYearlySpends(svg, creditCard.yearlySpends);
-          }
-        }}
-      >
-        <svg bind:this={svg} width="100%" />
+      <ChartFrame type="category" rows={Math.max(3, yearlySpendsData?.points.length ?? 3)}>
+        {#if yearlySpendsData}
+          <ComparisonBarChart
+            data={yearlySpendsData}
+            ariaLabel="Credit card yearly spending"
+            testId="credit-card-yearly-spends-echart"
+          />
+        {/if}
       </ChartFrame>
     </Section>
 

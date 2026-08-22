@@ -1,4 +1,4 @@
-import { BarChart, LineChart, SankeyChart } from "echarts/charts";
+import { BarChart, LineChart, SankeyChart, ScatterChart } from "echarts/charts";
 import {
   GridComponent,
   LegendComponent,
@@ -16,6 +16,7 @@ use([
   LineChart,
   MarkLineComponent,
   SankeyChart,
+  ScatterChart,
   TooltipComponent,
 ]);
 

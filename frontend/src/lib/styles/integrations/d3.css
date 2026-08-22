@@ -286,7 +286,6 @@ svg text,
 
 #d3-allocation-category,
 #d3-allocation-value,
-#d3-allocation-target-treemap,
 [id^="d3-portfolio"] {
   position: relative;
   overflow: hidden;

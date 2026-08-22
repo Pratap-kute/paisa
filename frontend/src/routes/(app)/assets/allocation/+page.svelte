@@ -1,9 +1,9 @@
 <script lang="ts">
   import {
     renderAllocation,
-    renderAllocationTarget,
     renderAllocationTimeline,
   } from "$lib/charts/allocation";
+  import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
   import COLORS, { generateColorScheme } from "$lib/core/colors";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Table from "$lib/components/ui/Table.svelte";
@@ -23,6 +23,7 @@
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});
@@ -35,6 +36,7 @@
 
   let hasTargets = $derived(!_.isEmpty(allocationTargets));
   let hasAllocationData = $derived(!_.isEmpty(aggregates));
+  let allocationTargetData = $derived(buildAllocationTargetComparison(allocationTargets));
 
   const columns: ColumnDefinition[] = [
     {
@@ -81,13 +83,6 @@
     },
   ];
 
-  function renderTargetCharts() {
-    if (!color) return;
-    document.getElementById("d3-allocation-target")?.replaceChildren();
-    document.getElementById("d3-allocation-target-treemap")?.replaceChildren();
-    renderAllocationTarget(allocationTargets, color);
-  }
-
   function renderCategoryValueCharts() {
     if (!color) return;
     renderAllocation(aggregates, color);
@@ -126,7 +121,6 @@
 
       isLoading = false;
       await tick();
-      renderTargetCharts();
       renderCategoryValueCharts();
       renderTimelineChart();
     } catch {
@@ -152,9 +146,12 @@
   {:else}
     <Section title="Allocation Targets" subtitle="Current vs configured target weights">
       {#if hasTargets}
-        <ChartFrame type="dynamic" onresize={renderTargetCharts}>
-          <div id="d3-allocation-target-treemap" style="width: 100%; position: relative"></div>
-          <svg id="d3-allocation-target" />
+        <ChartFrame type="dynamic" rows={Math.max(4, allocationTargetData.points.length)}>
+          <ComparisonBarChart
+            data={allocationTargetData}
+            ariaLabel="Allocation target versus current weights"
+            testId="allocation-target-echart"
+          />
         </ChartFrame>
       {:else}
         <ZeroState item={[]}>

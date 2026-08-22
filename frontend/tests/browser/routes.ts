@@ -6,15 +6,27 @@ export type VisualRoute = {
 };
 
 export const visualRoutes: VisualRoute[] = [
-  { name: "dashboard", path: "/", readyText: "Net worth" },
-  { name: "assets-allocation", path: "/assets/allocation" },
+  {
+    name: "dashboard",
+    path: "/",
+    ready: "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
+  },
+  {
+    name: "assets-allocation",
+    path: "/assets/allocation",
+    ready: "#d3-allocation-category",
+  },
   {
     name: "assets-analysis",
     path: "/assets/analysis",
     ready: "#d3-portfolio-security-type > g",
   },
   { name: "assets-balance", path: "/assets/balance" },
-  { name: "assets-gain", path: "/assets/gain" },
+  {
+    name: "assets-gain",
+    path: "/assets/gain",
+    ready: "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
+  },
   {
     name: "assets-gain-detail",
     path: "/assets/gain/Assets%3AEquity",
@@ -44,7 +56,11 @@ export const visualRoutes: VisualRoute[] = [
     ready: "[data-testid='cash-flow-yearly-echart'][data-chart-ready='true']",
   },
   { name: "expense-budget", path: "/expense/budget", readyText: "All Budgets" },
-  { name: "expense-monthly", path: "/expense/monthly" },
+  {
+    name: "expense-monthly",
+    path: "/expense/monthly",
+    ready: "[data-testid='monthly-expense-breakdown-echart'][data-chart-ready='true']",
+  },
   {
     name: "expense-yearly",
     path: "/expense/yearly",
@@ -82,6 +98,7 @@ export const visualRoutes: VisualRoute[] = [
   {
     name: "credit-card-detail",
     path: "/liabilities/credit_cards/Liabilities%3ACreditCard%3AFreedom",
+    ready: "[data-testid='credit-card-yearly-spends-echart'][data-chart-ready='true']",
   },
   { name: "liabilities-interest", path: "/liabilities/interest" },
   {
@@ -155,7 +172,7 @@ export const chartSnapshots = [
   {
     name: "expense-monthly",
     path: "/expense/monthly",
-    locator: "#d3-current-month-breakdown",
+    locator: "[data-testid='monthly-expense-breakdown-echart']",
   },
 ] as const;
 

@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import { buildLegends, renderOverview } from "$lib/charts/gain";
-  import { createClientWidthChart, type ChartHandle } from "$lib/charts/resize";
+  import { buildLegends } from "$lib/charts/gain";
+  import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
   import { ajax, formatCurrency, type Gain, type Legend } from "$lib/core/utils";
   import _ from "lodash";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -12,15 +13,26 @@
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let legends: Legend[] = $state([]);
   let gains: Gain[] = $state([]);
-  let overviewChart: ChartHandle<null> | null = $state(null);
   let isLoading = $state(true);
   let totalGain = $state(0);
   let totalInvestment = $state(0);
 
   let hasGains = $derived(gains.length > 0);
+  let overviewData = $derived(buildGainOverviewComparison(gains));
+  let chartEvents = $derived([
+    {
+      event: "click" as const,
+      handler: (event: { dataIndex?: number }) => {
+        if (typeof event.dataIndex !== "number") return;
+        const account = overviewData.points[event.dataIndex]?.key;
+        if (account) goto(`/assets/gain/${account}`);
+      },
+    },
+  ]);
 
   onMount(async () => {
     try {
@@ -32,18 +44,9 @@
       );
       legends = buildLegends();
       isLoading = false;
-      await tick();
-      overviewChart = createClientWidthChart("#d3-gain-overview", (_data, _size) => {
-        renderOverview(gains);
-      });
-      overviewChart.update(null);
     } catch {
       isLoading = false;
     }
-  });
-
-  onDestroy(() => {
-    overviewChart?.destroy();
   });
 </script>
 
@@ -85,10 +88,15 @@
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame
         type="category"
-        class="[&_.paisa-chart-frame-body]:overflow-x-auto [&_.paisa-chart-frame-body]:overflow-y-visible [&_svg]:min-w-full"
-        onresize={(dim) => overviewChart?.resize(dim)}
+        rows={Math.max(5, overviewData.points.length)}
+        class="[&_.paisa-chart-frame-body]:overflow-y-visible"
       >
-        <svg id="d3-gain-overview" />
+        <ComparisonBarChart
+          data={overviewData}
+          ariaLabel="Asset gain account overview"
+          testId="asset-gain-overview-echart"
+          events={chartEvents}
+        />
       </ChartFrame>
     {/if}
   </Section>
