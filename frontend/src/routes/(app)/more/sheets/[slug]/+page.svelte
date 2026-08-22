@@ -20,7 +20,12 @@
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
   import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Select from "$lib/components/ui/Select.svelte";
 
   let ledgerFiles: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);
@@ -245,199 +250,197 @@
   help="Filename without any extension"
 />
 
+<svelte:head>
+  <title>{selectedFile?.name || data.name || "Sheet"} - Paisa</title>
+</svelte:head>
+
 <Page width="fluid">
-  <Section>
-    <div class="mb-2">
-      <div
-        class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto"
-        style="width: 100%"
+  <PageHeader
+    title={selectedFile?.name || data.name || "Sheet"}
+    description="Edit and evaluate this .paisa calculation sheet"
+  >
+    {#snippet leading()}
+      <a
+        href="/more/sheets"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
       >
-        <div class="field has-addons mb-0">
-          <p class="control">
-            <button
-              class="button is-small is-link invertable is-light"
-              disabled={$sheetEditorState.hasUnsavedChanges}
-              onclick={(_e) => openCreateModal()}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-file-circle-plus"></i>
-              </span>
-              <span>Create</span>
-            </button>
-          </p>
-        </div>
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Sheets</span>
+      </a>
+    {/snippet}
 
-        <div class="field has-addons ml-5 mb-0">
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.hasUnsavedChanges == false}
-              onclick={(_e) => save()}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-floppy-disk"></i>
-              </span>
-              <span>Save</span>
-            </button>
-          </p>
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.undoDepth == 0}
-              onclick={undoEdit}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-arrow-left"></i>
-              </span>
-              <span>Undo</span>
-            </button>
-          </p>
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.redoDepth == 0}
-              onclick={redoEdit}
-            >
-              <span>Redo</span>
-              <span class="icon is-small">
-                <i class="fas fa-arrow-right"></i>
-              </span>
-            </button>
-          </p>
-        </div>
+    {#snippet actions()}
+      {#if $sheetEditorState.hasUnsavedChanges}
+        <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
+      {/if}
+      <Badge variant="neutral" size="sm">
+        {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
+      </Badge>
+      {#if $sheetEditorState.errors.length > 0}
+        <Badge variant="danger" size="sm">
+          {$sheetEditorState.errors.length} error(s)
+        </Badge>
+      {/if}
+    {/snippet}
+  </PageHeader>
 
-        {#if !_.isEmpty(selectedFile?.versions)}
-          <div class="field has-addons ml-5 mb-0">
-            <p class="control">
-              <button
-                class="button is-small"
-                disabled={!selectedVersion}
-                onclick={(_e) => revert(selectedVersion)}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-clock-rotate-left"></i>
-                </span>
-                <span>Revert</span>
-              </button>
-            </p>
+  <Section>
+    <Card
+      padding="sm"
+      variant="flat"
+      class="mb-4 flex w-full flex-wrap items-center gap-3 overflow-x-auto"
+    >
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={$sheetEditorState.hasUnsavedChanges}
+          onclick={() => openCreateModal()}
+        >
+          {#snippet icon()}
+            <i class="fas fa-file-circle-plus"></i>
+          {/snippet}
+          <span>Create</span>
+        </Button>
 
-            <div class="control">
-              <div class="select is-small">
-                <select bind:value={selectedVersion}>
-                  {#each selectedFile.versions as version}
-                    <option>{version}</option>
-                  {/each}
-                </select>
-              </div>
-            </div>
+        <Button
+          variant={$sheetEditorState.hasUnsavedChanges ? "primary" : "secondary"}
+          size="sm"
+          disabled={$sheetEditorState.hasUnsavedChanges === false}
+          onclick={() => save()}
+          title="Save sheet (Ctrl+S)"
+        >
+          {#snippet icon()}
+            <i class="fas fa-floppy-disk"></i>
+          {/snippet}
+          <span>Save</span>
+        </Button>
 
-            <p class="control">
-              <button
-                class="button is-small"
-                aria-label="Delete backups"
-                onclick={(_e) => deleteBackups()}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-trash-can"></i>
-                </span>
-              </button>
-            </p>
-          </div>
-        {/if}
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={$sheetEditorState.undoDepth === 0}
+          onclick={undoEdit}
+          title="Undo edit"
+        >
+          {#snippet icon()}
+            <i class="fas fa-arrow-left"></i>
+          {/snippet}
+          <span>Undo</span>
+        </Button>
 
-        {#if $sheetEditorState.errors.length > 0}
-          <div class="control ml-5">
-            <button
-              type="button"
-              class="button is-ghost p-0"
-              onclick={(_e) =>
-                moveToLine(editor, $sheetEditorState.errors[0].line_from)}
-              ><span class="ml-1 tag invertable is-danger is-light"
-                >{$sheetEditorState.errors.length} error(s) found</span
-              ></button
-            >
-          </div>
-        {/if}
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={$sheetEditorState.redoDepth === 0}
+          onclick={redoEdit}
+          title="Redo edit"
+        >
+          <span>Redo</span>
+          {#snippet icon()}
+            <i class="fas fa-arrow-right"></i>
+          {/snippet}
+        </Button>
+      </div>
 
-        <div class="control ml-5">
-          <button
-            class:is-loading={$sheetEditorState.pendingEval}
-            class="is-loading button is-small pointer-events-none px-0"
-            style="border: none"
+      {#if !_.isEmpty(selectedFile?.versions)}
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!selectedVersion}
+            onclick={() => revert(selectedVersion)}
           >
-            {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
-          </button>
+            {#snippet icon()}
+              <i class="fas fa-clock-rotate-left"></i>
+            {/snippet}
+            <span>Revert</span>
+          </Button>
+
+          <Select bind:value={selectedVersion} size="sm">
+            {#each selectedFile.versions as version}
+              <option value={version}>{version}</option>
+            {/each}
+          </Select>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            ariaLabel="Delete backups"
+            onclick={() => deleteBackups()}
+          >
+            {#snippet icon()}
+              <i class="fas fa-trash-can"></i>
+            {/snippet}
+          </Button>
         </div>
-      </div>
-    </div>
-    <div class="paisa-sheets-layout">
-      <div class="paisa-sheets-sidebar">
-        <div class="box px-2 full-height paisa-overflow-y-auto">
-          <aside class="menu">
-            <FileTree
-              path=""
-              on:select={(e) => selectFile(e.detail)}
-              files={buildDirectoryTree(_.values(filesMap))}
-              selectedFileName={selectedFile?.name}
-              hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
-            />
-          </aside>
-        </div>
-      </div>
-      <div class="paisa-sheets-editor">
-        <div class="is-flex paisa-overflow-x-auto">
-          <div
-            class="box box-r-none py-0 pr-1 mb-0"
-            style="min-width: min(75%,24rem); max-width: min(75%,48rem);"
+      {/if}
+
+      {#if $sheetEditorState.errors.length > 0}
+        <Button
+          variant="ghost"
+          size="sm"
+          onclick={() =>
+            moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+        >
+          <Badge variant="danger" size="sm">
+            {$sheetEditorState.errors.length} error(s) found
+          </Badge>
+        </Button>
+      {/if}
+    </Card>
+
+    <div
+      class="grid w-full grid-cols-1 gap-4 lg:grid-cols-[minmax(180px,1fr)_minmax(0,4fr)]"
+    >
+      <aside class="min-w-0">
+        <Card padding="sm" variant="flat" class="h-full max-h-[calc(100vh-220px)] overflow-y-auto px-2">
+          <FileTree
+            path=""
+            on:select={(e) => selectFile(e.detail)}
+            files={buildDirectoryTree(_.values(filesMap))}
+            selectedFileName={selectedFile?.name}
+            hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
+          />
+        </Card>
+      </aside>
+
+      <div class="min-w-0 overflow-x-auto">
+        <div class="flex min-w-0">
+          <Card
+            padding="none"
+            variant="flat"
+            class="mb-0 min-w-[min(75%,24rem)] max-w-[min(75%,48rem)] rounded-r-none border-r-0 py-0 pr-1"
           >
             <div class="sheet-editor" bind:this={editorDom}></div>
-          </div>
-          <div
-            class="box box-l-none has-text-right sheet-result"
-            style="padding: 4px 0; width: min(25%,200px);"
+          </Card>
+          <Card
+            padding="none"
+            variant="flat"
+            class="sheet-result mb-0 w-[min(25%,200px)] rounded-l-none py-1 text-right"
           >
             {#each $sheetEditorState.results as result, i}
               <div
                 class={i + 1 === $sheetEditorState.currentLine
-                  ? "has-background-grey-lightest has-text-grey-dark has-text-weight-bold"
+                  ? "bg-[var(--paisa-surface-hover)] font-semibold text-[var(--paisa-foreground)]"
                   : ""}
                 style="padding: 0 0.5rem"
               >
                 <div
                   title={result.result}
-                  class:underline={result.underline}
-                  class:font-bold={result.bold}
-                  class:text-left={result.align === "left"}
-                  class="m-0 p-0 paisa-truncate {result.error
-                    ? 'has-text-danger'
-                    : ''}"
-                  style="font-size: 0.9285714285714286rem; line-height: 1.4"
+                  class="paisa-truncate m-0 p-0 text-[0.9285714285714286rem] leading-[1.4] {result.error
+                    ? 'text-[var(--paisa-danger)]'
+                    : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
+                    ? 'font-bold'
+                    : ''} {result.underline ? 'underline' : ''}"
                 >
                   &nbsp;{result.result}
                 </div>
               </div>
             {/each}
-          </div>
+          </Card>
         </div>
       </div>
     </div>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-sheets-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-4);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(180px, 1fr) minmax(0, 4fr);
-    }
-  }
-
-  .paisa-sheets-sidebar,
-  .paisa-sheets-editor {
-    min-width: 0;
-  }
-</style>

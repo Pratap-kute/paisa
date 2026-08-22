@@ -4,7 +4,6 @@
     ajax,
     formatCurrency,
     formatFloat,
-    isMobile,
     type AssetBreakdown,
     type Forecast,
     type Point,
@@ -21,7 +20,6 @@
     findBreakPoints,
     renderInvestmentTimeline,
   } from "$lib/domain/goals";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import type { PageData } from "./$types";
   import { iconGlyph } from "$lib/core/icon";
   import _ from "lodash";
@@ -33,6 +31,7 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   interface Props {
@@ -130,42 +129,49 @@
   });
 </script>
 
+<svelte:head>
+  <title>{name || "Retirement Goal"} - Paisa</title>
+</svelte:head>
+
 <Page width="fluid">
   <PageHeader
     title="{iconGlyph(icon)} {name}"
     description="Retirement goal tracking, forecast, and portfolio health"
-  />
+  >
+    {#snippet leading()}
+      <a
+        href="/more/goals"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+      >
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Goals</span>
+      </a>
+    {/snippet}
+  </PageHeader>
 
   <MetricStrip cols={4}>
-    <LevelItem
-      title="Net Investment"
+    <Metric
+      label="Net Investment"
       value={formatCurrency(investmentTotal)}
-      color={COLORS.secondary}
-      subtitle={`<b>${formatCurrency(gainTotal)}</b> ${
-        gainTotal >= 0 ? "gain" : "loss"
-      } at <b>${formatFloat(xirr)}</b> XIRR`}
+      secondary={`${formatCurrency(gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatFloat(xirr)} XIRR`}
+      status="primary"
     />
-
-    <LevelItem
-      title="Current Savings"
+    <Metric
+      label="Current Savings"
       value={formatCurrency(savingsTotal)}
-      color={COLORS.gainText}
-      subtitle="{formatFloat(savingsX, 0)}x times Yearly Expenses"
+      secondary="{formatFloat(savingsX, 0)}x times Yearly Expenses"
+      status="positive"
     />
-    <LevelItem
-      title="Yearly Expenses"
-      color={COLORS.lossText}
+    <Metric
+      label="Yearly Expenses"
       value={formatCurrency(yearlyExpense)}
+      status="negative"
     />
-
-    <LevelItem
-      title="Target Savings"
+    <Metric
+      label="Target Savings"
       value={formatCurrency(targetSavings)}
-      color={COLORS.primary}
-      subtitle="{formatFloat(
-        targetX,
-        0,
-      )}x times Yearly Expenses (SWR {formatFloat(swr)})"
+      secondary="{formatFloat(targetX, 0)}x times Yearly Expenses (SWR {formatFloat(swr)})"
+      status="primary"
     />
   </MetricStrip>
 
@@ -173,9 +179,10 @@
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />
   </Section>
 
-  <div class="paisa-goal-detail-layout">
-    <!-- Main Content Panel -->
-    <div class="paisa-goal-detail-main">
+  <div
+    class="paisa-goal-detail-layout grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
+  >
+    <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
       <Section title="{iconGlyph(icon)} {name} Progress">
         <ChartFrame type="timeline" onresize={repaintProgressChart}>
           <svg height="400" width="100%" bind:this={svg} />
@@ -189,23 +196,22 @@
       </Section>
 
       <Section title="Current Balance">
-        <div class="has-text-grey">
+        <div class="text-[var(--paisa-muted-foreground)]">
           <AssetsBalance breakdowns={balances} indent={false} />
         </div>
       </Section>
     </div>
 
-    <!-- Side Postings Panel -->
-    <div class="paisa-goal-detail-side">
+    <div class="paisa-goal-detail-side flex min-w-0 flex-col gap-4">
       <Section title="Recent Postings">
         <PostingGroup postings={latestPostings} groupFormat="MMM YYYY">
           {#snippet children({ groupedPostings })}
             <div>
               {#each groupedPostings as posting}
                 <a
-                  class="paisa-posting-row"
+                  class="paisa-posting-row mb-2 flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)]"
                   href={postingUrl(posting)}
-                  style="--paisa-row-accent: {posting.amount >= 0
+                  style="border-left: 2px solid {posting.amount >= 0
                     ? posting.account.startsWith('Income:CapitalGains')
                       ? COLORS.tertiary
                       : COLORS.secondary
@@ -213,19 +219,26 @@
                       ? COLORS.secondary
                       : COLORS.tertiary}"
                 >
-                  <span class="paisa-posting-main">
-                    <span class="paisa-posting-payee">{posting.payee}</span>
-                    <span class="paisa-posting-date"
+                  <span class="flex min-w-0 items-center justify-between gap-2">
+                    <span
+                      class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-secondary)]"
+                      >{posting.payee}</span
+                    >
+                    <span
+                      class="shrink-0 text-xs text-[var(--paisa-text-muted)]"
                       >{posting.date.format("DD MMM YYYY")}</span
                     >
                   </span>
-                  <span class="paisa-posting-meta">
-                    <span class="paisa-posting-account custom-icon">
+                  <span class="flex min-w-0 items-center justify-between gap-2">
+                    <span
+                      class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-muted)]"
+                    >
                       {iconify(restName(posting.account), {
                         group: firstName(posting.account),
                       })}
                     </span>
-                    <span class="paisa-posting-amount"
+                    <span
+                      class="shrink-0 font-semibold text-[var(--paisa-text-primary)]"
                       >{formatCurrency(posting.amount)}</span
                     >
                   </span>
@@ -238,85 +251,3 @@
     </div>
   </div>
 </Page>
-
-<style lang="scss">
-  .paisa-goal-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-5);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-    }
-  }
-
-  .paisa-goal-detail-main,
-  .paisa-goal-detail-side {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-
-  .paisa-posting-row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-1);
-    min-height: 54px;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    border-left: 2px solid var(--paisa-row-accent);
-    border-radius: var(--paisa-radius-md);
-    border-top: 1px solid var(--paisa-border-default);
-    border-right: 1px solid var(--paisa-border-default);
-    border-bottom: 1px solid var(--paisa-border-default);
-    background: var(--paisa-surface-card);
-    color: var(--paisa-text-secondary);
-    text-decoration: none;
-    margin-bottom: var(--paisa-space-2);
-  }
-
-  .paisa-posting-row:hover {
-    border-color: var(--paisa-border-strong);
-    color: var(--paisa-text-primary);
-  }
-
-  .paisa-posting-main,
-  .paisa-posting-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    min-width: 0;
-  }
-
-  .paisa-posting-payee,
-  .paisa-posting-account {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-posting-payee {
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-posting-date,
-  .paisa-posting-account {
-    flex: 0 0 auto;
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-posting-account {
-    flex: 1 1 auto;
-  }
-
-  .paisa-posting-amount {
-    flex: 0 0 auto;
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-  }
-</style>
