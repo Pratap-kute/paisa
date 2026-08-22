@@ -49,7 +49,6 @@
     "npm:bignumber.js@^9.1.2": "9.3.1",
     "npm:bits-ui@^2.18.1": "2.18.1_@internationalized+date@3.12.3_svelte@5.56.9_@sveltejs+kit@2.70.2__@sveltejs+vite-plugin-svelte@7.3.0___svelte@5.56.9___vite@8.2.1____sass@1.102.0___sass@1.102.0__svelte@5.56.9__typescript@5.9.3__vite@8.2.1___sass@1.102.0__sass@1.102.0",
     "npm:buffer@^6.0.3": "6.0.3",
-    "npm:bulma@^1.0.4": "1.0.4",
     "npm:chroma-js@^2.4.2": "2.6.0",
     "npm:chrono-node@^2.6.6": "2.10.1",
     "npm:cookie@~0.7.2": "0.7.2",
@@ -67,7 +66,6 @@
     "npm:pdfjs-dist@^4.10.38": "4.10.38",
     "npm:playwright@*": "1.61.1",
     "npm:playwright@1.61.1": "1.61.1",
-    "npm:sass@^1.85.1": "1.102.0",
     "npm:set-cookie-parser@^2.6.0": "2.7.2",
     "npm:stemmer@^2.0.1": "2.0.1",
     "npm:svelte-check@*": "4.7.6_svelte@5.56.9_typescript@5.9.3",
@@ -1179,9 +1177,6 @@
         "base64-js",
         "ieee754"
       ]
-    },
-    "bulma@1.0.4": {
-      "integrity": "sha512-Ffb6YGXDiZYX3cqvSbHWqQ8+LkX6tVoTcZuVB3lm93sbAVXlO0D6QlOTMnV6g18gILpAXqkG2z9hf9z4hCjz2g=="
     },
     "cfb@1.2.2": {
       "integrity": "sha512-KfdUZsSOw19/ObEWasvBP/Ac4reZvAGauZhs6S/gqNhXhI7cKwvlH7ulj+dOEYnca4bm4SGo8C1bTAQvnTjgQA==",
@@ -2377,7 +2372,6 @@
       "npm:bignumber.js@^9.1.2",
       "npm:bits-ui@^2.18.1",
       "npm:buffer@^6.0.3",
-      "npm:bulma@^1.0.4",
       "npm:chroma-js@^2.4.2",
       "npm:chrono-node@^2.6.6",
       "npm:cookie@~0.7.2",
@@ -2392,7 +2386,6 @@
       "npm:nanoid@^3.3.18",
       "npm:papaparse@^5.4.1",
       "npm:pdfjs-dist@^4.10.38",
-      "npm:sass@^1.85.1",
       "npm:set-cookie-parser@^2.6.0",
       "npm:stemmer@^2.0.1",
       "npm:svelte-check@^4.1.0",
