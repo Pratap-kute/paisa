@@ -251,10 +251,8 @@ $editor-full-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px -
   border-radius: var(--paisa-radius-sm);
   background: var(--paisa-input-bg);
   padding: 2px 5px;
-  width: calc(100vw - 20px);
-  @media screen and (min-width: 1024px) {
-    width: 800px;
-  }
+  width: 100%;
+  max-width: 100%;
 }
 
 .full-height {

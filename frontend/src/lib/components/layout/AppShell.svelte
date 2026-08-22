@@ -139,17 +139,10 @@
       title: "Ledger",
       items: [
         { label: "Transactions", href: "/ledger/transaction", icon: "fa-solid fa-list-check" },
+        { label: "Postings", href: "/ledger/posting", icon: "fa-solid fa-table-list" },
+        { label: "Prices", href: "/ledger/price", icon: "fa-solid fa-chart-line" },
         { label: "Import", href: "/ledger/import", icon: "fa-solid fa-file-import" },
         { label: "Editor", href: "/ledger/editor", icon: "fa-solid fa-pen-to-square" },
-        {
-          label: "Postings & Prices",
-          href: "/ledger/posting",
-          icon: "fa-solid fa-table-list",
-          subItems: [
-            { label: "Postings", href: "/ledger/posting" },
-            { label: "Prices", href: "/ledger/price" },
-          ],
-        },
       ],
     },
     ...(isINR
@@ -282,11 +275,12 @@
     <div
       class="paisa-mobile-backdrop"
       onclick={() => (mobileDrawerOpen = false)}
+      onkeydown={(e) => e.key === "Escape" && (mobileDrawerOpen = false)}
       tabindex="-1"
       role="button"
       aria-label="Close navigation overlay"
     ></div>
-    <aside
+    <div
       class="paisa-mobile-drawer"
       role="dialog"
       aria-modal="true"
@@ -358,7 +352,7 @@
           </a>
         {/each}
       </div>
-    </aside>
+    </div>
   {/if}
 
   <!-- Top Utility Header Bar -->
