@@ -96,8 +96,8 @@ test("import produces a preview without saving", async ({ page }) => {
 
 test("networth chart renders on analytics page", async ({ page }) => {
   await page.goto("/assets/networth");
-  await expect(page.getByText("Net worth", { exact: true })).toBeVisible();
-  await expect(page.locator("#d3-networth-timeline")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Net Worth" })).toBeVisible();
+  await expect(page.locator("#d3-networth-timeline g").first()).toBeVisible();
 });
 
 test("cash flow monthly chart renders", async ({ page }) => {

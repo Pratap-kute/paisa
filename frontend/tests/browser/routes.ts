@@ -17,7 +17,11 @@ export const visualRoutes: VisualRoute[] = [
   { name: "assets-gain", path: "/assets/gain" },
   { name: "assets-gain-detail", path: "/assets/gain/Assets%3AEquity" },
   { name: "assets-investment", path: "/assets/investment" },
-  { name: "networth", path: "/assets/networth", readyText: "Net worth" },
+  {
+    name: "networth",
+    path: "/assets/networth",
+    ready: "#d3-networth-timeline g",
+  },
   { name: "cash-flow-income-statement", path: "/cash_flow/income_statement" },
   { name: "cash-flow-monthly", path: "/cash_flow/monthly" },
   {

@@ -4,26 +4,33 @@
     formatCurrency,
     formatFloat,
     type Legend,
-    type Networth
+    type Networth,
   } from "$lib/core/utils";
-  import { financialColors } from "$lib/theme/chartPalette";
   import { createNetworthChart, type NetworthChart } from "$lib/charts/networth";
   import _ from "lodash";
   import { onMount, onDestroy } from "svelte";
-  import { dateRange, setAllowedDateRange } from "../../../../store";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
+  import {
+    dateMin,
+    dateMax,
+    dateRange,
+    dateRangeOption,
+    setAllowedDateRange,
+  } from "../../../../store";
+  import DateRange from "$lib/components/ui/DateRange.svelte";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
 
   let networth = $state(0);
   let investment = $state(0);
   let gain = $state(0);
   let xirr = $state(0);
-  let svg: SVGElement = $state() as any;
+  let isLoading = $state(true);
+  let svg: SVGElement = $state() as SVGElement;
   let chart: NetworthChart | null = $state(null);
   let boundSvg: SVGElement | null = $state(null);
   let points: Networth[] = $state([]);
@@ -32,8 +39,8 @@
   let filteredPoints = $derived(
     _.filter(
       points,
-      (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from)
-    )
+      (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from),
+    ),
   );
 
   $effect(() => {
@@ -48,7 +55,6 @@
       return;
     }
 
-    // ChartFrame swaps the SVG when empty toggles (preserveChildren branch).
     if (!chart || boundSvg !== svg) {
       chart?.destroy();
       chart = createNetworthChart(svg);
@@ -64,45 +70,76 @@
   });
 
   onMount(async () => {
-    const result = await ajax("/api/networth");
-    points = result.networthTimeline;
-    setAllowedDateRange(_.map(points, (p) => p.date));
+    try {
+      const result = await ajax("/api/networth");
+      points = result.networthTimeline;
+      setAllowedDateRange(_.map(points, (p) => p.date));
 
-    const current = _.last(points);
-    if (current) {
-      networth = current.investmentAmount + current.gainAmount - current.withdrawalAmount;
-      investment = current.investmentAmount - current.withdrawalAmount;
-      gain = current.gainAmount;
+      const current = _.last(points);
+      if (current) {
+        networth = current.investmentAmount + current.gainAmount - current.withdrawalAmount;
+        investment = current.investmentAmount - current.withdrawalAmount;
+        gain = current.gainAmount;
+      }
+      xirr = result.xirr;
+    } finally {
+      isLoading = false;
     }
-    xirr = result.xirr;
   });
 </script>
+
+<svelte:head>
+  <title>Net Worth - Paisa</title>
+</svelte:head>
 
 <Page width="analysis">
   <PageHeader
     title="Net Worth"
     description="Track assets and investment growth over time"
-  />
+  >
+    {#snippet actions()}
+      <div class="paisa-page-toolbar-mobile">
+        <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
+      </div>
+    {/snippet}
+  </PageHeader>
 
   <MetricStrip cols={4}>
-    <LevelItem title="Net worth" value={formatCurrency(networth)} />
-    <LevelItem title="Net Investment" value={formatCurrency(investment)} />
-    <LevelItem
-      title="Gain / Loss"
-      color={gain >= 0 ? financialColors.gainText : financialColors.lossText}
-      value={formatCurrency(gain)}
+    <Metric
+      label="Net Worth"
+      value={formatCurrency(networth)}
+      loading={isLoading}
     />
-    <LevelItem title="XIRR" value={formatFloat(xirr)} />
+    <Metric
+      label="Net Investment"
+      value={formatCurrency(investment)}
+      loading={isLoading}
+    />
+    <Metric
+      label="Gain / Loss"
+      value={formatCurrency(gain)}
+      status={gain >= 0 ? "positive" : "negative"}
+      loading={isLoading}
+    />
+    <Metric
+      label="XIRR"
+      value={formatFloat(xirr)}
+      loading={isLoading}
+    />
   </MetricStrip>
 
-  <Section fill>
+  <Section
+    title="Net Worth Trend"
+    subtitle="Assets, liabilities, and investment performance over time"
+    fill
+  >
     {#if filteredPoints.length > 0}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
     {/if}
 
     <ChartFrame
       type="timeline"
-      empty={filteredPoints.length === 0}
+      empty={!isLoading && filteredPoints.length === 0}
       emptyMessage="No net-worth activity in this period"
       preserveChildren
       onresize={(dim) => chart?.resize(dim)}
@@ -111,3 +148,14 @@
     </ChartFrame>
   </Section>
 </Page>
+
+<style lang="scss">
+  .paisa-page-toolbar-mobile {
+    display: inline-flex;
+    align-items: center;
+
+    @media screen and (min-width: 640px) {
+      display: none;
+    }
+  }
+</style>
