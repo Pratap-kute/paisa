@@ -20,36 +20,36 @@
 </script>
 
 {#if schedule && n}
-  <div class="has-text-centered mb-0">
-    <div class="is-size-7 paisa-truncate has-text-weight-medium">{transactionSequece.key}</div>
+  <div class="mb-0 text-center">
+    <div class="truncate text-xs font-medium text-[var(--paisa-foreground)]">{transactionSequece.key}</div>
     <div class="my-1">
       <Badge variant="neutral" size="sm" rounded>{intervalText(transactionSequece)}</Badge>
     </div>
-    <div class="has-text-grey is-size-7">
-      <span class="icon has-text-grey-light">
-        <i class="fas fa-calendar"></i>
+    <div class="text-xs text-[var(--paisa-muted-foreground)]">
+      <span class="text-[var(--paisa-muted-foreground)]">
+        <i class="fas fa-calendar text-[10px]" aria-hidden="true"></i>
       </span>
       {schedule.scheduled.format("DD MMM YYYY")}
     </div>
-    <div class="paisa-grid is-justify-content-center">
+    <div class="paisa-grid justify-center">
       <div
-        class="mx-3 mt-3 radial-progress is-size-7 has-text-grey-lighter paisa-opacity-20"
+        class="mx-3 mt-3 radial-progress text-xs paisa-text-muted paisa-opacity-20"
         style="--value: 100; --thickness: 3px; --size: 100px; grid-area: 1/1"
       ></div>
       <div
-        class="mx-3 mt-3 radial-progress is-size-7 {icon.color}"
+        class="mx-3 mt-3 radial-progress text-xs {icon.color}"
         style="--value: {n.isBefore(now())
           ? '0'
           : (schedule.scheduled.diff(now(), 'day') / transactionSequece.interval) *
             100}; --thickness: 3px; --size: 100px; ; grid-area: 1/1"
       >
-        <div class="is-size-6">
-          <span class="icon">
-            <i class="fas {icon.icon}"></i>
+        <div class="text-base">
+          <span>
+            <i class="fas {icon.icon}" aria-hidden="true"></i>
           </span>
         </div>
-        <span class="has-text-weight-bold">{formatCurrencyCrude(totalRecurring(transactionSequece))}</span>
-        <span class="is-size-7">{n.isBefore(now()) ? 'past due' : `due ${n.fromNow()}`}</span>
+        <span class="font-bold">{formatCurrencyCrude(totalRecurring(transactionSequece))}</span>
+        <span class="text-xs">{n.isBefore(now()) ? 'past due' : `due ${n.fromNow()}`}</span>
       </div>
     </div>
   </div>

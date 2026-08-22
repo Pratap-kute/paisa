@@ -54,7 +54,7 @@
     <div class={isGrouped && "mb-3"}>
       {#if isGrouped}
         <div
-          class="is-flex is-justify-content-space-between paisa-negative-mb-1 has-text-weight-bold has-text-grey-light"
+          class="flex justify-between paisa-negative-mb-1 text-sm font-bold text-[var(--paisa-muted-foreground)]"
         >
           <div>{groupedPosting.key}</div>
           <div>{formatCurrency(groupedPosting.total)}</div>

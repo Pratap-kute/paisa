@@ -40,8 +40,8 @@
       accountBudget.expenses.map((e) => {
         return [
           e.date.format("DD MMM YYYY"),
-          [e.payee, "is-clipped"],
-          [formatCurrency(e.amount), "has-text-weight-bold has-text-right"],
+          [e.payee, "paisa-truncate"],
+          [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
         ];
       }),
     ),
@@ -53,7 +53,7 @@
 <Card
   padding="sm"
   variant="flat"
-  class="budget-card m-0"
+  class="m-0"
   data-tippy-content={_.isEmpty(accountBudget.expenses) ? null : tooltipContent}
 >
   <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
