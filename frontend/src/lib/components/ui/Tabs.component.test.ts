@@ -19,7 +19,8 @@ test("renders tab list and selects active tab", async () => {
   expect(tablist).toBeInTheDocument();
 
   const tabs = getAllByRole("tab");
-  expect(tabs[0]).toHaveClass("is-active");
+  expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+  expect(tabs[1]).toHaveAttribute("aria-selected", "false");
 
   await fireEvent.click(tabs[1]);
   expect(handleChange).toHaveBeenCalledWith("details");

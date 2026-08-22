@@ -15,25 +15,23 @@
     children,
   }: Props = $props();
 
-  const spinnerSizes: Record<string, string> = {
-    sm: "is-size-5",
-    md: "is-size-3",
-    lg: "is-size-1",
+  const spinnerSizeClasses: Record<string, string> = {
+    sm: "paisa-loading-spinner-sm",
+    md: "paisa-loading-spinner-md",
+    lg: "paisa-loading-spinner-lg",
   };
 </script>
 
 <div
-  class="paisa-loading-state has-text-centered {fullscreen ? 'is-fullscreen' : 'p-6'}"
+  class="paisa-loading-state {fullscreen ? 'paisa-loading-fullscreen' : ''}"
   role="status"
   aria-live="polite"
 >
-  <div class="paisa-loading-spinner mb-3 has-text-link {spinnerSizes[size]}">
-    <span class="icon">
-      <i class="fas fa-circle-notch fa-spin"></i>
-    </span>
+  <div class="paisa-loading-spinner {spinnerSizeClasses[size]}" aria-hidden="true">
+    <i class="fas fa-circle-notch fa-spin"></i>
   </div>
   {#if message}
-    <p class="has-text-grey is-size-6">{message}</p>
+    <p class="paisa-loading-message">{message}</p>
   {/if}
   {#if children}
     {@render children()}
@@ -47,8 +45,36 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+    padding: var(--paisa-space-6, 2rem);
+    text-align: center;
   }
-  .paisa-loading-state.is-fullscreen {
+
+  .paisa-loading-fullscreen {
     min-height: 60vh;
+    padding: 0;
+  }
+
+  .paisa-loading-spinner {
+    margin-bottom: var(--paisa-space-3, 0.75rem);
+    color: var(--paisa-primary);
+    line-height: 1;
+  }
+
+  .paisa-loading-spinner-sm {
+    font-size: 1.125rem;
+  }
+
+  .paisa-loading-spinner-md {
+    font-size: 1.75rem;
+  }
+
+  .paisa-loading-spinner-lg {
+    font-size: 2.5rem;
+  }
+
+  .paisa-loading-message {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--paisa-muted-foreground);
   }
 </style>

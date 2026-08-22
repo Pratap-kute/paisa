@@ -32,7 +32,10 @@
   }
 </script>
 
-<label class="checkbox is-inline-flex is-align-items-start gap-2 {disabled ? 'is-disabled' : ''} {className}" for={id}>
+<label
+  class="inline-flex items-start gap-2 text-sm text-[var(--paisa-foreground)] {disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} {className}"
+  for={id}
+>
   <input
     {id}
     {name}
@@ -40,16 +43,16 @@
     bind:checked
     {disabled}
     onchange={handleChange}
-    class="mt-1"
+    class="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--paisa-border-strong)] text-[var(--paisa-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] m-0"
   />
-  <div>
+  <div class="min-w-0">
     {#if children}
       {@render children()}
     {:else if label}
-      <span class="has-text-weight-normal">{label}</span>
+      <span class="font-normal">{label}</span>
     {/if}
     {#if description}
-      <p class="help is-marginless has-text-grey">{description}</p>
+      <p class="m-0 mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">{description}</p>
     {/if}
   </div>
 </label>
