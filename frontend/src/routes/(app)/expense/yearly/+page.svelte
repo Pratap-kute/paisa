@@ -161,13 +161,13 @@
     description="Multi-year annual expense trends and category comparisons"
   >
     {#snippet actions()}
-      <div class="paisa-page-toolbar-mobile">
+      <div class="inline-flex items-center sm:hidden">
         <FinancialYearPicker bind:value={$year} dateMin={$dateMin} dateMax={$dateMax} />
       </div>
     {/snippet}
   </PageHeader>
 
-  <div class="paisa-top-financial-context">
+  <div class="mb-[var(--paisa-space-5)]">
     <MetricStrip cols={2}>
       <Metric
         label="Total Expenses"
@@ -181,7 +181,7 @@
         value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="paisa-metric-rate"
+        class="[&_.paisa-chart-frame-body]:overflow-visible [&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -202,7 +202,7 @@
     >
       <ChartFrame
         type="category"
-        class="paisa-breakdown-chart"
+        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
         emptyMessage="No expenses recorded for {$year}"
@@ -246,37 +246,3 @@
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-page-toolbar-mobile {
-    display: inline-flex;
-    align-items: center;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-
-  .paisa-top-financial-context {
-    margin-bottom: var(--paisa-space-5);
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-value) {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
-    line-height: 1.15;
-  }
-
-  :global(.paisa-metric-rate .paisa4-metric-meta) {
-    white-space: normal;
-  }
-
-  :global(.paisa-breakdown-chart.paisa-chart-frame) {
-    overflow: visible;
-  }
-
-  :global(.paisa-breakdown-chart .paisa-chart-frame-body) {
-    overflow: visible;
-  }
-</style>

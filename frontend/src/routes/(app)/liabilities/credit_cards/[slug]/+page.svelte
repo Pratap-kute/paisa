@@ -1,9 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import COLORS from "$lib/core/colors";
-  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
   import DueDate from "$lib/components/finance/DueDate.svelte";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
   import { renderYearlySpends } from "$lib/charts/credit_cards";
   import { iconify } from "$lib/core/icon";
@@ -12,9 +9,8 @@
     formatCurrency,
     formatPercentage,
     type CreditCardBill,
-    type CreditCardSummary
+    type CreditCardSummary,
   } from "$lib/core/utils";
-  import MasonryGrid from "$lib/components/ui/MasonryGrid.svelte";
   import _, { now } from "lodash";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
@@ -22,7 +18,9 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import Select from "$lib/components/ui/Select.svelte";
 
   interface Props {
     data: PageData;
@@ -32,15 +30,32 @@
   let svg: SVGElement = $state();
 
   let creditCard: CreditCardSummary = $state();
-  let currentBill: CreditCardBill = $state();
   let found = false;
-  let small = true;
   let rendered = $state(false);
+  let selectedBillIndex = $state(0);
 
-  function lastBill(creditCard: CreditCardSummary): CreditCardBill {
-    return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
-      return b.statementEndDate.isSameOrBefore(now());
-    });
+  let billOptions = $derived(
+    creditCard ? _.reverse(_.clone(creditCard.bills)) : [],
+  );
+  let currentBill = $derived(billOptions[selectedBillIndex]);
+  let utilization = $derived(
+    creditCard && creditCard.creditLimit > 0
+      ? creditCard.balance / creditCard.creditLimit
+      : 0,
+  );
+
+  function lastBillIndex(creditCard: CreditCardSummary): number {
+    const bills = _.reverse(_.clone(creditCard.bills));
+    const idx = _.findIndex(bills, (b) =>
+      b.statementEndDate.isSameOrBefore(now()),
+    );
+    return idx >= 0 ? idx : 0;
+  }
+
+  function dueDateSecondary(bill: CreditCardBill): string {
+    if (bill.closingBalance <= 0) return "No dues";
+    if (bill.paidDate) return `Paid ${bill.paidDate.format("DD MMM YYYY")}`;
+    return `Due ${bill.dueDate.fromNow()}`;
   }
 
   $effect(() => {
@@ -50,202 +65,165 @@
     }
   });
 
+  $effect(() => {
+    if (billOptions.length > 0 && selectedBillIndex >= billOptions.length) {
+      selectedBillIndex = 0;
+    }
+  });
+
   onMount(async () => {
-    ({ creditCard, found } = await ajax("/api/credit_cards/:account", null, data));
+    ({ creditCard, found } = await ajax(
+      "/api/credit_cards/:account",
+      null,
+      data,
+    ));
     if (!found) {
       return goto("/liabilities/credit_cards");
     }
 
-    currentBill = lastBill(creditCard);
+    selectedBillIndex = lastBillIndex(creditCard);
   });
 </script>
+
+<svelte:head>
+  <title>{creditCard?.account || "Credit Card"} - Paisa</title>
+</svelte:head>
 
 <Page width="fluid">
   <PageHeader
     title={creditCard?.account || "Credit Card Details"}
-    description="Card utilization, statement history, and transaction details"
-  />
+    description="Statement history, utilization, and transaction breakdown"
+  >
+    {#snippet leading()}
+      <a
+        href="/liabilities/credit_cards"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+      >
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Credit Cards</span>
+      </a>
+    {/snippet}
 
-  <div class="paisa-credit-card-detail-layout">
-    <!-- Side Context Panel -->
-    <div class="paisa-credit-card-side">
-      {#if creditCard}
-        <div class="mb-2">
-          <CreditCardCard {creditCard} />
-        </div>
-
-        <Section title="Credit Summary">
-          <MetricStrip cols={2}>
-            <LevelItem
-              narrow
-              small
-              title="Available Credit"
-              color={COLORS.neutral}
-              value={formatCurrency(Math.max(creditCard.creditLimit - creditCard.balance, 0))}
-            />
-            <LevelItem
-              narrow
-              small
-              title="Credit Usage"
-              color={COLORS.neutral}
-              value={formatPercentage(creditCard.balance / creditCard.creditLimit, 2)}
-            />
-            <LevelItem
-              narrow
-              small
-              title="Statements"
-              color={COLORS.neutral}
-              value={creditCard.bills.length.toString()}
-            />
-            <LevelItem
-              narrow
-              small
-              title="Transactions"
-              color={COLORS.neutral}
-              value={_.sumBy(creditCard.bills, (b) => b.transactions.length).toString()}
-            />
-          </MetricStrip>
-        </Section>
-
-        <Section title="Year-wise Spends">
-          <ChartFrame
-            type="category"
-            onresize={() => {
-              if (svg && creditCard) {
-                svg.replaceChildren();
-                renderYearlySpends(svg, creditCard.yearlySpends);
-              }
-            }}
-          >
-            <svg bind:this={svg} width="100%" />
-          </ChartFrame>
-        </Section>
+    {#snippet actions()}
+      {#if billOptions.length > 0}
+        <Select bind:value={selectedBillIndex} size="md">
+          {#each billOptions as bill, index}
+            <option value={index}>
+              {bill.statementStartDate.format("DD MMM YYYY")} — {bill.statementEndDate.format(
+                "DD MMM YYYY",
+              )}
+            </option>
+          {/each}
+        </Select>
       {/if}
-    </div>
+    {/snippet}
+  </PageHeader>
 
-    <!-- Main Content Panel -->
-    <div class="paisa-credit-card-main">
-      {#if currentBill}
-        <Section>
-          <div class="paisa-bill-header-bar">
-            <div class="paisa-bill-due-meta">
-              <span class="custom-icon is-size-5 paisa-nowrap">{iconify(creditCard.account)}</span>
-              <div class="paisa-nowrap">
-                <span class="mr-1 is-size-7 has-text-grey">Payment:</span>
-                <span><DueDate dueDate={currentBill.dueDate} paidDate={currentBill.paidDate} /></span>
-              </div>
-            </div>
+  {#if creditCard && currentBill}
+    <MetricStrip cols={3}>
+      <Metric
+        label="Amount Due"
+        value={formatCurrency(currentBill.closingBalance)}
+        status="primary"
+      />
+      <Metric
+        label="Due Date"
+        value={currentBill.dueDate.format("DD MMM YYYY")}
+        secondary={dueDateSecondary(currentBill)}
+      />
+      <Metric
+        label="Utilization"
+        value={formatPercentage(utilization, 2)}
+        secondary={`Limit ${formatCurrency(creditCard.creditLimit)}`}
+        status={utilization > 0.8 ? "warning" : "neutral"}
+      />
+    </MetricStrip>
 
-            <div class="select is-medium">
-              <select bind:value={currentBill}>
-                {#each _.reverse(_.clone(creditCard.bills)) as bill}
-                  <option value={bill}
-                    >{bill.statementStartDate.format("DD MMM YYYY")} — {bill.statementEndDate.format(
-                      "DD MMM YYYY"
-                    )}</option
-                  >
-                {/each}
-              </select>
-            </div>
-          </div>
-        </Section>
+    <Section title="Statement Equation">
+      <div
+        class="flex items-center gap-3 overflow-x-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-4 py-3"
+      >
+        <Metric
+          class="!border-0 !p-0"
+          label="Opening Balance"
+          value={formatCurrency(currentBill.openingBalance)}
+        />
+        <span
+          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          aria-hidden="true"
+        >
+          <i class="fas fa-plus"></i>
+        </span>
+        <Metric
+          class="!border-0 !p-0"
+          label="Purchases"
+          value={formatCurrency(currentBill.debits)}
+          status="negative"
+        />
+        <span
+          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          aria-hidden="true"
+        >
+          <i class="fas fa-minus"></i>
+        </span>
+        <Metric
+          class="!border-0 !p-0"
+          label="Credits"
+          value={formatCurrency(currentBill.credits)}
+          status="positive"
+        />
+        <span
+          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          aria-hidden="true"
+        >
+          <i class="fas fa-equals"></i>
+        </span>
+        <Metric
+          class="!border-0 !p-0"
+          label="Amount Due"
+          value={formatCurrency(currentBill.closingBalance)}
+          status="primary"
+        />
+      </div>
 
-        <Section title="Statement Summary">
-          <div class="paisa-bill-calc-strip">
-            <LevelItem
-              {small}
-              narrow
-              title="Opening Balance"
-              color={COLORS.neutral}
-              value={formatCurrency(currentBill.openingBalance)}
-            />
-            <span class="icon is-size-4 has-text-grey"><i class="fas fa-plus"></i></span>
-            <LevelItem
-              {small}
-              narrow
-              title="Debits"
-              color={COLORS.expenses}
-              value={formatCurrency(currentBill.debits)}
-            />
-            <span class="icon is-size-4 has-text-grey"><i class="fas fa-minus"></i></span>
-            <LevelItem
-              {small}
-              narrow
-              title="Credits"
-              color={COLORS.income}
-              value={formatCurrency(currentBill.credits)}
-            />
-            <span class="icon is-size-4 has-text-grey"><i class="fas fa-equals"></i></span>
-            <LevelItem
-              {small}
-              narrow
-              title="Amount Due"
-              color={COLORS.liabilities}
-              value={formatCurrency(currentBill.closingBalance)}
-            />
-          </div>
-        </Section>
+      <div
+        class="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--paisa-muted-foreground)]"
+      >
+        <span class="custom-icon text-base">{iconify(creditCard.account)}</span>
+        <span class="inline-flex items-center gap-1">
+          <span>Payment:</span>
+          <DueDate
+            dueDate={currentBill.dueDate}
+            paidDate={currentBill.paidDate}
+            amountDue={currentBill.closingBalance}
+          />
+        </span>
+      </div>
+    </Section>
 
-        <Section title="Transactions">
-          <MasonryGrid gap={10} maxStretchColumnSize={500} align="stretch">
-            {#each currentBill.transactions as t}
-              <div class="mr-3 is-flex-grow-1">
-                <TransactionCard {t} />
-              </div>
-            {/each}
-          </MasonryGrid>
-        </Section>
-      {/if}
-    </div>
-  </div>
+    <Section title="Spending Trend">
+      <ChartFrame
+        type="category"
+        onresize={() => {
+          if (svg && creditCard) {
+            svg.replaceChildren();
+            renderYearlySpends(svg, creditCard.yearlySpends);
+          }
+        }}
+      >
+        <svg bind:this={svg} width="100%" />
+      </ChartFrame>
+    </Section>
+
+    <Section
+      title="Transactions in Statement"
+      subtitle="{currentBill.transactions.length} transaction(s)"
+    >
+      <div class="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+        {#each currentBill.transactions as t}
+          <TransactionCard {t} />
+        {/each}
+      </div>
+    </Section>
+  {/if}
 </Page>
-
-<style lang="scss">
-  .paisa-credit-card-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-5);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
-    }
-  }
-
-  .paisa-credit-card-side,
-  .paisa-credit-card-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-
-  .paisa-bill-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-3);
-    padding: var(--paisa-space-3) var(--paisa-space-4);
-    background: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-  }
-
-  .paisa-bill-due-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-  }
-
-  .paisa-bill-calc-strip {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    padding: var(--paisa-space-3) var(--paisa-space-4);
-    background: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    overflow-x: auto;
-  }
-</style>

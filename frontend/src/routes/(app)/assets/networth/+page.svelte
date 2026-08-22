@@ -98,7 +98,7 @@
     description="Track assets and investment growth over time"
   >
     {#snippet actions()}
-      <div class="paisa-page-toolbar-mobile">
+      <div class="inline-flex items-center sm:hidden">
         <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
       </div>
     {/snippet}
@@ -148,14 +148,3 @@
     </ChartFrame>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-page-toolbar-mobile {
-    display: inline-flex;
-    align-items: center;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-</style>

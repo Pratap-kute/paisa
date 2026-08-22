@@ -33,6 +33,11 @@
   import Page from "$lib/components/layout/Page.svelte";
   import Drawer from "$lib/components/ui/Drawer.svelte";
   import Switch from "$lib/components/ui/Switch.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import Field from "$lib/components/ui/Field.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
+  import IconButton from "$lib/components/ui/IconButton.svelte";
   import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
   import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
   import PredictionDetail from "$lib/components/prediction/PredictionDetail.svelte";
@@ -121,7 +126,6 @@
   let previewEditorDom: Element = $state();
   let previewEditor: EditorView = $state();
   let showSaveAsModal = $state(false);
-  let saveAsInput: HTMLInputElement = $state();
   let showFileModal = $state(false);
 
   onMount(async () => {
@@ -492,38 +496,38 @@
   <title>Ledger Import - Paisa</title>
 </svelte:head>
 
-<Page width="fluid">
-  <div class="paisa-import-workspace">
-    <!-- TOP TOOLBAR -->
-    <div class="paisa-import-topbar">
-      <div class="paisa-import-header-main">
-        <!-- Left: Page Title & File Context -->
-        <div class="paisa-import-title-group">
-          <h1 class="paisa-import-page-title">Ledger Import</h1>
+<Page
+  width="fluid"
+  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&_.paisa-page-content]:h-full [&_.paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
+>
+  <div class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
+    <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
+      <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)]">
+        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
+          <h1 class="m-0 text-lg font-bold text-[var(--paisa-text-primary)]">Ledger Import</h1>
 
           {#if activeFileName}
-            <div class="paisa-file-badge">
-              <span class="icon is-small has-text-link"><i class="fas fa-file-csv"></i></span>
-              <span class="paisa-file-name" title={activeFileName}>{activeFileName}</span>
-              <span class="paisa-file-count-badge">{data.length} rows</span>
+            <div class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5">
+              <i class="fas fa-file-csv text-xs text-[var(--paisa-brand-primary)]"></i>
+              <span class="max-w-[180px] truncate text-xs font-semibold text-[var(--paisa-text-primary)]" title={activeFileName}>{activeFileName}</span>
+              <span class="rounded-[var(--paisa-radius-full)] bg-[var(--paisa-brand-primary-light)] px-1.5 py-0.5 text-[0.6875rem] font-medium text-[var(--paisa-brand-primary)]">{data.length} rows</span>
               <button
                 type="button"
-                class="paisa-btn-subtle paisa-replace-btn"
+                class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
                 onclick={clearLoadedFile}
                 title="Replace with another file"
                 aria-label="Replace File"
               >
-                <span class="icon is-small"><i class="fas fa-arrow-rotate-right"></i></span>
-                <span class="is-hidden-mobile">Replace</span>
+                <i class="fas fa-arrow-rotate-right text-xs"></i>
+                <span class="hidden sm:inline">Replace</span>
               </button>
             </div>
           {/if}
         </div>
 
-        <!-- Right: Template Selector & Actions -->
-        <div class="paisa-import-controls-group">
-          <div class="paisa-import-template-control">
-            <div class="paisa-import-select-wrapper">
+        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
+          <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
+            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:border [&_.svelte-select]:border-[var(--paisa-border-default)] [&_.svelte-select]:bg-[var(--paisa-canvas-bg)] [&_.svelte-select]:text-xs">
               <Select
                 items={templateItems}
                 value={selectedTemplateOption}
@@ -535,116 +539,115 @@
                   if (e.detail?.value) onSelectTemplate(e.detail.value);
                 }}
               >
-                <div slot="item" let:item class="paisa-select-item-option">
-                  <span class="paisa-template-name">{item.label}</span>
-                  <span class="tag is-small {item.template_type === 'builtin' ? 'is-light is-info' : 'is-light is-primary'}">
+                <div slot="item" let:item class="flex w-full items-center justify-between gap-[var(--paisa-space-2)] overflow-hidden">
+                  <span class="truncate font-semibold text-[var(--paisa-text-primary)]">{item.label}</span>
+                  <Badge variant={item.template_type === "builtin" ? "info" : "primary"} size="sm">
                     {item.template_type}
-                  </span>
+                  </Badge>
                 </div>
               </Select>
             </div>
 
-            <div class="paisa-template-btn-group">
-              <button
-                type="button"
-                class="paisa-btn-secondary"
-                onclick={() => (templateDrawerOpen = true)}
+            <div class="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
                 title="Edit active Handlebars template"
-                aria-label="Edit Template"
+                ariaLabel="Edit Template"
+                onclick={() => (templateDrawerOpen = true)}
               >
-                <span class="icon is-small"><i class="fas fa-code"></i></span>
-                <span class="is-hidden-mobile">Edit Template</span>
+                {#snippet icon()}
+                  <i class="fas fa-code"></i>
+                {/snippet}
+                <span class="hidden sm:inline">Edit Template</span>
                 {#if $templateEditorState.hasUnsavedChanges}
-                  <span class="paisa-unsaved-dot"></span>
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-warning)]"></span>
                 {/if}
-              </button>
+              </Button>
 
-              <button
-                type="button"
-                class="paisa-btn-icon"
+              <IconButton
+                variant="outline"
+                size="sm"
+                ariaLabel="Create Template"
+                title="Create New Template"
                 onclick={() => {
                   showSaveAsModal = true;
-                  setTimeout(() => saveAsInput?.focus(), 50);
+                  setTimeout(() => document.getElementById("template-name-input")?.focus(), 50);
                 }}
-                title="Create New Template"
-                aria-label="Create Template"
               >
-                <span class="icon is-small"><i class="fas fa-plus"></i></span>
-              </button>
+                <i class="fas fa-plus"></i>
+              </IconButton>
 
-              <button
-                type="button"
-                class="paisa-btn-icon"
-                data-tippy-content={templateSaveTooltip}
+              <IconButton
+                variant="outline"
+                size="sm"
+                ariaLabel="Save Template"
+                title={templateSaveTooltip}
                 disabled={templateSaveDisabled}
-                aria-label="Save Template"
                 onclick={save}
               >
-                <span class="icon is-small"><i class="fas {selectedTemplateIsBuiltin ? 'fa-code-fork' : 'fa-floppy-disk'}"></i></span>
-              </button>
+                <i class="fas {selectedTemplateIsBuiltin ? 'fa-code-fork' : 'fa-floppy-disk'}"></i>
+              </IconButton>
 
               {#if !selectedTemplateIsBuiltin}
-                <button
-                  type="button"
-                  class="paisa-btn-icon is-danger"
-                  data-tippy-content={builtinNotAllowed("Delete", selectedTemplate)}
-                  aria-label="Delete Template"
+                <IconButton
+                  variant="danger"
+                  size="sm"
+                  ariaLabel="Delete Template"
+                  title={builtinNotAllowed("Delete", selectedTemplate)}
                   onclick={(_e) => remove()}
                 >
-                  <span class="icon is-small"><i class="fas fa-trash-can"></i></span>
-                </button>
+                  <i class="fas fa-trash-can"></i>
+                </IconButton>
               {/if}
             </div>
           </div>
 
-          <!-- Advanced Options Toggle -->
           <button
             type="button"
-            class="paisa-btn-subtle"
+            class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
             onclick={() => (advancedOptionsOpen = !advancedOptionsOpen)}
             aria-expanded={advancedOptionsOpen}
           >
             <span>Advanced Options</span>
-            <span class="icon is-small"><i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'}"></i></span>
+            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs"></i>
           </button>
         </div>
       </div>
 
       {#if advancedOptionsOpen}
-        <div class="paisa-advanced-options-bar">
-          <div class="paisa-advanced-switches">
+        <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)] border-t border-dashed border-[var(--paisa-border-subtle)] pt-[var(--paisa-space-2)]">
+          <div class="flex items-center gap-[var(--paisa-space-4)]">
             <Switch id="import-reverse" bind:checked={options.reverse} size="sm" label="Reverse Row Order" />
             <Switch id="trim-reverse" bind:checked={options.trim} size="sm" label="Trim Whitespace" />
           </div>
-          <span class="paisa-advanced-hint">Adjust row sequence or clean generated spacing</span>
+          <span class="text-xs text-[var(--paisa-text-muted)]">Adjust row sequence or clean generated spacing</span>
         </div>
       {/if}
     </div>
 
-    <!-- MAIN WORKSPACE -->
     {#if _.isEmpty(data) && !loading}
-      <!-- EMPTY / INITIAL STATE -->
-      <div class="paisa-empty-import-hero">
-        <div class="paisa-dropzone-container">
+      <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
+        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-[var(--paisa-border-default)] [&_.paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&_.paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
           <FileDropzone
             multiple={false}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
             on:drop={handleFilesSelect}
           >
-            <div class="paisa-dropzone-content-empty">
-              <div class="paisa-dropzone-icon-circle">
+            <div class="flex flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center">
+              <div class="mb-[var(--paisa-space-3)] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--paisa-brand-primary-light)] text-[var(--paisa-brand-primary)]">
                 <i class="fas fa-cloud-arrow-up fa-2x"></i>
               </div>
-              <h2 class="title is-5 mb-2">Drop your bank or card statement here</h2>
-              <p class="subtitle is-6 has-text-grey mb-4">Turn your financial statements into clean, verified ledger transactions</p>
-              <div class="paisa-format-chips mb-4">
-                <span class="paisa-format-chip">CSV</span>
-                <span class="paisa-format-chip">TXT</span>
-                <span class="paisa-format-chip">XLS / XLSX</span>
-                <span class="paisa-format-chip">PDF</span>
+              <h2 class="mb-2 text-xl font-semibold text-[var(--paisa-text-primary)]">Drop your bank or card statement here</h2>
+              <p class="mb-4 text-base text-[var(--paisa-text-secondary)]">Turn your financial statements into clean, verified ledger transactions</p>
+              <div class="mb-4 flex flex-wrap items-center justify-center gap-1.5">
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">CSV</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">TXT</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">XLS / XLSX</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">PDF</span>
               </div>
-              <div class="paisa-btn-primary">
-                <span class="icon is-small mr-1"><i class="fas fa-folder-open"></i></span>
+              <div class="inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-[filter] hover:brightness-110">
+                <i class="fas fa-folder-open text-xs"></i>
                 <span>Choose File</span>
               </div>
             </div>
@@ -652,78 +655,67 @@
         </div>
 
         {#if parseErrorMessage}
-          <div class="notification is-danger is-light p-3 m-3">
-            <div class="is-flex is-align-items-center">
-              <span class="icon mr-2"><i class="fas fa-triangle-exclamation"></i></span>
-              <div class="is-size-7"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
+          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+              <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
             </div>
           </div>
         {/if}
       </div>
     {:else if loading}
-      <!-- LOADING STATE -->
-      <div class="paisa-data-loading-state">
-        <span class="icon is-large has-text-link">
-          <i class="fas fa-spinner fa-pulse fa-2x"></i>
-        </span>
-        <p class="is-size-6 mt-2 has-text-weight-semibold">Parsing Spreadsheet Data…</p>
-        <p class="is-size-7 has-text-grey">Extracting tabular rows and columns</p>
+      <div class="flex flex-1 flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-[var(--paisa-text-primary)]">
+        <i class="fas fa-spinner fa-pulse fa-2x text-[var(--paisa-brand-primary)]"></i>
+        <p class="mt-2 text-base font-semibold">Parsing Spreadsheet Data…</p>
+        <p class="text-xs text-[var(--paisa-text-secondary)]">Extracting tabular rows and columns</p>
       </div>
     {:else}
-      <!-- LOADED WORKSPACE (DESKTOP SPLIT / MOBILE TABS) -->
-
-      <!-- MOBILE TAB BAR -->
-      <div class="paisa-mobile-view-tabs">
+      <div class="hidden shrink-0 grid-cols-2 gap-2 max-[860px]:grid">
         <button
           type="button"
-          class="paisa-mobile-tab-btn"
-          class:is-active={mobileActiveTab === "source"}
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'source' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
           onclick={() => (mobileActiveTab = "source")}
         >
-          <span class="icon is-small"><i class="fas fa-table-cells"></i></span>
+          <i class="fas fa-table-cells text-xs"></i>
           <span>Source Data</span>
         </button>
         <button
           type="button"
-          class="paisa-mobile-tab-btn"
-          class:is-active={mobileActiveTab === "preview"}
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'preview' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
           onclick={() => (mobileActiveTab = "preview")}
         >
-          <span class="icon is-small"><i class="fas fa-file-invoice-dollar"></i></span>
+          <i class="fas fa-file-invoice-dollar text-xs"></i>
           <span>Ledger Preview</span>
           {#if renderMetadata.generatedCount > 0}
-            <span class="paisa-tab-count-pill">{renderMetadata.generatedCount}</span>
+            <span class="rounded-[var(--paisa-radius-full)] bg-white/25 px-1.5 py-0.5 text-[0.6875rem]">{renderMetadata.generatedCount}</span>
           {/if}
         </button>
       </div>
 
-      <div class="paisa-import-main-grid" class:is-mobile-preview-active={mobileActiveTab === "preview"}>
-        <!-- SOURCE DATA PANE (~35% desktop) -->
-        <div class="paisa-import-pane paisa-source-pane" class:paisa-hide-on-mobile-preview={mobileActiveTab === "preview"}>
-          <div class="paisa-pane-header">
-            <div class="paisa-source-view-switcher">
+      <div class="grid min-h-0 flex-1 grid-cols-[minmax(380px,35%)_1fr] gap-[var(--paisa-space-2)] overflow-hidden max-[860px]:grid-cols-1">
+        <div class="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'preview' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
+            <div class="inline-flex shrink-0 gap-0.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-0.5">
               <button
                 type="button"
-                class="paisa-view-mode-btn"
-                class:is-active={sourceViewMode === "review"}
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
                 onclick={() => (sourceViewMode = "review")}
               >
-                <span class="icon is-small"><i class="fas fa-list-check"></i></span>
+                <i class="fas fa-list-check text-xs"></i>
                 <span>Review</span>
               </button>
               <button
                 type="button"
-                class="paisa-view-mode-btn"
-                class:is-active={sourceViewMode === "raw"}
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
                 onclick={() => (sourceViewMode = "raw")}
               >
-                <span class="icon is-small"><i class="fas fa-table"></i></span>
+                <i class="fas fa-table text-xs"></i>
                 <span>Raw Data</span>
               </button>
             </div>
 
             {#if !predictionReviewFailed && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
-              <div class="paisa-review-filter-wrap">
+              <div class="max-w-full overflow-x-auto">
                 <PredictionReviewBar
                   counts={predictionCounts}
                   filter={predictionFilter}
@@ -734,16 +726,15 @@
           </div>
 
           {#if parseErrorMessage}
-            <div class="notification is-danger is-light p-3 m-3">
-              <div class="is-flex is-align-items-center">
-                <span class="icon mr-2"><i class="fas fa-triangle-exclamation"></i></span>
-                <div class="is-size-7"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+                <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
               </div>
             </div>
           {/if}
 
-          <!-- SOURCE BODY -->
-          <div class="paisa-source-body">
+          <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
             {#if sourceViewMode === "review"}
               <SourceReviewList
                 {data}
@@ -754,16 +745,15 @@
                 onSelectRow={selectSourceRow}
               />
             {:else}
-              <!-- RAW DATA TABLE -->
-              <div class="paisa-spreadsheet-grid-wrapper">
-                <table class="table is-bordered is-size-7 is-narrow paisa-sheet-table">
+              <div class="h-full min-h-0 flex-1 overflow-auto bg-[var(--paisa-table-bg)]">
+                <table class="m-0 w-full min-w-full border-separate border-spacing-0 text-xs">
                   <thead>
                     <tr>
-                      <th class="paisa-sheet-corner-cell">#</th>
+                      <th class="sticky left-0 top-0 z-[15] w-10 min-w-10 border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">#</th>
                       {#each _.range(0, columnCount) as ci}
-                        <th class="paisa-sheet-col-header">
-                          <span class="paisa-col-letter">{String.fromCharCode(65 + ci)}</span>
-                          <span class="paisa-col-tag">ROW.{String.fromCharCode(65 + ci)}</span>
+                        <th class="sticky top-0 z-10 min-w-[110px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">
+                          <span class="block text-sm font-bold">{String.fromCharCode(65 + ci)}</span>
+                          <span class="block font-mono text-[0.68rem] text-[var(--paisa-brand-primary)]">ROW.{String.fromCharCode(65 + ci)}</span>
                         </th>
                       {/each}
                     </tr>
@@ -771,11 +761,10 @@
                   <tbody>
                     {#each data as row, ri}
                       <tr
-                        class:selected={selectedSourceRowIndex === ri}
-                        class:is-filtered={!rowIsVisible(ri)}
+                        class="cursor-pointer hover:[&_.paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&_.paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&_.paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&_.paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&_.paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
                         onclick={() => selectSourceRow(ri)}
                       >
-                        <th class="paisa-sheet-row-header">
+                        <th class="paisa-sheet-row-header sticky left-0 z-[5] w-[88px] min-w-[88px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center align-middle font-semibold text-[var(--paisa-table-header-text)]">
                           <span>{ri}</span>
                           <PredictionRowBadge
                             confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
@@ -783,7 +772,7 @@
                           />
                         </th>
                         {#each row as cell}
-                          <td class="paisa-sheet-data-cell" title={displayCell(cell)}>{displayCell(cell)}</td>
+                          <td class="paisa-sheet-data-cell max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-[var(--paisa-text-primary)]" title={displayCell(cell)}>{displayCell(cell)}</td>
                         {/each}
                       </tr>
                     {/each}
@@ -793,9 +782,8 @@
             {/if}
           </div>
 
-          <!-- DESKTOP SELECTED ROW REVIEW INSPECTOR -->
           {#if !predictionReviewFailed && selectedPrediction}
-            <div class="paisa-desktop-inspector-wrap">
+            <div class="max-h-[280px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
               <PredictionDetail
                 result={selectedPrediction}
                 accounts={predictionSession.index?.accounts || []}
@@ -809,54 +797,61 @@
           {/if}
         </div>
 
-        <!-- LEDGER PREVIEW PANE (~65% desktop) -->
-        <div class="paisa-import-pane paisa-preview-pane" class:paisa-hide-on-mobile-source={mobileActiveTab === "source"}>
-          <div class="paisa-pane-header">
-            <div class="paisa-pane-title">
-              <span class="icon is-small has-text-success"><i class="fas fa-file-invoice-dollar"></i></span>
+        <div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'source' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
+            <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
+              <i class="fas fa-file-invoice-dollar text-xs text-[var(--paisa-success)]"></i>
               <span>Ledger Preview</span>
               {#if renderMetadata.generatedCount > 0}
-                <span class="tag is-success is-light is-small">{renderMetadata.generatedCount} generated</span>
+                <Badge variant="success" size="sm">{renderMetadata.generatedCount} generated</Badge>
               {/if}
               {#if renderMetadata.errors.length > 0}
-                <span class="tag is-danger is-light is-small">{renderMetadata.errors.length} errors</span>
+                <Badge variant="danger" size="sm">{renderMetadata.errors.length} errors</Badge>
               {/if}
             </div>
-            <div class="paisa-editor-card-actions">
-              <button
-                data-tippy-content="Copy Generated Ledger"
-                aria-label="Copy to Clipboard"
-                class="button is-small clipboard paisa-btn-secondary"
+            <div class="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                title="Copy Generated Ledger"
+                ariaLabel="Copy to Clipboard"
+                class="clipboard"
                 disabled={_.isEmpty(preview)}
                 onclick={copyToClipboard}
               >
-                <span class="icon is-small"><i class="fas fa-copy"></i></span>
-                <span>Copy</span>
-              </button>
-              <button
-                data-tippy-content="Save to Ledger File"
-                aria-label="Save"
-                class="button is-small is-link save paisa-btn-primary"
+                {#snippet icon()}
+                  <i class="fas fa-copy"></i>
+                {/snippet}
+                Copy
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                title="Save to Ledger File"
+                ariaLabel="Save"
+                class="save"
                 disabled={_.isEmpty(preview)}
                 onclick={openSaveModal}
               >
-                <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
-                <span>Save to Ledger</span>
-              </button>
+                {#snippet icon()}
+                  <i class="fas fa-floppy-disk"></i>
+                {/snippet}
+                Save to Ledger
+              </Button>
             </div>
           </div>
 
           {#if renderMetadata.errors.length > 0}
-            <div class="notification is-warning is-light p-3 m-3">
-              <div class="is-size-7"><strong>Template Errors:</strong> {renderMetadata.errors.length} rows encountered template rendering issues. Check Handlebars syntax or column mappings.</div>
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-warning)]/20 bg-[var(--paisa-warning-light)] p-3">
+              <div class="text-xs"><strong>Template Errors:</strong> {renderMetadata.errors.length} rows encountered template rendering issues. Check Handlebars syntax or column mappings.</div>
             </div>
           {/if}
 
-          <div class="paisa-preview-body">
-            <div class="preview-editor" use:initPreviewEditor></div>
+          <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
+            <div class="preview-editor h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.8125rem] [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto" use:initPreviewEditor></div>
             {#if _.isEmpty(preview) && _.isEmpty(data)}
-              <div class="paisa-preview-placeholder">
-                <span class="icon has-text-grey-light mb-2"><i class="fas fa-arrow-left fa-2x"></i></span>
+              <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-[var(--paisa-text-muted)]">
+                <i class="fas fa-arrow-left fa-2x mb-2 text-[var(--paisa-text-muted)]"></i>
                 <p>Upload a statement to inspect generated journal transactions.</p>
               </div>
             {/if}
@@ -864,44 +859,45 @@
         </div>
       </div>
 
-      <!-- STATUS BAR -->
-      <div class="paisa-import-statusbar">
-        <div class="paisa-statusbar-info">
+      <div class="flex shrink-0 items-center justify-between gap-[var(--paisa-space-3)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1 text-xs shadow-[var(--paisa-shadow-sm)]">
+        <div class="flex min-w-0 items-center gap-[var(--paisa-space-3)] overflow-x-auto">
           {#if parseErrorMessage}
-            <span class="has-text-danger"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+            <span class="text-[var(--paisa-danger)]"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
           {:else if loading}
-            <span class="has-text-link"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
+            <span class="text-[var(--paisa-brand-primary)]"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
           {:else if renderMetadata.generatedCount > 0}
-            <span class="has-text-success"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
+            <span class="text-[var(--paisa-success)]"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
             {#if renderMetadata.errors.length > 0}
-              <span class="has-text-danger"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
+              <span class="text-[var(--paisa-danger)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
             {/if}
             {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
-              <span class="paisa-status-dot-group">
-                <span class="paisa-dot-count"><span class="paisa-dot-sm bg-emerald-500"></span> {predictionCounts.high}</span>
-                <span class="paisa-dot-count"><span class="paisa-dot-sm bg-blue-500"></span> {predictionCounts.medium}</span>
-                <span class="paisa-dot-count"><span class="paisa-dot-sm bg-amber-500"></span> {predictionCounts.review}</span>
-                <span class="paisa-dot-count"><span class="paisa-dot-sm bg-rose-500"></span> {predictionCounts.unknown}</span>
+              <span class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> {predictionCounts.high}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> {predictionCounts.medium}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span> {predictionCounts.review}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span> {predictionCounts.unknown}</span>
               </span>
             {/if}
           {:else if activeFileName}
-            <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
+            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
           {:else}
-            <span class="has-text-grey"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
+            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
           {/if}
         </div>
 
-        <!-- Mobile Persistent Save Action -->
-        <div class="paisa-statusbar-mobile-actions">
-          <button
-            type="button"
-            class="paisa-btn-primary paisa-mobile-save-btn"
+        <div class="hidden max-[860px]:flex">
+          <Button
+            variant="primary"
+            size="sm"
+            class="min-h-11 px-4 text-[0.8125rem]"
             disabled={_.isEmpty(preview)}
             onclick={openSaveModal}
           >
-            <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
-            <span>Save to Ledger</span>
-          </button>
+            {#snippet icon()}
+              <i class="fas fa-floppy-disk"></i>
+            {/snippet}
+            Save to Ledger
+          </Button>
         </div>
       </div>
     {/if}
@@ -929,45 +925,45 @@
   {/snippet}
 </Drawer>
 
-<!-- TEMPLATE SLIDE-OVER DRAWER -->
-<div class="paisa-template-drawer" class:is-open={templateDrawerOpen}>
+<div class="pointer-events-none fixed inset-0 z-50 {templateDrawerOpen ? 'pointer-events-auto' : ''}">
   <button
-    class="paisa-template-drawer-backdrop"
+    class="absolute inset-0 cursor-default border-0 bg-slate-900/30 p-0 transition-opacity {templateDrawerOpen ? 'opacity-100' : 'opacity-0'}"
     aria-label="Close Template Definition"
     onclick={() => (templateDrawerOpen = false)}
   ></button>
-  <aside class="paisa-template-drawer-panel" aria-label="Template Definition">
-    <div class="paisa-template-drawer-header">
-      <div class="paisa-pane-title">
-        <span class="icon is-small has-text-link"><i class="fas fa-code"></i></span>
+  <aside class="absolute right-0 top-0 flex h-full w-[min(45vw,620px)] min-w-[420px] translate-x-full flex-col border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-lg)] transition-transform duration-[var(--paisa-transition-fast)] max-[860px]:min-w-0 max-[860px]:w-full {templateDrawerOpen ? '!translate-x-0' : ''}" aria-label="Template Definition">
+    <div class="flex items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] p-[var(--paisa-space-3)]">
+      <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
+        <i class="fas fa-code text-xs text-[var(--paisa-brand-primary)]"></i>
         <span>Template Definition</span>
-        <span class="tag is-small is-link is-light">Handlebars</span>
+        <Badge variant="primary" size="sm">Handlebars</Badge>
       </div>
-      <div class="paisa-template-drawer-actions">
+      <div class="flex items-center gap-[var(--paisa-space-2)]">
         {#if $templateEditorState.hasUnsavedChanges}
-          <span class="tag is-warning is-light is-small">
-            <span class="paisa-unsaved-dot"></span> Unsaved
-          </span>
+          <Badge variant="warning" size="sm" dot>Unsaved</Badge>
         {/if}
-        <button class="button is-small is-ghost" aria-label="Close Template Definition" onclick={() => (templateDrawerOpen = false)}>
-          <span class="icon is-small"><i class="fas fa-xmark"></i></span>
-        </button>
+        <IconButton variant="ghost" size="sm" ariaLabel="Close Template Definition" onclick={() => (templateDrawerOpen = false)}>
+          <i class="fas fa-xmark"></i>
+        </IconButton>
       </div>
     </div>
-    <div class="paisa-template-drawer-body">
-      <div class="template-editor" bind:this={templateEditorDom}></div>
+    <div class="relative min-h-0 flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
+      <div class="template-editor h-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.85rem] [&_.cm-scroller]:h-full" bind:this={templateEditorDom}></div>
     </div>
-    <div class="paisa-template-drawer-footer">
-      <button class="button is-small" onclick={() => (templateDrawerOpen = false)}>Cancel</button>
-      <button
-        class="button is-small is-link"
-        data-tippy-content={templateSaveTooltip}
-        onclick={save}
+    <div class="flex items-center justify-end gap-[var(--paisa-space-2)] border-t border-[var(--paisa-border-subtle)] p-[var(--paisa-space-3)]">
+      <Button variant="ghost" size="sm" onclick={() => (templateDrawerOpen = false)}>Cancel</Button>
+      <Button
+        variant="primary"
+        size="sm"
+        title={templateSaveTooltip}
         disabled={templateSaveDisabled}
+        onclick={save}
       >
-        <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
-        <span>{selectedTemplateIsBuiltin ? "Save as Custom" : "Save"}</span>
-      </button>
+        {#snippet icon()}
+          <i class="fas fa-floppy-disk"></i>
+        {/snippet}
+        {selectedTemplateIsBuiltin ? "Save as Custom" : "Save"}
+      </Button>
     </div>
   </aside>
 </div>
@@ -983,28 +979,21 @@
     onclose={() => (showSaveAsModal = false)}
   >
     {#snippet body()}
-      <div class="field">
-        <label class="label is-small" for="template-name-input">Template Name</label>
-        <div class="control">
-          <input
-            id="template-name-input"
-            class="input is-small"
-            type="text"
-            bind:this={saveAsInput}
-            bind:value={saveAsName}
-            placeholder="e.g. HDFC Bank Statement"
-          />
-        </div>
-        {#if saveAsNameDuplicate}
-          <p class="help is-danger">A custom template with this name already exists.</p>
-        {/if}
-      </div>
+      <Field label="Template Name" labelFor="template-name-input" error={saveAsNameDuplicate ? "A custom template with this name already exists." : undefined}>
+        <Input
+          id="template-name-input"
+          size="sm"
+          bind:value={saveAsName}
+          placeholder="e.g. HDFC Bank Statement"
+        />
+      </Field>
     {/snippet}
     {#snippet foot({ close })}
-      <div class="is-flex is-justify-content-flex-end gap-2 w-full">
-        <button class="button is-small" onclick={close}>Cancel</button>
-        <button
-          class="button is-small is-link"
+      <div class="flex w-full justify-end gap-2">
+        <Button variant="ghost" size="sm" onclick={close}>Cancel</Button>
+        <Button
+          variant="primary"
+          size="sm"
           disabled={!saveAsName || saveAsNameDuplicate}
           onclick={async () => {
             close();
@@ -1032,832 +1021,8 @@
           }}
         >
           Create
-        </button>
+        </Button>
       </div>
     {/snippet}
   </Modal>
 {/if}
-
-<style lang="scss">
-  :global(.paisa-page-container:has(.paisa-import-workspace)) {
-    height: calc(100vh - 3.5rem);
-    max-height: calc(100vh - 3.5rem);
-    overflow: hidden;
-    padding-bottom: var(--paisa-space-4) !important;
-    box-sizing: border-box;
-  }
-
-  .paisa-import-workspace {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    min-height: 0;
-    overflow: hidden;
-    gap: var(--paisa-space-2);
-    box-sizing: border-box;
-  }
-
-  .paisa-import-topbar,
-  .paisa-import-statusbar,
-  .paisa-import-pane {
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-md);
-    box-shadow: var(--paisa-shadow-sm);
-  }
-
-  .paisa-import-topbar,
-  .paisa-import-statusbar {
-    flex-shrink: 0;
-  }
-
-  .paisa-import-topbar {
-    display: flex;
-    flex-direction: column;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-import-header-main {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-import-title-group {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-import-page-title {
-    font-size: var(--paisa-font-size-lg, 1.125rem);
-    font-weight: var(--paisa-font-weight-bold, 700);
-    color: var(--paisa-text-primary);
-    margin: 0;
-  }
-
-  .paisa-file-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.2rem 0.5rem;
-    background-color: var(--paisa-surface-muted);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-sm);
-  }
-
-  .paisa-file-name {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--paisa-text-primary);
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-file-count-badge {
-    font-size: 0.6875rem;
-    font-weight: 500;
-    padding: 0.1rem 0.375rem;
-    background-color: var(--paisa-brand-primary-light);
-    color: var(--paisa-brand-primary);
-    border-radius: var(--paisa-radius-full, 9999px);
-  }
-
-  .paisa-import-controls-group {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-import-template-control {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-1);
-    min-width: 0;
-  }
-
-  .paisa-import-select-wrapper {
-    min-width: 180px;
-    max-width: 260px;
-
-    :global(.svelte-select) {
-      border: 1px solid var(--paisa-border-default);
-      background-color: var(--paisa-canvas-bg);
-      border-radius: var(--paisa-radius-sm);
-      min-height: 32px;
-      font-size: 0.75rem;
-    }
-  }
-
-  .paisa-select-item-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    width: 100%;
-    overflow: hidden;
-  }
-
-  .paisa-template-name {
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-template-btn-group {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .paisa-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.375rem 0.75rem;
-    min-height: 32px;
-    border-radius: var(--paisa-radius-sm);
-    border: 1px solid var(--paisa-brand-primary);
-    background-color: var(--paisa-brand-primary);
-    color: #ffffff;
-    cursor: pointer;
-    transition: filter 0.15s ease;
-
-    &:hover {
-      filter: brightness(1.08);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  .paisa-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.375rem 0.625rem;
-    min-height: 32px;
-    border-radius: var(--paisa-radius-sm);
-    border: 1px solid var(--paisa-border-default);
-    background-color: var(--paisa-surface-card);
-    color: var(--paisa-text-primary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-      border-color: var(--paisa-border-focus);
-    }
-  }
-
-  .paisa-btn-subtle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.25rem 0.5rem;
-    min-height: 30px;
-    border-radius: var(--paisa-radius-sm);
-    border: 1px solid transparent;
-    background-color: transparent;
-    color: var(--paisa-text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background-color: var(--paisa-surface-muted);
-      color: var(--paisa-text-primary);
-    }
-  }
-
-  .paisa-btn-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--paisa-radius-sm);
-    border: 1px solid var(--paisa-border-default);
-    background-color: var(--paisa-surface-card);
-    color: var(--paisa-text-primary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-    }
-
-    &.is-danger {
-      color: var(--paisa-danger);
-      &:hover {
-        background-color: rgba(239, 68, 68, 0.1);
-        border-color: var(--paisa-danger);
-      }
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  .paisa-advanced-options-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-2);
-    padding-top: var(--paisa-space-2);
-    border-top: 1px dashed var(--paisa-border-subtle);
-  }
-
-  .paisa-advanced-switches {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-4);
-  }
-
-  .paisa-advanced-hint {
-    font-size: 0.75rem;
-    color: var(--paisa-text-muted);
-  }
-
-  /* EMPTY HERO */
-  .paisa-empty-import-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    min-height: 0;
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-md);
-    padding: var(--paisa-space-6);
-  }
-
-  .paisa-dropzone-container {
-    width: 100%;
-    max-width: 540px;
-
-    :global(.paisa-file-dropzone) {
-      width: 100%;
-      border: 2px dashed var(--paisa-border-default);
-      background-color: var(--paisa-canvas-bg);
-      border-radius: var(--paisa-radius-md);
-      transition: all var(--paisa-transition-fast);
-      cursor: pointer;
-
-      &:hover {
-        border-color: var(--paisa-brand-primary);
-        background-color: var(--paisa-brand-primary-light);
-      }
-    }
-  }
-
-  .paisa-dropzone-content-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--paisa-space-6) var(--paisa-space-4);
-    text-align: center;
-  }
-
-  .paisa-dropzone-icon-circle {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: var(--paisa-brand-primary-light);
-    color: var(--paisa-brand-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: var(--paisa-space-3);
-  }
-
-  .paisa-format-chips {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    flex-wrap: wrap;
-  }
-
-  .paisa-format-chip {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: var(--paisa-radius-full, 9999px);
-    background-color: var(--paisa-surface-muted);
-    color: var(--paisa-text-secondary);
-    border: 1px solid var(--paisa-border-subtle);
-  }
-
-  .paisa-data-loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--paisa-space-6) var(--paisa-space-4);
-    color: var(--paisa-text-primary);
-    flex: 1;
-  }
-
-  /* MOBILE TABS */
-  .paisa-mobile-view-tabs {
-    display: none;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-    flex-shrink: 0;
-  }
-
-  .paisa-mobile-tab-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    padding: 0.5rem 0.75rem;
-    min-height: 44px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    border-radius: var(--paisa-radius-sm);
-    border: 1px solid var(--paisa-border-default);
-    background-color: var(--paisa-surface-card);
-    color: var(--paisa-text-secondary);
-    cursor: pointer;
-
-    &.is-active {
-      background-color: var(--paisa-brand-primary);
-      border-color: var(--paisa-brand-primary);
-      color: #ffffff;
-    }
-  }
-
-  .paisa-tab-count-pill {
-    font-size: 0.6875rem;
-    padding: 0.125rem 0.375rem;
-    background-color: rgba(255, 255, 255, 0.25);
-    border-radius: var(--paisa-radius-full, 9999px);
-  }
-
-  /* MAIN GRID WORKSPACE */
-  .paisa-import-main-grid {
-    display: grid;
-    grid-template-columns: minmax(380px, 35%) 1fr;
-    gap: var(--paisa-space-2);
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .paisa-import-pane {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  .paisa-source-pane {
-    position: relative;
-  }
-
-  .paisa-source-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .paisa-desktop-inspector-wrap {
-    flex-shrink: 0;
-    max-height: 280px;
-    overflow-y: auto;
-    border-top: 1px solid var(--paisa-border-default);
-    background-color: var(--paisa-surface-card);
-  }
-
-  .paisa-pane-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    min-height: 40px;
-    padding: 0.25rem 0.625rem;
-    background-color: var(--paisa-surface-muted);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-    flex-shrink: 0;
-  }
-
-  .paisa-source-view-switcher {
-    display: inline-flex;
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-sm);
-    padding: 2px;
-    gap: 2px;
-    flex-shrink: 0;
-  }
-
-  .paisa-view-mode-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    padding: 0.2rem 0.5rem;
-    border-radius: calc(var(--paisa-radius-sm) - 2px);
-    border: none;
-    background: transparent;
-    color: var(--paisa-text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover {
-      color: var(--paisa-text-primary);
-    }
-
-    &.is-active {
-      background-color: var(--paisa-brand-primary);
-      color: #ffffff;
-      font-weight: 600;
-    }
-  }
-
-  .paisa-review-filter-wrap {
-    overflow-x: auto;
-    max-width: 100%;
-  }
-
-  .paisa-pane-title {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    min-width: 0;
-    font-size: var(--paisa-font-size-xs, 0.75rem);
-    font-weight: var(--paisa-font-weight-semibold, 600);
-    color: var(--paisa-text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0.025em;
-  }
-
-  .paisa-editor-card-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-
-  .paisa-preview-body {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--paisa-canvas-bg);
-
-    .preview-editor {
-      width: 100%;
-      height: 100%;
-    }
-
-    :global(.cm-editor) {
-      height: 100%;
-      min-height: 100%;
-      font-size: 0.8125rem;
-      font-family: var(--paisa-font-mono, monospace);
-    }
-
-    :global(.cm-scroller) {
-      height: 100%;
-      overflow: auto;
-    }
-  }
-
-  .paisa-preview-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--paisa-space-4);
-    color: var(--paisa-text-muted);
-    font-size: var(--paisa-font-size-xs);
-    pointer-events: none;
-  }
-
-  /* RAW SPREADSHEET TABLE */
-  .paisa-spreadsheet-grid-wrapper {
-    flex: 1;
-    min-height: 0;
-    height: 100%;
-    overflow: auto;
-    background-color: var(--paisa-table-bg);
-  }
-
-  .paisa-sheet-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    width: 100%;
-    min-width: 100%;
-
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background-color: var(--paisa-table-header-bg);
-      color: var(--paisa-table-header-text);
-      border-color: var(--paisa-table-border);
-      text-align: center;
-      padding: var(--paisa-space-1) var(--paisa-space-2);
-      font-size: var(--paisa-font-size-xs);
-    }
-
-    tbody tr {
-      cursor: pointer;
-
-      &.selected {
-        .paisa-sheet-row-header,
-        .paisa-sheet-data-cell {
-          background-color: var(--paisa-brand-primary-light);
-          color: var(--paisa-text-primary);
-        }
-      }
-
-      &:hover {
-        .paisa-sheet-row-header {
-          background-color: var(--paisa-surface-hover);
-          color: var(--paisa-brand-primary);
-        }
-
-        .paisa-sheet-data-cell {
-          background-color: var(--paisa-table-row-hover);
-        }
-      }
-    }
-
-    .paisa-sheet-corner-cell {
-      position: sticky;
-      left: 0;
-      top: 0;
-      z-index: 15;
-      background-color: var(--paisa-table-header-bg);
-      border-color: var(--paisa-table-border);
-      width: 40px;
-      min-width: 40px;
-    }
-
-    .paisa-sheet-col-header {
-      min-width: 110px;
-
-      .paisa-col-letter {
-        display: block;
-        font-weight: var(--paisa-font-weight-bold);
-        font-size: var(--paisa-font-size-sm);
-      }
-
-      .paisa-col-tag {
-        display: block;
-        font-size: 0.68rem;
-        color: var(--paisa-brand-primary);
-        font-family: monospace;
-      }
-    }
-
-    .paisa-sheet-row-header {
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      background-color: var(--paisa-table-header-bg);
-      color: var(--paisa-table-header-text);
-      border-color: var(--paisa-table-border);
-      text-align: center;
-      width: 88px;
-      min-width: 88px;
-      font-weight: var(--paisa-font-weight-semibold);
-      vertical-align: middle;
-    }
-
-    tbody tr.is-filtered {
-      display: none;
-    }
-
-    .paisa-sheet-data-cell {
-      border-color: var(--paisa-table-border);
-      background-color: var(--paisa-table-bg);
-      color: var(--paisa-text-primary);
-      max-width: 250px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: var(--paisa-space-1) var(--paisa-space-2);
-    }
-  }
-
-  .paisa-import-statusbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-3);
-    min-height: 32px;
-    padding: 0.25rem 0.75rem;
-    font-size: var(--paisa-font-size-xs, 0.75rem);
-    flex-shrink: 0;
-  }
-
-  .paisa-statusbar-info {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    min-width: 0;
-    overflow-x: auto;
-  }
-
-  .paisa-status-dot-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .paisa-dot-count {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-dot-sm {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
-
-  .paisa-statusbar-mobile-actions {
-    display: none;
-  }
-
-  .paisa-mobile-save-btn {
-    min-height: 44px;
-    padding: 0.5rem 1rem;
-    font-size: 0.8125rem;
-  }
-
-  /* TEMPLATE DRAWER */
-  .paisa-template-drawer {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    pointer-events: none;
-  }
-
-  .paisa-template-drawer-backdrop {
-    position: absolute;
-    inset: 0;
-    padding: 0;
-    border: 0;
-    background-color: rgba(15, 23, 42, 0.32);
-    cursor: default;
-    opacity: 0;
-    transition: opacity var(--paisa-transition-fast);
-  }
-
-  .paisa-template-drawer-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    width: min(45vw, 620px);
-    min-width: 420px;
-    height: 100%;
-    background-color: var(--paisa-surface-card);
-    border-left: 1px solid var(--paisa-border-default);
-    box-shadow: var(--paisa-shadow-lg);
-    transform: translateX(100%);
-    transition: transform var(--paisa-transition-fast);
-  }
-
-  .paisa-template-drawer.is-open {
-    pointer-events: auto;
-
-    .paisa-template-drawer-backdrop {
-      opacity: 1;
-    }
-
-    .paisa-template-drawer-panel {
-      transform: translateX(0);
-    }
-  }
-
-  .paisa-template-drawer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--paisa-space-3);
-    background-color: var(--paisa-surface-muted);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-  }
-
-  .paisa-template-drawer-actions,
-  .paisa-template-drawer-footer {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-template-drawer-body {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    background-color: var(--paisa-canvas-bg);
-    overflow: hidden;
-
-    :global(.cm-editor) {
-      height: 100%;
-      min-height: 100%;
-      font-size: 0.85rem;
-      font-family: var(--paisa-font-mono, monospace);
-    }
-
-    :global(.cm-scroller) {
-      height: 100%;
-    }
-  }
-
-  .paisa-template-drawer-footer {
-    justify-content: flex-end;
-    padding: var(--paisa-space-3);
-    border-top: 1px solid var(--paisa-border-subtle);
-  }
-
-  .paisa-unsaved-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--paisa-warning);
-  }
-
-  @media screen and (max-width: 860px) {
-    :global(.paisa-page-container:has(.paisa-import-workspace)) {
-      padding: var(--paisa-space-2) !important;
-      height: calc(100vh - 3.5rem);
-      max-height: calc(100vh - 3.5rem);
-    }
-
-    .paisa-mobile-view-tabs {
-      display: grid;
-    }
-
-    .paisa-import-main-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .paisa-hide-on-mobile-preview {
-      display: none !important;
-    }
-
-    .paisa-hide-on-mobile-source {
-      display: none !important;
-    }
-
-    .paisa-desktop-inspector-wrap {
-      display: none;
-    }
-
-    .paisa-statusbar-mobile-actions {
-      display: flex;
-    }
-
-    .paisa-template-drawer-panel {
-      width: 100%;
-      min-width: 0;
-    }
-  }
-</style>

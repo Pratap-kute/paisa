@@ -1,5 +1,9 @@
 <script lang="ts">
   import Logo from "$lib/components/layout/Logo.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+
   const links = [
     { name: "Chat", href: "https://matrix.to/#/#paisa:matrix.org", icon: "fa-solid fa-headset" },
     { name: "Issue", href: "https://github.com/ananthakumaran/paisa/issues", icon: "fas fa-bug" },
@@ -26,10 +30,6 @@
     }
   ];
 
-  import Card from "$lib/components/ui/Card.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-
   function externalLink(url: string) {
     if (window.runtime) {
       window.runtime.BrowserOpenURL(url);
@@ -41,24 +41,29 @@
 
 <Page width="analysis">
   <Section>
-    <div class="paisa-about-centered">
-      <Card padding="sm" class="has-text-centered">
+    <div class="mx-auto flex w-full max-w-[480px] flex-col gap-4">
+      <Card padding="sm" class="text-center">
         <div><Logo size={128} /></div>
-        <div class="is-size-3 is-primary-color">Paisa</div>
-        <div>
-          Version: <b>0.8.1</b>
+        <div class="text-3xl font-semibold text-[var(--paisa-primary)]">Paisa</div>
+        <div class="text-sm text-[var(--paisa-muted-foreground)]">
+          Version: <b class="text-[var(--paisa-foreground)]">0.8.1</b>
         </div>
       </Card>
 
       <Card padding="sm">
-        <h3 class="is-size-5 mb-1">Links</h3>
-        <ul>
+        <h3 class="mb-2 text-lg font-semibold text-[var(--paisa-foreground)]">Links</h3>
+        <ul class="m-0 list-none space-y-2 p-0">
           {#each links as link}
             <li>
-              <a href={link.href} onclick={(e) => { e.preventDefault(); externalLink(link.href); }}>
-                <span class="icon is-small">
-                  <i class={link.icon}></i>
-                </span>
+              <a
+                href={link.href}
+                class="inline-flex items-center gap-2 text-sm text-[var(--paisa-primary)] hover:underline"
+                onclick={(e) => {
+                  e.preventDefault();
+                  externalLink(link.href);
+                }}
+              >
+                <i class="{link.icon} w-4 text-center text-[var(--paisa-muted-foreground)]"></i>
                 <span>{link.name}</span>
               </a>
             </li>
@@ -68,13 +73,3 @@
     </div>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-about-centered {
-    max-width: 480px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-</style>

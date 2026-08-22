@@ -36,9 +36,12 @@
     subtitle="Market value, cost, and performance by account"
   >
     {#if isLoading}
-      <div class="paisa-balance-loading" aria-hidden="true">
+      <div
+        class="flex flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] p-[var(--paisa-space-4)]"
+        aria-hidden="true"
+      >
         {#each Array(6) as _}
-          <div class="paisa-balance-loading-row"></div>
+          <div class="h-5 animate-pulse rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-hover)]"></div>
         {/each}
       </div>
     {:else if !hasBreakdowns}
@@ -48,49 +51,9 @@
         </p>
       </ZeroState>
     {:else}
-      <div class="paisa-balance-table-wrap">
+      <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
         <AssetsBalance {breakdowns} />
       </div>
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-balance-table-wrap {
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    overflow: auto;
-    max-width: 100%;
-  }
-
-  .paisa-balance-loading {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-2);
-    padding: var(--paisa-space-4);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-  }
-
-  .paisa-balance-loading-row {
-    height: 1.25rem;
-    border-radius: var(--paisa-radius-sm);
-    background: linear-gradient(
-      90deg,
-      var(--paisa-surface-hover) 25%,
-      var(--paisa-surface) 50%,
-      var(--paisa-surface-hover) 75%
-    );
-    background-size: 200% 100%;
-    animation: paisa-shimmer 1.2s ease-in-out infinite;
-  }
-
-  @keyframes paisa-shimmer {
-    0% {
-      background-position: 100% 0;
-    }
-    100% {
-      background-position: -100% 0;
-    }
-  }
-</style>

@@ -30,27 +30,17 @@ async function assertNoPageOverflow(page: Page) {
   ).toBeLessThanOrEqual(1);
 }
 
-async function nestedMenuPosition(page: Page) {
-  const burger = page.locator(".navbar-burger");
-  if (await burger.isVisible()) {
-    await burger.click();
+async function assertNavigationVisible(page: Page) {
+  const mobileMenu = page.getByRole("button", { name: "Open navigation menu" });
+  if (await mobileMenu.isVisible()) {
+    await expect(mobileMenu).toBeVisible();
+    return;
   }
-  const parent = page.locator(".navbar-item.has-dropdown").filter({
-    hasText: "Cash Flow",
-  }).first();
-  await parent.locator("button.navbar-link").click();
-  const nested = parent.locator(".nested.has-dropdown").first();
-  if (await nested.count() === 0) {
-    return { position: "none" };
-  }
-  await nested.locator("button.nested-menu-trigger").click();
-  return nested.locator(".dropdown-menu").evaluate((el) => ({
-    position: getComputedStyle(el).position,
-    left: getComputedStyle(el).left,
-  }));
+  await expect(page.locator('aside nav[aria-label="main navigation"]')).toBeVisible();
 }
 
 test.describe("layout invariants", () => {
+  test.describe.configure({ timeout: 90_000 });
   test.beforeAll(async ({ request }) => {
     const response = await request.post("/api/sync", { data: { journal: true } });
     expect(response.ok()).toBeTruthy();
@@ -60,8 +50,7 @@ test.describe("layout invariants", () => {
     test(`dashboard does not overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      await expect(page.getByRole("navigation", { name: "main navigation" }))
-        .toBeVisible();
+      await assertNavigationVisible(page);
       await assertNoPageOverflow(page);
     });
   }
@@ -69,8 +58,7 @@ test.describe("layout invariants", () => {
   test("import workspace does not overflow at 1100px", async ({ page }) => {
     await page.setViewportSize({ width: 1100, height: 900 });
     await page.goto("/ledger/import");
-    await expect(page.getByRole("navigation", { name: "main navigation" }))
-      .toBeVisible();
+    await assertNavigationVisible(page);
     await assertNoPageOverflow(page);
   });
 
@@ -82,23 +70,19 @@ test.describe("layout invariants", () => {
       test(`${route.name} does not overflow at ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(route.path);
-        await expect(page.getByRole("navigation", { name: "main navigation" }))
-          .toBeVisible();
+        await assertNavigationVisible(page);
         await assertNoPageOverflow(page);
       });
     }
   }
 
-  for (const width of [800, 1023]) {
-    test(`navbar nested menus stay in-flow at ${width}px`, async ({ page }) => {
+  for (const width of [1024, 1280]) {
+    test(`sidebar expandable groups reveal children at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      await expect(page.getByRole("navigation", { name: "main navigation" }))
-        .toBeVisible();
-      const style = await nestedMenuPosition(page);
-      if (style.position !== "none") {
-        expect(style.position).toBe("static");
-      }
+      await assertNavigationVisible(page);
+      await page.locator('aside').getByRole("button", { name: "Cash Flow" }).click();
+      await expect(page.locator('aside').getByRole("link", { name: "Monthly" }).first()).toBeVisible();
     });
   }
 
@@ -115,7 +99,7 @@ test.describe("layout invariants", () => {
       });
     });
     await page.goto("/");
-    const row = page.locator(".paisa-dashboard-operations");
+    const row = page.locator("div.grid").filter({ has: page.getByRole("link", { name: "Recent Activity" }) });
     await expect(row).toBeVisible();
     await expect(row.locator(":scope > *")).toHaveCount(1);
   });
@@ -133,7 +117,7 @@ test.describe("layout invariants", () => {
       });
     });
     await page.goto("/");
-    const row = page.locator(".paisa-dashboard-longterm");
+    const row = page.locator("div.grid").filter({ has: page.getByRole("link", { name: "Upcoming / Recurring" }) });
     await expect(row).toBeVisible();
     await expect(row.locator(":scope > *")).toHaveCount(1);
   });

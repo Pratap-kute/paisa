@@ -75,7 +75,7 @@
     description="Monthly cash movement and checking balance"
   >
     {#snippet actions()}
-      <div class="paisa-page-toolbar-mobile">
+      <div class="inline-flex items-center sm:hidden">
         <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
       </div>
     {/snippet}
@@ -106,14 +106,3 @@
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-page-toolbar-mobile {
-    display: inline-flex;
-    align-items: center;
-
-    @media screen and (min-width: 640px) {
-      display: none;
-    }
-  }
-</style>

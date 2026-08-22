@@ -85,7 +85,7 @@
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame
         type="category"
-        class="paisa-gain-overview-chart"
+        class="[&_.paisa-chart-frame-body]:overflow-x-auto [&_.paisa-chart-frame-body]:overflow-y-visible [&_svg]:min-w-full"
         onresize={(dim) => overviewChart?.resize(dim)}
       >
         <svg id="d3-gain-overview" />
@@ -93,14 +93,3 @@
     {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  :global(.paisa-gain-overview-chart .paisa-chart-frame-body) {
-    overflow-x: auto;
-    overflow-y: visible;
-  }
-
-  :global(.paisa-gain-overview-chart svg) {
-    min-width: 100%;
-  }
-</style>

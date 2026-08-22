@@ -7,44 +7,65 @@
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
 
   let years: string[] = $state([]);
   let capitalGains: CapitalGain[] = $state([]);
+  let isLoading = $state(true);
+
+  let hasYears = $derived(years.length > 0);
 
   onMount(async () => {
-    const { capital_gains: capital_gains } = await ajax("/api/capital_gains");
+    try {
+      const { capital_gains: capital_gains } = await ajax("/api/capital_gains");
 
-    years = _.chain(capital_gains)
-      .values()
-      .flatMap((c) => _.keys(c.fy))
-      .uniq()
-      .sort()
-      .reverse()
-      .value();
+      years = _.chain(capital_gains)
+        .values()
+        .flatMap((c) => _.keys(c.fy))
+        .uniq()
+        .sort()
+        .reverse()
+        .value();
 
-    capitalGains = _.values(capital_gains);
+      capitalGains = _.values(capital_gains);
+    } finally {
+      isLoading = false;
+    }
   });
 </script>
 
-<Page width="fluid">
+<svelte:head>
+  <title>Capital Gains - Paisa</title>
+</svelte:head>
+
+<Page width="analysis">
   <PageHeader
     title="Capital Gains"
     description="Financial year capital gains summary and asset realization"
   />
 
   <Section>
-    <div class="paisa-capital-gains-list">
-      {#each years as year}
-        <CapitalGainCard financialYear={year} {capitalGains} />
-      {/each}
-    </div>
+    {#if isLoading}
+      <div
+        class="flex flex-col gap-[var(--paisa-space-4)]"
+        aria-hidden="true"
+      >
+        {#each Array(2) as _}
+          <div class="h-48 animate-pulse rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-hover)]"></div>
+        {/each}
+      </div>
+    {:else if !hasYears}
+      <ZeroState item={[]}>
+        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+          No capital gains recorded.
+        </p>
+      </ZeroState>
+    {:else}
+      <div class="flex flex-col gap-[var(--paisa-space-4)]">
+        {#each years as year}
+          <CapitalGainCard financialYear={year} {capitalGains} />
+        {/each}
+      </div>
+    {/if}
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-capital-gains-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-</style>

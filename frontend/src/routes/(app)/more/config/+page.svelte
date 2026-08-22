@@ -163,10 +163,10 @@
       return;
     }
     if (lastConfig) {
-        save({
-          journal_path: lastConfig.journal_path,
-          db_path: lastConfig.db_path,
-        });
+      save({
+        journal_path: lastConfig.journal_path,
+        db_path: lastConfig.db_path,
+      });
     }
   }
 
@@ -207,45 +207,79 @@
   let hasChanges = $derived(!_.isEqual(config, lastConfig));
 </script>
 
-<Page width="standard" loading={!loaded} loadingMessage="Loading configuration…">
-  <div class="paisa-settings">
-    <PageHeader
-      title="Configuration"
-      description="Edit paisa.yaml by section. Save writes the file and re-syncs the journal."
-      help="config"
-    >
-      {#snippet actions()}
-        {#if hasChanges}
-          <Badge variant="warning" size="sm">Unsaved changes</Badge>
-        {/if}
-      {/snippet}
-    </PageHeader>
+<svelte:head>
+  <title>Configuration - Paisa</title>
+</svelte:head>
 
-    {#if schema && config && activeSection && activeSchema}
-      <div class="paisa-settings-shell">
-        <nav class="paisa-settings-nav" aria-label="Configuration sections">
+<Page width="standard" loading={!loaded} loadingMessage="Loading configuration…">
+  <PageHeader
+    title="Configuration"
+    description="Edit paisa.yaml by section. Save writes the file and re-syncs the journal."
+    help="config"
+  >
+    {#snippet actions()}
+      {#if hasChanges}
+        <Badge variant="warning" size="sm">Unsaved changes</Badge>
+      {/if}
+    {/snippet}
+  </PageHeader>
+
+  {#if schema && config && activeSection && activeSchema}
+    <div class="flex min-h-[calc(100vh-6rem)] flex-col">
+      <div
+        class="flex flex-1 flex-col gap-[var(--paisa-space-5)] lg:grid lg:grid-cols-[13.5rem_minmax(0,1fr)] lg:items-start"
+      >
+        <div class="lg:hidden">
+          <label
+            class="mb-1 block text-sm font-medium text-[var(--paisa-text-secondary)]"
+            for="config-section"
+          >
+            Section
+          </label>
+          <select
+            id="config-section"
+            class="paisa4-control h-9 px-3"
+            bind:value={activeId}
+          >
+            {#each sections as section}
+              <option value={section.id}>{section.label}</option>
+            {/each}
+          </select>
+        </div>
+
+        <nav
+          class="sticky top-[var(--paisa-space-4)] hidden flex-col gap-0.5 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] lg:flex"
+          aria-label="Configuration sections"
+        >
           {#each sections as section}
             <button
               type="button"
-              class="paisa-settings-nav-item"
-              class:is-active={section.id === activeSection.id}
+              class="flex w-full items-center gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-sm)] border-0 bg-transparent px-[0.65rem] py-[0.45rem] text-left text-sm font-medium text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)] {section.id === activeSection.id ? 'bg-[var(--paisa-brand-primary-light)] text-[var(--paisa-brand-primary)]' : ''}"
               onclick={() => (activeId = section.id)}
             >
-              <span class="icon is-small">
-                <i class="fas {section.icon}"></i>
-              </span>
+              <i class="fas {section.icon} w-4 shrink-0 text-center text-xs" aria-hidden="true"></i>
               <span>{section.label}</span>
             </button>
           {/each}
         </nav>
 
-        <div class="paisa-settings-main">
-          <div class="paisa-settings-panel">
-            <div class="paisa-settings-panel-head">
+        <div
+          class="flex min-h-[calc(100vh-11rem)] min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)]"
+        >
+          <div class="min-w-0 flex-1 p-[var(--paisa-space-5)]">
+            <div
+              class="mb-[var(--paisa-space-5)] flex items-start justify-between gap-[var(--paisa-space-3)]"
+            >
               <div>
-                <h2 class="paisa-settings-title">{activeSection.label}</h2>
+                <h2
+                  class="m-0 text-lg font-semibold leading-tight text-[var(--paisa-text-primary)]"
+                >
+                  {activeSection.label}
+                </h2>
                 {#if activeSection.description}
-                  <p class="paisa-settings-copy">{activeSection.description}</p>
+                  <p class="mt-[var(--paisa-space-1)] text-sm text-[var(--paisa-text-secondary)]">
+                    {activeSection.description}
+                  </p>
                 {/if}
               </div>
               {#if sectionCount != null}
@@ -254,12 +288,15 @@
             </div>
 
             {#if error}
-              <article class="message is-danger paisa-settings-error">
-                <div class="message-body">{error}</div>
-              </article>
+              <div
+                class="mb-[var(--paisa-space-4)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] px-[var(--paisa-space-4)] py-[var(--paisa-space-3)] text-sm whitespace-pre-wrap text-[var(--paisa-danger)]"
+                role="alert"
+              >
+                {error}
+              </div>
             {/if}
 
-            <div class="paisa-settings-body">
+            <div>
               {#key activeSection.id}
                 {#if activeSection.kind === "general"}
                   <JsonSchemaForm
@@ -282,18 +319,32 @@
             </div>
           </div>
 
-          <div class="paisa-settings-bar">
-            <Button variant="ghost" onclick={() => resetToDefault()}>
+          <div
+            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-[var(--paisa-space-3)] border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-[var(--paisa-space-5)] py-[var(--paisa-space-3)]"
+          >
+            <Button
+              variant="ghost"
+              class="max-lg:w-full max-lg:justify-center"
+              onclick={() => resetToDefault()}
+            >
               Reset to defaults
             </Button>
-            <div class="paisa-settings-bar-actions">
-              <Button variant="outline" disabled={!hasChanges} onclick={discard}>
+            <div
+              class="ml-auto flex gap-[var(--paisa-space-2)] max-lg:ml-0 max-lg:w-full max-lg:flex-col"
+            >
+              <Button
+                variant="outline"
+                disabled={!hasChanges}
+                class="max-lg:w-full max-lg:justify-center"
+                onclick={discard}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 loading={isLoading}
                 disabled={!hasChanges}
+                class="max-lg:w-full max-lg:justify-center"
                 onclick={() => save(config)}
               >
                 Save
@@ -302,144 +353,6 @@
           </div>
         </div>
       </div>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </Page>
-
-<style lang="scss">
-  .paisa-settings {
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 6rem);
-  }
-
-  .paisa-settings-shell {
-    display: grid;
-    grid-template-columns: 13.5rem minmax(0, 1fr);
-    gap: var(--paisa-space-5);
-    align-items: start;
-    flex: 1;
-  }
-
-  .paisa-settings-nav {
-    position: sticky;
-    top: var(--paisa-space-4);
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    padding: var(--paisa-space-2);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    background: var(--paisa-surface-card);
-  }
-
-  .paisa-settings-nav-item {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    width: 100%;
-    border: 0;
-    border-radius: var(--paisa-radius-sm);
-    background: transparent;
-    color: var(--paisa-text-secondary);
-    font-size: var(--paisa-font-size-sm);
-    font-weight: var(--paisa-font-weight-medium);
-    text-align: left;
-    padding: 0.45rem 0.65rem;
-    cursor: pointer;
-
-    &:hover {
-      background: var(--paisa-surface-hover);
-      color: var(--paisa-text-primary);
-    }
-
-    &.is-active {
-      background: var(--paisa-brand-primary-light);
-      color: var(--paisa-brand-primary);
-    }
-  }
-
-  .paisa-settings-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 11rem);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    background: var(--paisa-surface-card);
-    overflow: hidden;
-  }
-
-  .paisa-settings-panel {
-    flex: 1;
-    min-width: 0;
-    padding: var(--paisa-space-5);
-  }
-
-  .paisa-settings-panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--paisa-space-3);
-    margin-bottom: var(--paisa-space-5);
-  }
-
-  .paisa-settings-title {
-    margin: 0;
-    font-size: var(--paisa-font-size-lg);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    line-height: var(--paisa-line-height-tight);
-  }
-
-  .paisa-settings-copy {
-    margin: var(--paisa-space-1) 0 0;
-    font-size: var(--paisa-font-size-sm);
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-settings-error {
-    margin-bottom: var(--paisa-space-4);
-
-    :global(.message-body) {
-      white-space: pre-wrap;
-      overflow: auto;
-      font-size: var(--paisa-font-size-sm);
-    }
-  }
-
-  .paisa-settings-bar {
-    position: sticky;
-    bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    flex-wrap: wrap;
-    padding: var(--paisa-space-3) var(--paisa-space-5);
-    border-top: 1px solid var(--paisa-border-subtle);
-    background: var(--paisa-surface-card);
-  }
-
-  .paisa-settings-bar-actions {
-    display: flex;
-    gap: var(--paisa-space-2);
-    margin-left: auto;
-  }
-
-  @media screen and (max-width: 900px) {
-    .paisa-settings-shell {
-      grid-template-columns: 1fr;
-    }
-
-    .paisa-settings-nav {
-      position: static;
-      flex-direction: row;
-      flex-wrap: wrap;
-    }
-
-    .paisa-settings-nav-item {
-      width: auto;
-    }
-  }
-</style>

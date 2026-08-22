@@ -6,6 +6,7 @@
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
 
   let modalOpen = $state(false);
   function openCreateModal() {
@@ -55,18 +56,14 @@
   />
 
   <Section>
-    <div class="is-flex is-align-items-center is-justify-content-center mt-5">
-      <div class="field">
-        <p class="control">
-          <button class="button is-medium is-link" onclick={(_e) => openCreateModal()}>
-            <span class="icon is-small">
-              <i class="fas fa-file-circle-plus"></i>
-            </span>
-            <span>Create</span>
-          </button>
-        </p>
-        <p class="mt-2 has-text-grey has-text-bold">Create your first sheet</p>
-      </div>
+    <div class="mt-8 flex flex-col items-center justify-center gap-2">
+      <Button variant="primary" size="lg" onclick={() => openCreateModal()}>
+        {#snippet icon()}
+          <i class="fas fa-file-circle-plus"></i>
+        {/snippet}
+        Create
+      </Button>
+      <p class="text-sm font-medium text-[var(--paisa-muted-foreground)]">Create your first sheet</p>
     </div>
   </Section>
 </Page>
