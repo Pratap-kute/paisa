@@ -1,8 +1,9 @@
 package model
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"slices"
 	"strings"
 
@@ -77,9 +78,13 @@ func SyncCommodities(db *gorm.DB) error {
 	AutoMigrate(db)
 	log.Info("Fetching commodities price history")
 	commodities := slices.Clone(commodity.All())
-	rand.Shuffle(len(commodities), func(i, j int) {
-		commodities[i], commodities[j] = commodities[j], commodities[i]
-	})
+	for i := len(commodities) - 1; i > 0; i-- {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+		if err == nil {
+			j := int(n.Int64())
+			commodities[i], commodities[j] = commodities[j], commodities[i]
+		}
+	}
 
 	var errors []error
 	for _, commodity := range commodities {
