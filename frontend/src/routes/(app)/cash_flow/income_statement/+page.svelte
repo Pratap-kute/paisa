@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import _ from "lodash";
-  import { renderIncomeStatement } from "$lib/charts/income_statement";
-  import { observeElementSize } from "$lib/charts/resize";
+  import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
   import {
     ajax,
     formatCurrency,
@@ -21,18 +20,17 @@
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import IncomeStatementWaterfallChart from "$lib/components/charts/IncomeStatementWaterfallChart.svelte";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
 
-  let svg: Element = $state()!;
   let incomeStatement: IncomeStatement | null = $state(null);
-  let renderer: ((data: IncomeStatement) => void) | undefined = $state();
-  let stopResize: (() => void) | undefined;
   let yearly: Record<string, IncomeStatement> = $state({});
   let diff: number = $state(0);
   let diffPercent: number = $state(0);
   let years: string[] = $state([]);
+  let waterfallData = $derived(incomeStatement ? buildIncomeStatementWaterfall(incomeStatement) : { steps: [], endingBalance: 0 });
 
   type AccountGroupName =
     | "income"
@@ -67,7 +65,7 @@
   let accountGroups: AccountGroup[] = $state([]);
 
   $effect(() => {
-    if (yearly && renderer) {
+    if (yearly) {
       if (yearly[$year] == null) {
         incomeStatement = null;
         isEmpty = true;
@@ -77,7 +75,6 @@
         diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
         diffPercent = diff / incomeStatement.startingBalance;
 
-        renderer(incomeStatement);
         isEmpty = false;
       }
     }
@@ -92,10 +89,6 @@
     }
     return Array.from(accounts).sort();
   }
-
-  onDestroy(() => {
-    stopResize?.();
-  });
 
   onMount(async () => {
     try {
@@ -156,17 +149,6 @@
       );
 
       isLoading = false;
-      await tick();
-      renderer = renderIncomeStatement(svg);
-      if (svg?.parentElement) {
-        stopResize = observeElementSize(svg.parentElement, () => {
-          svg.replaceChildren();
-          renderer = renderIncomeStatement(svg);
-          if (incomeStatement) {
-            renderer(incomeStatement);
-          }
-        });
-      }
     } catch {
       isLoading = false;
     }
@@ -224,8 +206,12 @@
         </p>
       </ZeroState>
     {:else}
-      <ChartFrame type="distribution" size="dynamic" preserveChildren>
-        <svg bind:this={svg} style="width: 100%; display: block; overflow: visible;" />
+      <ChartFrame type="distribution" size="dynamic">
+        <IncomeStatementWaterfallChart
+          data={waterfallData}
+          ariaLabel="Income statement waterfall from starting to ending net worth"
+          testId="income-statement-waterfall-echart"
+        />
       </ChartFrame>
     {/if}
   </Section>
