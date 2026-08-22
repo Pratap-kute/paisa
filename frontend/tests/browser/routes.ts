@@ -9,23 +9,27 @@ export const visualRoutes: VisualRoute[] = [
   {
     name: "dashboard",
     path: "/",
-    ready: "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
+    ready:
+      "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
   },
   {
     name: "assets-allocation",
     path: "/assets/allocation",
-    ready: "#d3-allocation-category",
+    ready:
+      "[data-testid='allocation-category-echart'][data-chart-ready='true']",
   },
   {
     name: "assets-analysis",
     path: "/assets/analysis",
-    ready: "#d3-portfolio-security-type > g",
+    ready:
+      "[data-testid='portfolio-security-type-echart'][data-chart-ready='true']",
   },
   { name: "assets-balance", path: "/assets/balance" },
   {
     name: "assets-gain",
     path: "/assets/gain",
-    ready: "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
+    ready:
+      "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
   },
   {
     name: "assets-gain-detail",
@@ -59,12 +63,14 @@ export const visualRoutes: VisualRoute[] = [
   {
     name: "expense-monthly",
     path: "/expense/monthly",
-    ready: "[data-testid='monthly-expense-breakdown-echart'][data-chart-ready='true']",
+    ready:
+      "[data-testid='monthly-expense-calendar-echart'][data-chart-ready='true']",
   },
   {
     name: "expense-yearly",
     path: "/expense/yearly",
-    ready: "#d3-yearly-expense-timeline g",
+    ready:
+      "[data-testid='yearly-expense-calendar-echart'][data-chart-ready='true']",
   },
   {
     name: "income",
@@ -98,7 +104,8 @@ export const visualRoutes: VisualRoute[] = [
   {
     name: "credit-card-detail",
     path: "/liabilities/credit_cards/Liabilities%3ACreditCard%3AFreedom",
-    ready: "[data-testid='credit-card-yearly-spends-echart'][data-chart-ready='true']",
+    ready:
+      "[data-testid='credit-card-yearly-spends-echart'][data-chart-ready='true']",
   },
   { name: "liabilities-interest", path: "/liabilities/interest" },
   {
@@ -162,12 +169,12 @@ export const chartSnapshots = [
   {
     name: "assets-analysis",
     path: "/assets/analysis",
-    locator: "#d3-portfolio-security-type",
+    locator: "[data-testid='portfolio-security-type-echart']",
   },
   {
     name: "assets-allocation",
     path: "/assets/allocation",
-    locator: "#d3-allocation-category",
+    locator: "[data-testid='allocation-category-echart']",
   },
   {
     name: "expense-monthly",

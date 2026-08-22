@@ -1,17 +1,14 @@
-// deno-lint-ignore-file no-explicit-any -- D3 stack and arc callback datum types are augmented at runtime.
+// deno-lint-ignore-file no-explicit-any -- D3 timeline callback datum types are augmented at runtime.
 import * as d3 from "d3";
 import type { Dayjs } from "dayjs";
 import _ from "lodash";
 import {
-  firstName,
   forEachMonth,
   formatCurrency,
   formatCurrencyCrude,
   type Legend,
-  monthDays,
   type Posting,
   rem,
-  restName,
   skipTicks,
   tooltip,
 } from "../../core/utils";
@@ -23,141 +20,7 @@ import {
   type Writable,
 } from "svelte/store";
 import { iconify } from "../../core/icon";
-import { expenseGroup, pieData } from "../expense";
-
-export function renderCalendar(
-  month: string,
-  expenses: Posting[],
-  z: d3.ScaleOrdinal<string, string, never>,
-  groups: string[],
-) {
-  const id = "#d3-current-month-expense-calendar";
-
-  const alpha = d3.scaleLinear().range([0.3, 1]);
-  const expensesByDay: Record<string, Posting[]> = {};
-  const { days, monthStart, monthEnd } = monthDays(month);
-  _.each(days, (d) => {
-    expensesByDay[d.format("YYYY-MM-DD")] = _.filter(
-      expenses,
-      (e) => e.date.isSame(d, "day") && _.includes(groups, expenseGroup(e)),
-    );
-  });
-
-  const expensesByDayTotal = _.mapValues(
-    expensesByDay,
-    (ps) => _.sumBy(ps, (p) => p.amount),
-  );
-
-  alpha.domain(d3.extent(_.values(expensesByDayTotal)));
-
-  const root = d3.select(id);
-  const dayDivs = root.select("div.days").selectAll("div").data(days);
-
-  const tooltipContent = (d: Dayjs) => {
-    const es = expensesByDay[d.format("YYYY-MM-DD")];
-    if (_.isEmpty(es)) {
-      return null;
-    }
-    const total = _.sumBy(es, (p) => p.amount);
-    return tooltip(
-      es.map((p) => {
-        return [
-          [iconify(restName(p.account), { group: firstName(p.account) })],
-          [p.payee, "paisa-truncate"],
-          [formatCurrency(p.amount), "paisa-text-bold paisa-text-right"],
-        ];
-      }),
-      {
-        total: formatCurrency(total),
-        header: es[0].date.format("DD MMM YYYY"),
-      },
-    );
-  };
-
-  const width = 36;
-  const height = 36;
-
-  const dayDiv = dayDivs
-    .join("div")
-    .attr("class", "date")
-    .attr("data-tippy-content", tooltipContent)
-    .style(
-      "visibility",
-      (d) =>
-        d.isBefore(monthStart) || d.isAfter(monthEnd) ? "hidden" : "visible",
-    );
-
-  const svg = dayDiv
-    .selectAll("svg.donut-svg")
-    .data((d) => [d])
-    .join("svg")
-    .attr("class", "donut-svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [-width / 2, -height / 2, width, height]);
-
-  // Subtle background ring for days without expenses
-  svg
-    .selectAll("circle.bg-ring")
-    .data((d) => [d])
-    .join("circle")
-    .attr("class", "bg-ring")
-    .attr("r", 15)
-    .attr("fill", "none")
-    .attr("stroke", "var(--paisa-border-subtle)")
-    .attr("stroke-width", 2)
-    .attr(
-      "opacity",
-      (d) => (expensesByDayTotal[d.format("YYYY-MM-DD")] > 0 ? 0 : 0.4),
-    );
-
-  // Donut slices
-  svg
-    .selectAll("path")
-    .data((d) => pieData(expensesByDay[d.format("YYYY-MM-DD")]))
-    .join("path")
-    .attr("fill", function (d) {
-      return z(d.data.category);
-    })
-    .attr("d", (arc) => {
-      return d3.arc().innerRadius(13).outerRadius(17)(arc as any);
-    });
-
-  // Date number centered inside donut circle
-  svg
-    .selectAll("text.day-text")
-    .data((d) => [d])
-    .join("text")
-    .attr("class", "day-text")
-    .attr("text-anchor", "middle")
-    .attr("dominant-baseline", "central")
-    .attr("x", 0)
-    .attr("y", 0)
-    .style("font-size", "0.75rem")
-    .style("font-weight", "500")
-    .style("fill", "var(--paisa-chart-text)")
-    .text((d) => d.date().toString());
-
-  // Total amount below donut
-  dayDiv
-    .selectAll("span.total")
-    .data((d) => [d])
-    .join("span")
-    .attr("class", "total")
-    .text((d) => {
-      const total = expensesByDayTotal[d.format("YYYY-MM-DD")];
-      if (total > 0) {
-        return formatCurrencyCrude(total);
-      }
-      return "";
-    });
-}
-
-export function colorScale(postings: Posting[]) {
-  const groups = _.chain(postings).map(expenseGroup).uniq().sort().value();
-  return generateColorScheme(groups);
-}
-
+import { expenseGroup } from "../expense";
 export function renderMonthlyExpensesTimeline(
   postings: Posting[],
   groupsStore: Writable<string[]>,

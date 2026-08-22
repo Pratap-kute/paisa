@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount, tick } from "svelte";
   import _ from "lodash";
   import dayjs from "dayjs";
@@ -15,8 +14,8 @@
   } from "$lib/core/utils";
   import {
     renderMonthlyExpensesTimeline,
-    renderCalendar,
   } from "$lib/charts/expense/monthly";
+  import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
   import { iconify } from "$lib/core/icon";
@@ -35,9 +34,10 @@
   import Badge from "$lib/components/ui/Badge.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
 
   let groups = writable<string[]>([]);
-  let z: ScaleOrdinal<string, string, never> | undefined = $state(),
+  let z: ((category: string) => string) | undefined = $state(),
     expenses: Posting[] | undefined = $state(),
     grouped_expenses: Record<string, Posting[]> | undefined = $state(),
     grouped_incomes: Record<string, Posting[]> | undefined = $state(),
@@ -116,6 +116,9 @@
   let selectedMonthExpenses: Posting[] = $derived(
     grouped_expenses?.[$month] || [],
   );
+  let selectedMonthHeatmapData = $derived(
+    buildMonthlyExpenseHeatmapData($month, selectedMonthExpenses, $groups),
+  );
   let selectedMonthBreakdownData = $derived(
     buildExpenseBreakdownComparison(selectedMonthExpenses, {
       color: (category) => z?.(category) || "var(--paisa-primary)",
@@ -154,8 +157,6 @@
 
   $effect(() => {
     if (grouped_expenses && z) {
-      renderCalendar($month, grouped_expenses[$month], z, $groups);
-
       const expenses = grouped_expenses[$month] || [];
       const incomes = grouped_incomes?.[$month] || [];
       const taxes = grouped_taxes?.[$month] || [];
@@ -266,14 +267,13 @@
       title="Expense Calendar"
       subtitle="Daily expense frequency and activity"
     >
-      <div id="d3-current-month-expense-calendar" class="d3-calendar">
-        <div class="weekdays">
-          {#each dayjs.weekdaysShort(true) as day}
-            <div>{day}</div>
-          {/each}
-        </div>
-        <div class="days"></div>
-      </div>
+      <ChartFrame type="distribution" empty={!hasSelectedMonthExpenses}>
+        <ExpenseHeatmapChart
+          data={selectedMonthHeatmapData}
+          ariaLabel="Daily expenses for {formattedCurrentMonth}"
+          testId="monthly-expense-calendar-echart"
+        />
+      </ChartFrame>
     </Section>
   </ResponsiveGrid>
 

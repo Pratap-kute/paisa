@@ -1,13 +1,10 @@
 <script lang="ts">
-  import COLORS, {
-    generateColorScheme,
-    genericBarColor,
-  } from "$lib/core/colors";
+  import COLORS from "$lib/core/colors";
   import { buildLegends } from "$lib/charts/gain";
   import {
+    buildPortfolioComparison,
     filterCommodityBreakdowns,
-    renderPortfolioBreakdown,
-  } from "$lib/charts/portfolio";
+  } from "$lib/charts/hierarchy_data";
   import {
     ajax,
     type Posting,
@@ -36,6 +33,7 @@
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -43,7 +41,10 @@
   let name_and_security_type: PortfolioAggregate[] = $state([]);
   let rating: PortfolioAggregate[] = $state([]);
   let industry: PortfolioAggregate[] = $state([]);
-  let color: any = $state();
+  let securityTypeData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(security_type, selectedCommodities)));
+  let ratingData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(rating, selectedCommodities)));
+  let industryData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(industry, selectedCommodities)));
+  let portfolioData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(name_and_security_type, selectedCommodities)));
 
   let securityTypeEmpty: boolean = $state(false);
   let nameAndSecurityTypeEmpty: boolean = $state(false);
@@ -61,11 +62,6 @@
   let legends = buildLegends();
 
   let postings: Posting[] = $state([]);
-
-  let securityTypeR: any = $state(),
-    portfolioR: any = $state(),
-    industryR: any = $state(),
-    ratingR: any = $state(null);
 
   onMount(async () => {
     ({
@@ -87,63 +83,12 @@
       .take(100)
       .value();
     selectedCommodities = [...commodities];
-    ({ renderer: securityTypeR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-type",
-      security_type,
-      {
-        small: true,
-      },
-    ));
-    ({ renderer: ratingR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-rating",
-      rating,
-      {
-        small: true,
-      },
-    ));
-    ({ renderer: industryR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-industry",
-      industry,
-      {
-        small: true,
-        z: [genericBarColor()],
-      },
-    ));
-    ({ renderer: portfolioR } = renderPortfolioBreakdown(
-      "#d3-portfolio",
-      name_and_security_type,
-      {
-        small: true,
-      },
-    ));
-
-    if (commodities.length !== 0) {
-      color = generateColorScheme(commodities);
-    }
-
     securityTypeEmpty = security_type.length === 0;
     nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
     ratingEmpty = rating.length === 0;
     industryEmpty = industry.length === 0;
   });
 
-  $effect(() => {
-    if (securityTypeR && ratingR && industryR && portfolioR) {
-      securityTypeR(
-        filterCommodityBreakdowns(security_type, selectedCommodities),
-        color,
-      );
-      ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);
-      industryR(
-        filterCommodityBreakdowns(industry, selectedCommodities),
-        color,
-      );
-      portfolioR(
-        filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-        color,
-      );
-    }
-  });
 </script>
 
 <svelte:head>
@@ -285,36 +230,24 @@
         <div class="flex min-w-0 flex-col gap-4">
           {#if !securityTypeEmpty}
             <Section title="Security Type">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-type-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-type" width="100%" />
+              <ChartFrame type="distribution" rows={Math.max(4, securityTypeData.points.length)}>
+                <ComparisonBarChart data={securityTypeData} ariaLabel="Asset security type breakdown" testId="gain-security-type-echart" />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !ratingEmpty}
             <Section title="Security Rating">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-rating-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-rating" width="100%" />
+              <ChartFrame type="distribution" rows={Math.max(4, ratingData.points.length)}>
+                <ComparisonBarChart data={ratingData} ariaLabel="Asset security rating breakdown" testId="gain-security-rating-echart" />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !industryEmpty}
             <Section title="Industry">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-industry-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-industry" width="100%" />
+              <ChartFrame type="distribution" rows={Math.max(4, industryData.points.length)}>
+                <ComparisonBarChart data={industryData} ariaLabel="Asset industry breakdown" testId="gain-industry-echart" />
               </ChartFrame>
             </Section>
           {/if}
@@ -323,12 +256,8 @@
         {#if !nameAndSecurityTypeEmpty}
           <div class="min-w-0">
             <Section title="Security">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio" width="100%" />
+              <ChartFrame type="distribution" rows={Math.max(4, portfolioData.points.length)}>
+                <ComparisonBarChart data={portfolioData} ariaLabel="Asset security breakdown" testId="gain-security-echart" />
               </ChartFrame>
             </Section>
           </div>

@@ -1,10 +1,10 @@
 <script lang="ts">
   import {
-    renderAllocation,
     renderAllocationTimeline,
   } from "$lib/charts/allocation";
+  import { buildAllocationHierarchy } from "$lib/charts/hierarchy_data";
   import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
-  import COLORS, { generateColorScheme } from "$lib/core/colors";
+  import COLORS from "$lib/core/colors";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
@@ -24,19 +24,19 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});
   let allocationTimeline: { [key: string]: Aggregate }[] = $state([]);
   let allocationTimelineLegends: Legend[] = $state([]);
   let aggregateLeafNodes: Aggregate[] = $state([]);
-  let depth = $state(2);
   let isLoading = $state(true);
-  let color: d3.ScaleOrdinal<string, string> | undefined = $state();
 
   let hasTargets = $derived(!_.isEmpty(allocationTargets));
   let hasAllocationData = $derived(!_.isEmpty(aggregates));
   let allocationTargetData = $derived(buildAllocationTargetComparison(allocationTargets));
+  let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
 
   const columns: ColumnDefinition[] = [
     {
@@ -83,11 +83,6 @@
     },
   ];
 
-  function renderCategoryValueCharts() {
-    if (!color) return;
-    renderAllocation(aggregates, color);
-  }
-
   function renderTimelineChart() {
     document.getElementById("d3-allocation-timeline")?.replaceChildren();
     if (!_.isEmpty(allocationTimeline)) {
@@ -107,7 +102,6 @@
       allocationTargets = fetchedTargets || [];
       allocationTimeline = aggregatesTimeline;
 
-      const accounts = _.keys(aggregates);
       aggregateLeafNodes = _.filter(_.values(aggregates), (a) => a.market_amount > 0);
       const total = _.sumBy(aggregateLeafNodes, (a) => a.market_amount);
       aggregateLeafNodes = _.map(aggregateLeafNodes, (a) => {
@@ -116,12 +110,8 @@
       });
       const max = _.max(_.map(aggregateLeafNodes, (a) => a.percent)) || 100;
       (_.last(columns).formatterParams as ProgressBarParams).max = max;
-      color = generateColorScheme(accounts);
-      depth = _.max(_.map(accounts, (account) => account.split(":").length)) || 2;
-
       isLoading = false;
       await tick();
-      renderCategoryValueCharts();
       renderTimelineChart();
     } catch {
       isLoading = false;
@@ -167,15 +157,23 @@
     </Section>
 
     {#if hasAllocationData}
-      <Section title="Allocation by category" subtitle="Hierarchical partition by account group">
-        <ChartFrame type="dynamic" onresize={renderCategoryValueCharts}>
-          <div id="d3-allocation-category" style="width: 100%; height: {depth * 100}px"></div>
+      <Section title="Allocation by category" subtitle="Nested account groups and categories">
+        <ChartFrame type="dynamic" size="large">
+          <FinancialHierarchyChart
+            data={{ roots: allocationHierarchy, mode: "treemap" }}
+            ariaLabel="Asset allocation account hierarchy"
+            testId="allocation-category-echart"
+          />
         </ChartFrame>
       </Section>
 
       <Section title="Allocation by value" subtitle="Treemap by market value">
-        <ChartFrame type="dynamic" onresize={renderCategoryValueCharts}>
-          <div id="d3-allocation-value" style="width: 100%; height: 300px"></div>
+        <ChartFrame type="dynamic">
+          <FinancialHierarchyChart
+            data={{ roots: allocationHierarchy, mode: "treemap" }}
+            ariaLabel="Asset allocation by market value"
+            testId="allocation-value-echart"
+          />
         </ChartFrame>
       </Section>
 

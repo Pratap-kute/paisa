@@ -40,6 +40,7 @@
     if (!element || controller || typeof window === "undefined") return;
 
     const echarts = await import("$lib/charts/echarts/core");
+    if (!element?.isConnected || controller) return;
     controller = createEChartSurfaceController({
       element,
       option,

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { ScaleOrdinal } from "d3";
   import { onDestroy, onMount, tick } from "svelte";
   import _ from "lodash";
-  import { ajax, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
+  import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import {
     renderYearlyExpensesTimeline,
-    renderCalendar,
   } from "$lib/charts/expense/yearly";
+  import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
@@ -22,9 +21,10 @@
   import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
 
   let groups = writable<string[]>([]);
-  let z: ScaleOrdinal<string, string, never> | undefined = $state(),
+  let z: ((category: string) => string) | undefined = $state(),
     expenses: Posting[] = $state([]),
     grouped_expenses: Record<string, Posting[]> = $state({}),
     grouped_incomes: Record<string, Posting[]> = $state({}),
@@ -63,8 +63,11 @@
 
       const dates = _.map(expenses, (e) => e.date);
       if (dates.length > 0) {
-        dateMin.set(_.minBy(dates, (d) => d.valueOf())!);
-        dateMax.set(_.maxBy(dates, (d) => d.valueOf())!);
+        const minimum = _.minBy(dates, (d) => d.valueOf())!;
+        const maximum = _.maxBy(dates, (d) => d.valueOf())!;
+        dateMin.set(minimum);
+        dateMax.set(maximum);
+        if (!$year) year.set(financialYear(maximum));
       }
 
       await tick();
@@ -93,6 +96,9 @@
   let currentYearExpenses: Posting[] = $derived(
     grouped_expenses[$year] || [],
   );
+  let currentYearHeatmapData = $derived(
+    buildYearlyExpenseHeatmapData($year, currentYearExpenses, $groups),
+  );
   let currentYearBreakdownData = $derived(
     buildExpenseBreakdownComparison(currentYearExpenses, {
       color: (category) => z?.(category) || "var(--paisa-primary)",
@@ -108,8 +114,6 @@
 
   $effect(() => {
     if (grouped_expenses && z) {
-      renderCalendar(currentYearExpenses, z, $groups);
-
       const yearExpenses = grouped_expenses[$year] || [];
       const incomes = grouped_incomes[$year] || [];
       const taxes = grouped_taxes[$year] || [];
@@ -215,9 +219,13 @@
       title="Activity Calendar"
       subtitle="Monthly expense frequency and activity"
     >
-      <div id="d3-current-year-expense-calendar" class="d3-calendar">
-        <div class="months"></div>
-      </div>
+      <ChartFrame type="distribution" empty={!hasCurrentYearExpenses}>
+        <ExpenseHeatmapChart
+          data={currentYearHeatmapData}
+          ariaLabel="Monthly expense activity for {$year}"
+          testId="yearly-expense-calendar-echart"
+        />
+      </ChartFrame>
     </Section>
   </ResponsiveGrid>
 

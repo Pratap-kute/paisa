@@ -1,164 +1,22 @@
-// deno-lint-ignore-file no-explicit-any -- D3 stack and arc callback datum types are augmented at runtime.
+// deno-lint-ignore-file no-explicit-any -- D3 timeline callback datum types are augmented at runtime.
 import * as d3 from "d3";
-import chroma from "chroma-js";
+import type { Dayjs } from "dayjs";
 import _ from "lodash";
 import {
   financialYear,
   forEachFinancialYear,
   formatCurrency,
   formatCurrencyCrude,
-  formatCurrencyCrudeWithPrecision,
-  formatPercentage,
   type Legend,
   now,
   type Posting,
-  secondName,
   skipTicks,
   tooltip,
 } from "../../core/utils";
-import COLORS, { generateColorScheme } from "../../core/colors";
+import { generateColorScheme } from "../../core/colors";
 import type { Writable } from "svelte/store";
 import { iconify } from "../../core/icon";
-import { expenseGroup, pieData } from "../expense";
-import type { Dayjs } from "dayjs";
-
-export function renderCalendar(
-  expenses: Posting[],
-  z: d3.ScaleOrdinal<string, string, never>,
-  groups: string[],
-) {
-  const id = "#d3-current-year-expense-calendar";
-  const alpha = d3.scaleLinear().range([0.3, 1]);
-
-  const ALL_MONTHS = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const months: string[] = _.concat(
-    _.drop(ALL_MONTHS, USER_CONFIG.financial_year_starting_month - 1),
-    _.take(ALL_MONTHS, USER_CONFIG.financial_year_starting_month - 1),
-  );
-  const expensesByMonth: Record<string, Posting[]> = _.chain(months)
-    .map((month) => {
-      return [
-        month,
-        _.filter(
-          expenses,
-          (e) =>
-            _.includes(groups, expenseGroup(e)) &&
-            e.date.format("MMM") == month,
-        ),
-      ];
-    })
-    .fromPairs()
-    .value();
-
-  const expensesByMonthTotal = _.mapValues(
-    expensesByMonth,
-    (ps) => _.sumBy(ps, (p) => p.amount),
-  );
-
-  alpha.domain(d3.extent(_.values(expensesByMonthTotal)));
-
-  const root = d3.select(id);
-  const dayDivs = root.select("div.months").selectAll("div.month").data(months);
-
-  const tooltipContent = (month: string) => {
-    const es = expensesByMonth[month];
-    if (_.isEmpty(es)) {
-      return null;
-    }
-    const byAccount: Record<string, number> = _.chain(es)
-      .groupBy((e) => secondName(e.account))
-      .map((ps, group) => [group, _.sumBy(ps, (p) => p.amount)])
-      .fromPairs()
-      .value();
-    const total = _.sumBy(es, (p) => p.amount);
-    return tooltip(
-      _.map(byAccount, (amount, group) => {
-        return [
-          [iconify(group, { group: "Expenses" })],
-          [formatPercentage(amount / total, 1), "paisa-text-right"],
-          [formatCurrency(amount), "paisa-text-bold paisa-text-right"],
-        ];
-      }),
-      { total: formatCurrency(total), header: es[0].date.format("MMM YYYY") },
-    );
-  };
-
-  const monthDiv = dayDivs
-    .join("div")
-    .attr("class", "month p-1")
-    .style("position", "relative")
-    .attr("data-tippy-content", tooltipContent);
-
-  const infoDiv = monthDiv
-    .selectAll("div.info")
-    .data((d) => [d])
-    .join("div")
-    .style("width", "40px")
-    .attr("class", "info");
-
-  infoDiv
-    .selectAll("div.day")
-    .data((d) => [d])
-    .join("div")
-    .attr("class", "day paisa-text-muted")
-    .text((d) => d);
-
-  infoDiv
-    .selectAll("div.total")
-    .data((d) => [d])
-    .join("div")
-    .attr("class", "total")
-    .style(
-      "color",
-      (d) =>
-        chroma(COLORS.lossText).alpha(alpha(expensesByMonthTotal[d])).hex(),
-    )
-    .text((d) => {
-      const total = expensesByMonthTotal[d];
-      if (total > 0) {
-        return formatCurrencyCrudeWithPrecision(total, 1);
-      }
-      return "";
-    });
-
-  const width = 50;
-  const height = 50;
-
-  monthDiv
-    .selectAll("svg")
-    .data((d) => [d])
-    .join("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [-width / 2, -height / 2, width, height])
-    .attr("style", "max-width: 100%; height: auto; height: intrinsic;")
-    .selectAll("path")
-    .data((d) => {
-      return pieData(expensesByMonth[d]);
-    })
-    .join("path")
-    .attr("fill", function (d) {
-      return z(d.data.category);
-    })
-    .attr("d", (arc) => {
-      return d3.arc().innerRadius(0).outerRadius(22)(arc as any);
-    });
-}
-
+import { expenseGroup } from "../expense";
 export function renderYearlyExpensesTimeline(
   postings: Posting[],
   groupsStore: Writable<string[]>,
