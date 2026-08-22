@@ -30,24 +30,12 @@ async function assertNoPageOverflow(page: Page) {
   ).toBeLessThanOrEqual(1);
 }
 
-async function nestedMenuPosition(page: Page) {
-  const burger = page.locator(".navbar-burger");
+async function expandSidebarGroup(page: Page, groupName: string) {
+  const burger = page.getByRole("button", { name: "Open navigation menu" });
   if (await burger.isVisible()) {
     await burger.click();
   }
-  const parent = page.locator(".navbar-item.has-dropdown").filter({
-    hasText: "Cash Flow",
-  }).first();
-  await parent.locator("button.navbar-link").click();
-  const nested = parent.locator(".nested.has-dropdown").first();
-  if (await nested.count() === 0) {
-    return { position: "none" };
-  }
-  await nested.locator("button.nested-menu-trigger").click();
-  return nested.locator(".dropdown-menu").evaluate((el) => ({
-    position: getComputedStyle(el).position,
-    left: getComputedStyle(el).left,
-  }));
+  await page.getByRole("button", { name: groupName }).click();
 }
 
 test.describe("layout invariants", () => {
@@ -90,15 +78,13 @@ test.describe("layout invariants", () => {
   }
 
   for (const width of [800, 1023]) {
-    test(`navbar nested menus stay in-flow at ${width}px`, async ({ page }) => {
+    test(`sidebar expandable groups reveal children at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       await expect(page.getByRole("navigation", { name: "main navigation" }))
         .toBeVisible();
-      const style = await nestedMenuPosition(page);
-      if (style.position !== "none") {
-        expect(style.position).toBe("static");
-      }
+      await expandSidebarGroup(page, "Cash Flow");
+      await expect(page.getByRole("link", { name: "Monthly" }).first()).toBeVisible();
     });
   }
 
