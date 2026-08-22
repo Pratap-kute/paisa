@@ -3,11 +3,13 @@ import {
   firstNames,
   formatCurrency,
   formatCurrencyCrude,
+  getColorPreference,
   type IncomeStatement,
   rem,
   tooltip,
 } from "../core/utils";
 import COLORS from "../core/colors";
+import chroma from "chroma-js";
 import _ from "lodash";
 import { iconGlyph, iconify } from "../core/icon";
 import { pathArrows } from "d3-path-arrows";
@@ -79,6 +81,19 @@ export function renderIncomeStatement(element: Element) {
 
   let firstRender = true;
   return function (statement: IncomeStatement) {
+    const darkMode = getColorPreference() === "dark";
+    const chartPalette = {
+      income: darkMode ? chroma(COLORS.income).brighten(0.2).hex() : COLORS.income,
+      expenses: darkMode ? chroma(COLORS.expenses).brighten(0.15).hex() : COLORS.expenses,
+      gain: darkMode ? chroma(COLORS.gain).brighten(0.15).hex() : COLORS.gain,
+      loss: darkMode ? chroma(COLORS.loss).brighten(0.15).hex() : COLORS.loss,
+      equity: darkMode ? chroma(COLORS.equity).brighten(0.15).hex() : COLORS.equity,
+      liabilities: darkMode
+        ? chroma(COLORS.liabilities).brighten(0.15).hex()
+        : COLORS.liabilities,
+    };
+    const axisText = darkMode ? "var(--paisa-chart-text)" : undefined;
+
     const incomeStart = statement.startingBalance;
     const income = sum(statement.income) * -1;
     const taxStart = incomeStart + income;
@@ -102,7 +117,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Income",
         start: incomeStart,
         end: incomeStart + income,
-        color: COLORS.income,
+        color: chartPalette.income,
         value: income,
         breakdown: statement.income,
         multiplier: -1,
@@ -111,7 +126,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Tax",
         start: taxStart,
         end: taxStart + tax,
-        color: COLORS.expenses,
+        color: chartPalette.expenses,
         value: tax,
         breakdown: statement.tax,
         multiplier: -1,
@@ -120,7 +135,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Interest",
         start: interestStart,
         end: interestStart + interest,
-        color: COLORS.income,
+        color: chartPalette.income,
         value: interest,
         breakdown: statement.interest,
         multiplier: -1,
@@ -129,7 +144,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Gain / Loss",
         start: pnlStart,
         end: pnlStart + pnl,
-        color: pnl > 0 ? COLORS.gain : COLORS.loss,
+        color: pnl > 0 ? chartPalette.gain : chartPalette.loss,
         value: pnl,
         breakdown: statement.pnl,
         multiplier: 1,
@@ -138,7 +153,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Equity",
         start: equityStart,
         end: equityStart + equity,
-        color: COLORS.equity,
+        color: chartPalette.equity,
         value: equity,
         breakdown: statement.equity,
         multiplier: -1,
@@ -147,7 +162,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Liabilities",
         start: liabilitiesStart,
         end: liabilitiesStart + liabilities,
-        color: COLORS.liabilities,
+        color: chartPalette.liabilities,
         value: liabilities,
         breakdown: statement.liabilities,
         multiplier: -1,
@@ -156,7 +171,7 @@ export function renderIncomeStatement(element: Element) {
         label: "Expenses",
         start: expensesStart,
         end: expensesStart + expenses,
-        color: COLORS.expenses,
+        color: chartPalette.expenses,
         value: expenses,
         breakdown: statement.expenses,
         multiplier: -1,
@@ -211,6 +226,10 @@ export function renderIncomeStatement(element: Element) {
       d3.axisTop(x).tickSize(height).tickFormat(formatCurrencyCrude),
     );
     yAxis.transition(t).call(d3.axisLeft(y).tickSize(-width).tickPadding(10));
+
+    if (axisText) {
+      g.selectAll(".axis text").style("fill", axisText);
+    }
 
     garrows.selectAll("g").remove();
     t.on("end", () => {
