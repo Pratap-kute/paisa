@@ -67,7 +67,7 @@
   {@render children?.()}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-cluster {
     display: flex;
   }

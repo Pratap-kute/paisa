@@ -134,7 +134,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-chart-frame {
     display: flex;
     flex-direction: column;

@@ -41,7 +41,7 @@
   {/each}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-postings-list {
     display: flex;
     flex-direction: column;

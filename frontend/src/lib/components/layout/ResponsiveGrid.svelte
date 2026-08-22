@@ -68,7 +68,7 @@
   {@render children?.()}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-responsive-grid {
     display: grid;
     width: 100%;

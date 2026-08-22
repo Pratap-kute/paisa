@@ -20,6 +20,7 @@ Date: 2026-08-22
 | CP10           | `3881d49` | test(ui): finalize redesigned application regression coverage |
 | Report         | `9e1fd06` | docs(design): add phase 7 final audit report                  |
 | CP10 follow-up | `4de4ae7` | test(ui): stabilize final regression coverage                 |
+| Final cleanup  | `45cfd0f` | chore(ui): remove remaining scoped scss                       |
 
 ## Primitive migration / deletion inventory
 
@@ -55,8 +56,9 @@ Date: 2026-08-22
 | `integrations/tooltip.css`    | Tippy.js tooltip skin + table tooltips                                                                                 |
 | `theme-switcher.css`          | Theme transition animation                                                                                             |
 
-Global `styles/index.scss` and all 14 application `.scss` files **deleted**.
-`+layout.ts` loads only plain CSS.
+Global `styles/index.scss`, all 14 application `.scss` files, and all scoped
+Svelte `lang="scss"` blocks are **deleted/converted**. `+layout.ts` loads only
+plain CSS.
 
 ## `!important` final count
 
@@ -81,17 +83,13 @@ Global `styles/index.scss` and all 14 application `.scss` files **deleted**.
 
 ## Bulma / Sass removal
 
-| Check                                                  | Result      |
-| ------------------------------------------------------ | ----------- |
-| `bulma` in `deno.json`                                 | **Removed** |
-| `sass` in `deno.json`                                  | **Removed** |
-| `styles/index.scss` Bulma import                       | **Deleted** |
-| Application `.scss` files under `frontend/src/styles/` | **0**       |
-| Vite Sass preprocessor config                          | **Removed** |
-
-**Note:** 21 Svelte components retain `lang="scss"` on scoped `<style>` blocks
-(nested selectors). These compile via Vite's transitive Sass dependency and
-contain no Bulma imports. Converting to plain CSS is optional follow-up.
+| Check                                                    | Result      |
+| -------------------------------------------------------- | ----------- |
+| `bulma` in `deno.json`                                   | **Removed** |
+| `sass` in `deno.json`                                    | **Removed** |
+| `styles/index.scss` Bulma import                         | **Deleted** |
+| Application `.scss` / `lang="scss"` under `frontend/src` | **0**       |
+| Vite Sass preprocessor config                            | **Removed** |
 
 ## Legacy class bridges (`legacy-compat.css`)
 
@@ -123,12 +121,12 @@ Fixes applied at primitive/foundation layer, not route patches.
 
 | Suite                                  | Result                                                                                                       |
 | -------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `deno task typecheck`                  | Pass (0 errors)                                                                                              |
+| `deno task typecheck`                  | Pass (0 errors, 0 warnings)                                                                                  |
 | `deno task lint`                       | Pass                                                                                                         |
 | `deno task test:component`             | **37/37** pass (2 tests removed with `LevelItem`)                                                            |
 | `deno task build`                      | Pass                                                                                                         |
 | `deno task test:e2e`                   | **80 passed, 1 skipped** (`/dev/ui` production-mode assertion is skipped when the dev-ui E2E flag is active) |
-| `deno task test:visual`                | **170/170** pass (160 route screenshots + 10 chart crops)                                                    |
+| `deno task test:visual`                | **170/170** pass (160 route screenshots + 10 chart crops; clean rerun after isolating port contention)       |
 | Visual matrix (40 routes × 4 variants) | **160/160** pass; snapshots refreshed and reviewed for the Preflight baseline                                |
 
 ### Test selector migrations (CP10)
@@ -195,8 +193,7 @@ remains recommended immediately before master cutover:
 - **master** untouched
 - **backend/calculations** unchanged
 - **Bulma package** = 0
-- **Application SCSS files** = 0 (global); scoped `lang="scss"` remains in 21
-  components
+- **Application SCSS / scoped `lang="scss"`** = 0 under `frontend/src`
 - **Sass direct dependency** = 0
 - **Preflight** = ON
 - **STOP before merging to master**

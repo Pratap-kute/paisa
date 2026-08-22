@@ -54,7 +54,7 @@
   {@render children?.()}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-stack {
     display: flex;
     flex-direction: column;

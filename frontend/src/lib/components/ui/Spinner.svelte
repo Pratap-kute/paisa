@@ -24,7 +24,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-spinner-shell,
   .paisa-spinner-content {
     display: flex;

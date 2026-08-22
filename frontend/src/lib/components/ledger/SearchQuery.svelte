@@ -30,7 +30,7 @@
   ></div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-search-query-container {
     position: relative;
     display: flex;

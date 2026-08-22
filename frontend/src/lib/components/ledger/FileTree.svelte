@@ -102,7 +102,7 @@
   {/each}
 </ul>
 
-<style lang="scss">
+<style>
   ul.ledger-file-tree {
     margin: 0;
     padding: 0;

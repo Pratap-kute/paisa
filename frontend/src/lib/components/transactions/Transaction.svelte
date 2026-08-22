@@ -45,7 +45,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-transaction-row {
     display: grid;
     grid-template-columns: 200px 1fr 1fr;

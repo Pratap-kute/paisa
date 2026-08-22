@@ -153,7 +153,7 @@
   </div>
 {/if}
 
-<style lang="scss">
+<style>
   .paisa-prediction-detail {
     display: flex;
     flex-direction: column;
@@ -320,28 +320,29 @@
       border-color: var(--paisa-border-focus, #3b82f6);
     }
 
-    &-subtle {
-      border: none;
-      background: transparent;
-      color: var(--paisa-text-secondary, #64748b);
-      justify-content: flex-start;
-      padding: 0.25rem 0;
+  }
 
-      &:hover {
-        background: transparent;
-        color: var(--paisa-text-primary, #0f172a);
-      }
-    }
+  .paisa-action-btn-subtle {
+    border: none;
+    background: transparent;
+    color: var(--paisa-text-secondary, #64748b);
+    justify-content: flex-start;
+    padding: 0.25rem 0;
+  }
 
-    &-primary {
-      background-color: var(--paisa-brand-primary, #3b82f6);
-      border-color: var(--paisa-brand-primary, #3b82f6);
-      color: #ffffff;
-      font-weight: 600;
+  .paisa-action-btn-subtle:hover {
+    background: transparent;
+    color: var(--paisa-text-primary, #0f172a);
+  }
 
-      &:hover {
-        filter: brightness(1.08);
-      }
-    }
+  .paisa-action-btn-primary {
+    background-color: var(--paisa-brand-primary, #3b82f6);
+    border-color: var(--paisa-brand-primary, #3b82f6);
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .paisa-action-btn-primary:hover {
+    filter: brightness(1.08);
   }
 </style>

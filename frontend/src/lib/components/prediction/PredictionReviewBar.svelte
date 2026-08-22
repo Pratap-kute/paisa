@@ -70,7 +70,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-prediction-review-bar {
     display: flex;
     align-items: center;
@@ -123,20 +123,25 @@
     border-radius: 50%;
     flex-shrink: 0;
 
-    &-high {
-      background-color: var(--paisa-success, #10b981);
-    }
-    &-medium {
-      background-color: var(--paisa-info, #3b82f6);
-    }
-    &-review {
-      background-color: var(--paisa-warning, #f59e0b);
-    }
-    &-unknown {
-      background-color: var(--paisa-danger, #ef4444);
-    }
-    &-transfer {
-      background-color: #8b5cf6;
-    }
+  }
+
+  .paisa-chip-dot-high {
+    background-color: var(--paisa-success, #10b981);
+  }
+
+  .paisa-chip-dot-medium {
+    background-color: var(--paisa-info, #3b82f6);
+  }
+
+  .paisa-chip-dot-review {
+    background-color: var(--paisa-warning, #f59e0b);
+  }
+
+  .paisa-chip-dot-unknown {
+    background-color: var(--paisa-danger, #ef4444);
+  }
+
+  .paisa-chip-dot-transfer {
+    background-color: #8b5cf6;
   }
 </style>

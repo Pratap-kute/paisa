@@ -424,7 +424,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-ledger-balance {
     display: flex;
     height: 100%;

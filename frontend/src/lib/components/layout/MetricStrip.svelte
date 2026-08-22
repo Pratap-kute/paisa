@@ -33,7 +33,7 @@
   {@render children?.()}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-metric-strip {
     display: grid;
     width: 100%;

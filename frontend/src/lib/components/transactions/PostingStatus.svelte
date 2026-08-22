@@ -18,7 +18,7 @@
   </span>
 {/if}
 
-<style lang="scss">
+<style>
   .paisa-status-icon {
     display: inline-flex;
     align-items: center;

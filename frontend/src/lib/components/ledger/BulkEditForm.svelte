@@ -92,7 +92,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-bulk-edit-card {
     background-color: var(--paisa-surface-raised);
     border: 1px solid var(--paisa-border);

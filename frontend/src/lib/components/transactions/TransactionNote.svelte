@@ -13,7 +13,7 @@
   </span>
 {/if}
 
-<style lang="scss">
+<style>
   .paisa-note-icon {
     display: inline-flex;
     align-items: center;

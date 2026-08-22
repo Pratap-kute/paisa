@@ -35,7 +35,7 @@
   </span>
 {/if}
 
-<style lang="scss">
+<style>
   .paisa-prediction-badge {
     display: inline-flex;
     align-items: center;
