@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import dayjs from "dayjs";
-import {
-  padTimeDomain,
-  renderTable,
-} from "$lib/charts/liabilities/interest";
+import { interestSummary, padTimeDomain } from "$lib/charts/interest_data";
 import type { Interest } from "$lib/core/utils";
 
 describe("padTimeDomain", () => {
@@ -21,18 +18,21 @@ describe("padTimeDomain", () => {
   });
 });
 
-describe("renderTable", () => {
+describe("interestSummary", () => {
   it("tolerates an empty overview timeline", () => {
-    document.body.innerHTML = "<table><tbody></tbody></table>";
-    const tbody = document.querySelector("tbody");
     const interest: Interest = {
       account: "Liabilities:Loan:Empty",
       overview_timeline: [],
       apr: 0,
     };
 
-    expect(() => renderTable.call(tbody, interest)).not.toThrow();
-    expect(tbody?.textContent).toContain("Empty");
-    expect(tbody?.textContent).toContain("Loan Drawn");
+    expect(interestSummary(interest)).toMatchObject({
+      label: "Loan:Empty",
+      drawn: 0,
+      repaid: 0,
+      interest: 0,
+      balance: 0,
+      apr: 0,
+    });
   });
 });

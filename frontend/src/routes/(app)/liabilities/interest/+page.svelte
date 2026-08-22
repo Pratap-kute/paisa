@@ -1,28 +1,23 @@
 <script lang="ts">
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import {
-    buildLegends,
-    createInterestOverviewChart,
-    createInterestPerAccountChart,
-  } from "$lib/charts/liabilities/interest";
-  import type { ChartHandle } from "$lib/charts/resize";
-  import { ajax, type Interest, type Legend } from "$lib/core/utils";
+    buildInterestOverviewComparison,
+    buildInterestTimelineSeries,
+    interestSummary,
+  } from "$lib/charts/interest_data";
+  import { ajax, formatCurrency, formatFloat, type Interest } from "$lib/core/utils";
   import _ from "lodash";
-  import { onDestroy, onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
-  let legends: Legend[] = $state([]);
   let interests: Interest[] = $state([]);
-  let overviewChart: ChartHandle<Interest[]> | null = $state(null);
-  let perAccountChart: ChartHandle<Interest[]> | null = $state(null);
-
-  const perAccountChartLayout =
-    "w-full [&_.paisa-interest-account-row]:mb-[var(--paisa-space-4)] [&_.paisa-interest-account-row]:grid [&_.paisa-interest-account-row]:grid-cols-[minmax(220px,240px)_minmax(0,1fr)] [&_.paisa-interest-account-row]:items-stretch [&_.paisa-interest-account-row]:gap-[var(--paisa-space-3)] [&_.paisa-interest-summary-card]:box-border [&_.paisa-interest-summary-card]:flex [&_.paisa-interest-summary-card]:flex-col [&_.paisa-interest-summary-card]:justify-center [&_.paisa-interest-summary-card]:self-stretch [&_.paisa-interest-summary-card]:p-[var(--paisa-space-2)_var(--paisa-space-3)] [&_.paisa-interest-chart-card]:box-border [&_.paisa-interest-chart-card]:flex [&_.paisa-interest-chart-card]:flex-col [&_.paisa-interest-chart-card]:self-stretch [&_.paisa-interest-chart-card]:overflow-x-auto [&_.paisa-interest-chart-card]:p-[var(--paisa-space-2)_var(--paisa-space-3)] [&_.paisa-interest-summary-table]:mb-0 [&_.paisa-interest-summary-table]:table-fixed [&_.paisa-interest-summary-table_td]:overflow-hidden [&_.paisa-interest-summary-table_td]:text-ellipsis [&_.paisa-interest-summary-table_td]:whitespace-nowrap [&_.paisa-interest-chart-card_svg]:block [&_.paisa-interest-chart-card_svg]:w-full [&_.paisa-interest-chart-card_svg]:max-w-none max-md:[&_.paisa-interest-account-row]:grid-cols-1 max-md:[&_.paisa-interest-summary-card]:max-w-full";
+  let overviewData = $derived(buildInterestOverviewComparison(interests));
 
   function hasLiabilityActivity(interests: Interest[]) {
     return _.some(interests, (interest) =>
@@ -44,23 +39,13 @@
         return;
       }
 
-      legends = buildLegends();
       interests = loadedInterests;
       isLoading = false;
-      await tick();
-      overviewChart = createInterestOverviewChart();
-      perAccountChart = createInterestPerAccountChart();
-      overviewChart.update(interests);
-      perAccountChart.update(interests);
     } finally {
       isLoading = false;
     }
   });
 
-  onDestroy(() => {
-    overviewChart?.destroy();
-    perAccountChart?.destroy();
-  });
 </script>
 
 <svelte:head>
@@ -74,35 +59,38 @@
   />
 
   <Section title="Interest Overview">
-    {#if !isLoading && !isEmpty}
-      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-    {/if}
     <ChartFrame
       type="dynamic"
       loading={isLoading}
       empty={!isLoading && isEmpty}
       emptyMessage="No liability activity in this period"
-      preserveChildren
-      onresize={(dim) => overviewChart?.resize(dim)}
     >
-      <div class="w-full paisa-overflow-x-auto [&_svg]:block [&_svg]:w-auto [&_svg]:max-w-none">
-        <svg id="d3-interest-overview" />
-      </div>
+      <ComparisonBarChart data={overviewData} ariaLabel="Liability interest overview" testId="interest-overview-echart" />
     </ChartFrame>
   </Section>
 
   <Section title="Per-Account Breakdown">
-    <ChartFrame
-      type="dynamic"
-      loading={isLoading}
-      empty={!isLoading && isEmpty}
-      emptyMessage="No liability activity in this period"
-      preserveChildren
-      class={perAccountChartLayout}
-    >
-      <div class="w-full">
-        <div id="d3-interest-timeline-breakdown"></div>
+    {#if !isLoading && !isEmpty}
+      <div class="flex flex-col gap-4">
+        {#each interests as interest (interest.account)}
+          {@const summary = interestSummary(interest)}
+          <div class="grid grid-cols-1 gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-3 md:grid-cols-[220px_minmax(0,1fr)]">
+            <table class="w-full text-xs">
+              <tbody>
+                <tr><th class="py-1 text-left">Account</th><td class="py-1 text-right font-semibold">{summary.label}</td></tr>
+                <tr><th class="py-1 text-left">Loan Drawn</th><td class="py-1 text-right">{formatCurrency(summary.drawn)}</td></tr>
+                <tr><th class="py-1 text-left">Loan Repaid</th><td class="py-1 text-right">{formatCurrency(summary.repaid)}</td></tr>
+                <tr><th class="py-1 text-left">Interest</th><td class="py-1 text-right">{formatCurrency(summary.interest)}</td></tr>
+                <tr><th class="py-1 text-left">Balance</th><td class="py-1 text-right font-semibold">{formatCurrency(summary.balance)}</td></tr>
+                <tr><th class="py-1 text-left">APR</th><td class="py-1 text-right">{formatFloat(summary.apr)}%</td></tr>
+              </tbody>
+            </table>
+            <ChartFrame type="timeline">
+              <TimeSeriesChart data={buildInterestTimelineSeries(interest)} ariaLabel="Interest timeline for {summary.label}" testId="interest-account-{encodeURIComponent(interest.account)}-echart" internalLegend />
+            </ChartFrame>
+          </div>
+        {/each}
       </div>
-    </ChartFrame>
+    {/if}
   </Section>
 </Page>
