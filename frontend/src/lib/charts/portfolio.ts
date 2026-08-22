@@ -377,18 +377,18 @@ function renderPartition(
       const breakdown = byName[d.id];
       if (!breakdown) return "";
       return tooltip([
-        ["Commodity", [breakdown.commodity_name, "has-text-right"]],
+        ["Commodity", [breakdown.commodity_name, "paisa-text-right"]],
         ["Security Count", [
           breakdown.security_id
             ? breakdown.security_id.split(",").length.toString()
             : "0",
-          "has-text-right",
+          "paisa-text-right",
         ]],
         ["Amount", [
           formatCurrency(breakdown.amount),
-          "has-text-weight-bold has-text-right",
+          "paisa-text-bold paisa-text-right",
         ]],
-        ["Percentage", [percent(d), "has-text-weight-bold has-text-right"]],
+        ["Percentage", [percent(d), "paisa-text-bold paisa-text-right"]],
       ]);
     })
     .style("top", (d: any) => d.y0 + "px")
@@ -404,7 +404,7 @@ function renderPartition(
     )
     .join("p")
     .style("font-size", ".7rem")
-    .attr("class", "has-text-weight-bold")
+    .attr("class", "paisa-text-bold")
     .text((d) => `${d.id} ${formatFloat(d.value)}%`);
 }
 

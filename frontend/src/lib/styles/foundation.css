@@ -1,8 +1,10 @@
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/jetbrains-mono";
+@import "../theme/tokens.css";
 
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
@@ -28,6 +30,12 @@
   --paisa-warning: #d97706;
   --paisa-warning-subtle: #fffbeb;
   --paisa-neutral: #475569;
+
+  --paisa-prediction-high: #10b981;
+  --paisa-prediction-medium: #3b82f6;
+  --paisa-prediction-review: #f59e0b;
+  --paisa-prediction-unknown: #f43f5e;
+  --paisa-prediction-transfer: #8b5cf6;
 
   --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -69,6 +77,12 @@
   --paisa-warning-subtle: #451a03;
   --paisa-neutral: #94a3b8;
 
+  --paisa-prediction-high: #34d399;
+  --paisa-prediction-medium: #60a5fa;
+  --paisa-prediction-review: #fbbf24;
+  --paisa-prediction-unknown: #fb7185;
+  --paisa-prediction-transfer: #a78bfa;
+
   --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
   --paisa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
@@ -94,6 +108,11 @@
   --color-warning: var(--paisa-warning);
   --color-warning-subtle: var(--paisa-warning-subtle);
   --color-neutral: var(--paisa-neutral);
+  --color-prediction-high: var(--paisa-prediction-high);
+  --color-prediction-medium: var(--paisa-prediction-medium);
+  --color-prediction-review: var(--paisa-prediction-review);
+  --color-prediction-unknown: var(--paisa-prediction-unknown);
+  --color-prediction-transfer: var(--paisa-prediction-transfer);
   --font-sans: var(--paisa-font-ui);
   --font-mono: var(--paisa-font-code);
   --radius-sm: var(--paisa-radius-sm);
@@ -157,6 +176,22 @@
 @utility paisa-focus-ring {
   outline: 2px solid var(--paisa-primary);
   outline-offset: 2px;
+}
+
+@utility paisa-text-success {
+  color: var(--paisa-positive);
+}
+
+@utility paisa-text-danger {
+  color: var(--paisa-negative);
+}
+
+@utility paisa-text-warning {
+  color: var(--paisa-warning);
+}
+
+@utility paisa-text-muted {
+  color: var(--paisa-muted-foreground);
 }
 
 .paisa4-button,

@@ -39,10 +39,10 @@
   };
 
   const alignClasses: Record<AlignOption, string> = {
-    start: "is-align-items-flex-start",
-    center: "is-align-items-center",
-    end: "is-align-items-flex-end",
-    stretch: "is-align-items-stretch",
+    start: "items-start",
+    center: "items-center",
+    end: "items-end",
+    stretch: "items-stretch",
   };
 </script>
 

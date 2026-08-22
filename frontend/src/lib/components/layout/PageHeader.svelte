@@ -47,7 +47,7 @@
               target="_blank"
               rel="noreferrer"
             >
-              <span class="icon is-small">
+              <span class="inline-flex items-center text-xs">
                 <i class="fas fa-circle-question"></i>
               </span>
             </a>
@@ -76,7 +76,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-page-header {
     width: 100%;
     margin-bottom: var(--paisa-space-5);
@@ -109,20 +109,23 @@
   }
 
   .paisa-page-title {
+    margin: 0;
     font-size: var(--paisa-font-size-xl);
     font-weight: var(--paisa-font-weight-bold);
     color: var(--paisa-text-primary);
     line-height: var(--paisa-line-height-tight);
-    margin: 0;
   }
 
   .paisa-help-link {
-    color: var(--paisa-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paisa-text-muted, var(--paisa-muted-foreground));
     transition: color var(--paisa-transition-fast);
+  }
 
-    &:hover {
-      color: var(--paisa-brand-primary);
-    }
+  .paisa-help-link:hover {
+    color: var(--paisa-brand-primary, var(--paisa-primary));
   }
 
   .paisa-page-description {

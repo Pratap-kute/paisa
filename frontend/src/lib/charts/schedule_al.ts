@@ -23,9 +23,9 @@ export function renderBreakdowns(scheduleALEntries: ScheduleALEntry[]) {
        <td>${s.section.code}</td>
        <td>${s.section.section}</td>
        <td class="${
-        s.section.code == "" ? "has-text-weight-bold" : ""
+        s.section.code == "" ? "paisa-text-bold" : ""
       }">${s.section.details}</td>
-       <td class='has-text-right has-text-weight-bold'>${
+       <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(s.amount)
       }</td>
       `;

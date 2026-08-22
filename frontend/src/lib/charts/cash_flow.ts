@@ -345,31 +345,31 @@ export function createMonthlyFlow(
           [
             ["Income", [
               formatCurrency(c.income),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Liabilities", [
               formatCurrency(c.liabilities),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Expenses", [
               formatCurrency(c.expenses),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Tax", [
               formatCurrency(c.tax),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Investment", [
               formatCurrency(c.investment),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Checking", [
               formatCurrency(c.checking),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
             ["Checking Balance", [
               formatCurrency(c.balance),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ]],
           ],
           { header: c.date.format("MMM YYYY") },
@@ -530,7 +530,7 @@ export function renderFlow(graph: Graph, dimensions?: Dimensions) {
         ["Account", iconify(d.name)],
         ["Total", [
           formatCurrency(d.value),
-          "has-text-right has-text-weight-bold",
+          "paisa-text-right paisa-text-bold",
         ]],
       ]));
 
@@ -579,7 +579,7 @@ export function renderFlow(graph: Graph, dimensions?: Dimensions) {
         ["Credit Account", iconify(d.target.name)],
         ["Total", [
           formatCurrency(d.value),
-          "has-text-right has-text-weight-bold",
+          "paisa-text-right paisa-text-bold",
         ]],
       ]));
 

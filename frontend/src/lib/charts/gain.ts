@@ -322,30 +322,30 @@ export function renderOverview(gains: Gain[]) {
     .attr("data-tippy-content", (g: Gain) => {
       const current = g.networth;
       return tooltip([
-        ["Account", [g.account, "has-text-weight-bold has-text-right"]],
+        ["Account", [g.account, "paisa-text-bold paisa-text-right"]],
         [
           "Investment",
           [
             formatCurrency(current.investmentAmount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
         [
           "Withdrawal",
           [
             formatCurrency(current.withdrawalAmount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
         ["Gain", [
           formatCurrency(current.gainAmount),
-          "has-text-weight-bold has-text-right",
+          "paisa-text-bold paisa-text-right",
         ]],
         ["Balance", [
           formatCurrency(current.balanceAmount),
-          "has-text-weight-bold has-text-right",
+          "paisa-text-bold paisa-text-right",
         ]],
-        ["XIRR", [formatFloat(g.xirr), "has-text-weight-bold has-text-right"]],
+        ["XIRR", [formatFloat(g.xirr), "paisa-text-bold paisa-text-right"]],
       ]);
     })
     .attr("x", 0)
@@ -430,7 +430,7 @@ export function renderAccountOverview(
           ["Date", p.date.format("DD MMM YYYY")],
           ["Amount", [
             formatCurrency(p.amount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ]],
         ],
         { header: p.payee },
@@ -588,18 +588,18 @@ export function renderAccountOverview(
           ["Date", d.date.format("DD MMM YYYY")],
           ["Balance", [
             formatCurrency(d.balanceAmount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ]],
           [
             "Net Investment",
             [
               formatCurrency(d.netInvestmentAmount),
-              "has-text-weight-bold has-text-right",
+              "paisa-text-bold paisa-text-right",
             ],
           ],
           ["Gain / Loss", [
             formatCurrency(d.gainAmount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ]],
         ]),
       });

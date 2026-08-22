@@ -92,8 +92,8 @@ export function renderCalendar(
       _.map(byAccount, (amount, group) => {
         return [
           [iconify(group, { group: "Expenses" })],
-          [formatPercentage(amount / total, 1), "has-text-right"],
-          [formatCurrency(amount), "has-text-weight-bold has-text-right"],
+          [formatPercentage(amount / total, 1), "paisa-text-right"],
+          [formatCurrency(amount), "paisa-text-bold paisa-text-right"],
         ];
       }),
       { total: formatCurrency(total), header: es[0].date.format("MMM YYYY") },
@@ -117,14 +117,14 @@ export function renderCalendar(
     .selectAll("div.day")
     .data((d) => [d])
     .join("div")
-    .attr("class", "day has-text-grey-light")
+    .attr("class", "day paisa-text-muted")
     .text((d) => d);
 
   infoDiv
     .selectAll("div.total")
     .data((d) => [d])
     .join("div")
-    .attr("class", "total is-size-7 has-text-weight-bold")
+    .attr("class", "total")
     .style(
       "color",
       (d) =>
@@ -244,7 +244,7 @@ export function renderYearlyExpensesTimeline(
             return [
               [
                 iconify(key, { group: "Expenses" }),
-                [formatCurrency(total), "has-text-weight-bold has-text-right"],
+                [formatCurrency(total), "paisa-text-bold paisa-text-right"],
               ],
             ];
           }
@@ -486,8 +486,8 @@ export function createCurrentExpensesBreakdown(
         _.map(byMonth, (amount, month) => {
           return [
             month,
-            [formatPercentage(amount / pointTotal, 1), "has-text-right"],
-            [formatCurrency(amount), "has-text-weight-bold has-text-right"],
+            [formatPercentage(amount / pointTotal, 1), "paisa-text-right"],
+            [formatCurrency(amount), "paisa-text-bold paisa-text-right"],
           ];
         }),
         {
@@ -530,7 +530,7 @@ export function createCurrentExpensesBreakdown(
       .style("font-size", narrow ? "0.75rem" : "0.875rem")
       .style("font-weight", "600")
       .style("fill", "var(--paisa-chart-text)")
-      .attr("class", "is-family-monospace")
+      .attr("class", "paisa-font-mono")
       .text(rightLabel);
   }
 

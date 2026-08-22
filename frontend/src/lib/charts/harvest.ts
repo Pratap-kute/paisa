@@ -15,7 +15,7 @@ export function renderHarvestables(harvestables: Harvestable[]) {
   const root = d3.select(id);
 
   const card = root
-    .selectAll("div.column")
+    .selectAll("div.paisa-d3-harvest-column")
     .data(
       _.filter(
         harvestables,
@@ -24,20 +24,20 @@ export function renderHarvestables(harvestables: Harvestable[]) {
     )
     .enter()
     .append("div")
-    .attr("class", "column is-12")
+    .attr("class", "paisa-d3-harvest-column")
     .append("div")
-    .attr("class", "card");
+    .attr("class", "paisa-d3-harvest-card");
 
-  const header = card.append("header").attr("class", "card-header");
+  const header = card.append("header").attr("class", "paisa-d3-harvest-header");
 
   header
     .append("p")
-    .attr("class", "card-header-title")
+    .attr("class", "paisa-d3-harvest-title")
     .text((h) => restName(h.account));
 
   header
     .append("div")
-    .attr("class", "card-header-icon")
+    .attr("class", "paisa-d3-harvest-header-action")
     .style("flex-grow", "1")
     .style("cursor", "auto")
     .append("div")
@@ -50,7 +50,7 @@ export function renderHarvestables(harvestables: Harvestable[]) {
       self.append("span").html("&nbsp;units you will get ₹");
       const amountInput = self
         .append("input")
-        .attr("class", "input is-small adjustable-input")
+        .attr("class", "paisa-harvest-input adjustable-input")
         .attr("type", "number")
         .attr("value", round(amount))
         .attr("step", "1000")
@@ -71,7 +71,7 @@ export function renderHarvestables(harvestables: Harvestable[]) {
       );
       const taxableGainInput = self
         .append("input")
-        .attr("class", "input is-small adjustable-input")
+        .attr("class", "paisa-harvest-input adjustable-input")
         .attr("type", "number")
         .attr("value", round(taxableGain))
         .attr("step", "1000")
@@ -89,7 +89,7 @@ export function renderHarvestables(harvestables: Harvestable[]) {
 
   header
     .append("span")
-    .attr("class", "card-header-icon")
+    .attr("class", "paisa-d3-harvest-header-action")
     .text(
       (harvestable) =>
         "price as on " +
@@ -98,29 +98,27 @@ export function renderHarvestables(harvestables: Harvestable[]) {
 
   const content = card
     .append("div")
-    .attr("class", "card-content")
+    .attr("class", "paisa-d3-harvest-body")
     .append("div")
-    .attr("class", "content")
-    .append("div")
-    .attr("class", "columns");
+    .attr("class", "paisa-d3-harvest-columns");
 
-  const summary = content.append("div").attr("class", "column is-4");
+  const summary = content.append("div").attr("class", "paisa-d3-harvest-summary");
 
   summary.append("div").each(renderSingleBar);
 
   summary.append("div").html((h) => {
     return `
-<table class="table is-narrow is-fullwidth is-hoverable">
+<table class="paisa-popup-table">
   <tbody>
     <tr>
       <td>Balance Units</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
       formatFloat(h.total_units)
     }</td>
     </tr>
     <tr>
       <td>Harvestable Units</td>
-      <td class='has-text-right has-text-weight-bold has-text-success'>${
+      <td class='paisa-text-right paisa-text-bold paisa-text-positive'>${
       formatFloat(
         h.harvestable_units,
       )
@@ -128,23 +126,23 @@ export function renderHarvestables(harvestables: Harvestable[]) {
     </tr>
     <tr>
       <td>Tax Category</td>
-      <td class='has-text-right is-uppercase'>${h.tax_category}</td>
+      <td class='paisa-text-right uppercase'>${h.tax_category}</td>
     </tr>
     <tr>
       <td>Current Unit Price</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
       formatFloat(h.current_unit_price)
     }</td>
     </tr>
     <tr>
       <td>Unrealized Gain / Loss</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
       formatCurrency(h.unrealized_gain)
     }</td>
     </tr>
     <tr>
       <td>Taxable Unrealized Gain / Loss</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
       formatCurrency(
         h.taxable_unrealized_gain,
       )
@@ -157,26 +155,26 @@ export function renderHarvestables(harvestables: Harvestable[]) {
 
   const table = content
     .append("div")
-    .attr("class", "column is-8")
+    .attr("class", "paisa-d3-harvest-detail")
     .append("div")
     .attr("class", "table-container")
     .style("overflow-y", "auto")
     .style("max-height", "245px")
     .append("table")
-    .attr("class", "table is-hoverable");
+    .attr("class", "paisa-d3-table");
 
   table.append("thead").html(`
 <tr>
   <th>Purchase Date</th>
-  <th class='has-text-right'>Units</th>
-  <th class='has-text-right'>Purchase Price</th>
-  <th class='has-text-right'>Purchase Unit Price</th>
-  <th class='has-text-right'>Current Price</th>
-  <th class='has-text-right'>Gain</th>
-  <th class='has-text-right'>Taxable Gain</th>
-  <th class='has-text-right'>Short Term Tax</th>
-  <th class='has-text-right'>Long Term Tax</th>
-  <th class='has-text-right'>Taxable at Slab Rate</th>
+  <th class='paisa-text-right'>Units</th>
+  <th class='paisa-text-right'>Purchase Price</th>
+  <th class='paisa-text-right'>Purchase Unit Price</th>
+  <th class='paisa-text-right'>Current Price</th>
+  <th class='paisa-text-right'>Gain</th>
+  <th class='paisa-text-right'>Taxable Gain</th>
+  <th class='paisa-text-right'>Short Term Tax</th>
+  <th class='paisa-text-right'>Long Term Tax</th>
+  <th class='paisa-text-right'>Taxable at Slab Rate</th>
 </tr>
 `);
 
@@ -194,23 +192,23 @@ export function renderHarvestables(harvestables: Harvestable[]) {
   <td style="white-space: nowrap">${
         dayjs(breakdown.purchase_date).format("DD MMM YYYY")
       }</td>
-  <td class='has-text-right'>${formatFloat(breakdown.units)}</td>
-  <td class='has-text-right'>${formatCurrency(breakdown.purchase_price)}</td>
-  <td class='has-text-right'>${formatFloat(breakdown.purchase_unit_price)}</td>
-  <td class='has-text-right'>${formatCurrency(breakdown.current_price)}</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right'>${formatFloat(breakdown.units)}</td>
+  <td class='paisa-text-right'>${formatCurrency(breakdown.purchase_price)}</td>
+  <td class='paisa-text-right'>${formatFloat(breakdown.purchase_unit_price)}</td>
+  <td class='paisa-text-right'>${formatCurrency(breakdown.current_price)}</td>
+  <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(breakdown.tax.gain)
       }</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(breakdown.tax.taxable)
       }</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(breakdown.tax.short_term)
       }</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(breakdown.tax.long_term)
       }</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(breakdown.tax.slab)
       }</td>
 </tr>
@@ -294,26 +292,26 @@ function renderSingleBar(harvestable: Harvestable) {
   g.attr("data-tippy-content", () => {
     return tooltip([
       [
-        ["Type", "has-text-weight-bold"],
-        ["Units", "has-text-weight-bold has-text-right"],
-        ["Percentage", "has-text-weight-bold has-text-right"],
+        ["Type", "paisa-text-bold"],
+        ["Units", "paisa-text-bold paisa-text-right"],
+        ["Percentage", "paisa-text-bold paisa-text-right"],
       ],
       [
         "Harvestable",
-        [formatFloat(harvestable.harvestable_units), "has-text-right"],
+        [formatFloat(harvestable.harvestable_units), "paisa-text-right"],
         [
           formatFloat(
             (harvestable.harvestable_units / harvestable.total_units) * 100,
           ),
-          "has-text-right",
+          "paisa-text-right",
         ],
       ],
       [
         "Non Harvestable",
-        [formatFloat(non_harvestable_units), "has-text-right"],
+        [formatFloat(non_harvestable_units), "paisa-text-right"],
         [
           formatFloat((non_harvestable_units / harvestable.total_units) * 100),
-          "has-text-right",
+          "paisa-text-right",
         ],
       ],
     ]);

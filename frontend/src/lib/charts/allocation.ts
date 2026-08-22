@@ -306,12 +306,12 @@ function renderPartition(
     .attr("class", "node")
     .attr("data-tippy-content", (d) => {
       return tooltip([
-        ["Account", [d.id, "has-text-right"]],
+        ["Account", [d.id, "paisa-text-right"]],
         ["Market Value", [
           formatCurrency(d.value),
-          "has-text-weight-bold has-text-right",
+          "paisa-text-bold paisa-text-right",
         ]],
-        ["Percentage", [percent(d), "has-text-weight-bold has-text-right"]],
+        ["Percentage", [percent(d), "paisa-text-bold paisa-text-right"]],
       ]);
     })
     .style("position", "absolute")
@@ -324,12 +324,12 @@ function renderPartition(
 
   cell
     .append("p")
-    .attr("class", "heading has-text-weight-bold")
+    .attr("class", "heading paisa-text-bold")
     .text((d) => lastName(d.id));
 
   cell
     .append("p")
-    .attr("class", "heading has-text-weight-bold")
+    .attr("class", "heading paisa-text-bold")
     .style("font-size", ".5 rem")
     .text(percent);
 }

@@ -174,7 +174,7 @@ export function renderMonthlyInvestmentTimeline(postings: Posting[]): Legend[] {
         _.sortBy(
           postings.map((p) => [
             _.drop(p.account.split(":")).join(":"),
-            [formatCurrency(p.amount), "has-text-weight-bold has-text-right"],
+            [formatCurrency(p.amount), "paisa-text-bold paisa-text-right"],
           ]),
           (r) => r[0],
         ),
@@ -353,7 +353,7 @@ export function renderYearlyInvestmentTimeline(
             return [
               [
                 k.replace("-credit", "").replace("-debit", ""),
-                [formatCurrency(total), "has-text-weight-bold has-text-right"],
+                [formatCurrency(total), "paisa-text-bold paisa-text-right"],
               ],
             ];
           }),
@@ -386,33 +386,33 @@ export function renderYearlyCards(yearlyCards: InvestmentYearlyCard[]) {
   const root = d3.select(id);
 
   const card = root
-    .selectAll("div.column")
+    .selectAll("div.paisa-d3-yearly-column")
     .data(_.reverse(yearlyCards))
     .enter()
     .append("div")
-    .attr("class", "column is-4")
+    .attr("class", "paisa-d3-yearly-column")
     .append("div")
-    .attr("class", "card box py-0");
+    .attr("class", "paisa-d3-yearly-card");
 
   card
     .append("header")
-    .attr("class", "card-header")
+    .attr("class", "paisa-d3-yearly-card-header")
     .append("p")
-    .attr("class", "card-header-title has-text-grey-dark")
+    .attr("class", "paisa-d3-yearly-card-title")
     .text((c) => financialYear(c));
 
   card
     .append("div")
-    .attr("class", "card-content p-1")
+    .attr("class", "paisa-d3-yearly-card-body")
     .append("div")
-    .attr("class", "content")
+    .attr("class", "paisa-d3-yearly-card-content")
     .html((card) => {
       return `
-<table class="table is-narrow is-fullwidth is-size-7 is-hoverable has-text-grey">
+<table class="paisa-popup-table paisa-d3-yearly-table">
   <tbody>
     <tr>
       <td>Gross Salary Income</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(
           card.gross_salary_income,
         )
@@ -420,7 +420,7 @@ export function renderYearlyCards(yearlyCards: InvestmentYearlyCard[]) {
     </tr>
     <tr>
       <td>Gross Other Income</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(
           card.gross_other_income,
         )
@@ -428,31 +428,31 @@ export function renderYearlyCards(yearlyCards: InvestmentYearlyCard[]) {
     </tr>
     <tr>
       <td>Tax</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(card.net_tax)
       }</td>
     </tr>
     <tr>
       <td>Net Income</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(card.net_income)
       }</td>
     </tr>
     <tr>
       <td>Net Expense</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(card.net_expense)
       }</td>
     </tr>
     <tr>
       <td>Investment</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatCurrency(card.net_investment)
       }</td>
     </tr>
     <tr>
       <td>Savings Rate</td>
-      <td class='has-text-right has-text-weight-bold'>${
+      <td class='paisa-text-right paisa-text-bold'>${
         formatFloat(card.savings_rate)
       }</td>
     </tr>

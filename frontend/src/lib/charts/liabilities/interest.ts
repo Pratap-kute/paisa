@@ -67,29 +67,29 @@ export function renderTable(interest: Interest) {
     return `
 <tr>
   <td>Account</td>
-  <td class='has-text-right has-text-weight-bold'>${
+  <td class='paisa-text-right paisa-text-bold'>${
       restName(interest.account)
     }</td>
 </tr>
 <tr>
   <td>Loan Drawn</td>
-  <td class='has-text-right'>${formatCurrency(drawn)}</td>
+  <td class='paisa-text-right'>${formatCurrency(drawn)}</td>
 </tr>
 <tr>
   <td>Loan Repaid</td>
-  <td class='has-text-right'>${formatCurrency(repaid)}</td>
+  <td class='paisa-text-right'>${formatCurrency(repaid)}</td>
 </tr>
 <tr>
   <td>Interest</td>
-  <td class='has-text-right'>${formatCurrency(interestAmount)}</td>
+  <td class='paisa-text-right'>${formatCurrency(interestAmount)}</td>
 </tr>
 <tr>
   <td>Balance</td>
-  <td class='has-text-right'>${formatCurrency(drawn + interestAmount - repaid)}</td>
+  <td class='paisa-text-right'>${formatCurrency(drawn + interestAmount - repaid)}</td>
 </tr>
 <tr>
   <td>APR</td>
-  <td class='has-text-right'>${formatFloat(interest.apr)}</td>
+  <td class='paisa-text-right'>${formatFloat(interest.apr)}</td>
 </tr>
 `;
   });
@@ -471,26 +471,26 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
       const current = getCurrentOverview(g);
       if (!current) return "";
       return tooltip([
-        ["Account", [g.account, "has-text-weight-bold has-text-right"]],
+        ["Account", [g.account, "paisa-text-bold paisa-text-right"]],
         [
           "Loan Drawn",
           [
             formatCurrency(current.drawn_amount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
         [
           "Loan Repaid",
           [
             formatCurrency(current.repaid_amount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
         [
           "Interest",
           [
             formatCurrency(current.interest_amount),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
         [
@@ -500,10 +500,10 @@ export function renderOverview(gains: Interest[], size: Dimensions = { width: 0,
               current.drawn_amount + current.interest_amount -
                 current.repaid_amount,
             ),
-            "has-text-weight-bold has-text-right",
+            "paisa-text-bold paisa-text-right",
           ],
         ],
-        ["APR", [formatFloat(g.apr), "has-text-weight-bold has-text-right"]],
+        ["APR", [formatFloat(g.apr), "paisa-text-bold paisa-text-right"]],
       ]);
     })
     .attr("x", 0)
@@ -549,7 +549,7 @@ export function renderPerAccountOverview(interests: Interest[]) {
       .append("table")
       .attr(
         "class",
-        "table is-narrow is-fullwidth is-size-7 paisa-interest-summary-table",
+        "paisa-popup-table paisa-interest-summary-table",
       )
       .append("tbody");
     const tbodyNode = tbody.node();
