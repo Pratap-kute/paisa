@@ -1,88 +1,59 @@
 <script lang="ts">
-  import Table from "$lib/components/ui/Table.svelte";
-  import {
-    indendedLiabilityAccountName,
-    nonZeroCurrency,
-    nonZeroFloatChange
-  } from "$lib/tables/formatters";
-  import { ajax, buildTree, type LiabilityBreakdown } from "$lib/core/utils";
-  import _ from "lodash";
+  import LiabilitiesBalance from "$lib/components/finance/LiabilitiesBalance.svelte";
+  import { ajax, type LiabilityBreakdown } from "$lib/core/utils";
   import { onMount } from "svelte";
-  import type { ColumnDefinition } from "tabulator-tables";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import ZeroState from "$lib/components/ui/ZeroState.svelte";
 
   let breakdowns: LiabilityBreakdown[] = $state([]);
-  let isEmpty = $state(false);
+  let isLoading = $state(true);
+
+  let hasBreakdowns = $derived(breakdowns.length > 0);
 
   onMount(async () => {
-    ({ liability_breakdowns: breakdowns } = await ajax("/api/liabilities/balance"));
-
-    if (_.isEmpty(breakdowns)) {
-      isEmpty = true;
+    try {
+      ({ liability_breakdowns: breakdowns } = await ajax("/api/liabilities/balance"));
+    } finally {
+      isLoading = false;
     }
   });
-
-  const columns: ColumnDefinition[] = [
-    {
-      title: "Account",
-      field: "group",
-      formatter: indendedLiabilityAccountName,
-      minWidth: 220,
-      widthGrow: 2,
-      frozen: true
-    },
-    {
-      title: "Drawn Amount",
-      field: "drawn_amount",
-      hozAlign: "right",
-      vertAlign: "middle",
-      formatter: nonZeroCurrency
-    },
-    {
-      title: "Repaid Amount",
-      field: "repaid_amount",
-      hozAlign: "right",
-      formatter: nonZeroCurrency
-    },
-    {
-      title: "Balance Amount",
-      field: "balance_amount",
-      hozAlign: "right",
-      formatter: nonZeroCurrency
-    },
-    {
-      title: "Interest",
-      field: "interest_amount",
-      hozAlign: "right",
-      formatter: nonZeroCurrency
-    },
-    { title: "APR", field: "apr", hozAlign: "right", formatter: nonZeroFloatChange }
-  ];
-
-  let tree: LiabilityBreakdown[] = $derived(
-    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : []
-  );
 </script>
 
-<Page width="fluid">
+<svelte:head>
+  <title>Liabilities Balance - Paisa</title>
+</svelte:head>
+
+<Page width="analysis">
   <PageHeader
     title="Liabilities Balance"
     description="Outstanding debts, loans, and credit lines"
   />
 
-  {#if isEmpty}
-    <Section>
-      <article class="message">
-        <div class="message-body">
-          <strong>Hurray!</strong> You have no liabilities.
-        </div>
-      </article>
-    </Section>
-  {:else}
-    <Section>
-      <Table data={tree} tree {columns} />
-    </Section>
-  {/if}
+  <Section
+    title="Account Balances"
+    subtitle="Drawn amounts, repayments, and interest by liability account"
+  >
+    {#if isLoading}
+      <div
+        class="flex flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] p-[var(--paisa-space-4)]"
+        aria-hidden="true"
+      >
+        {#each Array(6) as _}
+          <div class="h-5 animate-pulse rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-hover)]"></div>
+        {/each}
+      </div>
+    {:else if !hasBreakdowns}
+      <ZeroState item={[]}>
+        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+          <strong class="text-[var(--paisa-foreground)]">Hurray!</strong> You have no liabilities.
+        </p>
+      </ZeroState>
+    {:else}
+      <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+        <LiabilitiesBalance {breakdowns} />
+      </div>
+    {/if}
+  </Section>
 </Page>
