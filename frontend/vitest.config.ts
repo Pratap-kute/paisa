@@ -5,6 +5,7 @@ import { coverageThreshold, sharedResolve } from "./vitest.shared";
 type VitestPluginOption = NonNullable<ViteUserConfig["plugins"]>[number];
 
 const coreProject = defineConfig({
+  plugins: [svelte() as unknown as VitestPluginOption],
   resolve: sharedResolve,
   test: {
     name: "core",

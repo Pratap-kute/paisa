@@ -29,6 +29,12 @@
   import MonthPicker from "$lib/components/ui/MonthPicker.svelte";
   import InputRange from "$lib/components/ui/InputRange.svelte";
 
+  import {
+    navigationState,
+    type NavGroup,
+    type NavSection,
+  } from "$lib/state/navigation.svelte";
+
   interface Props {
     isBurger?: boolean | null;
     children?: Snippet;
@@ -37,8 +43,6 @@
   let { isBurger = $bindable(false), children }: Props = $props();
 
   let mobileDrawerOpen = $state(false);
-  let userCollapsedGroups = $state(new Set<string>());
-  let userExpandedGroups = $state(new Set<string>());
   let commandPaletteOpen = $state(false);
   let isMac = $state(false);
 
@@ -51,12 +55,10 @@
   afterNavigate(() => {
     mobileDrawerOpen = false;
     isBurger = false;
-    const activeGroup = allNavGroups.find((g) => isGroupActive(g, pathname));
-    if (activeGroup && userCollapsedGroups.has(activeGroup.id)) {
-      const next = new Set(userCollapsedGroups);
-      next.delete(activeGroup.id);
-      userCollapsedGroups = next;
-    }
+    const activeGroup = allNavGroups.find((g) =>
+      navigationState.isGroupActive(g, pathname)
+    );
+    navigationState.onNavigate(activeGroup);
   });
 
   $effect(() => {
@@ -72,33 +74,6 @@
 
   const readonly = typeof USER_CONFIG !== "undefined" && USER_CONFIG.readonly;
   const isINR = typeof USER_CONFIG !== "undefined" && USER_CONFIG.default_currency === "INR";
-
-  interface NavChild {
-    label: string;
-    href: string;
-  }
-
-  interface NavLink {
-    kind: "link";
-    label: string;
-    href: string;
-    icon?: string;
-  }
-
-  interface NavGroup {
-    kind: "group";
-    id: string;
-    label: string;
-    icon?: string;
-    children: NavChild[];
-  }
-
-  type NavEntry = NavLink | NavGroup;
-
-  interface NavSection {
-    title: string;
-    items: NavEntry[];
-  }
 
   const navSections: NavSection[] = [
     {
@@ -237,46 +212,6 @@
     )
   );
 
-  function isPathActive(targetHref: string, currentPath: string): boolean {
-    if (targetHref === "/") {
-      return currentPath === "/";
-    }
-    return currentPath === targetHref || currentPath.startsWith(`${targetHref}/`);
-  }
-
-  function groupChildHrefs(group: NavGroup): string[] {
-    return group.children.map((child) => child.href);
-  }
-
-  function isGroupActive(group: NavGroup, currentPath: string): boolean {
-    return groupChildHrefs(group).some((href) => isPathActive(href, currentPath));
-  }
-
-  function isGroupExpanded(group: NavGroup, currentPath: string): boolean {
-    if (userCollapsedGroups.has(group.id)) return false;
-    if (userExpandedGroups.has(group.id)) return true;
-    return isGroupActive(group, currentPath);
-  }
-
-  function toggleGroup(groupId: string, currentPath: string) {
-    const group = allNavGroups.find((g) => g.id === groupId);
-    if (!group) return;
-    const currentlyExpanded = isGroupExpanded(group, currentPath);
-    const nextCollapsed = new Set(userCollapsedGroups);
-    const nextExpanded = new Set(userExpandedGroups);
-
-    if (currentlyExpanded) {
-      nextCollapsed.add(groupId);
-      nextExpanded.delete(groupId);
-    } else {
-      nextExpanded.add(groupId);
-      nextCollapsed.delete(groupId);
-    }
-
-    userCollapsedGroups = nextCollapsed;
-    userExpandedGroups = nextExpanded;
-  }
-
   let pathname = $derived($page.url.pathname);
   let showDateRange = $derived(
     pathname === "/cash_flow/monthly" ||
@@ -316,7 +251,7 @@
       </div>
       {#each section.items as item}
         {#if item.kind === "link"}
-          {@const active = isPathActive(item.href, pathname)}
+          {@const active = navigationState.isPathActive(item.href, pathname)}
           <a
             href={item.href}
             class="{navLinkClass} {active ? navLinkActiveClass : ''}"
@@ -333,13 +268,13 @@
             <span class="truncate">{item.label}</span>
           </a>
         {:else}
-          {@const active = isGroupActive(item, pathname)}
-          {@const expanded = isGroupExpanded(item, pathname)}
+          {@const active = navigationState.isGroupActive(item, pathname)}
+          {@const expanded = navigationState.isGroupExpanded(item, pathname)}
           <button
             type="button"
             class="{navGroupButtonClass} {active ? navLinkActiveClass : ''}"
             aria-expanded={expanded}
-            onclick={() => toggleGroup(item.id, pathname)}
+            onclick={() => navigationState.toggleGroup(item, pathname)}
           >
             {#if item.icon}
               <i
@@ -360,7 +295,7 @@
           {#if expanded}
             <div class="flex flex-col gap-0.5 pl-7 pr-1">
               {#each item.children as sub}
-                {@const subActive = isPathActive(sub.href, pathname)}
+                {@const subActive = navigationState.isPathActive(sub.href, pathname)}
                 <a
                   href={sub.href}
                   class="{navSubLinkClass} {subActive ? navSubLinkActiveClass : ''}"
@@ -384,7 +319,7 @@
     </div>
     {#each systemSection.items as item}
       {#if item.kind === "link"}
-        {@const active = isPathActive(item.href, pathname)}
+        {@const active = navigationState.isPathActive(item.href, pathname)}
         <a
           href={item.href}
           class="{navLinkClass} text-xs {active ? navLinkActiveClass : 'text-[var(--paisa-muted-foreground)]'}"
@@ -396,13 +331,13 @@
           <span class="truncate">{item.label}</span>
         </a>
       {:else}
-        {@const active = isGroupActive(item, pathname)}
-        {@const expanded = isGroupExpanded(item, pathname)}
+        {@const active = navigationState.isGroupActive(item, pathname)}
+        {@const expanded = navigationState.isGroupExpanded(item, pathname)}
         <button
           type="button"
           class="{navGroupButtonClass} text-xs {active ? navLinkActiveClass : 'text-[var(--paisa-muted-foreground)]'}"
           aria-expanded={expanded}
-          onclick={() => toggleGroup(item.id, pathname)}
+          onclick={() => navigationState.toggleGroup(item, pathname)}
         >
           {#if item.icon}
             <i class="{item.icon} w-4 text-center text-xs" aria-hidden="true"></i>
@@ -418,7 +353,7 @@
         {#if expanded}
           <div class="flex flex-col gap-0.5 pl-7 pr-1">
             {#each item.children as sub}
-              {@const subActive = isPathActive(sub.href, pathname)}
+              {@const subActive = navigationState.isPathActive(sub.href, pathname)}
               <a
                 href={sub.href}
                 class="{navSubLinkClass} {subActive ? navSubLinkActiveClass : ''}"
