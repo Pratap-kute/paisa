@@ -1,14 +1,12 @@
 <script lang="ts">
   import Select from "svelte-select";
-  import {
-    createEditor as createTemplateEditor,
-    editorState as templateEditorState,
-    updateContent as updateTemplateContent
-  } from "$lib/editors/template_editor";
+  import Handlebars from "handlebars";
+  import { editorState as templateEditorState } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent
   } from "$lib/editors/editor";
+  import TemplateEditorDrawer from "$lib/components/import/TemplateEditorDrawer.svelte";
   import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
   import {
     parse,
@@ -121,12 +119,17 @@
     errors: []
   });
 
-  let templateEditorDom: Element = $state();
-  let templateEditor: EditorView = $state();
   let previewEditorDom: Element = $state();
   let previewEditor: EditorView = $state();
   let showSaveAsModal = $state(false);
   let showFileModal = $state(false);
+
+  let fileColumns = $derived.by(() => {
+    if (rows && rows.length > 0) {
+      return Object.keys(rows[0]).filter((k) => k !== "index");
+    }
+    return [];
+  });
 
   onMount(async () => {
     const [tfidf, historyResponse] = await Promise.all([
@@ -137,9 +140,7 @@
     predictionSession.loadHistory(historyResponse.history || []);
     ({ templates } = await ajax("/api/templates"));
     if (templates.length > 0) {
-      selectedTemplate = templates[0];
-      saveAsName = selectedTemplate.name;
-      templateEditor = createTemplateEditor(selectedTemplate.content, templateEditorDom);
+      onSelectTemplate(templates[0]);
     }
   });
 
@@ -158,35 +159,26 @@
 
   let saveAsNameDuplicate = $derived(!!_.find(templates, { name: saveAsName, template_type: "custom" }));
   let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
-  let templateSaveDisabled = $derived(!$templateEditorState.hasUnsavedChanges || !selectedTemplate);
-  let templateSaveTooltip = $derived(
-    !$templateEditorState.hasUnsavedChanges
-      ? "No Unsaved Changes"
-      : selectedTemplateIsBuiltin
-      ? "Save edited builtin template as custom"
-      : "Save Template"
-  );
 
-  async function save() {
-    const content = templateEditor ? templateEditor.state.doc.toString() : "";
+  async function handleSaveTemplate(name: string, content: string) {
     const { template, saved, message } = await ajax("/api/templates/upsert", {
       method: "POST",
       body: JSON.stringify({
-        name: saveAsName,
+        name,
         content
       }),
       background: true
     });
     if (!saved) {
       toast.toast({
-        message: `Failed to save template ${saveAsName}. reason: ${message}`,
+        message: `Failed to save template ${name}. reason: ${message}`,
         type: "is-danger",
         duration: 10000
       });
       return;
     }
     toast.toast({
-      message: `Saved ${saveAsName}`,
+      message: `Saved ${name}`,
       type: "is-success"
     });
     $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
@@ -201,8 +193,8 @@
     return "";
   }
 
-  async function remove() {
-    const oldName = selectedTemplate.name;
+  async function handleDeleteTemplate(templateToDelete: ImportTemplate) {
+    const oldName = templateToDelete.name;
     const confirmed = confirm(`Are you sure you want to delete ${oldName} template?`);
     if (!confirmed) {
       return;
@@ -210,7 +202,7 @@
     const { success, message } = await ajax("/api/templates/delete", {
       method: "POST",
       body: JSON.stringify({
-        name: selectedTemplate.name
+        name: templateToDelete.name
       }),
       background: true
     });
@@ -442,11 +434,14 @@
   function onSelectTemplate(template: ImportTemplate) {
     selectedTemplate = template;
     saveAsName = template.name;
-    if (templateEditor) {
-      updateTemplateContent(templateEditor, template.content);
+    let compiled: any = null;
+    try {
+      compiled = Handlebars.compile(template.content, { noEscape: true });
+    } catch (e) {
+      console.warn("Handlebars compile error on select:", e);
     }
     $templateEditorState = _.assign({}, $templateEditorState, {
-      template,
+      template: compiled,
       content: template.content,
       hasUnsavedChanges: false
     });
@@ -577,29 +572,6 @@
               >
                 <i class="fas fa-plus"></i>
               </IconButton>
-
-              <IconButton
-                variant="outline"
-                size="sm"
-                ariaLabel="Save Template"
-                title={templateSaveTooltip}
-                disabled={templateSaveDisabled}
-                onclick={save}
-              >
-                <i class="fas {selectedTemplateIsBuiltin ? 'fa-code-fork' : 'fa-floppy-disk'}"></i>
-              </IconButton>
-
-              {#if !selectedTemplateIsBuiltin}
-                <IconButton
-                  variant="danger"
-                  size="sm"
-                  ariaLabel="Delete Template"
-                  title={builtinNotAllowed("Delete", selectedTemplate)}
-                  onclick={(_e) => remove()}
-                >
-                  <i class="fas fa-trash-can"></i>
-                </IconButton>
-              {/if}
             </div>
           </div>
 
@@ -925,48 +897,15 @@
   {/snippet}
 </Drawer>
 
-<div class="pointer-events-none fixed inset-0 z-50 {templateDrawerOpen ? 'pointer-events-auto' : ''}">
-  <button
-    class="absolute inset-0 cursor-default border-0 bg-slate-900/30 p-0 transition-opacity {templateDrawerOpen ? 'opacity-100' : 'opacity-0'}"
-    aria-label="Close Template Definition"
-    onclick={() => (templateDrawerOpen = false)}
-  ></button>
-  <aside class="absolute right-0 top-0 flex h-full w-[min(45vw,620px)] min-w-[420px] translate-x-full flex-col border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-lg)] transition-transform duration-[var(--paisa-transition-fast)] max-[860px]:min-w-0 max-[860px]:w-full {templateDrawerOpen ? '!translate-x-0' : ''}" aria-label="Template Definition">
-    <div class="flex items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] p-[var(--paisa-space-3)]">
-      <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
-        <i class="fas fa-code text-xs text-[var(--paisa-brand-primary)]"></i>
-        <span>Template Definition</span>
-        <Badge variant="primary" size="sm">Handlebars</Badge>
-      </div>
-      <div class="flex items-center gap-[var(--paisa-space-2)]">
-        {#if $templateEditorState.hasUnsavedChanges}
-          <Badge variant="warning" size="sm" dot>Unsaved</Badge>
-        {/if}
-        <IconButton variant="ghost" size="sm" ariaLabel="Close Template Definition" onclick={() => (templateDrawerOpen = false)}>
-          <i class="fas fa-xmark"></i>
-        </IconButton>
-      </div>
-    </div>
-    <div class="relative min-h-0 flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
-      <div class="template-editor h-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.85rem] [&_.cm-scroller]:h-full" bind:this={templateEditorDom}></div>
-    </div>
-    <div class="flex items-center justify-end gap-[var(--paisa-space-2)] border-t border-[var(--paisa-border-subtle)] p-[var(--paisa-space-3)]">
-      <Button variant="ghost" size="sm" onclick={() => (templateDrawerOpen = false)}>Cancel</Button>
-      <Button
-        variant="primary"
-        size="sm"
-        title={templateSaveTooltip}
-        disabled={templateSaveDisabled}
-        onclick={save}
-      >
-        {#snippet icon()}
-          <i class="fas fa-floppy-disk"></i>
-        {/snippet}
-        {selectedTemplateIsBuiltin ? "Save as Custom" : "Save"}
-      </Button>
-    </div>
-  </aside>
-</div>
+<!-- TEMPLATE EDITOR DRAWER -->
+<TemplateEditorDrawer
+  bind:open={templateDrawerOpen}
+  {selectedTemplate}
+  {templates}
+  columns={fileColumns}
+  onsave={handleSaveTemplate}
+  ondelete={handleDeleteTemplate}
+/>
 
 <!-- FILE SAVE MODAL -->
 <FileModal bind:open={showFileModal} onsave={saveToFile} />
