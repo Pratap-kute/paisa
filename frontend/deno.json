@@ -35,7 +35,7 @@
     "clean": "rm -rf .svelte-kit .vite node_modules/.vite ../backend/web/static coverage playwright-report test-results"
   },
   "imports": {
-    "$lib": "./src/lib",
+    "$lib/": "./src/lib/",
     "@codemirror/autocomplete": "npm:@codemirror/autocomplete@^6.4.2",
     "@codemirror/commands": "npm:@codemirror/commands@^6.3.3",
     "@codemirror/language": "npm:@codemirror/language@^6.10.0",
