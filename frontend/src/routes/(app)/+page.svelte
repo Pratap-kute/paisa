@@ -2,6 +2,7 @@
   import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
@@ -117,51 +118,52 @@ import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collect
   });
 </script>
 
-{#if isEmpty}
-  <div class="max-w-3xl mx-auto py-8">
-    <div class="p-6 sm:p-8 rounded-xl bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
-      <ZeroState item={false}>
-        <div class="text-left space-y-4">
-          <p class="text-sm text-[var(--paisa-muted-foreground)]">
-            Looks like you are new here, you can either get started or look at a demo setup
-          </p>
-          <div>
-            <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to get started</h2>
-            <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2">
-              <li>
-                Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and set your default currency and locale.
-              </li>
-              <li>
-                Go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and start adding transactions to your journal.
-              </li>
-            </ol>
+<Page width="analysis">
+  {#if isEmpty}
+    <div class="max-w-3xl mx-auto py-8">
+      <div class="p-6 sm:p-8 rounded-xl bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
+        <ZeroState item={false}>
+          <div class="text-left space-y-4">
+            <p class="text-sm text-[var(--paisa-muted-foreground)]">
+              Looks like you are new here, you can either get started or look at a demo setup
+            </p>
+            <div>
+              <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to get started</h2>
+              <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2">
+                <li>
+                  Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and set your default currency and locale.
+                </li>
+                <li>
+                  Go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and start adding transactions to your journal.
+                </li>
+              </ol>
+            </div>
+            <div>
+              <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to view a Demo</h2>
+              <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2 mb-4">
+                <li>
+                  Click the button below to load a demo setup. This will load a demo journal with relevant config.
+                </li>
+                <li>
+                  Once you are done playing around, you can go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and select all the content and delete them.
+                </li>
+                <li>
+                  Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and click the reset to defaults button.
+                </li>
+              </ol>
+              <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
+            </div>
           </div>
-          <div>
-            <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to view a Demo</h2>
-            <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2 mb-4">
-              <li>
-                Click the button below to load a demo setup. This will load a demo journal with relevant config.
-              </li>
-              <li>
-                Once you are done playing around, you can go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and select all the content and delete them.
-              </li>
-              <li>
-                Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and click the reset to defaults button.
-              </li>
-            </ol>
-            <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
-          </div>
-        </div>
-      </ZeroState>
+        </ZeroState>
+      </div>
     </div>
-  </div>
-{:else}
-  <div class="w-full flex flex-col space-y-6">
-    <!-- Header -->
-    <PageHeader
-      title="Dashboard"
-      description="Your financial position at a glance"
-    />
+  {:else}
+    <div class="w-full flex flex-col space-y-6">
+      <!-- Header -->
+      <PageHeader
+        title="Dashboard"
+        description="Your financial position at a glance"
+      />
 
     <!-- Row 1: Primary Financial Metric Strip -->
     {#if networth || isLoading}
@@ -435,3 +437,4 @@ import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collect
     </div>
   </div>
 {/if}
+</Page>

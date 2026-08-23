@@ -534,7 +534,7 @@
 
   <!-- Main Content -->
   <main class="paisa-overflow-x-auto ml-0 mt-14 flex min-h-[calc(100vh-3.5rem)] min-w-0 max-w-full flex-col overflow-x-auto bg-[var(--paisa-canvas)] lg:ml-64 lg:max-w-[calc(100vw-16rem)]">
-    <div class="mx-auto w-full min-w-0 max-w-[1600px] flex-1 p-4 lg:p-6">
+    <div class="flex w-full min-w-0 flex-1 flex-col p-4 lg:p-6">
       <Spinner>
         {@render children?.()}
       </Spinner>

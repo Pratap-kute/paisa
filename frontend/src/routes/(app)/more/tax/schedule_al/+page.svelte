@@ -3,6 +3,7 @@
     import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
+  import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
 import { minBy } from "$lib/core/collection";
@@ -28,11 +29,12 @@ import { minBy } from "$lib/core/collection";
   <title>Schedule AL — Paisa</title>
 </svelte:head>
 
-<div class="flex w-full min-w-0 max-w-full flex-col gap-5">
-  <PageHeader
-    title="Schedule AL"
-    description="Statement of Assets and Liabilities for Income Tax filing"
-  />
+<Page width="analysis">
+  <div class="flex w-full min-w-0 max-w-full flex-col gap-5">
+    <PageHeader
+      title="Schedule AL"
+      description="Statement of Assets and Liabilities for Income Tax filing"
+    />
 
   <div class="flex w-full min-w-0 flex-col gap-4">
     {#if scheduleAls}
@@ -96,3 +98,4 @@ import { minBy } from "$lib/core/collection";
     {/if}
   </div>
 </div>
+</Page>
