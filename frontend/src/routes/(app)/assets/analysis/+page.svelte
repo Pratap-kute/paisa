@@ -1,12 +1,16 @@
 <script lang="ts">
   import {
+    buildFlattenedHoldings,
     buildPortfolioComparison,
-    buildPortfolioHierarchy,
+    buildTopHoldingsComparison,
     filterCommodityBreakdowns,
   } from "$lib/charts/hierarchy_data";
-  import { ajax, type PortfolioAggregate } from "$lib/core/utils";
+  import COLORS from "$lib/core/colors";
+  import { ajax, formatPercentage, type PortfolioAggregate } from "$lib/core/utils";
+  import { nonZeroCurrency } from "$lib/tables/formatters";
   import _ from "lodash";
   import { onMount } from "svelte";
+  import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
@@ -14,7 +18,8 @@
   import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
+  import Table from "$lib/components/ui/Table.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);
@@ -24,14 +29,99 @@
   let industry: PortfolioAggregate[] = $state([]);
   let isEmpty = $state(false);
   let isLoading = $state(true);
+  let searchHoldingQuery = $state("");
+
   let filteredSecurityType = $derived(filterCommodityBreakdowns(security_type, selectedCommodities));
   let filteredRating = $derived(filterCommodityBreakdowns(rating, selectedCommodities));
   let filteredIndustry = $derived(filterCommodityBreakdowns(industry, selectedCommodities));
   let filteredPortfolio = $derived(filterCommodityBreakdowns(name_and_security_type, selectedCommodities));
+
   let securityTypeData = $derived(buildPortfolioComparison(filteredSecurityType));
   let ratingData = $derived(buildPortfolioComparison(filteredRating));
-  let industryData = $derived(buildPortfolioHierarchy(filteredIndustry));
-  let portfolioData = $derived(buildPortfolioHierarchy(filteredPortfolio));
+  let industryData = $derived(buildPortfolioComparison(filteredIndustry));
+
+  let flattenedHoldings = $derived(buildFlattenedHoldings(filteredPortfolio));
+  let topHoldingsData = $derived(buildTopHoldingsComparison(flattenedHoldings, 10));
+
+  let filteredHoldingRows = $derived.by(() => {
+    if (!searchHoldingQuery.trim()) return flattenedHoldings;
+    const q = searchHoldingQuery.toLowerCase();
+    return flattenedHoldings.filter(
+      (h) =>
+        h.security_name.toLowerCase().includes(q) ||
+        h.security_type.toLowerCase().includes(q) ||
+        h.commodities.toLowerCase().includes(q),
+    );
+  });
+
+  const holdingColumns = $derived.by((): ColumnDefinition[] => {
+    const maxPercent = _.max(flattenedHoldings.map((h) => h.percentage)) || 100;
+    return [
+      {
+        title: "#",
+        field: "rank",
+        width: 56,
+        minWidth: 48,
+        maxWidth: 64,
+        hozAlign: "center",
+        headerHozAlign: "center",
+      },
+      {
+        title: "Security Name",
+        field: "security_name",
+        minWidth: 220,
+        widthGrow: 2,
+        headerHozAlign: "left",
+      },
+      {
+        title: "Type",
+        field: "security_type",
+        width: 100,
+        minWidth: 90,
+        headerHozAlign: "left",
+      },
+      {
+        title: "Funds",
+        field: "commodities",
+        minWidth: 140,
+        widthGrow: 1,
+        headerHozAlign: "left",
+      },
+      {
+        title: "Market Value",
+        field: "amount",
+        width: 140,
+        minWidth: 120,
+        hozAlign: "right",
+        headerHozAlign: "right",
+        formatter: nonZeroCurrency,
+      },
+      {
+        title: "Weight",
+        field: "percentage",
+        width: 90,
+        minWidth: 80,
+        hozAlign: "right",
+        headerHozAlign: "right",
+        formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
+      },
+      {
+        title: "Share",
+        field: "percentage",
+        minWidth: 140,
+        widthGrow: 2,
+        hozAlign: "left",
+        headerHozAlign: "left",
+        headerSort: false,
+        formatter: "progress",
+        formatterParams: {
+          color: COLORS.assets,
+          min: 0,
+          max: maxPercent,
+        } as ProgressBarParams,
+      },
+    ];
+  });
 
   let hasFilteredData = $derived(
     !isEmpty &&
@@ -66,7 +156,6 @@
       isLoading = false;
     }
   });
-
 </script>
 
 <svelte:head>
@@ -134,15 +223,30 @@
     </ResponsiveGrid>
 
     <Section title="Industry" subtitle="Sector exposure breakdown">
-      <ChartFrame height="tall">
-        <FinancialHierarchyChart data={{ roots: industryData, mode: "treemap" }} ariaLabel="Portfolio industry and security hierarchy" testId="portfolio-industry-echart" />
+      <ChartFrame height="compact" rows={Math.max(4, industryData.points.length)}>
+        <ComparisonBarChart data={industryData} ariaLabel="Portfolio by industry sector" testId="portfolio-industry-echart" />
       </ChartFrame>
     </Section>
 
-    <Section title="Holdings" subtitle="Individual security composition">
-      <ChartFrame height="tall">
-        <FinancialHierarchyChart data={{ roots: portfolioData, mode: "treemap" }} ariaLabel="Portfolio holdings hierarchy" testId="portfolio-holdings-echart" />
+    <Section title="Top Holdings" subtitle="Top 10 individual securities by market value">
+      <ChartFrame height="compact" rows={Math.max(4, topHoldingsData.points.length)}>
+        <ComparisonBarChart data={topHoldingsData} ariaLabel="Top portfolio holdings" testId="portfolio-top-holdings-echart" />
       </ChartFrame>
+    </Section>
+
+    <Section title="All Holdings" subtitle="Complete searchable security composition">
+      {#snippet action()}
+        <div class="w-64">
+          <Input
+            type="search"
+            placeholder="Search securities or funds..."
+            bind:value={searchHoldingQuery}
+          />
+        </div>
+      {/snippet}
+      <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+        <Table data={filteredHoldingRows} columns={holdingColumns} options={{ layout: "fitDataFill" }} />
+      </div>
     </Section>
   {/if}
 </Page>

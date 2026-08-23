@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { buildComparisonBarOption } from "$lib/charts/echarts/bar_comparison";
+import { buildPortfolioDonutOption } from "$lib/charts/echarts/donut";
 import { buildFinancialHierarchyOption } from "$lib/charts/echarts/hierarchy";
+import {
+  buildAllocationCategoryComparison,
+  buildFlattenedHoldings,
+  buildTopHoldingsComparison,
+} from "$lib/charts/hierarchy_data";
 import { buildPeriodSeriesOption } from "$lib/charts/echarts/period_series";
 import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
 
@@ -143,5 +149,119 @@ describe("chart option contracts", () => {
     expect(technology.children[0].itemStyle.color).toBe(
       technology.itemStyle.color,
     );
+  });
+
+  it("builds a segmented donut option with distinct category colors and tooltips", () => {
+    const option = buildPortfolioDonutOption([
+      { name: "Financial Services", value: 50000, percentage: 50 },
+      { name: "Technology", value: 50000, percentage: 50 },
+    ], { theme }) as {
+      baseOption: {
+        series: Array<{
+          type: string;
+          data: Array<{ name: string; value: number; percentage: number }>;
+        }>;
+      };
+    };
+
+    expect(option.baseOption.series[0].type).toBe("pie");
+    expect(option.baseOption.series[0].data.length).toBe(2);
+    expect(option.baseOption.series[0].data[0].name).toBe("Financial Services");
+  });
+
+  it("builds a sunburst hierarchy option for nested holdings", () => {
+    const option = buildFinancialHierarchyOption({
+      mode: "sunburst",
+      roots: [
+        {
+          id: "tech",
+          label: "Technology",
+          value: 100,
+          children: [
+            { id: "infy", label: "Infosys", value: 60 },
+            { id: "tcs", label: "TCS", value: 40 },
+          ],
+        },
+      ],
+    }, { theme }) as {
+      baseOption: {
+        series: Array<{
+          type: string;
+          data: Array<{
+            name: string;
+            children: Array<{ name: string }>;
+          }>;
+        }>;
+      };
+    };
+
+    expect(option.baseOption.series[0].type).toBe("sunburst");
+    expect(option.baseOption.series[0].data[0].children.length).toBe(2);
+  });
+
+  it("flattens and ranks portfolio holdings across multiple commodities", () => {
+    const holdings = buildFlattenedHoldings([
+      {
+        id: "equity",
+        group: "Equity",
+        sub_group: "Equity",
+        amount: 150000,
+        percentage: 75,
+        breakdowns: [
+          {
+            commodity_name: "NIFTY",
+            security_name: "Reliance Industries",
+            security_type: "Equity",
+            amount: 100000,
+            percentage: 50,
+          },
+          {
+            commodity_name: "PPFAS",
+            security_name: "Reliance Industries",
+            security_type: "Equity",
+            amount: 50000,
+            percentage: 25,
+          },
+        ],
+      },
+      {
+        id: "debt",
+        group: "Debt",
+        sub_group: "Debt",
+        amount: 50000,
+        percentage: 25,
+        breakdowns: [
+          {
+            commodity_name: "DEBT_FUND",
+            security_name: "Govt of India 2033",
+            security_type: "Debt",
+            amount: 50000,
+            percentage: 25,
+          },
+        ],
+      },
+    ]);
+
+    expect(holdings.length).toBe(2);
+    expect(holdings[0].rank).toBe(1);
+    expect(holdings[0].security_name).toBe("Reliance Industries");
+    expect(holdings[0].amount).toBe(150000);
+    expect(holdings[0].commodities).toBe("NIFTY, PPFAS");
+    expect(holdings[0].percentage).toBe(75);
+
+    const topComparison = buildTopHoldingsComparison(holdings, 1);
+    expect(topComparison.points.length).toBe(1);
+    expect(topComparison.points[0].label).toBe("Reliance Industries");
+  });
+
+  it("builds clean comparison bars for allocation categories", () => {
+    const comparison = buildAllocationCategoryComparison([
+      { id: "equity", label: "Equity", value: 100000, percentage: 66.67 },
+      { id: "debt", label: "Debt", value: 50000, percentage: 33.33 },
+    ]);
+
+    expect(comparison.points.length).toBe(2);
+    expect(comparison.points[0].label).toBe("Equity");
+    expect(comparison.points[0].value).toBe(100000);
   });
 });

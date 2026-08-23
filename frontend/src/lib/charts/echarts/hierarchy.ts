@@ -9,7 +9,7 @@ import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
 
 export interface FinancialHierarchyChartData {
   roots: FinancialHierarchyNode[];
-  mode: "treemap";
+  mode: "treemap" | "sunburst";
 }
 
 function mapNode(
@@ -82,39 +82,94 @@ function buildFinancialHierarchyLayout(
       formatter: tooltip,
     },
   };
-  return {
-    ...common,
-    series: [{
-      type: "treemap",
-      data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
-      roam: false,
-      nodeClick: false,
-      breadcrumb: { show: false },
-      visibleMin: 2,
-      label: {
-        show: true,
-        color: theme?.textColor,
-        overflow: "truncate",
-        formatter: "{b}",
-      },
-      upperLabel: { show: true, height: 24, color: theme?.textColor },
-      itemStyle: {
-        borderColor: theme?.surfaceColor,
-        borderWidth: 2,
-        gapWidth: 2,
-      },
-      levels: [
-        { itemStyle: { borderWidth: 0, gapWidth: 3 } },
+
+  if (data.mode === "sunburst") {
+    return {
+      ...common,
+      series: [
         {
-          upperLabel: { show: true },
-          itemStyle: { borderWidth: 2, gapWidth: 2 },
-        },
-        {
-          label: { show: !mobile },
-          itemStyle: { borderWidth: 1, gapWidth: 1 },
+          type: "sunburst",
+          data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
+          radius: mobile ? ["12%", "88%"] : ["16%", "92%"],
+          sort: undefined,
+          nodeClick: false,
+          emphasis: {
+            focus: "ancestor",
+          },
+          levels: [
+            {},
+            {
+              r0: "15%",
+              r: "48%",
+              itemStyle: {
+                borderWidth: 2,
+                borderColor: theme?.surfaceColor ?? "#ffffff",
+                borderRadius: 4,
+              },
+              label: {
+                rotate: "tangential",
+                minAngle: 12,
+                color: theme?.textColor,
+                fontSize: mobile ? 10 : 12,
+                fontWeight: 600,
+              },
+            },
+            {
+              r0: "50%",
+              r: "90%",
+              itemStyle: {
+                borderWidth: 1.5,
+                borderColor: theme?.surfaceColor ?? "#ffffff",
+                borderRadius: 2,
+              },
+              label: {
+                rotate: "radial",
+                minAngle: 6,
+                color: theme?.textColor,
+                fontSize: mobile ? 9 : 11,
+              },
+            },
+          ],
         },
       ],
-    }],
+    };
+  }
+
+  return {
+    ...common,
+    series: [
+      {
+        type: "treemap",
+        data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
+        roam: false,
+        nodeClick: false,
+        breadcrumb: { show: false },
+        visibleMin: 2,
+        label: {
+          show: true,
+          color: theme?.textColor,
+          overflow: "truncate",
+          formatter: "{b}",
+        },
+        upperLabel: { show: true, height: 24, color: theme?.textColor },
+        itemStyle: {
+          borderColor: theme?.surfaceColor,
+          borderWidth: 2,
+          gapWidth: 2,
+        },
+        levels: [
+          { itemStyle: { borderWidth: 0, gapWidth: 3 } },
+          {
+            upperLabel: { show: true },
+            itemStyle: { borderWidth: 2, gapWidth: 2 },
+          },
+          {
+            label: { show: !mobile },
+            itemStyle: { borderWidth: 1, gapWidth: 1 },
+          },
+        ],
+      },
+    ],
   };
 }
 

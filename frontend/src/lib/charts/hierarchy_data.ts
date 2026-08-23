@@ -141,3 +141,110 @@ export function buildPortfolioHierarchy(
     })),
   }));
 }
+
+export interface PortfolioHoldingRow {
+  rank: number;
+  security_name: string;
+  security_type: string;
+  commodities: string;
+  amount: number;
+  percentage: number;
+}
+
+export function buildFlattenedHoldings(
+  aggregates: PortfolioAggregate[],
+): PortfolioHoldingRow[] {
+  const map = new Map<string, {
+    security_name: string;
+    security_type: string;
+    commodities: Set<string>;
+    amount: number;
+  }>();
+
+  for (const agg of aggregates) {
+    for (const b of agg.breakdowns) {
+      const name = b.security_name || b.commodity_name || "Unknown";
+      const existing = map.get(name);
+      if (existing) {
+        existing.amount += b.amount;
+        existing.commodities.add(b.commodity_name);
+        if (!existing.security_type || existing.security_type === "unknown") {
+          existing.security_type = b.security_type || agg.group;
+        }
+      } else {
+        map.set(name, {
+          security_name: name,
+          security_type: b.security_type || agg.group || "unknown",
+          commodities: new Set([b.commodity_name]),
+          amount: b.amount,
+        });
+      }
+    }
+  }
+
+  const sorted = Array.from(map.values())
+    .filter((item) => item.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+
+  const grandTotal = _.sumBy(sorted, "amount");
+
+  return sorted.map((item, index) => ({
+    rank: index + 1,
+    security_name: item.security_name,
+    security_type: item.security_type,
+    commodities: Array.from(item.commodities).filter(Boolean).join(", "),
+    amount: item.amount,
+    percentage: grandTotal > 0 ? (item.amount / grandTotal) * 100 : 0,
+  }));
+}
+
+export function buildTopHoldingsComparison(
+  holdings: PortfolioHoldingRow[],
+  limit = 10,
+): ComparisonBarChartData {
+  const topHoldings = holdings.slice(0, limit);
+  return {
+    valueFormat: "currency",
+    valueLabel: "Market value",
+    sort: "input",
+    points: topHoldings.map((h) => ({
+      key: h.security_name,
+      label: h.security_name,
+      value: h.amount,
+      secondaryValue: h.percentage,
+      secondaryLabel: "Share %",
+      categoryKey: h.security_type,
+      tooltipRows: [
+        { label: "Market value", value: h.amount, format: "currency" },
+        { label: "Share", value: h.percentage / 100, format: "percentage" },
+      ],
+    })),
+  };
+}
+
+export function buildAllocationCategoryComparison(
+  roots: FinancialHierarchyNode[],
+): ComparisonBarChartData {
+  const sorted = [...roots].sort((a, b) => b.value - a.value);
+  return {
+    valueFormat: "currency",
+    valueLabel: "Market value",
+    sort: "input",
+    points: sorted.map((root) => ({
+      key: root.id,
+      label: root.label,
+      value: root.value,
+      secondaryValue: root.percentage ?? 0,
+      secondaryLabel: "Share %",
+      categoryKey: root.categoryKey ?? root.label,
+      tooltipRows: [
+        { label: "Market value", value: root.value, format: "currency" },
+        {
+          label: "Share",
+          value: (root.percentage ?? 0) / 100,
+          format: "percentage",
+        },
+      ],
+    })),
+  };
+}

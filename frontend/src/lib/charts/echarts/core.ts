@@ -2,8 +2,10 @@ import {
   BarChart,
   GraphChart,
   LineChart,
+  PieChart,
   SankeyChart,
   ScatterChart,
+  SunburstChart,
   TreemapChart,
 } from "echarts/charts";
 import {
@@ -23,8 +25,10 @@ use([
   LegendComponent,
   LineChart,
   MarkLineComponent,
+  PieChart,
   SankeyChart,
   ScatterChart,
+  SunburstChart,
   TooltipComponent,
   TreemapChart,
 ]);

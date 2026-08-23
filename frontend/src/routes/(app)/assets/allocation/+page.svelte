@@ -1,6 +1,9 @@
 <script lang="ts">
   import { buildAllocationTimelineSeries } from "$lib/charts/mixed_period_data";
-  import { buildAllocationHierarchy } from "$lib/charts/hierarchy_data";
+  import {
+    buildAllocationCategoryComparison,
+    buildAllocationHierarchy,
+  } from "$lib/charts/hierarchy_data";
   import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
   import COLORS from "$lib/core/colors";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -22,7 +25,6 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let allocationTargets: AllocationTarget[] = $state([]);
@@ -36,6 +38,7 @@
   let hasAllocationData = $derived(!_.isEmpty(aggregates));
   let allocationTargetData = $derived(buildAllocationTargetComparison(allocationTargets));
   let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
+  let allocationCategoryData = $derived(buildAllocationCategoryComparison(allocationHierarchy));
   let allocationTimelineData = $derived(buildAllocationTimelineSeries(allocationTimeline));
 
   const columns: ColumnDefinition[] = [
@@ -150,22 +153,12 @@
     </Section>
 
     {#if hasAllocationData}
-      <Section title="Allocation by category" subtitle="Nested account groups and categories">
-        <ChartFrame height="tall">
-          <FinancialHierarchyChart
-            data={{ roots: allocationHierarchy, mode: "treemap" }}
-            ariaLabel="Asset allocation account hierarchy"
+      <Section title="Allocation by Category" subtitle="Asset class distribution">
+        <ChartFrame height="compact" rows={Math.max(4, allocationCategoryData.points.length)}>
+          <ComparisonBarChart
+            data={allocationCategoryData}
+            ariaLabel="Asset allocation by category"
             testId="allocation-category-echart"
-          />
-        </ChartFrame>
-      </Section>
-
-      <Section title="Allocation by value" subtitle="Treemap by market value">
-        <ChartFrame height="tall">
-          <FinancialHierarchyChart
-            data={{ roots: allocationHierarchy, mode: "treemap" }}
-            ariaLabel="Asset allocation by market value"
-            testId="allocation-value-echart"
           />
         </ChartFrame>
       </Section>
