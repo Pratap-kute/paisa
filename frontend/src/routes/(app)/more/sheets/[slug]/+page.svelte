@@ -271,177 +271,194 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
     {/snippet}
 
     {#snippet actions()}
-      {#if $sheetEditorState.hasUnsavedChanges}
-        <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
-      {/if}
-      <Badge variant="neutral" size="sm">
-        {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
-      </Badge>
-      {#if $sheetEditorState.errors.length > 0}
-        <Badge variant="danger" size="sm">
-          {$sheetEditorState.errors.length} error(s)
+      <div class="flex items-center gap-2">
+        {#if $sheetEditorState.hasUnsavedChanges}
+          <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
+        {/if}
+        <Badge variant="neutral" size="sm">
+          {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
         </Badge>
-      {/if}
+        {#if $sheetEditorState.errors.length > 0}
+          <button
+            type="button"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-danger-light)] px-2.5 py-0.5 text-xs font-semibold text-[var(--paisa-danger)] transition-colors hover:bg-[var(--paisa-danger)] hover:text-[var(--paisa-text-inverse)]"
+            onclick={() => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+            title="Click to jump to error"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-danger)]"></span>
+            <span>{$sheetEditorState.errors.length} error(s)</span>
+          </button>
+        {/if}
+      </div>
     {/snippet}
   </PageHeader>
 
   <Section>
-    <Card
-      padding="sm"
-      variant="flat"
-      class="mb-4 flex w-full flex-wrap items-center gap-3 overflow-x-auto"
-    >
-      <div class="flex flex-wrap items-center gap-2">
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={$sheetEditorState.hasUnsavedChanges}
-          onclick={() => openCreateModal()}
-        >
-          {#snippet icon()}
-            <i class="fas fa-file-circle-plus"></i>
-          {/snippet}
-          <span>Create</span>
-        </Button>
-
-        <Button
-          variant={$sheetEditorState.hasUnsavedChanges ? "primary" : "secondary"}
-          size="sm"
-          disabled={$sheetEditorState.hasUnsavedChanges === false}
-          onclick={() => save()}
-          title="Save sheet (Ctrl+S)"
-        >
-          {#snippet icon()}
-            <i class="fas fa-floppy-disk"></i>
-          {/snippet}
-          <span>Save</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={$sheetEditorState.undoDepth === 0}
-          onclick={undoEdit}
-          title="Undo edit"
-        >
-          {#snippet icon()}
-            <i class="fas fa-arrow-left"></i>
-          {/snippet}
-          <span>Undo</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={$sheetEditorState.redoDepth === 0}
-          onclick={redoEdit}
-          title="Redo edit"
-        >
-          <span>Redo</span>
-          {#snippet icon()}
-            <i class="fas fa-arrow-right"></i>
-          {/snippet}
-        </Button>
-      </div>
-
-      {#if !isEmpty(selectedFile?.versions)}
-        <div class="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!selectedVersion}
-            onclick={() => revert(selectedVersion)}
+    <!-- Full-Width IDE Container -->
+    <div class="grid h-[calc(100vh-13.5rem)] min-h-[520px] w-full grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <!-- File Tree Sidebar -->
+      <aside class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden">
+        <div class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2">
+          <span class="text-[0.725rem] font-bold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            <i class="fa-regular fa-folder-open mr-1"></i>
+            SHEETS
+          </span>
+          <Badge variant="neutral" size="sm" rounded>{values(filesMap).length}</Badge>
+          <button
+            type="button"
+            class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
+            title="Create new sheet"
+            onclick={() => openCreateModal()}
           >
-            {#snippet icon()}
-              <i class="fas fa-clock-rotate-left"></i>
-            {/snippet}
-            <span>Revert</span>
-          </Button>
-
-          <Select bind:value={selectedVersion} size="sm">
-            {#each selectedFile.versions as version}
-              <option value={version}>{version}</option>
-            {/each}
-          </Select>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            ariaLabel="Delete backups"
-            onclick={() => deleteBackups()}
-          >
-            {#snippet icon()}
-              <i class="fas fa-trash-can"></i>
-            {/snippet}
-          </Button>
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
-      {/if}
-
-      {#if $sheetEditorState.errors.length > 0}
-        <Button
-          variant="ghost"
-          size="sm"
-          onclick={() =>
-            moveToLine(editor, $sheetEditorState.errors[0].line_from)}
-        >
-          <Badge variant="danger" size="sm">
-            {$sheetEditorState.errors.length} error(s) found
-          </Badge>
-        </Button>
-      {/if}
-    </Card>
-
-    <div
-      class="grid w-full grid-cols-1 gap-4 lg:grid-cols-[minmax(180px,1fr)_minmax(0,4fr)]"
-    >
-      <aside class="min-w-0">
-        <Card padding="sm" variant="flat" class="h-full max-h-[calc(100vh-220px)] overflow-y-auto px-2">
+        <div class="relative flex-1 overflow-y-auto p-2">
           <FileTree
             path=""
             on:select={(e) => selectFile(e.detail)}
             files={buildDirectoryTree(values(filesMap))}
-            selectedFileName={selectedFile?.name}
+            selectedFileName={selectedFile?.name ?? ""}
             hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
           />
-        </Card>
+        </div>
       </aside>
 
-      <div class="min-w-0 overflow-x-auto">
-        <div class="flex min-w-0">
-          <Card
-            padding="none"
-            variant="flat"
-            class="mb-0 min-w-[min(75%,24rem)] max-w-[min(75%,48rem)] rounded-r-none border-r-0 py-0 pr-1"
+      <!-- Main Editor & Live Results Pane -->
+      <main class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]">
+        <!-- Integrated Toolbar Header -->
+        <div class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-bg)] px-3 py-1.5">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 font-mono text-xs font-semibold text-[var(--paisa-text-primary)]">
+              <i class="fa-regular fa-file-lines text-[var(--paisa-brand-primary)]"></i>
+              <span class="max-w-[240px] truncate">{selectedFile?.name || "Sheet"}</span>
+              {#if $sheetEditorState.hasUnsavedChanges}
+                <span class="text-[0.75rem] leading-none text-[var(--paisa-warning)]" title="Unsaved changes">●</span>
+              {/if}
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <Button
+              variant={$sheetEditorState.hasUnsavedChanges ? "primary" : "secondary"}
+              size="xs"
+              disabled={$sheetEditorState.hasUnsavedChanges === false}
+              onclick={() => save()}
+              title="Save sheet (Ctrl+S)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-floppy-disk"></i>
+              {/snippet}
+              <span>Save</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.undoDepth === 0}
+              onclick={undoEdit}
+              title="Undo edit (Ctrl+Z)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-arrow-rotate-left"></i>
+              {/snippet}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.redoDepth === 0}
+              onclick={redoEdit}
+              title="Redo edit (Ctrl+Y)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-arrow-rotate-right"></i>
+              {/snippet}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.hasUnsavedChanges}
+              onclick={() => openCreateModal()}
+              title="Create new sheet file"
+            >
+              {#snippet icon()}
+                <i class="fas fa-plus"></i>
+              {/snippet}
+              <span>New</span>
+            </Button>
+
+            {#if !isEmpty(selectedFile?.versions)}
+              <div class="ml-1 flex items-center gap-1 border-l border-[var(--paisa-border-default)] pl-2">
+                <i class="fas fa-clock-rotate-left text-[0.75rem] text-[var(--paisa-text-muted)]" title="Backup versions"></i>
+                <Select bind:value={selectedVersion} size="sm" class="max-w-[150px] font-mono text-xs">
+                  <option value="" disabled>Select backup...</option>
+                  {#each selectedFile?.versions ?? [] as version}
+                    <option value={version}>{version}</option>
+                  {/each}
+                </Select>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  disabled={!selectedVersion}
+                  onclick={() => {
+                    if (selectedVersion) revert(selectedVersion);
+                  }}
+                  title="Revert to backup version"
+                >
+                  Revert
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  ariaLabel="Clear all backup versions"
+                  title="Delete backup history"
+                  onclick={() => deleteBackups()}
+                >
+                  {#snippet icon()}
+                    <i class="fas fa-trash-can"></i>
+                  {/snippet}
+                </Button>
+              </div>
+            {/if}
+          </div>
+        </div>
+
+        <!-- Split Editor & Results Workspace -->
+        <div class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--paisa-surface)]">
+          <!-- CodeMirror Editor Pane -->
+          <div
+            class="relative flex-1 min-w-0 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.sheet-editor]:h-full"
           >
-            <div class="sheet-editor" bind:this={editorDom}></div>
-          </Card>
-          <Card
-            padding="none"
-            variant="flat"
-            class="sheet-result mb-0 w-[min(25%,200px)] rounded-l-none py-1 text-right"
+            <div class="sheet-editor h-full" bind:this={editorDom}></div>
+          </div>
+
+          <!-- Live Calculated Evaluation Results Pane -->
+          <div
+            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
           >
             {#each $sheetEditorState.results as result, i}
               <div
-                class={i + 1 === $sheetEditorState.currentLine
-                  ? "bg-[var(--paisa-surface-hover)] font-semibold text-[var(--paisa-foreground)]"
-                  : ""}
-                style="padding: 0 0.5rem"
+                class="px-3 leading-[1.4] {i + 1 === $sheetEditorState.currentLine
+                  ? 'bg-[var(--paisa-surface-hover)] font-bold text-[var(--paisa-text-primary)]'
+                  : 'text-[var(--paisa-text-secondary)]'}"
               >
                 <div
                   title={result.result}
-                  class="paisa-truncate m-0 p-0 text-[0.9285714285714286rem] leading-[1.4] {result.error
-                    ? 'text-[var(--paisa-danger)]'
+                  class="paisa-truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
+                    ? 'font-bold text-[var(--paisa-danger)]'
                     : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
-                    ? 'font-bold'
+                    ? 'font-bold text-[var(--paisa-text-primary)]'
                     : ''} {result.underline ? 'underline' : ''}"
                 >
                   &nbsp;{result.result}
                 </div>
               </div>
             {/each}
-          </Card>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   </Section>
 </Page>
