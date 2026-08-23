@@ -359,7 +359,6 @@
               <Button
                 variant="primary"
                 size="sm"
-                aria-label="Save"
                 loading={isLoading}
                 disabled={!hasChanges}
                 class="max-lg:w-full max-lg:justify-center"
