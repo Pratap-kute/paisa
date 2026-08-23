@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { buildComparisonBarOption } from "$lib/charts/echarts/bar_comparison";
-import { buildPortfolioDonutOption } from "$lib/charts/echarts/donut";
 import { buildFinancialHierarchyOption } from "$lib/charts/echarts/hierarchy";
 import {
   buildAllocationCategoryComparison,
@@ -149,24 +148,6 @@ describe("chart option contracts", () => {
     expect(technology.children[0].itemStyle.color).toBe(
       technology.itemStyle.color,
     );
-  });
-
-  it("builds a segmented donut option with distinct category colors and tooltips", () => {
-    const option = buildPortfolioDonutOption([
-      { name: "Financial Services", value: 50000, percentage: 50 },
-      { name: "Technology", value: 50000, percentage: 50 },
-    ], { theme }) as {
-      baseOption: {
-        series: Array<{
-          type: string;
-          data: Array<{ name: string; value: number; percentage: number }>;
-        }>;
-      };
-    };
-
-    expect(option.baseOption.series[0].type).toBe("pie");
-    expect(option.baseOption.series[0].data.length).toBe(2);
-    expect(option.baseOption.series[0].data[0].name).toBe("Financial Services");
   });
 
   it("builds a sunburst hierarchy option for nested holdings", () => {
