@@ -36,6 +36,7 @@ export interface PeriodSeriesDefinition {
   dashed?: boolean;
   smooth?: boolean;
   showSymbol?: boolean;
+  symbolSize?: number;
   areaOpacity?: number;
   positiveColor?: string;
   negativeColor?: string;
@@ -231,6 +232,9 @@ function buildPeriodSeriesLayout(
         return value;
       });
       const bar = series.intent === "bar" || series.intent === "stacked-bar";
+      const defaultShowSymbol = mobile || data.points.length > 25
+        ? false
+        : !bar;
       return {
         type: bar ? "bar" : "line",
         name: series.label,
@@ -238,7 +242,8 @@ function buildPeriodSeriesLayout(
         stack: series.stack,
         smooth: series.smooth ?? false,
         connectNulls: false,
-        showSymbol: series.showSymbol ?? (mobile ? false : !bar),
+        showSymbol: series.showSymbol ?? defaultShowSymbol,
+        symbolSize: series.symbolSize ?? 5,
         barMaxWidth: bar ? (mobile ? 36 : 64) : undefined,
         itemStyle: {
           color: (params: { value?: unknown }) => {
