@@ -260,14 +260,14 @@
     {#if schema && config && activeSection && activeSchema}
       <div class="flex flex-col gap-4">
         <!-- Horizontal Section Navigation Tabs -->
-        <div class="w-full overflow-x-auto pb-1">
+        <nav class="w-full overflow-x-auto pb-1" aria-label="Configuration sections">
           <Tabs
             bind:value={activeId}
             options={tabOptions}
             variant="boxed"
             size="sm"
           />
-        </div>
+        </nav>
 
         <!-- Full-Width Configuration Form Card -->
         <Card padding="none" class="w-full overflow-hidden">
@@ -359,6 +359,7 @@
               <Button
                 variant="primary"
                 size="sm"
+                aria-label="Save"
                 loading={isLoading}
                 disabled={!hasChanges}
                 class="max-lg:w-full max-lg:justify-center"

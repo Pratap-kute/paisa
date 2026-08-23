@@ -257,7 +257,7 @@ test("config page loads configuration sections", async ({ page }) => {
   await expect(
     page.getByRole("navigation", { name: "Configuration sections" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /save/i })).toBeDisabled();
 });
 
 test("config page saves changes", async ({ page }) => {
