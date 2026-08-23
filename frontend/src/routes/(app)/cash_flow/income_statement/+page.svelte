@@ -200,7 +200,7 @@ import { keys, maxBy, minBy, some, sortBy, values } from "$lib/core/collection";
         secondary={incomeStatement ? formatPercentage(diffPercent, 2) : undefined}
         status={diff >= 0 ? "positive" : "negative"}
         loading={isLoading}
-        class="[&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal"
+        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal"
       />
     </MetricStrip>
   {/if}

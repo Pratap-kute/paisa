@@ -67,6 +67,18 @@ describe("financial hierarchy adapters", () => {
     expect(portfolio[0].breakdowns).toHaveLength(2);
   });
 
+  it("filters reactive proxy arrays without structured-clone errors", () => {
+    const reactivePortfolio = new Proxy(portfolio, {});
+    const filtered = filterCommodityBreakdowns(reactivePortfolio, ["FUND-A"]);
+
+    expect(filtered[0]).toMatchObject({ amount: 60, percentage: 100 });
+    expect(filtered[0].breakdowns[0]).toMatchObject({
+      commodity_name: "FUND-A",
+      percentage: 100,
+    });
+    expect(portfolio[0].breakdowns).toHaveLength(2);
+  });
+
   it("creates flat comparison and parent/commodity hierarchy contracts", () => {
     const comparison = buildPortfolioComparison(portfolio);
     expect(comparison.points[0]).toMatchObject({

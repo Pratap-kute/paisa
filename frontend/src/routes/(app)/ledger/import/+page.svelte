@@ -494,7 +494,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 
 <Page
   width="fluid"
-  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&paisa-page-content]:h-full [&paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
+  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&_.paisa-page-content]:h-full [&_.paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
 >
   <div class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
     <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
@@ -523,7 +523,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 
         <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
           <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
-            <div class="min-w-[180px] max-w-[260px] [&svelte-select]:min-h-8 [&svelte-select]:rounded-[var(--paisa-radius-sm)] [&svelte-select]:text-xs">
+            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:text-xs">
               <Select
                 items={templateItems}
                 value={selectedTemplateOption}
@@ -601,7 +601,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 
     {#if isEmpty(data) && !loading}
       <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
-        <div class="w-full max-w-[540px] [&paisa-file-dropzone]:w-full [&paisa-file-dropzone]:cursor-pointer [&paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&paisa-file-dropzone]:border-2 [&paisa-file-dropzone]:border-dashed [&paisa-file-dropzone]:border-[var(--paisa-border-default)] [&paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&paisa-file-dropzone]:transition-all [&paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
+        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-[var(--paisa-border-default)] [&_.paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&_.paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
           <FileDropzone
             multiple={false}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
@@ -734,7 +734,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
                   <tbody>
                     {#each data as row, ri}
                       <tr
-                        class="cursor-pointer hover:[&paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
+                        class="cursor-pointer hover:[&_.paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&_.paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&_.paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&_.paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&_.paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
                         onclick={() => selectSourceRow(ri)}
                       >
                         <th class="paisa-sheet-row-header sticky left-0 z-[5] w-[88px] min-w-[88px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center align-middle font-semibold text-[var(--paisa-table-header-text)]">
@@ -821,7 +821,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
           {/if}
 
           <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
-            <div class="preview-editor h-full w-full [&cm-editor]:h-full [&cm-editor]:min-h-full [&cm-editor]:font-mono [&cm-editor]:text-[0.8125rem] [&cm-scroller]:h-full [&cm-scroller]:overflow-auto" use:initPreviewEditor></div>
+            <div class="preview-editor h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.8125rem] [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto" use:initPreviewEditor></div>
             {#if isEmpty(preview) && isEmpty(data)}
               <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-[var(--paisa-text-muted)]">
                 <i class="fas fa-arrow-left fa-2x mb-2 text-[var(--paisa-text-muted)]"></i>

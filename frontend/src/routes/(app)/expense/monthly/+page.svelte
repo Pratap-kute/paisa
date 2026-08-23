@@ -212,7 +212,7 @@ import { isEmpty, map, sortBy } from "$lib/core/collection";
         value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="[&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal [&paisa4-metric-value]:leading-[1.15]"
+        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -233,7 +233,7 @@ import { isEmpty, map, sortBy } from "$lib/core/collection";
     >
       <ChartFrame
         height="compact"
-        class="overflow-visible [&paisa-chart-frame-body]:overflow-visible"
+        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, selectedMonthExpenses.length || 4)}
         empty={!hasSelectedMonthExpenses}
         emptyMessage="No expenses recorded for {formattedCurrentMonth}"

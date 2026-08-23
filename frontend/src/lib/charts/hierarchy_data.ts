@@ -65,11 +65,11 @@ export function filterCommodityBreakdowns(
   portfolioAggregates: PortfolioAggregate[],
   commodities: string[],
 ): PortfolioAggregate[] {
-  const filtered = structuredClone(portfolioAggregates).flatMap((aggregate) => {
-    aggregate.breakdowns = aggregate.breakdowns.filter((breakdown) =>
-      commodities.includes(breakdown.commodity_name)
-    );
-    return aggregate.breakdowns.length ? [aggregate] : [];
+  const filtered = portfolioAggregates.flatMap((aggregate) => {
+    const breakdowns = aggregate.breakdowns
+      .filter((breakdown) => commodities.includes(breakdown.commodity_name))
+      .map((breakdown) => ({ ...breakdown }));
+    return breakdowns.length ? [{ ...aggregate, breakdowns }] : [];
   });
   const total = sumBy(
     filtered,

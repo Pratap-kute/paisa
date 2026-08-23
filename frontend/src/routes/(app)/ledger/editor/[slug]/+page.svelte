@@ -546,7 +546,7 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
           </div>
         </div>
         <div
-          class="relative flex-1 overflow-auto [&cm-editor]:h-full [&cm-editor]:min-h-full [&cm-editor]:border-0 [&cm-scroller]:h-full [&cm-scroller]:overflow-auto [&cm-scroller]:py-2 [&editor]:h-full"
+          class="relative flex-1 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.editor]:h-full"
         >
           <div class="editor h-full" bind:this={editorDom}></div>
         </div>

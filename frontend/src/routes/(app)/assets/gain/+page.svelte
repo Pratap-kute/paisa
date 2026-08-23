@@ -89,7 +89,7 @@
       <ChartFrame
         height="compact"
         rows={Math.max(5, overviewData.points.length)}
-        class="[&paisa-chart-frame-body]:overflow-y-visible"
+        class="[&_.paisa-chart-frame-body]:overflow-y-visible"
       >
         <ComparisonBarChart
           data={overviewData}

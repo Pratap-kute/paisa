@@ -172,7 +172,7 @@ import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
         value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="[&paisa-chart-frame-body]:overflow-visible [&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal [&paisa4-metric-value]:leading-[1.15]"
+        class="[&_.paisa-chart-frame-body]:overflow-visible [&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -193,7 +193,7 @@ import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
     >
       <ChartFrame
         height="compact"
-        class="overflow-visible [&paisa-chart-frame-body]:overflow-visible"
+        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
         emptyMessage="No expenses recorded for {$year}"
