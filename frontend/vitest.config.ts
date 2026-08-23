@@ -1,6 +1,6 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig, type ViteUserConfig } from "vitest/config";
-import { coverageThreshold, sharedResolve } from "./vitest.shared";
+import { coverageThreshold, sharedResolve } from "./vitest.shared.ts";
 
 type VitestPluginOption = NonNullable<ViteUserConfig["plugins"]>[number];
 

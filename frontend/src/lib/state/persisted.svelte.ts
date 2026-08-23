@@ -1,5 +1,5 @@
-const isBrowser =
-  typeof window !== "undefined" && typeof localStorage !== "undefined";
+const isBrowser = typeof window !== "undefined" &&
+  typeof localStorage !== "undefined";
 
 export class PersistedState<T> {
   #key: string;

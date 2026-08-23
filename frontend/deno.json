@@ -3,7 +3,7 @@
     "dev": "deno run -A npm:vite dev --host 0.0.0.0",
     "preview": "deno run -A npm:vite preview",
 
-    "build": "deno run -A --unsafe-proto npm:@sveltejs/kit sync && deno run -A --unsafe-proto npm:vite build",
+    "build": "deno run -A npm:@sveltejs/kit sync && deno run -A npm:vite build",
     "build:watch": "deno run -A npm:vite build --watch",
 
     "audit": "deno audit --level=moderate",
@@ -32,7 +32,7 @@
 
     "playwright": "deno run -A npm:playwright@1.61.1",
 
-    "clean": "rm -rf .svelte-kit .vite node_modules/.vite ../backend/web/static coverage playwright-report test-results"
+    "clean": "deno run -A scripts/clean.ts"
   },
   "imports": {
     "$lib/": "./src/lib/",
@@ -48,8 +48,6 @@
     "@datasert/cronjs-parser": "npm:@datasert/cronjs-parser@^1.2.0",
     "@fontsource-variable/inter": "npm:@fontsource-variable/inter@^5.3.0",
     "@fontsource-variable/jetbrains-mono": "npm:@fontsource-variable/jetbrains-mono@^5.3.0",
-    "@fontsource-variable/roboto-flex": "npm:@fontsource-variable/roboto-flex@^5.0.8",
-    "@fontsource-variable/roboto-mono": "npm:@fontsource-variable/roboto-mono@^5.0.9",
     "@fortawesome/fontawesome-free": "npm:@fortawesome/fontawesome-free@^6.0",
     "@happy-dom/global-registrator": "npm:@happy-dom/global-registrator@^20.8.9",
     "@iconify/json": "npm:@iconify/json@^2.2.124",

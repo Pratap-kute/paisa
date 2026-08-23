@@ -13,8 +13,8 @@
   --paisa-surface-card: #ffffff;
 
   /* Typography Families */
-  --paisa-font-sans: "Roboto Flex Variable", "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --paisa-font-mono: "Roboto Mono Variable", monospace;
+  --paisa-font-sans: "Inter Variable", Inter, "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --paisa-font-mono: "JetBrains Mono Variable", "JetBrains Mono", monospace;
 
   /* Typography Scale (Stable 1rem = 16px) */
   --paisa-font-size-xs: 0.75rem; /* 12px */
