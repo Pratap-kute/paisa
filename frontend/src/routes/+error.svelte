@@ -31,8 +31,8 @@
           {/if}
           <p>
             Please report this issue at
-            <a href="https://github.com/ananthakumaran/paisa/issues" class="text-[var(--paisa-primary)] underline">
-              https://github.com/ananthakumaran/paisa/issues
+            <a href="https://github.com/Pratap-kute/paisa/issues" class="text-[var(--paisa-primary)] underline">
+              https://github.com/Pratap-kute/paisa/issues
             </a>. Closing and reopening the app may help.
           </p>
         </div>

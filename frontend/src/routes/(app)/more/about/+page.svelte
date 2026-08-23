@@ -16,15 +16,15 @@
     },
     {
       name: "Source Code",
-      desc: "Open source repository on GitHub (MIT License)",
-      href: "https://github.com/ananthakumaran/paisa",
+      desc: "GitHub repository (Fork maintained by Pratap Kute)",
+      href: "https://github.com/Pratap-kute/paisa",
       icon: "fa-brands fa-github",
       badge: "GitHub",
     },
     {
       name: "Releases & Changelog",
       desc: "Latest release downloads, updates, and release notes",
-      href: "https://github.com/ananthakumaran/paisa/releases",
+      href: "https://github.com/Pratap-kute/paisa/releases",
       icon: "fa-solid fa-download",
       badge: "v0.8.1",
     },
@@ -38,14 +38,14 @@
     {
       name: "Community Discussions",
       desc: "Ask questions, share workflows, and request features",
-      href: "https://github.com/ananthakumaran/paisa/discussions",
+      href: "https://github.com/Pratap-kute/paisa/discussions",
       icon: "fa-regular fa-comments",
       badge: "Community",
     },
     {
       name: "Issue Tracker",
       desc: "Report bugs or submit feature suggestions",
-      href: "https://github.com/ananthakumaran/paisa/issues",
+      href: "https://github.com/Pratap-kute/paisa/issues",
       icon: "fas fa-bug",
       badge: "Support",
     },
@@ -92,11 +92,20 @@
                   Paisa
                 </h1>
                 <Badge variant="primary" size="sm" rounded>v0.8.1</Badge>
-                <Badge variant="neutral" size="sm" rounded>Open Source</Badge>
+                <Badge variant="neutral" size="sm" rounded>AGPL-3.0</Badge>
               </div>
               <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">
                 Local-first, privacy-focused financial analytics & plain text accounting for personal ledgers.
               </p>
+              <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs md:justify-start">
+                <span class="font-medium text-[var(--paisa-text-primary)]">
+                  Maintained by <strong class="text-[var(--paisa-brand-primary)]">Pratap Kute</strong>
+                </span>
+                <span class="text-[var(--paisa-text-muted)]">•</span>
+                <span class="text-[var(--paisa-text-secondary)]">
+                  Originally created by <strong class="text-[var(--paisa-text-primary)]">Ananthakumaran</strong>
+                </span>
+              </div>
               <div class="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--paisa-text-secondary)] md:justify-start">
                 <span class="inline-flex items-center gap-1">
                   <i class="fas fa-shield-halved text-[var(--paisa-positive)]"></i>
@@ -120,12 +129,12 @@
             <button
               type="button"
               class="inline-flex cursor-pointer items-center gap-2 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-3 py-1.5 text-xs font-semibold text-[var(--paisa-text-primary)] transition-colors hover:border-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)]"
-              onclick={() => externalLink("https://github.com/ananthakumaran/paisa")}
+              onclick={() => externalLink("https://github.com/Pratap-kute/paisa")}
             >
               <i class="fa-brands fa-github"></i>
               <span>Star on GitHub</span>
             </button>
-            <span class="text-[0.6875rem] text-[var(--paisa-text-muted)]">Licensed under MIT</span>
+            <span class="text-[0.6875rem] text-[var(--paisa-text-muted)]">Licensed under GNU AGPL-3.0</span>
           </div>
         </div>
       </Card>
