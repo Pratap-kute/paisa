@@ -207,3 +207,24 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .paisa-posting-table {
+    width: 100%;
+    min-width: 1480px;
+  }
+
+  .posting-row {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns:
+      110px minmax(160px, 1.25fr) minmax(200px, 1.5fr)
+      repeat(7, minmax(92px, 0.75fr));
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .posting-row > div {
+    min-width: 0;
+  }
+</style>

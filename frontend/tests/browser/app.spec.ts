@@ -260,12 +260,30 @@ test("posting search filters fixture postings", async ({ page }) => {
   ]);
   const payeeLinks = page.locator(".paisa-posting-table").getByRole("link");
   await expect(payeeLinks.first()).toBeVisible();
-  const before = await payeeLinks.count();
-  const search = page.getByRole("searchbox", { name: "Filter query" });
-  await search.click();
-  await page.keyboard.type('payee = "Rent"');
-  await expect.poll(() => payeeLinks.count(), { timeout: 5000 })
-    .toBeLessThan(before);
+  const postingRows = page.locator(".virtual-list-inner .posting-row");
+  await expect(postingRows.first()).toHaveCSS("display", "grid");
+  const geometry = await postingRows.evaluateAll((elements) =>
+    elements.slice(0, 2).map((element) => {
+      const row = element.getBoundingClientRect();
+      const cells = [...element.children].map((cell) =>
+        cell.getBoundingClientRect()
+      );
+      return {
+        top: row.top,
+        bottom: row.bottom,
+        cellLefts: cells.map((cell) => cell.left),
+      };
+    })
+  );
+  expect(geometry).toHaveLength(2);
+  expect(geometry[1].top).toBeGreaterThanOrEqual(geometry[0].bottom);
+  expect(
+    geometry[0].cellLefts.every((left, index, values) =>
+      index === 0 || left > values[index - 1]
+    ),
+  ).toBe(true);
+  const search = page.locator(".search-query-editor .cm-content");
+  await search.fill('payee = "Rent"');
   await expect(payeeLinks.first()).toContainText("Rent");
 });
 
