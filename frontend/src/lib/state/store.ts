@@ -107,24 +107,7 @@ export const delayedLoading = derived(
   false,
 );
 
-let swithcTimeoutId: NodeJS.Timeout;
-export const delayedUnLoading = derived(
-  [loading],
-  ([$l], set) => {
-    if (swithcTimeoutId) {
-      clearTimeout(swithcTimeoutId);
-    }
-
-    if ($l) {
-      set($l);
-    } else {
-      swithcTimeoutId = setTimeout(() => {
-        return set($l);
-      }, DEBOUNCE_DELAY);
-    }
-  },
-  false,
-);
+export const delayedUnLoading = delayedLoading;
 
 export const willClearTippy = writable<number>(0);
 
