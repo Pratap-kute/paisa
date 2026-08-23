@@ -9,77 +9,20 @@
   let { label, value = $bindable(), allowed }: Props = $props();
 </script>
 
-{#if allowed.max > 1}
-  <div class="paisa-input-range">
-    <div class="paisa-input-range-label">{label}</div>
-    <input
-      type="range"
-      bind:value
-      min={allowed.min}
-      max={allowed.max}
-      class="paisa-range"
-      step={1}
-    />
-    <div class="paisa-input-range-ticks">
+{#if allowed && allowed.max > 1}
+  <div class="inline-flex h-8 items-center gap-1.5 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2 py-0.5 text-xs text-[var(--paisa-foreground)] shadow-xs">
+    <span class="font-semibold text-[var(--paisa-muted-foreground)] text-[0.6875rem] uppercase tracking-wider">{label}</span>
+    <div class="inline-flex items-center rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-hover)] p-0.5 border border-[var(--paisa-border-subtle)]">
       {#each range(allowed.min, allowed.max + 1) as i}
-        <span>{i}</span>
+        <button
+          type="button"
+          class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-[2px] px-1 text-[0.6875rem] font-bold transition-all {value === i ? 'bg-[var(--paisa-primary)] text-white shadow-xs' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-foreground)] hover:bg-[var(--paisa-surface)]'}"
+          onclick={() => (value = i)}
+          aria-label="{label} depth {i}"
+        >
+          {i}
+        </button>
       {/each}
     </div>
   </div>
 {/if}
-
-<style>
-  .paisa-input-range {
-    margin: var(--paisa-space-1, 0.25rem);
-  }
-
-  .paisa-input-range-label {
-    font-size: 0.75rem;
-    color: var(--paisa-foreground);
-  }
-
-  .paisa-input-range-ticks {
-    display: flex;
-    justify-content: space-between;
-    margin-top: -3px;
-    font-size: 0.75rem;
-    color: var(--paisa-muted-foreground);
-  }
-
-  .paisa-range {
-    width: 100%;
-    height: 1rem;
-    appearance: none;
-    background: transparent;
-  }
-
-  .paisa-range::-webkit-slider-runnable-track {
-    height: 0.25rem;
-    border-radius: var(--paisa-radius-full);
-    background: var(--paisa-border-default);
-  }
-
-  .paisa-range::-webkit-slider-thumb {
-    width: 1rem;
-    height: 1rem;
-    margin-top: -0.375rem;
-    appearance: none;
-    border: 0;
-    border-radius: 50%;
-    background: var(--paisa-foreground);
-  }
-
-  .paisa-range::-moz-range-track {
-    height: 0.25rem;
-    border-radius: var(--paisa-radius-full);
-    background: var(--paisa-border-default);
-  }
-
-  .paisa-range::-moz-range-thumb {
-    width: 1rem;
-    height: 1rem;
-    border: 0;
-    border-radius: 50%;
-    background: var(--paisa-foreground);
-  }
-</style>

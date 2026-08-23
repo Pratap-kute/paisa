@@ -61,7 +61,7 @@
   ];
 </script>
 
-<div class="inline-flex items-stretch">
+<div class="inline-flex h-8 items-stretch overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-xs">
   <button
     type="button"
     class="paisa-month-nav border-r border-[var(--paisa-border-subtle)]"
@@ -69,7 +69,7 @@
     disabled={!isAllowed(valueDate.add(-1, "month"), min, max)}
     onclick={() => select(valueDate.add(-1, "month"))}
   >
-    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+    <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
   </button>
 
   <div class="relative">
@@ -81,8 +81,9 @@
       aria-expanded={open}
       onclick={() => (open = !open)}
     >
-      <span class="font-semibold">{valueDate.format("MMM YYYY")}</span>
-      <i class="fas fa-angle-down text-xs" aria-hidden="true"></i>
+      <i class="fas fa-calendar-days text-xs text-[var(--paisa-muted-foreground)]" aria-hidden="true"></i>
+      <span class="font-semibold text-xs">{valueDate.format("MMM YYYY")}</span>
+      <i class="fas fa-angle-down text-[0.625rem] text-[var(--paisa-muted-foreground)]" aria-hidden="true"></i>
     </button>
 
     {#if open}
@@ -100,12 +101,12 @@
           <div class="flex items-center justify-between gap-2">
             <button
               type="button"
-              class="paisa-month-nav"
+              class="paisa-month-nav rounded border border-[var(--paisa-border-subtle)]"
               aria-label="Previous year"
               disabled={selectedYear - 1 < min.year()}
               onclick={() => selectedYear--}
             >
-              <i class="fas fa-chevron-left" aria-hidden="true"></i>
+              <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
             </button>
             <select
               class="paisa-month-year-select"
@@ -119,12 +120,12 @@
             </select>
             <button
               type="button"
-              class="paisa-month-nav"
+              class="paisa-month-nav rounded border border-[var(--paisa-border-subtle)]"
               aria-label="Next year"
               disabled={selectedYear + 1 > max.year()}
               onclick={() => selectedYear++}
             >
-              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              <i class="fas fa-chevron-right text-xs" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -133,11 +134,11 @@
             {#if isAllowed(dayjs(`${selectedYear}-${i + 1}`, "YYYY-M"), min, max)}
               <button
                 type="button"
-                class="rounded-[var(--paisa-radius-sm)] px-2 py-2 text-sm transition-colors hover:bg-[var(--paisa-surface-hover)] {valueDate.year() == selectedYear && valueDate.month() == i ? 'bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'text-[var(--paisa-foreground)]'}"
+                class="rounded-[var(--paisa-radius-sm)] px-2 py-1.5 text-xs transition-colors hover:bg-[var(--paisa-surface-hover)] {valueDate.year() == selectedYear && valueDate.month() == i ? 'bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'text-[var(--paisa-foreground)]'}"
                 onclick={() => selectMonth(i)}
               >{month}</button>
             {:else}
-              <span class="px-2 py-2 text-center text-sm text-[var(--paisa-muted-foreground)] opacity-50">{month}</span>
+              <span class="px-2 py-1.5 text-center text-xs text-[var(--paisa-muted-foreground)] opacity-50">{month}</span>
             {/if}
           {/each}
         </div>
@@ -152,7 +153,7 @@
     disabled={!isAllowed(valueDate.add(1, "month"), min, max)}
     onclick={() => select(valueDate.add(1, "month"))}
   >
-    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    <i class="fas fa-chevron-right text-xs" aria-hidden="true"></i>
   </button>
 </div>
 
@@ -163,13 +164,13 @@
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    height: 2rem;
-    min-width: 2rem;
+    height: 100%;
+    min-width: 1.75rem;
     padding: 0 0.5rem;
     border: 0;
     background: var(--paisa-surface);
     color: var(--paisa-foreground);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     cursor: pointer;
     transition: background-color 150ms ease;
   }
@@ -186,7 +187,7 @@
 
   .paisa-month-trigger {
     min-width: 7.5rem;
-    padding: 0 0.75rem;
+    padding: 0 0.625rem;
   }
 
   .paisa-month-year-select {
@@ -196,7 +197,7 @@
     background: var(--paisa-surface);
     color: var(--paisa-foreground);
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     padding: 0.25rem 0.5rem;
   }
 </style>

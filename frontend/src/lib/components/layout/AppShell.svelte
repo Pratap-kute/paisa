@@ -473,53 +473,68 @@
     </div>
 
     <div class="flex shrink-0 items-center gap-2">
+      <!-- Mobile Search Trigger -->
       <button
         type="button"
         onclick={() => (commandPaletteOpen = true)}
-        class="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)] lg:hidden"
+        class="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)] lg:hidden"
         aria-label="Search"
       >
-        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+        <i class="fa-solid fa-magnifying-glass text-xs"></i>
       </button>
-      {#if showDateRange}
-        <div class="hidden sm:block">
-          <DateRange
-            bind:value={$dateRangeOption}
-            dateMin={$dateMin}
-            dateMax={$dateMax}
-          />
+
+      <!-- Page Contextual Filters (DateRange, Month, FY, Depth) -->
+      {#if showDateRange || showMonthPicker || showFinancialYearPicker || (showYearlyDepth && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1))}
+        <div class="hidden sm:flex items-center gap-2">
+          {#if showDateRange}
+            <div>
+              <DateRange
+                bind:value={$dateRangeOption}
+                dateMin={$dateMin}
+                dateMax={$dateMax}
+              />
+            </div>
+          {/if}
+
+          {#if showMonthPicker}
+            <div>
+              <MonthPicker bind:value={$month} max={$dateMax} min={$dateMin} />
+            </div>
+          {/if}
+
+          {#if showFinancialYearPicker}
+            <div class="relative inline-flex h-8 items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2.5 text-xs font-semibold text-[var(--paisa-foreground)] shadow-xs transition-colors hover:border-[var(--paisa-border-strong)]">
+              <i class="fas fa-calendar-days mr-1.5 text-[0.75rem] text-[var(--paisa-muted-foreground)]" aria-hidden="true"></i>
+              <select
+                bind:value={$year}
+                class="cursor-pointer appearance-none border-0 bg-transparent pr-4 font-semibold text-[var(--paisa-foreground)] focus:outline-none"
+              >
+                {#each forEachFinancialYear($dateMin, $dateMax).reverse() as fy}
+                  <option class="bg-[var(--paisa-surface)] text-[var(--paisa-foreground)]">{financialYear(fy)}</option>
+                {/each}
+              </select>
+              <i class="fas fa-chevron-down pointer-events-none absolute right-2 text-[0.625rem] text-[var(--paisa-muted-foreground)]" aria-hidden="true"></i>
+            </div>
+          {/if}
+
+          {#if showYearlyDepth && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
+            <div class="flex items-center gap-1.5">
+              <InputRange
+                label="Expenses"
+                bind:value={$cashflowExpenseDepth}
+                allowed={$cashflowExpenseDepthAllowed}
+              />
+              <InputRange
+                label="Income"
+                bind:value={$cashflowIncomeDepth}
+                allowed={$cashflowIncomeDepthAllowed}
+              />
+            </div>
+          {/if}
         </div>
-      {/if}
-      {#if showMonthPicker}
-        <div class="hidden sm:block">
-          <MonthPicker bind:value={$month} max={$dateMax} min={$dateMin} />
-        </div>
-      {/if}
-      {#if showFinancialYearPicker}
-        <div class="hidden sm:block">
-          <select
-            bind:value={$year}
-            class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2 py-1 text-xs text-[var(--paisa-foreground)]"
-          >
-            {#each forEachFinancialYear($dateMin, $dateMax).reverse() as fy}
-              <option>{financialYear(fy)}</option>
-            {/each}
-          </select>
-        </div>
-      {/if}
-      {#if showYearlyDepth && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
-        <div class="hidden items-center gap-2 sm:flex">
-          <InputRange
-            label="Expenses"
-            bind:value={$cashflowExpenseDepth}
-            allowed={$cashflowExpenseDepthAllowed}
-          />
-          <InputRange
-            label="Income"
-            bind:value={$cashflowIncomeDepth}
-            allowed={$cashflowIncomeDepthAllowed}
-          />
-        </div>
+
+        <!-- Visual Divider between page filters and global actions -->
+        <div class="hidden sm:block h-4 w-px bg-[var(--paisa-border-subtle)] mx-0.5" aria-hidden="true"></div>
       {/if}
 
       {#if readonly}
