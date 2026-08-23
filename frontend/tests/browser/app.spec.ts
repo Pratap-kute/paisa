@@ -48,6 +48,22 @@ test("monthly expenses preserves calendar details and category icons", async ({ 
   await expect(recentIcon).not.toContainText("�");
 });
 
+test("yearly expenses preserves monthly composition and hover breakdown", async ({ page }) => {
+  await page.goto("/expense/yearly");
+  const calendar = page.locator(
+    "[data-testid='yearly-expense-calendar-echart'][data-chart-ready='true']",
+  );
+  await expect(calendar).toBeVisible();
+
+  const activeMonth = calendar.locator(".paisa-yearly-expense-month-active")
+    .first();
+  await expect(activeMonth).toHaveAttribute("data-tippy-content", /Total/);
+  await expect(activeMonth.locator(".paisa-yearly-expense-ring"))
+    .toHaveCSS("background-image", /conic-gradient/);
+  await activeMonth.hover();
+  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
+});
+
 test("major pages are routable", async ({ page }) => {
   for (
     const path of [

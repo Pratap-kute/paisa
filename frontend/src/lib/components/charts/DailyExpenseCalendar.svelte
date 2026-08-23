@@ -35,7 +35,7 @@
         }`
       )
       : ["No expense activity"];
-    return [point.label, ...rows].join("\n");
+    return [point.label, ...rows, `Total: ${formatCurrency(point.value)}`].join("\n");
   }
 
   function detailHtml(index: number) {
@@ -88,7 +88,6 @@
       class:paisa-expense-calendar-active={point.hasActivity}
       class="paisa-expense-calendar-day"
       style="--calendar-column: {index === 0 ? firstColumn : 'auto'}; --expense-ring: {ring(point)};"
-      title={detail(index)}
       aria-label={detail(index)}
       data-tippy-content={detailHtml(index)}
       role="gridcell"

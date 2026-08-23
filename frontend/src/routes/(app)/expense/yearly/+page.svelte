@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import _ from "lodash";
   import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
-  import { buildYearlyExpenseTimelineSeries, categoryLegends } from "$lib/charts/mixed_period_data";
+  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
@@ -31,6 +31,7 @@
     grouped_taxes: Record<string, Posting[]> = $state({});
 
   let legends: Legend[] = $state([]);
+  let expenseColor = $state(categoryColor);
   let isLoading = $state(true);
 
   let income = $state(""),
@@ -66,6 +67,7 @@
 
       const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
       groups.set(allGroups);
+      expenseColor = categoryColorResolver(allGroups);
       legends = categoryLegends(allGroups, (group) => {
         groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
       });
@@ -212,6 +214,7 @@
           data={currentYearHeatmapData}
           ariaLabel="Monthly expense activity for {$year}"
           testId="yearly-expense-calendar-echart"
+          colorFor={expenseColor}
         />
       </ChartFrame>
     </Section>

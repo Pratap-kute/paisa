@@ -29,8 +29,10 @@ test("renders aligned dates, category rings, amounts, and hover details", () => 
   expect(days[0]).toHaveStyle("--calendar-column: 4");
   expect(days[2].getAttribute("style")).toContain("conic-gradient");
   expect(days[2]).toHaveTextContent("100");
-  expect(days[2].getAttribute("title")).toContain("Rent (Expenses:Rent)");
   expect(days[2].getAttribute("data-tippy-content")).toContain("Total");
+  expect(days[2]).not.toHaveAttribute("title");
+  expect(days[2].getAttribute("aria-label")).toContain("Rent (Expenses:Rent)");
+  expect(days[2].getAttribute("aria-label")).toContain("Total");
   expect(getByRole("grid", { name: "February expenses" }))
     .toHaveAttribute("data-chart-ready", "true");
 });

@@ -99,17 +99,22 @@ export function buildYearlyExpenseHeatmapData(
     const month = start.add(index, "month");
     const rows = byMonth[month.format("YYYY-MM")] ?? [];
     const byCategory = grouped(rows, expenseGroup);
-    const byAccount = Object.entries(byCategory)
+    const categoryTotals = Object.entries(byCategory)
       .map(([category, categoryRows]) => ({
-        label: category,
+        key: category,
         value: total(categoryRows),
       }))
-      .sort((a, b) => b.value - a.value);
+      .filter((segment) => segment.value > 0)
+      .sort((a, b) => b.value - a.value || a.key.localeCompare(b.key));
     return {
       key: month.format("YYYY-MM"),
       label: month.format("MMM YYYY"),
       value: total(rows),
-      tooltipRows: byAccount,
+      tooltipRows: categoryTotals.map(({ key, value }) => ({
+        label: key,
+        value,
+      })),
+      segments: categoryTotals,
       hasActivity: rows.length > 0,
     };
   });

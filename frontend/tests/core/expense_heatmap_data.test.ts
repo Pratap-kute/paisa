@@ -83,5 +83,15 @@ describe("expense heatmap adapters", () => {
         ["Food", 100],
         ["Travel", 50],
       ]);
+    expect(data.points[0].segments).toEqual([
+      { key: "Food", value: 100 },
+      { key: "Travel", value: 50 },
+    ]);
+    expect(data.points[5]).toMatchObject({
+      key: "2023-09",
+      value: 0,
+      hasActivity: false,
+      segments: [],
+    });
   });
 });
