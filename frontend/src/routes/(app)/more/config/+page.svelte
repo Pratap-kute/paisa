@@ -9,6 +9,9 @@
   import { sync } from "$lib/api/sync";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Tabs from "$lib/components/ui/Tabs.svelte";
   import Button from "$lib/components/ui/Button.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
 
@@ -28,19 +31,14 @@
   const SECTION_META: Record<string, { icon: string; description: string }> = {
     general: {
       icon: "fa-sliders",
-      description: "Journal paths, locale, currency, and display",
-    },
-    budget: { icon: "fa-wallet", description: "Budget rollover behaviour" },
-    goals: { icon: "fa-flag", description: "Retirement and savings targets" },
-    prediction: {
-      icon: "fa-wand-magic-sparkles",
-      description: "Merchant rules for import account prediction",
+      description: "Journal paths, locale, currency, and display formatting",
     },
     accounts: { icon: "fa-folder", description: "Account icons and labels" },
     allocation_targets: {
       icon: "fa-chart-pie",
       description: "Target mix for asset classes",
     },
+    budget: { icon: "fa-wallet", description: "Budget rollover behaviour" },
     commodities: {
       icon: "fa-coins",
       description: "Mutual funds, stocks, and price providers",
@@ -49,9 +47,14 @@
       icon: "fa-credit-card",
       description: "Limits, due dates, and statement cycles",
     },
+    goals: { icon: "fa-flag", description: "Retirement and savings targets" },
     import_templates: {
       icon: "fa-file-import",
       description: "Handlebars templates for statement import",
+    },
+    prediction: {
+      icon: "fa-wand-magic-sparkles",
+      description: "Merchant rules for import account prediction",
     },
     schedule_al: {
       icon: "fa-file-invoice",
@@ -142,17 +145,35 @@
     return (schema.properties?.[activeSection.key!] as Schema) || null;
   });
 
-  let sectionCount = $derived.by(() => {
-    if (!config || !activeSection || activeSection.kind === "general") return null;
-    const value = (config as Record<string, unknown>)[activeSection.key!];
+  function getSectionCount(sectionId: string): number | null {
+    if (!config || sectionId === "general") return null;
+    const section = sections.find((s) => s.id === sectionId);
+    if (!section?.key) return null;
+    const value = (config as Record<string, unknown>)[section.key];
     if (Array.isArray(value)) return value.length;
     if (value && typeof value === "object") {
-      return Object.values(value).reduce((sum: number, item) => {
-        return sum + (Array.isArray(item) ? item.length : 0);
-      }, 0) || null;
+      return (
+        Object.values(value).reduce((sum: number, item) => {
+          return sum + (Array.isArray(item) ? item.length : 0);
+        }, 0) || null
+      );
     }
     return null;
-  });
+  }
+
+  let sectionCount = $derived(getSectionCount(activeSection?.id || ""));
+
+  let tabOptions = $derived(
+    sections.map((sec) => {
+      const count = getSectionCount(sec.id);
+      return {
+        label: sec.label,
+        value: sec.id,
+        icon: sec.icon,
+        badge: count != null ? count : undefined,
+      };
+    }),
+  );
 
   async function resetToDefault() {
     if (
@@ -205,91 +226,82 @@
   }
 
   let hasChanges = $derived(!isEqual(config, lastConfig));
+
+  function handleKeydown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      event.preventDefault();
+      if (hasChanges && !isLoading) {
+        save(config);
+      }
+    }
+  }
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <svelte:head>
   <title>Configuration - Paisa</title>
 </svelte:head>
 
-<Page width="standard" loading={!loaded} loadingMessage="Loading configuration…">
+<Page width="analysis" loading={!loaded} loadingMessage="Loading configuration…">
   <PageHeader
     title="Configuration"
-    description="Edit paisa.yaml by section. Save writes the file and re-syncs the journal."
+    description="Edit paisa.yaml by section. Save writes the configuration file and re-syncs your ledger."
     help="config"
   >
     {#snippet actions()}
       {#if hasChanges}
-        <Badge variant="warning" size="sm">Unsaved changes</Badge>
+        <Badge variant="warning" size="sm" rounded dot>Unsaved changes</Badge>
       {/if}
     {/snippet}
   </PageHeader>
 
-  {#if schema && config && activeSection && activeSchema}
-    <div class="flex min-h-[calc(100vh-6rem)] flex-col">
-      <div
-        class="flex flex-1 flex-col gap-[var(--paisa-space-5)] lg:grid lg:grid-cols-[13.5rem_minmax(0,1fr)] lg:items-start"
-      >
-        <div class="lg:hidden">
-          <label
-            class="mb-1 block text-sm font-medium text-[var(--paisa-text-secondary)]"
-            for="config-section"
-          >
-            Section
-          </label>
-          <select
-            id="config-section"
-            class="paisa4-control h-9 px-3"
+  <Section>
+    {#if schema && config && activeSection && activeSchema}
+      <div class="flex flex-col gap-4">
+        <!-- Horizontal Section Navigation Tabs -->
+        <div class="w-full overflow-x-auto pb-1">
+          <Tabs
             bind:value={activeId}
-          >
-            {#each sections as section}
-              <option value={section.id}>{section.label}</option>
-            {/each}
-          </select>
+            options={tabOptions}
+            variant="boxed"
+            size="sm"
+          />
         </div>
 
-        <nav
-          class="sticky top-[var(--paisa-space-4)] hidden flex-col gap-0.5 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] lg:flex"
-          aria-label="Configuration sections"
-        >
-          {#each sections as section}
-            <button
-              type="button"
-              class="flex w-full items-center gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-sm)] border-0 bg-transparent px-[0.65rem] py-[0.45rem] text-left text-sm font-medium text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)] {section.id === activeSection.id ? 'bg-[var(--paisa-brand-primary-light)] text-[var(--paisa-brand-primary)]' : ''}"
-              onclick={() => (activeId = section.id)}
-            >
-              <i class="fas {section.icon} w-4 shrink-0 text-center text-xs" aria-hidden="true"></i>
-              <span>{section.label}</span>
-            </button>
-          {/each}
-        </nav>
-
-        <div
-          class="flex min-h-[calc(100vh-11rem)] min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)]"
-        >
-          <div class="min-w-0 flex-1 p-[var(--paisa-space-5)]">
-            <div
-              class="mb-[var(--paisa-space-5)] flex items-start justify-between gap-[var(--paisa-space-3)]"
-            >
-              <div>
-                <h2
-                  class="m-0 text-lg font-semibold leading-tight text-[var(--paisa-text-primary)]"
-                >
-                  {activeSection.label}
-                </h2>
-                {#if activeSection.description}
-                  <p class="mt-[var(--paisa-space-1)] text-sm text-[var(--paisa-text-secondary)]">
-                    {activeSection.description}
-                  </p>
-                {/if}
+        <!-- Full-Width Configuration Form Card -->
+        <Card padding="none" class="w-full overflow-hidden">
+          <!-- Section Title Bar -->
+          <div class="border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] p-4 sm:p-5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-brand-primary)] shadow-sm">
+                  <i class="fas {activeSection.icon} text-base"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="m-0 text-base font-bold text-[var(--paisa-text-primary)]">
+                      {activeSection.label}
+                    </h2>
+                    {#if sectionCount != null}
+                      <Badge variant="neutral" size="sm" rounded>{sectionCount}</Badge>
+                    {/if}
+                  </div>
+                  {#if activeSection.description}
+                    <p class="mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">
+                      {activeSection.description}
+                    </p>
+                  {/if}
+                </div>
               </div>
-              {#if sectionCount != null}
-                <Badge variant="neutral" size="sm">{sectionCount}</Badge>
-              {/if}
             </div>
+          </div>
 
+          <!-- Form Fields Content -->
+          <div class="p-4 sm:p-6">
             {#if error}
               <div
-                class="mb-[var(--paisa-space-4)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] px-[var(--paisa-space-4)] py-[var(--paisa-space-3)] text-sm whitespace-pre-wrap text-[var(--paisa-danger)]"
+                class="mb-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] px-4 py-3 text-xs font-mono whitespace-pre-wrap text-[var(--paisa-danger)] shadow-sm"
                 role="alert"
               >
                 {error}
@@ -319,40 +331,48 @@
             </div>
           </div>
 
+          <!-- Sticky Action Bar -->
           <div
-            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-[var(--paisa-space-3)] border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-[var(--paisa-space-5)] py-[var(--paisa-space-3)]"
+            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] px-4 py-3 sm:px-6"
           >
             <Button
               variant="ghost"
-              class="max-lg:w-full max-lg:justify-center"
+              size="sm"
+              class="max-lg:w-full max-lg:justify-center text-xs"
               onclick={() => resetToDefault()}
             >
+              <i class="fas fa-arrow-rotate-left mr-1"></i>
               Reset to defaults
             </Button>
             <div
-              class="ml-auto flex gap-[var(--paisa-space-2)] max-lg:ml-0 max-lg:w-full max-lg:flex-col"
+              class="ml-auto flex gap-2 max-lg:ml-0 max-lg:w-full max-lg:flex-col"
             >
               <Button
                 variant="outline"
+                size="sm"
                 disabled={!hasChanges}
                 class="max-lg:w-full max-lg:justify-center"
                 onclick={discard}
               >
-                Cancel
+                Discard
               </Button>
               <Button
                 variant="primary"
+                size="sm"
                 loading={isLoading}
                 disabled={!hasChanges}
                 class="max-lg:w-full max-lg:justify-center"
                 onclick={() => save(config)}
               >
-                Save
+                {#snippet icon()}
+                  <i class="fas fa-floppy-disk"></i>
+                {/snippet}
+                Save Changes
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
-    </div>
-  {/if}
+    {/if}
+  </Section>
 </Page>
