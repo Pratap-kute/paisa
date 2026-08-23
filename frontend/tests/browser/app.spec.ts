@@ -269,6 +269,52 @@ test("posting search filters fixture postings", async ({ page }) => {
   await expect(payeeLinks.first()).toContainText("Rent");
 });
 
+test("large price histories load collapsed", async ({ page }) => {
+  test.setTimeout(20_000);
+  const prices = Object.fromEntries(
+    Array.from({ length: 8 }, (_, commodityIndex) => {
+      const commodity = `FUND${commodityIndex + 1}`;
+      return [
+        commodity,
+        Array.from({ length: 2500 }, (_, priceIndex) => ({
+          id: commodityIndex * 2500 + priceIndex,
+          date: new Date(Date.UTC(2026, 7, 21 - priceIndex)).toISOString(),
+          commodity_type: "mutualfund",
+          commodity_id: `${1000 + commodityIndex}`,
+          commodity_name: commodity,
+          value: 100 + commodityIndex + priceIndex / 100,
+        })),
+      ];
+    }),
+  );
+
+  await page.route("**/api/price", async (route) => {
+    if (new URL(route.request().url()).pathname === "/api/price") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ prices }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto("/ledger/price");
+  await expect(page.getByText("8 commodity(ies)")).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect(page.locator(".tabulator-row")).toHaveCount(8);
+  await expect(page.locator(".paisa-tabulator-tree-toggle")).toHaveCount(8);
+
+  const expansionStarted = Date.now();
+  await page.locator(".paisa-tabulator-tree-toggle").first().click();
+  await expect.poll(() => page.locator(".tabulator-row").count())
+    .toBeGreaterThan(8);
+  expect(Date.now() - expansionStarted).toBeLessThan(2_000);
+  expect(await page.locator(".tabulator-row").count()).toBeLessThan(100);
+});
+
 test("price cache clear shows success feedback", async ({ page }) => {
   await page.route("**/api/price", async (route) => {
     if (new URL(route.request().url()).pathname === "/api/price") {

@@ -126,6 +126,24 @@ async function expectStableChartSurfaces(page: Page) {
   });
 }
 
+async function expectDarkSelectTheme(page: Page) {
+  const control = page.locator(".svelte-select").first();
+  await expect(control).toBeVisible();
+  const colors = await control.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      foreground: style.color,
+      inputBackground: style.getPropertyValue("--paisa-input-bg").trim(),
+      inputForeground: style.getPropertyValue("--paisa-input-text").trim(),
+    };
+  });
+  expect(colors.background).toBe("rgb(15, 23, 42)");
+  expect(colors.foreground).toBe("rgb(248, 250, 252)");
+  expect(colors.inputBackground).toBe("#0f172a");
+  expect(colors.inputForeground).toBe("#f8fafc");
+}
+
 async function applyVariant(
   page: Page,
   variant: { width: number; height: number; theme: string },
@@ -218,6 +236,19 @@ for (const route of visualRoutes) {
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
       await expectStableChartSurfaces(page);
+      if (variant.theme === "dark" && route.name === "ledger-import") {
+        await expectDarkSelectTheme(page);
+        await page.locator(".svelte-select").click();
+        await expect(page.locator(".svelte-select-list")).toBeVisible();
+        const listBackground = await page.locator(".svelte-select-list")
+          .evaluate((element) => getComputedStyle(element).backgroundColor);
+        expect(listBackground).toBe("rgb(30, 41, 59)");
+      }
+      if (variant.theme === "dark" && route.name === "config") {
+        await page.getByRole("button", { name: "Allocation Targets" }).click();
+        await page.getByRole("button", { name: "Add" }).click();
+        await expectDarkSelectTheme(page);
+      }
       await expect(page).toHaveScreenshot(
         `${route.name}-${variant.name}.png`,
         { fullPage: true },

@@ -8,4 +8,5 @@ import "$lib/styles/legacy-compat.css";
 import "$lib/styles/integrations/tabulator.css";
 import "$lib/styles/integrations/codemirror.css";
 import "$lib/styles/integrations/tooltip.css";
+import "$lib/styles/integrations/select.css";
 import "$lib/styles/theme-switcher.css";

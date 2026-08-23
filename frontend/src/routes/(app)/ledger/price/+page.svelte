@@ -252,7 +252,14 @@
     {#if prices}
       {#if commodityCount > 0}
         <div class="w-full min-w-0 overflow-hidden rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
-          <Table data={tableData} tree {columns} class="border-0 shadow-none" />
+          <Table
+            data={tableData}
+            tree
+            treeStartExpanded={false}
+            {columns}
+            options={{ height: "min(70vh, 720px)" }}
+            class="border-0 shadow-none"
+          />
         </div>
       {:else}
         <ZeroState item={[]}>

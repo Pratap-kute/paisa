@@ -185,18 +185,8 @@
     :global(.svelte-select) {
       --height: 2.25rem;
       --max-height: 2.25rem;
-      --background: var(--paisa-surface);
-      --border: 1px solid var(--paisa-border);
       --border-radius: var(--paisa-radius-md, 0.375rem);
       --font-size: 0.8125rem;
-      --item-color: var(--paisa-foreground);
-      --input-color: var(--paisa-foreground);
-      --selected-item-color: var(--paisa-foreground);
-      --list-background: var(--paisa-surface);
-      --list-border: 1px solid var(--paisa-border);
-      --list-shadow: var(--paisa-shadow-lg);
-      --item-hover-bg: var(--paisa-surface-hover);
-      --item-hover-color: var(--paisa-foreground);
     }
   }
 

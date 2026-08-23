@@ -527,7 +527,7 @@
 
         <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
           <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
-            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:border [&_.svelte-select]:border-[var(--paisa-border-default)] [&_.svelte-select]:bg-[var(--paisa-canvas-bg)] [&_.svelte-select]:text-xs">
+            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:text-xs">
               <Select
                 items={templateItems}
                 value={selectedTemplateOption}

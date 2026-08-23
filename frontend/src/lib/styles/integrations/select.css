@@ -1,0 +1,68 @@
+/* Theme the svelte-select boundary with Paisa's form and overlay tokens. */
+.svelte-select {
+  --background: var(--paisa-input-bg);
+  --border: 1px solid var(--paisa-input-border);
+  --border-hover: 1px solid var(--paisa-input-border-hover);
+  --border-focused: 1px solid var(--paisa-input-border-focus);
+  --border-radius: var(--paisa-radius-sm);
+  --input-color: var(--paisa-input-text);
+  --item-color: var(--paisa-text-primary);
+  --selected-item-color: var(--paisa-input-text);
+  --placeholder-color: var(--paisa-input-placeholder);
+  --icons-color: var(--paisa-text-muted);
+  --clear-select-color: var(--paisa-text-muted);
+  --chevron-color: var(--paisa-text-muted);
+
+  --list-background: var(--paisa-dropdown-bg);
+  --list-border: 1px solid var(--paisa-dropdown-border);
+  --list-shadow: var(--paisa-dropdown-shadow);
+  --list-empty-color: var(--paisa-text-muted);
+  --item-hover-bg: var(--paisa-surface-hover);
+  --item-hover-color: var(--paisa-text-primary);
+  --item-active-background: var(--paisa-surface-active);
+  --item-is-active-bg: var(--paisa-primary);
+  --item-is-active-color: var(--paisa-text-inverse);
+  --item-is-not-selectable-color: var(--paisa-text-muted);
+  --group-title-color: var(--paisa-text-secondary);
+  --group-title-border-color: var(--paisa-border-default);
+
+  --multi-item-bg: var(--paisa-surface-muted);
+  --multi-item-color: var(--paisa-text-primary);
+  --multi-item-outline: 1px solid var(--paisa-border-default);
+  --multi-item-clear-icon-color: var(--paisa-text-secondary);
+
+  --disabled-background: var(--paisa-input-disabled-bg);
+  --disabled-border-color: var(--paisa-border-default);
+  --disabled-color: var(--paisa-input-disabled-text);
+  --disabled-placeholder-color: var(--paisa-input-disabled-text);
+  --error-background: var(--paisa-input-bg);
+  --error-border: 1px solid var(--paisa-negative);
+}
+
+html .svelte-select.svelte-select {
+  color: var(--paisa-input-text);
+  background: var(--paisa-input-bg);
+  border-color: var(--paisa-input-border);
+}
+
+html .svelte-select-list.svelte-select-list {
+  color: var(--paisa-text-primary);
+  background: var(--paisa-dropdown-bg);
+  border-color: var(--paisa-dropdown-border);
+}
+
+html .svelte-select-list.svelte-select-list .item.hover:not(.active) {
+  color: var(--paisa-text-primary);
+  background: var(--paisa-surface-hover);
+}
+
+html .svelte-select-list.svelte-select-list .item.active {
+  color: var(--paisa-text-inverse);
+  background: var(--paisa-primary);
+}
+
+html .svelte-select.svelte-select .multi-item {
+  color: var(--paisa-text-primary);
+  background: var(--paisa-surface-muted);
+  outline-color: var(--paisa-border-default);
+}

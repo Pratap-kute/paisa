@@ -7,6 +7,7 @@
     data?: any[];
     columns: ColumnDefinition[];
     tree?: boolean;
+    treeStartExpanded?: Options["dataTreeStartExpanded"];
     class?: string;
     options?: Partial<Options>;
   }
@@ -15,6 +16,7 @@
     data = [],
     columns,
     tree = false,
+    treeStartExpanded = [true, true, false],
     class: className = "",
     options = {},
   }: Props = $props();
@@ -22,6 +24,7 @@
   let tableComponent: HTMLElement = $state();
   let tabulator: Tabulator = $state();
   let isBuilt = $state(false);
+  let renderedData: any[] | undefined;
 
   let processedColumns = $derived(
     (columns || []).map((col) => {
@@ -34,7 +37,8 @@
   );
 
   $effect(() => {
-    if (isBuilt) {
+    if (isBuilt && data !== renderedData) {
+      renderedData = data;
       try {
         tabulator?.setData(data ?? []);
       } catch (_) {}
@@ -43,9 +47,10 @@
 
   onMount(() => {
     if (!tableComponent) return;
+    renderedData = data;
     tabulator = new Tabulator(tableComponent, {
       dataTree: tree,
-      dataTreeStartExpanded: [true, true, false],
+      dataTreeStartExpanded: treeStartExpanded,
       dataTreeBranchElement: false,
       dataTreeChildIndent: rem(30),
       dataTreeCollapseElement:
