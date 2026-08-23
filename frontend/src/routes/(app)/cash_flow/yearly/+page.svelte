@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { partition } from "es-toolkit";
   import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
-  import { buildCashFlowSunburstData } from "$lib/charts/cash_flow_hierarchy";
+  import { buildCashFlowHierarchyData } from "$lib/charts/cash_flow_hierarchy";
   import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
   import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
@@ -28,6 +28,10 @@
   let graph: Record<string, Graph> = $state();
   let expenses: Posting[] = $state([]);
   let isLoading = $state(true);
+  let rawGraph: Graph | undefined = $derived.by(() => {
+    if (!graph || isLoading || !graph[$year]) return undefined;
+    return graph[$year];
+  });
   let selectedGraph: Graph | undefined = $derived.by(() => {
     if (!graph || isLoading || !graph[$year]) return undefined;
     return filter(
@@ -39,10 +43,10 @@
   let sankeyData = $derived(
     selectedGraph ? buildCashFlowSankeyData(selectedGraph) : undefined,
   );
-  let sunburstData = $derived(
-    selectedGraph
-      ? buildCashFlowSunburstData(selectedGraph)
-      : { roots: [], mode: "sunburst" as const },
+  let hierarchyData = $derived(
+    rawGraph
+      ? buildCashFlowHierarchyData(rawGraph)
+      : { roots: [], mode: "treemap" as const },
   );
   let legends: Legend[] = $derived(
     sankeyData ? sankeyData.legends : [],
@@ -152,7 +156,7 @@
 
   <Section
     title="Yearly Cash Flow"
-    subtitle={$cashflowViewMode === "sunburst" ? "Interactive hierarchical breakdown (click slice to zoom in/out)" : "Multi-year flows at selected account depth"}
+    subtitle={$cashflowViewMode === "sunburst" ? "Interactive hierarchical treemap (click tile to zoom in/out)" : "Multi-year flows at selected account depth"}
   >
     {#snippet action()}
       <div class="hidden items-center gap-[var(--paisa-space-2)] sm:inline-flex">
@@ -163,12 +167,10 @@
             onclick={() => ($cashflowViewMode = "sunburst")}
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <circle cx="12" cy="12" r="4" />
-              <line x1="12" y1="2" x2="12" y2="8" />
-              <line x1="12" y1="16" x2="12" y2="22" />
-              <line x1="2" y1="12" x2="8" y2="12" />
-              <line x1="16" y1="12" x2="22" y2="12" />
+              <rect x="3" y="3" width="7" height="9" rx="1" />
+              <rect x="14" y="3" width="7" height="5" rx="1" />
+              <rect x="14" y="12" width="7" height="9" rx="1" />
+              <rect x="3" y="16" width="7" height="5" rx="1" />
             </svg>
             Breakdown
           </button>
@@ -202,9 +204,9 @@
         {#if selectedGraph}
           {#if $cashflowViewMode === "sunburst"}
             <FinancialHierarchyChart
-              data={sunburstData}
-              ariaLabel="Yearly cash flow hierarchical sunburst chart"
-              testId="cash-flow-yearly-sunburst-echart"
+              data={hierarchyData}
+              ariaLabel="Yearly cash flow hierarchical treemap chart"
+              testId="cash-flow-yearly-treemap-echart"
             />
           {:else}
             <CashFlowSankeyChart graph={selectedGraph} />

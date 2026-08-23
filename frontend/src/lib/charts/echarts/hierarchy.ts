@@ -174,30 +174,74 @@ function buildFinancialHierarchyLayout(
         type: "treemap",
         data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
         roam: false,
-        nodeClick: false,
-        breadcrumb: { show: false },
-        visibleMin: 2,
+        nodeClick: "zoomToNode",
+        leafDepth: 1,
+        drillDownIcon: "▶",
+        breadcrumb: {
+          show: true,
+          top: "bottom",
+          height: 30,
+          emptyItemWidth: 25,
+          itemStyle: {
+            color: theme?.surfaceColor ?? "rgba(30, 41, 59, 0.8)",
+            borderColor: theme?.borderColor ?? "rgba(148, 163, 184, 0.3)",
+            borderWidth: 1,
+            borderRadius: 4,
+            textStyle: {
+              color: theme?.textColor ?? "#ffffff",
+              fontSize: 12,
+              fontWeight: 600,
+            },
+          },
+        },
+        visibleMin: 10,
         label: {
           show: true,
-          color: theme?.textColor,
+          position: "inside",
+          color: "#ffffff",
+          textBorderColor: "rgba(0, 0, 0, 0.8)",
+          textBorderWidth: 2.5,
+          fontSize: mobile ? 12 : 14,
+          fontWeight: 600,
+          lineHeight: 18,
           overflow: "truncate",
-          formatter: "{b}",
+          formatter: (params: { name?: string; value?: number }) => {
+            if (!params.name) return "";
+            if (typeof params.value === "number" && params.value > 0) {
+              return `${params.name}\n${chartFormatters.currency(params.value)}`;
+            }
+            return params.name;
+          },
         },
-        upperLabel: { show: true, height: 24, color: theme?.textColor },
+        upperLabel: {
+          show: false,
+        },
         itemStyle: {
-          borderColor: theme?.surfaceColor,
-          borderWidth: 2,
-          gapWidth: 2,
+          borderColor: theme?.surfaceColor ?? "#0f172a",
+          borderWidth: 3,
+          gapWidth: 3,
+          borderRadius: 6,
         },
         levels: [
-          { itemStyle: { borderWidth: 0, gapWidth: 3 } },
           {
-            upperLabel: { show: true },
-            itemStyle: { borderWidth: 2, gapWidth: 2 },
+            itemStyle: {
+              borderWidth: 0,
+              gapWidth: 4,
+            },
           },
           {
-            label: { show: !mobile },
-            itemStyle: { borderWidth: 1, gapWidth: 1 },
+            itemStyle: {
+              borderWidth: 3,
+              gapWidth: 3,
+              borderRadius: 6,
+            },
+          },
+          {
+            itemStyle: {
+              borderWidth: 2,
+              gapWidth: 2,
+              borderRadius: 4,
+            },
           },
         ],
       },

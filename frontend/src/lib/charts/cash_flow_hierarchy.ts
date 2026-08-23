@@ -111,11 +111,13 @@ export function buildCashFlowHierarchy(graph: Graph): FinancialHierarchyNode[] {
   return resultRoots;
 }
 
-export function buildCashFlowSunburstData(
+export function buildCashFlowHierarchyData(
   graph: Graph,
 ): FinancialHierarchyChartData {
   return {
     roots: buildCashFlowHierarchy(graph),
-    mode: "sunburst",
+    mode: "treemap",
   };
 }
+
+export const buildCashFlowSunburstData = buildCashFlowHierarchyData;
