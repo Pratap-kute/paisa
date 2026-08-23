@@ -3,8 +3,8 @@
  * Engine-neutral color palettes and resolvers for financial visualizations.
  */
 
-import chroma from "chroma-js";
 import _ from "lodash";
+import { desaturateRgb, rgbToHex } from "../core/color";
 import { getColorPreference } from "../core/utils";
 
 export const MaterialUI = {
@@ -360,9 +360,13 @@ function sinebowColor(t: number): string {
     const value = Math.sin(angle + offset);
     return Math.round(255 * value * value);
   };
-  return chroma.rgb(channel(0), channel(third), channel(2 * third))
-    .desaturate(1.5)
-    .hex();
+  const [r, g, b] = desaturateRgb(
+    channel(0),
+    channel(third),
+    channel(2 * third),
+    1.5,
+  );
+  return rgbToHex(r, g, b);
 }
 
 function stableColorIndex(key: string, colorCount: number): number {

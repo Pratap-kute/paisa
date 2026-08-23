@@ -6,7 +6,6 @@ import { loading } from "../../store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
-import chroma from "chroma-js";
 import { iconGlyph } from "./icon";
 
 export interface AutoCompleteItem {
@@ -962,15 +961,7 @@ export function depth(account: string) {
   return account.split(":").length;
 }
 
-export function darkenOrLighten(backgroundColor: string, intensity = 2) {
-  const [red, green, blue] = chroma(backgroundColor).rgb();
-  // http://www.w3.org/TR/AERT#color-contrast
-  const brightness = (red * 299 + green * 587 + blue) / 1000;
-  if (brightness > 125) {
-    return chroma(backgroundColor).darken(intensity).hex();
-  }
-  return chroma(backgroundColor).brighten(intensity).hex();
-}
+export { darkenOrLighten } from "./color";
 
 export function tooltip(
   rows: Array<Array<string | string[]>>,

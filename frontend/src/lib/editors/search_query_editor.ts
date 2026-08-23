@@ -16,7 +16,6 @@ import type { EditorState } from "@codemirror/state";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { history, historyKeymap } from "@codemirror/commands";
 import type { SyntaxNode } from "@lezer/common";
-import * as chrono from "chrono-node";
 import dayjs from "dayjs";
 import _ from "lodash";
 import { writable } from "svelte/store";
@@ -582,62 +581,98 @@ function getProperty(
   }
 }
 
-export function parseDate(value: string, reference = new Date()): DateRange {
-  if (/^[0-9]{4}$/.test(value)) {
-    const date = dayjs(value, "YYYY");
+export function parseDate(
+  value: string,
+  reference = new Date(),
+): DateRange | null {
+  const trimmed = value.trim().toLowerCase();
+  const ref = dayjs(reference);
+
+  if (/^[0-9]{4}$/.test(trimmed)) {
+    const date = dayjs(trimmed, "YYYY");
     return {
       start: date.startOf("year"),
       end: date.endOf("year"),
     };
   }
 
-  if (/^[0-9]{4}[/-][0-9]{2}$/.test(value)) {
-    const date = dayjs(value.replaceAll(/[/-]/g, " "), "YYYY MM");
+  if (/^[0-9]{4}[/-][0-9]{1,2}$/.test(trimmed)) {
+    const parts = trimmed.split(/[/-]/);
+    const date = dayjs(
+      `${parts[0]}-${parts[1].padStart(2, "0")}`,
+      "YYYY-MM",
+    );
     return {
       start: date.startOf("month"),
       end: date.endOf("month"),
     };
   }
 
-  const results = chrono.parse(value, reference);
-  if (results.length === 0) {
-    return null;
+  if (/^[0-9]{4}[/-][0-9]{1,2}[/-][0-9]{1,2}$/.test(trimmed)) {
+    const parts = trimmed.split(/[/-]/);
+    const date = dayjs(
+      `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`,
+      "YYYY-MM-DD",
+    );
+    return {
+      start: date.startOf("day"),
+      end: date.endOf("day"),
+    };
   }
 
-  const result = results[0];
-  const start = adjustInterval(value, result.start, "start");
-  const end = adjustInterval(value, result.end || result.start, "end");
-
-  return {
-    start: start,
-    end: end,
-  };
-}
-
-function adjustInterval(
-  text: string,
-  parsed: chrono.ParsedComponents,
-  direction: "start" | "end",
-) {
-  let interval: dayjs.OpUnitType = "day";
-  if (parsed.isCertain("day")) {
-    interval = "day";
-  } else if (/week/i.test(text) || parsed.isCertain("weekday")) {
-    interval = "week";
-  } else if (parsed.isCertain("month")) {
-    interval = "month";
-  } else if (parsed.isCertain("year")) {
-    interval = "year";
+  switch (trimmed) {
+    case "today":
+      return { start: ref.startOf("day"), end: ref.endOf("day") };
+    case "yesterday":
+      return {
+        start: ref.subtract(1, "day").startOf("day"),
+        end: ref.subtract(1, "day").endOf("day"),
+      };
+    case "tomorrow":
+      return {
+        start: ref.add(1, "day").startOf("day"),
+        end: ref.add(1, "day").endOf("day"),
+      };
+    case "this week":
+      return { start: ref.startOf("week"), end: ref.endOf("week") };
+    case "last week":
+      return {
+        start: ref.subtract(1, "week").startOf("day"),
+        end: ref.subtract(1, "week").endOf("day"),
+      };
+    case "this month":
+      return { start: ref.startOf("month"), end: ref.endOf("month") };
+    case "last month":
+      return {
+        start: ref.subtract(1, "month").startOf("month"),
+        end: ref.subtract(1, "month").endOf("month"),
+      };
+    case "this year":
+      return { start: ref.startOf("year"), end: ref.endOf("year") };
+    case "last year":
+      return {
+        start: ref.subtract(1, "year").startOf("year"),
+        end: ref.subtract(1, "year").endOf("year"),
+      };
   }
 
-  const date = dayjs(parsed.date());
-
-  switch (direction) {
-    case "start":
-      return date.startOf(interval);
-    case "end":
-      return date.endOf(interval);
+  const monthMatch = trimmed.match(/^([a-z]+)\s+([0-9]{4})$/) ||
+    trimmed.match(/^([0-9]{4})\s+([a-z]+)$/);
+  if (monthMatch) {
+    const mStr = isNaN(Number(monthMatch[1])) ? monthMatch[1] : monthMatch[2];
+    const yStr = isNaN(Number(monthMatch[1])) ? monthMatch[2] : monthMatch[1];
+    const d = dayjs(`${mStr} ${yStr}`, "MMM YYYY");
+    if (d.isValid()) {
+      return { start: d.startOf("month"), end: d.endOf("month") };
+    }
   }
+
+  const generic = dayjs(trimmed);
+  if (generic.isValid()) {
+    return { start: generic.startOf("day"), end: generic.endOf("day") };
+  }
+
+  return null;
 }
 
 function childrens(node: SyntaxNode): SyntaxNode[] {

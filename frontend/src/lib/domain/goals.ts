@@ -1,6 +1,6 @@
 import type { Arima } from "arima/async";
 import dayjs from "dayjs";
-import * as financial from "financial";
+import * as financial from "../core/financial";
 import _, { isEmpty, last } from "lodash";
 import type { Forecast, Point } from "../core/utils";
 import { now } from "../core/utils";
