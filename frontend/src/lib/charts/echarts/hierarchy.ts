@@ -9,7 +9,7 @@ import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
 
 export interface FinancialHierarchyChartData {
   roots: FinancialHierarchyNode[];
-  mode: "treemap" | "sunburst";
+  mode?: "treemap";
 }
 
 function mapNode(
@@ -85,87 +85,6 @@ function buildFinancialHierarchyLayout(
       formatter: tooltip,
     },
   };
-
-  if (data.mode === "sunburst") {
-    return {
-      ...common,
-      series: [
-        {
-          type: "sunburst",
-          data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
-          radius: mobile ? ["12%", "88%"] : ["16%", "92%"],
-          sort: undefined,
-          nodeClick: "rootToNode",
-          emphasis: {
-            focus: "ancestor",
-          },
-          levels: [
-            {},
-            {
-              r0: "15%",
-              r: "44%",
-              itemStyle: {
-                borderWidth: 2,
-                borderColor: theme?.surfaceColor ?? "#0f172a",
-                borderRadius: 4,
-              },
-              label: {
-                rotate: "tangential",
-                minAngle: 12,
-                color: "#ffffff",
-                textBorderColor: "rgba(0, 0, 0, 0.8)",
-                textBorderWidth: 2.5,
-                fontSize: mobile ? 11 : 13,
-                fontWeight: 600,
-                overflow: "truncate",
-                ellipsis: true,
-              },
-            },
-            {
-              r0: "46%",
-              r: "72%",
-              itemStyle: {
-                borderWidth: 1.5,
-                borderColor: theme?.surfaceColor ?? "#0f172a",
-                borderRadius: 3,
-              },
-              label: {
-                rotate: "tangential",
-                minAngle: 10,
-                color: "#ffffff",
-                textBorderColor: "rgba(0, 0, 0, 0.8)",
-                textBorderWidth: 2.5,
-                fontSize: mobile ? 10 : 12,
-                fontWeight: 500,
-                overflow: "truncate",
-                ellipsis: true,
-              },
-            },
-            {
-              r0: "74%",
-              r: "94%",
-              itemStyle: {
-                borderWidth: 1.5,
-                borderColor: theme?.surfaceColor ?? "#0f172a",
-                borderRadius: 2,
-              },
-              label: {
-                rotate: "radial",
-                minAngle: 12,
-                color: "#ffffff",
-                textBorderColor: "rgba(0, 0, 0, 0.8)",
-                textBorderWidth: 2.5,
-                fontSize: mobile ? 9 : 11,
-                fontWeight: 500,
-                overflow: "truncate",
-                ellipsis: true,
-              },
-            },
-          ],
-        },
-      ],
-    };
-  }
 
   return {
     ...common,

@@ -119,5 +119,3 @@ export function buildCashFlowHierarchyData(
     mode: "treemap",
   };
 }
-
-export const buildCashFlowSunburstData = buildCashFlowHierarchyData;

@@ -7,9 +7,9 @@ export const cashflowExpenseDepthAllowed = writable({ min: 1, max: 1 });
 export const cashflowExpenseDepth = persisted("cashflowExpenseDepth", 0);
 export const cashflowIncomeDepthAllowed = writable({ min: 1, max: 1 });
 export const cashflowIncomeDepth = persisted("cashflowIncomeDepth", 0);
-export const cashflowViewMode = persisted<"sunburst" | "sankey">(
+export const cashflowViewMode = persisted<"treemap" | "sankey">(
   "cashflowViewMode",
-  "sunburst",
+  "treemap",
 );
 
 export function setCashflowDepthAllowed(expense: number, income: number) {

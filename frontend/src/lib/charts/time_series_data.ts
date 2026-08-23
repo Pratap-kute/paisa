@@ -147,9 +147,7 @@ export function buildMonthlyInvestmentSeries(
           pList.map((p) => p.amount).filter((amount) => amount >= 0),
         );
         values[`${key}-debit`] = sum(
-          pList.map((p) => p.amount).filter((amount) => amount < 0).map((a) =>
-            -a
-          ),
+          pList.map((p) => p.amount).filter((amount) => amount < 0),
         );
       }
       points.push({
@@ -204,9 +202,7 @@ export function buildYearlyInvestmentSeries(
         pList.map((p) => p.amount).filter((amount) => amount >= 0),
       );
       values[`${key}-debit`] = sum(
-        pList.map((p) => p.amount).filter((amount) => amount < 0).map((a) =>
-          -a
-        ),
+        pList.map((p) => p.amount).filter((amount) => amount < 0),
       );
     }
     return {

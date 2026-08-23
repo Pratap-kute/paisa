@@ -117,8 +117,8 @@
         <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5">
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sunburst' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
-            onclick={() => ($cashflowViewMode = "sunburst")}
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "treemap")}
           >
             Breakdown
           </button>
@@ -156,15 +156,15 @@
 
   <Section
     title="Yearly Cash Flow"
-    subtitle={$cashflowViewMode === "sunburst" ? "Interactive hierarchical treemap (click tile to zoom in/out)" : "Multi-year flows at selected account depth"}
+    subtitle={$cashflowViewMode === "treemap" ? "Interactive hierarchical treemap (click tile to zoom in/out)" : "Multi-year flows at selected account depth"}
   >
     {#snippet action()}
       <div class="hidden items-center gap-[var(--paisa-space-2)] sm:inline-flex">
         <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5" role="group" aria-label="Visualization mode">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sunburst' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
-            onclick={() => ($cashflowViewMode = "sunburst")}
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "treemap")}
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="9" rx="1" />
@@ -202,7 +202,7 @@
       {/if}
       <ChartFrame height="tall" preserveChildren>
         {#if selectedGraph}
-          {#if $cashflowViewMode === "sunburst"}
+          {#if $cashflowViewMode === "treemap"}
             <FinancialHierarchyChart
               data={hierarchyData}
               ariaLabel="Yearly cash flow hierarchical treemap chart"

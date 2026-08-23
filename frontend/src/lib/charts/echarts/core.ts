@@ -4,7 +4,6 @@ import {
   LineChart,
   SankeyChart,
   ScatterChart,
-  SunburstChart,
   TreemapChart,
 } from "echarts/charts";
 import {
@@ -26,7 +25,6 @@ use([
   MarkLineComponent,
   SankeyChart,
   ScatterChart,
-  SunburstChart,
   TooltipComponent,
   TreemapChart,
 ]);

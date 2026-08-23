@@ -1136,10 +1136,13 @@ export function formatTextAsHtml(text: string) {
 
 export function groupSumBy(
   postings: Posting[],
-  groupBy: (posting: Posting) => string,
+  groupBy: ((posting: Posting) => string) | keyof Posting | string,
 ) {
+  const fn = typeof groupBy === "function"
+    ? groupBy
+    : (p: Posting) => (p as Record<string, any>)[groupBy as string];
   return mapValues(
-    groupByItems(postings, groupBy),
+    groupByItems(postings, fn),
     (ps) => sumBy(ps, (p) => p.amount),
   );
 }

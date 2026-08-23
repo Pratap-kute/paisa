@@ -150,9 +150,9 @@ describe("chart option contracts", () => {
     );
   });
 
-  it("builds a sunburst hierarchy option for nested holdings", () => {
+  it("builds a treemap hierarchy option for nested holdings", () => {
     const option = buildFinancialHierarchyOption({
-      mode: "sunburst",
+      mode: "treemap",
       roots: [
         {
           id: "tech",
@@ -176,7 +176,7 @@ describe("chart option contracts", () => {
       };
     };
 
-    expect(option.baseOption.series[0].type).toBe("sunburst");
+    expect(option.baseOption.series[0].type).toBe("treemap");
     expect(option.baseOption.series[0].data[0].children.length).toBe(2);
   });
 

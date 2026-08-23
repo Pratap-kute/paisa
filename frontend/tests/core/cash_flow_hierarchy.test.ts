@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildCashFlowHierarchy,
-  buildCashFlowSunburstData,
+  buildCashFlowHierarchyData,
 } from "$lib/charts/cash_flow_hierarchy";
 import type { Graph } from "$lib/core/utils";
 import browserExpense from "../fixture/browser/expense.json" with {
@@ -24,7 +24,7 @@ const graph: Graph = {
   ],
 };
 
-describe("Cash Flow Hierarchy & Sunburst transformer", () => {
+describe("Cash Flow Hierarchy & Treemap transformer", () => {
   it("builds root-level account groups from graph paths", () => {
     const roots = buildCashFlowHierarchy(graph);
     const rootLabels = roots.map((r) => r.id);
@@ -77,10 +77,10 @@ describe("Cash Flow Hierarchy & Sunburst transformer", () => {
       ],
     };
 
-    const sunburstData = buildCashFlowSunburstData(cycleGraph);
-    expect(sunburstData.mode).toBe("sunburst");
-    expect(sunburstData.roots.length).toBeGreaterThan(0);
-    expect(sunburstData.roots.find((r) => r.id === "Assets")?.value)
+    const treemapData = buildCashFlowHierarchyData(cycleGraph);
+    expect(treemapData.mode).toBe("treemap");
+    expect(treemapData.roots.length).toBeGreaterThan(0);
+    expect(treemapData.roots.find((r) => r.id === "Assets")?.value)
       .toBeGreaterThan(0);
   });
 
