@@ -40,7 +40,7 @@ function harvestable(overrides: Partial<Harvestable> = {}): Harvestable {
   };
 }
 
-describe("Tax Harvest data", () => {
+describe("Tax Harvest calculations", () => {
   it("keeps only positive harvest opportunities in source order", () => {
     const first = harvestable({ account: "First" });
     const unavailable = harvestable({
@@ -81,7 +81,7 @@ describe("Tax Harvest data", () => {
   });
 });
 
-describe("Schedule AL data", () => {
+describe("Schedule AL calculations", () => {
   it("sums entries without changing their order", () => {
     const entries: ScheduleALEntry[] = [
       {

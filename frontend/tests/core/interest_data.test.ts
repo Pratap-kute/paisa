@@ -4,6 +4,7 @@ import {
   buildInterestOverviewComparison,
   buildInterestTimelineSeries,
   interestSummary,
+  padTimeDomain,
   timelineDomain,
 } from "$lib/charts/interest_data";
 import type { Interest } from "$lib/core/utils";
@@ -28,6 +29,32 @@ const interest: Interest = {
 };
 
 describe("interest chart adapters", () => {
+  it("pads a single-point time domain without changing multi-day domains", () => {
+    const day = dayjs("2024-01-15");
+    const [paddedStart, paddedEnd] = padTimeDomain(day, day);
+    expect(paddedStart.isSame(paddedEnd)).toBe(false);
+    expect(paddedEnd.diff(paddedStart, "day")).toBe(2);
+
+    const start = dayjs("2024-01-01");
+    const end = dayjs("2024-02-01");
+    expect(padTimeDomain(start, end)).toEqual([start, end]);
+  });
+
+  it("tolerates an empty overview timeline", () => {
+    expect(interestSummary({
+      account: "Liabilities:Loan:Empty",
+      overview_timeline: [],
+      apr: 0,
+    })).toMatchObject({
+      label: "Loan:Empty",
+      drawn: 0,
+      repaid: 0,
+      interest: 0,
+      balance: 0,
+      apr: 0,
+    });
+  });
+
   it("preserves latest account comparison values and units", () => {
     expect(interestSummary(interest)).toMatchObject({
       drawn: 1000,
