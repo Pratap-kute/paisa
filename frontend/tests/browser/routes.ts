@@ -194,6 +194,42 @@ export const chartSnapshots = [
     path: "/expense/monthly",
     locator: "[data-testid='monthly-expense-breakdown-echart']",
   },
+  {
+    name: "expense-yearly-calendar",
+    path: "/expense/yearly",
+    locator: "[data-testid='yearly-expense-calendar-echart']",
+  },
+  {
+    name: "portfolio-hierarchy",
+    path: "/assets/analysis",
+    locator: "[data-testid='portfolio-industry-echart']",
+  },
+  {
+    name: "allocation-timeline",
+    path: "/assets/allocation",
+    locator: "[data-testid='allocation-timeline-echart']",
+  },
+  {
+    name: "liability-interest",
+    path: "/liabilities/interest",
+    locator: "[data-testid='interest-overview-echart']",
+  },
+  {
+    name: "income-statement",
+    path: "/cash_flow/income_statement",
+    locator: "[data-testid='income-statement-waterfall-echart']",
+  },
+  {
+    name: "cash-flow-yearly",
+    path: "/cash_flow/yearly",
+    locator: "[data-testid='cash-flow-yearly-echart']",
+    selectOption: "2021 - 22",
+  },
+  {
+    name: "savings-goal",
+    path: "/more/goals/savings/House",
+    locator: "[data-testid='savings-goal-progress-echart']",
+  },
 ] as const;
 
 export const chartSnapshotVariants = [

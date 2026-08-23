@@ -13,10 +13,6 @@ import { byExpenseGroup, expenseGroup } from "$lib/charts/expense";
 
 export function buildExpenseBreakdownComparison(
   postings: Posting[],
-  options: {
-    color?: (category: string) => string;
-    headerPrefix?: string;
-  } = {},
 ): ComparisonBarChartData {
   const categories = byExpenseGroup(postings);
   const total = _.sumBy(_.values(categories), (point) => point.total);
@@ -36,11 +32,10 @@ export function buildExpenseBreakdownComparison(
       return {
         key: point.category,
         categoryKey: point.category,
-        label: iconify(point.category, { group: "Expenses", suffix: true }),
+        label: point.category,
         value: point.total,
         secondaryValue: total > 0 ? (point.total / total) * 100 : 0,
         secondaryLabel: "Share %",
-        color: options.color?.(point.category),
         tooltipRows: [
           {
             label: "Total",

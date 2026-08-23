@@ -143,11 +143,12 @@ export function createEChartSurfaceController(options: {
       if (chart) return;
       chart = options.initChart(options.element, options.renderer);
       invalidateReady();
-      chart.on("finished", scheduleReady as never);
       attachHandlers();
       chart.setOption(currentOption, true);
+      scheduleReady();
     },
     update(option) {
+      if (option === currentOption) return;
       currentOption = option;
       if (chart) invalidateReady();
       chart?.setOption(currentOption, true);
@@ -157,24 +158,23 @@ export function createEChartSurfaceController(options: {
       if (nextDimensions.width <= 0 || nextDimensions.height <= 0) return;
       const changed = dimensions?.width !== nextDimensions.width ||
         dimensions?.height !== nextDimensions.height;
+      if (!changed) return;
       dimensions = nextDimensions;
-      if (changed) invalidateReady();
+      invalidateReady();
       chart?.resize({
         width: nextDimensions.width,
         height: nextDimensions.height,
       });
-      if (changed) options.onresize?.(nextDimensions);
+      options.onresize?.(nextDimensions);
       scheduleReady();
     },
     setEventHandlers(handlers) {
+      if (handlers === eventHandlers) return;
       eventHandlers = handlers;
       attachHandlers();
     },
     markReady,
     dispose() {
-      if (chart) {
-        chart.off("finished", scheduleReady as never);
-      }
       clearReadyFrame();
       detachHandlers();
       chart?.dispose();

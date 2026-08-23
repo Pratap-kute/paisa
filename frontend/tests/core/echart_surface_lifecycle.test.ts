@@ -59,7 +59,6 @@ describe("ECharts surface lifecycle controller", () => {
 
     controller.init();
     expect(initChart).toHaveBeenCalledWith(element, "canvas");
-    expect(chart.on).toHaveBeenCalledWith("finished", expect.any(Function));
     expect(chart.setOption).toHaveBeenCalledWith(initialOption, true);
     expect(element.dataset.chartReady).toBe("false");
     expect(onreadinesschange).toHaveBeenLastCalledWith(false);
@@ -72,6 +71,7 @@ describe("ECharts surface lifecycle controller", () => {
     expect(onresize).toHaveBeenCalledWith({ width: 640, height: 360 });
     controller.resize({ width: 640, height: 360 });
     expect(onresize).toHaveBeenCalledTimes(1);
+    expect(chart.resize).toHaveBeenCalledTimes(1);
 
     controller.markReady();
     expect(controller.ready()).toBe(true);
@@ -79,7 +79,6 @@ describe("ECharts surface lifecycle controller", () => {
     expect(onreadinesschange).toHaveBeenLastCalledWith(true);
 
     controller.dispose();
-    expect(chart.off).toHaveBeenCalledWith("finished", expect.any(Function));
     expect(chart.dispose).toHaveBeenCalledTimes(1);
     expect(controller.chart()).toBeUndefined();
     expect(controller.ready()).toBe(false);
@@ -166,11 +165,6 @@ describe("ECharts surface lifecycle controller", () => {
     });
 
     controller.init();
-    const finished = chart.on.mock.calls.find(([event]) => event === "finished")
-      ?.[1] as (() => void);
-    finished();
-    frames.flush();
-    frames.flush();
     expect(controller.ready()).toBe(false);
 
     controller.resize({ width: 640, height: 360 });

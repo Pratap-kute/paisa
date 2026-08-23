@@ -118,14 +118,16 @@ describe("cash-flow Sankey ECharts adapter", () => {
   it("creates intent-shaped ECharts sankey options without exposing D3 scales", () => {
     const data = buildCashFlowSankeyData(graph);
     const option = buildCashFlowSankeyOption(data, {
-      width: 390,
+      compact: true,
       theme: {
+        fontFamily: "Paisa Sans",
         textColor: "rgb(1, 2, 3)",
         mutedColor: "rgb(4, 5, 6)",
         borderColor: "rgb(7, 8, 9)",
         gridColor: "rgb(7, 8, 9)",
         surfaceColor: "rgb(10, 11, 12)",
         tooltipSurfaceColor: "rgb(13, 14, 15)",
+        tooltipTextColor: "rgb(240, 241, 242)",
         primaryColor: "rgb(16, 17, 18)",
         positiveColor: "rgb(19, 20, 21)",
         negativeColor: "rgb(22, 23, 24)",

@@ -97,6 +97,12 @@
   --paisa-chart-series-4: #f28e2c;
   --paisa-chart-series-5: #af7aa1;
   --paisa-chart-series-6: #76b7b2;
+  --paisa-chart-series-7: #edc949;
+  --paisa-chart-series-8: #ff9da7;
+  --paisa-chart-series-9: #9c755f;
+  --paisa-chart-series-10: #bab0ab;
+  --paisa-chart-series-11: #8cd17d;
+  --paisa-chart-series-12: #b6992d;
 
   /* Borders & Dividers */
   --paisa-border-subtle: #f1f5f9;
@@ -218,6 +224,12 @@ html[data-theme="dark"] {
   --paisa-chart-series-4: #ffad5c;
   --paisa-chart-series-5: #d49acb;
   --paisa-chart-series-6: #86d4ce;
+  --paisa-chart-series-7: #f2cf5b;
+  --paisa-chart-series-8: #ffadb6;
+  --paisa-chart-series-9: #c49a87;
+  --paisa-chart-series-10: #d0cbc7;
+  --paisa-chart-series-11: #9cda8e;
+  --paisa-chart-series-12: #d6bd48;
 
   /* Dark Borders & Dividers */
   --paisa-border-subtle: #1e293b;

@@ -7,10 +7,10 @@
 
   interface Props { data: IncomeStatementWaterfallData; ariaLabel: string; testId: string }
   let { data, ariaLabel, testId }: Props = $props();
-  let width = $state(0);
+  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
-  const option = $derived(buildIncomeStatementWaterfallOption(data, { width, theme: tokenTheme, darkMode: $theme === "dark" }));
+  const option = $derived(buildIncomeStatementWaterfallOption(data, { compact, theme: tokenTheme, darkMode: $theme === "dark" }));
   $effect(() => { $theme; tokenTheme = readPaisaChartTheme(); });
 </script>
 
-<EChartSurface {option} {ariaLabel} {testId} onresize={(dimensions) => { width = dimensions.width; }} />
+<EChartSurface {option} {ariaLabel} {testId} onresize={(dimensions) => compact = dimensions.width < 640} />

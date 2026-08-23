@@ -124,7 +124,7 @@ export function buildPortfolioHierarchy(
     label: aggregate.group,
     value: aggregate.amount,
     percentage: aggregate.percentage,
-    categoryKey: aggregate.sub_group || aggregate.group,
+    categoryKey: aggregate.group,
     metadata: { group: aggregate.group, subGroup: aggregate.sub_group },
     children: aggregate.breakdowns.map((breakdown) => ({
       id:
@@ -132,7 +132,7 @@ export function buildPortfolioHierarchy(
       label: breakdown.security_name || breakdown.commodity_name,
       value: breakdown.amount,
       percentage: breakdown.percentage,
-      categoryKey: breakdown.commodity_name,
+      categoryKey: aggregate.group,
       metadata: {
         commodity: breakdown.commodity_name,
         security: breakdown.security_name,

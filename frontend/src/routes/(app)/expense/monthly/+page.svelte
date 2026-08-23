@@ -12,7 +12,7 @@
     postingUrl,
     restName,
   } from "$lib/core/utils";
-  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryLegends } from "$lib/charts/mixed_period_data";
+  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
@@ -43,6 +43,7 @@
     grouped_taxes: Record<string, Posting[]> | undefined = $state();
 
   let legends: Legend[] = $state([]);
+  let expenseColor = $state(categoryColor);
   let isLoading = $state(true);
 
   let taxRate = $state(""),
@@ -69,6 +70,7 @@
 
       setAllowedDateRange(_.map(expenses, (e: Posting) => e.date));
       const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
+      expenseColor = categoryColorResolver(allGroups);
       groups.set(allGroups);
       legends = categoryLegends(allGroups, (group) => {
         groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
@@ -102,9 +104,7 @@
     buildMonthlyExpenseHeatmapData($month, selectedMonthExpenses, $groups),
   );
   let selectedMonthBreakdownData = $derived(
-    buildExpenseBreakdownComparison(selectedMonthExpenses, {
-      color: categoryColor,
-    }),
+    buildExpenseBreakdownComparison(selectedMonthExpenses),
   );
   let expenseTimelineData = $derived(buildMonthlyExpenseTimelineSeries(expenses ?? [], $groups, $dateRange));
   let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
@@ -313,7 +313,7 @@
           <a
             class="flex items-center gap-[var(--paisa-space-3)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-[var(--paisa-space-3)] py-[var(--paisa-space-2)] no-underline transition-colors last:border-b-0 hover:bg-[var(--paisa-surface-hover)]"
             href={postingUrl(exp)}
-            style="--paisa-category-color: {categoryColor(expenseGroup(exp))}"
+            style="--paisa-category-color: {expenseColor(expenseGroup(exp))}"
           >
             <div class="w-[3px] shrink-0 self-stretch rounded-[var(--paisa-radius-full)] bg-[var(--paisa-category-color)]"></div>
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">

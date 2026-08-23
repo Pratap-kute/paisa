@@ -69,32 +69,11 @@ for (
 }
 
 try {
-  const staticIndex = join(root, "../backend/web/static/index.html");
-  const serverIndex = join(root, ".svelte-kit/output/server/index.js");
-  const e2eMarker = join(root, "../backend/web/static/.e2e-dev-ui");
-  let hasStatic = false;
-  try {
-    Deno.statSync(staticIndex);
-    Deno.statSync(serverIndex);
-    hasStatic = true;
-  } catch (_) {
-    // Static assets or preview server build not ready yet
-  }
-  let needsE2eBuild = !hasStatic ||
-    Deno.env.get("PAISA_REBUILD_FRONTEND") === "true";
-  if (!needsE2eBuild) {
-    try {
-      needsE2eBuild = Deno.readTextFileSync(e2eMarker).trim() !== "1";
-    } catch {
-      needsE2eBuild = true;
-    }
-  }
-  if (needsE2eBuild) {
-    await run(Deno.execPath(), ["task", "build"], root, {
-      VITE_PAISA_E2E_DEV_UI: "true",
-    });
-    await Deno.writeTextFile(e2eMarker, "1");
-  }
+  // Browser tests must exercise the current working tree, not a static bundle
+  // left behind by an earlier run.
+  await run(Deno.execPath(), ["task", "build"], root, {
+    VITE_PAISA_E2E_DEV_UI: "true",
+  });
   await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
   await run(binary, [
     "--config",

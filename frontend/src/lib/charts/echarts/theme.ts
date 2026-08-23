@@ -1,10 +1,12 @@
 export interface PaisaChartTheme {
+  fontFamily: string;
   textColor: string;
   mutedColor: string;
   borderColor: string;
   gridColor: string;
   surfaceColor: string;
   tooltipSurfaceColor: string;
+  tooltipTextColor: string;
   primaryColor: string;
   positiveColor: string;
   negativeColor: string;
@@ -27,12 +29,14 @@ function seriesToken(index: number, fallback: string): string {
 
 export function readPaisaChartTheme(): PaisaChartTheme {
   return {
+    fontFamily: token("--paisa-font-sans", "sans-serif"),
     textColor: token("--paisa-foreground", "currentColor"),
     mutedColor: token("--paisa-muted-foreground", "currentColor"),
     borderColor: token("--paisa-border-subtle", "currentColor"),
     gridColor: token("--paisa-border-subtle", "currentColor"),
     surfaceColor: token("--paisa-surface", "transparent"),
-    tooltipSurfaceColor: token("--paisa-popover", "Canvas"),
+    tooltipSurfaceColor: token("--paisa-tooltip-bg", "#1e293b"),
+    tooltipTextColor: token("--paisa-tooltip-text", "#f8fafc"),
     primaryColor: token("--paisa-primary", "#2563eb"),
     positiveColor: token("--paisa-positive", "#16a34a"),
     negativeColor: token("--paisa-negative", "#dc2626"),
@@ -45,6 +49,12 @@ export function readPaisaChartTheme(): PaisaChartTheme {
       seriesToken(4, "#d97706"),
       seriesToken(5, "#7c3aed"),
       seriesToken(6, "#0891b2"),
+      seriesToken(7, "#edc949"),
+      seriesToken(8, "#ff9da7"),
+      seriesToken(9, "#9c755f"),
+      seriesToken(10, "#bab0ab"),
+      seriesToken(11, "#8cd17d"),
+      seriesToken(12, "#b6992d"),
     ],
   };
 }
@@ -78,4 +88,16 @@ export function categorySeriesColor(
 ): string {
   if (colors.length === 0) return fallback;
   return colors[categorySeriesIndex(key, colors.length)] ?? fallback;
+}
+
+export function categoryColorAssignments(
+  keys: Array<string | undefined>,
+  colors: readonly string[],
+  fallback = "currentColor",
+): Map<string, string> {
+  const normalized = [...new Set(keys.map(normalizeCategoryKey))].sort();
+  return new Map(normalized.map((key, index) => [
+    key,
+    colors[index % colors.length] ?? fallback,
+  ]));
 }

@@ -7,7 +7,6 @@
     type EChartRenderer,
     type PaisaChartEventHandler,
   } from "$lib/charts/echarts/surface_lifecycle";
-  import { theme } from "../../../store";
   import type { EChartsCoreOption } from "echarts/core";
   import { untrack } from "svelte";
 
@@ -37,7 +36,6 @@
   let controller: EChartSurfaceController | undefined = $state();
   let chartReady = $state(false);
   let pendingDimensions: Dimensions | undefined;
-  let currentTheme = $derived($theme);
 
   async function ensureChart() {
     if (!element || controller || typeof window === "undefined") return;
@@ -92,11 +90,6 @@
   });
 
   $effect(() => {
-    currentTheme;
-    controller?.update(option);
-  });
-
-  $effect(() => {
     controller?.setEventHandlers(events);
   });
 </script>
@@ -115,5 +108,7 @@
     min-height: 320px;
     height: 100%;
     width: 100%;
+    min-width: 0;
+    overflow: hidden;
   }
 </style>

@@ -4,16 +4,18 @@ import type { IncomeStatementWaterfallData } from "$lib/charts/income_statement_
 
 export function buildIncomeStatementWaterfallOption(
   data: IncomeStatementWaterfallData,
-  options: { width?: number; theme?: PaisaChartTheme; darkMode?: boolean } = {},
+  options: { compact?: boolean; theme?: PaisaChartTheme; darkMode?: boolean } =
+    {},
 ) {
   const theme = options.theme;
-  const mobile = (options.width ?? 0) > 0 && (options.width ?? 0) < 640;
+  const mobile = options.compact ?? false;
   const colorFor = (delta: number) =>
     delta >= 0
       ? theme?.positiveColor ?? "#16a34a"
       : theme?.negativeColor ?? "#dc2626";
   const baseOption = {
-    animationDuration: 250,
+    animation: false,
+    textStyle: { fontFamily: theme?.fontFamily, color: theme?.mutedColor },
     grid: {
       top: 24,
       right: 18,
@@ -26,7 +28,7 @@ export function buildIncomeStatementWaterfallOption(
       confine: true,
       backgroundColor: theme?.tooltipSurfaceColor,
       borderColor: theme?.borderColor,
-      textStyle: { color: theme?.textColor },
+      textStyle: { color: theme?.tooltipTextColor ?? theme?.textColor },
       formatter: (params: { seriesName?: string; dataIndex?: number }) => {
         if (params.seriesName === "Base") return "";
         const step = data.steps[params.dataIndex ?? 0];

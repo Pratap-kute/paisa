@@ -16,10 +16,10 @@
   }
 
   let { data, ariaLabel, testId, events = [] }: Props = $props();
-  let chartWidth = $state(0);
+  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(buildComparisonBarOption(data, {
-    width: chartWidth,
+    compact,
     darkMode: $theme === "dark",
     theme: tokenTheme,
   }));
@@ -36,6 +36,6 @@
   {testId}
   {events}
   onresize={(dimensions) => {
-    chartWidth = dimensions.width;
+    compact = dimensions.width < 640;
   }}
 />

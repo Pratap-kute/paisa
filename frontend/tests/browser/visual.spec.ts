@@ -5,7 +5,22 @@ import {
   visualRoutes,
 } from "./routes.ts";
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "parallel" });
+
+const browserErrors = new WeakMap<Page, string[]>();
+
+test.beforeEach(({ page }) => {
+  const errors: string[] = [];
+  browserErrors.set(page, errors);
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+});
+
+test.afterEach(({ page }) => {
+  expect(browserErrors.get(page) ?? []).toEqual([]);
+});
 
 const mockLogs = {
   logs: [
@@ -45,6 +60,7 @@ const mockLogs = {
 const variants = [
   { name: "desktop-light", width: 1440, height: 900, theme: "light" },
   { name: "desktop-dark", width: 1440, height: 900, theme: "dark" },
+  { name: "tablet-light", width: 768, height: 900, theme: "light" },
   { name: "mobile-light", width: 390, height: 844, theme: "light" },
   { name: "mobile-dark", width: 390, height: 844, theme: "dark" },
 ] as const;
@@ -65,6 +81,49 @@ async function waitForStableLayout(page: Page) {
     { polling: 100 },
   );
   await page.waitForTimeout(100);
+}
+
+async function expectStableChartSurfaces(page: Page) {
+  const charts = page.locator("[data-chart-ready='true']");
+  const count = await charts.count();
+  if (count === 0) return;
+
+  const first = await charts.evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      const parent = element.parentElement?.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        parentWidth: parent?.width ?? 0,
+      };
+    })
+  );
+  await page.evaluate(() =>
+    new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    )
+  );
+  const second = await charts.evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      const parent = element.parentElement?.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        parentWidth: parent?.width ?? 0,
+      };
+    })
+  );
+
+  expect(second).toHaveLength(first.length);
+  second.forEach((size, index) => {
+    expect(size.width).toBeGreaterThan(0);
+    expect(size.height).toBeGreaterThan(0);
+    expect(Math.abs(size.width - first[index].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(size.height - first[index].height)).toBeLessThanOrEqual(1);
+    expect(size.width).toBeLessThanOrEqual(size.parentWidth + 1);
+  });
 }
 
 async function applyVariant(
@@ -158,6 +217,7 @@ for (const route of visualRoutes) {
       }
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
+      await expectStableChartSurfaces(page);
       await expect(page).toHaveScreenshot(
         `${route.name}-${variant.name}.png`,
         { fullPage: true },
@@ -172,6 +232,11 @@ for (const chart of chartSnapshots) {
       await applyVariant(page, variant);
       await page.goto(chart.path);
       await page.waitForLoadState("networkidle");
+      if ("selectOption" in chart) {
+        await page.getByRole("combobox").selectOption({
+          label: chart.selectOption,
+        });
+      }
       if ("readyText" in chart && typeof chart.readyText === "string") {
         await expect(page.getByText(chart.readyText, { exact: true }))
           .toBeVisible();
@@ -182,9 +247,10 @@ for (const chart of chartSnapshots) {
       await expect(chartLocator).toBeVisible();
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
+      await expectStableChartSurfaces(page);
       await expect(chartLocator).toHaveScreenshot(
         `chart-${chart.name}-${variant.name}.png`,
-        { maxDiffPixelRatio: 0.05 },
+        { maxDiffPixelRatio: 0.02 },
       );
     });
   }

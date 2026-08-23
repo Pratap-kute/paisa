@@ -1,10 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
-import process from "node:process";
 
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: false,
-  workers: process.env.CI ? 4 : undefined,
+  workers: 4,
   timeout: 45_000,
   expect: {
     timeout: 10_000,

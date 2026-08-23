@@ -29,9 +29,7 @@ describe("bar/comparison ECharts adapters", () => {
       posting("Expenses:Food:Groceries", 100, "2022-01-01"),
       posting("Expenses:Food:Restaurant", 50, "2022-01-02"),
       posting("Expenses:Travel:Taxi", 50, "2022-01-03"),
-    ], {
-      color: (category) => `color-${category}`,
-    });
+    ]);
 
     const food = data.points.find((point) => point.key === "Food");
     const travel = data.points.find((point) => point.key === "Travel");
@@ -39,7 +37,7 @@ describe("bar/comparison ECharts adapters", () => {
     expect(food?.value).toBe(150);
     expect(food?.secondaryValue).toBe(75);
     expect(food?.categoryKey).toBe("Food");
-    expect(food?.color).toBe("color-Food");
+    expect(food?.color).toBeUndefined();
     expect(travel?.value).toBe(50);
     expect(data.points.reduce((sum, point) => sum + point.value, 0)).toBe(200);
   });

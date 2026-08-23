@@ -1,6 +1,7 @@
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import {
-  categorySeriesColor,
+  categoryColorAssignments,
+  normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
 import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
@@ -13,21 +14,30 @@ export interface FinancialHierarchyChartData {
 function mapNode(
   node: FinancialHierarchyNode,
   theme?: PaisaChartTheme,
+  categoryColors = new Map<string, string>(),
+  inheritedCategoryKey = node.id,
 ): Record<string, unknown> {
+  const categoryKey = node.categoryKey ?? inheritedCategoryKey;
   return {
     name: node.label,
     value: Math.max(0, node.value),
     itemStyle: {
-      color: categorySeriesColor(
-        node.categoryKey ?? node.id,
-        theme?.seriesColors ?? [],
+      color: categoryColors.get(normalizeCategoryKey(categoryKey)) ??
         theme?.primaryColor,
-      ),
       borderColor: theme?.surfaceColor,
     },
-    children: node.children?.map((child) => mapNode(child, theme)),
+    children: node.children?.map((child) =>
+      mapNode(child, theme, categoryColors, categoryKey)
+    ),
     paisa: node,
   };
+}
+
+function categoryKeys(nodes: FinancialHierarchyNode[]): string[] {
+  return nodes.flatMap((node) => [
+    node.categoryKey ?? node.id,
+    ...categoryKeys(node.children ?? []),
+  ]);
 }
 
 function tooltip(params: { data?: { paisa?: FinancialHierarchyNode } }) {
@@ -46,23 +56,28 @@ function tooltip(params: { data?: { paisa?: FinancialHierarchyNode } }) {
 
 export function buildFinancialHierarchyOption(
   data: FinancialHierarchyChartData,
-  options: { width?: number; theme?: PaisaChartTheme } = {},
+  options: { compact?: boolean; theme?: PaisaChartTheme } = {},
 ) {
-  const mobile = (options.width ?? 0) > 0 && (options.width ?? 0) < 640;
+  const mobile = options.compact ?? false;
   const theme = options.theme;
+  const categoryColors = categoryColorAssignments(
+    categoryKeys(data.roots),
+    theme?.seriesColors ?? [],
+    theme?.primaryColor,
+  );
   const common = {
-    animationDuration: 250,
+    animation: false,
     backgroundColor: "transparent",
     textStyle: {
       color: theme?.mutedColor,
-      fontFamily: "var(--paisa-font-sans)",
+      fontFamily: theme?.fontFamily,
     },
     tooltip: {
       trigger: "item",
       confine: true,
       borderColor: theme?.borderColor,
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: { color: theme?.textColor },
+      textStyle: { color: theme?.tooltipTextColor ?? theme?.textColor },
       formatter: tooltip,
     },
   };
@@ -70,7 +85,7 @@ export function buildFinancialHierarchyOption(
     ...common,
     series: [{
       type: "treemap",
-      data: data.roots.map((node) => mapNode(node, theme)),
+      data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
       roam: false,
       nodeClick: false,
       breadcrumb: { show: false },

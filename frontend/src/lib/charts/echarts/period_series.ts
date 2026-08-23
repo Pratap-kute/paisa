@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import type { Legend } from "$lib/core/utils";
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import {
-  categorySeriesColor,
+  categoryColorAssignments,
+  normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
 
@@ -54,7 +55,7 @@ export interface PeriodSeriesChartData {
 }
 
 export interface PeriodSeriesOptions {
-  width?: number;
+  compact?: boolean;
   darkMode?: boolean;
   theme?: PaisaChartTheme;
   internalLegend?: boolean;
@@ -75,10 +76,11 @@ function seriesColor(
   series: PeriodSeriesDefinition,
   theme: PaisaChartTheme | undefined,
   index: number,
+  categoryColors: Map<string, string>,
 ) {
   return series.color ??
-    (series.categoryKey && theme
-      ? categorySeriesColor(series.categoryKey, theme.seriesColors)
+    (series.categoryKey
+      ? categoryColors.get(normalizeCategoryKey(series.categoryKey))
       : undefined) ??
     theme?.seriesColors[index % (theme.seriesColors.length || 1)] ??
     "currentColor";
@@ -119,7 +121,7 @@ export function buildPeriodSeriesOption(
   data: PeriodSeriesChartData,
   options: PeriodSeriesOptions = {},
 ) {
-  const mobile = (options.width ?? 0) > 0 && (options.width ?? 0) < 640;
+  const mobile = options.compact ?? false;
   const theme = options.theme;
   const textColor = theme?.textColor ?? "currentColor";
   const mutedColor = theme?.mutedColor ?? textColor;
@@ -129,6 +131,11 @@ export function buildPeriodSeriesOption(
   const categories = data.points.map((point) => point.period);
   const timeValues = data.points.map((point) =>
     point.timestamp ?? point.period
+  );
+  const categoryColors = categoryColorAssignments(
+    data.series.map((series) => series.categoryKey),
+    theme?.seriesColors ?? [],
+    theme?.primaryColor,
   );
 
   const axisLabel = {
@@ -169,10 +176,10 @@ export function buildPeriodSeriesOption(
   };
 
   return {
-    animationDuration: 250,
+    animation: false,
     backgroundColor: "transparent",
     color: data.series.map((series, index) =>
-      seriesColor(series, theme, index)
+      seriesColor(series, theme, index, categoryColors)
     ),
     grid: {
       top: options.internalLegend ? (mobile ? 44 : 52) : 16,
@@ -184,8 +191,19 @@ export function buildPeriodSeriesOption(
     legend: options.internalLegend
       ? {
         top: 0,
-        type: "scroll",
-        textStyle: { color: mutedColor },
+        left: "center",
+        type: mobile ? "plain" : "scroll",
+        itemWidth: mobile ? 12 : 18,
+        itemHeight: mobile ? 8 : 10,
+        itemGap: mobile ? 8 : 14,
+        textStyle: { color: mutedColor, fontSize: mobile ? 10 : 12 },
+        formatter: mobile
+          ? (name: string) =>
+            ({
+              "Interest gain": "Gain",
+              "Interest cost": "Cost",
+            })[name] ?? name
+          : undefined,
       }
       : undefined,
     tooltip: {
@@ -193,19 +211,19 @@ export function buildPeriodSeriesOption(
       confine: true,
       borderColor,
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: { color: textColor },
+      textStyle: { color: theme?.tooltipTextColor ?? textColor },
       formatter: (params: unknown) => tooltipFormatter(data, params),
     },
     xAxis: horizontal ? valueAxis : periodAxis,
     yAxis: horizontal ? periodAxis : valueAxis,
     textStyle: {
       color: mutedColor,
-      fontFamily: "var(--paisa-font-sans)",
+      fontFamily: theme?.fontFamily,
     },
     series: data.series.map((series, index) => {
-      const color = seriesColor(series, theme, index);
+      const color = seriesColor(series, theme, index, categoryColors);
       const values = data.points.map((point, pointIndex) => {
-        const value = point.values[series.key] ?? 0;
+        const value = point.values[series.key] ?? null;
         if (!categoryAxis && !horizontal) {
           return [timeValues[pointIndex], value];
         }
@@ -217,9 +235,10 @@ export function buildPeriodSeriesOption(
         name: series.label,
         data: values,
         stack: series.stack,
-        smooth: series.smooth ?? !bar,
+        smooth: series.smooth ?? false,
+        connectNulls: false,
         showSymbol: series.showSymbol ?? (mobile ? false : !bar),
-        barMaxWidth: bar ? (mobile ? 28 : 40) : undefined,
+        barMaxWidth: bar ? (mobile ? 36 : 64) : undefined,
         itemStyle: {
           color: (params: { value?: unknown }) => {
             const raw = Array.isArray(params.value)

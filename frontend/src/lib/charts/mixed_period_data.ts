@@ -16,15 +16,26 @@ import {
 } from "$lib/core/utils";
 
 export const categoryColor = (key: string) =>
-  `var(--paisa-chart-series-${categorySeriesIndex(key, 6) + 1})`;
+  `var(--paisa-chart-series-${categorySeriesIndex(key, 12) + 1})`;
+
+export function categoryColorResolver(keys: string[]) {
+  const colors = new Map(
+    [...new Set(keys)].sort().map((key, index) => [
+      key,
+      `var(--paisa-chart-series-${index % 12 + 1})`,
+    ]),
+  );
+  return (key: string) => colors.get(key) ?? categoryColor(key);
+}
 
 export function categoryLegends(
   keys: string[],
   onSelect?: (key: string) => void,
 ): Legend[] {
+  const color = categoryColorResolver(keys);
   return keys.map((key) => ({
     label: key,
-    color: categoryColor(key),
+    color: color(key),
     shape: "square",
     onClick: onSelect ? () => onSelect(key) : undefined,
   }));
@@ -42,6 +53,9 @@ export function buildCashFlowSeries(
     ["investment-use", "Investment", "use"],
     ["liability-use", "Liabilities repaid", "use"],
   ] as const;
+  const legendColor = categoryColorResolver(
+    definitions.map(([key]) => key),
+  );
   return {
     axis: "category",
     granularity: "month",
@@ -49,7 +63,7 @@ export function buildCashFlowSeries(
     legends: [
       ...definitions.map(([key, label]) => ({
         label,
-        color: categoryColor(key),
+        color: legendColor(key),
         shape: "square" as const,
         symbol: key === "tax" ? "diagonal-stripe" as const : undefined,
       })),
@@ -225,7 +239,7 @@ export function buildAllocationTimelineSeries(
       date: first?.date,
       values: _.mapValues(
         grouped,
-        (value) => total ? (value / total) * 100 : 0,
+        (value) => total ? value / total : 0,
       ),
     };
   }).filter((row) => row.date);
@@ -249,7 +263,7 @@ export function buildAllocationTimelineSeries(
       values: row.values,
       tooltipRows: groups.map((
         group,
-      ) => [group, (row.values[group] ?? 0) / 100, "percentage"]),
+      ) => [group, row.values[group] ?? 0, "percentage"]),
     })),
   };
 }

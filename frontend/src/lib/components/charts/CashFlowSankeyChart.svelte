@@ -7,22 +7,17 @@
 
   interface Props {
     graph: Graph;
-    width?: number;
   }
 
-  let { graph, width = 0 }: Props = $props();
-  let chartWidth = $state(0);
+  let { graph }: Props = $props();
+  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const sankeyData = $derived(buildCashFlowSankeyData(graph));
   const option = $derived(buildCashFlowSankeyOption(sankeyData, {
-    width: chartWidth,
+    compact,
     darkMode: $theme === "dark",
     theme: tokenTheme,
   }));
-
-  $effect(() => {
-    chartWidth = width;
-  });
 
   $effect(() => {
     $theme;
@@ -35,6 +30,6 @@
   ariaLabel="Yearly cash flow Sankey chart"
   testId="cash-flow-yearly-echart"
   onresize={(dimensions) => {
-    chartWidth = dimensions.width;
+    compact = dimensions.width < 640;
   }}
 />

@@ -1,6 +1,7 @@
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import {
-  categorySeriesColor,
+  categoryColorAssignments,
+  normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
 
@@ -37,7 +38,7 @@ export interface ComparisonBarChartData {
 }
 
 export interface ComparisonBarOptions {
-  width?: number;
+  compact?: boolean;
   theme?: PaisaChartTheme;
   darkMode?: boolean;
 }
@@ -102,22 +103,27 @@ export function buildComparisonBarOption(
   options: ComparisonBarOptions = {},
 ) {
   const points = orderedPoints(data);
-  const mobile = (options.width ?? 0) > 0 && (options.width ?? 0) < 640;
+  const mobile = options.compact ?? false;
   const theme = options.theme;
   const textColor = theme?.textColor ?? "currentColor";
   const mutedColor = theme?.mutedColor ?? textColor;
   const borderColor = theme?.borderColor ?? textColor;
   const defaultColor = theme?.primaryColor ?? "currentColor";
   const maxLabelLength = mobile ? 16 : 28;
+  const categoryColors = categoryColorAssignments(
+    points.map((point) => point.categoryKey),
+    theme?.seriesColors ?? [],
+    defaultColor,
+  );
 
   return {
-    animationDuration: 250,
+    animation: false,
     backgroundColor: "transparent",
     grid: {
       top: 12,
-      right: mobile ? 16 : 28,
+      right: mobile ? 8 : 20,
       bottom: 28,
-      left: mobile ? 86 : 132,
+      left: 8,
       containLabel: true,
     },
     tooltip: {
@@ -125,12 +131,12 @@ export function buildComparisonBarOption(
       confine: true,
       borderColor,
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: { color: textColor },
+      textStyle: { color: theme?.tooltipTextColor ?? textColor },
       formatter: (params: unknown) => tooltipFormatter(data, params),
     },
     xAxis: {
       type: "value",
-      splitNumber: mobile ? 3 : 5,
+      splitNumber: mobile ? 2 : 5,
       axisLabel: {
         color: mutedColor,
         hideOverlap: true,
@@ -150,7 +156,7 @@ export function buildComparisonBarOption(
       axisLabel: {
         color: mutedColor,
         overflow: "truncate",
-        width: mobile ? 72 : 118,
+        width: mobile ? 96 : 140,
         formatter: (label: string) =>
           label.length > maxLabelLength
             ? `${label.slice(0, maxLabelLength - 1)}...`
@@ -160,7 +166,7 @@ export function buildComparisonBarOption(
     },
     textStyle: {
       color: mutedColor,
-      fontFamily: "var(--paisa-font-sans)",
+      fontFamily: theme?.fontFamily,
     },
     series: [
       {
@@ -172,11 +178,8 @@ export function buildComparisonBarOption(
           itemStyle: {
             color: point.color ??
               (point.categoryKey
-                ? categorySeriesColor(
-                  point.categoryKey,
-                  theme?.seriesColors ?? [],
-                  defaultColor,
-                )
+                ? categoryColors.get(normalizeCategoryKey(point.categoryKey)) ??
+                  defaultColor
                 : defaultColor),
           },
         })),
@@ -191,11 +194,6 @@ export function buildComparisonBarOption(
               point.value,
               data.valueFormat ?? "currency",
             );
-            if (typeof point.secondaryValue === "number") {
-              return `${formatted} (${
-                formatValue(point.secondaryValue, "number")
-              })`;
-            }
             return formatted;
           },
         },

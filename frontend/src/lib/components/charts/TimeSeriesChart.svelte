@@ -15,10 +15,10 @@
   }
 
   let { data, ariaLabel, testId, internalLegend = false }: Props = $props();
-  let chartWidth = $state(0);
+  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(buildPeriodSeriesOption(data, {
-    width: chartWidth,
+    compact,
     darkMode: $theme === "dark",
     theme: tokenTheme,
     internalLegend,
@@ -35,6 +35,6 @@
   {ariaLabel}
   {testId}
   onresize={(dimensions) => {
-    chartWidth = dimensions.width;
+    compact = dimensions.width < 640;
   }}
 />

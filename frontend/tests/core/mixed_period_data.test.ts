@@ -82,7 +82,7 @@ describe("mixed-period chart adapters", () => {
       a: { account: "Assets:Equity:A", market_amount: 75, date } as Aggregate,
       b: { account: "Assets:Debt:B", market_amount: 25, date } as Aggregate,
     }]);
-    expect(data.points[0].values).toMatchObject({ Equity: 75, Debt: 25 });
+    expect(data.points[0].values).toMatchObject({ Equity: 0.75, Debt: 0.25 });
     expect(data.series.map((series) => series.key)).toEqual(["Debt", "Equity"]);
   });
 });

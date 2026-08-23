@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import _ from "lodash";
   import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
-  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryLegends } from "$lib/charts/mixed_period_data";
+  import { buildYearlyExpenseTimelineSeries, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
   import { expenseGroup } from "$lib/charts/expense";
@@ -89,9 +89,7 @@
     buildYearlyExpenseHeatmapData($year, currentYearExpenses, $groups),
   );
   let currentYearBreakdownData = $derived(
-    buildExpenseBreakdownComparison(currentYearExpenses, {
-      color: categoryColor,
-    }),
+    buildExpenseBreakdownComparison(currentYearExpenses),
   );
   let expenseTimelineData = $derived(buildYearlyExpenseTimelineSeries(expenses, $groups));
   let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
@@ -209,7 +207,7 @@
       title="Activity Calendar"
       subtitle="Monthly expense frequency and activity"
     >
-      <ChartFrame type="distribution" empty={!hasCurrentYearExpenses}>
+      <ChartFrame type="category" rows={1} empty={!hasCurrentYearExpenses}>
         <ExpenseHeatmapChart
           data={currentYearHeatmapData}
           ariaLabel="Monthly expense activity for {$year}"

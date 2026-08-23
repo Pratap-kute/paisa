@@ -3,7 +3,6 @@
   import ErrorState from "./ErrorState.svelte";
   import Spinner from "./Spinner.svelte";
   import ZeroState from "./ZeroState.svelte";
-  import { observeElementSize, type Dimensions } from "$lib/charts/resize";
 
   type ChartType = "timeline" | "dashboard-timeline" | "category" | "distribution" | "dynamic";
   type ChartSize = "compact" | "standard" | "large" | "dynamic";
@@ -26,7 +25,6 @@
     id?: string;
     actions?: Snippet;
     children?: Snippet;
-    onresize?: (dimensions: Dimensions) => void;
   }
 
   let {
@@ -47,28 +45,7 @@
     id,
     actions,
     children,
-    onresize,
   }: Props = $props();
-
-  let frameBody: HTMLDivElement | undefined = $state();
-
-  $effect(() => {
-    if (frameBody && onresize) {
-      const body = frameBody;
-      const resize = onresize;
-      const cleanup = observeElementSize(body, (dimensions) => {
-        if (type === "timeline") {
-          const svg = body.querySelector("svg");
-          if (svg) {
-            svg.setAttribute("width", String(dimensions.width));
-            svg.setAttribute("height", String(dimensions.height));
-          }
-        }
-        resize(dimensions);
-      });
-      return cleanup;
-    }
-  });
 
   const typeClasses: Record<ChartType, string> = {
     timeline: "paisa-chart-type-timeline",
@@ -108,7 +85,7 @@
     </div>
   {/if}
 
-  <div class="paisa-chart-frame-body" bind:this={frameBody}>
+  <div class="paisa-chart-frame-body">
     {#if loading}
       <div class="paisa-chart-frame-loading">
         <Spinner />
@@ -139,6 +116,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-width: 0;
     position: relative;
     overflow: hidden;
   }
@@ -167,15 +145,11 @@
 
   .paisa-chart-frame-body {
     width: 100%;
+    min-width: 0;
     flex: 1 1 auto;
     position: relative;
     min-height: inherit;
 
-    :global(svg) {
-      display: block;
-      width: 100%;
-      overflow: visible;
-    }
   }
 
   .paisa-chart-centered .paisa-chart-frame-body {
@@ -194,11 +168,6 @@
 
   .paisa-chart-type-timeline .paisa-chart-frame-body {
     min-height: 0;
-  }
-
-  .paisa-chart-type-timeline .paisa-chart-frame-body :global(svg) {
-    width: 100%;
-    height: 100%;
   }
 
   @media screen and (max-width: 768px) {

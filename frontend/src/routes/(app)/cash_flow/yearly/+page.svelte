@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import _ from "lodash";
   import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
   import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
@@ -21,12 +21,21 @@
   import Section from "$lib/components/layout/Section.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
 
-  let legends: Legend[] = $state([]);
   let graph: Record<string, Graph> = $state();
   let expenses: Posting[] = $state([]);
-  let isEmpty = $state(false);
   let isLoading = $state(true);
-  let selectedGraph: Graph | undefined = $state();
+  let selectedGraph: Graph | undefined = $derived.by(() => {
+    if (!graph || isLoading || !graph[$year]) return undefined;
+    return filter(
+      graph[$year],
+      $cashflowIncomeDepth,
+      $cashflowExpenseDepth,
+    );
+  });
+  let legends: Legend[] = $derived(
+    selectedGraph ? buildCashFlowSankeyData(selectedGraph).legends : [],
+  );
+  let isEmpty = $derived(!isLoading && Boolean(graph) && !selectedGraph);
 
   let showDepthControls = $derived(
     $cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1,
@@ -63,23 +72,6 @@
     };
   }
 
-  function updateChart() {
-    if (!graph || isLoading) return;
-    if (graph[$year] == null) {
-      isEmpty = true;
-      return;
-    }
-    selectedGraph = filter(_.cloneDeep(graph[$year]), $cashflowIncomeDepth, $cashflowExpenseDepth);
-    legends = buildCashFlowSankeyData(selectedGraph).legends;
-    isEmpty = false;
-  }
-
-  $effect(() => {
-    if (graph) {
-      updateChart();
-    }
-  });
-
   onMount(async () => {
     try {
       ({ expenses, graph } = await ajax("/api/expense"));
@@ -90,8 +82,6 @@
 
       setCashflowDepthAllowed(maxDepth("Expenses"), maxDepth("Income"));
       isLoading = false;
-      await tick();
-      updateChart();
     } catch {
       isLoading = false;
     }
