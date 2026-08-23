@@ -229,7 +229,7 @@
     title="Detailed Statement"
     subtitle="Multi-year account comparison"
   >
-    <div class="max-h-[calc(100vh-440px)] min-h-[260px] max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+    <div class="max-h-[min(650px,calc(100vh-280px))] min-h-[300px] max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-sm">
       {#if isLoading}
         <div class="flex flex-col gap-[var(--paisa-space-2)] p-[var(--paisa-space-4)]" aria-hidden="true">
           {#each Array(8) as _}
@@ -237,14 +237,14 @@
           {/each}
         </div>
       {:else}
-        <table class="mb-0 w-full border-separate border-spacing-0 text-sm text-[var(--paisa-text-primary)]">
+        <table class="mb-0 w-full min-w-max border-separate border-spacing-0 text-sm text-[var(--paisa-text-primary)]">
           <thead>
             <tr>
-              <th class="sticky left-0 top-0 z-[6] bg-[var(--paisa-table-header-bg)] py-2 text-left font-semibold text-[var(--paisa-table-header-text)]">
+              <th class="sticky left-0 top-0 z-20 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-table-header-bg)] px-4 py-3 text-left font-semibold text-[var(--paisa-table-header-text)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
                 Account
               </th>
               {#each years as y}
-                <th class="sticky top-0 z-[5] bg-[var(--paisa-table-header-bg)] py-2 text-right font-semibold tabular-nums text-[var(--paisa-table-header-text)]">
+                <th class="sticky top-0 z-10 min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-table-header-bg)] px-3.5 py-3 text-right font-semibold tabular-nums text-[var(--paisa-table-header-text)]">
                   {y}
                 </th>
               {/each}
@@ -253,11 +253,11 @@
           <tbody>
             {#each accountGroups as group}
               <tr class="bg-[var(--paisa-surface-hover)]">
-                <th class="border-b border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-2 py-2 text-left font-bold text-[var(--paisa-brand-primary)]">
+                <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-4 py-2.5 text-left font-bold text-[var(--paisa-brand-primary)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
                   {group.label}
                 </th>
                 {#each years as y}
-                  <td class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-hover)] px-2 py-2 text-right font-bold tabular-nums text-[var(--paisa-brand-primary)]">
+                  <td class="min-w-[120px] border-b border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-brand-primary)]">
                     {#if yearly[y]?.[group.key]}
                       {formatUnlessZero(sum(yearly[y][group.key]) * group.multiplier)}
                     {/if}
@@ -265,14 +265,14 @@
                 {/each}
               </tr>
               {#each group.accounts as account}
-                <tr>
-                  <th class="custom-icon sticky left-0 z-[1] whitespace-nowrap bg-[var(--paisa-surface)] px-2 py-1 text-left text-xs font-normal text-[var(--paisa-text-secondary)]">
-                    <span class="pl-4">
+                <tr class="group transition-colors hover:bg-[var(--paisa-surface-hover)]/40">
+                  <th class="custom-icon sticky left-0 z-[1] min-w-[220px] max-w-[280px] truncate whitespace-nowrap border-b border-r border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-4 py-2 text-left text-xs font-normal text-[var(--paisa-text-secondary)] shadow-[2px_0_4px_rgba(0,0,0,0.06)] transition-colors group-hover:bg-[var(--paisa-surface-hover)]/70">
+                    <span class="pl-3">
                       {iconify(restName(account), { group: firstName(account) })}
                     </span>
                   </th>
                   {#each years as y}
-                    <td class="whitespace-nowrap px-2 py-1 text-right text-xs tabular-nums text-[var(--paisa-text-secondary)]">
+                    <td class="min-w-[120px] whitespace-nowrap border-b border-[var(--paisa-border-subtle)] px-3.5 py-2 text-right text-xs tabular-nums text-[var(--paisa-text-secondary)] transition-colors group-hover:bg-[var(--paisa-surface-hover)]/40">
                       {#if yearly[y]?.[group.key]?.[account]}
                         {formatUnlessZero(yearly[y][group.key][account] * group.multiplier)}
                       {/if}
@@ -284,23 +284,23 @@
           </tbody>
           <tfoot class="border-t-2 border-[var(--paisa-border-strong)]">
             <tr class="bg-[var(--paisa-surface-default)]">
-              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">Change</th>
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Change</th>
               {#each years as y}
                 {#if yearly[y]}
                   {@const yearDiff = yearly[y].endingBalance - yearly[y].startingBalance}
-                  <td class="px-2 py-2 text-right font-bold tabular-nums {changeClass(yearDiff)}">
+                  <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums {changeClass(yearDiff)}">
                     <div>{formatCurrency(yearDiff)}</div>
-                    <div class="text-xs">{formatPercentage(yearDiff / yearly[y].startingBalance)}</div>
+                    <div class="text-xs font-normal opacity-85">{formatPercentage(yearDiff / yearly[y].startingBalance)}</div>
                   </td>
                 {:else}
-                  <td></td>
+                  <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5"></td>
                 {/if}
               {/each}
             </tr>
             <tr class="bg-[var(--paisa-surface-default)]">
-              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">End Balance</th>
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">End Balance</th>
               {#each years as y}
-                <td class="px-2 py-2 text-right font-bold tabular-nums">
+                <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].endingBalance)}
                   {/if}
@@ -308,9 +308,9 @@
               {/each}
             </tr>
             <tr class="bg-[var(--paisa-surface-default)]">
-              <th class="sticky left-0 bg-[var(--paisa-surface-default)] px-2 py-2 text-left font-bold">Start Balance</th>
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Start Balance</th>
               {#each years as y}
-                <td class="px-2 py-2 text-right font-bold tabular-nums">
+                <td class="min-w-[120px] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].startingBalance)}
                   {/if}
