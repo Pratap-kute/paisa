@@ -99,23 +99,46 @@ function tooltipFormatter(
     ? data.points[first.dataIndex]
     : undefined;
   const header = first?.axisValueLabel ?? point?.period ?? "";
-  const rows = point?.tooltipRows?.length
-    ? point.tooltipRows.map(([label, value, format]) =>
-      `${label}: <strong>${
-        formatValue(value, format ?? data.valueFormat)
-      }</strong>`
-    )
-    : items.map((item) => {
-      const p = item as { seriesName?: string; value?: unknown };
-      const raw = Array.isArray(p.value)
-        ? p.value[p.value.length - 1]
-        : p.value;
-      return `${p.seriesName ?? ""}: <strong>${
-        formatValue(Number(raw ?? 0), data.valueFormat)
-      }</strong>`;
-    });
+  const rawRows: Array<[string, number, PeriodValueFormat?]> =
+    point?.tooltipRows?.length
+      ? point.tooltipRows
+      : items.map((item) => {
+        const p = item as { seriesName?: string; value?: unknown };
+        const raw = Array.isArray(p.value)
+          ? p.value[p.value.length - 1]
+          : p.value;
+        return [
+          p.seriesName ?? "",
+          Number(raw ?? 0),
+          data.valueFormat,
+        ];
+      });
 
-  return [`<strong>${header}</strong>`, ...rows].join("<br/>");
+  const maxVisible = 8;
+  let formattedRows: string[] = [];
+
+  if (rawRows.length > maxVisible) {
+    const sorted = [...rawRows].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+    const visible = sorted.slice(0, maxVisible);
+    const remaining = sorted.slice(maxVisible);
+
+    formattedRows = visible.map(([label, value, format]) =>
+      `${label}: <strong>${formatValue(value, format ?? data.valueFormat)}</strong>`
+    );
+
+    const remainingSum = remaining.reduce((s, r) => s + r[1], 0);
+    formattedRows.push(
+      `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} other items: <strong>${
+        formatValue(remainingSum, data.valueFormat)
+      }</strong></span>`
+    );
+  } else {
+    formattedRows = rawRows.map(([label, value, format]) =>
+      `${label}: <strong>${formatValue(value, format ?? data.valueFormat)}</strong>`
+    );
+  }
+
+  return [`<strong>${header}</strong>`, ...formattedRows].join("<br/>");
 }
 
 function buildPeriodSeriesLayout(
