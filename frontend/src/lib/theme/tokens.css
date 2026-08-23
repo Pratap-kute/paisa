@@ -4,6 +4,8 @@
  */
 
 :root {
+  color-scheme: light;
+
   /* Surface & Canvas */
   --paisa-canvas-bg: #f8fafc;
   --paisa-surface-bg: #ffffff;
@@ -155,6 +157,8 @@
 }
 
 html[data-theme="dark"] {
+  color-scheme: dark;
+
   /* Dark Surface & Canvas */
   --paisa-canvas-bg: #0b1120;
   --paisa-surface-bg: #111827;
