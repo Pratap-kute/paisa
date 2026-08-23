@@ -3,6 +3,7 @@ import { firstName } from "$lib/core/utils";
 import { generateColorScheme } from "$lib/core/colors";
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
+import { responsiveChartOption } from "$lib/charts/echarts/responsive";
 
 export interface CashFlowSankeyNode {
   id: number;
@@ -36,7 +37,6 @@ export interface CashFlowSankeyData {
 }
 
 export interface CashFlowSankeyOptions {
-  compact?: boolean;
   darkMode?: boolean;
   theme?: PaisaChartTheme;
 }
@@ -189,11 +189,11 @@ export function buildCashFlowSankeyData(graph: Graph): CashFlowSankeyData {
   };
 }
 
-export function buildCashFlowSankeyOption(
+function buildCashFlowSankeyLayout(
   data: CashFlowSankeyData,
   options: CashFlowSankeyOptions = {},
+  mobile = false,
 ) {
-  const mobile = options.compact ?? false;
   const textColor = options.theme?.textColor ?? "currentColor";
   const mutedColor = options.theme?.mutedColor ?? textColor;
   const borderColor = options.theme?.borderColor ?? textColor;
@@ -235,7 +235,7 @@ export function buildCashFlowSankeyOption(
         type: "graph",
         name: "Cash Flow",
         layout: "circular",
-        circular: { rotateLabel: true },
+        circular: { rotateLabel: !mobile },
         left: mobile ? 12 : 48,
         right: mobile ? 12 : 48,
         top: mobile ? 12 : 24,
@@ -247,7 +247,7 @@ export function buildCashFlowSankeyOption(
         edgeSymbolSize: [0, mobile ? 7 : 9],
         emphasis: { focus: "adjacency" },
         label: {
-          show: true,
+          show: !mobile,
           color: textColor,
           fontSize: mobile ? 10 : 12,
           overflow: "truncate",
@@ -364,4 +364,14 @@ export function buildCashFlowSankeyOption(
       fontFamily: options.theme?.fontFamily,
     },
   };
+}
+
+export function buildCashFlowSankeyOption(
+  data: CashFlowSankeyData,
+  options: CashFlowSankeyOptions = {},
+) {
+  return responsiveChartOption(
+    buildCashFlowSankeyLayout(data, options),
+    buildCashFlowSankeyLayout(data, options, true),
+  );
 }

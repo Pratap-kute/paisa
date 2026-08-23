@@ -60,7 +60,7 @@
 
   <Section title="Interest Overview">
     <ChartFrame
-      type="dynamic"
+      height="compact"
       loading={isLoading}
       empty={!isLoading && isEmpty}
       emptyMessage="No liability activity in this period"
@@ -85,7 +85,7 @@
                 <tr><th class="py-1 text-left">APR</th><td class="py-1 text-right">{formatFloat(summary.apr)}%</td></tr>
               </tbody>
             </table>
-            <ChartFrame type="timeline">
+            <ChartFrame height="tall">
               <TimeSeriesChart data={buildInterestTimelineSeries(interest)} ariaLabel="Interest timeline for {summary.label}" testId="interest-account-{encodeURIComponent(interest.account)}-echart" internalLegend />
             </ChartFrame>
           </div>

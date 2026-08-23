@@ -6,6 +6,7 @@ import {
   normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
+import { responsiveChartOption } from "$lib/charts/echarts/responsive";
 
 export type PeriodSeriesIntent = "line" | "area" | "bar" | "stacked-bar";
 export type PeriodAxis = "time" | "category" | "value";
@@ -55,7 +56,6 @@ export interface PeriodSeriesChartData {
 }
 
 export interface PeriodSeriesOptions {
-  compact?: boolean;
   darkMode?: boolean;
   theme?: PaisaChartTheme;
   internalLegend?: boolean;
@@ -117,11 +117,11 @@ function tooltipFormatter(
   return [`<strong>${header}</strong>`, ...rows].join("<br/>");
 }
 
-export function buildPeriodSeriesOption(
+function buildPeriodSeriesLayout(
   data: PeriodSeriesChartData,
   options: PeriodSeriesOptions = {},
+  mobile = false,
 ) {
-  const mobile = options.compact ?? false;
   const theme = options.theme;
   const textColor = theme?.textColor ?? "currentColor";
   const mutedColor = theme?.mutedColor ?? textColor;
@@ -192,7 +192,8 @@ export function buildPeriodSeriesOption(
       ? {
         top: 0,
         left: "center",
-        type: mobile ? "plain" : "scroll",
+        type: "scroll",
+        width: mobile ? "92%" : "88%",
         itemWidth: mobile ? 12 : 18,
         itemHeight: mobile ? 8 : 10,
         itemGap: mobile ? 8 : 14,
@@ -286,4 +287,14 @@ export function buildPeriodSeriesOption(
       };
     }),
   };
+}
+
+export function buildPeriodSeriesOption(
+  data: PeriodSeriesChartData,
+  options: PeriodSeriesOptions = {},
+) {
+  return responsiveChartOption(
+    buildPeriodSeriesLayout(data, options),
+    buildPeriodSeriesLayout(data, options, true),
+  );
 }

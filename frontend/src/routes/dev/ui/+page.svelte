@@ -177,7 +177,7 @@
             </div>
             <span class="break-words text-sm text-muted-foreground">{longAccount}</span>
           </div>
-          <ChartFrame title="ChartFrame placeholder" size="compact">
+          <ChartFrame title="ChartFrame placeholder" height="compact">
             <div class="flex h-48 items-center justify-center rounded-md border border-border-subtle text-sm text-muted-foreground">
               Stable chart geometry
             </div>

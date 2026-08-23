@@ -77,8 +77,7 @@
         <LegendCard legends={cashFlowData.legends ?? []} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
       <ChartFrame
-        type="timeline"
-        size="dynamic"
+        height="tall"
       >
         <TimeSeriesChart
           data={cashFlowData}

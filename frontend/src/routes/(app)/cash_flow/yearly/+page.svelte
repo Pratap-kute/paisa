@@ -137,7 +137,7 @@
       {#if !isLoading && !isEmpty}
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       {/if}
-      <ChartFrame type="timeline" size="dynamic" preserveChildren>
+      <ChartFrame height="tall" preserveChildren>
         {#if selectedGraph}
           <CashFlowSankeyChart graph={selectedGraph} />
         {/if}

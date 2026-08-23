@@ -219,7 +219,7 @@
 
       <Section title="Timeline">
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame height="tall">
           {#if gain}
             <GainAccountTimelineChart points={gain.networthTimeline} />
           {/if}
@@ -230,7 +230,7 @@
         <div class="flex min-w-0 flex-col gap-4">
           {#if !securityTypeEmpty}
             <Section title="Security Type">
-              <ChartFrame type="distribution" rows={Math.max(4, securityTypeData.points.length)}>
+              <ChartFrame height="compact" rows={Math.max(4, securityTypeData.points.length)}>
                 <ComparisonBarChart data={securityTypeData} ariaLabel="Asset security type breakdown" testId="gain-security-type-echart" />
               </ChartFrame>
             </Section>
@@ -238,7 +238,7 @@
 
           {#if !ratingEmpty}
             <Section title="Security Rating">
-              <ChartFrame type="distribution" rows={Math.max(4, ratingData.points.length)}>
+              <ChartFrame height="compact" rows={Math.max(4, ratingData.points.length)}>
                 <ComparisonBarChart data={ratingData} ariaLabel="Asset security rating breakdown" testId="gain-security-rating-echart" />
               </ChartFrame>
             </Section>
@@ -246,7 +246,7 @@
 
           {#if !industryEmpty}
             <Section title="Industry">
-              <ChartFrame type="distribution" rows={Math.max(4, industryData.points.length)}>
+              <ChartFrame height="compact" rows={Math.max(4, industryData.points.length)}>
                 <ComparisonBarChart data={industryData} ariaLabel="Asset industry breakdown" testId="gain-industry-echart" />
               </ChartFrame>
             </Section>
@@ -256,7 +256,7 @@
         {#if !nameAndSecurityTypeEmpty}
           <div class="min-w-0">
             <Section title="Security">
-              <ChartFrame type="distribution" rows={Math.max(4, portfolioData.points.length)}>
+              <ChartFrame height="compact" rows={Math.max(4, portfolioData.points.length)}>
                 <ComparisonBarChart data={portfolioData} ariaLabel="Asset security breakdown" testId="gain-security-echart" />
               </ChartFrame>
             </Section>

@@ -103,7 +103,7 @@
 
   {#if isLoading}
     <Section title="Loading portfolio data">
-      <ChartFrame type="dynamic" />
+      <ChartFrame height="content" />
     </Section>
   {:else if isEmpty}
     <ZeroState item={[]}>
@@ -121,26 +121,26 @@
   {:else}
     <ResponsiveGrid variant="two-column">
       <Section title="Security Type" subtitle="Composition by fund category">
-        <ChartFrame type="dynamic" rows={Math.max(4, securityTypeData.points.length)}>
+        <ChartFrame height="compact" rows={Math.max(4, securityTypeData.points.length)}>
           <ComparisonBarChart data={securityTypeData} ariaLabel="Portfolio by security type" testId="portfolio-security-type-echart" />
         </ChartFrame>
       </Section>
 
       <Section title="Security Rating" subtitle="Credit quality distribution">
-        <ChartFrame type="dynamic" rows={Math.max(4, ratingData.points.length)}>
+        <ChartFrame height="compact" rows={Math.max(4, ratingData.points.length)}>
           <ComparisonBarChart data={ratingData} ariaLabel="Portfolio by security rating" testId="portfolio-security-rating-echart" />
         </ChartFrame>
       </Section>
     </ResponsiveGrid>
 
     <Section title="Industry" subtitle="Sector exposure breakdown">
-      <ChartFrame type="dynamic" size="large">
+      <ChartFrame height="tall">
         <FinancialHierarchyChart data={{ roots: industryData, mode: "treemap" }} ariaLabel="Portfolio industry and security hierarchy" testId="portfolio-industry-echart" />
       </ChartFrame>
     </Section>
 
     <Section title="Holdings" subtitle="Individual security composition">
-      <ChartFrame type="dynamic" size="large">
+      <ChartFrame height="tall">
         <FinancialHierarchyChart data={{ roots: portfolioData, mode: "treemap" }} ariaLabel="Portfolio holdings hierarchy" testId="portfolio-holdings-echart" />
       </ChartFrame>
     </Section>

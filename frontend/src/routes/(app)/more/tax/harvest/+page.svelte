@@ -34,7 +34,7 @@
 
   <Section>
     <ChartFrame
-      type="dynamic"
+      height="content"
       loading={isLoading}
       empty={!isLoading && isEmpty}
       emptyMessage="No harvestable tax-loss opportunities found"

@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { Dimensions } from "$lib/charts/resize";
-  import { observeElementSize } from "$lib/charts/resize";
+  import { observeElementSize, type Dimensions } from "$lib/charts/resize";
   import {
     createEChartSurfaceController,
     type EChartSurfaceController,
@@ -17,7 +16,6 @@
     ariaLabel?: string;
     testId?: string;
     events?: PaisaChartEventHandler[];
-    onresize?: (dimensions: Dimensions) => void;
     onready?: () => void;
   }
 
@@ -28,7 +26,6 @@
     ariaLabel = "Chart",
     testId = "paisa-echart-surface",
     events = [],
-    onresize,
     onready,
   }: Props = $props();
 
@@ -47,7 +44,6 @@
       option,
       renderer,
       initChart: echarts.initChart,
-      onresize,
       onready,
       onreadinesschange: (ready) => {
         chartReady = ready;
@@ -55,13 +51,8 @@
       eventHandlers: events,
     });
     controller.init();
-    const rect = element.getBoundingClientRect();
-    const dimensions = pendingDimensions ?? {
-      width: Math.round(rect.width),
-      height: Math.round(rect.height),
-    };
-    if (dimensions.width > 0 && dimensions.height > 0) {
-      controller.resize(dimensions);
+    if (pendingDimensions) {
+      controller.resize(pendingDimensions);
     }
   }
 
@@ -105,7 +96,6 @@
 
 <style>
   .paisa-echart-surface {
-    min-height: 320px;
     height: 100%;
     width: 100%;
     min-width: 0;

@@ -32,7 +32,7 @@
   import Badge from "$lib/components/ui/Badge.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
+  import DailyExpenseCalendar from "$lib/components/charts/DailyExpenseCalendar.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let groups = writable<string[]>([]);
@@ -232,7 +232,7 @@
       subtitle="Distribution across spending categories"
     >
       <ChartFrame
-        type="category"
+        height="compact"
         class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, selectedMonthExpenses.length || 4)}
         empty={!hasSelectedMonthExpenses}
@@ -250,12 +250,12 @@
       title="Expense Calendar"
       subtitle="Daily expense frequency and activity"
     >
-      <ChartFrame type="distribution" empty={!hasSelectedMonthExpenses}>
-        <ExpenseHeatmapChart
+      <ChartFrame height="content" empty={!hasSelectedMonthExpenses}>
+        <DailyExpenseCalendar
           data={selectedMonthHeatmapData}
           colorFor={expenseColor}
           ariaLabel="Daily expenses for {formattedCurrentMonth}"
-          testId="monthly-expense-calendar-echart"
+          testId="monthly-expense-calendar"
         />
       </ChartFrame>
     </Section>
@@ -268,8 +268,7 @@
     {#if hasTrendInRange}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame
-        type="timeline"
-        size="dynamic"
+        height="tall"
         empty={false}
       >
         <TimeSeriesChart

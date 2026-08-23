@@ -94,13 +94,16 @@ describe("cash-flow Sankey ECharts adapter", () => {
     ]]);
 
     const option = buildCashFlowSankeyOption(data);
-    expect(option.series[0].type).toBe("graph");
-    expect(option.series[0].data.map((node) => node.nodeId)).toEqual([1, 2, 3]);
-    expect(option.series[0].links.map((link) => ({
+    expect(option.baseOption.series[0].type).toBe("graph");
+    expect(option.baseOption.series[0].data.map((node) => node.nodeId)).toEqual(
+      [1, 2, 3],
+    );
+    expect(option.baseOption.series[0].links.map((link) => ({
       source: link.sourceId,
       target: link.targetId,
       value: link.value,
     }))).toEqual(cycleGraph.links);
+    expect(option.media[0].option.series[0].label.show).toBe(false);
   });
 
   it("reports no true directed cycles in the real browser cash-flow fixture", () => {
@@ -118,7 +121,6 @@ describe("cash-flow Sankey ECharts adapter", () => {
   it("creates intent-shaped ECharts sankey options without exposing D3 scales", () => {
     const data = buildCashFlowSankeyData(graph);
     const option = buildCashFlowSankeyOption(data, {
-      compact: true,
       theme: {
         fontFamily: "Paisa Sans",
         textColor: "rgb(1, 2, 3)",
@@ -136,7 +138,7 @@ describe("cash-flow Sankey ECharts adapter", () => {
         seriesColors: ["red", "green"],
       },
     });
-    const series = option.series[0];
+    const series = option.media[0].option.series[0];
 
     expect(series.type).toBe("sankey");
     expect(series.nodeWidth).toBe(10);

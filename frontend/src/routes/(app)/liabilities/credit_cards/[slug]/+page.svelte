@@ -197,7 +197,7 @@
     </Section>
 
     <Section title="Spending Trend">
-      <ChartFrame type="category" rows={Math.max(3, yearlySpendsData?.points.length ?? 3)}>
+      <ChartFrame height="compact" rows={Math.max(3, yearlySpendsData?.points.length ?? 3)}>
         {#if yearlySpendsData}
           <ComparisonBarChart
             data={yearlySpendsData}

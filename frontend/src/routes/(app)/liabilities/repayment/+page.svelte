@@ -58,7 +58,7 @@
       </ZeroState>
     {:else}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline">
+      <ChartFrame height="tall">
         <RepaymentTimelineChart {repayments} />
       </ChartFrame>
     {/if}

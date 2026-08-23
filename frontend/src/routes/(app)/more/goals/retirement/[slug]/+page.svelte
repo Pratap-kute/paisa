@@ -157,7 +157,7 @@
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline">
+        <ChartFrame height="tall">
           <GoalProgressChart
             points={savingsTimeline}
             predictions={predictionsTimeline}
@@ -170,7 +170,7 @@
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline">
+        <ChartFrame height="tall">
           <GoalInvestmentChart
             {postings}
             pmt={0}

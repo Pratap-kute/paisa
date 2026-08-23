@@ -80,7 +80,6 @@ async function waitForStableLayout(page: Page) {
     null,
     { polling: 100 },
   );
-  await page.waitForTimeout(100);
 }
 
 async function expectStableChartSurfaces(page: Page) {
@@ -243,9 +242,18 @@ for (const route of visualRoutes) {
         const listBackground = await page.locator(".svelte-select-list")
           .evaluate((element) => getComputedStyle(element).backgroundColor);
         expect(listBackground).toBe("rgb(30, 41, 59)");
+        await page.keyboard.press("Escape");
+        await expect(page.locator(".svelte-select-list")).toBeHidden();
       }
       if (variant.theme === "dark" && route.name === "config") {
-        await page.getByRole("button", { name: "Allocation Targets" }).click();
+        if (variant.width < 1024) {
+          await page.getByLabel("Section", { exact: true }).selectOption({
+            label: "Allocation Targets",
+          });
+        } else {
+          await page.getByRole("button", { name: "Allocation Targets" })
+            .click();
+        }
         await page.getByRole("button", { name: "Add" }).click();
         await expectDarkSelectTheme(page);
       }
@@ -281,7 +289,7 @@ for (const chart of chartSnapshots) {
       await expectStableChartSurfaces(page);
       await expect(chartLocator).toHaveScreenshot(
         `chart-${chart.name}-${variant.name}.png`,
-        { maxDiffPixelRatio: 0.02 },
+        { maxDiffPixelRatio: chart.name === "networth" ? 0.01 : 0.005 },
       );
     });
   }

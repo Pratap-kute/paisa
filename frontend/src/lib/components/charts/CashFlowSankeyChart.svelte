@@ -10,11 +10,9 @@
   }
 
   let { graph }: Props = $props();
-  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const sankeyData = $derived(buildCashFlowSankeyData(graph));
   const option = $derived(buildCashFlowSankeyOption(sankeyData, {
-    compact,
     darkMode: $theme === "dark",
     theme: tokenTheme,
   }));
@@ -29,7 +27,4 @@
   {option}
   ariaLabel="Yearly cash flow Sankey chart"
   testId="cash-flow-yearly-echart"
-  onresize={(dimensions) => {
-    compact = dimensions.width < 640;
-  }}
 />

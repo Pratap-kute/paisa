@@ -124,12 +124,12 @@
 
   {#if isLoading}
     <Section title="Loading allocation data">
-      <ChartFrame type="dynamic" />
+      <ChartFrame height="content" />
     </Section>
   {:else}
     <Section title="Allocation Targets" subtitle="Current vs configured target weights">
       {#if hasTargets}
-        <ChartFrame type="dynamic" rows={Math.max(4, allocationTargetData.points.length)}>
+        <ChartFrame height="compact" rows={Math.max(4, allocationTargetData.points.length)}>
           <ComparisonBarChart
             data={allocationTargetData}
             ariaLabel="Allocation target versus current weights"
@@ -151,7 +151,7 @@
 
     {#if hasAllocationData}
       <Section title="Allocation by category" subtitle="Nested account groups and categories">
-        <ChartFrame type="dynamic" size="large">
+        <ChartFrame height="tall">
           <FinancialHierarchyChart
             data={{ roots: allocationHierarchy, mode: "treemap" }}
             ariaLabel="Asset allocation account hierarchy"
@@ -161,7 +161,7 @@
       </Section>
 
       <Section title="Allocation by value" subtitle="Treemap by market value">
-        <ChartFrame type="dynamic">
+        <ChartFrame height="tall">
           <FinancialHierarchyChart
             data={{ roots: allocationHierarchy, mode: "treemap" }}
             ariaLabel="Asset allocation by market value"
@@ -172,7 +172,7 @@
 
       <Section title="Allocation Timeline" subtitle="Historical allocation by asset class">
         <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline">
+        <ChartFrame height="tall">
           <TimeSeriesChart
             data={allocationTimelineData}
             ariaLabel="Historical allocation percentages by asset class"

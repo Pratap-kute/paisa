@@ -215,7 +215,7 @@
         </p>
       </ZeroState>
     {:else}
-      <ChartFrame type="distribution" size="dynamic">
+      <ChartFrame height="tall">
         <IncomeStatementWaterfallChart
           data={waterfallData}
           ariaLabel="Income statement waterfall from starting to ending net worth"

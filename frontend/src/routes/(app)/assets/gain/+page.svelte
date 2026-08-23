@@ -87,7 +87,7 @@
     {:else}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame
-        type="category"
+        height="compact"
         rows={Math.max(5, overviewData.points.length)}
         class="[&_.paisa-chart-frame-body]:overflow-y-visible"
       >

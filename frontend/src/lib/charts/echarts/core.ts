@@ -1,7 +1,6 @@
 import {
   BarChart,
   GraphChart,
-  HeatmapChart,
   LineChart,
   SankeyChart,
   ScatterChart,
@@ -21,7 +20,6 @@ use([
   BarChart,
   GraphChart,
   GridComponent,
-  HeatmapChart,
   LegendComponent,
   LineChart,
   MarkLineComponent,

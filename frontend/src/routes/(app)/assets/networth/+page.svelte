@@ -114,7 +114,7 @@
     {/if}
 
     <ChartFrame
-      type="timeline"
+      height="tall"
       empty={!isLoading && filteredPoints.length === 0}
       emptyMessage="No net-worth activity in this period"
       preserveChildren

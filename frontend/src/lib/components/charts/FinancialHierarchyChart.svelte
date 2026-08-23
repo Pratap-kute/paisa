@@ -5,9 +5,8 @@
   import { theme } from "../../../store";
   interface Props { data: FinancialHierarchyChartData; ariaLabel: string; testId: string }
   let { data, ariaLabel, testId }: Props = $props();
-  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
-  const option = $derived(buildFinancialHierarchyOption(data, { compact, theme: tokenTheme }));
+  const option = $derived(buildFinancialHierarchyOption(data, { theme: tokenTheme }));
   $effect(() => { $theme; tokenTheme = readPaisaChartTheme(); });
 </script>
-<EChartSurface {option} {ariaLabel} {testId} onresize={(size) => compact = size.width < 640} />
+<EChartSurface {option} {ariaLabel} {testId} />

@@ -43,16 +43,21 @@ describe("chart option contracts", () => {
         },
       ],
     }, { theme }) as {
-      animation: boolean;
-      color: string[];
-      series: Array<{ data: Array<number | null>; connectNulls: boolean }>;
+      baseOption: {
+        animation: boolean;
+        color: string[];
+        series: Array<{ data: Array<number | null>; connectNulls: boolean }>;
+      };
+      media: Array<{ query: { maxWidth: number }; option: unknown }>;
     };
 
-    expect(option.animation).toBe(false);
-    expect(option.series[0].data).toEqual([10, null]);
-    expect(option.series[1].data).toEqual([null, 20]);
-    expect(option.series.every((series) => !series.connectNulls)).toBe(true);
-    expect(new Set(option.color).size).toBe(2);
+    expect(option.baseOption.animation).toBe(false);
+    expect(option.baseOption.series[0].data).toEqual([10, null]);
+    expect(option.baseOption.series[1].data).toEqual([null, 20]);
+    expect(option.baseOption.series.every((series) => !series.connectNulls))
+      .toBe(true);
+    expect(new Set(option.baseOption.color).size).toBe(2);
+    expect(option.media[0].query).toEqual({ maxWidth: 639 });
   });
 
   it("keeps a useful compact comparison plot and readable tooltip colors", () => {
@@ -61,32 +66,43 @@ describe("chart option contracts", () => {
         { key: "food", label: "Food", value: 10, categoryKey: "food" },
         { key: "rent", label: "Rent", value: 100, categoryKey: "rent" },
       ],
-    }, { compact: true, theme }) as {
-      animation: boolean;
-      grid: { left: number; right: number; containLabel: boolean };
-      tooltip: { backgroundColor: string; textStyle: { color: string } };
-      xAxis: { splitNumber: number };
-      series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
+    }, { theme }) as {
+      baseOption: {
+        animation: boolean;
+        grid: { left: number; right: number; containLabel: boolean };
+        tooltip: { backgroundColor: string; textStyle: { color: string } };
+        xAxis: { splitNumber: number };
+        series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
+      };
+      media: Array<{
+        option: {
+          grid: { left: number; right: number; containLabel: boolean };
+          xAxis: { splitNumber: number };
+        };
+      }>;
     };
+    const desktop = option.baseOption;
+    const compact = option.media[0].option;
 
-    expect(option.animation).toBe(false);
-    expect(option.grid).toMatchObject({
+    expect(desktop.animation).toBe(false);
+    expect(compact.grid).toMatchObject({
       left: 8,
       right: 8,
       containLabel: true,
     });
-    expect(option.xAxis.splitNumber).toBe(2);
-    expect(option.tooltip).toMatchObject({
+    expect(compact.xAxis.splitNumber).toBe(2);
+    expect(desktop.tooltip).toMatchObject({
       backgroundColor: "tooltip-bg",
       textStyle: { color: "tooltip-text" },
     });
-    const comparisonTooltip = (option.tooltip as unknown as {
+    const comparisonTooltip = (desktop.tooltip as unknown as {
       formatter: (params: unknown) => string;
     }).formatter({ dataIndex: 1 });
     expect(comparisonTooltip).toContain("Rent");
     expect(comparisonTooltip).toContain("100");
     expect(
-      new Set(option.series[0].data.map((point) => point.itemStyle.color)).size,
+      new Set(desktop.series[0].data.map((point) => point.itemStyle.color))
+        .size,
     )
       .toBe(2);
   });
@@ -111,15 +127,17 @@ describe("chart option contracts", () => {
         },
       ],
     }, { theme }) as {
-      series: Array<{
-        data: Array<{
-          itemStyle: { color: string };
-          children: Array<{ itemStyle: { color: string } }>;
+      baseOption: {
+        series: Array<{
+          data: Array<{
+            itemStyle: { color: string };
+            children: Array<{ itemStyle: { color: string } }>;
+          }>;
         }>;
-      }>;
+      };
     };
 
-    const [energy, technology] = option.series[0].data;
+    const [energy, technology] = option.baseOption.series[0].data;
     expect(energy.itemStyle.color).not.toBe(technology.itemStyle.color);
     expect(energy.children[0].itemStyle.color).toBe(energy.itemStyle.color);
     expect(technology.children[0].itemStyle.color).toBe(

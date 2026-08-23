@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildYearlyIncomeSeries } from "$lib/charts/time_series_data";
+  import { buildYearlyIncomeComparisonSeries } from "$lib/charts/time_series_data";
   import type { IncomeYearlyCard } from "$lib/core/utils";
   import TimeSeriesChart from "./TimeSeriesChart.svelte";
 
@@ -8,7 +8,7 @@
   }
 
   let { yearlyCards }: Props = $props();
-  const data = $derived(buildYearlyIncomeSeries(yearlyCards));
+  const data = $derived(buildYearlyIncomeComparisonSeries(yearlyCards));
 </script>
 
 <TimeSeriesChart

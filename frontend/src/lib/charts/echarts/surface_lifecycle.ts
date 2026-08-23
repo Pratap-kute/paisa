@@ -52,7 +52,6 @@ export function createEChartSurfaceController(options: {
     element: HTMLDivElement,
     renderer: EChartRenderer,
   ) => EChartSurfaceEngine;
-  onresize?: (dimensions: Dimensions) => void;
   onready?: () => void;
   onreadinesschange?: (ready: boolean) => void;
   eventHandlers?: PaisaChartEventHandler[];
@@ -65,7 +64,6 @@ export function createEChartSurfaceController(options: {
   let attachedHandlers: PaisaChartEventHandler[] = [];
   let isReady = false;
   let dimensions: Dimensions | undefined;
-  let generation = 0;
   let readyFrame: number | undefined;
   const requestFrame: RequestFrame = options.requestFrame ??
     globalThis.requestAnimationFrame.bind(globalThis);
@@ -96,15 +94,14 @@ export function createEChartSurfaceController(options: {
   }
 
   function invalidateReady() {
-    generation += 1;
     isReady = false;
     options.element.dataset.chartReady = "false";
     options.onreadinesschange?.(false);
     clearReadyFrame();
   }
 
-  function markReady(expectedGeneration = generation) {
-    if (expectedGeneration !== generation || !dimensions) return;
+  function markReady() {
+    if (!chart || !dimensions) return;
     if (isReady) return;
     isReady = true;
     options.element.dataset.chartReady = "true";
@@ -113,28 +110,11 @@ export function createEChartSurfaceController(options: {
   }
 
   function scheduleReady() {
-    if (!chart || !dimensions || isReady) return;
-    if (readyFrame !== undefined) return;
-    const expectedGeneration = generation;
+    if (!chart || !dimensions) return;
+    clearReadyFrame();
     readyFrame = requestFrame(() => {
-      readyFrame = requestFrame(() => {
-        readyFrame = undefined;
-        if (expectedGeneration !== generation || !dimensions) return;
-        const rect = options.element.getBoundingClientRect();
-        const actual = {
-          width: Math.round(rect.width),
-          height: Math.round(rect.height),
-        };
-        if (
-          actual.width > 0 && actual.height > 0 &&
-          (actual.width !== dimensions.width ||
-            actual.height !== dimensions.height)
-        ) {
-          controller.resize(actual);
-          return;
-        }
-        markReady(expectedGeneration);
-      });
+      readyFrame = undefined;
+      markReady();
     });
   }
 
@@ -165,7 +145,6 @@ export function createEChartSurfaceController(options: {
         width: nextDimensions.width,
         height: nextDimensions.height,
       });
-      options.onresize?.(nextDimensions);
       scheduleReady();
     },
     setEventHandlers(handlers) {
@@ -180,7 +159,6 @@ export function createEChartSurfaceController(options: {
       chart?.dispose();
       chart = undefined;
       dimensions = undefined;
-      generation += 1;
       isReady = false;
       options.onreadinesschange?.(false);
       delete options.element.dataset.chartReady;

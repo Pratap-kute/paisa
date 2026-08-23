@@ -15,10 +15,8 @@
   }
 
   let { data, ariaLabel, testId, internalLegend = false }: Props = $props();
-  let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(buildPeriodSeriesOption(data, {
-    compact,
     darkMode: $theme === "dark",
     theme: tokenTheme,
     internalLegend,
@@ -30,11 +28,4 @@
   });
 </script>
 
-<EChartSurface
-  {option}
-  {ariaLabel}
-  {testId}
-  onresize={(dimensions) => {
-    compact = dimensions.width < 640;
-  }}
-/>
+<EChartSurface {option} {ariaLabel} {testId} />

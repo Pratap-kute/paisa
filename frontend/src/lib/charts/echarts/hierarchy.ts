@@ -4,6 +4,7 @@ import {
   normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
+import { responsiveChartOption } from "$lib/charts/echarts/responsive";
 import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
 
 export interface FinancialHierarchyChartData {
@@ -54,11 +55,11 @@ function tooltip(params: { data?: { paisa?: FinancialHierarchyNode } }) {
   ].filter(Boolean).join("<br/>");
 }
 
-export function buildFinancialHierarchyOption(
+function buildFinancialHierarchyLayout(
   data: FinancialHierarchyChartData,
-  options: { compact?: boolean; theme?: PaisaChartTheme } = {},
+  options: { theme?: PaisaChartTheme } = {},
+  mobile = false,
 ) {
-  const mobile = options.compact ?? false;
   const theme = options.theme;
   const categoryColors = categoryColorAssignments(
     categoryKeys(data.roots),
@@ -115,4 +116,14 @@ export function buildFinancialHierarchyOption(
       ],
     }],
   };
+}
+
+export function buildFinancialHierarchyOption(
+  data: FinancialHierarchyChartData,
+  options: { theme?: PaisaChartTheme } = {},
+) {
+  return responsiveChartOption(
+    buildFinancialHierarchyLayout(data, options),
+    buildFinancialHierarchyLayout(data, options, true),
+  );
 }

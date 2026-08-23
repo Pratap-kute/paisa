@@ -2,6 +2,7 @@ import _ from "lodash";
 import type dayjs from "dayjs";
 import { generateColorScheme } from "$lib/core/colors";
 import COLORS from "$lib/core/colors";
+import { financialColors } from "$lib/theme/chartPalette";
 import {
   forEachMonth,
   type Forecast,
@@ -350,6 +351,47 @@ export function buildYearlyIncomeValueSeries(
       period: financialYear(card),
       values: { [key]: card[key] },
       tooltipRows: [[label, card[key]]],
+    })),
+  };
+}
+
+export function buildYearlyIncomeComparisonSeries(
+  yearlyCards: IncomeYearlyCard[],
+): PeriodSeriesChartData {
+  const income = buildYearlyIncomeSeries(yearlyCards);
+  const netIncome = buildYearlyIncomeValueSeries(
+    "Net Income",
+    "net_income",
+    financialColors.gainText,
+    yearlyCards,
+  );
+  const netTax = buildYearlyIncomeValueSeries(
+    "Net Tax",
+    "net_tax",
+    financialColors.lossText,
+    yearlyCards,
+  );
+
+  return {
+    ...income,
+    legends: [
+      ...(income.legends ?? []),
+      ...(netIncome.legends ?? []),
+      ...(netTax.legends ?? []),
+    ],
+    series: [...income.series, ...netIncome.series, ...netTax.series],
+    points: income.points.map((point, index) => ({
+      ...point,
+      values: {
+        ...point.values,
+        net_income: yearlyCards[index]?.net_income ?? 0,
+        net_tax: yearlyCards[index]?.net_tax ?? 0,
+      },
+      tooltipRows: [
+        ...(point.tooltipRows ?? []),
+        ["Net Income", yearlyCards[index]?.net_income ?? 0],
+        ["Net Tax", yearlyCards[index]?.net_tax ?? 0],
+      ],
     })),
   };
 }

@@ -4,6 +4,7 @@ import {
   normalizeCategoryKey,
   type PaisaChartTheme,
 } from "$lib/charts/echarts/theme";
+import { responsiveChartOption } from "$lib/charts/echarts/responsive";
 
 export type ComparisonValueFormat =
   | "currency"
@@ -38,7 +39,6 @@ export interface ComparisonBarChartData {
 }
 
 export interface ComparisonBarOptions {
-  compact?: boolean;
   theme?: PaisaChartTheme;
   darkMode?: boolean;
 }
@@ -98,12 +98,12 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
   ].join("<br/>");
 }
 
-export function buildComparisonBarOption(
+function buildComparisonBarLayout(
   data: ComparisonBarChartData,
   options: ComparisonBarOptions = {},
+  mobile = false,
 ) {
   const points = orderedPoints(data);
-  const mobile = options.compact ?? false;
   const theme = options.theme;
   const textColor = theme?.textColor ?? "currentColor";
   const mutedColor = theme?.mutedColor ?? textColor;
@@ -217,4 +217,14 @@ export function buildComparisonBarOption(
         : undefined,
     ].filter(Boolean),
   };
+}
+
+export function buildComparisonBarOption(
+  data: ComparisonBarChartData,
+  options: ComparisonBarOptions = {},
+) {
+  return responsiveChartOption(
+    buildComparisonBarLayout(data, options),
+    buildComparisonBarLayout(data, options, true),
+  );
 }

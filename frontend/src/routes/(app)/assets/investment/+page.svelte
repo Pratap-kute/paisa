@@ -99,7 +99,7 @@
       subtitle="Capital invested by month and account"
     >
       <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" size="dynamic">
+      <ChartFrame height="tall">
         <MonthlyInvestmentChart {postings} />
       </ChartFrame>
     </Section>
@@ -109,7 +109,7 @@
       subtitle="Yearly invested capital comparison"
     >
       <LegendCard legends={yearlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame type="timeline" size="dynamic">
+      <ChartFrame height="tall">
         <YearlyInvestmentChart {yearlyCards} />
       </ChartFrame>
     </Section>

@@ -40,7 +40,6 @@ describe("ECharts surface lifecycle controller", () => {
       off: vi.fn(),
     };
     const initChart = vi.fn(() => chart as never);
-    const onresize = vi.fn();
     const onreadinesschange = vi.fn();
     const element = document.createElement("div");
     const initialOption = { series: [{ type: "sankey", data: [] }] };
@@ -53,7 +52,6 @@ describe("ECharts surface lifecycle controller", () => {
       option: initialOption,
       renderer: "canvas",
       initChart,
-      onresize,
       onreadinesschange,
     });
 
@@ -68,9 +66,7 @@ describe("ECharts surface lifecycle controller", () => {
 
     controller.resize({ width: 640, height: 360 });
     expect(chart.resize).toHaveBeenCalledWith({ width: 640, height: 360 });
-    expect(onresize).toHaveBeenCalledWith({ width: 640, height: 360 });
     controller.resize({ width: 640, height: 360 });
-    expect(onresize).toHaveBeenCalledTimes(1);
     expect(chart.resize).toHaveBeenCalledTimes(1);
 
     controller.markReady();
@@ -145,7 +141,7 @@ describe("ECharts surface lifecycle controller", () => {
     expect(chart.off).toHaveBeenCalledWith("mouseover", onHover);
   });
 
-  it("waits for a positive size that is stable across two frames", () => {
+  it("publishes readiness after options and one positive-size resize", () => {
     const chart = chartEngine();
     const frames = createFrameScheduler();
     const element = document.createElement("div");
@@ -168,8 +164,6 @@ describe("ECharts surface lifecycle controller", () => {
     expect(controller.ready()).toBe(false);
 
     controller.resize({ width: 640, height: 360 });
-    frames.flush();
-    expect(controller.ready()).toBe(false);
     frames.flush();
     expect(controller.ready()).toBe(true);
     expect(element.dataset.chartReady).toBe("true");
@@ -195,11 +189,9 @@ describe("ECharts surface lifecycle controller", () => {
 
     controller.init();
     controller.resize({ width: 640, height: 360 });
-    frames.flush();
     controller.update({ series: [{ type: "line", data: [1] }] });
     expect(controller.ready()).toBe(false);
     expect(frames.cancel).toHaveBeenCalled();
-    frames.flush();
     frames.flush();
     expect(controller.ready()).toBe(true);
 
@@ -207,18 +199,13 @@ describe("ECharts surface lifecycle controller", () => {
     controller.resize({ width: 480, height: 360 });
     expect(element.dataset.chartReady).toBe("false");
     frames.flush();
-    frames.flush();
     expect(controller.ready()).toBe(true);
   });
 
-  it("reconciles the final element rect before publishing readiness", () => {
+  it("deduplicates unchanged resizes without rebuilding options", () => {
     const chart = chartEngine();
     const frames = createFrameScheduler();
     const element = document.createElement("div");
-    const rect = { width: 640, height: 360 };
-    vi.spyOn(element, "getBoundingClientRect").mockImplementation(() =>
-      rect as DOMRect
-    );
     const controller = createEChartSurfaceController({
       element,
       option: { series: [] },
@@ -230,12 +217,11 @@ describe("ECharts surface lifecycle controller", () => {
 
     controller.init();
     controller.resize({ width: 640, height: 360 });
-    frames.flush();
-    rect.width = 520;
-    frames.flush();
-    expect(controller.ready()).toBe(false);
-    expect(chart.resize).toHaveBeenLastCalledWith({ width: 520, height: 360 });
-    frames.flush();
+    controller.resize({ width: 640, height: 360 });
+    controller.resize({ width: 520, height: 360 });
+    controller.resize({ width: 520, height: 360 });
+    expect(chart.resize).toHaveBeenCalledTimes(2);
+    expect(chart.setOption).toHaveBeenCalledTimes(1);
     frames.flush();
     expect(controller.ready()).toBe(true);
   });
@@ -265,5 +251,9 @@ describe("ECharts surface lifecycle controller", () => {
     frames.flush();
     expect(element.dataset.chartReady).toBeUndefined();
     expect(controller.ready()).toBe(false);
+    controller.resize({ width: 480, height: 320 });
+    controller.update({ series: [{ type: "line", data: [1] }] });
+    expect(chart.resize).toHaveBeenCalledTimes(1);
+    expect(chart.setOption).toHaveBeenCalledTimes(1);
   });
 });

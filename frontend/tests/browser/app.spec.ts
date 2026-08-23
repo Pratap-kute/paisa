@@ -31,7 +31,7 @@ test("dashboard renders synchronized fixture data", async ({ page }) => {
 test("monthly expenses preserves calendar details and category icons", async ({ page }) => {
   await page.goto("/expense/monthly");
   const calendar = page.locator(
-    "[data-testid='monthly-expense-calendar-echart'][data-chart-ready='true']",
+    "[data-testid='monthly-expense-calendar'][data-chart-ready='true']",
   );
   await expect(calendar).toBeVisible();
 
@@ -43,7 +43,11 @@ test("monthly expenses preserves calendar details and category icons", async ({ 
   const recentIcon = page.locator("section", { hasText: "Recent Expenses" })
     .locator(".custom-icon").first();
   await expect(recentIcon).toBeVisible();
-  expect(await recentIcon.evaluate((element) => getComputedStyle(element).fontFamily))
+  expect(
+    await recentIcon.evaluate((element) =>
+      getComputedStyle(element).fontFamily
+    ),
+  )
     .toContain("fa6-solid");
   await expect(recentIcon).not.toContainText("�");
 });
@@ -51,7 +55,7 @@ test("monthly expenses preserves calendar details and category icons", async ({ 
 test("yearly expenses preserves monthly composition and hover breakdown", async ({ page }) => {
   await page.goto("/expense/yearly");
   const calendar = page.locator(
-    "[data-testid='yearly-expense-calendar-echart'][data-chart-ready='true']",
+    "[data-testid='yearly-expense-calendar'][data-chart-ready='true']",
   );
   await expect(calendar).toBeVisible();
 

@@ -82,13 +82,13 @@ describe("income statement waterfall adapter", () => {
     expect(range.max).toBeGreaterThanOrEqual(
       Math.max(...data.steps.map((step) => step.end)),
     );
-    expect(option.yAxis).toMatchObject({
+    expect(option.baseOption.yAxis).toMatchObject({
       min: range.min,
       max: range.max,
       scale: true,
     });
-    expect(option.series[1].data[1].value).toBe(1_748_750);
-    expect(option.series[1].data[2].value).toBe(524_625);
+    expect(option.baseOption.series[1].data[1].value).toBe(1_748_750);
+    expect(option.baseOption.series[1].data[2].value).toBe(524_625);
   });
 
   it("provides a finite axis for empty chart data", () => {

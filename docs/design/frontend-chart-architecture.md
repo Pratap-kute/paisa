@@ -20,14 +20,17 @@ the option-builder boundary.
 
 ## Layout And Lifecycle
 
-- `ChartFrame` owns chart chrome, loading/empty/error states, and the available
-  content region.
+- `ChartFrame` owns chart chrome, loading/empty/error states, and one explicit
+  height intent: compact, standard, tall, or content-sized. Horizontal
+  comparison charts may additionally derive a capped height from their row
+  count.
 - `EChartSurface` lazily initializes one Canvas chart in the browser, owns the
   single `ResizeObserver`, forwards meaningful size changes to `chart.resize()`,
   updates options and events, exposes `data-chart-ready`, and disposes the
   chart.
-- Chart wrappers rebuild responsive options only when crossing the 640px compact
-  breakpoint. Ordinary width changes are handled by ECharts resize.
+- Chart wrappers build options only from data and theme changes. ECharts media
+  queries own compact presentation at 639px and below; container resizing never
+  feeds back into Svelte state or rebuilds options.
 - Charts render without animation. This keeps financial geometry deterministic,
   avoids partially rendered readiness states, and reduces background work.
 - Paisa semantic CSS tokens feed the chart theme. Option builders do not contain
@@ -35,30 +38,30 @@ the option-builder boundary.
 
 ## Production Inventory
 
-| Financial surface                | Renderer                                 | Adapter / option family                         | Interaction retained                |
-| -------------------------------- | ---------------------------------------- | ----------------------------------------------- | ----------------------------------- |
-| Dashboard cash flow              | mixed bar/line                           | `mixed_period_data` / `period_series`           | tooltip, legend                     |
-| Dashboard expense breakdown      | horizontal bar                           | `bar_comparison_data` / `bar_comparison`        | tooltip                             |
-| Net worth                        | line/area                                | `time_series_data` / `period_series`            | tooltip, legend                     |
-| Investment monthly/yearly        | stacked bars                             | `time_series_data` / `period_series`            | tooltip, legend                     |
-| Income monthly/yearly            | stacked bars and lines                   | `time_series_data` / `period_series`            | tooltip, legend                     |
-| Monthly/yearly expense breakdown | horizontal bar                           | `bar_comparison_data` / `bar_comparison`        | tooltip                             |
-| Monthly expense calendar         | native CSS grid                          | `expense_heatmap_data` / `DailyExpenseCalendar` | date/posting hover and focus detail |
-| Yearly expense activity          | monthly heatmap                          | `expense_heatmap_data` / `expense_heatmap`      | month/category tooltip              |
-| Monthly/yearly expense timeline  | stacked bars and cumulative line         | `mixed_period_data` / `period_series`           | selectable external legend, tooltip |
-| Asset allocation target          | comparison bar                           | `bar_comparison_data` / `bar_comparison`        | tooltip                             |
-| Asset allocation hierarchy/value | treemap                                  | `hierarchy_data` / `hierarchy`                  | hierarchy tooltip                   |
-| Asset allocation timeline        | percentage lines                         | `mixed_period_data` / `period_series`           | tooltip, legend                     |
-| Portfolio analysis summaries     | comparison bar                           | `hierarchy_data` / `bar_comparison`             | tooltip                             |
-| Portfolio industry/holdings      | treemap                                  | `hierarchy_data` / `hierarchy`                  | hierarchy tooltip                   |
-| Asset gain overview/detail       | comparison and period series             | `bar_comparison_data`, `time_series_data`       | account navigation, tooltip, legend |
-| Credit-card yearly spend         | comparison bar                           | `bar_comparison_data` / `bar_comparison`        | tooltip                             |
-| Liability repayment              | stacked bars                             | `time_series_data` / `period_series`            | tooltip, legend                     |
-| Liability interest               | comparison and period series             | `interest_data` / shared option families        | tooltip, legend                     |
-| Savings/retirement goals         | line/area/bar                            | `time_series_data` / `period_series`            | tooltip, milestones, legend         |
-| Monthly cash flow                | mixed bar/line                           | `mixed_period_data` / `period_series`           | tooltip, legend                     |
-| Yearly cash flow                 | Sankey or graph fallback for true cycles | `cash_flow_sankey_data` / `cash_flow_sankey`    | tooltip, depth filtering            |
-| Income statement                 | waterfall                                | `income_statement_data` / `waterfall`           | section/account tooltip             |
+| Financial surface                | Renderer                                 | Adapter / option family                          | Interaction retained                |
+| -------------------------------- | ---------------------------------------- | ------------------------------------------------ | ----------------------------------- |
+| Dashboard cash flow              | mixed bar/line                           | `mixed_period_data` / `period_series`            | tooltip, legend                     |
+| Dashboard expense breakdown      | horizontal bar                           | `bar_comparison_data` / `bar_comparison`         | tooltip                             |
+| Net worth                        | line/area                                | `time_series_data` / `period_series`             | tooltip, legend                     |
+| Investment monthly/yearly        | stacked bars                             | `time_series_data` / `period_series`             | tooltip, legend                     |
+| Income monthly/yearly            | stacked bars and lines                   | `time_series_data` / `period_series`             | tooltip, legend                     |
+| Monthly/yearly expense breakdown | horizontal bar                           | `bar_comparison_data` / `bar_comparison`         | tooltip                             |
+| Monthly expense calendar         | native CSS grid                          | `expense_heatmap_data` / `DailyExpenseCalendar`  | date/posting hover and focus detail |
+| Yearly expense activity          | native CSS composition grid              | `expense_heatmap_data` / `YearlyExpenseCalendar` | month/category tooltip              |
+| Monthly/yearly expense timeline  | stacked bars and cumulative line         | `mixed_period_data` / `period_series`            | selectable external legend, tooltip |
+| Asset allocation target          | comparison bar                           | `bar_comparison_data` / `bar_comparison`         | tooltip                             |
+| Asset allocation hierarchy/value | treemap                                  | `hierarchy_data` / `hierarchy`                   | hierarchy tooltip                   |
+| Asset allocation timeline        | percentage lines                         | `mixed_period_data` / `period_series`            | tooltip, legend                     |
+| Portfolio analysis summaries     | comparison bar                           | `hierarchy_data` / `bar_comparison`              | tooltip                             |
+| Portfolio industry/holdings      | treemap                                  | `hierarchy_data` / `hierarchy`                   | hierarchy tooltip                   |
+| Asset gain overview/detail       | comparison and period series             | `bar_comparison_data`, `time_series_data`        | account navigation, tooltip, legend |
+| Credit-card yearly spend         | comparison bar                           | `bar_comparison_data` / `bar_comparison`         | tooltip                             |
+| Liability repayment              | stacked bars                             | `time_series_data` / `period_series`             | tooltip, legend                     |
+| Liability interest               | comparison and period series             | `interest_data` / shared option families         | tooltip, legend                     |
+| Savings/retirement goals         | line/area/bar                            | `time_series_data` / `period_series`             | tooltip, milestones, legend         |
+| Monthly cash flow                | mixed bar/line                           | `mixed_period_data` / `period_series`            | tooltip, legend                     |
+| Yearly cash flow                 | Sankey or graph fallback for true cycles | `cash_flow_sankey_data` / `cash_flow_sankey`     | tooltip, depth filtering            |
+| Income statement                 | waterfall                                | `income_statement_data` / `waterfall`            | section/account tooltip             |
 
 Normal tables, cards, forms, and progress indicators are rendered with Svelte,
 HTML, and CSS rather than a chart engine.
@@ -72,8 +75,8 @@ HTML, and CSS rather than a chart engine.
   and the token-backed series palette. Semantic gain/loss/status colors remain
   separate.
 - Calendar adapters distinguish missing periods, true zero-value activity, and
-  positive activity. Calendar geometry is owned by ECharts; token-driven color
-  intensity is computed from the adapter value range.
+  positive activity. Native CSS grids own calendar geometry and composition
+  rings; no chart engine is initialized for either calendar.
 - Tooltips use Paisa currency/number/percentage formatters and explicit tooltip
   foreground/background tokens.
 
@@ -86,6 +89,9 @@ HTML, and CSS rather than a chart engine.
   resize, event replacement, readiness, disposal, and SSR behavior.
 - Browser tests wait on a Paisa-owned test ID plus `data-chart-ready="true"`;
   they do not inspect Canvas or zrender internals.
+- ECharts readiness means initialization, option application, and one
+  positive-size resize have completed. Layout stability is measured by the
+  browser test harness rather than production chart code.
 - The visual matrix covers every production route at desktop, tablet, and mobile
   widths in light/dark where defined. Focused crops cover each high-risk
   renderer family.

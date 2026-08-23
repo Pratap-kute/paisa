@@ -197,7 +197,7 @@ export const chartSnapshots = [
   {
     name: "expense-yearly-calendar",
     path: "/expense/yearly",
-    locator: "[data-testid='yearly-expense-calendar-echart']",
+    locator: "[data-testid='yearly-expense-calendar']",
   },
   {
     name: "portfolio-hierarchy",

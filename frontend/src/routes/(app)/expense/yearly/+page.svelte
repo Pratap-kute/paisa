@@ -20,7 +20,7 @@
   import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import ExpenseHeatmapChart from "$lib/components/charts/ExpenseHeatmapChart.svelte";
+  import YearlyExpenseCalendar from "$lib/components/charts/YearlyExpenseCalendar.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
 
   let groups = writable<string[]>([]);
@@ -191,7 +191,7 @@
       subtitle="Distribution across spending categories"
     >
       <ChartFrame
-        type="category"
+        height="compact"
         class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
@@ -209,11 +209,11 @@
       title="Activity Calendar"
       subtitle="Monthly expense frequency and activity"
     >
-      <ChartFrame type="category" rows={1} empty={!hasCurrentYearExpenses}>
-        <ExpenseHeatmapChart
+      <ChartFrame height="content" empty={!hasCurrentYearExpenses}>
+        <YearlyExpenseCalendar
           data={currentYearHeatmapData}
           ariaLabel="Monthly expense activity for {$year}"
-          testId="yearly-expense-calendar-echart"
+          testId="yearly-expense-calendar"
           colorFor={expenseColor}
         />
       </ChartFrame>
@@ -227,8 +227,7 @@
     {#if hasExpenses}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame
-        type="timeline"
-        size="dynamic"
+        height="tall"
       >
         <TimeSeriesChart
           data={expenseTimelineData}

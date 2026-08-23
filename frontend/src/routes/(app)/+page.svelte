@@ -236,7 +236,7 @@
         {/if}
 
         <ChartFrame
-          type="dashboard-timeline"
+          height="compact"
           empty={!hasCashFlowData}
           emptyMessage="No cash-flow activity in this period"
         >
@@ -263,7 +263,7 @@
           </span>
         </div>
         <ChartFrame
-          type="category"
+          height="compact"
           rows={Math.min(8, selectedExpenses.length || 4)}
           empty={!hasSelectedExpenses}
           emptyMessage="No expenses this month"

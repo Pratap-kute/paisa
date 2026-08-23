@@ -9,6 +9,7 @@ import {
   buildMonthlyInvestmentSeries,
   buildNetworthSeries,
   buildRepaymentSeries,
+  buildYearlyIncomeComparisonSeries,
   buildYearlyIncomeSeries,
   buildYearlyIncomeValueSeries,
   buildYearlyInvestmentSeries,
@@ -158,6 +159,29 @@ describe("time-series ECharts adapters", () => {
     expect(yearly.points[0].values.Salary).toBe(1200);
     expect(yearly.points[0].values.Interest).toBe(100);
     expect(net.points[0].values.net_income).toBe(900);
+
+    const comparison = buildYearlyIncomeComparisonSeries([{
+      start_date: dayjs("2021-04-01"),
+      end_date: dayjs("2022-03-31"),
+      postings: [
+        posting("Income:Salary:Acme", -1200),
+        posting("Income:Interest:Bank", -100),
+      ],
+      net_income: 900,
+      net_tax: 400,
+    } as IncomeYearlyCard]);
+    expect(comparison.series.map((series) => series.key)).toEqual([
+      "Interest",
+      "Salary",
+      "net_income",
+      "net_tax",
+    ]);
+    expect(comparison.points[0].values).toEqual({
+      Interest: 100,
+      Salary: 1200,
+      net_income: 900,
+      net_tax: 400,
+    });
   });
 
   it("groups monthly repayments by liability account", () => {

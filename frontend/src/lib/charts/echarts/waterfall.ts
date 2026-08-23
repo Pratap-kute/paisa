@@ -1,6 +1,7 @@
 import { chartFormatters } from "$lib/charts/echarts/formatters";
 import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
 import type { IncomeStatementWaterfallData } from "$lib/charts/income_statement_data";
+import { responsiveChartOption } from "$lib/charts/echarts/responsive";
 
 export function incomeStatementAxisRange(data: IncomeStatementWaterfallData) {
   const values = data.steps.flatMap((step) =>
@@ -20,13 +21,12 @@ export function incomeStatementAxisRange(data: IncomeStatementWaterfallData) {
   };
 }
 
-export function buildIncomeStatementWaterfallOption(
+function buildIncomeStatementWaterfallLayout(
   data: IncomeStatementWaterfallData,
-  options: { compact?: boolean; theme?: PaisaChartTheme; darkMode?: boolean } =
-    {},
+  options: { theme?: PaisaChartTheme; darkMode?: boolean } = {},
+  mobile = false,
 ) {
   const theme = options.theme;
-  const mobile = options.compact ?? false;
   const axisRange = incomeStatementAxisRange(data);
   const colorFor = (delta: number) =>
     delta >= 0
@@ -132,7 +132,9 @@ export function buildIncomeStatementWaterfallOption(
             color: theme?.textColor,
             formatter: step.id === "start" || step.id === "end"
               ? chartFormatters.compactCurrency(step.end)
-              : `${step.delta > 0 ? "+" : ""}${chartFormatters.compactCurrency(step.delta)}`,
+              : `${step.delta > 0 ? "+" : ""}${
+                chartFormatters.compactCurrency(step.delta)
+              }`,
           },
         })),
         label: {
@@ -144,4 +146,14 @@ export function buildIncomeStatementWaterfallOption(
   };
 
   return baseOption;
+}
+
+export function buildIncomeStatementWaterfallOption(
+  data: IncomeStatementWaterfallData,
+  options: { theme?: PaisaChartTheme; darkMode?: boolean } = {},
+) {
+  return responsiveChartOption(
+    buildIncomeStatementWaterfallLayout(data, options),
+    buildIncomeStatementWaterfallLayout(data, options, true),
+  );
 }
