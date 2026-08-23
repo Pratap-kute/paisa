@@ -1,10 +1,11 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { afterNavigate } from "$app/navigation";
-  import type { Snippet } from "svelte";
+  import { onMount, type Snippet } from "svelte";
   import Logo from "./Logo.svelte";
   import ThemeSwitcher from "./ThemeSwitcher.svelte";
   import Actions from "./Actions.svelte";
+  import CommandPalette from "./CommandPalette.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
   import Spinner from "$lib/components/ui/Spinner.svelte";
   import {
@@ -37,6 +38,14 @@
 
   let mobileDrawerOpen = $state(false);
   let expandedGroups = $state(new Set<string>());
+  let commandPaletteOpen = $state(false);
+  let isMac = $state(false);
+
+  onMount(() => {
+    isMac =
+      typeof navigator !== "undefined" &&
+      /Mac|iPhone|iPod|iPad/i.test(navigator.platform || navigator.userAgent);
+  });
 
   afterNavigate(() => {
     mobileDrawerOpen = false;
@@ -489,18 +498,29 @@
         </div>
       </div>
 
-      <div
-        class="hidden w-64 max-w-full cursor-pointer items-center gap-2 rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-3 py-1.5 text-xs text-[var(--paisa-muted-foreground)] transition-colors hover:border-[var(--paisa-border-strong)] lg:flex"
+      <button
+        type="button"
+        onclick={() => (commandPaletteOpen = true)}
+        class="hidden w-64 max-w-full cursor-pointer items-center gap-2 rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-3 py-1.5 text-left text-xs text-[var(--paisa-muted-foreground)] transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] lg:flex"
+        aria-label="Open Command Palette and search"
       >
         <i class="fa-solid fa-magnifying-glass text-[11px]" aria-hidden="true"></i>
         <span class="min-w-0 flex-1 truncate">Search Paisa or commands...</span>
         <kbd
           class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1.5 py-0.5 font-mono text-[0.625rem]"
-        >⌘K</kbd>
-      </div>
+        >{isMac ? "⌘K" : "Ctrl K"}</kbd>
+      </button>
     </div>
 
     <div class="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        onclick={() => (commandPaletteOpen = true)}
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)] lg:hidden"
+        aria-label="Search"
+      >
+        <i class="fa-solid fa-magnifying-glass text-sm"></i>
+      </button>
       {#if showDateRange}
         <div class="hidden sm:block">
           <DateRange
@@ -561,3 +581,5 @@
     </div>
   </main>
 </div>
+
+<CommandPalette bind:open={commandPaletteOpen} />
