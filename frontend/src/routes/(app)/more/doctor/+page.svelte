@@ -112,7 +112,7 @@
             <div>
               <div class="flex items-center justify-center gap-2 md:justify-start">
                 <h2 class="text-base font-bold text-[var(--paisa-text-primary)]">
-                  {issues.length === 0 ? "All Systems Operational" : `${issues.length} Diagnostic Issue(s) Detected`}
+                  {issues.length === 0 ? "All Systems Operational" : `${issues.length} potential issue(s) found`}
                 </h2>
                 <Badge variant={issues.length === 0 ? "success" : "danger"} size="sm" rounded>
                   {issues.length === 0 ? "Healthy" : "Attention Required"}
