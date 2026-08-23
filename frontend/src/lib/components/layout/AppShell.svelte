@@ -37,7 +37,8 @@
   let { isBurger = $bindable(false), children }: Props = $props();
 
   let mobileDrawerOpen = $state(false);
-  let expandedGroups = $state(new Set<string>());
+  let userCollapsedGroups = $state(new Set<string>());
+  let userExpandedGroups = $state(new Set<string>());
   let commandPaletteOpen = $state(false);
   let isMac = $state(false);
 
@@ -50,6 +51,12 @@
   afterNavigate(() => {
     mobileDrawerOpen = false;
     isBurger = false;
+    const activeGroup = allNavGroups.find((g) => isGroupActive(g, pathname));
+    if (activeGroup && userCollapsedGroups.has(activeGroup.id)) {
+      const next = new Set(userCollapsedGroups);
+      next.delete(activeGroup.id);
+      userCollapsedGroups = next;
+    }
   });
 
   $effect(() => {
@@ -224,6 +231,12 @@
     ],
   };
 
+  let allNavGroups = $derived(
+    [...navSections, systemSection].flatMap((sec) =>
+      sec.items.filter((item): item is NavGroup => item.kind === "group")
+    )
+  );
+
   function isPathActive(targetHref: string, currentPath: string): boolean {
     if (targetHref === "/") {
       return currentPath === "/";
@@ -240,17 +253,28 @@
   }
 
   function isGroupExpanded(group: NavGroup, currentPath: string): boolean {
-    return expandedGroups.has(group.id) || isGroupActive(group, currentPath);
+    if (userCollapsedGroups.has(group.id)) return false;
+    if (userExpandedGroups.has(group.id)) return true;
+    return isGroupActive(group, currentPath);
   }
 
-  function toggleGroup(groupId: string) {
-    const next = new Set(expandedGroups);
-    if (next.has(groupId)) {
-      next.delete(groupId);
+  function toggleGroup(groupId: string, currentPath: string) {
+    const group = allNavGroups.find((g) => g.id === groupId);
+    if (!group) return;
+    const currentlyExpanded = isGroupExpanded(group, currentPath);
+    const nextCollapsed = new Set(userCollapsedGroups);
+    const nextExpanded = new Set(userExpandedGroups);
+
+    if (currentlyExpanded) {
+      nextCollapsed.add(groupId);
+      nextExpanded.delete(groupId);
     } else {
-      next.add(groupId);
+      nextExpanded.add(groupId);
+      nextCollapsed.delete(groupId);
     }
-    expandedGroups = next;
+
+    userCollapsedGroups = nextCollapsed;
+    userExpandedGroups = nextExpanded;
   }
 
   let pathname = $derived($page.url.pathname);
@@ -279,8 +303,9 @@
   const navGroupButtonClass =
     "flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-1.5 text-left text-sm font-medium text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]";
   const navSubLinkClass =
-    "block rounded px-2 py-1 text-xs text-[var(--paisa-muted-foreground)] no-underline transition-colors hover:text-[var(--paisa-foreground)]";
-  const navSubLinkActiveClass = "font-semibold text-[var(--paisa-primary)]";
+    "block rounded px-2.5 py-1.5 text-xs text-[var(--paisa-foreground)]/70 no-underline transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)]";
+  const navSubLinkActiveClass =
+    "font-semibold text-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)]/70";
 </script>
 
 {#snippet navPanel(onNavigate?: () => void)}
@@ -314,7 +339,7 @@
             type="button"
             class="{navGroupButtonClass} {active ? navLinkActiveClass : ''}"
             aria-expanded={expanded}
-            onclick={() => toggleGroup(item.id)}
+            onclick={() => toggleGroup(item.id, pathname)}
           >
             {#if item.icon}
               <i
@@ -377,7 +402,7 @@
           type="button"
           class="{navGroupButtonClass} text-xs {active ? navLinkActiveClass : 'text-[var(--paisa-muted-foreground)]'}"
           aria-expanded={expanded}
-          onclick={() => toggleGroup(item.id)}
+          onclick={() => toggleGroup(item.id, pathname)}
         >
           {#if item.icon}
             <i class="{item.icon} w-4 text-center text-xs" aria-hidden="true"></i>
