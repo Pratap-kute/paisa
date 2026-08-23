@@ -209,7 +209,7 @@
       />
       <Metric
         label="% of Net Income"
-        value={expenseRateValue ? `${expenseRateValue}%` : "—"}
+        value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
         class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
@@ -253,6 +253,7 @@
       <ChartFrame type="distribution" empty={!hasSelectedMonthExpenses}>
         <ExpenseHeatmapChart
           data={selectedMonthHeatmapData}
+          colorFor={expenseColor}
           ariaLabel="Daily expenses for {formattedCurrentMonth}"
           testId="monthly-expense-calendar-echart"
         />

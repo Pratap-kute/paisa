@@ -12,6 +12,10 @@
   font-family: var(--paisa-font-mono);
 }
 
+.custom-icon {
+  font-family: var(--paisa-font-sans);
+}
+
 :root {
   --paisa-canvas: #f8fafc;
   --paisa-surface: #ffffff;

@@ -2,12 +2,13 @@ import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import DailyExpenseCalendar from "./DailyExpenseCalendar.svelte";
 
-test("renders aligned dates, activity intensity, and useful detail text", () => {
+test("renders aligned dates, category rings, amounts, and hover details", () => {
   const points = Array.from({ length: 29 }, (_, index) => ({
     key: `2024-02-${String(index + 1).padStart(2, "0")}`,
     label: `${String(index + 1).padStart(2, "0")} Feb 2024`,
     value: index === 2 ? 100 : 0,
     hasActivity: index === 2,
+    segments: index === 2 ? [{ key: "Rent", value: 100 }] : [],
     tooltipRows: index === 2
       ? [{ label: "Rent", detail: "Expenses:Rent", value: 100 }]
       : [],
@@ -26,8 +27,10 @@ test("renders aligned dates, activity intensity, and useful detail text", () => 
   const days = getAllByRole("gridcell");
   expect(days).toHaveLength(29);
   expect(days[0]).toHaveStyle("--calendar-column: 4");
-  expect(days[2]).toHaveStyle("--expense-intensity: 100%");
+  expect(days[2].getAttribute("style")).toContain("conic-gradient");
+  expect(days[2]).toHaveTextContent("100");
   expect(days[2].getAttribute("title")).toContain("Rent (Expenses:Rent)");
+  expect(days[2].getAttribute("data-tippy-content")).toContain("Total");
   expect(getByRole("grid", { name: "February expenses" }))
     .toHaveAttribute("data-chart-ready", "true");
 });

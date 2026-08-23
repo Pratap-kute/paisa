@@ -130,7 +130,20 @@ export function buildMonthlyExpenseTimelineSeries(
   const start = _.minBy(postings, (posting) => posting.date.valueOf())?.date;
   const end = _.maxBy(postings, (posting) => posting.date.valueOf())?.date;
   const points: PeriodSeriesChartData["points"] = [];
-  let cumulative = 0;
+  const yearlyAverage = _.chain(postings)
+    .groupBy((posting) => posting.date.format("YYYY"))
+    .mapValues((yearPostings, year) => {
+      const activeStart = start?.format("YYYY") === year ? start.month() : 0;
+      const activeEnd = end?.format("YYYY") === year ? end.month() : 11;
+      const months = Math.max(1, activeEnd - activeStart + 1);
+      return _.sumBy(
+        yearPostings.filter((posting) =>
+          selected.includes(expenseGroup(posting))
+        ),
+        (posting) => posting.amount,
+      ) / months;
+    })
+    .value();
   if (start && end) {
     forEachMonth(start, end, (month) => {
       if (
@@ -142,16 +155,16 @@ export function buildMonthlyExpenseTimelineSeries(
       const values = _.chain(bucket).groupBy(expenseGroup).mapValues((items) =>
         _.sumBy(items, (item) => item.amount)
       ).value();
-      cumulative += _.sum(selected.map((group) => values[group] ?? 0));
+      const average = yearlyAverage[month.format("YYYY")] ?? 0;
       points.push({
         period: month.format("MMM-YYYY"),
         timestamp: month.valueOf(),
-        values: { ...values, cumulative },
+        values: { ...values, yearlyAverage: average },
         tooltipRows: [
           ...selected.filter((group) => (values[group] ?? 0) !== 0).map((
             group,
           ) => [group, values[group] ?? 0] as [string, number]),
-          ["Cumulative total", cumulative],
+          ["Yearly monthly average", average],
         ],
       });
     });
@@ -169,8 +182,8 @@ export function buildMonthlyExpenseTimelineSeries(
         categoryKey: group,
       })),
       {
-        key: "cumulative",
-        label: "Cumulative total",
+        key: "yearlyAverage",
+        label: "Yearly monthly average",
         intent: "line",
         dashed: true,
         color: "var(--paisa-negative)",

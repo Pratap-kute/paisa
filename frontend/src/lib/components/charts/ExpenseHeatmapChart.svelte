@@ -6,8 +6,13 @@
   import DailyExpenseCalendar from "./DailyExpenseCalendar.svelte";
   import { theme } from "../../../store";
 
-  interface Props { data: ExpenseHeatmapData; ariaLabel: string; testId: string }
-  let { data, ariaLabel, testId }: Props = $props();
+  interface Props {
+    data: ExpenseHeatmapData;
+    ariaLabel: string;
+    testId: string;
+    colorFor?: (key: string) => string;
+  }
+  let { data, ariaLabel, testId, colorFor }: Props = $props();
   let compact = $state(false);
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(
@@ -19,7 +24,7 @@
 </script>
 
 {#if data.granularity === "day"}
-  <DailyExpenseCalendar {data} {ariaLabel} {testId} />
+  <DailyExpenseCalendar {data} {ariaLabel} {testId} {colorFor} />
 {:else if option}
   <EChartSurface
     {option}

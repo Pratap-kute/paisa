@@ -28,6 +28,26 @@ test("dashboard renders synchronized fixture data", async ({ page }) => {
     .toBeVisible();
 });
 
+test("monthly expenses preserves calendar details and category icons", async ({ page }) => {
+  await page.goto("/expense/monthly");
+  const calendar = page.locator(
+    "[data-testid='monthly-expense-calendar-echart'][data-chart-ready='true']",
+  );
+  await expect(calendar).toBeVisible();
+
+  const activeDay = calendar.locator(".paisa-expense-calendar-active").first();
+  await expect(activeDay).toHaveAttribute("data-tippy-content", /Total/);
+  await activeDay.hover();
+  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
+
+  const recentIcon = page.locator("section", { hasText: "Recent Expenses" })
+    .locator(".custom-icon").first();
+  await expect(recentIcon).toBeVisible();
+  expect(await recentIcon.evaluate((element) => getComputedStyle(element).fontFamily))
+    .toContain("fa6-solid");
+  await expect(recentIcon).not.toContainText("�");
+});
+
 test("major pages are routable", async ({ page }) => {
   for (
     const path of [

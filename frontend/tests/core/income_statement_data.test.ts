@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 import { describe, expect, it } from "vitest";
 import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
+import {
+  buildIncomeStatementWaterfallOption,
+  incomeStatementAxisRange,
+} from "$lib/charts/echarts/waterfall";
 import type { IncomeStatement } from "$lib/core/utils";
 
 describe("income statement waterfall adapter", () => {
@@ -52,5 +56,45 @@ describe("income statement waterfall adapter", () => {
       expenses: {},
     } as IncomeStatement;
     expect(buildIncomeStatementWaterfall(statement).endingBalance).toBe(99);
+  });
+
+  it("zooms the chart to the cumulative bridge without changing step values", () => {
+    const data = buildIncomeStatementWaterfall({
+      startingBalance: 18_731_450,
+      endingBalance: 20_817_436,
+      date: dayjs(),
+      income: { "Income:Salary": -1_748_750 },
+      tax: { "Expenses:Tax": 524_625 },
+      interest: { "Income:Interest": -372_083 },
+      pnl: { "Income:CapitalGains": 661_377 },
+      equity: {},
+      liabilities: {},
+      expenses: { "Expenses:Food": 171_600 },
+    } as IncomeStatement);
+
+    const range = incomeStatementAxisRange(data);
+    const option = buildIncomeStatementWaterfallOption(data);
+
+    expect(range.min).toBeGreaterThan(0);
+    expect(range.min).toBeLessThanOrEqual(
+      Math.min(...data.steps.map((step) => step.end)),
+    );
+    expect(range.max).toBeGreaterThanOrEqual(
+      Math.max(...data.steps.map((step) => step.end)),
+    );
+    expect(option.yAxis).toMatchObject({
+      min: range.min,
+      max: range.max,
+      scale: true,
+    });
+    expect(option.series[1].data[1].value).toBe(1_748_750);
+    expect(option.series[1].data[2].value).toBe(524_625);
+  });
+
+  it("provides a finite axis for empty chart data", () => {
+    expect(incomeStatementAxisRange({ steps: [], endingBalance: 0 })).toEqual({
+      min: 0,
+      max: 1,
+    });
   });
 });

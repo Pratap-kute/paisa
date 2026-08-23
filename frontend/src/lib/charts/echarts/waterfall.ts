@@ -2,6 +2,24 @@ import { chartFormatters } from "$lib/charts/echarts/formatters";
 import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
 import type { IncomeStatementWaterfallData } from "$lib/charts/income_statement_data";
 
+export function incomeStatementAxisRange(data: IncomeStatementWaterfallData) {
+  const values = data.steps.flatMap((step) =>
+    step.id === "start" || step.id === "end"
+      ? [step.end]
+      : [step.start, step.end]
+  );
+  if (values.length === 0) return { min: 0, max: 1 };
+  const minimum = Math.min(...values);
+  const maximum = Math.max(...values);
+  const span = maximum - minimum;
+  const padding = Math.max(span * 0.08, Math.abs(maximum) * 0.01, 1);
+
+  return {
+    min: Math.floor((minimum - padding) / padding) * padding,
+    max: Math.ceil((maximum + padding) / padding) * padding,
+  };
+}
+
 export function buildIncomeStatementWaterfallOption(
   data: IncomeStatementWaterfallData,
   options: { compact?: boolean; theme?: PaisaChartTheme; darkMode?: boolean } =
@@ -9,6 +27,7 @@ export function buildIncomeStatementWaterfallOption(
 ) {
   const theme = options.theme;
   const mobile = options.compact ?? false;
+  const axisRange = incomeStatementAxisRange(data);
   const colorFor = (delta: number) =>
     delta >= 0
       ? theme?.positiveColor ?? "#16a34a"
@@ -68,6 +87,9 @@ export function buildIncomeStatementWaterfallOption(
     },
     yAxis: {
       type: "value",
+      min: axisRange.min,
+      max: axisRange.max,
+      scale: true,
       axisLabel: {
         color: theme?.mutedColor,
         formatter: chartFormatters.compactCurrency,
@@ -103,15 +125,18 @@ export function buildIncomeStatementWaterfallOption(
             ? step.end
             : Math.abs(step.delta),
           itemStyle: { color: colorFor(step.delta), opacity: 0.82 },
+          label: {
+            show: !mobile &&
+              (step.id === "start" || step.id === "end" || step.delta !== 0),
+            position: step.delta < 0 ? "bottom" : "top",
+            color: theme?.textColor,
+            formatter: step.id === "start" || step.id === "end"
+              ? chartFormatters.compactCurrency(step.end)
+              : `${step.delta > 0 ? "+" : ""}${chartFormatters.compactCurrency(step.delta)}`,
+          },
         })),
         label: {
           show: false,
-          position: "top",
-          color: theme?.textColor,
-          formatter: (params: { dataIndex: number }) =>
-            chartFormatters.compactCurrency(
-              data.steps[params.dataIndex]?.delta ?? 0,
-            ),
         },
         labelLayout: { hideOverlap: true },
       },

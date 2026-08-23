@@ -1,15 +1,21 @@
 <script lang="ts">
   import dayjs from "dayjs";
   import type { ExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { formatCurrency } from "$lib/core/utils";
+  import { categoryColor } from "$lib/charts/mixed_period_data";
+  import {
+    formatCurrency,
+    tooltip,
+  } from "$lib/core/utils";
+  import { iconText } from "$lib/core/icon";
 
   interface Props {
     data: ExpenseHeatmapData;
     ariaLabel: string;
     testId: string;
+    colorFor?: (key: string) => string;
   }
 
-  let { data, ariaLabel, testId }: Props = $props();
+  let { data, ariaLabel, testId, colorFor = categoryColor }: Props = $props();
   const weekStart = USER_CONFIG.week_starting_day;
   const weekdays = $derived(
     Array.from({ length: 7 }, (_, index) =>
@@ -32,9 +38,34 @@
     return [point.label, ...rows].join("\n");
   }
 
-  function intensity(value: number) {
-    if (data.maxValue <= 0) return 0;
-    return Math.round(Math.max(0, Math.min(1, value / data.maxValue)) * 100);
+  function detailHtml(index: number) {
+    const point = data.points[index];
+    if (!point.tooltipRows.length) return null;
+    return tooltip(
+      point.tooltipRows.map((row) => [
+        [
+          iconText(row.detail ?? ""),
+          "custom-icon",
+        ],
+        [row.label, "paisa-truncate"],
+        [formatCurrency(row.value), "paisa-text-bold paisa-text-right"],
+      ]),
+      { header: point.label, total: formatCurrency(point.value) },
+    );
+  }
+
+  function ring(point: ExpenseHeatmapData["points"][number]) {
+    if (!point.segments?.length || point.value <= 0) return "none";
+    let offset = 0;
+    const stops = point.segments.flatMap((segment) => {
+      const start = offset;
+      offset += segment.value / point.value * 100;
+      return [
+        `${colorFor(segment.key)} ${start}%`,
+        `${colorFor(segment.key)} ${offset}%`,
+      ];
+    });
+    return `conic-gradient(${stops.join(", ")})`;
   }
 </script>
 
@@ -54,13 +85,20 @@
     <button
       type="button"
       class:paisa-expense-calendar-zero={point.hasActivity && point.value === 0}
+      class:paisa-expense-calendar-active={point.hasActivity}
       class="paisa-expense-calendar-day"
-      style="--calendar-column: {index === 0 ? firstColumn : 'auto'}; --expense-intensity: {intensity(point.value)}%;"
+      style="--calendar-column: {index === 0 ? firstColumn : 'auto'}; --expense-ring: {ring(point)};"
       title={detail(index)}
       aria-label={detail(index)}
+      data-tippy-content={detailHtml(index)}
       role="gridcell"
     >
-      {index + 1}
+      <span class="paisa-expense-calendar-ring" aria-hidden="true">
+        <span>{index + 1}</span>
+      </span>
+      <span class="paisa-expense-calendar-total">
+        {point.value > 0 ? formatCurrency(point.value, 0) : ""}
+      </span>
     </button>
   {/each}
 </div>
@@ -98,11 +136,49 @@
   .paisa-expense-calendar-day {
     grid-column-start: var(--calendar-column);
     cursor: help;
-    background: color-mix(
-      in srgb,
-      var(--paisa-negative) var(--expense-intensity),
-      var(--paisa-surface)
-    );
+    min-height: 4.25rem;
+    grid-template-rows: auto 1rem;
+    align-content: center;
+    gap: 0.2rem;
+    background: var(--paisa-surface);
+  }
+
+  .paisa-expense-calendar-ring {
+    position: relative;
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--expense-ring);
+  }
+
+  .paisa-expense-calendar-ring::after {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: var(--paisa-surface);
+    content: "";
+  }
+
+  .paisa-expense-calendar-ring > span {
+    position: relative;
+    z-index: 1;
+    font-weight: var(--paisa-font-weight-medium);
+  }
+
+  .paisa-expense-calendar-day:not(.paisa-expense-calendar-active) .paisa-expense-calendar-ring {
+    box-shadow: inset 0 0 0 1px var(--paisa-border-subtle);
+  }
+
+  .paisa-expense-calendar-total {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--paisa-muted-foreground);
+    font-size: 0.625rem;
+    line-height: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .paisa-expense-calendar-day:hover,
@@ -119,7 +195,12 @@
 
   @media (max-width: 640px) {
     .paisa-expense-calendar-day {
-      min-height: 2.4rem;
+      min-height: 3.75rem;
+    }
+
+    .paisa-expense-calendar-ring {
+      width: 2rem;
+      height: 2rem;
     }
   }
 </style>

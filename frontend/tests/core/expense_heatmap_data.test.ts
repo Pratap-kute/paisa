@@ -32,9 +32,24 @@ describe("expense heatmap adapters", () => {
       label: "Market",
       value: 100,
     });
+    expect(data.points[0].segments).toEqual([{ key: "Food", value: 100 }]);
     expect(data.points[1]).toMatchObject({ value: 0, hasActivity: true });
     expect(data.points[2]).toMatchObject({ value: 0, hasActivity: false });
     expect(data.maxValue).toBe(100);
+  });
+
+  it("preserves daily category composition for calendar rings", () => {
+    const data = buildMonthlyExpenseHeatmapData("2024-03", [
+      posting("2024-03-05", "Expenses:Food:Groceries", 75),
+      posting("2024-03-05", "Expenses:Travel:Taxi", 25),
+      posting("2024-03-05", "Expenses:Food:Dining", 25),
+    ]);
+
+    expect(data.points[4].value).toBe(125);
+    expect(data.points[4].segments).toEqual([
+      { key: "Food", value: 100 },
+      { key: "Travel", value: 25 },
+    ]);
   });
 
   it.each([

@@ -13,6 +13,7 @@ export interface ExpenseHeatmapDatum {
   label: string;
   value: number;
   tooltipRows: ExpenseHeatmapTooltipRow[];
+  segments?: Array<{ key: string; value: number }>;
   hasActivity: boolean;
 }
 
@@ -54,6 +55,10 @@ export function buildMonthlyExpenseHeatmapData(
   const points = Array.from({ length: start.daysInMonth() }, (_, index) => {
     const date = start.date(index + 1);
     const rows = byDay[date.format("YYYY-MM-DD")] ?? [];
+    const segments = Object.entries(grouped(rows, expenseGroup))
+      .map(([key, items]) => ({ key, value: total(items) }))
+      .filter((segment) => segment.value > 0)
+      .sort((a, b) => b.value - a.value || a.key.localeCompare(b.key));
     return {
       key: date.format("YYYY-MM-DD"),
       label: date.format("DD MMM YYYY"),
@@ -63,6 +68,7 @@ export function buildMonthlyExpenseHeatmapData(
         detail: posting.account,
         value: posting.amount,
       })),
+      segments,
       hasActivity: rows.length > 0,
     };
   });

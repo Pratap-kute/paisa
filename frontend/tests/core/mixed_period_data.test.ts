@@ -43,7 +43,7 @@ describe("mixed-period chart adapters", () => {
     ]);
   });
 
-  it("groups monthly expenses and preserves cumulative totals", () => {
+  it("groups monthly expenses and preserves yearly monthly averages", () => {
     const data = buildMonthlyExpenseTimelineSeries(
       [
         posting("2024-01-05", "Expenses:Food", 100),
@@ -54,13 +54,17 @@ describe("mixed-period chart adapters", () => {
       { from: dayjs("2024-01-01"), to: dayjs("2024-02-29") },
     );
     expect(data.points.map((point) => point.values.Food)).toEqual([100, 50]);
-    expect(data.points.map((point) => point.values.cumulative)).toEqual([
-      100,
-      150,
+    expect(data.points.map((point) => point.values.yearlyAverage)).toEqual([
+      75,
+      75,
     ]);
     expect(data.series.map((series) => series.key)).toEqual([
       "Food",
-      "cumulative",
+      "yearlyAverage",
+    ]);
+    expect(data.points[0].tooltipRows).toContainEqual([
+      "Yearly monthly average",
+      75,
     ]);
   });
 
