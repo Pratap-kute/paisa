@@ -2,7 +2,9 @@
   import { onMount } from "svelte";
   import { partition } from "es-toolkit";
   import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
+  import { buildCashFlowSunburstData } from "$lib/charts/cash_flow_hierarchy";
   import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
+  import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, dateMax, year } from "../../../../store";
   import {
@@ -11,6 +13,7 @@
     cashflowExpenseDepthAllowed,
     cashflowIncomeDepth,
     cashflowIncomeDepthAllowed,
+    cashflowViewMode,
   } from "../../../../persisted_store";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
@@ -20,7 +23,7 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-import { max as arrayMax, minBy } from "$lib/core/collection";
+  import { max as arrayMax, minBy } from "$lib/core/collection";
 
   let graph: Record<string, Graph> = $state();
   let expenses: Posting[] = $state([]);
@@ -33,8 +36,16 @@ import { max as arrayMax, minBy } from "$lib/core/collection";
       $cashflowExpenseDepth,
     );
   });
+  let sankeyData = $derived(
+    selectedGraph ? buildCashFlowSankeyData(selectedGraph) : undefined,
+  );
+  let sunburstData = $derived(
+    selectedGraph
+      ? buildCashFlowSunburstData(selectedGraph)
+      : { roots: [], mode: "sunburst" as const },
+  );
   let legends: Legend[] = $derived(
-    selectedGraph ? buildCashFlowSankeyData(selectedGraph).legends : [],
+    sankeyData ? sankeyData.legends : [],
   );
   let isEmpty = $derived(!isLoading && Boolean(graph) && !selectedGraph);
 
@@ -99,6 +110,22 @@ import { max as arrayMax, minBy } from "$lib/core/collection";
   >
     {#snippet actions()}
       <div class="inline-flex flex-wrap items-center gap-[var(--paisa-space-2)] sm:hidden">
+        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sunburst' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "sunburst")}
+          >
+            Breakdown
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "sankey")}
+          >
+            Flow
+          </button>
+        </div>
         <FinancialYearPicker bind:value={$year} dateMin={$dateMin} dateMax={$dateMax} />
         {#if showDepthControls}
           <details class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)]">
@@ -125,8 +152,42 @@ import { max as arrayMax, minBy } from "$lib/core/collection";
 
   <Section
     title="Yearly Cash Flow"
-    subtitle="Multi-year flows at selected account depth"
+    subtitle={$cashflowViewMode === "sunburst" ? "Interactive hierarchical breakdown (click slice to zoom in/out)" : "Multi-year flows at selected account depth"}
   >
+    {#snippet action()}
+      <div class="hidden items-center gap-[var(--paisa-space-2)] sm:inline-flex">
+        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5" role="group" aria-label="Visualization mode">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sunburst' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "sunburst")}
+          >
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="4" />
+              <line x1="12" y1="2" x2="12" y2="8" />
+              <line x1="12" y1="16" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="8" y2="12" />
+              <line x1="16" y1="12" x2="22" y2="12" />
+            </svg>
+            Breakdown
+          </button>
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            onclick={() => ($cashflowViewMode = "sankey")}
+          >
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 5h4c2 0 4 3 6 3s4-3 6-3h2" />
+              <path d="M3 12h4c2 0 4 3 6 3s4-3 6-3h2" />
+              <path d="M3 19h4c2 0 4-3 6-3s4 3 6 3h2" />
+            </svg>
+            Flow
+          </button>
+        </div>
+      </div>
+    {/snippet}
+
     {#if !isLoading && isEmpty}
       <ZeroState item={[]}>
         <p class="text-sm text-[var(--paisa-muted-foreground)]">
@@ -139,7 +200,15 @@ import { max as arrayMax, minBy } from "$lib/core/collection";
       {/if}
       <ChartFrame height="tall" preserveChildren>
         {#if selectedGraph}
-          <CashFlowSankeyChart graph={selectedGraph} />
+          {#if $cashflowViewMode === "sunburst"}
+            <FinancialHierarchyChart
+              data={sunburstData}
+              ariaLabel="Yearly cash flow hierarchical sunburst chart"
+              testId="cash-flow-yearly-sunburst-echart"
+            />
+          {:else}
+            <CashFlowSankeyChart graph={selectedGraph} />
+          {/if}
         {/if}
       </ChartFrame>
     {/if}

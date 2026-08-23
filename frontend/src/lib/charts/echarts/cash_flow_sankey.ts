@@ -296,7 +296,7 @@ function buildCashFlowSankeyLayout(
         type: "sankey",
         name: "Cash Flow",
         top: mobile ? 12 : 24,
-        right: mobile ? 12 : 48,
+        right: mobile ? 16 : 180,
         bottom: mobile ? 12 : 24,
         left: mobile ? 12 : 48,
         nodeWidth: mobile ? 10 : 18,

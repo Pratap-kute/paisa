@@ -44,9 +44,12 @@ function categoryKeys(nodes: FinancialHierarchyNode[]): string[] {
 function tooltip(params: { data?: { paisa?: FinancialHierarchyNode } }) {
   const node = params.data?.paisa;
   if (!node) return "";
+  const valueLabel = typeof node.metadata?.valueLabel === "string"
+    ? node.metadata.valueLabel
+    : (node.metadata?.account ? "Amount" : "Market value");
   return [
     `<strong>${node.label}</strong>`,
-    `Market value: <strong>${chartFormatters.currency(node.value)}</strong>`,
+    `${valueLabel}: <strong>${chartFormatters.currency(node.value)}</strong>`,
     typeof node.percentage === "number"
       ? `Share: <strong>${
         chartFormatters.percentage(node.percentage / 100)
@@ -92,7 +95,7 @@ function buildFinancialHierarchyLayout(
           data: data.roots.map((node) => mapNode(node, theme, categoryColors)),
           radius: mobile ? ["12%", "88%"] : ["16%", "92%"],
           sort: undefined,
-          nodeClick: false,
+          nodeClick: "rootToNode",
           emphasis: {
             focus: "ancestor",
           },
@@ -100,7 +103,7 @@ function buildFinancialHierarchyLayout(
             {},
             {
               r0: "15%",
-              r: "48%",
+              r: "44%",
               itemStyle: {
                 borderWidth: 2,
                 borderColor: theme?.surfaceColor ?? "#ffffff",
@@ -108,15 +111,15 @@ function buildFinancialHierarchyLayout(
               },
               label: {
                 rotate: "tangential",
-                minAngle: 12,
+                minAngle: 10,
                 color: theme?.textColor,
                 fontSize: mobile ? 10 : 12,
                 fontWeight: 600,
               },
             },
             {
-              r0: "50%",
-              r: "90%",
+              r0: "46%",
+              r: "72%",
               itemStyle: {
                 borderWidth: 1.5,
                 borderColor: theme?.surfaceColor ?? "#ffffff",
@@ -127,6 +130,21 @@ function buildFinancialHierarchyLayout(
                 minAngle: 6,
                 color: theme?.textColor,
                 fontSize: mobile ? 9 : 11,
+              },
+            },
+            {
+              r0: "74%",
+              r: "94%",
+              itemStyle: {
+                borderWidth: 1,
+                borderColor: theme?.surfaceColor ?? "#ffffff",
+                borderRadius: 2,
+              },
+              label: {
+                rotate: "radial",
+                minAngle: 4,
+                color: theme?.textColor,
+                fontSize: mobile ? 8 : 10,
               },
             },
           ],
