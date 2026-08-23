@@ -14,9 +14,8 @@ export function withoutGeneratedIds(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(withoutGeneratedIds);
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).filter(([key]) =>
-        !GENERATED_ID_KEYS.includes(key)
-      ).map(([key, item]) => [key, withoutGeneratedIds(item)]),
+      Object.entries(value).filter(([key]) => !GENERATED_ID_KEYS.includes(key))
+        .map(([key, item]) => [key, withoutGeneratedIds(item)]),
     );
   }
   return value;

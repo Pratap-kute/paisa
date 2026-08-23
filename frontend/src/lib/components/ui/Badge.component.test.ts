@@ -16,7 +16,9 @@ test("renders badge variant classes properly", () => {
     variant: "warning",
     dot: true,
   });
-  expect(warning.container.querySelector(".paisa-badge")).toHaveClass("paisa-badge-warning");
+  expect(warning.container.querySelector(".paisa-badge")).toHaveClass(
+    "paisa-badge-warning",
+  );
   expect(warning.container.querySelector(".paisa-badge-dot"))
     .toBeInTheDocument();
 });

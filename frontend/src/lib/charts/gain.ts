@@ -4,7 +4,10 @@ import type { Legend } from "$lib/core/utils";
 const areaKeys = ["gain", "loss"] as const;
 const lineKeys = ["balance", "investment", "withdrawal"] as const;
 
-const colors: Record<(typeof areaKeys)[number] | (typeof lineKeys)[number], string> = {
+const colors: Record<
+  (typeof areaKeys)[number] | (typeof lineKeys)[number],
+  string
+> = {
   balance: COLORS.primary,
   investment: COLORS.secondary,
   withdrawal: COLORS.tertiary,

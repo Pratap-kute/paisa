@@ -256,7 +256,8 @@
 
 .full-height,
 .editor .cm-editor {
-  max-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px - 10.5px - 10.5px);
+  max-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px - 10.5px -
+    10.5px);
 }
 
 .cm-scroller {

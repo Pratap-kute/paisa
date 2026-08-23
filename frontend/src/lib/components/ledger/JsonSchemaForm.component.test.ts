@@ -54,7 +54,8 @@ test("normalizes a missing optional array to an empty list", async () => {
     expect(Array.isArray(value.tags)).toBe(true);
     expect(value.tags).toEqual([]);
   });
-  expect(getByText("Nothing here yet. Add one to get started.")).toBeInTheDocument();
+  expect(getByText("Nothing here yet. Add one to get started."))
+    .toBeInTheDocument();
   unmount();
 });
 

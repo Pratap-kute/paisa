@@ -120,14 +120,18 @@ function aggregateCoreCoverage(summary: CoverageSummary): FileCoverage {
 
   for (const [filePath, metrics] of Object.entries(summary)) {
     if (filePath === "total" || !isCoreCoverageFile(filePath)) continue;
-    for (const metric of ["lines", "statements", "functions", "branches"] as const) {
+    for (
+      const metric of ["lines", "statements", "functions", "branches"] as const
+    ) {
       totals[metric].total += metrics[metric].total;
       totals[metric].covered += metrics[metric].covered;
       totals[metric].skipped += metrics[metric].skipped;
     }
   }
 
-  for (const metric of ["lines", "statements", "functions", "branches"] as const) {
+  for (
+    const metric of ["lines", "statements", "functions", "branches"] as const
+  ) {
     const { total, covered } = totals[metric];
     totals[metric].pct = total === 0
       ? 100
