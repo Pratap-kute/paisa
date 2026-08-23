@@ -23,6 +23,20 @@ function fixVendorEvalPlugin() {
   };
 }
 
+function fixArimaBufferPlugin() {
+  return {
+    name: "fix-arima-buffer-fallback",
+    transform(code, id) {
+      if (id.endsWith("/arima/wrapper/native.bin.js")) {
+        return code.replace(
+          "require('buf' + 'fer').Buffer",
+          "globalThis.Buffer",
+        );
+      }
+    },
+  };
+}
+
 export default defineConfig({
   cacheDir: "node_modules/.vite",
   resolve: {
@@ -39,7 +53,12 @@ export default defineConfig({
     target: "es2021",
     chunkSizeWarningLimit: 700,
   },
-  plugins: [tailwindcss(), sveltekit(), fixVendorEvalPlugin()],
+  plugins: [
+    tailwindcss(),
+    sveltekit(),
+    fixVendorEvalPlugin(),
+    fixArimaBufferPlugin(),
+  ],
   server: {
     // The backend proxy is tied to this development server. Starting on an
     // arbitrary fallback port hides stale `make develop` processes and leaves
