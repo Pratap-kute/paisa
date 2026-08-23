@@ -41,7 +41,9 @@ describe("Cash Flow Hierarchy & Sunburst transformer", () => {
     expect(expenses).toBeDefined();
     expect(expenses?.value).toBe(70_000); // 20k + 10k + 40k
 
-    const foodCategory = expenses?.children?.find((c) => c.id === "Expenses:Food");
+    const foodCategory = expenses?.children?.find((c) =>
+      c.id === "Expenses:Food"
+    );
     expect(foodCategory).toBeDefined();
     expect(foodCategory?.value).toBe(30_000); // 20k + 10k
     expect(foodCategory?.children).toHaveLength(2);
@@ -50,7 +52,10 @@ describe("Cash Flow Hierarchy & Sunburst transformer", () => {
   it("calculates accurate percentages across active roots", () => {
     const roots = buildCashFlowHierarchy(graph);
     const totalValue = roots.reduce((sum, r) => sum + r.value, 0);
-    const totalPercentage = roots.reduce((sum, r) => sum + (r.percentage ?? 0), 0);
+    const totalPercentage = roots.reduce(
+      (sum, r) => sum + (r.percentage ?? 0),
+      0,
+    );
 
     expect(Math.round(totalPercentage)).toBe(100);
 
@@ -75,7 +80,8 @@ describe("Cash Flow Hierarchy & Sunburst transformer", () => {
     const sunburstData = buildCashFlowSunburstData(cycleGraph);
     expect(sunburstData.mode).toBe("sunburst");
     expect(sunburstData.roots.length).toBeGreaterThan(0);
-    expect(sunburstData.roots.find((r) => r.id === "Assets")?.value).toBeGreaterThan(0);
+    expect(sunburstData.roots.find((r) => r.id === "Assets")?.value)
+      .toBeGreaterThan(0);
   });
 
   it("builds hierarchy from real browser expense fixture", () => {
@@ -85,7 +91,10 @@ describe("Cash Flow Hierarchy & Sunburst transformer", () => {
     for (const fixtureGraph of graphs) {
       const roots = buildCashFlowHierarchy(fixtureGraph);
       expect(Array.isArray(roots)).toBe(true);
-      const totalLinkValue = fixtureGraph.links.reduce((s, l) => s + l.value, 0);
+      const totalLinkValue = fixtureGraph.links.reduce(
+        (s, l) => s + l.value,
+        0,
+      );
       if (fixtureGraph.nodes.length > 0 && totalLinkValue > 0) {
         expect(roots.length).toBeGreaterThan(0);
         roots.forEach((root) => {

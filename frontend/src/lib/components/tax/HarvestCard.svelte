@@ -12,8 +12,14 @@
     type Harvestable,
     restName,
   } from "$lib/core/utils";
+  import Card from "$lib/components/ui/Card.svelte";
 
-  let { harvestable }: { harvestable: Harvestable } = $props();
+  interface Props {
+    harvestable: Harvestable;
+    hideHeader?: boolean;
+  }
+
+  let { harvestable, hideHeader = false }: Props = $props();
   let units = $state(0);
   let amount = $state(0);
   let taxableGain = $state(0);
@@ -43,99 +49,187 @@
     amount = round(result[1]);
     taxableGain = round(result[2]);
   }
+
+  function gainClass(value: number) {
+    if (value > 0) return "text-[var(--paisa-positive)]";
+    if (value < 0) return "text-[var(--paisa-negative)]";
+    return "text-[var(--paisa-muted-foreground)]";
+  }
 </script>
 
-<article class="harvest-card" data-testid="harvest-card">
-  <header class="harvest-header">
-    <h2>{restName(harvestable.account)}</h2>
-    <div class="harvest-calculator">
-      <span>If you redeem <strong>{formatFloat(units)}</strong> units you will get</span>
-      <label>
-        <span class="sr-only">Redemption amount</span>
-        <span aria-hidden="true">₹</span><input type="number" step="1000" value={amount} oninput={(event) => updateFromAmount(event.currentTarget.valueAsNumber)} />
-      </label>
-      <span>and your <strong>taxable</strong> gain would be</span>
-      <label>
-        <span class="sr-only">Taxable gain</span>
-        <span aria-hidden="true">₹</span><input type="number" step="1000" value={taxableGain} oninput={(event) => updateFromGain(event.currentTarget.valueAsNumber)} />
-      </label>
-    </div>
-    <p>Price as on {dayjs(harvestable.current_unit_date).format("DD MMM YYYY")}</p>
-  </header>
-
-  <div class="harvest-body">
-    <div class="harvest-summary">
-      <div class="units-indicator" aria-label={`${formatFloat(harvestable.harvestable_units)} of ${formatFloat(harvestable.total_units)} units are harvestable`}>
-        <div class="units-bar" role="img">
-          <span class="units-harvestable" style:width={`${barPercentage}%`}></span>
-          <span class="units-remaining"></span>
+<Card padding="none" class="w-full overflow-hidden">
+  {#if !hideHeader}
+    {#snippet header()}
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-base font-semibold text-[var(--paisa-foreground)]">
+            {restName(harvestable.account)}
+          </span>
+          <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+            {harvestable.tax_category}
+          </span>
         </div>
-        <div class="units-labels">
-          <span>Harvestable {formatFloat(percentage)}%</span>
-          <span>Remaining {formatFloat(100 - percentage)}%</span>
+        <span class="text-xs text-[var(--paisa-muted-foreground)]">
+          Price as of {dayjs(harvestable.current_unit_date).format("DD MMM YYYY")}
+        </span>
+      </div>
+    {/snippet}
+  {/if}
+
+  <div class="flex flex-col divide-y divide-[var(--paisa-border-subtle)]">
+    <!-- Simulator & Progress Block -->
+    <div class="grid grid-cols-1 gap-4 bg-[var(--paisa-surface-card)] p-4 lg:grid-cols-12">
+      <!-- Interactive Redemption Simulator -->
+      <div class="flex flex-col gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-3.5 lg:col-span-7">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            Redemption Simulator
+          </span>
+          <span class="text-[0.6875rem] text-[var(--paisa-text-muted)]">
+            NAV: {formatCurrency(harvestable.current_unit_price, 2)} / unit
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="flex flex-col gap-1">
+            <label for="taxable-gain-input" class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+              Target Taxable Gain
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-2.5 text-xs font-semibold text-[var(--paisa-text-muted)]">₹</span>
+              <input
+                id="taxable-gain-input"
+                type="number"
+                step="5000"
+                value={taxableGain}
+                class="w-full rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1.5 pl-6 pr-2 text-sm font-semibold tabular-nums text-[var(--paisa-text-primary)] shadow-sm focus:border-[var(--paisa-brand-primary)] focus:outline-none"
+                oninput={(event) => updateFromGain(event.currentTarget.valueAsNumber)}
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label for="redemption-amount-input" class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+              Redemption Proceeds
+            </label>
+            <div class="relative flex items-center">
+              <span class="absolute left-2.5 text-xs font-semibold text-[var(--paisa-text-muted)]">₹</span>
+              <input
+                id="redemption-amount-input"
+                type="number"
+                step="5000"
+                value={amount}
+                class="w-full rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1.5 pl-6 pr-2 text-sm font-semibold tabular-nums text-[var(--paisa-text-primary)] shadow-sm focus:border-[var(--paisa-brand-primary)] focus:outline-none"
+                oninput={(event) => updateFromAmount(event.currentTarget.valueAsNumber)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-1 rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface)] p-2.5 text-xs">
+          <span class="text-[var(--paisa-muted-foreground)]">Required Redemption:</span>
+          <strong class="ml-1 text-sm font-bold text-[var(--paisa-brand-primary)]">{formatFloat(units)}</strong> units
+          <span class="text-[var(--paisa-text-muted)]">will realize</span>
+          <strong class="text-[var(--paisa-text-primary)]">{formatCurrency(amount)}</strong>
+          <span class="text-[var(--paisa-text-muted)]">with</span>
+          <strong class="text-[var(--paisa-positive)]">{formatCurrency(taxableGain)}</strong> taxable gain.
         </div>
       </div>
 
-      <table class="summary-table">
-        <tbody>
-          <tr><th scope="row">Balance Units</th><td>{formatFloat(harvestable.total_units)}</td></tr>
-          <tr><th scope="row">Harvestable Units</th><td class="positive">{formatFloat(harvestable.harvestable_units)}</td></tr>
-          <tr><th scope="row">Tax Category</th><td class="uppercase">{harvestable.tax_category}</td></tr>
-          <tr><th scope="row">Current Unit Price</th><td>{formatFloat(harvestable.current_unit_price)}</td></tr>
-          <tr><th scope="row">Unrealized Gain / Loss</th><td>{formatCurrency(harvestable.unrealized_gain)}</td></tr>
-          <tr><th scope="row">Taxable Unrealized Gain / Loss</th><td>{formatCurrency(harvestable.taxable_unrealized_gain)}</td></tr>
-        </tbody>
-      </table>
+      <!-- Holding Stats & Progress Bar -->
+      <div class="flex flex-col justify-between gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-3.5 lg:col-span-5">
+        <div>
+          <div class="mb-1.5 flex items-center justify-between text-xs font-semibold">
+            <span class="text-[var(--paisa-positive)]">Harvestable ({formatFloat(percentage)}%)</span>
+            <span class="text-[var(--paisa-muted-foreground)]">Remaining ({formatFloat(100 - percentage)}%)</span>
+          </div>
+          <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--paisa-surface-raised)]">
+            <div class="bg-[var(--paisa-positive)] transition-all duration-300" style:width={`${barPercentage}%`}></div>
+            <div class="flex-1 bg-[var(--paisa-chart-series-3)] opacity-60"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="flex flex-col rounded bg-[var(--paisa-surface)] p-2">
+            <span class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">Harvestable Units</span>
+            <span class="font-bold tabular-nums text-[var(--paisa-positive)]">{formatFloat(harvestable.harvestable_units)}</span>
+          </div>
+          <div class="flex flex-col rounded bg-[var(--paisa-surface)] p-2">
+            <span class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">Balance Units</span>
+            <span class="font-bold tabular-nums text-[var(--paisa-text-primary)]">{formatFloat(harvestable.total_units)}</span>
+          </div>
+          <div class="flex flex-col rounded bg-[var(--paisa-surface)] p-2">
+            <span class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">Unrealized Gain</span>
+            <span class="font-bold tabular-nums {gainClass(harvestable.unrealized_gain)}">{formatCurrency(harvestable.unrealized_gain)}</span>
+          </div>
+          <div class="flex flex-col rounded bg-[var(--paisa-surface)] p-2">
+            <span class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">Taxable Gain</span>
+            <span class="font-bold tabular-nums {gainClass(harvestable.taxable_unrealized_gain)}">{formatCurrency(harvestable.taxable_unrealized_gain)}</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="detail-table-wrap">
-      <table class="detail-table">
-        <thead><tr><th>Purchase Date</th><th>Units</th><th>Purchase Price</th><th>Purchase Unit Price</th><th>Current Price</th><th>Gain</th><th>Taxable Gain</th><th>Short Term Tax</th><th>Long Term Tax</th><th>Taxable at Slab Rate</th></tr></thead>
-        <tbody>
+    <!-- Full-Width Lot Breakdown Table -->
+    <div class="w-full overflow-x-auto">
+      <table class="w-full min-w-[900px] border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+            <th class="px-3.5 py-2.5">Purchase Date</th>
+            <th class="px-3.5 py-2.5 text-right">Units</th>
+            <th class="px-3.5 py-2.5 text-right">Purchase Cost</th>
+            <th class="px-3.5 py-2.5 text-right">Current Value</th>
+            <th class="px-3.5 py-2.5 text-right">Unrealized Gain</th>
+            <th class="px-3.5 py-2.5 text-right">Taxable Gain</th>
+            <th class="px-3.5 py-2.5 text-right">STCG Tax</th>
+            <th class="px-3.5 py-2.5 text-right">LTCG Tax</th>
+            <th class="px-3.5 py-2.5 text-right">Slab Tax</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--paisa-border-subtle)]">
           {#each harvestable.harvest_breakdown as breakdown, index (`${breakdown.purchase_date}-${index}`)}
-            <tr>
-              <td>{dayjs(breakdown.purchase_date).format("DD MMM YYYY")}</td>
-              <td>{formatFloat(breakdown.units)}</td>
-              <td>{formatCurrency(breakdown.purchase_price)}</td>
-              <td>{formatFloat(breakdown.purchase_unit_price)}</td>
-              <td>{formatCurrency(breakdown.current_price)}</td>
-              <td>{formatCurrency(breakdown.tax.gain)}</td>
-              <td>{formatCurrency(breakdown.tax.taxable)}</td>
-              <td>{formatCurrency(breakdown.tax.short_term)}</td>
-              <td>{formatCurrency(breakdown.tax.long_term)}</td>
-              <td>{formatCurrency(breakdown.tax.slab)}</td>
+            <tr class="transition-colors hover:bg-[var(--paisa-surface-hover)]">
+              <td class="whitespace-nowrap px-3.5 py-2.5 font-medium text-[var(--paisa-text-primary)]">
+                {dayjs(breakdown.purchase_date).format("DD MMM YYYY")}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-[var(--paisa-text-primary)]">
+                {formatFloat(breakdown.units)}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums">
+                <div class="font-medium text-[var(--paisa-text-primary)]">
+                  {formatCurrency(breakdown.purchase_price)}
+                </div>
+                <div class="text-[0.6875rem] text-[var(--paisa-text-muted)]">
+                  {formatCurrency(breakdown.purchase_unit_price, 2)} / unit
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums">
+                <div class="font-medium text-[var(--paisa-text-primary)]">
+                  {formatCurrency(breakdown.current_price)}
+                </div>
+                <div class="text-[0.6875rem] text-[var(--paisa-text-muted)]">
+                  {formatCurrency(harvestable.current_unit_price, 2)} / unit
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums {gainClass(breakdown.tax.gain)}">
+                {formatCurrency(breakdown.tax.gain)}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums {gainClass(breakdown.tax.taxable)}">
+                {formatCurrency(breakdown.tax.taxable)}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums {breakdown.tax.short_term !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                {formatCurrency(breakdown.tax.short_term)}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums {breakdown.tax.long_term !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                {formatCurrency(breakdown.tax.long_term)}
+              </td>
+              <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums {breakdown.tax.slab !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                {formatCurrency(breakdown.tax.slab)}
+              </td>
             </tr>
           {/each}
         </tbody>
       </table>
     </div>
   </div>
-</article>
-
-<style>
-  .harvest-card { overflow: hidden; border: 1px solid var(--paisa-border-subtle); border-radius: var(--paisa-radius-md); background: var(--paisa-surface-card); color: var(--paisa-foreground); }
-  .harvest-header { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; padding: .75rem; border-bottom: 1px solid var(--paisa-border-subtle); }
-  .harvest-header h2 { margin: 0; font-size: var(--paisa-font-size-sm); font-weight: var(--paisa-font-weight-semibold); }
-  .harvest-header p { margin: 0 0 0 auto; font-size: var(--paisa-font-size-xs); color: var(--paisa-muted-foreground); }
-  .harvest-calculator { display: flex; flex: 1 1 32rem; align-items: center; flex-wrap: wrap; gap: .25rem; font-size: var(--paisa-font-size-xs); color: var(--paisa-muted-foreground); }
-  input { width: 6.5rem; padding: .25rem .4rem; font: inherit; font-family: var(--paisa-font-mono); border: 1px solid var(--paisa-border); border-radius: var(--paisa-radius-sm); background: var(--paisa-surface); color: var(--paisa-foreground); }
-  .harvest-body { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr); gap: var(--paisa-space-3); padding: .75rem; }
-  .units-bar { display: flex; width: 100%; height: 1.25rem; overflow: hidden; border-radius: var(--paisa-radius-sm); background: var(--paisa-surface-raised); }
-  .units-harvestable { background: var(--paisa-positive); }
-  .units-remaining { flex: 1; background: var(--paisa-chart-series-3); }
-  .units-labels { display: flex; justify-content: space-between; gap: .5rem; margin-top: .35rem; font-size: var(--paisa-font-size-xs); color: var(--paisa-muted-foreground); }
-  table { width: 100%; border-collapse: collapse; font-size: var(--paisa-font-size-xs); }
-  .summary-table { margin-top: .75rem; }
-  th, td { padding: .3rem .5rem; border-bottom: 1px solid var(--paisa-border-subtle); text-align: left; }
-  .summary-table th { font-weight: 400; }
-  .summary-table th { color: var(--paisa-muted-foreground); }
-  .summary-table td { color: var(--paisa-foreground); }
-  .summary-table td, .detail-table th:not(:first-child), .detail-table td:not(:first-child) { text-align: right; }
-  .summary-table td, .detail-table td:nth-child(n+6) { font-weight: var(--paisa-font-weight-semibold); }
-  .positive { color: var(--paisa-positive); }
-  .detail-table-wrap { max-height: 245px; overflow: auto; }
-  .detail-table { min-width: 980px; }
-  .detail-table thead { position: sticky; top: 0; background: var(--paisa-surface-raised); }
-  .detail-table tbody tr:hover { background: var(--paisa-surface-hover); }
-  @media (max-width: 768px) { .harvest-body { grid-template-columns: 1fr; } .harvest-header p { margin-left: 0; } }
-</style>
+</Card>
