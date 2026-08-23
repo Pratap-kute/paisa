@@ -13,7 +13,7 @@
     type: "entry";
     value: BalanceValue;
     account?: string;
-    accountColumn?: number;
+    depth: number;
   }
 
   interface ParsedDivider {
@@ -102,82 +102,104 @@
       return { type: "divider" };
     }
 
-    const match = line.match(
-      /^(\s*)([-+]?[0-9,]+(?:\.[0-9]+)?)\s+(\S+)(?:(\s+)(\S.*))?$/,
-    );
-
-    if (!match) {
-      return { type: "raw", rawText: line };
+    // Match: (amount and commodity)(2 or more spaces)(account name)
+    const match = line.match(/^(\s*[-+]?[0-9,]+(?:\.[0-9]+)?\s+\S+)(\s{2,})(\S.*)$/);
+    if (match) {
+      const amountPart = match[1].trim();
+      const valMatch = amountPart.match(/^([-+]?[0-9,]+(?:\.[0-9]+)?)\s+(\S+)$/);
+      if (valMatch) {
+        const spaceCount = match[2].length;
+        const depth = Math.max(0, Math.round((spaceCount - 2) / 2));
+        const cleanAccount = match[3].trim();
+        return {
+          type: "entry",
+          value: balanceValue(valMatch[1], valMatch[2]),
+          account: cleanAccount,
+          depth,
+        };
+      }
     }
 
-    const [, , amount, commodity, , account] = match;
-    const cleanAccount = account?.trim();
+    // Amount only (e.g. "                   0" summary lines)
+    const singleNumberMatch = line.match(/^\s*([-+]?[0-9,]+(?:\.[0-9]+)?)\s*$/);
+    if (singleNumberMatch) {
+      return {
+        type: "entry",
+        value: balanceValue(singleNumberMatch[1], ""),
+        depth: 0,
+      };
+    }
 
-    return {
-      type: "entry",
-      value: balanceValue(amount, commodity),
-      account: cleanAccount,
-      accountColumn: cleanAccount ? line.lastIndexOf(cleanAccount) : undefined,
-    };
+    // Amount with commodity only (multi-commodity continuation line or footer)
+    const valOnlyMatch = line.match(/^\s*([-+]?[0-9,]+(?:\.[0-9]+)?)\s+(\S+)\s*$/);
+    if (valOnlyMatch) {
+      return {
+        type: "entry",
+        value: balanceValue(valOnlyMatch[1], valOnlyMatch[2]),
+        depth: 0,
+      };
+    }
+
+    return { type: "raw", rawText: line };
   }
 
   function parseBalance(output: string): BalanceGroup[] {
-    const parsedLines = output
-      .split("\n")
+    const lines = output.split("\n");
+    const parsedLines = lines
       .map(parseLine)
-      .filter((line): line is ParsedLine => line !== null);
-
-    const accountColumns = parsedLines
-      .filter(
-        (line): line is ParsedEntry => line.type === "entry" && !!line.account,
-      )
-      .map((line) => line.accountColumn as number);
-    const baseAccountColumn =
-      accountColumns.length > 0 ? Math.min(...accountColumns) : 0;
+      .filter((l): l is ParsedLine => l !== null);
 
     const groups: BalanceGroup[] = [];
     let pendingValues: BalanceValue[] = [];
-
-    const flushPending = () => {
-      if (pendingValues.length === 0) return;
-      groups.push({ type: "summary", values: pendingValues });
-      pendingValues = [];
-    };
+    let dividerSeen = false;
 
     for (const line of parsedLines) {
-      if (line.type === "entry") {
-        pendingValues.push(line.value);
-
-        if (line.account) {
-          const accountColumn = line.accountColumn ?? baseAccountColumn;
-          const depth = Math.max(
-            0,
-            Math.round((accountColumn - baseAccountColumn) / 2),
-          );
-
-          groups.push({
-            type: "account",
-            account: line.account,
-            depth,
-            values: pendingValues,
-            path: [],
-            hasChildren: false,
-          });
+      if (line.type === "divider") {
+        if (pendingValues.length > 0) {
+          groups.push({ type: "summary", values: pendingValues });
           pendingValues = [];
         }
+        dividerSeen = true;
+        groups.push({ type: "divider" });
         continue;
       }
 
-      flushPending();
-
-      if (line.type === "divider") {
-        groups.push({ type: "divider" });
-      } else {
+      if (line.type === "raw") {
+        if (pendingValues.length > 0) {
+          groups.push({ type: "summary", values: pendingValues });
+          pendingValues = [];
+        }
         groups.push({ type: "raw", rawText: line.rawText });
+        continue;
+      }
+
+      if (line.type === "entry") {
+        pendingValues.push(line.value);
+        if (line.account) {
+          if (!dividerSeen) {
+            groups.push({
+              type: "account",
+              account: line.account,
+              depth: line.depth,
+              values: pendingValues,
+              path: [],
+              hasChildren: false,
+            });
+          } else {
+            groups.push({
+              type: "summary",
+              values: pendingValues,
+            });
+          }
+          pendingValues = [];
+        }
       }
     }
 
-    flushPending();
+    if (pendingValues.length > 0) {
+      groups.push({ type: "summary", values: pendingValues });
+      pendingValues = [];
+    }
 
     const path: string[] = [];
 
@@ -191,10 +213,7 @@
 
       const nextAccount = groups
         .slice(index + 1)
-        .find(
-          (candidate): candidate is AccountGroup =>
-            candidate.type === "account",
-        );
+        .find((candidate): candidate is AccountGroup => candidate.type === "account");
 
       group.hasChildren = !!nextAccount && nextAccount.depth > group.depth;
     }
@@ -294,11 +313,12 @@
     if (
       group.depth === 0 &&
       group.hasChildren &&
-      group.values.length === 1 &&
-      group.values[0].isCurrency &&
-      (!baseCurrency || group.values[0].commodity === baseCurrency)
+      group.values.length >= 1
     ) {
-      return group.values[0];
+      const currencyVal = group.values.find(
+        (v) => v.isCurrency && (!baseCurrency || v.commodity === baseCurrency),
+      );
+      if (currencyVal) return currencyVal;
     }
 
     return null;

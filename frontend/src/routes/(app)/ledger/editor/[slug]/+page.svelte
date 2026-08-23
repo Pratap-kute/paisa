@@ -41,7 +41,6 @@
   let payees: string[] = $state([]);
   let selectedVersion = $state("");
   let lineNumber = $state(0);
-  let viewportWidth = $state(typeof window !== "undefined" ? window.innerWidth : 1200);
 
   function command(fn: Function) {
     return () => {
@@ -97,20 +96,11 @@
   }
 
   onMount(() => {
-    const onResize = () => {
-      viewportWidth = window.innerWidth;
-    };
-    window.addEventListener("resize", onResize);
-
     loadFiles(data.name);
     const line = _.toNumber($page.url.hash.substring(1));
     if (_.isNumber(line)) {
       lineNumber = line;
     }
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-    };
   });
 
   async function loadFiles(selectedFileName: string) {
@@ -287,28 +277,22 @@
     }
   }
 
-  let workspaceColumns = $derived.by(() => {
-    const noSidebar = !sidebarOpen;
-    const noOutput = !outputOpen || _.isEmpty($editorState.output);
-    const isMobile = viewportWidth <= 768;
-    const isTablet = viewportWidth <= 1024;
 
-    if (isMobile || (noSidebar && noOutput)) {
-      return "minmax(0, 1fr)";
+  let gridColsClass = $derived.by(() => {
+    const hasSidebar = sidebarOpen;
+    const hasOutput = outputOpen && !_.isEmpty($editorState.output);
+
+    if (hasSidebar && hasOutput) {
+      return "grid-cols-1 md:grid-cols-[minmax(180px,200px)_1fr_minmax(220px,280px)] lg:grid-cols-[minmax(200px,240px)_1fr_minmax(260px,340px)]";
     }
-    if (isTablet || noOutput) {
-      if (noSidebar) return "minmax(0, 1fr)";
-      return "minmax(200px, 220px) minmax(0, 1fr)";
+    if (hasSidebar) {
+      return "grid-cols-1 md:grid-cols-[minmax(180px,220px)_1fr] lg:grid-cols-[minmax(200px,240px)_1fr]";
     }
-    if (noSidebar) return "minmax(0, 1fr) minmax(280px, 340px)";
-    if (noOutput) return "minmax(220px, 240px) minmax(0, 1fr)";
-    return "minmax(220px, 240px) minmax(0, 1fr) minmax(280px, 340px)";
+    if (hasOutput) {
+      return "grid-cols-1 md:grid-cols-[1fr_minmax(240px,320px)] lg:grid-cols-[1fr_minmax(260px,340px)]";
+    }
+    return "grid-cols-1";
   });
-
-  let showSidebarPane = $derived(sidebarOpen && viewportWidth > 768);
-  let showOutputPane = $derived(
-    outputOpen && !_.isEmpty($editorState.output) && viewportWidth > 1024,
-  );
 </script>
 
 <FileModal
@@ -359,8 +343,8 @@
           <Button
             variant={$editorState.hasUnsavedChanges ? "primary" : "secondary"}
             size="sm"
-            disabled={$editorState.hasUnsavedChanges === false}
-            onclick={() => save()}
+            onclick={save}
+            disabled={!$editorState.hasUnsavedChanges}
             title="Save file (Ctrl+S)"
           >
             {#snippet icon()}
@@ -369,11 +353,16 @@
             <span>Save</span>
           </Button>
 
-          <Button variant="ghost" size="sm" onclick={() => pretty()} title="Format ledger entries (Ctrl+I)">
+          <Button
+            variant="ghost"
+            size="sm"
+            onclick={pretty}
+            title="Format ledger file (Ctrl+Shift+I)"
+            ariaLabel="Format document"
+          >
             {#snippet icon()}
-              <i class="fas fa-code"></i>
+              <i class="fas fa-wand-magic-sparkles"></i>
             {/snippet}
-            <span>Prettify</span>
           </Button>
 
           <Button
@@ -498,13 +487,10 @@
       </div>
     </div>
 
-    <div
-      class="grid h-full min-h-0 w-full flex-1 gap-3"
-      style="grid-template-columns: {workspaceColumns};"
-    >
-      {#if showSidebarPane}
+    <div class="grid h-full min-h-0 w-full flex-1 gap-3 {gridColsClass}">
+      {#if sidebarOpen}
         <aside
-          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]"
+          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >
           <div
             class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2"
@@ -565,9 +551,9 @@
         </div>
       </main>
 
-      {#if showOutputPane}
+      {#if outputOpen && !_.isEmpty($editorState.output)}
         <section
-          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]"
+          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >
           <div
             class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2"
