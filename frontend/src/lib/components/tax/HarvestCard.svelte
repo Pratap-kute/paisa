@@ -57,7 +57,7 @@
   }
 </script>
 
-<Card padding="none" class="w-full overflow-hidden">
+<Card padding="none" class="w-full overflow-hidden" data-testid="harvest-card">
   {#if !hideHeader}
     {#snippet header()}
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -101,6 +101,7 @@
                 id="taxable-gain-input"
                 type="number"
                 step="5000"
+                aria-label="Taxable gain"
                 value={taxableGain}
                 class="w-full rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1.5 pl-6 pr-2 text-sm font-semibold tabular-nums text-[var(--paisa-text-primary)] shadow-sm focus:border-[var(--paisa-brand-primary)] focus:outline-none"
                 oninput={(event) => updateFromGain(event.currentTarget.valueAsNumber)}
@@ -118,6 +119,7 @@
                 id="redemption-amount-input"
                 type="number"
                 step="5000"
+                aria-label="Redemption amount"
                 value={amount}
                 class="w-full rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1.5 pl-6 pr-2 text-sm font-semibold tabular-nums text-[var(--paisa-text-primary)] shadow-sm focus:border-[var(--paisa-brand-primary)] focus:outline-none"
                 oninput={(event) => updateFromAmount(event.currentTarget.valueAsNumber)}
