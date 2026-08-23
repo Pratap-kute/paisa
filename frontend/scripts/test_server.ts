@@ -38,7 +38,14 @@ async function waitForPort(port: number, timeout = 30_000) {
       connection.close();
       return;
     } catch (error) {
-      if (!(error instanceof Deno.errors.ConnectionRefused)) throw error;
+      if (
+        !(error instanceof Deno.errors.ConnectionRefused) &&
+        !(error instanceof Deno.errors.ConnectionReset) &&
+        !(error instanceof Deno.errors.ConnectionAborted) &&
+        !(error instanceof Deno.errors.NotConnected)
+      ) {
+        throw error;
+      }
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
