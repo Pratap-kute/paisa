@@ -1,7 +1,6 @@
 <script lang="ts">
   import { postingUrl, type Transaction } from "$lib/core/utils";
   import Postings from "$lib/components/transactions/Postings.svelte";
-  import _ from "lodash";
   import PostingStatus from "$lib/components/transactions/PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
@@ -13,11 +12,11 @@
   let { compact = false, t }: Props = $props();
 
   const debits = (t: Transaction) => {
-    return _.filter(t.postings, (p) => p.amount < 0);
+    return t.postings.filter((p) => p.amount < 0);
   };
 
   const credits = (t: Transaction) => {
-    return _.filter(t.postings, (p) => p.amount >= 0);
+    return t.postings.filter((p) => p.amount >= 0);
   };
 </script>
 

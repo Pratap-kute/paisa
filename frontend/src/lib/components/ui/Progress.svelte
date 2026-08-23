@@ -1,7 +1,7 @@
 <script lang="ts">
   import { formatPercentage } from "$lib/core/utils";
-  import { dropRight, floor, range } from "lodash";
-
+  import { dropRight, range } from "es-toolkit";
+import { floor } from "$lib/core/collection";
   interface Props {
     small?: boolean;
     progressPercent: number;

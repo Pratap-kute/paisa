@@ -43,10 +43,9 @@ if (pdfjs.GlobalWorkerOptions) {
 import Handlebars from "handlebars";
 import helpers from "$lib/importing/template_helpers";
 import * as toast from "$lib/core/toast";
-import _ from "lodash";
-
+import { mapValues } from "es-toolkit";
 Handlebars.registerHelper(
-  _.mapValues(helpers, (helper, name) => {
+  mapValues(helpers, (helper, name) => {
     return function (this: any, ...args: any[]) {
       try {
         return helper.apply(this, args);

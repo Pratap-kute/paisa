@@ -20,8 +20,7 @@
   } from "$lib/domain/goals";
   import type { PageData } from "./$types";
   import { iconGlyph } from "$lib/core/icon";
-  import _ from "lodash";
-  import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
+    import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
   import { iconify } from "$lib/core/icon";
   import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
@@ -33,6 +32,7 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
   import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
+import { sortBy } from "$lib/core/collection";
 
   interface Props {
     data: PageData;
@@ -75,11 +75,9 @@
     } = await ajax("/api/goals/retirement/:name", null as any, data as Record<string, string>));
     targetSavings = yearlyExpense * (100 / swr);
 
-    latestPostings = _.chain(postings)
-      .sortBy((p: Posting) => p.date)
+    latestPostings = sortBy(postings, (p: Posting) => p.date)
       .reverse()
-      .take(100)
-      .value();
+      .slice(0, 100);
 
     if (yearlyExpense > 0) {
       progressPercent = (savingsTotal / targetSavings) * 100;

@@ -20,7 +20,7 @@
     restName,
     postingUrl,
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { last } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
@@ -34,6 +34,7 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+import { sortBy } from "$lib/core/collection";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -76,12 +77,10 @@
       },
     } = await ajax("/api/gain/:name", null, data));
 
-    overview = _.last(gain.networthTimeline);
-    postings = _.chain(gain.postings)
-      .sortBy((p) => p.date)
+    overview = last(gain.networthTimeline);
+    postings = sortBy(gain.postings, (p) => p.date)
       .reverse()
-      .take(100)
-      .value();
+      .slice(0, 100);
     selectedCommodities = [...commodities];
     securityTypeEmpty = security_type.length === 0;
     nameAndSecurityTypeEmpty = name_and_security_type.length === 0;

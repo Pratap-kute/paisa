@@ -3,7 +3,7 @@
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
   import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
-  import _ from "lodash";
+  import { cloneDeep, isEqual, startCase } from "es-toolkit";
   import * as toast from "$lib/core/toast";
   import { refresh } from "../../../../store";
   import { sync } from "$lib/api/sync";
@@ -78,7 +78,7 @@
       config = data.config;
       schema = data.schema;
       accounts = data.accounts || [];
-      lastConfig = _.cloneDeep(config);
+      lastConfig = cloneDeep(config);
     } finally {
       loaded = true;
     }
@@ -113,7 +113,7 @@
       list.push({
         id: key,
         key,
-        label: _.startCase(key),
+        label: startCase(key),
         kind: "key",
         icon: meta.icon,
         description: meta.description,
@@ -184,9 +184,9 @@
       error = respError;
 
       if (success) {
-        lastConfig = _.cloneDeep(newConfig);
-        config = _.cloneDeep(newConfig);
-        globalThis.USER_CONFIG = _.cloneDeep(newConfig) as UserConfig;
+        lastConfig = cloneDeep(newConfig);
+        config = cloneDeep(newConfig);
+        globalThis.USER_CONFIG = cloneDeep(newConfig) as UserConfig;
         configUpdated();
         refresh();
         toast.toast({
@@ -201,10 +201,10 @@
   }
 
   function discard() {
-    config = _.cloneDeep(lastConfig);
+    config = cloneDeep(lastConfig);
   }
 
-  let hasChanges = $derived(!_.isEqual(config, lastConfig));
+  let hasChanges = $derived(!isEqual(config, lastConfig));
 </script>
 
 <svelte:head>

@@ -17,12 +17,13 @@
     type Transaction,
     asTransaction
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { debounce } from "es-toolkit";
   import { get } from "svelte/store";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+import { map } from "$lib/core/collection";
 
   let files: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);
@@ -38,7 +39,7 @@
     filteredPostings = rows.filter((r) => predicate(r.transaction)).map((r) => r.posting);
   }
 
-  const handleInput = _.debounce(handleInputRaw, 100);
+  const handleInput = debounce(handleInputRaw, 100);
 
   const unsubscribe = editorState.subscribe((state) => {
     handleInput(state.predicate);
@@ -58,7 +59,7 @@
     ({ files, accounts, commodities } = await ajax("/api/editor/files"));
     const { postings: loadedPostings } = await ajax("/api/ledger");
     postings = loadedPostings;
-    rows = _.map(loadedPostings, (p) => ({
+    rows = map(loadedPostings, (p) => ({
       posting: p,
       transaction: asTransaction(p)
     }));

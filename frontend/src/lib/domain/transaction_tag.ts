@@ -9,7 +9,6 @@ import {
   ViewPlugin,
   type ViewUpdate,
 } from "@codemirror/view";
-import _ from "lodash";
 import { prefixMinutesSeconds } from "../core/utils";
 
 class SchedulePreview extends WidgetType {
@@ -31,12 +30,11 @@ class SchedulePreview extends WidgetType {
         matchCount: 3,
         timezone: dayjs.tz.guess(),
       });
-      text = _.chain(schedules)
+      text = schedules
         .map((schedule) => dayjs(schedule).format("DD MMM YYYY"))
-        .join(", ")
-        .value();
+        .join(", ");
 
-      if (_.isEmpty(schedules)) {
+      if (schedules.length === 0) {
         text = "Invalid";
       }
     } catch (_e) {

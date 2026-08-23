@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import _ from "lodash";
 import COLORS from "$lib/core/colors";
 import {
   type Interest,
@@ -8,6 +7,7 @@ import {
 } from "$lib/core/utils";
 import type { ComparisonBarChartData } from "$lib/charts/echarts/bar_comparison";
 import type { PeriodSeriesChartData } from "$lib/charts/echarts/period_series";
+import { maxBy, minBy, sortBy } from "$lib/core/collection";
 
 export interface InterestSummary {
   account: string;
@@ -32,13 +32,13 @@ export function timelineDomain(
   points: InterestOverview[],
 ): [dayjs.Dayjs, dayjs.Dayjs] | null {
   const dates = points.map((point) => point.date).filter(Boolean);
-  const start = _.minBy(dates, (date) => date.valueOf());
-  const end = _.maxBy(dates, (date) => date.valueOf());
+  const start = minBy(dates, (date) => date.valueOf());
+  const end = maxBy(dates, (date) => date.valueOf());
   return start && end ? padTimeDomain(start, end) : null;
 }
 
 export function interestSummary(interest: Interest): InterestSummary {
-  const current = _.last(interest.overview_timeline);
+  const current = interest.overview_timeline.at(-1);
   const drawn = current?.drawn_amount ?? 0;
   const repaid = current?.repaid_amount ?? 0;
   const interestAmount = current?.interest_amount ?? 0;
@@ -60,7 +60,7 @@ export function buildInterestOverviewComparison(
     valueFormat: "currency",
     valueLabel: "Balance",
     sort: "input",
-    points: _.sortBy(
+    points: sortBy(
       interests.map(interestSummary),
       (summary) => summary.account,
     ).map((summary) => ({

@@ -4,7 +4,7 @@
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { ajax, helpUrl, type GoalSummary } from "$lib/core/utils";
-  import _ from "lodash";
+  import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";
   import * as toast from "$lib/core/toast";
   import { writable } from "svelte/store";
@@ -12,6 +12,7 @@
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+import { find, isEmpty as isEmptyValue, sortBy } from "$lib/core/collection";
 
   const goalDndzone = dndzone;
 
@@ -31,7 +32,7 @@
     for (let i = 0; i < goals.length; i++) {
       const g = goals[i];
       g.priority = goals.length - i;
-      const goalConfig = _.find(config.goals[g.type] || [], { name: g.name });
+      const goalConfig = find(config.goals[g.type] || [], { name: g.name });
       if (goalConfig) {
         goalConfig.priority = g.priority;
       }
@@ -47,7 +48,7 @@
     });
 
     if (success) {
-      globalThis.USER_CONFIG = _.cloneDeep(newConfig);
+      globalThis.USER_CONFIG = cloneDeep(newConfig);
       toast.toast({
         message: `Updated goal config`,
         type: "is-success"
@@ -64,8 +65,8 @@
   onMount(async () => {
     ({ config } = await ajax("/api/config"));
     ({ goals } = await ajax("/api/goals"));
-    goals = _.sortBy(goals, (g) => -g.priority);
-    if (_.isEmpty(goals)) {
+    goals = sortBy(goals, (g) => -g.priority);
+    if (isEmptyValue(goals)) {
       isEmpty = true;
     }
   });

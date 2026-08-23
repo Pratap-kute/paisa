@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import _ from "lodash";
+  import { sumBy, uniq } from "es-toolkit";
   import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
@@ -22,6 +22,7 @@
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import YearlyExpenseCalendar from "$lib/components/charts/YearlyExpenseCalendar.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
 
   let groups = writable<string[]>([]);
   let expenses: Posting[] = $state([]),
@@ -56,16 +57,16 @@
         },
       } = await ajax("/api/expense"));
 
-      const dates = _.map(expenses, (e) => e.date);
+      const dates = map(expenses, (e) => e.date);
       if (dates.length > 0) {
-        const minimum = _.minBy(dates, (d) => d.valueOf())!;
-        const maximum = _.maxBy(dates, (d) => d.valueOf())!;
+        const minimum = minBy(dates, (d) => d.valueOf())!;
+        const maximum = maxBy(dates, (d) => d.valueOf())!;
         dateMin.set(minimum);
         dateMax.set(maximum);
         if (!$year) year.set(financialYear(maximum));
       }
 
-      const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
+      const allGroups = uniq(expenses.map(expenseGroup)).sort();
       groups.set(allGroups);
       expenseColor = categoryColorResolver(allGroups);
       legends = categoryLegends(allGroups, (group) => {
@@ -77,11 +78,11 @@
   });
 
   function sum(postings: Posting[], sign = 1) {
-    return sign * _.sumBy(postings, (p) => p.amount);
+    return sign * sumBy(postings, (p) => p.amount);
   }
 
   function sumCurrency(postings: Posting[], sign = 1) {
-    return formatCurrency(sign * _.sumBy(postings, (p) => p.amount));
+    return formatCurrency(sign * sumBy(postings, (p) => p.amount));
   }
 
   let currentYearExpenses: Posting[] = $derived(
@@ -114,7 +115,7 @@
       expense = sumCurrency(yearExpenses);
       investment = sumCurrency(investments);
 
-      if (_.isEmpty(incomes)) {
+      if (isEmpty(incomes)) {
         expenseRate = "";
         expenseRateValue = "";
         taxRate = "";
@@ -171,7 +172,7 @@
         value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="[&_.paisa-chart-frame-body]:overflow-visible [&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
+        class="[&paisa-chart-frame-body]:overflow-visible [&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal [&paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -192,7 +193,7 @@
     >
       <ChartFrame
         height="compact"
-        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
+        class="overflow-visible [&paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
         emptyMessage="No expenses recorded for {$year}"

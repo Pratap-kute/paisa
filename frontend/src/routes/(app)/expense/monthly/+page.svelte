@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import _ from "lodash";
+  import { sumBy, uniq } from "es-toolkit";
   import dayjs from "dayjs";
   import {
     ajax,
@@ -34,6 +34,7 @@
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import DailyExpenseCalendar from "$lib/components/charts/DailyExpenseCalendar.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+import { isEmpty, map, sortBy } from "$lib/core/collection";
 
   let groups = writable<string[]>([]);
   let expenses: Posting[] | undefined = $state(),
@@ -68,8 +69,8 @@
         },
       } = await ajax("/api/expense"));
 
-      setAllowedDateRange(_.map(expenses, (e: Posting) => e.date));
-      const allGroups = _.chain(expenses).map(expenseGroup).uniq().sort().value();
+      setAllowedDateRange(map(expenses, (e: Posting) => e.date));
+      const allGroups = uniq(expenses.map(expenseGroup)).sort();
       expenseColor = categoryColorResolver(allGroups);
       groups.set(allGroups);
       legends = categoryLegends(allGroups, (group) => {
@@ -81,21 +82,20 @@
   });
 
   function sum(postings: Posting[], sign = 1) {
-    return sign * _.sumBy(postings, (p: Posting) => p.amount);
+    return sign * sumBy(postings, (p: Posting) => p.amount);
   }
 
   function sumCurrency(postings: Posting[], sign = 1) {
-    return formatCurrency(sign * _.sumBy(postings, (p: Posting) => p.amount));
+    return formatCurrency(sign * sumBy(postings, (p: Posting) => p.amount));
   }
 
   let current_month_expenses: Posting[] = $derived(
-    _.chain((grouped_expenses && grouped_expenses[$month]) || [])
-      .filter((e: Posting) =>
-        _.isEmpty($groups) || _.includes($groups, expenseGroup(e))
-      )
-      .sortBy((e: Posting) => e.date)
-      .reverse()
-      .value(),
+    sortBy(
+      ((grouped_expenses && grouped_expenses[$month]) || []).filter(
+        (e: Posting) => isEmpty($groups) || $groups.includes(expenseGroup(e)),
+      ),
+      (e: Posting) => e.date,
+    ).reverse(),
   );
   let selectedMonthExpenses: Posting[] = $derived(
     grouped_expenses?.[$month] || [],
@@ -150,7 +150,7 @@
       expense = sumCurrency(expenses);
       saving = sumCurrency(investments);
 
-      if (_.isEmpty(incomes)) {
+      if (isEmpty(incomes)) {
         taxRate = "";
         expenseRate = "";
         expenseRateValue = "";
@@ -212,7 +212,7 @@
         value={expenseRateValue || "—"}
         secondary={expenseRateValue ? "of net income" : (netIncome || "No income recorded")}
         loading={isLoading}
-        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal [&_.paisa4-metric-value]:leading-[1.15]"
+        class="[&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal [&paisa4-metric-value]:leading-[1.15]"
       />
     </MetricStrip>
 
@@ -233,7 +233,7 @@
     >
       <ChartFrame
         height="compact"
-        class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
+        class="overflow-visible [&paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, selectedMonthExpenses.length || 4)}
         empty={!hasSelectedMonthExpenses}
         emptyMessage="No expenses recorded for {formattedCurrentMonth}"
@@ -301,7 +301,7 @@
       {/if}
     {/snippet}
 
-    {#if _.isEmpty(current_month_expenses)}
+    {#if isEmpty(current_month_expenses)}
       <ZeroState item={[]}>
         <p class="text-sm text-[var(--paisa-muted-foreground)]">
           {recentExpensesEmptyMessage}

@@ -19,7 +19,7 @@
     displayCell,
     emptyRenderMetadata,
   } from "$lib/importing/import_commit";
-  import _ from "lodash";
+  import { range } from "es-toolkit";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
   import { ajax, type ImportTemplate } from "$lib/core/utils";
@@ -46,6 +46,7 @@
     type ConfidenceFilter,
   } from "$lib/prediction/session";
   import type { Confidence, PredictionResult } from "$lib/prediction/types";
+import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 
   let templates: ImportTemplate[] = $state([]);
   let selectedTemplate: ImportTemplate = $state();
@@ -157,7 +158,7 @@
     };
   }
 
-  let saveAsNameDuplicate = $derived(!!_.find(templates, { name: saveAsName, template_type: "custom" }));
+  let saveAsNameDuplicate = $derived(!!find(templates, { name: saveAsName, template_type: "custom" }));
   let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
 
   async function handleSaveTemplate(name: string, content: string) {
@@ -181,7 +182,7 @@
       message: `Saved ${name}`,
       type: "is-success"
     });
-    $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
+    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
     ({ templates } = await ajax("/api/templates", { background: true }));
     selectedTemplate = template;
   }
@@ -224,7 +225,7 @@
       type: "is-success"
     });
 
-    $templateEditorState = _.assign({}, $templateEditorState, { hasUnsavedChanges: false });
+    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
   }
 
   $effect(() => {
@@ -234,7 +235,7 @@
     const currentTrim = options.trim;
     const _tick = predictionTick;
 
-    if (!_.isEmpty(currentRows) && currentTemplate) {
+    if (!isEmpty(currentRows) && currentTemplate) {
       try {
         predictionSession.beginRender();
       } catch (error) {
@@ -259,7 +260,7 @@
         }
       }
       refreshPredictionReview();
-    } else if (_.isEmpty(currentRows)) {
+    } else if (isEmpty(currentRows)) {
       renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
       preview = "";
       if (previewEditor) {
@@ -300,8 +301,8 @@
           onSelectTemplate(match);
         }
 
-        columnCount = _.maxBy(data, (row) => row.length)?.length || 0;
-        _.each(data, (row) => {
+        columnCount = maxBy(data, (row) => row.length)?.length || 0;
+        each(data, (row) => {
           row.length = columnCount;
         });
       }
@@ -341,7 +342,7 @@
     if (typeof window !== "undefined" && window.innerWidth <= 860) {
       mobileInspectorOpen = true;
     }
-    const renderedRow = _.find(renderMetadata.rows, { sourceRowIndex: rowIndex });
+    const renderedRow = find(renderMetadata.rows, { sourceRowIndex: rowIndex });
     if (!renderedRow?.lineRange || !previewEditor) {
       return;
     }
@@ -354,7 +355,7 @@
 
   function summaryForRow(rowIndex: number) {
     try {
-      return _.find(predictionRows, { rowIndex });
+      return find(predictionRows, { rowIndex });
     } catch (_error) {
       return undefined;
     }
@@ -440,7 +441,7 @@
     } catch (e) {
       console.warn("Handlebars compile error on select:", e);
     }
-    $templateEditorState = _.assign({}, $templateEditorState, {
+    $templateEditorState = assign({}, $templateEditorState, {
       template: compiled,
       content: template.content,
       hasUnsavedChanges: false
@@ -448,7 +449,7 @@
   }
 
   function openSaveModal() {
-    if (!_.isEmpty(preview)) {
+    if (!isEmpty(preview)) {
       showFileModal = true;
     }
   }
@@ -493,7 +494,7 @@
 
 <Page
   width="fluid"
-  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&_.paisa-page-content]:h-full [&_.paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
+  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&paisa-page-content]:h-full [&paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
 >
   <div class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
     <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
@@ -522,7 +523,7 @@
 
         <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
           <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
-            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:text-xs">
+            <div class="min-w-[180px] max-w-[260px] [&svelte-select]:min-h-8 [&svelte-select]:rounded-[var(--paisa-radius-sm)] [&svelte-select]:text-xs">
               <Select
                 items={templateItems}
                 value={selectedTemplateOption}
@@ -598,9 +599,9 @@
       {/if}
     </div>
 
-    {#if _.isEmpty(data) && !loading}
+    {#if isEmpty(data) && !loading}
       <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
-        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-[var(--paisa-border-default)] [&_.paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&_.paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
+        <div class="w-full max-w-[540px] [&paisa-file-dropzone]:w-full [&paisa-file-dropzone]:cursor-pointer [&paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&paisa-file-dropzone]:border-2 [&paisa-file-dropzone]:border-dashed [&paisa-file-dropzone]:border-[var(--paisa-border-default)] [&paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&paisa-file-dropzone]:transition-all [&paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
           <FileDropzone
             multiple={false}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
@@ -722,7 +723,7 @@
                   <thead>
                     <tr>
                       <th class="sticky left-0 top-0 z-[15] w-10 min-w-10 border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">#</th>
-                      {#each _.range(0, columnCount) as ci}
+                      {#each range(0, columnCount) as ci}
                         <th class="sticky top-0 z-10 min-w-[110px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">
                           <span class="block text-sm font-bold">{String.fromCharCode(65 + ci)}</span>
                           <span class="block font-mono text-[0.68rem] text-[var(--paisa-brand-primary)]">ROW.{String.fromCharCode(65 + ci)}</span>
@@ -733,7 +734,7 @@
                   <tbody>
                     {#each data as row, ri}
                       <tr
-                        class="cursor-pointer hover:[&_.paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&_.paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&_.paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&_.paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&_.paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
+                        class="cursor-pointer hover:[&paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
                         onclick={() => selectSourceRow(ri)}
                       >
                         <th class="paisa-sheet-row-header sticky left-0 z-[5] w-[88px] min-w-[88px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center align-middle font-semibold text-[var(--paisa-table-header-text)]">
@@ -788,7 +789,7 @@
                 title="Copy Generated Ledger"
                 ariaLabel="Copy to Clipboard"
                 class="clipboard"
-                disabled={_.isEmpty(preview)}
+                disabled={isEmpty(preview)}
                 onclick={copyToClipboard}
               >
                 {#snippet icon()}
@@ -802,7 +803,7 @@
                 title="Save to Ledger File"
                 ariaLabel="Save to Ledger"
                 class="save"
-                disabled={_.isEmpty(preview)}
+                disabled={isEmpty(preview)}
                 onclick={openSaveModal}
               >
                 {#snippet icon()}
@@ -820,8 +821,8 @@
           {/if}
 
           <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
-            <div class="preview-editor h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.8125rem] [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto" use:initPreviewEditor></div>
-            {#if _.isEmpty(preview) && _.isEmpty(data)}
+            <div class="preview-editor h-full w-full [&cm-editor]:h-full [&cm-editor]:min-h-full [&cm-editor]:font-mono [&cm-editor]:text-[0.8125rem] [&cm-scroller]:h-full [&cm-scroller]:overflow-auto" use:initPreviewEditor></div>
+            {#if isEmpty(preview) && isEmpty(data)}
               <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-[var(--paisa-text-muted)]">
                 <i class="fas fa-arrow-left fa-2x mb-2 text-[var(--paisa-text-muted)]"></i>
                 <p>Upload a statement to inspect generated journal transactions.</p>
@@ -862,7 +863,7 @@
             variant="primary"
             size="sm"
             class="min-h-11 px-4 text-[0.8125rem]"
-            disabled={_.isEmpty(preview)}
+            disabled={isEmpty(preview)}
             onclick={openSaveModal}
           >
             {#snippet icon()}

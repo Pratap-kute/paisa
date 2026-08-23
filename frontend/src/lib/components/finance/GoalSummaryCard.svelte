@@ -2,7 +2,6 @@
   import Card from "$lib/components/ui/Card.svelte";
   import { iconGlyph } from "$lib/core/icon";
   import { formatCurrency, formatPercentage, type GoalSummary } from "$lib/core/utils";
-  import _ from "lodash";
   import Metric from "$lib/components/layout/Metric.svelte";
   import Progress from "$lib/components/ui/Progress.svelte";
   import dayjs from "dayjs";
@@ -53,7 +52,7 @@
         <h4 class="text-xl text-[var(--paisa-muted-foreground)] truncate">{goal.name}</h4>
       </a>
     </div>
-    {#if !_.isEmpty(goal.icon)}
+    {#if goal.icon}
       <span
         class="{small ? 'text-2xl' : 'text-3xl'} custom-icon inline-flex items-center shrink-0"
         >{iconGlyph(goal.icon)}</span

@@ -4,7 +4,7 @@
     buildYearlyIncomeComparisonSeries,
   } from "$lib/charts/time_series_data";
   import { ajax, formatCurrency, type Income, type IncomeYearlyCard, type Legend } from "$lib/core/utils";
-  import _ from "lodash";
+  import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -16,6 +16,7 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import MonthlyIncomeChart from "$lib/components/charts/MonthlyIncomeChart.svelte";
   import YearlyIncomeChart from "$lib/components/charts/YearlyIncomeChart.svelte";
+import { isEmpty } from "$lib/core/collection";
 
   let grossIncome = $state(0);
   let netTax = $state(0);
@@ -37,9 +38,9 @@
 
       incomes = fetchedIncomes ?? [];
       yearlyCards = fetchedYearlyCards ?? [];
-      grossIncome = _.sumBy(incomes, (i) => _.sumBy(i.postings, (p) => -p.amount));
-      netTax = _.sumBy(taxes, (t) => _.sumBy(t.postings, (p) => p.amount));
-      hasIncomeData = grossIncome !== 0 || netTax !== 0 || !_.isEmpty(yearlyCards);
+      grossIncome = sumBy(incomes, (i) => sumBy(i.postings, (p) => -p.amount));
+      netTax = sumBy(taxes, (t) => sumBy(t.postings, (p) => p.amount));
+      hasIncomeData = grossIncome !== 0 || netTax !== 0 || !isEmpty(yearlyCards);
       monthlyInvestmentTimelineLegends = buildMonthlyIncomeSeries(incomes).legends ?? [];
       yearlyIncomeTimelineLegends =
         buildYearlyIncomeComparisonSeries(yearlyCards).legends ?? [];

@@ -17,11 +17,12 @@ import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { history, historyKeymap } from "@codemirror/commands";
 import type { SyntaxNode } from "@lezer/common";
 import dayjs from "dayjs";
-import _ from "lodash";
+import { sumBy } from "es-toolkit";
 import { writable } from "svelte/store";
 import * as Terms from "../search/parser/parser.terms.js";
 import { queryExtension } from "../search/parser/query";
 import { baseEditorExtensions } from "./base";
+import { assign, every, includes, map, some } from "$lib/core/collection";
 
 abstract class AST {
   readonly id: number;
@@ -444,7 +445,7 @@ function lint(editor: EditorView): Diagnostic[] {
 
     if (diagnostics.length === 0) {
       editorState.update((current) =>
-        _.assign({}, current, { predicate: ast.evaluate() })
+        assign({}, current, { predicate: ast.evaluate() })
       );
     }
   }
@@ -460,19 +461,19 @@ export type TransactionPredicate = (transaction: Transaction) => boolean;
 
 function andFilter(...filters: TransactionPredicate[]): TransactionPredicate {
   return (transaction: Transaction) => {
-    return _.every(filters, (filter) => filter(transaction));
+    return every(filters, (filter) => filter(transaction));
   };
 }
 
 function orFilter(...filters: TransactionPredicate[]): TransactionPredicate {
   return (transaction: Transaction) => {
-    return _.some(filters, (filter) => filter(transaction));
+    return some(filters, (filter) => filter(transaction));
   };
 }
 
 function notFilter(...filters: TransactionPredicate[]): TransactionPredicate {
   return (transaction: Transaction) => {
-    return !_.some(filters, (filter) => filter(transaction));
+    return !some(filters, (filter) => filter(transaction));
   };
 }
 
@@ -483,7 +484,7 @@ function conditionFilter(
 ) {
   return (transaction: Transaction) => {
     const operatorFn = getOperator(operator);
-    return _.some(
+    return some(
       getProperty(transaction, property),
       (actual) => operatorFn(actual, expected),
     );
@@ -497,7 +498,7 @@ function getOperator(
     switch (operator) {
       case "=":
         if (typeof actual === "string") {
-          return _.includes(actual.toLowerCase(), expected.toLowerCase());
+          return includes(actual.toLowerCase(), expected.toLowerCase());
         }
 
         if (typeof actual === "number") {
@@ -567,7 +568,7 @@ function getProperty(
       return transaction.postings.map((posting) => posting.amount);
     case Terms.Total:
       return [
-        _.sumBy(
+        sumBy(
           transaction.postings,
           (posting) => (posting.amount > 0 ? posting.amount : 0),
         ),
@@ -751,7 +752,7 @@ export function createEditor(
 
             return null;
           },
-          ..._.map(
+          ...map(
             autocompletions,
             (options, node) => ifIn([node], completeFromList(options)),
           ),

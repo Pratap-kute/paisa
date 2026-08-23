@@ -16,7 +16,7 @@
     type AllocationTarget,
     type Legend,
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { last, sumBy } from "es-toolkit";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
   import Page from "$lib/components/layout/Page.svelte";
@@ -26,6 +26,7 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+import { filter, isEmpty, map, max as arrayMax, values } from "$lib/core/collection";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});
@@ -34,8 +35,8 @@
   let aggregateLeafNodes: Aggregate[] = $state([]);
   let isLoading = $state(true);
 
-  let hasTargets = $derived(!_.isEmpty(allocationTargets));
-  let hasAllocationData = $derived(!_.isEmpty(aggregates));
+  let hasTargets = $derived(!isEmpty(allocationTargets));
+  let hasAllocationData = $derived(!isEmpty(aggregates));
   let allocationTargetData = $derived(buildAllocationTargetComparison(allocationTargets));
   let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
   let allocationCategoryData = $derived(buildAllocationCategoryComparison(allocationHierarchy));
@@ -98,14 +99,14 @@
       allocationTargets = fetchedTargets || [];
       allocationTimeline = aggregatesTimeline;
 
-      aggregateLeafNodes = _.filter(_.values(aggregates), (a) => a.market_amount > 0);
-      const total = _.sumBy(aggregateLeafNodes, (a) => a.market_amount);
-      aggregateLeafNodes = _.map(aggregateLeafNodes, (a) => {
+      aggregateLeafNodes = filter(values(aggregates), (a) => a.market_amount > 0);
+      const total = sumBy(aggregateLeafNodes, (a) => a.market_amount);
+      aggregateLeafNodes = map(aggregateLeafNodes, (a) => {
         a.percent = total > 0 ? (a.market_amount / total) * 100 : 0;
         return a;
       });
-      const max = _.max(_.map(aggregateLeafNodes, (a) => a.percent)) || 100;
-      (_.last(columns).formatterParams as ProgressBarParams).max = max;
+      const max = arrayMax(map(aggregateLeafNodes, (a) => a.percent)) || 100;
+      (last(columns).formatterParams as ProgressBarParams).max = max;
       isLoading = false;
       await tick();
       allocationTimelineLegends = allocationTimelineData.legends ?? [];

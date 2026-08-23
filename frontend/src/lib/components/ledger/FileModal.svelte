@@ -3,7 +3,6 @@
   import Input from "$lib/components/ui/Input.svelte";
   import Button from "$lib/components/ui/Button.svelte";
   import FormField from "$lib/components/layout/FormField.svelte";
-  import _ from "lodash";
   import { createEventDispatcher } from "svelte";
 
   interface Props {
@@ -39,7 +38,7 @@
     <form
       onsubmit={(e) => {
         e.preventDefault();
-        if (!_.isEmpty(destinationFile)) {
+        if (destinationFile.trim()) {
           handleSave(e);
           close();
         }
@@ -54,7 +53,7 @@
             bind:value={destinationFile}
             class="paisa-font-mono"
             onkeydown={(e) => {
-              if (e.key === "Enter" && !_.isEmpty(destinationFile)) {
+              if (e.key === "Enter" && destinationFile.trim()) {
                 e.preventDefault();
                 handleSave(e);
                 close();
@@ -74,7 +73,7 @@
       <Button
         variant="primary"
         size="md"
-        disabled={_.isEmpty(destinationFile)}
+        disabled={!destinationFile.trim()}
         onclick={(e) => {
           handleSave(e);
           close();

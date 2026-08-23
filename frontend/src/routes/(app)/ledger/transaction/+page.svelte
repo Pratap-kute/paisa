@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ajax, type LedgerFile, type Transaction as T } from "$lib/core/utils";
-  import _ from "lodash";
+  import { debounce } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import Transaction from "$lib/components/transactions/Transaction.svelte";
@@ -15,6 +15,7 @@
   import { download } from "$lib/importing/export";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Button from "$lib/components/ui/Button.svelte";
+import { filter } from "$lib/core/collection";
 
   let bulkEditOpen = $state(false);
   let transactions: T[] = $state(null);
@@ -29,19 +30,19 @@
   let isSmallScreen = $state(false);
 
   const debits = (t: T) => {
-    return _.filter(t.postings, (p) => p.amount < 0);
+    return filter(t.postings, (p) => p.amount < 0);
   };
 
   const credits = (t: T) => {
-    return _.filter(t.postings, (p) => p.amount >= 0);
+    return filter(t.postings, (p) => p.amount >= 0);
   };
 
   function handleInputRaw(predicate: (t: T) => boolean) {
     if (!transactions) return;
-    filtered = _.filter(transactions, predicate);
+    filtered = filter(transactions, predicate);
   }
 
-  const handleInput = _.debounce(handleInputRaw, 100);
+  const handleInput = debounce(handleInputRaw, 100);
 
   const unsubscribe = editorState.subscribe((state) => {
     handleInput(state.predicate);

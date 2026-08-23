@@ -1,7 +1,6 @@
 import type { Arima } from "arima/async";
 import dayjs from "dayjs";
 import * as financial from "../core/financial";
-import _, { isEmpty, last } from "lodash";
 import type { Forecast, Point } from "../core/utils";
 import { now } from "../core/utils";
 
@@ -91,7 +90,7 @@ export function forecast(
 
   for (const config of configs) {
     const forecast = doForecast(config, points, target, ARIMA);
-    if (!_.isEmpty(forecast)) {
+    if (forecast.length > 0) {
       return forecast;
     }
   }
@@ -111,13 +110,13 @@ function doForecast(
   let i = 1;
   while (i < 10) {
     const [predictions, errors] = arima.predict(predictYears * i * 365);
-    if (isEmpty(predictions)) {
+    if (!predictions || predictions.length === 0) {
       return [];
     }
-    if (last(predictions) > target) {
+    if ((predictions.at(-1) ?? 0) > target) {
       const predictionsTimeline: Forecast[] = [];
-      let start = last(points).date;
-      while (!isEmpty(predictions)) {
+      let start = points.at(-1)?.date ?? now();
+      while (predictions.length > 0) {
         start = start.add(1, "day");
         const point = {
           date: start,
@@ -144,7 +143,7 @@ function doForecast(
 export function findBreakPoints(points: Point[], target: number): Point[] {
   const result: Point[] = [];
   let i = 1;
-  while (i <= 4 && !isEmpty(points)) {
+  while (i <= 4 && points.length > 0) {
     const p = points.shift();
     if (!p) {
       continue;

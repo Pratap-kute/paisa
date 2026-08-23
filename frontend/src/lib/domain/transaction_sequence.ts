@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { groupBy, partition } from "es-toolkit";
 import {
   dueDateIcon,
   now,
@@ -11,6 +11,7 @@ import {
 import dayjs from "dayjs";
 import { type CronExprs, parse } from "@datasert/cronjs-parser";
 import { getFutureMatches } from "@datasert/cronjs-matcher";
+import { sortBy } from "$lib/core/collection";
 
 const end = now().add(36, "month");
 
@@ -90,7 +91,7 @@ function zip(
 function enrich(ts: TransactionSequence) {
   const transactions = ts.transactions.slice().reverse();
   const amount = totalRecurring(ts);
-  const start = transactions[0].date;
+  const start = transactions[0]?.date ?? now();
   let periodAvailable = false;
   let cron: CronExprs;
   try {
@@ -102,7 +103,7 @@ function enrich(ts: TransactionSequence) {
         matchCount: 1,
         timezone: dayjs.tz.guess(),
       });
-      if (!_.isEmpty(schedules)) {
+      if (schedules && schedules.length > 0) {
         periodAvailable = true;
       }
     } else {
@@ -121,41 +122,45 @@ function enrich(ts: TransactionSequence) {
     });
 
     ts.schedules = zip(
-      _.map(schedules, (s) => dayjs(s)),
+      schedules.map((s) => dayjs(s)),
       transactions,
       ts.key,
       amount,
     );
   } else {
-    const schedules: dayjs.Dayjs[] = _.map(transactions, (t) => t.date);
-    let next = _.last(schedules);
-    do {
-      next = nextDate(ts, next);
-      schedules.push(next);
-    } while (schedules.length < 1000 && end.isAfter(next));
+    const schedules: dayjs.Dayjs[] = transactions.map((t) => t.date);
+    let next = schedules.at(-1);
+    if (next) {
+      do {
+        next = nextDate(ts, next);
+        schedules.push(next);
+      } while (schedules.length < 1000 && end.isAfter(next));
+    }
     ts.schedules = zip(schedules, transactions, ts.key, amount);
   }
 
-  const [past, future] = _.partition(
+  const [past, future] = partition(
     ts.schedules,
-    (s) => s.scheduled?.isBefore(now()),
+    (s) => s.scheduled?.isBefore(now()) ?? false,
   );
   ts.pastSchedules = past;
   ts.futureSchedules = future;
-  ts.schedulesByMonth = _.groupBy(
+  ts.schedulesByMonth = groupBy(
     ts.schedules,
     (s) => s.scheduled?.format("YYYY-MM") || "NA",
   );
-  ts.interval = _.first(future).scheduled.diff(_.last(past).scheduled, "day");
+  if (future[0]?.scheduled && past.at(-1)?.scheduled) {
+    ts.interval = future[0].scheduled.diff(past.at(-1)!.scheduled, "day");
+  }
   return ts;
 }
 
 export function nextUnpaidSchedule(ts: TransactionSequence) {
-  const last = _.last(ts.pastSchedules);
+  const last = ts.pastSchedules?.at(-1);
   if (last && !last.actual) {
     return last;
   }
-  return _.find(ts.futureSchedules, (s) => !s.actual);
+  return ts.futureSchedules?.find((s) => !s.actual);
 }
 
 export function scheduleIcon(schedule: TransactionSchedule) {
@@ -210,18 +215,16 @@ export function totalRecurring(ts: TransactionSequence) {
 export function enrichTrantionSequence(
   transactionSequences: TransactionSequence[],
 ) {
-  return _.map(transactionSequences, (ts) => enrich(ts));
+  return transactionSequences.map((ts) => enrich(ts));
 }
 
 export function sortTrantionSequence(
   transactionSequences: TransactionSequence[],
 ) {
-  return _.chain(transactionSequences)
-    .sortBy((ts) => {
-      const s = nextUnpaidSchedule(ts);
-      return s?.scheduled
-        ? Math.abs(s.scheduled.diff(now()))
-        : Number.MAX_SAFE_INTEGER;
-    })
-    .value();
+  return sortBy(transactionSequences, (ts) => {
+    const s = nextUnpaidSchedule(ts);
+    return s?.scheduled
+      ? Math.abs(s.scheduled.diff(now()))
+      : Number.MAX_SAFE_INTEGER;
+  });
 }

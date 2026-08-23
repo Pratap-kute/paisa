@@ -7,7 +7,6 @@ import type {
   SheetFileError,
   SheetLineResult,
 } from "../core/utils";
-import _ from "lodash";
 
 export function now(): dayjs.Dayjs {
   const customNow = (globalThis as { __now?: dayjs.Dayjs }).__now;
@@ -148,9 +147,10 @@ export function refresh(): boolean {
     if (!confirmed) {
       return false;
     } else {
-      editorState.update((current) =>
-        _.assign({}, current, { hasUnsavedChanges: false })
-      );
+      editorState.update((current) => ({
+        ...current,
+        hasUnsavedChanges: false,
+      }));
     }
   }
   willRefresh.update((n) => n + 1);

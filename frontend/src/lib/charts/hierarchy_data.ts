@@ -1,6 +1,7 @@
-import _ from "lodash";
+import { sumBy } from "es-toolkit";
 import type { Aggregate, PortfolioAggregate } from "$lib/core/utils";
 import type { ComparisonBarChartData } from "$lib/charts/echarts/bar_comparison";
+import { sortBy } from "$lib/core/collection";
 
 export interface FinancialHierarchyNode {
   id: string;
@@ -45,13 +46,13 @@ export function buildAllocationHierarchy(
     },
   );
   const total = (node: FinancialHierarchyNode): number => {
-    const childTotal = _.sumBy(node.children ?? [], total);
+    const childTotal = sumBy(node.children ?? [], total);
     node.value = node.value !== 0 ? node.value : childTotal;
     if (!node.children?.length) delete node.children;
     return node.value;
   };
   roots.forEach(total);
-  const grandTotal = _.sumBy(roots, total);
+  const grandTotal = sumBy(roots, total);
   const addPercent = (node: FinancialHierarchyNode) => {
     node.percentage = grandTotal === 0 ? 0 : (node.value / grandTotal) * 100;
     node.children?.forEach(addPercent);
@@ -64,19 +65,19 @@ export function filterCommodityBreakdowns(
   portfolioAggregates: PortfolioAggregate[],
   commodities: string[],
 ): PortfolioAggregate[] {
-  const filtered = _.flatMap(_.cloneDeep(portfolioAggregates), (aggregate) => {
+  const filtered = structuredClone(portfolioAggregates).flatMap((aggregate) => {
     aggregate.breakdowns = aggregate.breakdowns.filter((breakdown) =>
       commodities.includes(breakdown.commodity_name)
     );
     return aggregate.breakdowns.length ? [aggregate] : [];
   });
-  const total = _.sumBy(
+  const total = sumBy(
     filtered,
-    (aggregate) => _.sumBy(aggregate.breakdowns, "amount"),
+    (aggregate) => sumBy(aggregate.breakdowns, (b) => b.amount),
   );
-  return _.sortBy(
+  return sortBy(
     filtered.map((aggregate) => {
-      aggregate.amount = _.sumBy(aggregate.breakdowns, "amount");
+      aggregate.amount = sumBy(aggregate.breakdowns, (b) => b.amount);
       aggregate.percentage = total === 0 ? 0 : (aggregate.amount / total) * 100;
       aggregate.breakdowns = aggregate.breakdowns.map((breakdown) => ({
         ...breakdown,
@@ -186,7 +187,7 @@ export function buildFlattenedHoldings(
     .filter((item) => item.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 
-  const grandTotal = _.sumBy(sorted, "amount");
+  const grandTotal = sumBy(sorted, (item) => item.amount);
 
   return sorted.map((item, index) => ({
     rank: index + 1,

@@ -1,4 +1,3 @@
-import _ from "lodash";
 import type { IncomeStatement } from "$lib/core/utils";
 
 export type IncomeStatementCategory =
@@ -29,7 +28,8 @@ export interface IncomeStatementWaterfallData {
   endingBalance: number;
 }
 
-const sum = (values: Record<string, number>) => _.sum(Object.values(values));
+const sum = (values: Record<string, number>) =>
+  Object.values(values).reduce((acc, v) => acc + v, 0);
 
 export function buildIncomeStatementWaterfall(
   statement: IncomeStatement,

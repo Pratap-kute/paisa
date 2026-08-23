@@ -1,5 +1,5 @@
 import type { StreamParser, StringStream } from "@codemirror/language";
-import _ from "lodash";
+import { includes } from "$lib/core/collection";
 
 const DATE = /^\d{4}[/-]\d{2}[/-]\d{2}/;
 const DATE_TIME = /^\d{4}[/-]\d{2}[/-]\d{2} \d{2}:\d{2}:\d{2}/;
@@ -118,13 +118,13 @@ export const ledger: StreamParser<State> = {
       return "operator";
     }
 
-    if (_.includes(["~", "="], ch)) {
+    if (includes(["~", "="], ch)) {
       state.inTransaction = true;
       state.inPosting = false;
       return "operator";
     }
 
-    if (_.includes(["€", "$"], ch)) {
+    if (includes(["€", "$"], ch)) {
       return "unit";
     }
 

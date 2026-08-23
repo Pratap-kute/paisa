@@ -9,8 +9,7 @@
     helpUrl,
     now,
   } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -18,6 +17,7 @@
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
   import Metric from "$lib/components/layout/Metric.svelte";
+import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   const monthStart = now().startOf("month");
   let budgetsByMonth: Record<string, Budget> = $state({});
@@ -59,14 +59,12 @@
     try {
       ({ budgetsByMonth, checkingBalance, availableForBudgeting } = await ajax("/api/budget"));
       setAllowedDateRange(
-        _.chain(budgetsByMonth)
-          .values()
-          .flatten()
-          .map((b) => b.date)
-          .value(),
+        Object.values(budgetsByMonth)
+          .flat()
+          .map((b) => b.date),
       );
 
-      if (_.isEmpty(budgetsByMonth)) {
+      if (isEmptyValue(budgetsByMonth)) {
         isEmpty = true;
       }
     } finally {

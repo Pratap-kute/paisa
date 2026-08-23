@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatCurrency, formatFloat, type CapitalGain, type FYCapitalGain } from "$lib/core/utils";
-  import _ from "lodash";
+  import { sumBy } from "es-toolkit";
   import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
   import Toggleable from "$lib/components/ui/Toggleable.svelte";
   import Card from "$lib/components/ui/Card.svelte";
@@ -13,16 +13,16 @@
   let { financialYear, capitalGains }: Props = $props();
 
   let fyGains: FYCapitalGain[] = $derived(
-    _.flatMap(capitalGains, (cg) => cg.fy[financialYear] || [])
+    capitalGains.flatMap((cg) => cg.fy[financialYear] || [])
   );
 
   let total = $derived({
-    withdrawn: _.sumBy(fyGains, (fy) => fy.sell_price),
-    gain: _.sumBy(fyGains, (fy) => fy.tax.gain),
-    taxableGain: _.sumBy(fyGains, (fy) => fy.tax.taxable),
-    shortTermTax: _.sumBy(fyGains, (fy) => fy.tax.short_term),
-    longTermTax: _.sumBy(fyGains, (fy) => fy.tax.long_term),
-    slab: _.sumBy(fyGains, (fy) => fy.tax.slab)
+    withdrawn: sumBy(fyGains, (fy) => fy.sell_price),
+    gain: sumBy(fyGains, (fy) => fy.tax.gain),
+    taxableGain: sumBy(fyGains, (fy) => fy.tax.taxable),
+    shortTermTax: sumBy(fyGains, (fy) => fy.tax.short_term),
+    longTermTax: sumBy(fyGains, (fy) => fy.tax.long_term),
+    slab: sumBy(fyGains, (fy) => fy.tax.slab)
   });
 
   const summaryRows = $derived([

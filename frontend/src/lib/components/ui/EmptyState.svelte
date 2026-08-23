@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import _ from "lodash";
 
   interface Props {
     item?: any;
@@ -26,7 +25,9 @@
     item === null ||
     item === undefined ||
     item === false ||
-    (typeof item !== "boolean" && _.isEmpty(item))
+    (typeof item === "string" && item.trim().length === 0) ||
+    (Array.isArray(item) && item.length === 0) ||
+    (typeof item === "object" && item !== null && Object.keys(item).length === 0)
   );
 </script>
 

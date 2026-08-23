@@ -1,6 +1,5 @@
 <script lang="ts">
   import { formatCurrency, type Posting } from "$lib/core/utils";
-  import _ from "lodash";
 
   interface Props {
     postings: Posting[];
@@ -46,7 +45,11 @@
   }
 
   let groupedPostings: GroupedPosting[] = $derived(group(postings));
-  let isGrouped = $derived(_.some(groupedPostings, (groupedPosting) => groupedPosting.postings.length > 1));
+  let isGrouped = $derived(
+    groupedPostings.some((groupedPosting) =>
+      groupedPosting.postings.length > 1
+    ),
+  );
 </script>
 
 <div>

@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
 import type dayjs from "dayjs";
 import { generateColorScheme } from "$lib/core/colors";
 import COLORS from "$lib/core/colors";
@@ -26,6 +26,7 @@ import type {
   PeriodSeriesDefinition,
   PeriodSeriesPoint,
 } from "$lib/charts/echarts/period_series";
+import { minBy, sortBy } from "$lib/core/collection";
 
 function financialYear(
   card: { start_date: dayjs.Dayjs; end_date: dayjs.Dayjs },
@@ -41,12 +42,12 @@ function legends(keys: string[], color: (key: string) => string): Legend[] {
   }));
 }
 
-function emptyValues(keys: string[]) {
-  return _.zipObject(keys, keys.map(() => 0)) as Record<string, number>;
+function initialValues(keys: string[]) {
+  return Object.fromEntries(keys.map((k) => [k, 0])) as Record<string, number>;
 }
 
 function postingRows(postings: Posting[], sign = 1): Array<[string, number]> {
-  return _.sortBy(
+  return sortBy(
     postings.map((posting) =>
       [
         restName(posting.account),
@@ -122,40 +123,38 @@ export function buildMonthlyInvestmentSeries(
   postings: Posting[],
 ): PeriodSeriesChartData {
   const timeFormat = "MMM-YYYY";
-  const groups = _.chain(postings).map((p) => secondName(p.account)).uniq()
-    .sort().value();
-  const groupKeys = _.flatMap(
-    groups,
-    (group) => [`${group}-credit`, `${group}-debit`],
-  );
+  const groups = uniq(postings.map((p) => secondName(p.account))).sort();
+  const groupKeys = groups.flatMap((group) => [
+    `${group}-credit`,
+    `${group}-debit`,
+  ]);
   const color = generateColorScheme(groups);
-  const groupedPostings = _.groupBy(postings, (p) => p.date.format(timeFormat));
-  const start = _.min(postings.map((p) => p.date));
+  const groupedPostings = groupBy(postings, (p) => p.date.format(timeFormat));
+  const start = minBy(postings.map((p) => p.date), (d) => d.valueOf());
   const end = now().startOf("month");
   const points: PeriodSeriesPoint[] = [];
 
   if (start) {
     forEachMonth(start, end, (month) => {
       const bucket = groupedPostings[month.format(timeFormat)] ?? [];
-      const values = _.chain(bucket)
-        .groupBy((posting) => secondName(posting.account))
-        .flatMap((postings, key) => [
-          [
-            `${key}-credit`,
-            _.sum(
-              postings.map((p) => p.amount).filter((amount) => amount >= 0),
-            ),
-          ],
-          [
-            `${key}-debit`,
-            _.sum(postings.map((p) => p.amount).filter((amount) => amount < 0)),
-          ],
-        ])
-        .fromPairs()
-        .value();
+      const bySecondName = groupBy(
+        bucket,
+        (posting) => secondName(posting.account),
+      );
+      const values = initialValues(groupKeys);
+      for (const [key, pList] of Object.entries(bySecondName)) {
+        values[`${key}-credit`] = sum(
+          pList.map((p) => p.amount).filter((amount) => amount >= 0),
+        );
+        values[`${key}-debit`] = sum(
+          pList.map((p) => p.amount).filter((amount) => amount < 0).map((a) =>
+            -a
+          ),
+        );
+      }
       points.push({
         period: month.format(timeFormat),
-        values: { ...emptyValues(groupKeys), ...values },
+        values: { ...values },
         tooltipRows: postingRows(bucket),
       });
     });
@@ -184,32 +183,35 @@ export function buildMonthlyInvestmentSeries(
 export function buildYearlyInvestmentSeries(
   yearlyCards: InvestmentYearlyCard[],
 ): PeriodSeriesChartData {
-  const groups = _.chain(yearlyCards).flatMap((card) => card.postings).map((
-    p,
-  ) => secondName(p.account)).uniq().sort().value();
-  const groupKeys = _.flatMap(
-    groups,
-    (group) => [`${group}-credit`, `${group}-debit`],
-  );
+  const groups = uniq(
+    yearlyCards.flatMap((card) => card.postings).map((p) =>
+      secondName(p.account)
+    ),
+  ).sort();
+  const groupKeys = groups.flatMap((group) => [
+    `${group}-credit`,
+    `${group}-debit`,
+  ]);
   const color = generateColorScheme(groups);
   const points = yearlyCards.map((card) => {
-    const values = _.chain(card.postings)
-      .groupBy((posting) => secondName(posting.account))
-      .flatMap((postings, key) => [
-        [
-          `${key}-credit`,
-          _.sum(postings.map((p) => p.amount).filter((amount) => amount >= 0)),
-        ],
-        [
-          `${key}-debit`,
-          _.sum(postings.map((p) => p.amount).filter((amount) => amount < 0)),
-        ],
-      ])
-      .fromPairs()
-      .value();
+    const bySecondName = groupBy(
+      card.postings,
+      (posting) => secondName(posting.account),
+    );
+    const values = initialValues(groupKeys);
+    for (const [key, pList] of Object.entries(bySecondName)) {
+      values[`${key}-credit`] = sum(
+        pList.map((p) => p.amount).filter((amount) => amount >= 0),
+      );
+      values[`${key}-debit`] = sum(
+        pList.map((p) => p.amount).filter((amount) => amount < 0).map((a) =>
+          -a
+        ),
+      );
+    }
     return {
       period: financialYear(card),
-      values: { ...emptyValues(groupKeys), ...values },
+      values: { ...values },
       tooltipRows: groupKeys.flatMap((key) =>
         values[key]
           ? [
@@ -250,21 +252,13 @@ export function incomeGroup(posting: Posting) {
 export function buildMonthlyIncomeSeries(
   incomes: Income[],
 ): PeriodSeriesChartData {
-  const postings = _.flatMap(incomes, (income) => income.postings);
-  const groupKeys = _.chain(postings).map((p) => incomeGroup(p)).uniq().sort()
-    .value();
+  const postings = incomes.flatMap((income) => income.postings);
+  const groupKeys = uniq(postings.map((p) => incomeGroup(p))).sort();
   const color = generateColorScheme(groupKeys);
-  const groupTotal = _.chain(postings)
-    .groupBy((posting) => incomeGroup(posting))
-    .map((
-      postings,
-      key,
-    ) => [
-      key,
-      `${key}\n${formatCurrency(_.sumBy(postings, (p) => -p.amount))}`,
-    ])
-    .fromPairs()
-    .value();
+  const groupTotal = mapValues(
+    groupBy(postings, (posting) => incomeGroup(posting)),
+    (pList, key) => `${key}\n${formatCurrency(sumBy(pList, (p) => -p.amount))}`,
+  );
   return {
     axis: "category",
     granularity: "month",
@@ -283,14 +277,13 @@ export function buildMonthlyIncomeSeries(
       color: color(key),
     })),
     points: incomes.map((income) => {
-      const values = _.chain(income.postings)
-        .groupBy((posting) => incomeGroup(posting))
-        .map((postings, key) => [key, _.sumBy(postings, (p) => -p.amount)])
-        .fromPairs()
-        .value();
+      const values = mapValues(
+        groupBy(income.postings, (posting) => incomeGroup(posting)),
+        (pList) => sumBy(pList, (p) => -p.amount),
+      );
       return {
         period: income.date.format("MMM-YYYY"),
-        values: { ...emptyValues(groupKeys), ...values },
+        values: { ...initialValues(groupKeys), ...values },
         tooltipRows: postingRows(income.postings, -1),
       };
     }),
@@ -300,9 +293,11 @@ export function buildMonthlyIncomeSeries(
 export function buildYearlyIncomeSeries(
   yearlyCards: IncomeYearlyCard[],
 ): PeriodSeriesChartData {
-  const groups = _.chain(yearlyCards).flatMap((card) => card.postings).map((
-    p,
-  ) => secondName(p.account)).uniq().sort().value();
+  const groups = uniq(
+    yearlyCards.flatMap((card) => card.postings).map((p) =>
+      secondName(p.account)
+    ),
+  ).sort();
   const color = generateColorScheme(groups);
   return {
     axis: "category",
@@ -318,14 +313,13 @@ export function buildYearlyIncomeSeries(
       color: color(group),
     })),
     points: yearlyCards.map((card) => {
-      const values = _.chain(card.postings)
-        .groupBy((posting) => secondName(posting.account))
-        .map((postings, key) => [key, _.sum(postings.map((p) => -p.amount))])
-        .fromPairs()
-        .value();
+      const values = mapValues(
+        groupBy(card.postings, (posting) => secondName(posting.account)),
+        (pList) => sum(pList.map((p) => -p.amount)),
+      );
       return {
         period: financialYear(card),
-        values: { ...emptyValues(groups), ...values },
+        values: { ...initialValues(groups), ...values },
         tooltipRows: groups.flatMap((key) =>
           values[key] ? [[key, values[key]] as [string, number]] : []
         ),
@@ -400,25 +394,23 @@ export function buildRepaymentSeries(
   postings: Posting[],
 ): PeriodSeriesChartData {
   const timeFormat = "MMM-YYYY";
-  const groups = _.chain(postings).map((p) => restName(p.account)).uniq().sort()
-    .value();
+  const groups = uniq(postings.map((p) => restName(p.account))).sort();
   const color = generateColorScheme(groups);
-  const groupedPostings = _.groupBy(postings, (p) => p.date.format(timeFormat));
-  const start = _.min(postings.map((p) => p.date));
+  const groupedPostings = groupBy(postings, (p) => p.date.format(timeFormat));
+  const start = minBy(postings.map((p) => p.date), (d) => d.valueOf());
   const end = now().startOf("month");
   const points: PeriodSeriesPoint[] = [];
 
   if (start) {
     forEachMonth(start, end, (month) => {
       const bucket = groupedPostings[month.format(timeFormat)] ?? [];
-      const values = _.chain(bucket)
-        .groupBy((posting) => restName(posting.account))
-        .map((postings, key) => [key, _.sum(postings.map((p) => p.amount))])
-        .fromPairs()
-        .value();
+      const values = mapValues(
+        groupBy(bucket, (posting) => restName(posting.account)),
+        (pList) => sum(pList.map((p) => p.amount)),
+      );
       points.push({
         period: month.format(timeFormat),
-        values: { ...emptyValues(groups), ...values },
+        values: { ...initialValues(groups), ...values },
         tooltipRows: postingRows(bucket),
       });
     });
@@ -450,7 +442,7 @@ export function buildGoalProgressSeries(
   breakPoints: Point[],
   targetSavings: number,
 ): PeriodSeriesChartData {
-  const forecastPoints = _.takeRight(points, 1).concat(predictions);
+  const forecastPoints = points.slice(-1).concat(predictions);
   const progressRow = (value: number): [string, number, "percentage"] => [
     "Progress",
     targetSavings ? value / targetSavings : 0,
@@ -493,7 +485,7 @@ export function buildGoalProgressSeries(
         color: COLORS.tertiary,
       },
     ],
-    points: _.sortBy(
+    points: sortBy(
       [
         ...points.map((point) => ({
           period: point.date.format("DD MMM YYYY"),
@@ -539,7 +531,7 @@ export function buildGoalInvestmentSeries(
   pmt: number,
 ): PeriodSeriesChartData {
   const timeFormat = "MMM YYYY";
-  const groupedPostings = _.groupBy(postings, (p) => p.date.format(timeFormat));
+  const groupedPostings = groupBy(postings, (p) => p.date.format(timeFormat));
   const months = 24;
   let start = now().startOf("month").subtract(months, "months");
   const points: PeriodSeriesPoint[] = [];
@@ -550,12 +542,10 @@ export function buildGoalInvestmentSeries(
     points.push({
       period: month,
       values: { total },
-      tooltipRows: _.sortBy(
-        _.map(groupSumBy(bucket, (p) => p.account), (amount, account) =>
-          [
-            iconify(account),
-            amount,
-          ] as [string, number]),
+      tooltipRows: sortBy(
+        Object.entries(groupSumBy(bucket, (p) => p.account)).map((
+          [account, amount],
+        ) => [iconify(account), amount] as [string, number]),
         (row) => row[0],
       ),
     });

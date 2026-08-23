@@ -13,7 +13,6 @@
   import Dialog from "$lib/components/ui/Dialog.svelte";
   import FormField from "$lib/components/layout/FormField.svelte";
   import Input from "$lib/components/ui/Input.svelte";
-  import _ from "lodash";
 
   interface Props {
     open?: boolean;
@@ -41,7 +40,7 @@
   const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
   const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
   const saveAsNameDuplicate = $derived(
-    Boolean(_.find(templates, { name: saveAsName, template_type: "custom" })),
+    templates.some((t) => t.name === saveAsName && t.template_type === "custom"),
   );
 
   function initCodeMirror(node: HTMLElement, template?: ImportTemplate) {

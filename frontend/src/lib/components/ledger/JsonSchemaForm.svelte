@@ -3,7 +3,7 @@
   import { sha256Hex } from "$lib/core/crypto";
   import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
   import Select from "svelte-select";
-  import _ from "lodash";
+  import { isEqual, startCase } from "es-toolkit";
   import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
   import { iconGlyph, iconsList } from "$lib/core/icon";
   import AccountSelect from "./AccountsSelect.svelte";
@@ -12,6 +12,7 @@
   import Input from "$lib/components/ui/Input.svelte";
   import UiSelect from "$lib/components/ui/Select.svelte";
   import IconButton from "$lib/components/ui/IconButton.svelte";
+import { sortBy } from "$lib/core/collection";
 
   interface Schema extends JSONSchema7 {
     "ui:header"?: string;
@@ -53,7 +54,7 @@
   let radioName = $derived(`${key || "field"}-${radioInstanceId}`);
   let fieldId = $derived(`${key || "field"}-${radioInstanceId}`);
   let open = $state(untrack(() => variant === "panel" || variant === "item"));
-  let title = $derived(_.startCase(key));
+  let title = $derived(startCase(key));
   let itemTitle = $derived(
     schema["ui:header"] && value && value[schema["ui:header"]]
       ? String(value[schema["ui:header"]])
@@ -62,7 +63,7 @@
 
   function newItem(listSchema: any) {
     if (listSchema.default?.[0] != null) {
-      return _.cloneDeep(listSchema.default[0]);
+      return structuredClone(listSchema.default[0]);
     }
     return {};
   }
@@ -78,10 +79,10 @@
   function sortedProperties(schema: Schema): [string, Schema][] {
     const entries = Object.entries(schema.properties || {})
       .filter((entry): entry is [string, Schema] => isSchema(entry[1]));
-    return _.sortBy(entries, ([key, subSchema]) => {
+    return sortBy(entries, ([key, subSchema]) => {
       return [
         subSchema["ui:order"] || 999,
-        _.includes(schema.required || [], key) ? 0 : 1,
+        (schema.required || []).includes(key) ? 0 : 1,
         subSchema.type == "object" ? 2 : subSchema.type == "array" ? 3 : 1,
         key,
       ];
@@ -90,7 +91,7 @@
 
   function defaultValueForSchema(s: Schema) {
     if (s.default !== undefined) {
-      return _.cloneDeep(s.default);
+      return structuredClone(s.default);
     }
     if (s.type === "array") {
       return [];
@@ -114,14 +115,11 @@
   });
 
   async function searchIcons(text: string) {
-    text = text.toLowerCase();
-    if (_.isEmpty(text)) {
-      return _.take(iconsList, ICON_MAX_RESULTS);
+    text = text.toLowerCase().trim();
+    if (!text) {
+      return iconsList.slice(0, ICON_MAX_RESULTS);
     }
-    return _.take(
-      iconsList.filter((icon) => icon.includes(text)),
-      ICON_MAX_RESULTS,
-    );
+    return iconsList.filter((icon) => icon.includes(text)).slice(0, ICON_MAX_RESULTS);
   }
 </script>
 
@@ -144,7 +142,7 @@
           {disabled}
           {required}
           onchange={async () => {
-            if (!_.isEmpty(rawValue)) {
+            if (rawValue?.trim()) {
               const inner = await sha256Hex(rawValue);
               value = "sha256:" + (await sha256Hex(inner));
             }
@@ -193,7 +191,7 @@
       {/snippet}
     </FormField>
   </div>
-{:else if schema.type === "string" || _.isEqual(schema.type, ["string", "integer"])}
+{:else if schema.type === "string" || isEqual(schema.type, ["string", "integer"])}
   <div
     class="min-w-0 {schema.enum && schema['ui:widget'] !== 'textarea' ? '' : 'col-span-full'}"
   >
@@ -278,7 +276,7 @@
       {#each sortedProperties(schema) as [childKey, subSchema]}
         <JsonSchemaForm
           {allAccounts}
-          required={_.includes(schema.required || [], childKey)}
+          required={(schema.required || []).includes(childKey)}
           depth={depth + 1}
           key={childKey}
           bind:value={value[childKey]}
@@ -298,7 +296,7 @@
         {#if subSchema["ui:widget"] !== "hidden"}
           <JsonSchemaForm
             {allAccounts}
-            required={_.includes(schema.required || [], childKey)}
+            required={(schema.required || []).includes(childKey)}
             depth={depth + 1}
             key={childKey}
             bind:value={value[childKey]}
@@ -330,7 +328,7 @@
           {#each sortedProperties(schema) as [childKey, subSchema]}
             <JsonSchemaForm
               {allAccounts}
-              required={_.includes(schema.required || [], childKey)}
+              required={(schema.required || []).includes(childKey)}
               depth={depth + 1}
               key={childKey}
               bind:value={value[childKey]}

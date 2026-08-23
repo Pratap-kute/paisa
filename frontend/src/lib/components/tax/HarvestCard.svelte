@@ -1,6 +1,6 @@
 <script lang="ts">
   import dayjs from "dayjs";
-  import { round } from "lodash";
+  import { round } from "es-toolkit";
   import {
     harvestablePercentage,
     unitsRequiredFromAmount,

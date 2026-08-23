@@ -1,6 +1,7 @@
-import _ from "lodash";
+import { groupBy } from "es-toolkit";
 import { format } from "./journal";
 import type { LedgerFile, Transaction } from "../core/utils";
+import { sortBy } from "$lib/core/collection";
 
 interface OperationResult {
   updated: boolean;
@@ -14,12 +15,12 @@ export function applyChanges(
   args: RenameAccountArgs,
 ) {
   let updatedTransactionsCount = 0;
-  const transactionsGrouped = _.groupBy(transactions, (t) => t.fileName);
-  const newFiles = _.map(files, (file) => {
+  const transactionsGrouped = groupBy(transactions, (t) => t.fileName);
+  const newFiles = files.map((file) => {
     const transactions = transactionsGrouped[file.name] || [];
 
     const lines = file.content.split("\n");
-    const sortedTransactions = _.sortBy(transactions, (t) => t.beginLine);
+    const sortedTransactions = sortBy(transactions, (t) => t.beginLine);
     let lastLine = 0;
     const newLines: string[] = [];
     for (const transaction of sortedTransactions) {
@@ -44,7 +45,7 @@ export function applyChanges(
 
     newLines.push(...lines.slice(lastLine));
 
-    return _.merge({}, file, { content: newLines.join("\n") });
+    return { ...file, content: newLines.join("\n") };
   });
 
   return {
@@ -63,8 +64,7 @@ function renameAccount(
   transaction: Transaction,
   args: RenameAccountArgs,
 ): OperationResult {
-  const found = _.some(
-    transaction.postings,
+  const found = transaction.postings.some(
     (p) => p.account === args.oldAccountName,
   );
   if (!found) {
@@ -78,9 +78,9 @@ function renameAccount(
   );
   const lines = text.split("\n");
   const content = format(
-    _.map(lines, (line) => {
-      return line.replace(regex, `$1${args.newAccountName}$3`);
-    }).join("\n"),
+    lines.map((line) => line.replace(regex, `$1${args.newAccountName}$3`)).join(
+      "\n",
+    ),
   );
 
   return { updated: true, content };

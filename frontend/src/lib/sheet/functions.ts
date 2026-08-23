@@ -1,7 +1,8 @@
 import type { Posting } from "../core/utils";
-import _ from "lodash";
+import { groupBy } from "es-toolkit";
 import { assertType, type Environment, type Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";
+import { sortBy } from "$lib/core/collection";
 
 type PostingsOrQuery = Posting[] | Query;
 
@@ -42,40 +43,37 @@ function fifo(env: Environment, q: PostingsOrQuery): Posting[] {
   assertType("Postings", q);
 
   const ps = toPostings(env, q);
-  return _.chain(ps)
-    .groupBy((p) => [p.account, p.commodity].join(":"))
-    .map((ps) => {
-      ps = _.sortBy(ps, (p) => p.date);
-      const available: Posting[] = [];
-      while (ps.length > 0) {
-        const p = ps.shift();
-        if (p.quantity >= 0) {
-          available.push(p);
-        } else {
-          let quantity = -p.quantity;
-          while (quantity > 0 && available.length > 0) {
-            const a = available.shift();
-            if (a.quantity > quantity) {
-              const diff = a.quantity - quantity;
-              const price = a.amount / a.quantity;
-              const marketPrice = a.market_amount / a.quantity;
-              available.unshift({
-                ...a,
-                quantity: diff,
-                amount: diff * price,
-                market_amount: diff * marketPrice,
-              });
-              quantity = 0;
-            } else {
-              quantity -= a.quantity;
-            }
+  const grouped = groupBy(ps, (p) => [p.account, p.commodity].join(":"));
+  return Object.values(grouped).flatMap((groupList) => {
+    const sorted = sortBy(groupList, (p) => p.date);
+    const available: Posting[] = [];
+    while (sorted.length > 0) {
+      const p = sorted.shift()!;
+      if (p.quantity >= 0) {
+        available.push(p);
+      } else {
+        let quantity = -p.quantity;
+        while (quantity > 0 && available.length > 0) {
+          const a = available.shift()!;
+          if (a.quantity > quantity) {
+            const diff = a.quantity - quantity;
+            const price = a.amount / a.quantity;
+            const marketPrice = a.market_amount / a.quantity;
+            available.unshift({
+              ...a,
+              quantity: diff,
+              amount: diff * price,
+              market_amount: diff * marketPrice,
+            });
+            quantity = 0;
+          } else {
+            quantity -= a.quantity;
           }
         }
       }
-      return available;
-    })
-    .flatten()
-    .value();
+    }
+    return available;
+  });
 }
 
 function toPostings(env: Environment, q: PostingsOrQuery) {

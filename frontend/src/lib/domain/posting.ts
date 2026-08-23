@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { now, type Posting } from "../core/utils";
 
 export interface Change {

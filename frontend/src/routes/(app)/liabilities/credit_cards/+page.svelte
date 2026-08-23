@@ -2,18 +2,18 @@
   import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let creditCards: CreditCardSummary[] = $state([]);
 
   onMount(async () => {
     ({ creditCards } = await ajax("/api/credit_cards"));
-    if (_.isEmpty(creditCards)) {
+    if (isEmptyValue(creditCards)) {
       isEmpty = true;
     }
   });

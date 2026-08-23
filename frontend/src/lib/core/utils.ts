@@ -1,12 +1,23 @@
 // deno-lint-ignore-file no-explicit-any -- Shared API overloads bridge heterogeneous JSON and third-party scale/texture types.
 import { sha256Hex } from "./crypto";
 import dayjs from "dayjs";
-import _ from "lodash";
+import {
+  drop,
+  dropRight,
+  groupBy as groupByItems,
+  isString,
+  last,
+  mapValues,
+  sumBy,
+  take,
+  trim,
+} from "es-toolkit";
 import { loading } from "../../store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
 import { iconGlyph } from "./icon";
+import { each, first, isEmpty, max, sortBy } from "$lib/core/collection";
 
 export interface AutoCompleteItem {
   label: string;
@@ -439,10 +450,10 @@ export function buildDirectoryTree<T extends File>(files: T[]) {
     children: [],
   };
 
-  for (const file of _.sortBy(files, (f) => f.name)) {
+  for (const file of sortBy(files, (f) => f.name)) {
     const parts = file.name.split("/");
     let current = root;
-    for (const part of _.dropRight(parts, 1)) {
+    for (const part of dropRight(parts, 1)) {
       let found = current.children.find((c) => c.name === part);
       if (!found) {
         found = {
@@ -829,8 +840,8 @@ export async function ajax(
     loading.set(true);
   }
 
-  if (!_.isEmpty(params)) {
-    _.each(params, (value, key) => {
+  if (!isEmpty(params)) {
+    each(params, (value, key) => {
       route = route.replace(`:${key}`, value);
     });
   }
@@ -842,7 +853,7 @@ export async function ajax(
   };
 
   const requestToken = localStorage.getItem(tokenKey);
-  if (!_.isEmpty(requestToken)) {
+  if (!isEmpty(requestToken)) {
     options.headers["X-Auth"] = requestToken;
   }
 
@@ -868,7 +879,7 @@ export async function ajax(
 
   return JSON.parse(body, (key, value) => {
     if (
-      _.isString(value) &&
+      isString(value) &&
       /Date|date|time|now/.test(key) &&
       /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/
         .test(
@@ -887,7 +898,7 @@ export async function login(username: string, password: string) {
 }
 
 export function isLoggedIn() {
-  return !_.isEmpty(localStorage.getItem(tokenKey));
+  return !isEmpty(localStorage.getItem(tokenKey));
 }
 
 export function logout() {
@@ -934,11 +945,11 @@ export {
 } from "../formatters/date";
 
 export function firstName(account: string) {
-  return _.first(account.split(":"));
+  return first(account.split(":"));
 }
 
 export function lastName(account: string) {
-  return _.last(account.split(":"));
+  return last(account.split(":"));
 }
 
 export function secondName(account: string) {
@@ -946,15 +957,15 @@ export function secondName(account: string) {
 }
 
 export function firstNames(account: string, n: number) {
-  return _.take(account.split(":"), n).join(":");
+  return take(account.split(":"), n).join(":");
 }
 
 export function restName(account: string) {
-  return _.drop(account.split(":")).join(":");
+  return drop(account.split(":"), 1).join(":");
 }
 
 export function parentName(account: string) {
-  return _.dropRight(account.split(":"), 1).join(":");
+  return dropRight(account.split(":"), 1).join(":");
 }
 
 export function depth(account: string) {
@@ -1116,21 +1127,21 @@ export function sumPostings(postings: Posting[]) {
 }
 
 export function transactionTotal(transaction: Transaction) {
-  return _.sumBy(transaction.postings, (t) => _.max([0, t.amount]));
+  return sumBy(transaction.postings, (t) => max([0, t.amount]));
 }
 
 export function formatTextAsHtml(text: string) {
-  return `<p>${_.trim(text).replaceAll("\n", "<br />")}</p>`;
+  return `<p>${trim(text).replaceAll("\n", "<br />")}</p>`;
 }
 
 export function groupSumBy(
   postings: Posting[],
-  groupBy: _.ValueIteratee<Posting>,
+  groupBy: (posting: Posting) => string,
 ) {
-  return _.chain(postings)
-    .groupBy(groupBy)
-    .mapValues((ps) => _.sumBy(ps, (p) => p.amount))
-    .value();
+  return mapValues(
+    groupByItems(postings, groupBy),
+    (ps) => sumBy(ps, (p) => p.amount),
+  );
 }
 
 export function asTransaction(p: Posting): Transaction {
@@ -1188,7 +1199,7 @@ export function buildTree<I>(
 ): I[] {
   const result: I[] = [];
 
-  const sorted = _.sortBy(items, accountAccessor);
+  const sorted = sortBy(items, accountAccessor);
 
   for (const item of sorted) {
     const account = accountAccessor(item);

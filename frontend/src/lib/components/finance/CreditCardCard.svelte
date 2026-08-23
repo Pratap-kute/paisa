@@ -9,7 +9,6 @@
     now,
     type CreditCardBill
   } from "$lib/core/utils";
-  import _ from "lodash";
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
 
@@ -20,9 +19,9 @@
   let { creditCard }: Props = $props();
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
-    return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
-      return b.statementEndDate.isSameOrBefore(now());
-    });
+    return creditCard.bills.findLast((b) =>
+      b.statementEndDate.isSameOrBefore(now())
+    );
   }
 
   let bill = $derived(lastBill(creditCard));

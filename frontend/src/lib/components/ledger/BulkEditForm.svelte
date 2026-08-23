@@ -1,5 +1,4 @@
 <script lang="ts">
-  import _ from "lodash";
   import { createEventDispatcher } from "svelte";
   import Select from "svelte-select";
 
@@ -9,9 +8,7 @@
 
   let { accounts }: Props = $props();
 
-  let selectItems = $derived(_.map(accounts, (account) => {
-    return { id: account, name: account };
-  }));
+  let selectItems = $derived(accounts.map((account) => ({ id: account, name: account })));
 
   let selectedItem: { id: string; name: string } = $state();
 

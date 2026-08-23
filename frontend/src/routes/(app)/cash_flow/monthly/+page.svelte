@@ -1,6 +1,5 @@
 <script lang="ts">
-  import _ from "lodash";
-  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
+    import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
   import { ajax, type CashFlow } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, dateMax, dateRange, dateRangeOption, setAllowedDateRange } from "../../../../store";
@@ -12,18 +11,19 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+import { filter, map, some } from "$lib/core/collection";
 
   let cashFlows: CashFlow[] = $state([]);
   let isLoading = $state(true);
 
   let filteredCashFlows = $derived(
-    _.filter(
+    filter(
       cashFlows,
       (c) => c.date.isSameOrBefore($dateRange.to) && c.date.isSameOrAfter($dateRange.from),
     ),
   );
   let hasFilteredCashFlows = $derived(
-    _.some(filteredCashFlows, (c) =>
+    some(filteredCashFlows, (c) =>
       c.income !== 0 ||
       c.expenses !== 0 ||
       c.liabilities !== 0 ||
@@ -38,7 +38,7 @@
   onMount(async () => {
     try {
       ({ cash_flows: cashFlows } = await ajax("/api/cash_flow"));
-      setAllowedDateRange(_.map(cashFlows, (c) => c.date));
+      setAllowedDateRange(map(cashFlows, (c) => c.date));
       isLoading = false;
     } catch {
       isLoading = false;

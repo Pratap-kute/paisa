@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
 import COLORS, { generateColorScheme } from "$lib/core/colors";
 import { iconify } from "$lib/core/icon";
 import {
@@ -10,25 +10,22 @@ import {
 } from "$lib/core/utils";
 import type { ComparisonBarChartData } from "$lib/charts/echarts/bar_comparison";
 import { byExpenseGroup, expenseGroup } from "$lib/charts/expense";
+import { sortBy } from "$lib/core/collection";
 
 export function buildExpenseBreakdownComparison(
   postings: Posting[],
 ): ComparisonBarChartData {
   const categories = byExpenseGroup(postings);
-  const total = _.sumBy(_.values(categories), (point) => point.total);
+  const total = sumBy(Object.values(categories), (point) => point.total);
   return {
     valueFormat: "currency",
     valueLabel: "Expenses",
     sort: "ascending",
-    points: _.map(categories, (point) => {
-      const byMonth = _.chain(point.postings)
-        .groupBy((posting) => posting.date.format("MMM"))
-        .map((monthPostings, month) => [
-          month,
-          _.sumBy(monthPostings, (posting) => posting.amount),
-        ])
-        .fromPairs()
-        .value();
+    points: Object.values(categories).map((point) => {
+      const byMonth = mapValues(
+        groupBy(point.postings, (posting) => posting.date.format("MMM")),
+        (monthPostings) => sumBy(monthPostings, (posting) => posting.amount),
+      );
       return {
         key: point.category,
         categoryKey: point.category,
@@ -47,7 +44,7 @@ export function buildExpenseBreakdownComparison(
             value: total > 0 ? point.total / total : 0,
             format: "percentage",
           },
-          ..._.map(byMonth, (amount, month) => ({
+          ...Object.entries(byMonth).map(([month, amount]) => ({
             label: month,
             value: amount,
             format: "currency" as const,
@@ -59,7 +56,7 @@ export function buildExpenseBreakdownComparison(
 }
 
 export function expenseComparisonLegends(postings: Posting[]) {
-  const groups = _.chain(postings).map(expenseGroup).uniq().sort().value();
+  const groups = uniq(postings.map(expenseGroup)).sort();
   const color = generateColorScheme(groups);
   return groups.map((group) => ({
     label: iconify(group, { group: "Expenses" }),
@@ -75,9 +72,9 @@ export function buildCreditCardYearlySpendsComparison(
     valueFormat: "currency",
     valueLabel: "Spending",
     sort: "input",
-    points: _.chain(yearlySpends)
-      .map((breakdown, year) => {
-        const value = _.sum(_.values(breakdown));
+    points: sortBy(
+      Object.entries(yearlySpends).map(([year, breakdown]) => {
+        const value = sum(Object.values(breakdown));
         return {
           key: year,
           label: year,
@@ -85,16 +82,16 @@ export function buildCreditCardYearlySpendsComparison(
           color: COLORS.expenses,
           tooltipRows: [
             { label: "Total", value, format: "currency" as const },
-            ..._.map(breakdown, (amount, month) => ({
+            ...Object.entries(breakdown).map(([month, amount]) => ({
               label: month,
               value: amount,
               format: "currency" as const,
             })),
           ],
         };
-      })
-      .sortBy((point) => point.key)
-      .value(),
+      }),
+      (point) => point.key,
+    ),
   };
 }
 
@@ -106,7 +103,7 @@ export function buildAllocationTargetComparison(
     valueLabel: "Current",
     targetLabel: "Target",
     sort: "input",
-    points: _.sortBy(allocationTargets, (target) => target.name).map((
+    points: sortBy(allocationTargets, (target) => target.name).map((
       target,
     ) => ({
       key: target.name,
@@ -136,7 +133,7 @@ export function buildGainOverviewComparison(
     valueFormat: "currency",
     valueLabel: "Balance",
     sort: "input",
-    points: _.sortBy(gains, (gain) => gain.account).map((gain) => {
+    points: sortBy(gains, (gain) => gain.account).map((gain) => {
       const current = gain.networth;
       return {
         key: gain.account,
@@ -170,15 +167,10 @@ export function buildGainOverviewComparison(
 }
 
 export function buildYearlyExpenseTimelineComparisonInput(postings: Posting[]) {
-  return _.chain(postings)
-    .groupBy((posting) => financialYear(posting.date))
-    .mapValues((yearPostings) =>
-      _.chain(yearPostings)
-        .groupBy(expenseGroup)
-        .mapValues((groupPostings) =>
-          _.sumBy(groupPostings, (posting) => posting.amount)
-        )
-        .value()
-    )
-    .value();
+  const byYear = groupBy(postings, (posting) => financialYear(posting.date));
+  return mapValues(byYear, (yearPostings) =>
+    mapValues(
+      groupBy(yearPostings, expenseGroup),
+      (groupPostings) => sumBy(groupPostings, (posting) => posting.amount),
+    ));
 }

@@ -1,4 +1,3 @@
-import _ from "lodash";
 import arcticons from "../../../fonts/arcticons-info.json" with {
   type: "json",
 };
@@ -34,9 +33,9 @@ export function iconGlyph(symbol: string): string {
   return String.fromCodePoint(code);
 }
 
-export const iconsList = _.flatMap(icons, (glyph, font) => {
-  return _.map(glyph, (_code, name) => `${font}:${name}`);
-});
+export const iconsList = Object.entries(icons).flatMap(([font, glyph]) =>
+  Object.keys(glyph).map((name) => `${font}:${name}`)
+);
 
 interface IconLookup {
   symbol: string;
@@ -72,12 +71,11 @@ const ICON_LOOKUP: IconLookup[] = [
   { symbol: "fa6-solid:money-bill", words: ["cash"] },
 ];
 
-const ICONS: Record<string, string> = _.chain(ICON_LOOKUP)
-  .flatMap((icon) =>
-    _.map(icon.words, (word) => [word, iconGlyph(icon.symbol)])
-  )
-  .fromPairs()
-  .value();
+const ICONS: Record<string, string> = Object.fromEntries(
+  ICON_LOOKUP.flatMap((icon) =>
+    icon.words.map((word) => [word, iconGlyph(icon.symbol)])
+  ),
+);
 
 export function iconText(account: string): string {
   if (account == "") {
@@ -87,13 +85,13 @@ export function iconText(account: string): string {
   const accountConfig = (USER_CONFIG.accounts || []).find((a) =>
     a.name == account
   );
-  if (!_.isEmpty(accountConfig?.icon)) {
+  if (accountConfig?.icon) {
     return iconGlyph(accountConfig.icon);
   }
 
   const parts = account.split(":");
-  const part = stemmer(_.last(parts).toLowerCase());
-  return ICONS[part] || iconText(_.dropRight(parts, 1).join(":"));
+  const part = stemmer((parts.at(-1) ?? "").toLowerCase());
+  return ICONS[part] || iconText(parts.slice(0, -1).join(":"));
 }
 
 export function iconify(

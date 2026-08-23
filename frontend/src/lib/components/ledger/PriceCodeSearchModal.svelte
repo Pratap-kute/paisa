@@ -5,7 +5,6 @@
   import Button from "$lib/components/ui/Button.svelte";
   import Input from "$lib/components/ui/Input.svelte";
   import SelectField from "$lib/components/ui/Select.svelte";
-  import _ from "lodash";
   import { createEventDispatcher, onMount } from "svelte";
   import { ajax, type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
 
@@ -50,7 +49,8 @@
   function reset() {
     code = "";
     filters = {};
-    for (let i = 0; i < _.max(_.map(providers, (p) => p.fields.length)); i++) {
+    const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
+    for (let i = 0; i < maxLen; i++) {
       clearCache(i);
     }
   }
@@ -63,12 +63,14 @@
   ) {
     return async function autocomplete(filterText: string): Promise<AutoCompleteItem[]> {
       for (let j = 0; j < i; j++) {
-        if (_.isEmpty(filters[provider.fields[j].id])) {
+        if (!filters[provider.fields[j].id]) {
           return [];
         }
       }
 
-      const queryFilters = _.mapValues(filters, (v) => (_.isString(v) ? v : v?.id));
+      const queryFilters = Object.fromEntries(
+        Object.entries(filters).map(([k, v]) => [k, typeof v === "string" ? v : v?.id]),
+      );
       queryFilters[field] = filterText;
       const { completions } = await ajax("/api/price/autocomplete", {
         method: "POST",
@@ -155,7 +157,7 @@
                       searchable={true}
                       clearable={false}
                       on:change={() => {
-                        _.each(selectedProvider.fields, (f, j) => {
+                        selectedProvider.fields.forEach((f, j) => {
                           if (j > i) {
                             clearCache(j);
                             filters[f.id] = null;
@@ -187,7 +189,7 @@
       <Button
         variant="primary"
         size="md"
-        disabled={_.isEmpty(code)}
+        disabled={!code.trim()}
         onclick={() => {
           dispatch("select", { code: code, provider: selectedProvider.code });
           reset();

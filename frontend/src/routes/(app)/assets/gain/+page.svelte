@@ -4,7 +4,7 @@
   import { buildLegends } from "$lib/charts/gain";
   import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
   import { ajax, formatCurrency, type Gain, type Legend } from "$lib/core/utils";
-  import _ from "lodash";
+  import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -37,8 +37,8 @@
   onMount(async () => {
     try {
       ({ gain_breakdown: gains } = await ajax("/api/gain"));
-      totalGain = _.sumBy(gains, (g) => g.networth.gainAmount);
-      totalInvestment = _.sumBy(
+      totalGain = sumBy(gains, (g) => g.networth.gainAmount);
+      totalInvestment = sumBy(
         gains,
         (g) => g.networth.investmentAmount - g.networth.withdrawalAmount,
       );
@@ -89,7 +89,7 @@
       <ChartFrame
         height="compact"
         rows={Math.max(5, overviewData.points.length)}
-        class="[&_.paisa-chart-frame-body]:overflow-y-visible"
+        class="[&paisa-chart-frame-body]:overflow-y-visible"
       >
         <ComparisonBarChart
           data={overviewData}

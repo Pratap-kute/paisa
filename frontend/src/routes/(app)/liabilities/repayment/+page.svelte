@@ -2,14 +2,14 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { buildRepaymentSeries } from "$lib/charts/time_series_data";
   import { ajax, type Legend, type Posting } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import RepaymentTimelineChart from "$lib/components/charts/RepaymentTimelineChart.svelte";
+import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
@@ -19,7 +19,7 @@
   onMount(async () => {
     try {
       ({ repayments } = await ajax("/api/liabilities/repayment"));
-      if (_.isEmpty(repayments)) {
+      if (isEmptyValue(repayments)) {
         isEmpty = true;
         return;
       }

@@ -8,8 +8,7 @@
   import COLORS from "$lib/core/colors";
   import { ajax, formatPercentage, type PortfolioAggregate } from "$lib/core/utils";
   import { nonZeroCurrency } from "$lib/tables/formatters";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -20,6 +19,7 @@
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import Input from "$lib/components/ui/Input.svelte";
+import { isEmpty as isEmptyValue, max, some } from "$lib/core/collection";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);
@@ -55,7 +55,7 @@
   });
 
   const holdingColumns = $derived.by((): ColumnDefinition[] => {
-    const maxPercent = _.max(flattenedHoldings.map((h) => h.percentage)) || 100;
+    const maxPercent = max(flattenedHoldings.map((h) => h.percentage)) || 100;
     return [
       {
         title: "#",
@@ -126,7 +126,7 @@
   let hasFilteredData = $derived(
     !isEmpty &&
       selectedCommodities.length > 0 &&
-      _.some(
+      some(
         [
           ...filterCommodityBreakdowns(security_type, selectedCommodities),
           ...filterCommodityBreakdowns(rating, selectedCommodities),
@@ -143,7 +143,7 @@
         "/api/portfolio_allocation",
       ));
 
-      if (_.isEmpty(commodities)) {
+      if (isEmptyValue(commodities)) {
         isEmpty = true;
         return;
       }

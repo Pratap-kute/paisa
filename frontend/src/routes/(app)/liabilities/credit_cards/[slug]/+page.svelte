@@ -11,7 +11,7 @@
     type CreditCardBill,
     type CreditCardSummary,
   } from "$lib/core/utils";
-  import _, { now } from "lodash";
+  import { clone } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
   import Page from "$lib/components/layout/Page.svelte";
@@ -22,6 +22,7 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import Select from "$lib/components/ui/Select.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+import { findIndex, now, reverse } from "$lib/core/collection";
 
   interface Props {
     data: PageData;
@@ -34,7 +35,7 @@
   let selectedBillIndex = $state(0);
 
   let billOptions = $derived(
-    creditCard ? _.reverse(_.clone(creditCard.bills)) : [],
+    creditCard ? reverse(clone(creditCard.bills)) : [],
   );
   let currentBill = $derived(billOptions[selectedBillIndex]);
   let utilization = $derived(
@@ -47,8 +48,8 @@
   );
 
   function lastBillIndex(creditCard: CreditCardSummary): number {
-    const bills = _.reverse(_.clone(creditCard.bills));
-    const idx = _.findIndex(bills, (b) =>
+    const bills = reverse(clone(creditCard.bills));
+    const idx = findIndex(bills, (b) =>
       b.statementEndDate.isSameOrBefore(now()),
     );
     return idx >= 0 ? idx : 0;

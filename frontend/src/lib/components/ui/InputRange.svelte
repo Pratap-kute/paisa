@@ -1,6 +1,5 @@
 <script lang="ts">
-  import _ from "lodash";
-
+  import { range } from "es-toolkit";
   interface Props {
     label: string;
     value: number;
@@ -22,7 +21,7 @@
       step={1}
     />
     <div class="paisa-input-range-ticks">
-      {#each _.range(allowed.min, allowed.max + 1) as i}
+      {#each range(allowed.min, allowed.max + 1) as i}
         <span>{i}</span>
       {/each}
     </div>

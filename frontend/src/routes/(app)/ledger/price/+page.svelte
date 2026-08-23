@@ -7,10 +7,11 @@
   import { ajax, formatCurrency, type Price } from "$lib/core/utils";
   import { nonZeroPercentageChange } from "$lib/tables/formatters";
   import { toast } from "$lib/core/toast";
-  import _ from "lodash";
+  import { omitBy } from "es-toolkit";
   import { onMount } from "svelte";
   import type { CellComponent, ColumnDefinition } from "tabulator-tables";
   import type dayjs from "dayjs";
+import { find } from "$lib/core/collection";
 
   interface PriceRow {
     commodity_name: string;
@@ -36,7 +37,7 @@
     if (!first) return null;
 
     const date = first.date.subtract(days, "day");
-    const last = _.find(prices, (p) => p.date.isSameOrBefore(date, "day"));
+    const last = find(prices, (p) => p.date.isSameOrBefore(date, "day"));
     if (!last) return null;
 
     const diffDays = first.date.diff(last.date, "day");
@@ -204,7 +205,7 @@
 
   async function fetchPrice() {
     const { prices: loadedPrices } = await ajax("/api/price");
-    prices = _.omitBy(loadedPrices, (v) => v.length === 0);
+    prices = omitBy(loadedPrices, (v) => v.length === 0);
   }
 
   onMount(async () => {

@@ -5,14 +5,14 @@
     interestSummary,
   } from "$lib/charts/interest_data";
   import { ajax, formatCurrency, formatFloat, type Interest } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+import { isEmpty as isEmptyValue, some } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
@@ -20,9 +20,9 @@
   let overviewData = $derived(buildInterestOverviewComparison(interests));
 
   function hasLiabilityActivity(interests: Interest[]) {
-    return _.some(interests, (interest) =>
-      !_.isEmpty(interest.overview_timeline) &&
-      _.some(interest.overview_timeline, (point) =>
+    return some(interests, (interest) =>
+      !isEmptyValue(interest.overview_timeline) &&
+      some(interest.overview_timeline, (point) =>
         point.drawn_amount !== 0 ||
         point.interest_amount !== 0 ||
         point.repaid_amount !== 0

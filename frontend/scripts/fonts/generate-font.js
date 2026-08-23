@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { writeFileSync } from "fs";
 import { join } from "path";
 import { createSVG, createTTF, createWOFF2 } from "svgtofont/lib/utils.js";
@@ -52,8 +51,8 @@ async function createFont(font) {
       "utf8",
     );
 
-    const min = _.min(Object.values(infoData));
-    const max = _.max(Object.values(infoData));
+    const min = Math.min(...Object.values(infoData));
+    const max = Math.max(...Object.values(infoData));
 
     const scss = `
 @font-face {

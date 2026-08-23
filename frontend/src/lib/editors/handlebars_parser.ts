@@ -1,11 +1,11 @@
 import type { StreamParser, StringStream } from "@codemirror/language";
 import helpers from "../importing/template_helpers";
-import _ from "lodash";
+import { includes, keys } from "$lib/core/collection";
 
 const KEYWORDS = /^(?:[#/](?:if|with|true|false|unless|each)|(?:else if|else))/;
 const HELPERS = new RegExp(
   `^(?:(?:${
-    _.keys(helpers)
+    keys(helpers)
       .sort((a, b) => b.length - a.length)
       .join("|")
   }))`,
@@ -53,7 +53,7 @@ export const handlebars: StreamParser<HandlebarsState> = {
       return "comment";
     }
 
-    if (_.includes(["(", ")", "{", "}"], ch)) {
+    if (includes(["(", ")", "{", "}"], ch)) {
       return "bracket";
     }
   },

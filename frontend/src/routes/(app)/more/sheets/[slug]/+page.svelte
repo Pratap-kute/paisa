@@ -12,7 +12,7 @@
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
-  import _ from "lodash";
+  import { isNumber } from "es-toolkit";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
@@ -26,6 +26,7 @@
   import Badge from "$lib/components/ui/Badge.svelte";
   import Card from "$lib/components/ui/Card.svelte";
   import Select from "$lib/components/ui/Select.svelte";
+import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/core/collection";
 
   let ledgerFiles: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);
@@ -77,7 +78,7 @@
         cancel();
         cancelled = true;
       } else {
-        $sheetEditorState = _.assign({}, $sheetEditorState, {
+        $sheetEditorState = assign({}, $sheetEditorState, {
           hasUnsavedChanges: false,
         });
       }
@@ -95,8 +96,8 @@
 
   onMount(async () => {
     loadFiles(data.name);
-    const line = _.toNumber($page.url.hash.substring(1));
-    if (_.isNumber(line)) {
+    const line = toNumber($page.url.hash.substring(1));
+    if (isNumber(line)) {
       lineNumber = line;
     }
   });
@@ -109,10 +110,10 @@
       commodities,
     } = await ajax("/api/editor/files"));
     ({ files, postings } = await ajax("/api/sheets/files"));
-    filesMap = _.fromPairs(_.map(files, (f) => [f.name, f]));
-    if (!_.isEmpty(files)) {
+    filesMap = fromPairs(map(files, (f) => [f.name, f]));
+    if (!isEmpty(files)) {
       selectedFile =
-        _.find(files, (f) => f.name == selectedFileName) || files[0];
+        find(files, (f) => f.name == selectedFileName) || files[0];
     }
   }
 
@@ -170,7 +171,7 @@
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = null;
-      $sheetEditorState = _.assign({}, $sheetEditorState, {
+      $sheetEditorState = assign({}, $sheetEditorState, {
         hasUnsavedChanges: false,
       });
     }
@@ -343,7 +344,7 @@
         </Button>
       </div>
 
-      {#if !_.isEmpty(selectedFile?.versions)}
+      {#if !isEmpty(selectedFile?.versions)}
         <div class="flex flex-wrap items-center gap-2">
           <Button
             variant="outline"
@@ -398,7 +399,7 @@
           <FileTree
             path=""
             on:select={(e) => selectFile(e.detail)}
-            files={buildDirectoryTree(_.values(filesMap))}
+            files={buildDirectoryTree(values(filesMap))}
             selectedFileName={selectedFile?.name}
             hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
           />

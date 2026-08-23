@@ -16,7 +16,6 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import _ from "lodash";
 import { writable } from "svelte/store";
 import {
   autocompletion,
@@ -25,6 +24,7 @@ import {
   ifIn,
 } from "@codemirror/autocomplete";
 import Handlebars from "handlebars";
+import { assign, map } from "$lib/core/collection";
 
 interface EditorState {
   hasUnsavedChanges: boolean;
@@ -50,7 +50,7 @@ function lint(editor: EditorView): Diagnostic[] {
     Handlebars.parse(doc.toString());
     const compiled = Handlebars.compile(doc.toString(), { noEscape: true });
     editorState.update((current) =>
-      _.assign({}, current, { template: compiled })
+      assign({}, current, { template: compiled })
     );
   } catch (e) {
     const lines = e.message.split("\n");
@@ -86,7 +86,7 @@ export function createEditor(content: string, dom: Element) {
       history(),
       keymap.of(historyKeymap),
       autocompletion({
-        override: _.map(
+        override: map(
           autocompletions,
           (options, node) => ifIn([node], completeFromList(options)),
         ),
@@ -94,7 +94,7 @@ export function createEditor(content: string, dom: Element) {
       keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
         editorState.update((current) =>
-          _.assign({}, current, {
+          assign({}, current, {
             hasUnsavedChanges: current.hasUnsavedChanges ||
               viewUpdate.docChanged,
             undoDepth: undoDepth(viewUpdate.state),

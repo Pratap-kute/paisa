@@ -1,15 +1,22 @@
 <script lang="ts">
-  import _ from "lodash";
-
   interface Props {
     item: any;
     children?: import('svelte').Snippet;
   }
 
   let { item, children }: Props = $props();
+
+  let shouldShow = $derived(
+    item === null ||
+    item === undefined ||
+    item === false ||
+    (typeof item === "string" && item.trim().length === 0) ||
+    (Array.isArray(item) && item.length === 0) ||
+    (typeof item === "object" && item !== null && Object.keys(item).length === 0)
+  );
 </script>
 
-{#if item == null || item == false || (item != true && _.isEmpty(item))}
+{#if shouldShow}
   <div class="paisa-zero-state">
     {@render children?.()}
   </div>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import _ from "lodash";
-  import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
+    import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
   import {
     ajax,
     formatCurrency,
@@ -21,6 +20,7 @@
   import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import IncomeStatementWaterfallChart from "$lib/components/charts/IncomeStatementWaterfallChart.svelte";
+import { keys, maxBy, minBy, some, sortBy, values } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
@@ -71,7 +71,7 @@
         isEmpty = true;
       } else {
         incomeStatement = yearly[$year];
-        years = _.sortBy(_.keys(yearly)).reverse();
+        years = sortBy(keys(yearly)).reverse();
         diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
         diffPercent = diff / incomeStatement.startingBalance;
 
@@ -83,7 +83,7 @@
   function uniqueAccounts(statements: IncomeStatement[], key: AccountGroupName) {
     const accounts = new Set<string>();
     for (const statement of statements) {
-      for (const account of _.keys(statement[key])) {
+      for (const account of keys(statement[key])) {
         accounts.add(account);
       }
     }
@@ -93,9 +93,9 @@
   onMount(async () => {
     try {
       ({ yearly } = await ajax("/api/income_statement"));
-      const statements = _.values(yearly);
-      const earliest = _.minBy(statements, (statement) => statement.date);
-      const latest = _.maxBy(statements, (statement) => statement.date);
+      const statements = values(yearly);
+      const earliest = minBy(statements, (statement) => statement.date);
+      const latest = maxBy(statements, (statement) => statement.date);
       if (earliest) {
         dateMin.set(earliest.date);
       }
@@ -103,50 +103,51 @@
         dateMax.set(latest.date);
       }
       if (!$year) {
-        const latestYear = _.chain(_.keys(yearly)).sort().last().value();
+        const sortedYears = Object.keys(yearly).sort();
+        const latestYear = sortedYears[sortedYears.length - 1];
         if (latestYear) year.set(latestYear);
       }
 
       const rawGroups: AccountGroup[] = [
         {
           key: "income",
-          accounts: uniqueAccounts(_.values(yearly), "income"),
+          accounts: uniqueAccounts(values(yearly), "income"),
           label: "Income",
           multiplier: -1,
         },
         {
           key: "tax",
-          accounts: uniqueAccounts(_.values(yearly), "tax"),
+          accounts: uniqueAccounts(values(yearly), "tax"),
           label: "Tax",
           multiplier: -1,
         },
         {
           key: "interest",
-          accounts: uniqueAccounts(_.values(yearly), "interest"),
+          accounts: uniqueAccounts(values(yearly), "interest"),
           label: "Interest",
           multiplier: -1,
         },
         {
           key: "pnl",
-          accounts: uniqueAccounts(_.values(yearly), "pnl"),
+          accounts: uniqueAccounts(values(yearly), "pnl"),
           label: "Gain / Loss",
           multiplier: 1,
         },
         {
           key: "equity",
-          accounts: uniqueAccounts(_.values(yearly), "equity"),
+          accounts: uniqueAccounts(values(yearly), "equity"),
           label: "Equity",
           multiplier: -1,
         },
         {
           key: "liabilities",
-          accounts: uniqueAccounts(_.values(yearly), "liabilities"),
+          accounts: uniqueAccounts(values(yearly), "liabilities"),
           label: "Liabilities",
           multiplier: -1,
         },
         {
           key: "expenses",
-          accounts: uniqueAccounts(_.values(yearly), "expenses"),
+          accounts: uniqueAccounts(values(yearly), "expenses"),
           label: "Expenses",
           multiplier: -1,
         },
@@ -154,7 +155,7 @@
       accountGroups = rawGroups.filter(
         (g) =>
           g.accounts.length > 0 ||
-          _.some(_.values(yearly), (y) => y[g.key] && Math.abs(sum(y[g.key])) > 0),
+          some(values(yearly), (y) => y[g.key] && Math.abs(sum(y[g.key])) > 0),
       );
 
       isLoading = false;
@@ -199,7 +200,7 @@
         secondary={incomeStatement ? formatPercentage(diffPercent, 2) : undefined}
         status={diff >= 0 ? "positive" : "negative"}
         loading={isLoading}
-        class="[&_.paisa4-metric-meta]:whitespace-normal [&_.paisa4-metric-value]:overflow-visible [&_.paisa4-metric-value]:whitespace-normal"
+        class="[&paisa4-metric-meta]:whitespace-normal [&paisa4-metric-value]:overflow-visible [&paisa4-metric-value]:whitespace-normal"
       />
     </MetricStrip>
   {/if}

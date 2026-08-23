@@ -1,7 +1,6 @@
 <script lang="ts">
   import { iconify } from "$lib/core/icon";
   import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
-  import _ from "lodash";
   import Card from "$lib/components/ui/Card.svelte";
 
   interface Props {
@@ -69,7 +68,7 @@
   padding="sm"
   variant="flat"
   class="m-0"
-  data-tippy-content={_.isEmpty(accountBudget.expenses) ? null : tooltipContent}
+  data-tippy-content={accountBudget.expenses.length === 0 ? null : tooltipContent}
 >
   <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div

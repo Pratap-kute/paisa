@@ -1,6 +1,4 @@
 <script lang="ts">
-  import _ from "lodash";
-
   interface Props {
     options: { label: string; value: any }[];
     value: any;
@@ -9,8 +7,8 @@
   let { options, value = $bindable() }: Props = $props();
 
   $effect(() => {
-    if (value && !options.find((option) => option.value === value) && !_.isEmpty(options)) {
-      value = _.last(options).value;
+    if (value && !options.find((option) => option.value === value) && options.length > 0) {
+      value = options.at(-1)?.value;
     }
   });
 </script>

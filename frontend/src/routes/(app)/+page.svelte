@@ -39,9 +39,10 @@
     type Transaction,
     type TransactionSequence
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { sumBy, take } from "es-toolkit";
   import dayjs from "dayjs";
   import { onMount } from "svelte";
+import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collection";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));
@@ -58,7 +59,7 @@
   let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
   function hasCashFlowActivity(flows: CashFlow[]) {
-    return _.some(flows, (c) =>
+    return some(flows, (c) =>
       c.income !== 0 ||
       c.expenses !== 0 ||
       c.liabilities !== 0 ||
@@ -71,7 +72,7 @@
 
   let currentBudget = $derived(budgetsByMonth[month]);
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
-  let totalExpense = $derived(_.sumBy(selectedExpenses, (p) => p.amount));
+  let totalExpense = $derived(sumBy(selectedExpenses, (p) => p.amount));
   let selectedExpenseBreakdownData = $derived(
     buildExpenseBreakdownComparison(selectedExpenses),
   );
@@ -97,16 +98,16 @@
         transactions
       } = await ajax("/api/dashboard"));
 
-      goalSummaries = _.sortBy(goalSummaries, (g) => -g.priority);
+      goalSummaries = sortBy(goalSummaries, (g) => -g.priority);
 
-      if (_.isEmpty(transactions)) {
+      if (isEmptyValue(transactions)) {
         isEmpty = true;
       } else {
         isEmpty = false;
       }
 
       cashflowLegends = cashFlowData.legends ?? [];
-      transactionSequences = _.take(
+      transactionSequences = take(
         sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
         8
       );
@@ -193,7 +194,7 @@
     {/if}
 
     <!-- Row 1B: Checking / Cash Accounts Summary -->
-    {#if !_.isEmpty(checkingBalances)}
+    {#if !isEmptyValue(checkingBalances)}
       <div class="rounded-xl p-4 sm:p-5 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Cash Accounts</span>
@@ -202,7 +203,7 @@
           </a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {#each _.values(checkingBalances) as assetBreakdown}
+          {#each values(checkingBalances) as assetBreakdown}
             {@const name = restName(restName(assetBreakdown.group)) || restName(assetBreakdown.group) || assetBreakdown.group}
             <a
               href="/assets/gain/{encodeURIComponent(assetBreakdown.group)}"
@@ -315,7 +316,7 @@
         </div>
       {/if}
 
-      {#if !_.isEmpty(transactions)}
+      {#if !isEmptyValue(transactions)}
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
             <a href="/ledger/transaction" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
@@ -326,7 +327,7 @@
             </a>
           </div>
           <div class="divide-y divide-[var(--paisa-border-subtle)]">
-            {#each _.take(transactions, 8) as t}
+            {#each take(transactions, 8) as t}
               {@const posting = t.postings[0]}
               <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-[var(--paisa-surface-hover)] -mx-2 px-2 rounded-md transition-colors">
                 <div class="min-w-0 flex-1 pr-3">
@@ -356,7 +357,7 @@
 
     <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
     <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:mb-0 [&>*]:min-w-0 [&>:only-child]:col-span-full">
-      {#if !_.isEmpty(goalSummaries)}
+      {#if !isEmptyValue(goalSummaries)}
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
             <a href="/more/goals" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
@@ -394,7 +395,7 @@
         </div>
       {/if}
 
-      {#if !_.isEmpty(transactionSequences)}
+      {#if !isEmptyValue(transactionSequences)}
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
             <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">

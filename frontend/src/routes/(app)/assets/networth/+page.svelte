@@ -6,7 +6,7 @@
     type Legend,
     type Networth,
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { last } from "es-toolkit";
   import { onMount } from "svelte";
   import {
     dateMin,
@@ -25,6 +25,7 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import NetworthTimelineChart from "$lib/components/charts/NetworthTimelineChart.svelte";
   import { buildNetworthSeries } from "$lib/charts/time_series_data";
+import { filter, map } from "$lib/core/collection";
 
   let networth = $state(0);
   let investment = $state(0);
@@ -35,7 +36,7 @@
   let legends: Legend[] = $state([]);
 
   let filteredPoints = $derived(
-    _.filter(
+    filter(
       points,
       (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from),
     ),
@@ -49,9 +50,9 @@
     try {
       const result = await ajax("/api/networth");
       points = result.networthTimeline;
-      setAllowedDateRange(_.map(points, (p) => p.date));
+      setAllowedDateRange(map(points, (p) => p.date));
 
-      const current = _.last(points);
+      const current = last(points);
       if (current) {
         networth = current.investmentAmount + current.gainAmount - current.withdrawalAmount;
         investment = current.investmentAmount - current.withdrawalAmount;

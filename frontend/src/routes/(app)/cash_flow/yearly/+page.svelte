@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import _ from "lodash";
+  import { partition } from "es-toolkit";
   import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
   import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
@@ -20,6 +20,7 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+import { max as arrayMax, minBy } from "$lib/core/collection";
 
   let graph: Record<string, Graph> = $state();
   let expenses: Posting[] = $state([]);
@@ -43,12 +44,11 @@
 
   function maxDepth(prefix: string) {
     if (!graph) return 1;
-    const max = _.chain(graph)
+    const depths = Object.values(graph)
       .flatMap((g) => g.nodes)
       .filter((n) => n.name.startsWith(prefix))
-      .map((n) => depth(n.name))
-      .max()
-      .value();
+      .map((n) => depth(n.name));
+    const max = arrayMax(depths);
 
     return max || 1;
   }
@@ -56,7 +56,7 @@
   function filter(graph: Graph, incomeDepth: number, expenseDepth: number) {
     if (!graph) return graph;
 
-    const [removed, allowed] = _.partition(graph.nodes, (n) => {
+    const [removed, allowed] = partition(graph.nodes, (n) => {
       const account = firstName(n.name);
       if (account === "Income") return depth(n.name) > incomeDepth;
       if (account === "Expenses") return depth(n.name) > expenseDepth;
@@ -75,7 +75,7 @@
   onMount(async () => {
     try {
       ({ expenses, graph } = await ajax("/api/expense"));
-      const firstExpense = _.minBy(expenses, (e) => e.date);
+      const firstExpense = minBy(expenses, (e) => e.date);
       if (firstExpense) {
         dateMin.set(firstExpense.date);
       }

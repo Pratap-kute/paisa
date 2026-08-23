@@ -2,11 +2,12 @@
   import { onMount } from "svelte";
   import { ajax, type Log } from "$lib/core/utils";
   import VirtualList from "svelte-tiny-virtual-list";
-  import _ from "lodash";
+  import { omit } from "es-toolkit";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
+import { map } from "$lib/core/collection";
 
   let logs: Log[] = $state([]);
   const ITEM_SIZE = 20;
@@ -44,7 +45,7 @@
   }
 
   function formatFields(log: Log) {
-    return _.map(_.omit(log, ["time", "level", "msg"]), (value, key) => `${key}=${value}`).join(
+    return map(omit(log, ["time", "level", "msg"]), (value, key) => `${key}=${value}`).join(
       ", "
     );
   }
@@ -63,7 +64,7 @@
       <VirtualList width="100%" height={listHeight} itemCount={logs.length} itemSize={ITEM_SIZE}>
         <svelte:fragment slot="item" let:index let:style>
           {@const log = logs[index]}
-          {@const fields = _.omit(log, ["time", "level", "msg"])}
+          {@const fields = omit(log, ["time", "level", "msg"])}
           <div {style}>
             <div
               class="flex min-w-[1000px] items-baseline gap-1.5 px-1"

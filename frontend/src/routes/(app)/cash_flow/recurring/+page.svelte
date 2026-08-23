@@ -12,7 +12,7 @@
     type TransactionSchedule,
     type TransactionSequence,
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";
   import RecurringCard from "$lib/components/finance/RecurringCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
@@ -23,6 +23,7 @@
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);
@@ -31,24 +32,26 @@
 
   let days: Dayjs[] = $derived(monthDays($month).days);
   let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
-    _.chain(transactionSequences)
-      .flatMap((ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [])
-      .groupBy((s) => s.scheduled.format("YYYY-MM-DD"))
-      .value(),
+    groupBy(
+      transactionSequences.flatMap(
+        (ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [],
+      ),
+      (s) => s.scheduled.format("YYYY-MM-DD"),
+    ),
   );
 
   onMount(async () => {
     try {
       ({ transaction_sequences: transactionSequences } = await ajax("/api/recurring"));
 
-      if (_.isEmpty(transactionSequences)) {
+      if (isEmptyValue(transactionSequences)) {
         isEmpty = true;
       }
 
       transactionSequences = sortTrantionSequence(enrichTrantionSequence(transactionSequences));
 
       setAllowedDateRange(
-        _.compact(_.flatMap(transactionSequences, (ts) => ts.schedules.map((s) => s.scheduled))),
+        compact(flatMap(transactionSequences, (ts) => ts.schedules.map((s) => s.scheduled))),
       );
 
       transactionSequencesDelayed = transactionSequences;

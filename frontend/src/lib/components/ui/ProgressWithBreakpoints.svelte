@@ -1,8 +1,7 @@
 <script lang="ts">
   import Progress from "$lib/components/ui/Progress.svelte";
   import { formatCurrencyCrude, type Point } from "$lib/core/utils";
-  import _ from "lodash";
-
+  import { range } from "es-toolkit";
   interface Props {
     progressPercent: number;
     breakPoints: Point[];
@@ -10,11 +9,11 @@
 
   let { progressPercent, breakPoints }: Props = $props();
 
-  let spacers = $derived(_.range(breakPoints.length, 4));
+  let spacers = $derived(range(breakPoints.length, 4));
 </script>
 
 <div>
-  {#if !_.isEmpty(breakPoints)}
+  {#if breakPoints.length > 0}
     <div class="paisa-breakpoints-row">
       <div></div>
       {#each breakPoints as point, i}

@@ -13,7 +13,7 @@
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
   import { format } from "$lib/ledger/journal";
-  import _ from "lodash";
+  import { isNumber, last } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
@@ -26,6 +26,7 @@
   import Page from "$lib/components/layout/Page.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import LedgerBalance from "$lib/components/ledger/LedgerBalance.svelte";
+import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/core/collection";
 
   interface Props {
     data: PageData;
@@ -81,7 +82,7 @@
         cancel();
         cancelled = true;
       } else {
-        $editorState = _.assign({}, $editorState, { hasUnsavedChanges: false });
+        $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
       }
     }
   });
@@ -97,8 +98,8 @@
 
   onMount(() => {
     loadFiles(data.name);
-    const line = _.toNumber($page.url.hash.substring(1));
-    if (_.isNumber(line)) {
+    const line = toNumber($page.url.hash.substring(1));
+    if (isNumber(line)) {
       lineNumber = line;
     }
   });
@@ -107,10 +108,10 @@
     let files;
     ({ files, accounts, commodities, payees } =
       await ajax("/api/editor/files"));
-    filesMap = _.fromPairs(_.map(files, (f: LedgerFile) => [f.name, f]));
-    if (!_.isEmpty(files)) {
+    filesMap = fromPairs(map(files, (f: LedgerFile) => [f.name, f]));
+    if (!isEmpty(files)) {
       selectedFile =
-        _.find(files, (f: LedgerFile) => f.name == selectedFileName) ||
+        find(files, (f: LedgerFile) => f.name == selectedFileName) ||
         files[0];
     }
   }
@@ -171,7 +172,7 @@
         type: "is-danger",
         duration: 10000,
       });
-      if (!_.isEmpty(errors)) {
+      if (!isEmpty(errors)) {
         if (editor) moveToLine(editor, errors[0].line_from);
       }
     } else {
@@ -182,7 +183,7 @@
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = "";
-      $editorState = _.assign({}, $editorState, { hasUnsavedChanges: false });
+      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     }
   }
 
@@ -280,7 +281,7 @@
 
   let gridColsClass = $derived.by(() => {
     const hasSidebar = sidebarOpen;
-    const hasOutput = outputOpen && !_.isEmpty($editorState.output);
+    const hasOutput = outputOpen && !isEmpty($editorState.output);
 
     if (hasSidebar && hasOutput) {
       return "grid-cols-1 md:grid-cols-[minmax(180px,200px)_1fr_minmax(220px,280px)] lg:grid-cols-[minmax(200px,240px)_1fr_minmax(260px,340px)]";
@@ -405,7 +406,7 @@
           </Button>
         </div>
 
-        {#if !_.isEmpty(selectedFile?.versions)}
+        {#if !isEmpty(selectedFile?.versions)}
           <div
             class="flex items-center gap-1 border-l border-[var(--paisa-border-default)] pl-2"
           >
@@ -471,7 +472,7 @@
           </div>
         {/if}
 
-        {#if !_.isEmpty($editorState.output)}
+        {#if !isEmpty($editorState.output)}
           <Button
             variant={outputOpen ? "secondary" : "ghost"}
             size="sm"
@@ -499,7 +500,7 @@
               <i class="fa-regular fa-folder-open mr-1"></i>
               FILES
             </span>
-            <Badge variant="neutral" size="sm" rounded>{_.values(filesMap).length}</Badge>
+            <Badge variant="neutral" size="sm" rounded>{values(filesMap).length}</Badge>
             <button
               type="button"
               class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
@@ -513,7 +514,7 @@
             <FileTree
               path=""
               on:select={(e) => selectFile(e.detail)}
-              files={buildDirectoryTree(_.values(filesMap))}
+              files={buildDirectoryTree(values(filesMap))}
               selectedFileName={selectedFile?.name ?? ""}
               hasUnsavedChanges={$editorState.hasUnsavedChanges}
             />
@@ -532,7 +533,7 @@
           >
             <i class="fa-regular fa-file-lines mr-1"></i>
             <span class="max-w-[200px] truncate">
-              {selectedFile ? _.last(selectedFile.name.split("/")) : "editor"}
+              {selectedFile ? last(selectedFile.name.split("/")) : "editor"}
             </span>
             {#if $editorState.hasUnsavedChanges}
               <span class="text-[0.75rem] leading-none text-[var(--paisa-warning)]" title="Unsaved changes"
@@ -545,13 +546,13 @@
           </div>
         </div>
         <div
-          class="relative flex-1 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.editor]:h-full"
+          class="relative flex-1 overflow-auto [&cm-editor]:h-full [&cm-editor]:min-h-full [&cm-editor]:border-0 [&cm-scroller]:h-full [&cm-scroller]:overflow-auto [&cm-scroller]:py-2 [&editor]:h-full"
         >
           <div class="editor h-full" bind:this={editorDom}></div>
         </div>
       </main>
 
-      {#if outputOpen && !_.isEmpty($editorState.output)}
+      {#if outputOpen && !isEmpty($editorState.output)}
         <section
           class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >

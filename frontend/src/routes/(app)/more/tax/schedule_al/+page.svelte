@@ -1,11 +1,11 @@
 <script lang="ts">
   import { scheduleALTotal } from "$lib/charts/schedule_al_data";
-  import _ from "lodash";
-  import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
+    import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+import { minBy } from "$lib/core/collection";
 
   let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
   let selectedScheduleAl: ScheduleAL | null = $derived(
@@ -17,7 +17,7 @@
   onMount(async () => {
     ({ schedule_als: scheduleAls } = await ajax("/api/schedule_al"));
 
-    const firstScheduleAl = _.minBy(Object.values(scheduleAls), (e) => e.date);
+    const firstScheduleAl = minBy(Object.values(scheduleAls), (e) => e.date);
     if (firstScheduleAl) {
       dateMin.set(firstScheduleAl.date);
     }

@@ -20,8 +20,7 @@
     project,
     solvePMTOrNper,
   } from "$lib/domain/goals";
-  import _ from "lodash";
-  import type { PageData } from "./$types";
+    import type { PageData } from "./$types";
   import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
   import { iconGlyph, iconify } from "$lib/core/icon";
   import dayjs from "dayjs";
@@ -35,6 +34,7 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
   import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
+import { isEmpty, sortBy } from "$lib/core/collection";
 
   interface Props {
     data: PageData;
@@ -92,11 +92,9 @@
     postings = postings || [];
     balances = balances || {};
 
-    latestPostings = _.chain(postings)
-      .sortBy((p: Posting) => p.date)
+    latestPostings = sortBy(postings, (p: Posting) => p.date)
       .reverse()
-      .take(100)
-      .value();
+      .slice(0, 100);
 
     if (targetSavings != 0) {
       progressPercent = (savingsTotal / targetSavings) * 100;
@@ -120,7 +118,7 @@
         pmt,
         savingsTotal,
       );
-    } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
+    } else if (savingsTotal < targetSavings && !isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
       nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
     }

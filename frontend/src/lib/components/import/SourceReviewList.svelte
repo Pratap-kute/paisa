@@ -3,8 +3,8 @@
   import type { Confidence, PredictionResult } from "$lib/prediction/types";
   import { rowMatchesFilter, type ConfidenceFilter } from "$lib/prediction/session";
   import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
-  import _ from "lodash";
-
+import { maxBy } from "$lib/core/collection";
+  
   interface Props {
     data: any[][];
     renderMetadata: RenderMetadata;
@@ -29,7 +29,7 @@
   }: Props = $props();
 
   function summaryForRow(rowIndex: number) {
-    return _.find(predictionRows, { rowIndex });
+    return predictionRows.find((r) => r.rowIndex === rowIndex);
   }
 
   interface ParsedReviewItem {
@@ -95,7 +95,7 @@
 
     if (!payee) {
       const rawRow = data[rowIndex] || [];
-      const candidate = _.maxBy(rawRow, (cell) => (typeof cell === "string" ? cell.length : 0));
+      const candidate = maxBy(rawRow, (cell) => (typeof cell === "string" ? cell.length : 0));
       payee = candidate ? String(candidate).trim() : `Transaction #${rowIndex + 1}`;
     }
 

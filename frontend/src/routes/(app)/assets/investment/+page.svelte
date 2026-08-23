@@ -11,7 +11,7 @@
     type Legend,
     type Posting,
   } from "$lib/core/utils";
-  import _ from "lodash";
+  import { orderBy, sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -24,6 +24,7 @@
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import MonthlyInvestmentChart from "$lib/components/charts/MonthlyInvestmentChart.svelte";
   import YearlyInvestmentChart from "$lib/components/charts/YearlyInvestmentChart.svelte";
+import { isEmpty } from "$lib/core/collection";
 
   let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
   let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
@@ -36,7 +37,7 @@
   let latestFyLabel = $state("");
 
   let sortedYearlyCards = $derived(
-    _.orderBy(yearlyCards, (c) => c.start_date.valueOf(), "desc"),
+    orderBy(yearlyCards, [(c) => c.start_date.valueOf()], ["desc"]),
   );
 
   onMount(async () => {
@@ -45,14 +46,14 @@
       yearlyCards = fetchedYearlyCards || [];
       postings = assets as Posting[];
 
-      totalInvested = _.sumBy(yearlyCards, (c) => c.net_investment);
+      totalInvested = sumBy(yearlyCards, (c) => c.net_investment);
       const latest = sortedYearlyCards[0];
       if (latest) {
         latestFyInvestment = formatCurrency(latest.net_investment);
         latestFyLabel = `${latest.start_date.format("YYYY")}-${latest.end_date.format("YY")}`;
       }
 
-      hasData = !_.isEmpty(postings) || !_.isEmpty(yearlyCards);
+      hasData = !isEmpty(postings) || !isEmpty(yearlyCards);
       monthlyInvestmentTimelineLegends = buildMonthlyInvestmentSeries(postings).legends ?? [];
       yearlyInvestmentTimelineLegends = buildYearlyInvestmentSeries(yearlyCards).legends ?? [];
 

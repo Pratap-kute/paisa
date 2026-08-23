@@ -8,7 +8,6 @@
   } from "$lib/core/utils";
   import { accountTfIdf, theme as themeStore } from "$lib/state/store";
   import Badge from "$lib/components/ui/Badge.svelte";
-  import _ from "lodash";
 
   interface Props {
     open?: boolean;

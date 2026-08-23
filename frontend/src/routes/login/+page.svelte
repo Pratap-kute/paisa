@@ -5,15 +5,15 @@
   import Button from "$lib/components/ui/Button.svelte";
   import FormField from "$lib/components/layout/FormField.svelte";
   import Input from "$lib/components/ui/Input.svelte";
-  import _ from "lodash";
-
+import { isEmpty } from "$lib/core/collection";
+  
   let username = $state("");
   let password = $state("");
 
   let invalid = $state(false);
   let invalidErrorMessage = $state("");
 
-  let loginDisabled = $derived(_.isEmpty(username) || _.isEmpty(password));
+  let loginDisabled = $derived(isEmpty(username) || isEmpty(password));
 
   async function tryLogin() {
     if (loginDisabled) return;

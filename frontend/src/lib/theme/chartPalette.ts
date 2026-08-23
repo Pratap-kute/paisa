@@ -3,7 +3,6 @@
  * Engine-neutral color palettes and resolvers for financial visualizations.
  */
 
-import _ from "lodash";
 import { desaturateRgb, rgbToHex } from "../core/color";
 import { getColorPreference } from "../core/utils";
 
@@ -383,9 +382,8 @@ export function generateColorScheme(domain: string[]): CategoryColorResolver {
   let colors: string[];
   const n = domain.length;
 
-  if (_.every(domain, (d) => _.has(chartColors, d.toLowerCase()))) {
-    colors = _.map(
-      domain,
+  if (domain.every((d) => d.toLowerCase() in chartColors)) {
+    colors = domain.map(
       (d) => (chartColors as Record<string, string>)[d.toLowerCase()],
     );
   } else {
@@ -469,7 +467,10 @@ export function generateColorScheme(domain: string[]): CategoryColorResolver {
       } as Record<number, string[]>)[n] ?? [];
     } else {
       const normalize = 1 / (n - 1);
-      colors = _.map(_.range(0, n), (index) => sinebowColor(index * normalize));
+      colors = Array.from(
+        { length: n },
+        (_, index) => sinebowColor(index * normalize),
+      );
     }
   }
 
@@ -511,8 +512,7 @@ export function accountColorStyle(account: string) {
   let color = "hsl(0, 0%, 48%)";
 
   if (
-    _.includes(
-      ["assets", "expenses", "income", "liabilities", "equity"],
+    ["assets", "expenses", "income", "liabilities", "equity"].includes(
       normalized,
     )
   ) {

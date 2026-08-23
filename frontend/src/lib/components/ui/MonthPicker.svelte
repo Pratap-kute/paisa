@@ -1,7 +1,6 @@
 <script lang="ts">
   import { now } from "$lib/core/utils";
   import dayjs from "dayjs";
-  import _ from "lodash";
 
   interface Props {
     min: dayjs.Dayjs;
@@ -15,7 +14,12 @@
   let valueDate = $derived(dayjs(value, "YYYY-MM"));
   let selectedYear: number = $state(dayjs(value, "YYYY-MM").year());
   let allowedYears: number[] = $derived(
-    min && max ? _.range(min.year(), max.year() + 1) : []
+    min && max
+      ? Array.from(
+        { length: max.year() - min.year() + 1 },
+        (_, i) => min.year() + i,
+      )
+      : []
   );
 
   $effect(() => {

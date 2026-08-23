@@ -2,12 +2,13 @@
   import type { CapitalGain } from "$lib/core/utils";
   import CapitalGainCard from "$lib/components/finance/CapitalGainCard.svelte";
   import { ajax } from "$lib/core/utils";
-  import _ from "lodash";
+  import { uniq } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
+import { values } from "$lib/core/collection";
 
   let years: string[] = $state([]);
   let capitalGains: CapitalGain[] = $state([]);
@@ -19,15 +20,13 @@
     try {
       const { capital_gains: capital_gains } = await ajax("/api/capital_gains");
 
-      years = _.chain(capital_gains)
-        .values()
-        .flatMap((c) => _.keys(c.fy))
-        .uniq()
+      years = uniq(
+        Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),
+      )
         .sort()
-        .reverse()
-        .value();
+        .reverse();
 
-      capitalGains = _.values(capital_gains);
+      capitalGains = values(capital_gains);
     } finally {
       isLoading = false;
     }
