@@ -1,6 +1,6 @@
 import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { expect, test } from "vitest";
-import DialogHarness from "../../../test/components/DialogHarness.svelte";
+import DialogHarness from "../../../../tests/setup/components/DialogHarness.svelte";
 
 test("opens and closes dialog through the Paisa wrapper", async () => {
   const { getByRole, queryByRole, unmount } = render(DialogHarness);

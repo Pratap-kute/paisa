@@ -10,7 +10,7 @@ const coreProject = defineConfig({
     name: "core",
     environment: "happy-dom",
     include: ["tests/core/**/*.test.ts"],
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./tests/setup/setup.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov", "json-summary"],
@@ -55,7 +55,7 @@ const componentProject = defineConfig({
       },
     },
     include: ["src/**/*.component.test.ts"],
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./tests/setup/setup.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov", "json-summary"],
