@@ -1,5 +1,13 @@
 # CHANGELOG
 
+### 0.9.0 (2026-08-24)
+
+- **UI & Design Modernization**: Complete migration to a pure Tailwind CSS design system with curated HSL color tokens, rich glassmorphic styling, enhanced card ergonomics, and zero legacy Bulma/SCSS footprint.
+- **Unified ECharts Architecture**: Standardized, responsive ECharts surface component with declarative data adapters, custom canvas theme integration, and resilient resize observers across all financial dashboards.
+- **Svelte 5 Runes**: Full state reactivity upgrade (`$state`, `$derived`, `$props`, `$effect`) across all route layouts, components, and interactive drawers.
+- **Refined Navigation & Workflows**: Segmented boxed tabs, responsive filter toolbars, unified metric strips, sticky action footers, and full keyboard accessibility.
+- **CI & Stability**: Streamlined GitHub Actions test pipelines, stabilized Playwright E2E browser tests, and upgraded Deno/Go type diagnostics.
+
 ### 0.8.1 (2026-08-18)
 
 - **Transaction prediction:** Smart account suggestions in journal templates based on posting history
