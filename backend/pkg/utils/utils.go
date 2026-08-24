@@ -297,7 +297,13 @@ func Sha256(str string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+var ErrInvalidPath = errors.New("not allowed to refer path outside the base directory")
+
 func BuildSubPath(baseDirectory string, path string) (string, error) {
+	if filepath.IsAbs(path) {
+		return "", ErrInvalidPath
+	}
+
 	baseDirectory = filepath.Clean(baseDirectory)
 	fullpath := filepath.Clean(filepath.Join(baseDirectory, filepath.Clean(path)))
 
@@ -307,7 +313,36 @@ func BuildSubPath(baseDirectory string, path string) (string, error) {
 	}
 
 	if relpath == ".." || strings.HasPrefix(relpath, ".."+string(filepath.Separator)) {
-		return "", errors.New("not allowed to refer path outside the base directory")
+		return "", ErrInvalidPath
+	}
+
+	evalBase, err := filepath.EvalSymlinks(baseDirectory)
+	if err == nil {
+		target := fullpath
+		for {
+			evalTarget, err := filepath.EvalSymlinks(target)
+			if err == nil {
+				evalRel, err := filepath.Rel(evalBase, evalTarget)
+				if err != nil {
+					return "", err
+				}
+				if evalRel == ".." || strings.HasPrefix(evalRel, ".."+string(filepath.Separator)) {
+					return "", ErrInvalidPath
+				}
+				break
+			}
+			if !os.IsNotExist(err) {
+				return "", err
+			}
+			if target == baseDirectory {
+				break
+			}
+			parent := filepath.Dir(target)
+			if parent == target {
+				break
+			}
+			target = parent
+		}
 	}
 
 	return fullpath, nil

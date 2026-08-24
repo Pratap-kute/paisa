@@ -2,9 +2,11 @@ package server
 
 import (
 	"crypto/subtle"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -247,7 +249,14 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		c.JSON(200, GetFile(ledgerFile))
+		res, err := GetFile(ledgerFile)
+		if err != nil {
+			status, body := mapFileError(err)
+			c.JSON(status, body)
+			return
+		}
+
+		c.JSON(200, res)
 	})
 
 	router.POST("/api/editor/file/delete_backups", func(c *gin.Context) {
@@ -257,7 +266,14 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		c.JSON(200, DeleteBackups(ledgerFile))
+		res, err := DeleteBackups(ledgerFile)
+		if err != nil {
+			status, body := mapFileError(err)
+			c.JSON(status, body)
+			return
+		}
+
+		c.JSON(200, res)
 	})
 
 	router.POST("/api/editor/validate", func(c *gin.Context) {
@@ -296,7 +312,14 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		c.JSON(200, GetSheet(sheetFile))
+		res, err := GetSheet(sheetFile)
+		if err != nil {
+			status, body := mapFileError(err)
+			c.JSON(status, body)
+			return
+		}
+
+		c.JSON(200, res)
 	})
 
 	router.POST("/api/sheets/file/delete_backups", func(c *gin.Context) {
@@ -306,7 +329,14 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		c.JSON(200, DeleteSheetBackups(sheetFile))
+		res, err := DeleteSheetBackups(sheetFile)
+		if err != nil {
+			status, body := mapFileError(err)
+			c.JSON(status, body)
+			return
+		}
+
+		c.JSON(200, res)
 	})
 
 	router.POST("/api/sheets/save", func(c *gin.Context) {
@@ -451,4 +481,14 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		_, _, _ = rateLimiter.RateLimitCtx(c.Request.Context(), "user", 1)
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 	}
+}
+
+func mapFileError(err error) (int, gin.H) {
+	if errors.Is(err, utils.ErrInvalidPath) {
+		return http.StatusBadRequest, gin.H{"error": "Invalid file path"}
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return http.StatusNotFound, gin.H{"error": "File not found"}
+	}
+	return http.StatusInternalServerError, gin.H{"error": err.Error()}
 }

@@ -109,7 +109,7 @@ func computeHierarchyGraph(postings []posting.Posting) Graph {
 				top := to[0]
 				if top.Amount.GreaterThan(f.Amount.Neg()) {
 					addLink(f.Account, top.Account, f.Amount.Neg(), &nodes, &links)
-					top.Amount = top.Amount.Sub(f.Amount)
+					to[0].Amount = to[0].Amount.Add(f.Amount)
 					f.Amount = decimal.Zero
 				} else {
 					addLink(f.Account, top.Account, top.Amount, &nodes, &links)

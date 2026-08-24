@@ -12,7 +12,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -36,7 +35,12 @@ func GetSheets(db *gorm.DB) gin.H {
 
 	files := make([]*SheetFile, 0, len(paths))
 	for _, path := range paths {
-		files = append(files, readSheetFileWithVersions(dir, path))
+		sf, err := readSheetFileWithVersions(dir, path)
+		if err == nil {
+			files = append(files, sf)
+		} else {
+			log.Warn("Failed to read sheet file: ", path, err)
+		}
 	}
 
 	postings := query.Init(db).All()
@@ -45,25 +49,41 @@ func GetSheets(db *gorm.DB) gin.H {
 	return gin.H{"files": files, "postings": postings}
 }
 
-func GetSheet(file SheetFile) gin.H {
+func GetSheet(file SheetFile) (gin.H, error) {
 	dir := config.GetSheetDir()
-	return gin.H{"file": readSheetFile(dir, filepath.Join(dir, file.Name))}
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
+	sf, err := readSheetFile(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": sf}, nil
 }
 
-func DeleteSheetBackups(file SheetFile) gin.H {
+func DeleteSheetBackups(file SheetFile) (gin.H, error) {
 	dir := config.GetSheetDir()
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
 
 	if !config.GetConfig().Readonly {
-		versions, _ := filepath.Glob(filepath.Join(dir, file.Name+".backup.*"))
+		versions, _ := filepath.Glob(filepath.Join(filepath.Dir(filePath), filepath.Base(filePath)+".backup.*"))
 		for _, version := range versions {
 			err := os.Remove(version)
 			if err != nil {
-				log.Fatal(err)
+				return nil, err
 			}
 		}
 	}
 
-	return gin.H{"file": readSheetFileWithVersions(dir, filepath.Join(dir, file.Name))}
+	sf, err := readSheetFileWithVersions(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": sf}, nil
 }
 
 func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
@@ -116,50 +136,54 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 		return gin.H{"saved": false, "message": "Failed to write file"}
 	}
 
-	return gin.H{"saved": true, "file": readSheetFileWithVersions(dir, filePath)}
+	sf, _ := readSheetFileWithVersions(dir, filePath)
+	return gin.H{"saved": true, "file": sf}
 }
 
-func readSheetFile(dir string, path string) *SheetFile {
+func readSheetFile(dir string, path string) (*SheetFile, error) {
 	//nolint:gosec // user requested sheet file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	name, _ := filepath.Rel(dir, path)
+	name, err := filepath.Rel(dir, path)
+	if err != nil {
+		return nil, err
+	}
 
 	return &SheetFile{
 		Name:    name,
 		Content: string(content),
-	}
+	}, nil
 }
 
-func readSheetFileWithVersions(dir string, path string) *SheetFile {
+func readSheetFileWithVersions(dir string, path string) (*SheetFile, error) {
 	//nolint:gosec // user requested sheet file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	versions, _ := filepath.Glob(filepath.Join(filepath.Dir(path), filepath.Base(path)+".backup.*"))
-	versionPaths := lo.Map(versions, func(path string, _ int) string {
-		name, err := filepath.Rel(dir, path)
+	versionPaths := make([]string, 0, len(versions))
+	for _, version := range versions {
+		name, err := filepath.Rel(dir, version)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
-
-		return name
-	})
+		versionPaths = append(versionPaths, name)
+	}
 	sort.Sort(sort.Reverse(sort.StringSlice(versionPaths)))
 
 	name, err := filepath.Rel(dir, path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &SheetFile{
 		Name:     name,
 		Content:  string(content),
 		Versions: versionPaths,
-	}
+	}, nil
 }

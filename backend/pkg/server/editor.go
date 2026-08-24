@@ -14,7 +14,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -44,7 +43,12 @@ func GetFiles(db *gorm.DB) gin.H {
 	files := make([]*LedgerFile, 0, len(paths))
 
 	for _, path = range paths {
-		files = append(files, readLedgerFileWithVersions(dir, path))
+		lf, err := readLedgerFileWithVersions(dir, path)
+		if err == nil {
+			files = append(files, lf)
+		} else {
+			log.Warn("Failed to read ledger file: ", path, err)
+		}
 	}
 
 	return gin.H{"files": files, "accounts": accounts, "payees": payees, "commodities": commodities}
@@ -77,27 +81,43 @@ func ensureJournalFile(path string, readonly bool) error {
 	return file.Close()
 }
 
-func GetFile(file LedgerFile) gin.H {
+func GetFile(file LedgerFile) (gin.H, error) {
 	path := config.GetJournalPath()
 	dir := filepath.Dir(path)
-	return gin.H{"file": readLedgerFile(dir, filepath.Join(dir, file.Name))}
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
+	lf, err := readLedgerFile(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": lf}, nil
 }
 
-func DeleteBackups(file LedgerFile) gin.H {
+func DeleteBackups(file LedgerFile) (gin.H, error) {
 	path := config.GetJournalPath()
 	dir := filepath.Dir(path)
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
 
 	if !config.GetConfig().Readonly {
-		versions, _ := filepath.Glob(filepath.Join(dir, file.Name+".backup.*"))
+		versions, _ := filepath.Glob(filepath.Join(filepath.Dir(filePath), filepath.Base(filePath)+".backup.*"))
 		for _, version := range versions {
 			err := os.Remove(version)
 			if err != nil {
-				log.Fatal(err)
+				return nil, err
 			}
 		}
 	}
 
-	return gin.H{"file": readLedgerFileWithVersions(dir, filepath.Join(dir, file.Name))}
+	lf, err := readLedgerFileWithVersions(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": lf}, nil
 }
 
 func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
@@ -162,7 +182,8 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 
 	Sync(db, SyncRequest{Journal: true})
 
-	return gin.H{"errors": errors, "saved": true, "file": readLedgerFileWithVersions(dir, filePath)}
+	lf, _ := readLedgerFileWithVersions(dir, filePath)
+	return gin.H{"errors": errors, "saved": true, "file": lf}
 }
 
 func ValidateFile(file LedgerFile) gin.H {
@@ -191,47 +212,50 @@ func validateFile(file LedgerFile) ([]ledger.LedgerFileError, string, error) {
 	return ledger.Cli().ValidateFile(tmpfile.Name())
 }
 
-func readLedgerFile(dir string, path string) *LedgerFile {
+func readLedgerFile(dir string, path string) (*LedgerFile, error) {
 	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	name, _ := filepath.Rel(dir, path)
+	name, err := filepath.Rel(dir, path)
+	if err != nil {
+		return nil, err
+	}
 
 	return &LedgerFile{
 		Name:    name,
 		Content: string(content),
-	}
+	}, nil
 }
 
-func readLedgerFileWithVersions(dir string, path string) *LedgerFile {
+func readLedgerFileWithVersions(dir string, path string) (*LedgerFile, error) {
 	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	versions, _ := filepath.Glob(filepath.Join(filepath.Dir(path), filepath.Base(path)+".backup.*"))
-	versionPaths := lo.Map(versions, func(path string, _ int) string {
-		name, err := filepath.Rel(dir, path)
+	versionPaths := make([]string, 0, len(versions))
+	for _, version := range versions {
+		name, err := filepath.Rel(dir, version)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
-
-		return name
-	})
+		versionPaths = append(versionPaths, name)
+	}
 	sort.Sort(sort.Reverse(sort.StringSlice(versionPaths)))
 
 	name, err := filepath.Rel(dir, path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &LedgerFile{
 		Name:     name,
 		Content:  string(content),
 		Versions: versionPaths,
-	}
+	}, nil
 }
