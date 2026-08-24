@@ -36,6 +36,11 @@ func setupHardenedTestRouter(t *testing.T) (*gin.Engine, *gorm.DB) {
 	cfgContent := fmt.Sprintf("journal_path: %s\ndb_path: %s\nlocale: en-US\n", journalPath, dbPath)
 	require.NoError(t, os.WriteFile(cfgPath, []byte(cfgContent), 0o600))
 	require.NoError(t, config.LoadConfig([]byte(cfgContent), cfgPath))
+	t.Cleanup(func() {
+		defaultJournal := filepath.Join(os.TempDir(), "paisa-test-journal.ledger")
+		_ = os.WriteFile(defaultJournal, []byte(""), 0o600)
+		_ = config.LoadConfig([]byte(fmt.Sprintf("journal_path: %s\n", defaultJournal)), "")
+	})
 
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	require.NoError(t, err)

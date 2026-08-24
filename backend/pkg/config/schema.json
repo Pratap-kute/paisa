@@ -710,12 +710,11 @@
             "type": "string",
             "ui:widget": "password",
             "ui:order": 2,
-            "description": "Password for the account",
-            "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+            "description": "Password for the account"
           }
         },
         "ui:header": "username",
-        "required": ["username", "password"],
+        "required": ["username"],
         "additionalProperties": false
       }
     },

@@ -282,15 +282,17 @@ accounts:
     # Optional, use the UI to select the icon.
 
 ## List of user accounts.
-# If the list is empty, then no authentication will be performed
+# If the list is empty, then no authentication will be performed.
+# Remote/network-exposed Paisa instances should always be hosted behind HTTPS.
+# Passwords in UI configuration are stored using Argon2id ($argon2id$...).
+# Legacy sha256:... credentials remain fully backwards-compatible and are
+# opportunistically upgraded to Argon2id upon successful authentication.
 #
 # OPTIONAL, DEFAULT: []
 user_accounts:
   - username: john.doe
-    # Required
-    password: sha256:a96dc73edd639b1c711b006e714bd2ff5bf5c1aecd77d0b3c3370403c66d58e5
-    # Required, password hashed twice with sha256, then prefixed sha256:
-    # echo -n 'secret' | sha256sum | head -c 64 | sha256sum | head -c 64
+    # Required. When updated via the UI or API, password values are hashed with Argon2id.
+    password: $argon2id$v=19$m=65536,t=3,p=2$c2FsdHNhbHRzYWx0c2FsdA$aGFzaGhhc2hoYXNoaGFzaGhhc2hoYXNoaGFzaGhhc2g
 
 ## List of credit cards
 # OPTIONAL, DEFAULT: []

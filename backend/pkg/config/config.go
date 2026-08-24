@@ -14,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"dario.cat/mergo"
+	"github.com/ananthakumaran/paisa/pkg/auth"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 
 	"gopkg.in/yaml.v3"
@@ -351,8 +352,29 @@ func SaveConfig(content []byte) error {
 	}
 
 	configMu.RLock()
+	existingAccounts := make(map[string]string)
+	for _, acc := range config.UserAccounts {
+		existingAccounts[acc.Username] = acc.Password
+	}
 	cp := configPath
 	configMu.RUnlock()
+
+	for i := range newConfig.UserAccounts {
+		acc := &newConfig.UserAccounts[i]
+		if acc.Password == "" {
+			if existingPw, ok := existingAccounts[acc.Username]; ok {
+				acc.Password = existingPw
+			}
+		} else if strings.HasPrefix(acc.Password, "sha256:") || strings.HasPrefix(acc.Password, "$argon2id$") {
+			// Already a valid verifier format, keep as is
+		} else {
+			hashed, hashErr := auth.HashPassword(acc.Password)
+			if hashErr != nil {
+				return hashErr
+			}
+			acc.Password = hashed
+		}
+	}
 
 	yamlContent, err := yaml.Marshal(newConfig)
 	if err != nil {
@@ -369,6 +391,63 @@ func SaveConfig(content []byte) error {
 	location = newLocation
 	configMu.Unlock()
 
+	return nil
+}
+
+func GetPublicConfig() Config {
+	configMu.RLock()
+	defer configMu.RUnlock()
+	publicCfg := config
+	if len(publicCfg.UserAccounts) > 0 {
+		publicCfg.UserAccounts = make([]UserAccount, len(config.UserAccounts))
+		for i, acc := range config.UserAccounts {
+			publicCfg.UserAccounts[i] = UserAccount{
+				Username: acc.Username,
+				Password: "", // Redact verifier
+			}
+		}
+	}
+	return publicCfg
+}
+
+func UpgradeUserPassword(username string, passwordToken string) error {
+	configMu.Lock()
+	defer configMu.Unlock()
+
+	accountIdx := -1
+	for i, acc := range config.UserAccounts {
+		if acc.Username == username {
+			accountIdx = i
+			break
+		}
+	}
+	if accountIdx == -1 {
+		return fmt.Errorf("user %s not found in configuration", username)
+	}
+
+	newHash, err := auth.HashPassword(passwordToken)
+	if err != nil {
+		return err
+	}
+
+	newConfig := config
+	newAccounts := make([]UserAccount, len(config.UserAccounts))
+	copy(newAccounts, config.UserAccounts)
+	newAccounts[accountIdx].Password = newHash
+	newConfig.UserAccounts = newAccounts
+
+	yamlContent, err := yaml.Marshal(newConfig)
+	if err != nil {
+		return err
+	}
+
+	if err := atomicWriteFile(configPath, yamlContent, 0o600); err != nil {
+		log.Warnf("Failed to persist upgraded credential for %s: %v", username, err)
+		return err
+	}
+
+	config = newConfig
+	log.Infof("Successfully upgraded credential to Argon2id for user %s", username)
 	return nil
 }
 

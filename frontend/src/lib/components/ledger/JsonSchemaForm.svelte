@@ -143,8 +143,9 @@ import { sortBy } from "$lib/core/collection";
           {required}
           onchange={async () => {
             if (rawValue?.trim()) {
-              const inner = await sha256Hex(rawValue);
-              value = "sha256:" + (await sha256Hex(inner));
+              value = await sha256Hex(rawValue);
+            } else {
+              value = "";
             }
           }}
         />

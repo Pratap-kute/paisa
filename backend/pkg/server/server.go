@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/auth"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/generator"
 	"github.com/ananthakumaran/paisa/pkg/ledger"
@@ -116,7 +117,7 @@ func registerConfigAndInitRoutes(router *gin.Engine, db *gorm.DB) {
 			n := utils.Now()
 			now = &n
 		}
-		c.JSON(200, gin.H{"config": config.GetConfig(), "accounts": accounting.AllAccounts(db), "now": now, "schema": config.GetSchema()})
+		c.JSON(200, gin.H{"config": config.GetPublicConfig(), "accounts": accounting.AllAccounts(db), "now": now, "schema": config.GetSchema()})
 	})
 
 	router.POST("/api/config", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
@@ -573,7 +574,7 @@ func Listen(db *gorm.DB, host string, port int) {
 }
 
 func TokenAuthMiddleware() gin.HandlerFunc {
-	store, err := memstore.NewCtx(10)
+	store, err := memstore.NewCtx(1000)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -595,29 +596,44 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		_, detail, _ := rateLimiter.RateLimitCtx(c.Request.Context(), "user", 0)
+		authHeader := c.Request.Header.Get("X-Auth")
+		tokens := strings.SplitN(authHeader, ":", 2)
+		username := ""
+		if len(tokens) > 0 {
+			username = tokens[0]
+		}
+		limiterKey := fmt.Sprintf("auth:%s:%s", c.ClientIP(), username)
+
+		_, detail, _ := rateLimiter.RateLimitCtx(c.Request.Context(), limiterKey, 0)
 		if detail.Remaining <= 0 {
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
+			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "too_many_requests", "message": "Too many failed login attempts, please try again later"})
 			return
 		}
 
-		tokens := strings.SplitN(c.Request.Header.Get("X-Auth"), ":", 2)
 		if len(tokens) != 2 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid Token"})
+			_, _, _ = rateLimiter.RateLimitCtx(c.Request.Context(), limiterKey, 1)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized", "message": "Invalid username or password"})
 			return
 		}
 
-		hashed := utils.Sha256(tokens[1])
+		suppliedToken := tokens[1]
 		for _, userAccount := range userAccounts {
-			if subtle.ConstantTimeCompare([]byte(userAccount.Username), []byte(tokens[0])) == 1 &&
-				subtle.ConstantTimeCompare([]byte(userAccount.Password), []byte("sha256:"+hashed)) == 1 {
-				c.Next()
-				return
+			if subtle.ConstantTimeCompare([]byte(userAccount.Username), []byte(username)) == 1 {
+				valid, needsRehash, _ := auth.VerifyPassword(userAccount.Password, suppliedToken)
+				if valid {
+					if needsRehash {
+						go func(uname, token string) {
+							_ = config.UpgradeUserPassword(uname, token)
+						}(username, suppliedToken)
+					}
+					c.Next()
+					return
+				}
 			}
 		}
 
-		_, _, _ = rateLimiter.RateLimitCtx(c.Request.Context(), "user", 1)
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
+		_, _, _ = rateLimiter.RateLimitCtx(c.Request.Context(), limiterKey, 1)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized", "message": "Invalid username or password"})
 	}
 }
 
