@@ -1,4 +1,4 @@
-import { isAbortError, normalizeApiError, type AppApiError } from "./errors";
+import { type AppApiError, isAbortError, normalizeApiError } from "./errors";
 
 export interface AsyncState<TArgs, TResult> {
   readonly data: TResult;
@@ -76,7 +76,7 @@ export function createAsyncState<TArgs = void, TResult = unknown>(
     return undefined;
   }
 
-  async function refresh(): Promise<TResult | undefined> {
+  function refresh(): Promise<TResult | undefined> {
     return run(lastArgs as TArgs);
   }
 

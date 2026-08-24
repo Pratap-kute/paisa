@@ -127,7 +127,9 @@ function buildFinancialHierarchyLayout(
           formatter: (params: { name?: string; value?: number }) => {
             if (!params.name) return "";
             if (typeof params.value === "number" && params.value > 0) {
-              return `${params.name}\n${chartFormatters.currency(params.value)}`;
+              return `${params.name}\n${
+                chartFormatters.currency(params.value)
+              }`;
             }
             return params.name;
           },

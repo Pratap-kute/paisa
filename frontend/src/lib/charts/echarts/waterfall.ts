@@ -47,8 +47,12 @@ function buildIncomeStatementWaterfallLayout(
       confine: true,
       backgroundColor: theme?.tooltipSurfaceColor,
       borderColor: theme?.borderColor,
-      extraCssText: "max-width: 340px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border-radius: 8px;",
-      textStyle: { color: theme?.tooltipTextColor ?? theme?.textColor, fontSize: 12 },
+      extraCssText:
+        "max-width: 340px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border-radius: 8px;",
+      textStyle: {
+        color: theme?.tooltipTextColor ?? theme?.textColor,
+        fontSize: 12,
+      },
       formatter: (params: { seriesName?: string; dataIndex?: number }) => {
         if (params.seriesName === "Base") return "";
         const step = data.steps[params.dataIndex ?? 0];
@@ -61,22 +65,30 @@ function buildIncomeStatementWaterfallLayout(
         ];
 
         if (step.breakdown && step.breakdown.length > 0) {
-          lines.push("<hr style='border: 0; border-top: 1px solid rgba(148, 163, 184, 0.2); margin: 6px 0;'/>");
-          const sorted = [...step.breakdown].sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+          lines.push(
+            "<hr style='border: 0; border-top: 1px solid rgba(148, 163, 184, 0.2); margin: 6px 0;'/>",
+          );
+          const sorted = [...step.breakdown].sort((a, b) =>
+            Math.abs(b.value) - Math.abs(a.value)
+          );
           const maxVisible = 6;
           const visible = sorted.slice(0, maxVisible);
           const remaining = sorted.slice(maxVisible);
 
           for (const row of visible) {
             lines.push(
-              `${row.account}: <strong>${chartFormatters.currency(row.value)}</strong>`
+              `${row.account}: <strong>${
+                chartFormatters.currency(row.value)
+              }</strong>`,
             );
           }
 
           if (remaining.length > 0) {
             const remainingSum = remaining.reduce((s, r) => s + r.value, 0);
             lines.push(
-              `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} more accounts: <strong>${chartFormatters.currency(remainingSum)}</strong></span>`
+              `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} more accounts: <strong>${
+                chartFormatters.currency(remainingSum)
+              }</strong></span>`,
             );
           }
         }

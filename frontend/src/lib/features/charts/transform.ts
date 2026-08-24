@@ -1,8 +1,6 @@
 import type {
   DtoAssetsBalanceResponse,
-  DtoBudgetsSummaryResponse,
   DtoExpenseResponse,
-  DtoIncomeResponse,
   DtoNetworthTimelineItemResponse,
 } from "$lib/api";
 

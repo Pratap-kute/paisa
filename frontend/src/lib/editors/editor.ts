@@ -39,14 +39,21 @@ async function lint(editor: EditorView): Promise<Diagnostic[]> {
   });
 
   editorState.update((current) =>
-    assign({}, current, { errors: response.errors || [], output: response.output })
+    assign({}, current, {
+      errors: response.errors || [],
+      output: response.output,
+    })
   );
 
   return map(response.errors || [], (error) => {
     const lineNum = error.line_from || error.line || 1;
     const safeLineNum = Math.min(Math.max(1, lineNum), doc.lines);
     const lineFrom = doc.line(safeLineNum);
-    const lineTo = doc.line(error.line_to ? Math.min(Math.max(1, error.line_to), doc.lines) : safeLineNum);
+    const lineTo = doc.line(
+      error.line_to
+        ? Math.min(Math.max(1, error.line_to), doc.lines)
+        : safeLineNum,
+    );
     return {
       message: error.message,
       severity: "error",

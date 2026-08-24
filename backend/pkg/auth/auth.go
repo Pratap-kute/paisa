@@ -8,8 +8,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"strings"
 	"golang.org/x/crypto/argon2"
+	"strings"
 )
 
 var (

@@ -217,7 +217,9 @@ test("theme toggle switches document theme between light and dark", async ({ pag
 test("doctor diagnostics page reports system status", async ({ page }) => {
   await page.goto("/more/doctor");
   await expect(
-    page.getByText(/(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i),
+    page.getByText(
+      /(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i,
+    ),
   ).toBeVisible();
   await assertNavigationVisible(page);
 });

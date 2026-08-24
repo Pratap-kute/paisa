@@ -100,19 +100,17 @@ function tooltipFormatter(
     : undefined;
   const header = first?.axisValueLabel ?? point?.period ?? "";
   const rawRows: Array<[string, number, PeriodValueFormat?]> =
-    point?.tooltipRows?.length
-      ? point.tooltipRows
-      : items.map((item) => {
-        const p = item as { seriesName?: string; value?: unknown };
-        const raw = Array.isArray(p.value)
-          ? p.value[p.value.length - 1]
-          : p.value;
-        return [
-          p.seriesName ?? "",
-          Number(raw ?? 0),
-          data.valueFormat,
-        ];
-      });
+    point?.tooltipRows?.length ? point.tooltipRows : items.map((item) => {
+      const p = item as { seriesName?: string; value?: unknown };
+      const raw = Array.isArray(p.value)
+        ? p.value[p.value.length - 1]
+        : p.value;
+      return [
+        p.seriesName ?? "",
+        Number(raw ?? 0),
+        data.valueFormat,
+      ];
+    });
 
   const maxVisible = 8;
   let formattedRows: string[] = [];
@@ -123,18 +121,22 @@ function tooltipFormatter(
     const remaining = sorted.slice(maxVisible);
 
     formattedRows = visible.map(([label, value, format]) =>
-      `${label}: <strong>${formatValue(value, format ?? data.valueFormat)}</strong>`
+      `${label}: <strong>${
+        formatValue(value, format ?? data.valueFormat)
+      }</strong>`
     );
 
     const remainingSum = remaining.reduce((s, r) => s + r[1], 0);
     formattedRows.push(
       `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} other items: <strong>${
         formatValue(remainingSum, data.valueFormat)
-      }</strong></span>`
+      }</strong></span>`,
     );
   } else {
     formattedRows = rawRows.map(([label, value, format]) =>
-      `${label}: <strong>${formatValue(value, format ?? data.valueFormat)}</strong>`
+      `${label}: <strong>${
+        formatValue(value, format ?? data.valueFormat)
+      }</strong>`
     );
   }
 

@@ -26,9 +26,10 @@ export function parseJsonWithDates(text: string): unknown {
     if (
       isString(value) &&
       /Date|date|time|now/.test(key) &&
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/.test(
-        value,
-      )
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/
+        .test(
+          value,
+        )
     ) {
       return dayjs(value.substring(0, 19));
     }
@@ -48,8 +49,8 @@ function wrapResponse(response: Response): Response {
       if (prop === "clone") {
         return () => wrapResponse(target.clone());
       }
-      const val = (target as any)[prop];
-      return typeof val === "function" ? val.bind(target) : val;
+      const val = (target as unknown as Record<string | symbol, unknown>)[prop];
+      return typeof val === "function" ? (val as (...args: unknown[]) => unknown).bind(target) : val;
     },
   });
 }
@@ -64,10 +65,13 @@ export function createApiClient(options: ClientOptions = {}): Api<unknown> {
     (typeof fetch !== "undefined" ? fetch : undefined);
 
   const customFetch = baseFetch
-    ? async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-        const res = await baseFetch(input, init);
-        return wrapResponse(res);
-      }
+    ? async (
+      input: RequestInfo | URL,
+      init?: RequestInit,
+    ): Promise<Response> => {
+      const res = await baseFetch(input, init);
+      return wrapResponse(res);
+    }
     : undefined;
 
   const httpClient = new HttpClient({

@@ -62,7 +62,7 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 
 		var account, commodity string
 		var amount decimal.Decimal
-		isForecast := (i % 50 == 0) // occasional forecast
+		isForecast := (i%50 == 0) // occasional forecast
 
 		switch i % 4 {
 		case 0:

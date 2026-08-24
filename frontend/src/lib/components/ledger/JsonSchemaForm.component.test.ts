@@ -60,7 +60,8 @@ test("normalizes a missing optional array to an empty list", async () => {
 });
 
 test("normalizes an empty price widget value to an object", async () => {
-  const providersSpy = vi.spyOn(api.price, "getPriceProviders").mockResolvedValue({ providers: [] });
+  const providersSpy = vi.spyOn(api.price, "getPriceProviders")
+    .mockResolvedValue({ providers: [] });
 
   let value: Record<string, unknown> | null = null;
   const schema: JSONSchema7 & { "ui:widget"?: string } = {

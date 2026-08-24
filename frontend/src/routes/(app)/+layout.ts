@@ -9,7 +9,7 @@ export const load = (async ({ fetch }) => {
   if (now) {
     setNow(dayjs(now));
   }
-  globalThis.USER_CONFIG = config as any;
+  globalThis.USER_CONFIG = config as unknown as UserConfig;
   configUpdated();
   return {};
 }) satisfies LayoutLoad;

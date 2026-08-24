@@ -4,9 +4,11 @@ import { ApiError } from "$lib/api/errors";
 
 describe("Request Lifecycle & AsyncState", () => {
   it("transitions loading -> success", async () => {
-    const fetcher = vi.fn().mockImplementation(async (id: string, _signal: AbortSignal) => {
-      return { id, name: "Item " + id };
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (id: string, _signal: AbortSignal) => {
+        return Promise.resolve({ id, name: "Item " + id });
+      },
+    );
 
     const state = createAsyncState(fetcher, null);
     expect(state.loading).toBe(false);
@@ -23,9 +25,11 @@ describe("Request Lifecycle & AsyncState", () => {
   });
 
   it("transitions loading -> error on failure", async () => {
-    const fetcher = vi.fn().mockImplementation(async (_args: void, _signal: AbortSignal) => {
-      throw new ApiError(500, "Internal Error");
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (_args: void, _signal: AbortSignal) => {
+        return Promise.reject(new ApiError(500, "Internal Error"));
+      },
+    );
 
     const state = createAsyncState(fetcher, null);
     await expect(state.run()).rejects.toMatchObject({
@@ -44,14 +48,18 @@ describe("Request Lifecycle & AsyncState", () => {
   it("passes AbortSignal to fetcher and aborts on cancel()", async () => {
     let capturedSignal: AbortSignal | undefined;
 
-    const fetcher = vi.fn().mockImplementation(async (_args: void, signal: AbortSignal) => {
-      capturedSignal = signal;
-      return new Promise((resolve, reject) => {
-        signal.addEventListener("abort", () => {
-          reject(new DOMException("The operation was aborted.", "AbortError"));
+    const fetcher = vi.fn().mockImplementation(
+      (_args: void, signal: AbortSignal) => {
+        capturedSignal = signal;
+        return new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => {
+            reject(
+              new DOMException("The operation was aborted.", "AbortError"),
+            );
+          });
         });
-      });
-    });
+      },
+    );
 
     const state = createAsyncState(fetcher, null);
     const runPromise = state.run();
@@ -73,13 +81,19 @@ describe("Request Lifecycle & AsyncState", () => {
     let resolveFirst!: (val: string) => void;
     let resolveSecond!: (val: string) => void;
 
-    const fetcher = vi.fn().mockImplementation(async (query: string, _signal: AbortSignal) => {
-      if (query === "first") {
-        return new Promise<string>((resolve) => { resolveFirst = resolve; });
-      } else {
-        return new Promise<string>((resolve) => { resolveSecond = resolve; });
-      }
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (query: string, _signal: AbortSignal) => {
+        if (query === "first") {
+          return new Promise<string>((resolve) => {
+            resolveFirst = resolve;
+          });
+        } else {
+          return new Promise<string>((resolve) => {
+            resolveSecond = resolve;
+          });
+        }
+      },
+    );
 
     const state = createAsyncState(fetcher, "");
 
@@ -105,13 +119,19 @@ describe("Request Lifecycle & AsyncState", () => {
     let rejectFirst!: (err: Error) => void;
     let resolveSecond!: (val: string) => void;
 
-    const fetcher = vi.fn().mockImplementation(async (query: string, _signal: AbortSignal) => {
-      if (query === "first") {
-        return new Promise<string>((_res, rej) => { rejectFirst = rej; });
-      } else {
-        return new Promise<string>((res) => { resolveSecond = res; });
-      }
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (query: string, _signal: AbortSignal) => {
+        if (query === "first") {
+          return new Promise<string>((_res, rej) => {
+            rejectFirst = rej;
+          });
+        } else {
+          return new Promise<string>((res) => {
+            resolveSecond = res;
+          });
+        }
+      },
+    );
 
     const state = createAsyncState(fetcher, "");
 
@@ -133,12 +153,14 @@ describe("Request Lifecycle & AsyncState", () => {
 
   it("retains existing data on refresh failure", async () => {
     let shouldFail = false;
-    const fetcher = vi.fn().mockImplementation(async (_args: void, _signal: AbortSignal) => {
-      if (shouldFail) {
-        throw new ApiError(503, "Service Unavailable");
-      }
-      return ["Initial Data"];
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (_args: void, _signal: AbortSignal) => {
+        if (shouldFail) {
+          return Promise.reject(new ApiError(503, "Service Unavailable"));
+        }
+        return Promise.resolve(["Initial Data"]);
+      },
+    );
 
     const state = createAsyncState(fetcher, [] as string[]);
     await state.run();
@@ -155,9 +177,11 @@ describe("Request Lifecycle & AsyncState", () => {
   });
 
   it("cancel followed immediately by run works cleanly", async () => {
-    const fetcher = vi.fn().mockImplementation(async (val: number, _signal: AbortSignal) => {
-      return val * 2;
-    });
+    const fetcher = vi.fn().mockImplementation(
+      (val: number, _signal: AbortSignal) => {
+        return Promise.resolve(val * 2);
+      },
+    );
 
     const state = createAsyncState(fetcher, 0);
     state.run(5);
@@ -184,14 +208,16 @@ describe("MutationState Lifecycle", () => {
       message: string;
     }
 
-    const mutator = vi.fn().mockImplementation(async (payload: SavePayload): Promise<SaveResult> => {
-      return {
-        saved: true,
-        synced: false,
-        errors: ["Sync skipped"],
-        message: `Saved ${payload.name}`,
-      };
-    });
+    const mutator = vi.fn().mockImplementation(
+      (payload: SavePayload): Promise<SaveResult> => {
+        return Promise.resolve({
+          saved: true,
+          synced: false,
+          errors: ["Sync skipped"],
+          message: `Saved ${payload.name}`,
+        });
+      },
+    );
 
     const mutation = createMutation(mutator);
     expect(mutation.saving).toBe(false);
@@ -231,8 +257,8 @@ describe("MutationState Lifecycle", () => {
   });
 
   it("distinguishes mutation network failure from domain partial success", async () => {
-    const networkFailMutator = vi.fn().mockImplementation(async () => {
-      throw new TypeError("Failed to fetch");
+    const networkFailMutator = vi.fn().mockImplementation(() => {
+      return Promise.reject(new TypeError("Failed to fetch"));
     });
 
     const mutation = createMutation(networkFailMutator);

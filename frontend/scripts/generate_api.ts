@@ -35,7 +35,9 @@ if (isCheck) {
     await fmtCmd.output();
 
     if (!fs.existsSync(targetFile)) {
-      console.error("Error: Generated API client does not exist at: " + targetFile);
+      console.error(
+        "Error: Generated API client does not exist at: " + targetFile,
+      );
       console.error("Run 'deno task api:generate' to generate it.");
       Deno.exit(1);
     }
@@ -44,7 +46,9 @@ if (isCheck) {
     const newContent = fs.readFileSync(tempFile, "utf-8");
 
     if (currentContent !== newContent) {
-      console.error("Error: Generated API client is out of date with backend Swagger specification.");
+      console.error(
+        "Error: Generated API client is out of date with backend Swagger specification.",
+      );
       console.error("Please run: deno task api:generate");
       Deno.exit(1);
     }
