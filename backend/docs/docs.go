@@ -2441,7 +2441,7 @@ const docTemplate = `{
                 },
                 "timeline": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -3297,7 +3297,7 @@ const docTemplate = `{
                 },
                 "schema": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },

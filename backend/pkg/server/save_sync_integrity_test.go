@@ -153,7 +153,7 @@ func TestSaveFile_TempFileCleanup(t *testing.T) {
 	db, dir, _ := setupIntegrityTestEnv(t)
 
 	// Attempt multiple saves (some successful, some invalid)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		_ = SaveFile(db, LedgerFile{
 			Name:    "main.ledger",
 			Content: fmt.Sprintf("invalid syntax line %d", i),

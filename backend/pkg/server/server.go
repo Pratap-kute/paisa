@@ -49,7 +49,7 @@ func MaxBodySize(limitBytes int64) gin.HandlerFunc {
 }
 
 func SafeRecovery() gin.HandlerFunc {
-	return gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
+	return gin.CustomRecovery(func(c *gin.Context, recovered any) {
 		log.Errorf("HTTP panic recovered: %v", recovered)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   "internal_server_error",

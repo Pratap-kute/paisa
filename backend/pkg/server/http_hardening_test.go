@@ -60,7 +60,7 @@ func TestRouting_API404(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, w.Code)
 	assert.Contains(t, w.Header().Get("Content-Type"), "application/json")
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	require.NoError(t, err)
 	assert.Equal(t, "not_found", resp["error"])
@@ -137,7 +137,7 @@ func TestPanicRecovery_KeepsServerAlive(t *testing.T) {
 	router.ServeHTTP(w1, req1)
 
 	assert.Equal(t, http.StatusInternalServerError, w1.Code)
-	var resp map[string]interface{}
+	var resp map[string]any
 	err := json.Unmarshal(w1.Body.Bytes(), &resp)
 	require.NoError(t, err)
 	assert.Equal(t, "internal_server_error", resp["error"])

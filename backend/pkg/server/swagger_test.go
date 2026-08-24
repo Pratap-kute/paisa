@@ -19,11 +19,11 @@ import (
 )
 
 type swaggerDoc struct {
-	Swagger             string                            `json:"swagger"`
-	Info                map[string]interface{}            `json:"info"`
-	BasePath            string                            `json:"basePath"`
-	Paths               map[string]map[string]interface{} `json:"paths"`
-	Definitions         map[string]interface{}            `json:"definitions"`
+	Swagger             string                    `json:"swagger"`
+	Info                map[string]any            `json:"info"`
+	BasePath            string                    `json:"basePath"`
+	Paths               map[string]map[string]any `json:"paths"`
+	Definitions         map[string]any            `json:"definitions"`
 	SecurityDefinitions map[string]struct {
 		Type        string `json:"type"`
 		Name        string `json:"name"`

@@ -34,10 +34,8 @@ default_currency: USD
 	stop := make(chan struct{})
 
 	// 5 reader goroutines
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 5 {
+		wg.Go(func() {
 			for {
 				select {
 				case <-stop:
@@ -66,15 +64,15 @@ default_currency: USD
 					assert.Contains(t, []string{"INR", "USD"}, curr)
 				}
 			}
-		}()
+		})
 	}
 
 	// 2 writer goroutines toggling between configA and configB
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
-			for j := 0; j < 50; j++ {
+			for j := range 50 {
 				var err error
 				if (j+id)%2 == 0 {
 					err = LoadConfig([]byte(configA), filepath.Join(tempDir, "paisa.yaml"))
@@ -106,7 +104,7 @@ default_currency: EUR
 	require.NoError(t, LoadConfig([]byte(cfgContent), configPath))
 
 	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()

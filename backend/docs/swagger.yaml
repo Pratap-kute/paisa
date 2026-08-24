@@ -426,7 +426,7 @@ definitions:
       summary:
         $ref: '#/definitions/dto.GoalSummaryResponse'
       timeline:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   dto.GoalSummariesResponse:
@@ -985,7 +985,7 @@ definitions:
       now:
         type: string
       schema:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
     type: object
   dto.RecurringTransactionsResponse:

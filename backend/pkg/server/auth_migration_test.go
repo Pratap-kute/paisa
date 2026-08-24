@@ -274,7 +274,7 @@ func TestAuth_ConfigRoundtripPreservesPassword(t *testing.T) {
 	require.Equal(t, http.StatusOK, w1.Code)
 
 	var getResp struct {
-		Config map[string]interface{} `json:"config"`
+		Config map[string]any `json:"config"`
 	}
 	err = json.Unmarshal(w1.Body.Bytes(), &getResp)
 	require.NoError(t, err)
@@ -324,14 +324,14 @@ func TestAuth_ConfigPasswordChange(t *testing.T) {
 	require.Equal(t, http.StatusOK, wGet.Code)
 
 	var getResp struct {
-		Config map[string]interface{} `json:"config"`
+		Config map[string]any `json:"config"`
 	}
 	err = json.Unmarshal(wGet.Body.Bytes(), &getResp)
 	require.NoError(t, err)
 
 	// Change user1's password to new_pass_1
 	newToken1 := computeClientToken("new_pass_1")
-	getResp.Config["user_accounts"] = []map[string]interface{}{
+	getResp.Config["user_accounts"] = []map[string]any{
 		{"username": "user1", "password": newToken1},
 		{"username": "user2", "password": ""}, // user2 unchanged
 	}
@@ -380,7 +380,7 @@ func TestAuth_RateLimiterPerPrincipalIsolation(t *testing.T) {
 	router, _, _ := setupAuthTestRouter(t, accounts)
 
 	// Failed attempts for alice
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest(http.MethodGet, "/api/ping", nil)
 		req.Header.Set("X-Auth", "alice:wrong_token")

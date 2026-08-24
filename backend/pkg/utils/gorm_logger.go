@@ -27,19 +27,19 @@ func (l *GormLogrusLogger) LogMode(level gormlogger.LogLevel) gormlogger.Interfa
 	return &newlogger
 }
 
-func (l *GormLogrusLogger) Info(ctx context.Context, msg string, data ...interface{}) {
+func (l *GormLogrusLogger) Info(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= gormlogger.Info {
 		log.Infof(msg, data...)
 	}
 }
 
-func (l *GormLogrusLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (l *GormLogrusLogger) Warn(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= gormlogger.Warn {
 		log.Warnf(msg, data...)
 	}
 }
 
-func (l *GormLogrusLogger) Error(ctx context.Context, msg string, data ...interface{}) {
+func (l *GormLogrusLogger) Error(ctx context.Context, msg string, data ...any) {
 	if l.LogLevel >= gormlogger.Error {
 		log.Errorf(msg, data...)
 	}

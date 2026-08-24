@@ -50,10 +50,8 @@ func TestService_ConcurrentPriceAndInterestCache(t *testing.T) {
 	stop := make(chan struct{})
 
 	// Price Readers
-	for i := 0; i < 4; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 4 {
+		wg.Go(func() {
 			for {
 				select {
 				case <-stop:
@@ -63,14 +61,12 @@ func TestService_ConcurrentPriceAndInterestCache(t *testing.T) {
 					assert.False(t, pr.Value.IsZero())
 				}
 			}
-		}()
+		})
 	}
 
 	// Interest Readers
-	for i := 0; i < 4; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 4 {
+		wg.Go(func() {
 			p := posting.Posting{
 				Account:   "Assets:Checking",
 				Payee:     "Acme Bank",
@@ -87,20 +83,18 @@ func TestService_ConcurrentPriceAndInterestCache(t *testing.T) {
 					assert.True(t, isI)
 				}
 			}
-		}()
+		})
 	}
 
 	// Resetters
-	for i := 0; i < 2; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < 50; j++ {
+	for range 2 {
+		wg.Go(func() {
+			for range 50 {
 				ClearPriceCache()
 				ClearInterestCache()
 				time.Sleep(1 * time.Millisecond)
 			}
-		}()
+		})
 	}
 
 	time.Sleep(100 * time.Millisecond)

@@ -1,7 +1,7 @@
 package dto
 
 type DashboardResponse struct {
-	CheckingBalances     interface{}                     `json:"checkingBalances"`
+	CheckingBalances     any                             `json:"checkingBalances"`
 	Networth             CurrentNetworthResponse         `json:"networth"`
 	Expenses             PeriodicPostingsSummaryResponse `json:"expenses"`
 	CashFlows            []CashFlowResponse              `json:"cashFlows"`

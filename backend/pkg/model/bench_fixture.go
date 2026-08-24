@@ -58,7 +58,7 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 	baseDate := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
 	postings := make([]*posting.Posting, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		daysOffset := rng.Intn(1800) // ~5 years
 		date := baseDate.AddDate(0, 0, daysOffset)
 		txID := fmt.Sprintf("tx-%08d", i/2)
@@ -115,7 +115,7 @@ func GenerateSyntheticPrices(n int) []price.Price {
 	baseDate := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
 
 	prices := make([]price.Price, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		comm := commodities[i%len(commodities)]
 		date := baseDate.AddDate(0, 0, i/len(commodities))
 		prices[i] = price.Price{

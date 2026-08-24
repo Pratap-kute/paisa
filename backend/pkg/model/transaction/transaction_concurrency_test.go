@@ -48,7 +48,7 @@ func TestTransactionCache_ConcurrentReadClear(t *testing.T) {
 	stop := make(chan struct{})
 
 	// Readers
-	for i := 0; i < 6; i++ {
+	for i := range 6 {
 		wg.Add(1)
 		go func(readerID int) {
 			defer wg.Done()
@@ -72,15 +72,13 @@ func TestTransactionCache_ConcurrentReadClear(t *testing.T) {
 	}
 
 	// Resetter
-	for i := 0; i < 2; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < 50; j++ {
+	for range 2 {
+		wg.Go(func() {
+			for range 50 {
 				ClearCache()
 				time.Sleep(1 * time.Millisecond)
 			}
-		}()
+		})
 	}
 
 	time.Sleep(100 * time.Millisecond)

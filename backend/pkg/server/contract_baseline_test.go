@@ -50,12 +50,12 @@ func setupBaselineTestServer(t *testing.T) (*gorm.DB, http.Handler) {
 	return db, router
 }
 
-func executeGet(handler http.Handler, path string) (*httptest.ResponseRecorder, map[string]interface{}, error) {
+func executeGet(handler http.Handler, path string) (*httptest.ResponseRecorder, map[string]any, error) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, path, nil)
 	handler.ServeHTTP(w, req)
 
-	var body map[string]interface{}
+	var body map[string]any
 	err := json.Unmarshal(w.Body.Bytes(), &body)
 	return w, body, err
 }
@@ -70,11 +70,11 @@ func TestBaselineContract_FreezePrimaryEndpoints(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		require.Contains(t, body, "transactions")
 
-		txList, ok := body["transactions"].([]interface{})
+		txList, ok := body["transactions"].([]any)
 		require.True(t, ok)
 		require.NotEmpty(t, txList)
 
-		firstTx := txList[0].(map[string]interface{})
+		firstTx := txList[0].(map[string]any)
 		// Check exact field names and casing
 		assert.Contains(t, firstTx, "id")
 		assert.Contains(t, firstTx, "date")
@@ -87,9 +87,9 @@ func TestBaselineContract_FreezePrimaryEndpoints(t *testing.T) {
 		assert.Contains(t, firstTx, "fileName")
 		assert.Contains(t, firstTx, "note")
 
-		postings := firstTx["postings"].([]interface{})
+		postings := firstTx["postings"].([]any)
 		require.NotEmpty(t, postings)
-		firstPosting := postings[0].(map[string]interface{})
+		firstPosting := postings[0].(map[string]any)
 		assert.Contains(t, firstPosting, "id")
 		assert.Contains(t, firstPosting, "transaction_id")
 		assert.Contains(t, firstPosting, "date")
@@ -116,7 +116,7 @@ func TestBaselineContract_FreezePrimaryEndpoints(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 		require.Contains(t, body, "balancedPostings")
-		posts, ok := body["balancedPostings"].([]interface{})
+		posts, ok := body["balancedPostings"].([]any)
 		require.True(t, ok)
 		require.NotEmpty(t, posts)
 	})

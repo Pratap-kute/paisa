@@ -152,6 +152,6 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 	return entries
 }
 
-func GetHistory(db *gorm.DB) map[string]interface{} {
-	return map[string]interface{}{"history": HistoryFromPostings(db)}
+func GetHistory(db *gorm.DB) map[string]any {
+	return map[string]any{"history": HistoryFromPostings(db)}
 }

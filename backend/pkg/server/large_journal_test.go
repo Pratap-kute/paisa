@@ -77,7 +77,7 @@ func TestLargeJournal_SyncAndQueryIntegrity(t *testing.T) {
 	router.ServeHTTP(wDash, reqDash)
 	assert.Equal(t, http.StatusOK, wDash.Code)
 
-	var dashResp map[string]interface{}
+	var dashResp map[string]any
 	err = json.Unmarshal(wDash.Body.Bytes(), &dashResp)
 	require.NoError(t, err)
 

@@ -106,7 +106,7 @@ func tokenize(s string) []string {
 	})
 }
 
-func GetTfIdf(db *gorm.DB) map[string]interface{} {
+func GetTfIdf(db *gorm.DB) map[string]any {
 	vector, idx := cache.get(db)
-	return map[string]interface{}{"tf_idf": vector, "index": idx}
+	return map[string]any{"tf_idf": vector, "index": idx}
 }

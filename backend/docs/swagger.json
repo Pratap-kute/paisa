@@ -2434,7 +2434,7 @@
                 },
                 "timeline": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
@@ -3290,7 +3290,7 @@
                 },
                 "schema": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 }
             }
         },
