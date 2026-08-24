@@ -3,16 +3,15 @@ package accounting
 import (
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
-	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type Balance struct {
@@ -29,17 +28,21 @@ func Register(postings []posting.Posting) []Balance {
 		sameDay := p.Date.Equal(current.Date)
 		current = Balance{Date: p.Date, Quantity: p.Quantity.Add(current.Quantity), Commodity: p.Commodity}
 		if sameDay {
-			balances = balances[:len(balances)-1]
+			balances[len(balances)-1] = current
+		} else {
+			balances = append(balances, current)
 		}
-		balances = append(balances, current)
-
 	}
 	return balances
 }
 
 func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posting {
+	if len(accounts) == 0 {
+		return postings
+	}
+
 	negatePresent := lo.SomeBy(accounts, func(accountGlob string) bool {
-		return accountGlob[0] == '!'
+		return len(accountGlob) > 0 && accountGlob[0] == '!'
 	})
 	var combine func(collection []string, predicate func(item string) bool) bool
 	if negatePresent {
@@ -58,8 +61,8 @@ func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posti
 			}
 
 			account := p.Account
-			if service.IsCapitalGains(p) {
-				account = service.CapitalGainsSourceAccount(p.Account)
+			if utils.IsParent(p.Account, "Income:CapitalGains") {
+				account = strings.Replace(p.Account, "Income:CapitalGains", "Assets", 1)
 			}
 			match, err := filepath.Match(accountGlob, account)
 			if err != nil {
@@ -134,58 +137,10 @@ func CurrentBalance(postings []posting.Posting) decimal.Decimal {
 	})
 }
 
-func CurrentBalanceOn(db *gorm.DB, postings []posting.Posting, date time.Time) decimal.Decimal {
-	return utils.SumBy(postings, func(p posting.Posting) decimal.Decimal {
-		return service.GetMarketPrice(db, p, date)
-	})
-}
-
 func CostSum(postings []posting.Posting) decimal.Decimal {
 	return utils.SumBy(postings, func(p posting.Posting) decimal.Decimal {
 		return p.Amount
 	})
-}
-
-type Point struct {
-	Date  time.Time       `json:"date"`
-	Value decimal.Decimal `json:"value"`
-}
-
-func RunningBalance(db *gorm.DB, postings []posting.Posting) []Point {
-	SortAsc(postings)
-	var series []Point
-
-	if len(postings) == 0 {
-		return series
-	}
-
-	var p posting.Posting
-	accumulator := make(map[string]decimal.Decimal)
-
-	end := utils.EndOfToday()
-	for start := postings[0].Date; start.Before(end); start = start.AddDate(0, 0, 1) {
-		for len(postings) > 0 && (postings[0].Date.Before(start) || postings[0].Date.Equal(start)) {
-			p, postings = postings[0], postings[1:]
-			accumulator[p.Commodity] = accumulator[p.Commodity].Add(p.Quantity)
-		}
-
-		balance := decimal.Zero
-
-		for commodity, quantity := range accumulator {
-			if utils.IsCurrency(commodity) {
-				balance = balance.Add(quantity)
-			} else {
-				price := service.GetUnitPrice(db, commodity, start)
-				if !price.Value.Equal(decimal.Zero) {
-					balance = balance.Add(quantity.Mul(price.Value))
-				} else {
-					balance = balance.Add(quantity)
-				}
-			}
-		}
-		series = append(series, Point{Date: start, Value: balance})
-	}
-	return series
 }
 
 func SortTransactionAsc(transactions []transaction.Transaction) []transaction.Transaction {

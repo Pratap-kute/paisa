@@ -1,33 +1,18 @@
 package liabilities
 
 import (
-	"time"
-
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-type Overview struct {
-	Date           time.Time       `json:"date"`
-	DrawnAmount    decimal.Decimal `json:"drawn_amount"`
-	RepaidAmount   decimal.Decimal `json:"repaid_amount"`
-	InterestAmount decimal.Decimal `json:"interest_amount"`
-}
-
-type Interest struct {
-	Account          string          `json:"account"`
-	OverviewTimeline []Overview      `json:"overview_timeline"`
-	APR              decimal.Decimal `json:"apr"`
-}
-
-func GetInterest(db *gorm.DB) gin.H {
+func GetInterest(db *gorm.DB) dto.LiabilitiesInterestResponse {
 	postings := query.Init(db).Like("Liabilities:%").All()
 	expenses := query.Init(db).Like("Expenses:Interest:%").All()
 	postings = service.PopulateMarketPrice(db, postings)
@@ -44,20 +29,24 @@ func GetInterest(db *gorm.DB) gin.H {
 	}
 
 	//nolint:prealloc // nil slice required for null JSON serialization when empty
-	var interests []Interest
+	var interests []dto.LiabilityInterestResponse
 	for _, account := range accounts {
 		ps := byAccount[account]
 		es := lo.Filter(expenses, func(e posting.Posting, _ int) bool { return e.RestName(1) == "Interest:"+account })
 		ps = append(ps, es...)
-		interests = append(interests, Interest{Account: "Liabilities:" + account, APR: service.APR(db, ps), OverviewTimeline: computeOverviewTimeline(db, ps)})
+		interests = append(interests, dto.LiabilityInterestResponse{
+			Account:          "Liabilities:" + account,
+			APR:              service.APR(db, ps),
+			OverviewTimeline: computeOverviewTimeline(db, ps),
+		})
 	}
 
-	return gin.H{"interest_timeline_breakdown": interests}
+	return dto.LiabilitiesInterestResponse{InterestTimelineBreakdown: interests}
 }
 
-func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []Overview {
+func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []dto.LiabilityOverviewResponse {
 	accounting.SortAsc(postings)
-	netliabilities := []Overview{}
+	netliabilities := []dto.LiabilityOverviewResponse{}
 
 	var p posting.Posting
 	var pastPostings []posting.Posting
@@ -98,7 +87,7 @@ func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []Overview
 		}, decimal.Zero)
 
 		interest := balance.Add(repaid).Sub(drawn)
-		netliabilities = append(netliabilities, Overview{Date: start, DrawnAmount: drawn, RepaidAmount: repaid, InterestAmount: interest})
+		netliabilities = append(netliabilities, dto.LiabilityOverviewResponse{Date: start, DrawnAmount: drawn, RepaidAmount: repaid, InterestAmount: interest})
 
 		if len(postings) == 0 && balance.Abs().LessThan(decimal.NewFromFloat(0.01)) {
 			break

@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
+	"github.com/ananthakumaran/paisa/pkg/api/mapper"
 	"github.com/ananthakumaran/paisa/pkg/auth"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/generator"
@@ -473,49 +475,49 @@ func registerEditorAndSheetRoutes(router *gin.Engine, db *gorm.DB) {
 
 func registerTemplateAndGoalRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/api/templates", func(c *gin.Context) {
-		c.JSON(200, gin.H{"templates": template.All()})
+		c.JSON(200, dto.TemplatesResponse{Templates: mapper.TemplatesToDTO(template.All())})
 	})
 
 	router.POST("/api/templates/upsert", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
 		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"saved": false, "message": "Readonly mode"})
+			c.JSON(200, dto.TemplateSaveResponse{Saved: false, Message: "Readonly mode"})
 			return
 		}
 
-		var t template.Template
-		if err := c.ShouldBindJSON(&t); err != nil {
+		var req dto.TemplateUpsertRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
 			status, body := mapBindingOrFileError(err)
 			c.JSON(status, body)
 			return
 		}
 
-		tpl, err := template.Upsert(t.Name, t.Content)
+		tpl, err := template.Upsert(req.Name, req.Content)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"saved": false, "message": err.Error()})
+			c.JSON(http.StatusInternalServerError, dto.TemplateSaveResponse{Saved: false, Message: err.Error()})
 			return
 		}
 
-		c.JSON(200, gin.H{"template": tpl, "saved": true})
+		c.JSON(200, dto.TemplateSaveResponse{Template: mapper.TemplateToDTO(tpl), Saved: true})
 	})
 
 	router.POST("/api/templates/delete", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
 		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": false, "message": "Readonly mode"})
+			c.JSON(200, dto.SuccessResponse{Success: false, Message: "Readonly mode"})
 			return
 		}
 
-		var t template.Template
-		if err := c.ShouldBindJSON(&t); err != nil {
+		var req dto.TemplateDeleteRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
 			status, body := mapBindingOrFileError(err)
 			c.JSON(status, body)
 			return
 		}
 
-		if err := template.Delete(t.Name); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
+		if err := template.Delete(req.Name); err != nil {
+			c.JSON(http.StatusInternalServerError, dto.SuccessResponse{Success: false, Message: err.Error()})
 			return
 		}
-		c.JSON(200, gin.H{"success": true})
+		c.JSON(200, dto.SuccessResponse{Success: true})
 	})
 
 	router.GET("/api/goals", func(c *gin.Context) {

@@ -4,35 +4,25 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/samber/lo"
-	"github.com/shopspring/decimal"
-
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/samber/lo"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-type AssetBreakdown struct {
-	Group          string          `json:"group"`
-	DrawnAmount    decimal.Decimal `json:"drawn_amount"`
-	RepaidAmount   decimal.Decimal `json:"repaid_amount"`
-	InterestAmount decimal.Decimal `json:"interest_amount"`
-	BalanceAmount  decimal.Decimal `json:"balance_amount"`
-	APR            decimal.Decimal `json:"apr"`
-}
-
-func GetBalance(db *gorm.DB) gin.H {
+func GetBalance(db *gorm.DB) dto.LiabilitiesBalanceResponse {
 	postings := query.Init(db).Like("Liabilities:%").All()
 	expenses := query.Init(db).Like("Expenses:Interest:%").All()
 	postings = service.PopulateMarketPrice(db, postings)
 	breakdowns := computeBreakdown(db, postings, expenses)
-	return gin.H{"liability_breakdowns": breakdowns}
+	return dto.LiabilitiesBalanceResponse{LiabilityBreakdowns: breakdowns}
 }
 
-func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[string]AssetBreakdown {
+func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[string]dto.LiabilityBreakdownResponse {
 	accounts := make(map[string]bool)
 	for i := range postings {
 		p := &postings[i]
@@ -42,10 +32,9 @@ func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[str
 			accounts[strings.Join(parts, ":")] = false
 		}
 		accounts[p.Account] = true
-
 	}
 
-	result := make(map[string]AssetBreakdown)
+	result := make(map[string]dto.LiabilityBreakdownResponse)
 
 	for group := range accounts {
 		ps := lo.Filter(postings, func(p posting.Posting, _ int) bool { return utils.IsSameOrParent(p.Account, group) })
@@ -80,7 +69,14 @@ func computeBreakdown(db *gorm.DB, postings, expenses []posting.Posting) map[str
 		interest := balance.Add(repaid).Sub(drawn)
 
 		apr := service.APR(db, ps)
-		breakdown := AssetBreakdown{DrawnAmount: drawn, RepaidAmount: repaid, BalanceAmount: balance, APR: apr, Group: group, InterestAmount: interest}
+		breakdown := dto.LiabilityBreakdownResponse{
+			DrawnAmount:    drawn,
+			RepaidAmount:   repaid,
+			BalanceAmount:  balance,
+			APR:            apr,
+			Group:          group,
+			InterestAmount: interest,
+		}
 		result[group] = breakdown
 	}
 

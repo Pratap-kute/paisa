@@ -148,7 +148,7 @@ func computeAggregate(db *gorm.DB, postings []posting.Posting, date time.Time) m
 			result[parent] = Aggregate{Account: parent}
 		}
 
-		marketAmount := accounting.CurrentBalanceOn(db, ps, date)
+		marketAmount := service.CurrentBalanceOn(db, ps, date)
 		result[account] = Aggregate{Date: date, Account: account, MarketAmount: marketAmount}
 
 	}

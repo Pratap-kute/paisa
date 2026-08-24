@@ -6,6 +6,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
+	"github.com/ananthakumaran/paisa/pkg/api/mapper"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
@@ -22,14 +24,9 @@ const (
 	opOverwrite = "overwrite"
 )
 
-type SheetFile struct {
-	Name      string   `json:"name"`
-	Content   string   `json:"content"`
-	Versions  []string `json:"versions"`
-	Operation string   `json:"operation"`
-}
+type SheetFile = dto.SheetFileResponse
 
-func GetSheets(db *gorm.DB) gin.H {
+func GetSheets(db *gorm.DB) dto.SheetsResponse {
 	dir := config.GetSheetDir()
 	paths, _ := doublestar.FilepathGlob(dir + "/**/*" + Extension)
 
@@ -46,7 +43,7 @@ func GetSheets(db *gorm.DB) gin.H {
 	postings := query.Init(db).All()
 	postings = service.PopulateMarketPrice(db, postings)
 
-	return gin.H{"files": files, "postings": postings}
+	return dto.SheetsResponse{Files: files, Postings: mapper.PostingsToDTO(postings)}
 }
 
 func GetSheet(file SheetFile) (gin.H, error) {

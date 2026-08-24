@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/ledger"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
@@ -18,14 +19,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type LedgerFile struct {
-	Name      string   `json:"name"`
-	Content   string   `json:"content"`
-	Versions  []string `json:"versions"`
-	Operation string   `json:"operation"`
-}
+type LedgerFile = dto.LedgerFileResponse
 
-func GetFiles(db *gorm.DB) gin.H {
+func GetFiles(db *gorm.DB) dto.EditorFilesResponse {
 	var accounts []string
 	var payees []string
 	var commodities []string
@@ -51,7 +47,7 @@ func GetFiles(db *gorm.DB) gin.H {
 		}
 	}
 
-	return gin.H{"files": files, "accounts": accounts, "payees": payees, "commodities": commodities}
+	return dto.EditorFilesResponse{Files: files, Accounts: accounts, Payees: payees, Commodities: commodities}
 }
 
 func ensureJournalFile(path string, readonly bool) error {

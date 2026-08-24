@@ -83,7 +83,7 @@ func TestGoldenNetworthScenarios(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := serverTestDB(t, false)
-			got := computeNetworth(db, tt.postings)
+			got := service.ComputeNetworth(db, tt.postings)
 			assert.Equal(t, tt.investment, got.InvestmentAmount.String())
 			assert.True(t, decimal.RequireFromString(defaultZero(tt.withdrawal)).Equal(got.WithdrawalAmount), "withdrawal: %s", got.WithdrawalAmount)
 			assert.Equal(t, tt.balance, got.BalanceAmount.String())

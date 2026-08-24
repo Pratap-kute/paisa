@@ -46,7 +46,7 @@ func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
 		"investmentTotal":  investmentTotal,
 		"savingsTotal":     savingsTotal,
 		"gainTotal":        savingsTotal.Sub(investmentTotal),
-		"savingsTimeline":  accounting.RunningBalance(db, savings),
+		"savingsTimeline":  service.RunningBalance(db, savings),
 		"target":           decimal.NewFromFloat(conf.Target),
 		"targetDate":       conf.TargetDate,
 		"rate":             conf.Rate,

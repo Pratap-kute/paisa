@@ -92,15 +92,14 @@ func TestContract_ScenarioA_Salary(t *testing.T) {
 
 	// 1. Income Endpoint / computeIncomeYearlyCard
 	incomeData := GetIncome(db)
-	yearlyCards, ok := incomeData["yearly_cards"].([]IncomeYearlyCard)
-	require.True(t, ok)
+	yearlyCards := incomeData.YearlyCards
 	require.NotEmpty(t, yearlyCards)
 	assert.Equal(t, "50000", yearlyCards[0].GrossIncome.String())
 	assert.Equal(t, "50000", yearlyCards[0].NetIncome.String())
 	assert.Equal(t, "0", yearlyCards[0].NetTax.String())
 
 	// 2. Cash Flow
-	cf := computeCashFlow(query.Init(db), decimal.Zero)
+	cf := service.ComputeCashFlow(query.Init(db), decimal.Zero)
 	require.Len(t, cf, 2) // Jan and Feb 2024
 	assert.Equal(t, "50000", cf[0].Income.String())
 	assert.Equal(t, "50000", cf[0].Checking.String())
@@ -108,8 +107,7 @@ func TestContract_ScenarioA_Salary(t *testing.T) {
 
 	// 3. Networth Endpoint (Asset postings participate in networth)
 	nwData := GetCurrentNetworth(db)
-	nw, ok := nwData["networth"].(Networth)
-	require.True(t, ok)
+	nw := nwData.Networth
 	assert.Equal(t, "50000", nw.InvestmentAmount.String())
 	assert.Equal(t, "50000", nw.BalanceAmount.String())
 }
@@ -137,7 +135,7 @@ func TestContract_ScenarioB_Expense(t *testing.T) {
 		require.NoError(t, db.Create(p).Error)
 	}
 
-	cf := computeCashFlow(query.Init(db), decimal.Zero)
+	cf := service.ComputeCashFlow(query.Init(db), decimal.Zero)
 	require.NotEmpty(t, cf)
 	assert.Equal(t, "2000", cf[0].Expenses.String())
 	assert.Equal(t, "-2000", cf[0].Checking.String())
@@ -168,7 +166,7 @@ func TestContract_ScenarioC_AssetTransfer(t *testing.T) {
 		require.NoError(t, db.Create(p).Error)
 	}
 
-	cf := computeCashFlow(query.Init(db), decimal.Zero)
+	cf := service.ComputeCashFlow(query.Init(db), decimal.Zero)
 	require.NotEmpty(t, cf)
 	assert.Equal(t, "0", cf[0].Expenses.String(), "Asset transfer must not be an expense")
 	assert.Equal(t, "10000", cf[0].Investment.String(), "Must be categorized as investment")
@@ -198,7 +196,7 @@ func TestContract_ScenarioD_Liability(t *testing.T) {
 		require.NoError(t, db.Create(p).Error)
 	}
 
-	cf := computeCashFlow(query.Init(db), decimal.Zero)
+	cf := service.ComputeCashFlow(query.Init(db), decimal.Zero)
 	require.NotEmpty(t, cf)
 	assert.Equal(t, "50000", cf[0].Liabilities.String())
 	assert.Equal(t, "50000", cf[0].Checking.String())
@@ -263,7 +261,7 @@ func TestContract_ScenarioG_TaxExpense(t *testing.T) {
 	}
 
 	incomeData := GetIncome(db)
-	yearlyCards := incomeData["yearly_cards"].([]IncomeYearlyCard)
+	yearlyCards := incomeData.YearlyCards
 	require.NotEmpty(t, yearlyCards)
 	assert.Equal(t, "100000", yearlyCards[0].GrossIncome.String())
 	assert.Equal(t, "15000", yearlyCards[0].NetTax.String())
@@ -298,7 +296,7 @@ func TestContract_ScenarioH_BudgetRolloverAndChildRollup(t *testing.T) {
 		}
 
 		bRes := GetBudget(db)
-		budgetsByMonth := bRes["budgetsByMonth"].(map[string]Budget)
+		budgetsByMonth := bRes.BudgetsByMonth
 		febBudget, ok := budgetsByMonth["2024-02"]
 		require.True(t, ok)
 		require.Len(t, febBudget.Accounts, 1)
@@ -326,7 +324,7 @@ func TestContract_ScenarioH_BudgetRolloverAndChildRollup(t *testing.T) {
 		}
 
 		bRes := GetBudget(db)
-		budgetsByMonth := bRes["budgetsByMonth"].(map[string]Budget)
+		budgetsByMonth := bRes.BudgetsByMonth
 		febBudget := budgetsByMonth["2024-02"]
 		require.NotEmpty(t, febBudget.Accounts)
 
@@ -351,7 +349,7 @@ func TestContract_ScenarioH_BudgetRolloverAndChildRollup(t *testing.T) {
 		}
 
 		bRes := GetBudget(db)
-		budgetsByMonth := bRes["budgetsByMonth"].(map[string]Budget)
+		budgetsByMonth := bRes.BudgetsByMonth
 		febBudget := budgetsByMonth["2024-02"]
 		require.NotEmpty(t, febBudget.Accounts)
 
@@ -394,7 +392,7 @@ func TestContract_ScenarioJ_CheckingAccountBehavior(t *testing.T) {
 	}
 	require.NoError(t, db.Create(p).Error)
 
-	cf := computeCashFlow(query.Init(db), decimal.Zero)
+	cf := service.ComputeCashFlow(query.Init(db), decimal.Zero)
 	require.NotEmpty(t, cf)
 	assert.Equal(t, "25000", cf[0].Checking.String())
 	assert.Equal(t, "25000", cf[0].Balance.String())

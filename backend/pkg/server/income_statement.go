@@ -3,40 +3,28 @@ package server
 import (
 	"sort"
 	"strings"
-	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-type IncomeStatement struct {
-	StartingBalance decimal.Decimal            `json:"startingBalance"`
-	EndingBalance   decimal.Decimal            `json:"endingBalance"`
-	Date            time.Time                  `json:"date"`
-	Income          map[string]decimal.Decimal `json:"income"`
-	Interest        map[string]decimal.Decimal `json:"interest"`
-	Equity          map[string]decimal.Decimal `json:"equity"`
-	Pnl             map[string]decimal.Decimal `json:"pnl"`
-	Liabilities     map[string]decimal.Decimal `json:"liabilities"`
-	Tax             map[string]decimal.Decimal `json:"tax"`
-	Expenses        map[string]decimal.Decimal `json:"expenses"`
-}
+type IncomeStatement = dto.IncomeStatementItemResponse
 
 type RunningBalance struct {
 	amount   decimal.Decimal
 	quantity map[string]decimal.Decimal
 }
 
-func GetIncomeStatement(db *gorm.DB) gin.H {
+func GetIncomeStatement(db *gorm.DB) dto.IncomeStatementResponse {
 	postings := query.Init(db).All()
 	statements := computeStatement(db, postings)
-	return gin.H{"yearly": statements}
+	return dto.IncomeStatementResponse{Yearly: statements}
 }
 
 func computeStatement(db *gorm.DB, postings []posting.Posting) map[string]IncomeStatement {

@@ -96,7 +96,5 @@ func TestGetDiagnosis(t *testing.T) {
 
 	// Clean diagnosis on clean DB
 	diagnosis := GetDiagnosis(db)
-	issues, ok := diagnosis["issues"].([]Issue)
-	require.True(t, ok)
-	assert.Empty(t, issues)
+	assert.Empty(t, diagnosis.Issues)
 }

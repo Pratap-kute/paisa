@@ -1,25 +1,16 @@
 package goal
 
 import (
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
-	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-type GoalSummary struct {
-	Type       string          `json:"type"`
-	Name       string          `json:"name"`
-	ID         string          `json:"id"`
-	Icon       string          `json:"icon"`
-	Current    decimal.Decimal `json:"current"`
-	Target     decimal.Decimal `json:"target"`
-	TargetDate string          `json:"targetDate"`
-	Priority   int             `json:"priority"`
-}
+type GoalSummary = dto.GoalSummaryResponse
 
 func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	goals := config.GetConfig().Goals
