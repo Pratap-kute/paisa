@@ -88,13 +88,39 @@ jobs:
     needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./.github/actions/ci-setup
-      - name: Browser E2E and visual tests
+      - name: Browser E2E tests
         run: |
           nix develop --command bash -c "
-            make build-frontend test-e2e test-visual
+            make build-frontend test-e2e
+          "
+      - name: Update visual baselines
+        run: |
+          nix develop --command bash -c "
+            make test-visual-update
+          "
+      - name: Commit updated visual baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A frontend/tests/browser/visual.spec.ts-snapshots/
+          if git diff --cached --quiet; then
+            echo "Visual baselines are up to date."
+          else
+            git commit -m "chore: update visual baselines from CI [skip ci]"
+            git push
+          fi
+      - name: Verify visual baselines match
+        run: |
+          nix develop --command bash -c "
+            make test-visual
           "
       - name: Upload browser test reports on failure
         if: failure()
