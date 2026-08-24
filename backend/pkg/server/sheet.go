@@ -130,7 +130,7 @@ func SaveSheetFile(db *gorm.DB, file SheetFile) gin.H {
 		}
 	}
 
-	err = os.WriteFile(filePath, []byte(file.Content), perm)
+	err = utils.AtomicWriteFile(filePath, []byte(file.Content), perm)
 	if err != nil {
 		log.Warn(err)
 		return gin.H{"saved": false, "message": "Failed to write file"}

@@ -274,24 +274,100 @@ func SaveConfigObject(config Config) error {
 	return SaveConfig(content)
 }
 
-func SaveConfig(content []byte) error {
-	err := LoadConfig(content, "")
+func atomicWriteFile(filename string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+
+	tmpFile, err := os.CreateTemp(dir, ".paisa-tmp-*")
 	if err != nil {
 		return err
+	}
+	tmpName := tmpFile.Name()
+	cleanedUp := false
+	defer func() {
+		if !cleanedUp {
+			_ = tmpFile.Close()
+			_ = os.Remove(tmpName)
+		}
+	}()
+
+	if _, err := tmpFile.Write(data); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Chmod(perm); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Sync(); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Close(); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tmpName, filename); err != nil {
+		return err
+	}
+
+	cleanedUp = true
+	return nil
+}
+
+func SaveConfig(content []byte) error {
+	var configJSON any
+	err := yaml.Unmarshal(content, &configJSON)
+	if err != nil {
+		return err
+	}
+
+	err = schema.Validate(configJSON)
+	if err != nil {
+		return fmt.Errorf("invalid configuration\n%w", err)
+	}
+
+	newConfig := Config{}
+	err = yaml.Unmarshal(content, &newConfig)
+	if err != nil {
+		return err
+	}
+
+	err = mergo.Merge(&newConfig, defaultConfig, mergo.WithOverrideEmptySlice)
+	if err != nil {
+		return err
+	}
+
+	var newLocation *time.Location
+	if newConfig.TimeZone == "" {
+		newLocation = time.Local
+	} else {
+		newLocation, err = time.LoadLocation(newConfig.TimeZone)
+		if err != nil {
+			return fmt.Errorf("invalid time zone: %s\n%w", newConfig.TimeZone, err)
+		}
 	}
 
 	configMu.RLock()
 	cp := configPath
-	yamlContent, err := yaml.Marshal(config)
 	configMu.RUnlock()
+
+	yamlContent, err := yaml.Marshal(newConfig)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(cp, yamlContent, 0o600)
+	err = atomicWriteFile(cp, yamlContent, 0o600)
 	if err != nil {
 		return err
 	}
+
+	configMu.Lock()
+	config = newConfig
+	location = newLocation
+	configMu.Unlock()
 
 	return nil
 }

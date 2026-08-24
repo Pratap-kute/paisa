@@ -24,8 +24,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func AutoMigrate(db *gorm.DB) {
-	err := db.AutoMigrate(
+func AutoMigrate(db *gorm.DB) error {
+	return db.AutoMigrate(
 		&npsModel.Scheme{},
 		&mutualfundModel.Scheme{},
 		&posting.Posting{},
@@ -34,13 +34,12 @@ func AutoMigrate(db *gorm.DB) {
 		&cii.CII{},
 		&cache.Cache{},
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func SyncJournal(db *gorm.DB) (string, error) {
-	AutoMigrate(db)
+	if err := AutoMigrate(db); err != nil {
+		return err.Error(), err
+	}
 	log.Info("Syncing transactions from journal")
 
 	errors, _, err := ledger.Cli().ValidateFile(config.GetJournalPath())
@@ -63,19 +62,31 @@ func SyncJournal(db *gorm.DB) (string, error) {
 		return err.Error(), err
 	}
 
-	price.UpsertAllByType(db, config.Unknown, prices)
-
 	postings, err := ledger.Cli().Parse(config.GetJournalPath(), prices)
 	if err != nil {
 		return err.Error(), err
 	}
-	posting.UpsertAll(db, postings)
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		if err := price.UpsertAllByType(tx, config.Unknown, prices); err != nil {
+			return err
+		}
+		if err := posting.UpsertAll(tx, postings); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err.Error(), err
+	}
 
 	return "", nil
 }
 
 func SyncCommodities(db *gorm.DB) error {
-	AutoMigrate(db)
+	if err := AutoMigrate(db); err != nil {
+		return err
+	}
 	log.Info("Fetching commodities price history")
 	commodities := slices.Clone(commodity.All())
 	for i := len(commodities) - 1; i > 0; i-- {
@@ -102,7 +113,10 @@ func SyncCommodities(db *gorm.DB) error {
 			continue
 		}
 
-		price.UpsertAllByTypeNameAndID(db, commodity.Type, name, code, prices)
+		if err := price.UpsertAllByTypeNameAndID(db, commodity.Type, name, code, prices); err != nil {
+			log.Error(err)
+			errors = append(errors, fmt.Errorf("failed to persist prices for %s: %w", name, err))
+		}
 	}
 
 	if len(errors) > 0 {
@@ -117,15 +131,16 @@ func SyncCommodities(db *gorm.DB) error {
 }
 
 func SyncCII(db *gorm.DB) error {
-	AutoMigrate(db)
+	if err := AutoMigrate(db); err != nil {
+		return err
+	}
 	log.Info("Fetching taxation related info")
 	ciis, err := india.GetCostInflationIndex()
 	if err != nil {
 		log.Error(err)
 		return fmt.Errorf("failed to fetch CII: %w", err)
 	}
-	cii.UpsertAll(db, ciis)
-	return nil
+	return cii.UpsertAll(db, ciis)
 }
 
 func SyncPortfolios(db *gorm.DB) error {
@@ -147,7 +162,10 @@ func SyncPortfolios(db *gorm.DB) error {
 			return fmt.Errorf("failed to fetch portfolio for %s: %w", name, err)
 		}
 
-		portfolio.UpsertAll(db, commodity.Type, commodity.Price.Code, portfolios)
+		if err := portfolio.UpsertAll(db, commodity.Type, commodity.Price.Code, portfolios); err != nil {
+			log.Error(err)
+			return fmt.Errorf("failed to persist portfolio for %s: %w", name, err)
+		}
 	}
 	return nil
 }

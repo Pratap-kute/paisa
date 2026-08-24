@@ -157,7 +157,7 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
   async function save() {
     if (!editor || !selectedFile) return;
     const doc = editor.state.doc;
-    const { errors, saved, file, message } = await ajax("/api/editor/save", {
+    const { errors, saved, synced, file, message } = await ajax("/api/editor/save", {
       method: "POST",
       body: JSON.stringify({
         name: selectedFile.name,
@@ -175,6 +175,16 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
       if (!isEmpty(errors)) {
         if (editor) moveToLine(editor, errors[0].line_from);
       }
+    } else if (synced === false) {
+      toast.toast({
+        message: `Saved ${selectedFile.name}, but failed to sync derived data. ${message || "Please retry sync."}`,
+        type: "is-warning",
+        duration: 10000,
+      });
+      filesMap[file.name] = file;
+      selectedFile = file;
+      selectedVersion = "";
+      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     } else {
       toast.toast({
         message: `Saved ${selectedFile.name}`,

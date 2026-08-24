@@ -127,7 +127,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		if len(errors) > 0 && errors[0].Message != "" {
 			msg = fmt.Sprintf("Validation failed at Line %d: %s", errors[0].LineFrom, strings.TrimSpace(errors[0].Message))
 		}
-		return gin.H{"errors": errors, "saved": false, "message": msg}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": msg}
 	}
 
 	path := config.GetJournalPath()
@@ -136,7 +136,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 	filePath, err := utils.BuildSubPath(dir, file.Name)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Invalid file name"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Invalid file name"}
 	}
 
 	backupPath := filePath + ".backup." + time.Now().Format("2006-01-02-15-04-05.000")
@@ -144,19 +144,19 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 	err = os.MkdirAll(filepath.Dir(filePath), 0o700)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Failed to create directory"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to create directory"}
 	}
 
 	fileStat, err := os.Stat(filePath)
 	if err != nil && file.Operation != "overwrite" && file.Operation != "create" {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "File does not exist"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "File does not exist"}
 	}
 
 	var perm os.FileMode = 0o644
 	if err == nil {
 		if file.Operation == "create" {
-			return gin.H{"errors": errors, "saved": false, "message": "File already exists"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "File already exists"}
 		}
 
 		perm = fileStat.Mode().Perm()
@@ -164,26 +164,36 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		existingContent, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Warn(err)
-			return gin.H{"errors": errors, "saved": false, "message": "Failed to read file"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to read file"}
 		}
 
 		err = os.WriteFile(backupPath, existingContent, perm)
 		if err != nil {
 			log.Warn(err)
-			return gin.H{"errors": errors, "saved": false, "message": "Failed to create backup"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to create backup"}
 		}
 	}
 
-	err = os.WriteFile(filePath, []byte(file.Content), perm)
+	err = utils.AtomicWriteFile(filePath, []byte(file.Content), perm)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Failed to write file"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to write file"}
 	}
 
-	Sync(db, SyncRequest{Journal: true})
+	syncResult := Sync(db, SyncRequest{Journal: true})
 
 	lf, _ := readLedgerFileWithVersions(dir, filePath)
-	return gin.H{"errors": errors, "saved": true, "file": lf}
+	if !syncResult.Success {
+		return gin.H{
+			"errors":  errors,
+			"saved":   true,
+			"synced":  false,
+			"file":    lf,
+			"message": fmt.Sprintf("Journal saved, but sync failed: %s", syncResult.Message),
+		}
+	}
+
+	return gin.H{"errors": errors, "saved": true, "synced": true, "file": lf}
 }
 
 func ValidateFile(file LedgerFile) gin.H {

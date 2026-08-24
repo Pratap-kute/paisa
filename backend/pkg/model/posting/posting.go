@@ -7,7 +7,6 @@ import (
 
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/shopspring/decimal"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -110,8 +109,8 @@ func (p Posting) HasBehaviour(behaviour string) bool {
 	return slices.Contains(p.Behaviours(), behaviour)
 }
 
-func UpsertAll(db *gorm.DB, postings []*Posting) {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func UpsertAll(db *gorm.DB, postings []*Posting) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Exec("DELETE FROM postings").Error
 		if err != nil {
 			return err
@@ -125,9 +124,6 @@ func UpsertAll(db *gorm.DB, postings []*Posting) {
 
 		return nil
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func Behaviours(account string) []string {

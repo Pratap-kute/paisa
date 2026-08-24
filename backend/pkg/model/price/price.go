@@ -8,7 +8,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/google/btree"
 	"github.com/shopspring/decimal"
-	log "github.com/sirupsen/logrus"
 )
 
 type Price struct {
@@ -32,8 +31,8 @@ func DeleteAll(db *gorm.DB) error {
 	return nil
 }
 
-func UpsertAllByTypeNameAndID(db *gorm.DB, commodityType config.CommodityType, commodityName string, commodityID string, prices []*Price) {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func UpsertAllByTypeNameAndID(db *gorm.DB, commodityType config.CommodityType, commodityName string, commodityID string, prices []*Price) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Delete(&Price{}, "commodity_type = ? and (commodity_id = ? or commodity_name = ?)", commodityType, commodityID, commodityName).Error
 		if err != nil {
 			return err
@@ -48,13 +47,10 @@ func UpsertAllByTypeNameAndID(db *gorm.DB, commodityType config.CommodityType, c
 
 		return nil
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
-func UpsertAllByType(db *gorm.DB, commodityType config.CommodityType, prices []Price) {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func UpsertAllByType(db *gorm.DB, commodityType config.CommodityType, prices []Price) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Delete(&Price{}, "commodity_type = ?", commodityType).Error
 		if err != nil {
 			return err
@@ -68,7 +64,4 @@ func UpsertAllByType(db *gorm.DB, commodityType config.CommodityType, prices []P
 
 		return nil
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }

@@ -23,7 +23,9 @@ var serveCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		model.AutoMigrate(db)
+		if err := model.AutoMigrate(db); err != nil {
+			log.Fatal(err)
+		}
 
 		if os.Getenv("PAISA_DEBUG") == "true" {
 			db = db.Debug()
