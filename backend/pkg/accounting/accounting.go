@@ -42,7 +42,7 @@ func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posti
 	}
 
 	negatePresent := lo.SomeBy(accounts, func(accountGlob string) bool {
-		return len(accountGlob) > 0 && accountGlob[0] == '!'
+		return accountGlob != "" && accountGlob[0] == '!'
 	})
 	var combine func(collection []string, predicate func(item string) bool) bool
 	if negatePresent {

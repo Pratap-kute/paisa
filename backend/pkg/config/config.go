@@ -361,13 +361,14 @@ func SaveConfig(content []byte) error {
 
 	for i := range newConfig.UserAccounts {
 		acc := &newConfig.UserAccounts[i]
-		if acc.Password == "" {
+		switch {
+		case acc.Password == "":
 			if existingPw, ok := existingAccounts[acc.Username]; ok {
 				acc.Password = existingPw
 			}
-		} else if strings.HasPrefix(acc.Password, "sha256:") || strings.HasPrefix(acc.Password, "$argon2id$") {
+		case strings.HasPrefix(acc.Password, "sha256:") || strings.HasPrefix(acc.Password, "$argon2id$"):
 			// Already a valid verifier format, keep as is
-		} else {
+		default:
 			hashed, hashErr := auth.HashPassword(acc.Password)
 			if hashErr != nil {
 				return hashErr

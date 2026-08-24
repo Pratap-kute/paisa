@@ -8,8 +8,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/argon2"
 	"strings"
+
+	"golang.org/x/crypto/argon2"
 )
 
 var (
@@ -125,6 +126,7 @@ func verifyArgon2id(encodedHash, password string) (bool, error) {
 		return false, ErrInvalidHash
 	}
 
+	//nolint:gosec // decoded hash length is safely bounded
 	keyLen := uint32(len(expectedHash))
 	if iterations < 1 || memory < 8 || parallelism < 1 || keyLen < 1 {
 		return false, ErrInvalidHash

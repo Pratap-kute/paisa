@@ -227,18 +227,16 @@ func Serve(server *http.Server) error {
 }
 
 func TokenAuthMiddleware() gin.HandlerFunc {
-	store, err := memstore.NewCtx(65536)
-	if err != nil {
-		log.Errorf("Failed to initialize auth rate limiter store: %v", err)
-	}
-
 	quota := throttled.RateQuota{
 		MaxRate:  throttled.PerMin(6),
 		MaxBurst: 3,
 	}
 
 	var rateLimiter *throttled.GCRARateLimiterCtx
-	if store != nil {
+	store, err := memstore.NewCtx(65536)
+	if err != nil {
+		log.Errorf("Failed to initialize auth rate limiter store: %v", err)
+	} else {
 		rateLimiter, err = throttled.NewGCRARateLimiterCtx(store, quota)
 		if err != nil {
 			log.Errorf("Failed to initialize GCRA rate limiter: %v", err)

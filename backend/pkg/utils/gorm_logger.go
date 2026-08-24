@@ -51,26 +51,30 @@ func (l *GormLogrusLogger) Trace(ctx context.Context, begin time.Time, fc func()
 	}
 
 	elapsed := time.Since(begin)
+	const (
+		fieldElapsed = "elapsed"
+		fieldRows    = "rows"
+	)
 	switch {
 	case err != nil && l.LogLevel >= gormlogger.Error && !errors.Is(err, gormlogger.ErrRecordNotFound):
 		sql, rows := fc()
 		log.WithFields(log.Fields{
-			"elapsed": elapsed,
-			"rows":    rows,
-			"err":     err,
+			fieldElapsed: elapsed,
+			fieldRows:    rows,
+			"err":        err,
 		}).Error(sql)
 	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= gormlogger.Warn:
 		sql, rows := fc()
 		log.WithFields(log.Fields{
-			"elapsed": elapsed,
-			"rows":    rows,
-			"slow":    true,
+			fieldElapsed: elapsed,
+			fieldRows:    rows,
+			"slow":       true,
 		}).Warn(sql)
 	case l.LogLevel >= gormlogger.Info:
 		sql, rows := fc()
 		log.WithFields(log.Fields{
-			"elapsed": elapsed,
-			"rows":    rows,
+			fieldElapsed: elapsed,
+			fieldRows:    rows,
 		}).Debug(sql)
 	}
 }

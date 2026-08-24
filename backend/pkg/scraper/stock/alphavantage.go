@@ -51,7 +51,6 @@ type AlphaVantageExchangePrice struct {
 }
 
 func fetch[R any](url string, response *R) error {
-	//nolint:gosec // generic fetch helper for AlphaVantage endpoints
 	resp, err := httpClient.Get(url)
 	if err != nil {
 		return err

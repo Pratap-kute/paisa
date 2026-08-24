@@ -1,11 +1,11 @@
 package mapper
 
 import (
+	"time"
+
 	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
-	"time"
-
 	"github.com/shopspring/decimal"
 )
 

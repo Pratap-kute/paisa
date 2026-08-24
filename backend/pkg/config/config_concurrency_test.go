@@ -54,9 +54,10 @@ default_currency: USD
 					assert.NotNil(t, tz)
 
 					// Invariant: each returned snapshot must be internally consistent
-					if cfg.DefaultCurrency == "INR" {
+					switch cfg.DefaultCurrency {
+					case "INR":
 						assert.Equal(t, "Asia/Kolkata", cfg.TimeZone)
-					} else if cfg.DefaultCurrency == "USD" {
+					case "USD":
 						assert.Equal(t, "America/New_York", cfg.TimeZone)
 					}
 

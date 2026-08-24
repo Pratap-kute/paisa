@@ -12,9 +12,12 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const currencyINR = "INR"
+
 // GenerateSyntheticPostings deterministically generates N postings with realistic accounts, dates, and amounts
 func GenerateSyntheticPostings(n int) []*posting.Posting {
-	rng := rand.New(rand.NewSource(42)) // Deterministic seed
+	//nolint:gosec // benchmark fixture deterministic seed
+	rng := rand.New(rand.NewSource(42))
 
 	expenseCategories := []string{
 		"Expenses:Food:Groceries",
@@ -50,7 +53,7 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 		"Liabilities:Loan:Home",
 	}
 
-	commodities := []string{"INR", "USD", "NIFTY50", "GOLD"}
+	commodities := []string{currencyINR, "USD", "NIFTY50", "GOLD"}
 
 	baseDate := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
 	postings := make([]*posting.Posting, n)
@@ -63,11 +66,10 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 		var account, commodity string
 		var amount decimal.Decimal
 		isForecast := (i%50 == 0) // occasional forecast
-
 		switch i % 4 {
 		case 0:
 			account = expenseCategories[rng.Intn(len(expenseCategories))]
-			commodity = "INR"
+			commodity = currencyINR
 			amount = decimal.NewFromFloat(float64(rng.Intn(5000) + 100))
 		case 1:
 			account = assetAccounts[rng.Intn(len(assetAccounts))]
@@ -75,16 +77,16 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 			amount = decimal.NewFromFloat(float64(rng.Intn(50000) - 25000))
 		case 2:
 			account = incomeAccounts[rng.Intn(len(incomeAccounts))]
-			commodity = "INR"
+			commodity = currencyINR
 			amount = decimal.NewFromFloat(float64(-1 * (rng.Intn(100000) + 5000)))
 		default:
 			account = liabilityAccounts[rng.Intn(len(liabilityAccounts))]
-			commodity = "INR"
+			commodity = currencyINR
 			amount = decimal.NewFromFloat(float64(rng.Intn(20000) - 10000))
 		}
 
 		qty := amount
-		if commodity != "INR" {
+		if commodity != currencyINR {
 			qty = decimal.NewFromFloat(float64(rng.Intn(100) + 1))
 		}
 
@@ -107,6 +109,7 @@ func GenerateSyntheticPostings(n int) []*posting.Posting {
 
 // GenerateSyntheticPrices deterministically generates N prices for commodities
 func GenerateSyntheticPrices(n int) []price.Price {
+	//nolint:gosec // benchmark fixture deterministic seed
 	rng := rand.New(rand.NewSource(99))
 	commodities := []string{"NIFTY50", "GOLD", "USD", "EUR"}
 	baseDate := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -135,9 +138,9 @@ func GenerateSyntheticJournal(n int) string {
 		p1 := postings[i]
 		p2 := postings[i+1]
 		// Balanced transaction
-		sb.WriteString(fmt.Sprintf("%s %s\n", p1.Date.Format("2006/01/02"), p1.Payee))
-		sb.WriteString(fmt.Sprintf("    %-40s %12s INR\n", p1.Account, p1.Amount.StringFixed(2)))
-		sb.WriteString(fmt.Sprintf("    %-40s %12s INR\n\n", p2.Account, p1.Amount.Neg().StringFixed(2)))
+		fmt.Fprintf(&sb, "%s %s\n", p1.Date.Format("2006/01/02"), p1.Payee)
+		fmt.Fprintf(&sb, "    %-40s %12s INR\n", p1.Account, p1.Amount.StringFixed(2))
+		fmt.Fprintf(&sb, "    %-40s %12s INR\n\n", p2.Account, p1.Amount.Neg().StringFixed(2))
 	}
 	return sb.String()
 }

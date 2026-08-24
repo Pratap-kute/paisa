@@ -71,10 +71,7 @@ func SyncJournal(db *gorm.DB) (string, error) {
 		if err := price.UpsertAllByType(tx, config.Unknown, prices); err != nil {
 			return err
 		}
-		if err := posting.UpsertAll(tx, postings); err != nil {
-			return err
-		}
-		return nil
+		return posting.UpsertAll(tx, postings)
 	})
 	if err != nil {
 		return err.Error(), err

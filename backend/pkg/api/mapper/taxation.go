@@ -53,8 +53,8 @@ func HarvestableToDTO(h taxation.Harvestable) dto.HarvestableResponse {
 
 func HarvestablesMapToDTO(m map[string]taxation.Harvestable) map[string]dto.HarvestableResponse {
 	result := make(map[string]dto.HarvestableResponse, len(m))
-	for k, v := range m {
-		result[k] = HarvestableToDTO(v)
+	for k := range m {
+		result[k] = HarvestableToDTO(m[k])
 	}
 	return result
 }
@@ -90,8 +90,8 @@ func FYCapitalGainToDTO(f taxation.FYCapitalGain) dto.FYCapitalGainResponse {
 
 func FYCapitalGainsMapToDTO(m map[string]taxation.FYCapitalGain) map[string]dto.FYCapitalGainResponse {
 	result := make(map[string]dto.FYCapitalGainResponse, len(m))
-	for k, v := range m {
-		result[k] = FYCapitalGainToDTO(v)
+	for k := range m {
+		result[k] = FYCapitalGainToDTO(m[k])
 	}
 	return result
 }
