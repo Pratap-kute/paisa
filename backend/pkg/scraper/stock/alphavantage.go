@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"strings"
 	"time"
 
@@ -57,15 +56,18 @@ func (p AlphaVantageExchangePrice) Less(o btree.Item) bool {
 
 func fetch[R any](url string, response *R) error {
 	//nolint:gosec // generic fetch helper for AlphaVantage endpoints
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize+1))
 	if err != nil {
 		return err
+	}
+	if len(respBytes) > maxResponseSize {
+		return fmt.Errorf("response exceeded maximum allowed size of %d bytes", maxResponseSize)
 	}
 
 	if resp.StatusCode != 200 {

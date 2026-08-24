@@ -26,10 +26,16 @@ func GetNav(schemeCode string, commodityName string) ([]*price.Price, error) {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
 
-	respBytes, err := io.ReadAll(resp.Body)
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024+1))
 	if err != nil {
 		return nil, err
+	}
+	if len(respBytes) > 10*1024*1024 {
+		return nil, fmt.Errorf("response exceeded maximum allowed size of 10MB")
 	}
 
 	type Data struct {

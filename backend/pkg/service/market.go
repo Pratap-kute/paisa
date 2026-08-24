@@ -41,7 +41,7 @@ func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btr
 		var prices []price.Price
 		result := db.Where("commodity_type != ?", config.Unknown).Find(&prices)
 		if result.Error != nil {
-			log.Fatal(result.Error)
+			log.Warn(result.Error)
 		}
 		pricesTree := make(map[string]*btree.BTree)
 		postingPricesTree := make(map[string]*btree.BTree)
@@ -56,14 +56,14 @@ func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btr
 		var postings []posting.Posting
 		result = db.Find(&postings)
 		if result.Error != nil {
-			log.Fatal(result.Error)
+			log.Warn(result.Error)
 		}
 
 		for commodityName, ps := range lo.GroupBy(postings, func(p posting.Posting) string { return p.Commodity }) {
 			if !utils.IsCurrency(ps[0].Commodity) {
 				result := db.Where("commodity_type = ? and commodity_name = ?", config.Unknown, commodityName).Find(&prices)
 				if result.Error != nil {
-					log.Fatal(result.Error)
+					log.Warn(result.Error)
 				}
 
 				ppt := btree.New(2)
@@ -113,7 +113,8 @@ func GetUnitPrice(db *gorm.DB, commodity string, date time.Time) price.Price {
 	}
 
 	if pt == nil && ppt == nil {
-		log.Fatal("Price not found ", commodity)
+		log.Warn("Price not found ", commodity)
+		return pc
 	}
 
 	return pc
@@ -123,7 +124,8 @@ func GetAllPrices(db *gorm.DB, commodity string) []price.Price {
 	pricesPt, pt := pcache.getTrees(db, commodity)
 
 	if pt == nil && pricesPt == nil {
-		log.Fatal("Price not found ", commodity)
+		log.Warn("Price not found ", commodity)
+		return []price.Price{}
 	}
 
 	pmap := make(map[string]price.Price)

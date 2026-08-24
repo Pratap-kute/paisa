@@ -152,8 +152,17 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 	return prices, nil
 }
 
+var (
+	YahooBaseURL = "https://query2.finance.yahoo.com"
+	httpClient   = &http.Client{
+		Timeout: 30 * time.Second,
+	}
+)
+
+const maxResponseSize = 10 * 1024 * 1024 // 10MB
+
 func getTicker(ticker string) (*Response, error) {
-	url := fmt.Sprintf("https://query2.finance.yahoo.com/v8/finance/chart/%s?interval=1d&range=50y", ticker)
+	url := fmt.Sprintf("%s/v8/finance/chart/%s?interval=1d&range=50y", YahooBaseURL, ticker)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -162,15 +171,22 @@ func getTicker(ticker string) (*Response, error) {
 	agent.Do(func() { selectAgent() })
 	req.Header.Add("User-Agent", agent.name)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize+1))
 	if err != nil {
 		return nil, err
+	}
+	if len(respBytes) > maxResponseSize {
+		return nil, fmt.Errorf("response exceeded maximum allowed size of %d bytes", maxResponseSize)
 	}
 
 	var response Response

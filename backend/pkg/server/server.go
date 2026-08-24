@@ -378,7 +378,13 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		c.JSON(200, gin.H{"template": template.Upsert(t.Name, t.Content), "saved": true})
+		tpl, err := template.Upsert(t.Name, t.Content)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"saved": false, "message": err.Error()})
+			return
+		}
+
+		c.JSON(200, gin.H{"template": tpl, "saved": true})
 	})
 
 	router.POST("/api/templates/delete", func(c *gin.Context) {
@@ -393,7 +399,10 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 			return
 		}
 
-		template.Delete(t.Name)
+		if err := template.Delete(t.Name); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": err.Error()})
+			return
+		}
 		c.JSON(200, gin.H{"success": true})
 	})
 

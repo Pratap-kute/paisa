@@ -39,15 +39,22 @@ WHERE s.code = %s
 	}
 	req.Header.Add("Content-Type", "text/plain")
 	req.Header.Add("Authorization", "Basic cGxheTo=")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024+1))
 	if err != nil {
 		return nil, err
+	}
+	if len(respBytes) > 10*1024*1024 {
+		return nil, fmt.Errorf("response exceeded maximum allowed size of 10MB")
 	}
 
 	type Data struct {

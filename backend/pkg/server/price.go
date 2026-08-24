@@ -18,13 +18,14 @@ import (
 )
 
 func GetPrices(db *gorm.DB) gin.H {
+	prices := make(map[string][]price.Price)
 	var commodities []string
 	result := db.Model(&posting.Posting{}).Where("commodity != ?", config.DefaultCurrency()).Distinct().Pluck("commodity", &commodities)
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return gin.H{"prices": prices}
 	}
 
-	prices := make(map[string][]price.Price)
 	for _, commodity := range commodities {
 		prices[commodity] = service.GetAllPrices(db, commodity)
 	}

@@ -47,6 +47,10 @@ func (p *PriceProvider) AutoComplete(db *gorm.DB, field string, filter map[strin
 	}
 }
 
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
+}
+
 func (p *PriceProvider) ClearCache(db *gorm.DB) {
 }
 
@@ -54,15 +58,22 @@ func (p *PriceProvider) GetPrices(code string, commodityName string) ([]*price.P
 	log.Info("Fetching Metal price history from Purified Bytes")
 	url := fmt.Sprintf("https://india.finbodhi.com/api/metal/%s/price.json", code)
 	//nolint:gosec // URL is constructed from validated metal code
-	resp, err := http.Get(url)
+	resp, err := httpClient.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024+1))
 	if err != nil {
 		return nil, err
+	}
+	if len(respBytes) > 10*1024*1024 {
+		return nil, fmt.Errorf("response exceeded maximum allowed size of 10MB")
 	}
 
 	type Data struct {

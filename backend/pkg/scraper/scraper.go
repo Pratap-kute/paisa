@@ -32,6 +32,6 @@ func GetProviderByCode(code string) price.PriceProvider {
 	case "co-alphavantage":
 		return &stock.AlphaVantagePriceProvider{}
 	}
-	log.Fatal("Unknown price provider: ", code)
+	log.Warn("Unknown price provider: ", code)
 	return nil
 }
