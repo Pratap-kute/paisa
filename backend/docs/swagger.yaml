@@ -1831,6 +1831,7 @@ paths:
   /ping:
     get:
       description: Returns success indicator when service is healthy
+      operationId: getPing
       produces:
       - application/json
       responses:

@@ -1031,6 +1031,7 @@ const docTemplate = `{
                     "System"
                 ],
                 "summary": "Health check / ping",
+                "operationId": "getPing",
                 "responses": {
                     "200": {
                         "description": "OK",

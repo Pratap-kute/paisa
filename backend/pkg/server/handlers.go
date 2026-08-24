@@ -24,6 +24,7 @@ import (
 
 // PingHandler godoc
 //
+// @ID getPing
 // @Summary Health check / ping
 // @Description Returns success indicator when service is healthy
 // @Tags System
