@@ -31,7 +31,8 @@ type Template struct {
 func All() []Template {
 	dirEntries, err := BuiltinTemplates.ReadDir("templates")
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return nil
 	}
 
 	importTemplates := config.GetConfig().ImportTemplates
@@ -45,7 +46,8 @@ func All() []Template {
 		name := f.Name()
 		content, err := BuiltinTemplates.ReadFile(fmt.Sprintf("templates/%s", name))
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			continue
 		}
 
 		name = strings.TrimSuffix(name, filepath.Ext(name))

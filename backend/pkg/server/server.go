@@ -576,7 +576,7 @@ func Listen(db *gorm.DB, host string, port int) {
 func TokenAuthMiddleware() gin.HandlerFunc {
 	store, err := memstore.NewCtx(1000)
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("Failed to initialize auth rate limiter store: %v", err)
 	}
 
 	quota := throttled.RateQuota{
@@ -584,9 +584,12 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		MaxBurst: 3,
 	}
 
-	rateLimiter, err := throttled.NewGCRARateLimiterCtx(store, quota)
-	if err != nil {
-		log.Fatal(err)
+	var rateLimiter *throttled.GCRARateLimiterCtx
+	if store != nil {
+		rateLimiter, err = throttled.NewGCRARateLimiterCtx(store, quota)
+		if err != nil {
+			log.Errorf("Failed to initialize GCRA rate limiter: %v", err)
+		}
 	}
 
 	return func(c *gin.Context) {

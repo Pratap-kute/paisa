@@ -41,7 +41,8 @@ func GetPortfolios(db *gorm.DB, parentCommodityID string) []Portfolio {
 	result := db.Model(&Portfolio{}).Where("parent_commodity_id = ?", parentCommodityID).Find(&portfolios)
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return nil
 	}
 	return portfolios
 }
@@ -51,7 +52,8 @@ func GetAllParentCommodityIDs(db *gorm.DB) []string {
 	result := db.Model(&Portfolio{}).Distinct().Pluck("parent_commodity_id", &parentCommodityIDs)
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return nil
 	}
 	return parentCommodityIDs
 }

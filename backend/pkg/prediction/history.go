@@ -7,7 +7,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
@@ -153,6 +152,6 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 	return entries
 }
 
-func GetHistory(db *gorm.DB) gin.H {
-	return gin.H{"history": HistoryFromPostings(db)}
+func GetHistory(db *gorm.DB) map[string]interface{} {
+	return map[string]interface{}{"history": HistoryFromPostings(db)}
 }

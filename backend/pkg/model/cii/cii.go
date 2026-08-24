@@ -39,7 +39,8 @@ func GetIndex(db *gorm.DB, financialYear string) uint {
 	}
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return 100
 	}
 	return cii.CostInflationIndex
 }

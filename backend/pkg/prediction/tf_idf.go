@@ -9,12 +9,11 @@ import (
 
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 )
 
-type index struct {
+type Index struct {
 	Docs   map[string]map[string]int64 `json:"docs"`
 	Tokens map[string]map[string]int64 `json:"tokens"`
 }
@@ -23,12 +22,12 @@ type tfidfCache struct {
 	mu          sync.RWMutex
 	initialized bool
 	vector      map[string]map[string]float64
-	index       index
+	index       Index
 }
 
 var cache tfidfCache
 
-func (c *tfidfCache) get(db *gorm.DB) (map[string]map[string]float64, index) {
+func (c *tfidfCache) get(db *gorm.DB) (map[string]map[string]float64, Index) {
 	c.mu.RLock()
 	if c.initialized {
 		v := c.vector
@@ -57,7 +56,7 @@ func (c *tfidfCache) get(db *gorm.DB) (map[string]map[string]float64, index) {
 func (c *tfidfCache) clear() {
 	c.mu.Lock()
 	c.vector = nil
-	c.index = index{}
+	c.index = Index{}
 	c.initialized = false
 	c.mu.Unlock()
 }
@@ -66,8 +65,8 @@ func ClearCache() {
 	cache.clear()
 }
 
-func buldIndex(postings []posting.Posting) index {
-	idx := index{
+func buldIndex(postings []posting.Posting) Index {
+	idx := Index{
 		Docs:   make(map[string]map[string]int64),
 		Tokens: make(map[string]map[string]int64),
 	}
@@ -87,7 +86,7 @@ func buldIndex(postings []posting.Posting) index {
 	return idx
 }
 
-func tfidf(account string, idx index) map[string]float64 {
+func tfidf(account string, idx Index) map[string]float64 {
 	tfidf := make(map[string]float64)
 	for token, freq := range idx.Docs[account] {
 		tf := float64(freq) / float64(len(idx.Docs[account]))
@@ -107,7 +106,7 @@ func tokenize(s string) []string {
 	})
 }
 
-func GetTfIdf(db *gorm.DB) gin.H {
+func GetTfIdf(db *gorm.DB) map[string]interface{} {
 	vector, idx := cache.get(db)
-	return gin.H{"tf_idf": vector, "index": idx}
+	return map[string]interface{}{"tf_idf": vector, "index": idx}
 }

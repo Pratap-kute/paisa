@@ -63,7 +63,8 @@ func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posti
 			}
 			match, err := filepath.Match(accountGlob, account)
 			if err != nil {
-				log.Fatal("Invalid account glob used for filtering", accountGlob, err)
+				log.Warn("Invalid account glob used for filtering ", accountGlob, ": ", err)
+				return false
 			}
 
 			if negative {

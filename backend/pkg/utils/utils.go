@@ -125,7 +125,8 @@ var (
 func SetNow(date string) {
 	t, err := time.ParseInLocation("2006-01-02", date, config.TimeZone())
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("Invalid date passed to SetNow: %v", err)
+		return
 	}
 	log.Infof("Setting now to %s", t)
 	nowMu.Lock()
