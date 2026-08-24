@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
@@ -116,7 +117,10 @@ func EndOfDay(date time.Time) time.Time {
 	return toDate(date).AddDate(0, 0, 1).Add(-time.Nanosecond)
 }
 
-var now time.Time
+var (
+	nowMu sync.RWMutex
+	now   time.Time
+)
 
 func SetNow(date string) {
 	t, err := time.ParseInLocation("2006-01-02", date, config.TimeZone())
@@ -124,10 +128,14 @@ func SetNow(date string) {
 		log.Fatal(err)
 	}
 	log.Infof("Setting now to %s", t)
+	nowMu.Lock()
 	now = t
+	nowMu.Unlock()
 }
 
 func Now() time.Time {
+	nowMu.RLock()
+	defer nowMu.RUnlock()
 	if !now.Equal(time.Time{}) {
 		return now
 	}
@@ -135,6 +143,8 @@ func Now() time.Time {
 }
 
 func IsNowDefined() bool {
+	nowMu.RLock()
+	defer nowMu.RUnlock()
 	return !now.Equal(time.Time{})
 }
 

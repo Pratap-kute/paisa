@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/kelindar/binary"
@@ -24,17 +25,26 @@ func DeleteExpired(db *gorm.DB) error {
 	return nil
 }
 
-var lastGarbageCollectedAt *time.Time
+var (
+	gcMu                   sync.Mutex
+	lastGarbageCollectedAt *time.Time
+)
+
+func maybeGarbageCollect(db *gorm.DB) {
+	gcMu.Lock()
+	defer gcMu.Unlock()
+	if lastGarbageCollectedAt == nil || time.Since(*lastGarbageCollectedAt) > 24*time.Hour {
+		_ = DeleteExpired(db)
+		now := time.Now()
+		lastGarbageCollectedAt = &now
+	}
+}
 
 func Lookup[I any, K any](db *gorm.DB, key K, fallback func() I) I {
 	var item I
 	var cache Cache
 
-	if lastGarbageCollectedAt == nil || time.Since(*lastGarbageCollectedAt) > 24*time.Hour {
-		_ = DeleteExpired(db)
-		lastGarbageCollectedAt = new(time.Time)
-		*lastGarbageCollectedAt = time.Now()
-	}
+	maybeGarbageCollect(db)
 
 	hash, err := hashstructure.Hash(key, hashstructure.FormatV2, nil)
 	hashKey := fmt.Sprintf("%d", hash)

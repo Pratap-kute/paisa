@@ -24,30 +24,43 @@ type Transaction struct {
 }
 
 type transactionCache struct {
-	sync.Once
+	mu           sync.RWMutex
+	initialized  bool
 	transactions map[string]Transaction
 }
 
 var tcache transactionCache
 
-func loadTransactionCache(db *gorm.DB) {
-	postings := query.Init(db).All()
-	tcache.transactions = make(map[string]Transaction)
-
-	built := Build(postings)
-	for i := range built {
-		tcache.transactions[built[i].ID] = built[i]
-	}
-}
-
 func GetByID(db *gorm.DB, id string) (Transaction, bool) {
-	tcache.Do(func() { loadTransactionCache(db) })
+	tcache.mu.RLock()
+	if tcache.initialized {
+		t, found := tcache.transactions[id]
+		tcache.mu.RUnlock()
+		return t, found
+	}
+	tcache.mu.RUnlock()
+
+	tcache.mu.Lock()
+	defer tcache.mu.Unlock()
+	if !tcache.initialized {
+		postings := query.Init(db).All()
+		txs := make(map[string]Transaction, len(postings))
+		built := Build(postings)
+		for i := range built {
+			txs[built[i].ID] = built[i]
+		}
+		tcache.transactions = txs
+		tcache.initialized = true
+	}
 	t, found := tcache.transactions[id]
 	return t, found
 }
 
 func ClearCache() {
-	tcache = transactionCache{}
+	tcache.mu.Lock()
+	tcache.transactions = nil
+	tcache.initialized = false
+	tcache.mu.Unlock()
 }
 
 func Build(postings []posting.Posting) []Transaction {

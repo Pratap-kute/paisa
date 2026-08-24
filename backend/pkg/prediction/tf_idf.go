@@ -20,27 +20,50 @@ type index struct {
 }
 
 type tfidfCache struct {
-	sync.Once
-	vector map[string]map[string]float64
-	index  index
+	mu          sync.RWMutex
+	initialized bool
+	vector      map[string]map[string]float64
+	index       index
 }
 
 var cache tfidfCache
 
-func loadVectorCache(db *gorm.DB) {
-	postings := query.Init(db).All()
-	idx := buldIndex(postings)
-
-	cache.index = idx
-	cache.vector = make(map[string]map[string]float64)
-
-	for account := range idx.Docs {
-		cache.vector[account] = tfidf(account, idx)
+func (c *tfidfCache) get(db *gorm.DB) (map[string]map[string]float64, index) {
+	c.mu.RLock()
+	if c.initialized {
+		v := c.vector
+		idx := c.index
+		c.mu.RUnlock()
+		return v, idx
 	}
+	c.mu.RUnlock()
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if !c.initialized {
+		postings := query.Init(db).All()
+		idx := buldIndex(postings)
+		vector := make(map[string]map[string]float64, len(idx.Docs))
+		for account := range idx.Docs {
+			vector[account] = tfidf(account, idx)
+		}
+		c.index = idx
+		c.vector = vector
+		c.initialized = true
+	}
+	return c.vector, c.index
+}
+
+func (c *tfidfCache) clear() {
+	c.mu.Lock()
+	c.vector = nil
+	c.index = index{}
+	c.initialized = false
+	c.mu.Unlock()
 }
 
 func ClearCache() {
-	cache = tfidfCache{}
+	cache.clear()
 }
 
 func buldIndex(postings []posting.Posting) index {
@@ -85,8 +108,6 @@ func tokenize(s string) []string {
 }
 
 func GetTfIdf(db *gorm.DB) gin.H {
-	cache.Do(func() {
-		loadVectorCache(db)
-	})
-	return gin.H{"tf_idf": cache.vector, "index": cache.index}
+	vector, idx := cache.get(db)
+	return gin.H{"tf_idf": vector, "index": idx}
 }

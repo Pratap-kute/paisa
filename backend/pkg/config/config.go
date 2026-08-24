@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	_ "embed"
@@ -170,6 +171,7 @@ type Config struct {
 }
 
 var (
+	configMu   sync.RWMutex
 	config     Config
 	configPath string
 	location   *time.Location
@@ -278,12 +280,15 @@ func SaveConfig(content []byte) error {
 		return err
 	}
 
+	configMu.RLock()
+	cp := configPath
 	yamlContent, err := yaml.Marshal(config)
+	configMu.RUnlock()
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(configPath, yamlContent, 0o600)
+	err = os.WriteFile(cp, yamlContent, 0o600)
 	if err != nil {
 		return err
 	}
@@ -324,54 +329,71 @@ func LoadConfig(content []byte, cp string) error {
 		return fmt.Errorf("invalid configuration\n%w", err)
 	}
 
-	config = Config{}
-	err = yaml.Unmarshal(content, &config)
+	newConfig := Config{}
+	err = yaml.Unmarshal(content, &newConfig)
 	if err != nil {
 		return err
 	}
 
-	err = mergo.Merge(&config, defaultConfig, mergo.WithOverrideEmptySlice)
+	err = mergo.Merge(&newConfig, defaultConfig, mergo.WithOverrideEmptySlice)
 	if err != nil {
 		return err
 	}
 
+	var newLocation *time.Location
+	if newConfig.TimeZone == "" {
+		newLocation = time.Local
+	} else {
+		newLocation, err = time.LoadLocation(newConfig.TimeZone)
+		if err != nil {
+			return fmt.Errorf("invalid time zone: %s\n%w", newConfig.TimeZone, err)
+		}
+	}
+
+	configMu.Lock()
+	config = newConfig
 	if cp != "" {
 		configPath = cp
 	}
-
-	if config.TimeZone == "" {
-		location = time.Local
-	} else {
-		location, err = time.LoadLocation(config.TimeZone)
-		if err != nil {
-			location = time.Local
-			return fmt.Errorf("invalid time zone: %s\n%w", config.TimeZone, err)
-		}
-	}
+	location = newLocation
+	configMu.Unlock()
 
 	return nil
 }
 
 func GetConfig() Config {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return config
 }
 
 func GetJournalPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if !filepath.IsAbs(config.JournalPath) {
-		return filepath.Join(GetConfigDir(), config.JournalPath)
+		return filepath.Join(filepath.Dir(configPath), config.JournalPath)
 	}
 
 	return config.JournalPath
 }
 
 func GetSheetDir() string {
-	if config.SheetsDirectory == "" {
-		return filepath.Dir(GetJournalPath())
+	configMu.RLock()
+	sheetsDir := config.SheetsDirectory
+	journalPath := config.JournalPath
+	cfgDir := filepath.Dir(configPath)
+	configMu.RUnlock()
+
+	if sheetsDir == "" {
+		if !filepath.IsAbs(journalPath) {
+			return filepath.Dir(filepath.Join(cfgDir, journalPath))
+		}
+		return filepath.Dir(journalPath)
 	}
 
-	dir := config.SheetsDirectory
-	if !filepath.IsAbs(config.SheetsDirectory) {
-		dir = filepath.Join(GetConfigDir(), config.SheetsDirectory)
+	dir := sheetsDir
+	if !filepath.IsAbs(sheetsDir) {
+		dir = filepath.Join(cfgDir, sheetsDir)
 	}
 
 	err := os.MkdirAll(dir, 0o750)
@@ -383,18 +405,24 @@ func GetSheetDir() string {
 }
 
 func GetDBPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if !filepath.IsAbs(config.DBPath) {
-		return filepath.Join(GetConfigDir(), config.DBPath)
+		return filepath.Join(filepath.Dir(configPath), config.DBPath)
 	}
 
 	return config.DBPath
 }
 
 func GetConfigDir() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return filepath.Dir(configPath)
 }
 
 func GetConfigPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return configPath
 }
 
@@ -435,10 +463,14 @@ func EnsureLogFilePath() (string, error) {
 }
 
 func DefaultCurrency() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return config.DefaultCurrency
 }
 
 func TimeZone() *time.Location {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if location != nil {
 		return location
 	}

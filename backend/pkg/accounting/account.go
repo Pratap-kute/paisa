@@ -1,27 +1,39 @@
 package accounting
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
-	"golang.org/x/exp/slices"
 	"gorm.io/gorm"
 )
 
 type accountCache struct {
-	sync.Once
-	accounts []string
+	mu          sync.RWMutex
+	initialized bool
+	accounts    []string
 }
 
 var acache accountCache
 
-func loadAccountCache(db *gorm.DB) {
-	db.Model(&posting.Posting{}).Distinct().Pluck("Account", &acache.accounts)
-}
-
 func AllAccounts(db *gorm.DB) []string {
-	acache.Do(func() { loadAccountCache(db) })
-	return acache.accounts
+	acache.mu.RLock()
+	if acache.initialized {
+		res := slices.Clone(acache.accounts)
+		acache.mu.RUnlock()
+		return res
+	}
+	acache.mu.RUnlock()
+
+	acache.mu.Lock()
+	defer acache.mu.Unlock()
+	if !acache.initialized {
+		var accounts []string
+		db.Model(&posting.Posting{}).Distinct().Pluck("Account", &accounts)
+		acache.accounts = accounts
+		acache.initialized = true
+	}
+	return slices.Clone(acache.accounts)
 }
 
 func IsLeafAccount(db *gorm.DB, account string) bool {
@@ -29,5 +41,8 @@ func IsLeafAccount(db *gorm.DB, account string) bool {
 }
 
 func ClearCache() {
-	acache = accountCache{}
+	acache.mu.Lock()
+	acache.accounts = nil
+	acache.initialized = false
+	acache.mu.Unlock()
 }

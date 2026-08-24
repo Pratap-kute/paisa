@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -20,7 +21,10 @@ var DefaultPath = []string{
 	"/opt/homebrew/bin",
 }
 
-var cachedLedgerBinaryPath string
+var (
+	binaryPathMu           sync.RWMutex
+	cachedLedgerBinaryPath string
+)
 
 func LookPath(name string) (string, error) {
 	path, err := exec.LookPath(name)
@@ -45,6 +49,16 @@ func LookPath(name string) (string, error) {
 }
 
 func LedgerBinaryPath() (string, error) {
+	binaryPathMu.RLock()
+	if cachedLedgerBinaryPath != "" {
+		p := cachedLedgerBinaryPath
+		binaryPathMu.RUnlock()
+		return p, nil
+	}
+	binaryPathMu.RUnlock()
+
+	binaryPathMu.Lock()
+	defer binaryPathMu.Unlock()
 	if cachedLedgerBinaryPath != "" {
 		return cachedLedgerBinaryPath, nil
 	}
