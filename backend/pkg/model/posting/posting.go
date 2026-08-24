@@ -25,11 +25,11 @@ const (
 
 type Posting struct {
 	ID                   uint            `gorm:"primaryKey" json:"id"`
-	TransactionID        string          `json:"transaction_id"`
-	Date                 time.Time       `json:"date"`
+	TransactionID        string          `gorm:"index:idx_postings_transaction_id" json:"transaction_id"`
+	Date                 time.Time       `gorm:"index:idx_postings_forecast_date,priority:2" json:"date"`
 	Payee                string          `json:"payee"`
-	Account              string          `json:"account"`
-	Commodity            string          `json:"commodity"`
+	Account              string          `gorm:"index:idx_postings_account_forecast,priority:1" json:"account"`
+	Commodity            string          `gorm:"index:idx_postings_commodity" json:"commodity"`
 	Quantity             decimal.Decimal `json:"quantity"`
 	Amount               decimal.Decimal `json:"amount"`
 	Status               string          `json:"status"`
@@ -38,7 +38,7 @@ type Posting struct {
 	TransactionBeginLine uint64          `json:"transaction_begin_line"`
 	TransactionEndLine   uint64          `json:"transaction_end_line"`
 	FileName             string          `json:"file_name"`
-	Forecast             bool            `json:"forecast"`
+	Forecast             bool            `gorm:"index:idx_postings_forecast_date,priority:1;index:idx_postings_account_forecast,priority:2" json:"forecast"`
 	Note                 string          `json:"note"`
 	TransactionNote      string          `json:"transaction_note"`
 
@@ -115,14 +115,10 @@ func UpsertAll(db *gorm.DB, postings []*Posting) error {
 		if err != nil {
 			return err
 		}
-		for _, posting := range postings {
-			err := tx.Create(posting).Error
-			if err != nil {
-				return err
-			}
+		if len(postings) == 0 {
+			return nil
 		}
-
-		return nil
+		return tx.CreateInBatches(postings, 500).Error
 	})
 }
 

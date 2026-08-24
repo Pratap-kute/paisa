@@ -12,10 +12,10 @@ import (
 
 type Price struct {
 	ID            uint                 `gorm:"primaryKey" json:"id"`
-	Date          time.Time            `json:"date"`
-	CommodityType config.CommodityType `json:"commodity_type"`
-	CommodityID   string               `json:"commodity_id"`
-	CommodityName string               `json:"commodity_name"`
+	Date          time.Time            `gorm:"index:idx_prices_date" json:"date"`
+	CommodityType config.CommodityType `gorm:"index:idx_prices_type_name_id,priority:1" json:"commodity_type"`
+	CommodityID   string               `gorm:"index:idx_prices_type_name_id,priority:3" json:"commodity_id"`
+	CommodityName string               `gorm:"index:idx_prices_type_name_id,priority:2" json:"commodity_name"`
 	Value         decimal.Decimal      `json:"value"`
 }
 
@@ -37,15 +37,10 @@ func UpsertAllByTypeNameAndID(db *gorm.DB, commodityType config.CommodityType, c
 		if err != nil {
 			return err
 		}
-
-		for _, price := range prices {
-			err := tx.Create(price).Error
-			if err != nil {
-				return err
-			}
+		if len(prices) == 0 {
+			return nil
 		}
-
-		return nil
+		return tx.CreateInBatches(prices, 500).Error
 	})
 }
 
@@ -55,13 +50,9 @@ func UpsertAllByType(db *gorm.DB, commodityType config.CommodityType, prices []P
 		if err != nil {
 			return err
 		}
-		for _, price := range prices {
-			err := tx.Create(&price).Error
-			if err != nil {
-				return err
-			}
+		if len(prices) == 0 {
+			return nil
 		}
-
-		return nil
+		return tx.CreateInBatches(prices, 500).Error
 	})
 }

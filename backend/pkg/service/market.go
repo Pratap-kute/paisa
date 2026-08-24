@@ -53,27 +53,32 @@ func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btr
 			pricesTree[p.CommodityName].ReplaceOrInsert(p)
 		}
 
-		var postings []posting.Posting
-		result = db.Find(&postings)
+		var unknownPrices []price.Price
+		result = db.Where("commodity_type = ?", config.Unknown).Find(&unknownPrices)
 		if result.Error != nil {
 			log.Warn(result.Error)
 		}
 
-		for commodityName, ps := range lo.GroupBy(postings, func(p posting.Posting) string { return p.Commodity }) {
-			if !utils.IsCurrency(ps[0].Commodity) {
-				result := db.Where("commodity_type = ? and commodity_name = ?", config.Unknown, commodityName).Find(&prices)
-				if result.Error != nil {
-					log.Warn(result.Error)
-				}
+		var commodities []string
+		result = db.Model(&posting.Posting{}).Distinct().Pluck("Commodity", &commodities)
+		if result.Error != nil {
+			log.Warn(result.Error)
+		}
 
-				ppt := btree.New(2)
-				for _, p := range prices {
-					ppt.ReplaceOrInsert(p)
-				}
-				postingPricesTree[commodityName] = ppt
+		unknownByCommodity := lo.GroupBy(unknownPrices, func(p price.Price) string { return p.CommodityName })
 
-				if pricesTree[commodityName] == nil {
-					pricesTree[commodityName] = ppt
+		for _, commodityName := range commodities {
+			if !utils.IsCurrency(commodityName) {
+				if pricesList, ok := unknownByCommodity[commodityName]; ok {
+					ppt := btree.New(2)
+					for _, p := range pricesList {
+						ppt.ReplaceOrInsert(p)
+					}
+					postingPricesTree[commodityName] = ppt
+
+					if pricesTree[commodityName] == nil {
+						pricesTree[commodityName] = ppt
+					}
 				}
 			}
 		}

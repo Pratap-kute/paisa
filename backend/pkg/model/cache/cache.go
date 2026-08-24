@@ -13,7 +13,7 @@ import (
 type Cache struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	ExpiresAt time.Time `json:"expires_at"`
-	HashKey   string    `json:"hash_key"`
+	HashKey   string    `gorm:"index:idx_caches_hash_key" json:"hash_key"`
 	Value     []byte    `gorm:"type:BLOB" json:"item"`
 }
 
