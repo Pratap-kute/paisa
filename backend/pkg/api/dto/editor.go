@@ -1,9 +1,10 @@
 package dto
 
 type LedgerFileRequest struct {
-	Name    string `json:"name"`
-	Version string `json:"version,omitempty"`
-	Content string `json:"content,omitempty"`
+	Name      string `json:"name"`
+	Version   string `json:"version,omitempty"`
+	Content   string `json:"content,omitempty"`
+	Operation string `json:"operation,omitempty"`
 }
 
 type SheetFileRequest struct {

@@ -22,7 +22,6 @@
     totalRecurring
   } from "$lib/domain/transaction_sequence";
   import {
-    ajax,
     formatCurrency,
     formatCurrencyCrude,
     formatFloat,
@@ -72,6 +71,8 @@ import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collect
   }
 
   let currentBudget = $derived(budgetsByMonth[month]);
+  import { api } from "$lib/api";
+
   let selectedExpenses: Posting[] = $derived(expenses[month] || []);
   let totalExpense = $derived(sumBy(selectedExpenses, (p) => p.amount));
   let selectedExpenseBreakdownData = $derived(
@@ -82,22 +83,22 @@ import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collect
   let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
 
   async function initDemo() {
-    await ajax("/api/init", { method: "POST" });
+    await api.init.initDemoData();
     refresh();
   }
 
   onMount(async () => {
     try {
-      ({
-        expenses,
-        cashFlows,
-        goalSummaries,
-        budget: { budgetsByMonth },
-        transactionSequences,
-        networth: { networth, xirr },
-        checkingBalances: { asset_breakdowns: checkingBalances },
-        transactions
-      } = await ajax("/api/dashboard"));
+      const res = await api.dashboard.getDashboard();
+      expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
+      cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
+      goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
+      budgetsByMonth = (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
+      transactionSequences = (res.transactionSequences as unknown as TransactionSequence[]) || [];
+      networth = (res.networth?.networth as unknown as Networth) || null;
+      xirr = res.networth?.xirr || 0;
+      checkingBalances = (res.checkingBalances?.asset_breakdowns as unknown as Record<string, AssetBreakdown>) || {};
+      transactions = (res.transactions as unknown as Transaction[]) || [];
 
       goalSummaries = sortBy(goalSummaries, (g) => -g.priority);
 

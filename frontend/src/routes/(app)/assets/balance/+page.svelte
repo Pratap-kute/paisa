@@ -1,6 +1,7 @@
 <script lang="ts">
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import { ajax, type AssetBreakdown } from "$lib/core/utils";
+  import { type AssetBreakdown } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
@@ -14,7 +15,8 @@
 
   onMount(async () => {
     try {
-      ({ asset_breakdowns: breakdowns } = await ajax("/api/assets/balance"));
+      const res = await api.assets.getAssetsBalance();
+      breakdowns = (res.asset_breakdowns as unknown as Record<string, AssetBreakdown>) || {};
     } finally {
       isLoading = false;
     }

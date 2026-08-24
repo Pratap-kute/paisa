@@ -3,7 +3,6 @@
   import { sumBy, uniq } from "es-toolkit";
   import dayjs from "dayjs";
   import {
-    ajax,
     firstName,
     type Posting,
     formatCurrency,
@@ -12,6 +11,7 @@
     postingUrl,
     restName,
   } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
@@ -59,15 +59,12 @@ import { isEmpty, map, sortBy } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      ({
-        expenses: expenses,
-        month_wise: {
-          expenses: grouped_expenses,
-          incomes: grouped_incomes,
-          investments: grouped_investments,
-          taxes: grouped_taxes,
-        },
-      } = await ajax("/api/expense"));
+      const res = await api.expense.getExpense();
+      expenses = res.expenses as unknown as Posting[];
+      grouped_expenses = res.month_wise?.expenses as unknown as Record<string, Posting[]>;
+      grouped_incomes = res.month_wise?.incomes as unknown as Record<string, Posting[]>;
+      grouped_investments = res.month_wise?.investments as unknown as Record<string, Posting[]>;
+      grouped_taxes = res.month_wise?.taxes as unknown as Record<string, Posting[]>;
 
       setAllowedDateRange(map(expenses, (e: Posting) => e.date));
       const allGroups = uniq(expenses.map(expenseGroup)).sort();

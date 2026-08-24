@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ajax, type LedgerFile, type Transaction as T } from "$lib/core/utils";
+  import { type LedgerFile, type Transaction as T } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { debounce } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
@@ -68,15 +69,20 @@ import { filter } from "$lib/core/collection";
   }
 
   async function loadTransactions() {
-    ({ files, accounts, commodities } = await ajax("/api/editor/files"));
-    ({ transactions } = await ajax("/api/transaction"));
+    const editorRes = await api.editor.getEditorFiles();
+    files = (editorRes.files as unknown as LedgerFile[]) || [];
+    accounts = editorRes.accounts || [];
+    commodities = editorRes.commodities || [];
+
+    const txRes = await api.transaction.getTransactions();
+    transactions = (txRes.transactions as unknown as T[]) || [];
     handleInputRaw(get(editorState).predicate);
     newFiles = files;
   }
 
   async function downloadTransactions() {
-    const { balancedPostings } = await ajax("/api/transaction/balanced");
-    download(balancedPostings);
+    const balancedPostings = await api.transaction.getBalancedPostings();
+    download(balancedPostings as unknown as any);
   }
 
   function showPreview(detail: any) {
@@ -91,15 +97,14 @@ import { filter } from "$lib/core/collection";
 
   async function saveAll(newFiles: LedgerFile[]) {
     for (const newFile of newFiles) {
-      const { saved, message } = await ajax("/api/editor/save", {
-        method: "POST",
-        body: JSON.stringify({ name: newFile.name, content: newFile.content }),
-        background: true
+      const res = await api.editor.saveEditorFile({
+        name: newFile.name,
+        content: newFile.content,
       });
 
-      if (!saved) {
+      if (!res.saved) {
         toast.toast({
-          message: `Failed to save ${newFile.name}. reason: ${message}`,
+          message: `Failed to save ${newFile.name}. reason: ${res.message || "Unknown error"}`,
           type: "is-danger",
           duration: 10000
         });

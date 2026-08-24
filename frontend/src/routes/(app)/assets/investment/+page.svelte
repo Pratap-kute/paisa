@@ -5,12 +5,12 @@
     buildYearlyInvestmentSeries,
   } from "$lib/charts/time_series_data";
   import {
-    ajax,
     formatCurrency,
     type InvestmentYearlyCard as InvestmentYearlyCardType,
     type Legend,
     type Posting,
   } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { orderBy, sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -42,9 +42,9 @@ import { isEmpty } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      const { assets, yearly_cards: fetchedYearlyCards } = await ajax("/api/investment");
-      yearlyCards = fetchedYearlyCards || [];
-      postings = assets as Posting[];
+      const res = await api.investment.getInvestment();
+      yearlyCards = (res.yearly_cards as unknown as InvestmentYearlyCardType[]) || [];
+      postings = (res.assets as unknown as Posting[]) || [];
 
       totalInvested = sumBy(yearlyCards, (c) => c.net_investment);
       const latest = sortedYearlyCards[0];

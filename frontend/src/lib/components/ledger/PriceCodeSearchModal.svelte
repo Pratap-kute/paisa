@@ -6,7 +6,8 @@
   import Input from "$lib/components/ui/Input.svelte";
   import SelectField from "$lib/components/ui/Select.svelte";
   import { createEventDispatcher, onMount } from "svelte";
-  import { ajax, type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
+  import { type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
+  import { api } from "$lib/api";
 
   let label = "Choose Price Provider";
   interface Props {
@@ -22,19 +23,22 @@
   let filters: Record<string, AutoCompleteItem | string | null> = $state({});
 
   onMount(async () => {
-    ({ providers } = await ajax("/api/price/providers", { background: true }));
-    selectedProvider = providers[0];
+    try {
+      const res = await api.price.getPriceProviders();
+      providers = (res.providers as unknown as PriceProvider[]) || [];
+      selectedProvider = providers[0];
+    } catch {
+      providers = [];
+    }
   });
 
   let isLoading = $state(false);
   async function clearProviderCache() {
     isLoading = true;
     try {
-      await ajax(
-        "/api/price/providers/delete/:provider",
-        { method: "POST", background: true },
-        { provider: selectedProvider.code }
-      );
+      if (selectedProvider?.code) {
+        await api.price.clearPriceProviderCache(selectedProvider.code);
+      }
     } finally {
       isLoading = false;
       reset();
@@ -72,16 +76,12 @@
         Object.entries(filters).map(([k, v]) => [k, typeof v === "string" ? v : v?.id]),
       );
       queryFilters[field] = filterText;
-      const { completions } = await ajax("/api/price/autocomplete", {
-        method: "POST",
-        body: JSON.stringify({
-          field,
-          provider: selectedProvider.code,
-          filters: queryFilters
-        }),
-        background: true
+      const res = await api.price.getPriceAutoCompletions({
+        field,
+        provider: selectedProvider.code,
+        filters: queryFilters
       });
-      return completions;
+      return (res.completions as unknown as AutoCompleteItem[]) || [];
     };
   }
 

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { sumBy, uniq } from "es-toolkit";
-  import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
+  import { financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
   import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
@@ -47,15 +48,12 @@ import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      ({
-        expenses: expenses,
-        year_wise: {
-          expenses: grouped_expenses,
-          incomes: grouped_incomes,
-          investments: grouped_investments,
-          taxes: grouped_taxes,
-        },
-      } = await ajax("/api/expense"));
+      const res = await api.expense.getExpense();
+      expenses = (res.expenses as unknown as Posting[]) || [];
+      grouped_expenses = (res.year_wise?.expenses as unknown as Record<string, Posting[]>) || {};
+      grouped_incomes = (res.year_wise?.incomes as unknown as Record<string, Posting[]>) || {};
+      grouped_investments = (res.year_wise?.investments as unknown as Record<string, Posting[]>) || {};
+      grouped_taxes = (res.year_wise?.taxes as unknown as Record<string, Posting[]>) || {};
 
       const dates = map(expenses, (e) => e.date);
       if (dates.length > 0) {

@@ -1,11 +1,11 @@
 <script lang="ts">
   import {
-    ajax,
     formatCurrency,
     formatFloat,
     type Legend,
     type Networth,
   } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { last } from "es-toolkit";
   import { onMount } from "svelte";
   import {
@@ -48,8 +48,8 @@ import { filter, map } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      const result = await ajax("/api/networth");
-      points = result.networthTimeline;
+      const result = await api.networth.getNetworth();
+      points = (result.networthTimeline as unknown as Networth[]) || [];
       setAllowedDateRange(map(points, (p) => p.date));
 
       const current = last(points);
@@ -58,7 +58,7 @@ import { filter, map } from "$lib/core/collection";
         investment = current.investmentAmount - current.withdrawalAmount;
         gain = current.gainAmount;
       }
-      xirr = result.xirr;
+      xirr = result.xirr || 0;
     } finally {
       isLoading = false;
     }

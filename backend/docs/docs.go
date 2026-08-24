@@ -1815,7 +1815,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AccountGainResponse": {
+        "dto.AccountGainDetailResponse": {
             "type": "object",
             "properties": {
                 "account": {
@@ -1827,7 +1827,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/dto.NetworthTimelineItemResponse"
                     }
                 },
-                "portfolioGroups": {},
                 "postings": {
                     "type": "array",
                     "items": {
@@ -1836,6 +1835,20 @@ const docTemplate = `{
                 },
                 "xirr": {
                     "type": "number"
+                }
+            }
+        },
+        "dto.AccountGainResponse": {
+            "type": "object",
+            "properties": {
+                "asset_breakdown": {
+                    "$ref": "#/definitions/dto.AssetBreakdownResponse"
+                },
+                "gain_timeline_breakdown": {
+                    "$ref": "#/definitions/dto.AccountGainDetailResponse"
+                },
+                "portfolio_allocation": {
+                    "$ref": "#/definitions/dto.PortfolioAllocationGroupsResponse"
                 }
             }
         },
@@ -1942,13 +1955,24 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.AutoCompleteItemResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AutoCompleteResponse": {
             "type": "object",
             "properties": {
-                "value": {
+                "completions": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.AutoCompleteItemResponse"
                     }
                 }
             }
@@ -2209,10 +2233,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "budget": {
-                    "$ref": "#/definitions/dto.BudgetResponse"
+                    "$ref": "#/definitions/dto.BudgetsSummaryResponse"
                 },
                 "cashFlows": {
-                    "$ref": "#/definitions/dto.CashFlowResponse"
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CashFlowResponse"
+                    }
                 },
                 "checkingBalances": {},
                 "expenses": {
@@ -2798,6 +2825,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "operation": {
                     "type": "string"
                 },
                 "version": {

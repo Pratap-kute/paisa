@@ -19,7 +19,7 @@ definitions:
       rollover:
         type: number
     type: object
-  dto.AccountGainResponse:
+  dto.AccountGainDetailResponse:
     properties:
       account:
         type: string
@@ -27,13 +27,21 @@ definitions:
         items:
           $ref: '#/definitions/dto.NetworthTimelineItemResponse'
         type: array
-      portfolioGroups: {}
       postings:
         items:
           $ref: '#/definitions/dto.PostingResponse'
         type: array
       xirr:
         type: number
+    type: object
+  dto.AccountGainResponse:
+    properties:
+      asset_breakdown:
+        $ref: '#/definitions/dto.AssetBreakdownResponse'
+      gain_timeline_breakdown:
+        $ref: '#/definitions/dto.AccountGainDetailResponse'
+      portfolio_allocation:
+        $ref: '#/definitions/dto.PortfolioAllocationGroupsResponse'
     type: object
   dto.AggregateResponse:
     properties:
@@ -102,11 +110,18 @@ definitions:
           $ref: '#/definitions/dto.AssetBreakdownResponse'
         type: object
     type: object
+  dto.AutoCompleteItemResponse:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+    type: object
   dto.AutoCompleteResponse:
     properties:
-      value:
+      completions:
         items:
-          type: string
+          $ref: '#/definitions/dto.AutoCompleteItemResponse'
         type: array
     type: object
   dto.BalancedPostingResponse:
@@ -276,9 +291,11 @@ definitions:
   dto.DashboardResponse:
     properties:
       budget:
-        $ref: '#/definitions/dto.BudgetResponse'
+        $ref: '#/definitions/dto.BudgetsSummaryResponse'
       cashFlows:
-        $ref: '#/definitions/dto.CashFlowResponse'
+        items:
+          $ref: '#/definitions/dto.CashFlowResponse'
+        type: array
       checkingBalances: {}
       expenses:
         $ref: '#/definitions/dto.PeriodicPostingsSummaryResponse'
@@ -661,6 +678,8 @@ definitions:
       content:
         type: string
       name:
+        type: string
+      operation:
         type: string
       version:
         type: string

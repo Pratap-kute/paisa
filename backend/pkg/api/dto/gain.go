@@ -15,10 +15,15 @@ type GainsResponse struct {
 	GainBreakdown []GainResponse `json:"gain_breakdown"`
 }
 
-type AccountGainResponse struct {
+type AccountGainDetailResponse struct {
 	Account          string                         `json:"account"`
 	NetworthTimeline []NetworthTimelineItemResponse `json:"networthTimeline"`
 	XIRR             decimal.Decimal                `json:"xirr"`
 	Postings         []PostingResponse              `json:"postings"`
-	PortfolioGroups  interface{}                    `json:"portfolioGroups,omitempty"`
+}
+
+type AccountGainResponse struct {
+	GainTimelineBreakdown *AccountGainDetailResponse         `json:"gain_timeline_breakdown,omitempty"`
+	PortfolioAllocation   *PortfolioAllocationGroupsResponse `json:"portfolio_allocation,omitempty"`
+	AssetBreakdown        *AssetBreakdownResponse            `json:"asset_breakdown,omitempty"`
 }

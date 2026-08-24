@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
-  import { ajax, type CashFlow } from "$lib/core/utils";
+  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
+  import { type CashFlow } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { onMount } from "svelte";
   import { dateMin, dateMax, dateRange, dateRangeOption, setAllowedDateRange } from "../../../../store";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
@@ -37,7 +38,8 @@ import { filter, map, some } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      ({ cash_flows: cashFlows } = await ajax("/api/cash_flow"));
+      const res = await api.cashFlow.getCashFlow();
+      cashFlows = (res.cash_flows as unknown as CashFlow[]) || [];
       setAllowedDateRange(map(cashFlows, (c) => c.date));
       isLoading = false;
     } catch {

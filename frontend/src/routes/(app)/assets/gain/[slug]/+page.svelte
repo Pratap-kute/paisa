@@ -6,7 +6,6 @@
     filterCommodityBreakdowns,
   } from "$lib/charts/hierarchy_data";
   import {
-    ajax,
     type Posting,
     formatCurrency,
     formatFloat,
@@ -20,7 +19,8 @@
     restName,
     postingUrl,
   } from "$lib/core/utils";
-  import { last } from "es-toolkit";
+  import { api } from "$lib/api";
+  import { last, sortBy } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
@@ -34,7 +34,6 @@
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
   import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-import { sortBy } from "$lib/core/collection";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -65,22 +64,23 @@ import { sortBy } from "$lib/core/collection";
   let postings: Posting[] = $state([]);
 
   onMount(async () => {
-    ({
-      gain_timeline_breakdown: gain,
-      asset_breakdown: assetBreakdown,
-      portfolio_allocation: {
-        name_and_security_type,
-        security_type,
-        rating,
-        industry,
-        commodities,
-      },
-    } = await ajax("/api/gain/:name", null, data));
+    const res = await api.gain.getAccountGain(data.name);
+    gain = res.gain_timeline_breakdown as unknown as AccountGain;
+    assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
+    name_and_security_type = (res.portfolio_allocation?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
+    security_type = (res.portfolio_allocation?.security_type as unknown as PortfolioAggregate[]) || [];
+    rating = (res.portfolio_allocation?.rating as unknown as PortfolioAggregate[]) || [];
+    industry = (res.portfolio_allocation?.industry as unknown as PortfolioAggregate[]) || [];
+    commodities = (res.portfolio_allocation?.commodities as unknown as any) || [];
 
-    overview = last(gain.networthTimeline);
-    postings = sortBy(gain.postings, (p) => p.date)
-      .reverse()
-      .slice(0, 100);
+    overview = last(gain.networthTimeline as any);
+    postings = [...(gain.postings || [])]
+      .sort((a, b) => {
+        const da = a.date ? (typeof a.date === "string" ? new Date(a.date).getTime() : (a.date as any).valueOf()) : 0;
+        const db = b.date ? (typeof b.date === "string" ? new Date(b.date).getTime() : (b.date as any).valueOf()) : 0;
+        return db - da;
+      })
+      .slice(0, 100) as unknown as Posting[];
     selectedCommodities = [...commodities];
     securityTypeEmpty = security_type.length === 0;
     nameAndSecurityTypeEmpty = name_and_security_type.length === 0;

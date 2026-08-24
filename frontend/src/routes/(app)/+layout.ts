@@ -1,12 +1,15 @@
 import type { LayoutLoad } from "./$types";
-import { ajax, configUpdated, setNow } from "$lib/core/utils";
+import { configUpdated, setNow } from "$lib/core/utils";
+import { createApiClient } from "$lib/api";
+import dayjs from "dayjs";
 
 export const load = (async ({ fetch }) => {
-  const { config, now } = await ajax("/api/config", { customFetch: fetch });
+  const client = createApiClient({ customFetch: fetch });
+  const { config, now } = await client.config.getConfig();
   if (now) {
-    setNow(now);
+    setNow(dayjs(now));
   }
-  globalThis.USER_CONFIG = config;
+  globalThis.USER_CONFIG = config as any;
   configUpdated();
   return {};
 }) satisfies LayoutLoad;

@@ -25,8 +25,8 @@ func GainsToDTO(gains []service.Gain) []dto.GainResponse {
 	return result
 }
 
-func AccountGainToDTO(g service.AccountGain) dto.AccountGainResponse {
-	return dto.AccountGainResponse{
+func AccountGainToDTO(g service.AccountGain) dto.AccountGainDetailResponse {
+	return dto.AccountGainDetailResponse{
 		Account:          g.Account,
 		NetworthTimeline: NetworthTimelineToDTO(g.NetworthTimeline),
 		XIRR:             g.XIRR,

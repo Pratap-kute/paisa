@@ -20,12 +20,17 @@ export interface DtoAccountBudgetResponse {
   rollover?: number;
 }
 
-export interface DtoAccountGainResponse {
+export interface DtoAccountGainDetailResponse {
   account?: string;
   networthTimeline?: DtoNetworthTimelineItemResponse[];
-  portfolioGroups?: any;
   postings?: DtoPostingResponse[];
   xirr?: number;
+}
+
+export interface DtoAccountGainResponse {
+  asset_breakdown?: DtoAssetBreakdownResponse;
+  gain_timeline_breakdown?: DtoAccountGainDetailResponse;
+  portfolio_allocation?: DtoPortfolioAllocationGroupsResponse;
 }
 
 export interface DtoAggregateResponse {
@@ -63,8 +68,13 @@ export interface DtoAssetsBalanceResponse {
   asset_breakdowns?: Record<string, DtoAssetBreakdownResponse>;
 }
 
+export interface DtoAutoCompleteItemResponse {
+  id?: string;
+  label?: string;
+}
+
 export interface DtoAutoCompleteResponse {
-  value?: string[];
+  completions?: DtoAutoCompleteItemResponse[];
 }
 
 export interface DtoBalancedPostingResponse {
@@ -157,8 +167,8 @@ export interface DtoCurrentNetworthResponse {
 }
 
 export interface DtoDashboardResponse {
-  budget?: DtoBudgetResponse;
-  cashFlows?: DtoCashFlowResponse;
+  budget?: DtoBudgetsSummaryResponse;
+  cashFlows?: DtoCashFlowResponse[];
   checkingBalances?: any;
   expenses?: DtoPeriodicPostingsSummaryResponse;
   goalSummaries?: DtoGoalSummaryResponse[];
@@ -350,6 +360,7 @@ export interface DtoLedgerErrorResponse {
 export interface DtoLedgerFileRequest {
   content?: string;
   name?: string;
+  operation?: string;
   version?: string;
 }
 

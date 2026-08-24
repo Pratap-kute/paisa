@@ -5,13 +5,13 @@
     sortTrantionSequence,
   } from "$lib/domain/transaction_sequence";
   import {
-    ajax,
     helpUrl,
     isMobile,
     monthDays,
     type TransactionSchedule,
     type TransactionSequence,
   } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";
   import RecurringCard from "$lib/components/finance/RecurringCard.svelte";
@@ -25,10 +25,10 @@
   import Section from "$lib/components/layout/Section.svelte";
 import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
   let transactionSequences: TransactionSequence[] = $state([]);
   let transactionSequencesDelayed: TransactionSequence[] = $state([]);
+  let isEmpty = $state(false);
+  let isLoading = $state(true);
 
   let days: Dayjs[] = $derived(monthDays($month).days);
   let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
@@ -42,7 +42,8 @@ import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      ({ transaction_sequences: transactionSequences } = await ajax("/api/recurring"));
+      const res = await api.recurring.getRecurringTransactions();
+      transactionSequences = (res.transaction_sequences as unknown as TransactionSequence[]) || [];
 
       if (isEmptyValue(transactionSequences)) {
         isEmpty = true;

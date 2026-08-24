@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ajax, configUpdated } from "$lib/core/utils";
+  import { configUpdated } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
   import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
@@ -77,9 +78,9 @@
 
   onMount(async () => {
     try {
-      const data = await ajax("/api/config");
-      config = data.config;
-      schema = data.schema;
+      const data = await api.config.getConfig();
+      config = (data.config as unknown as Record<string, any>) || null;
+      schema = (data.schema as unknown as Schema) || null;
       accounts = data.accounts || [];
       lastConfig = cloneDeep(config);
     } finally {
@@ -197,11 +198,12 @@
     try {
       let success = false;
       let respError: string | null = null;
-      ({ success, error: respError } = await ajax("/api/config", {
-        method: "POST",
-        body: JSON.stringify(newConfig),
-        background: true,
-      }));
+      try {
+        const res = await api.config.saveConfig(newConfig as unknown as string);
+        success = res.success;
+      } catch (err: unknown) {
+        respError = err instanceof Error ? err.message : "Failed to save config";
+      }
       error = respError;
 
       if (success) {

@@ -1,7 +1,6 @@
 <script lang="ts">
   import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
   import {
-    ajax,
     formatCurrency,
     restName,
     type AccountBudget,
@@ -9,7 +8,8 @@
     helpUrl,
     now,
   } from "$lib/core/utils";
-    import { onMount } from "svelte";
+  import { api } from "$lib/api";
+  import { onMount } from "svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -57,7 +57,10 @@ import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   onMount(async () => {
     try {
-      ({ budgetsByMonth, checkingBalance, availableForBudgeting } = await ajax("/api/budget"));
+      const res = await api.budget.getBudget();
+      budgetsByMonth = (res.budgetsByMonth as unknown as Record<string, Budget>) || {};
+      checkingBalance = res.checkingBalance || 0;
+      availableForBudgeting = res.availableForBudgeting || 0;
       setAllowedDateRange(
         Object.values(budgetsByMonth)
           .flat()

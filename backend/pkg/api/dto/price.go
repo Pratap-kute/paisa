@@ -30,6 +30,11 @@ type PriceProvidersResponse struct {
 	Providers []PriceProviderResponse `json:"providers"`
 }
 
+type AutoCompleteItemResponse struct {
+	Label string `json:"label"`
+	ID    string `json:"id"`
+}
+
 type AutoCompleteResponse struct {
-	Value []string `json:"value"`
+	Completions []AutoCompleteItemResponse `json:"completions"`
 }

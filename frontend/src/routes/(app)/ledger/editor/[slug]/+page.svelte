@@ -8,7 +8,8 @@
     updateContent,
   } from "$lib/editors/editor";
   import { insertTab } from "@codemirror/commands";
-  import { ajax, buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
+  import { buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
@@ -105,9 +106,11 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
   });
 
   async function loadFiles(selectedFileName: string) {
-    let files;
-    ({ files, accounts, commodities, payees } =
-      await ajax("/api/editor/files"));
+    const res = await api.editor.getEditorFiles();
+    const files = (res.files as unknown as LedgerFile[]) || [];
+    accounts = res.accounts || [];
+    commodities = res.commodities || [];
+    payees = res.payees || [];
     filesMap = fromPairs(map(files, (f: LedgerFile) => [f.name, f]));
     if (!isEmpty(files)) {
       selectedFile =
@@ -126,13 +129,8 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
   }
 
   async function revert(version: string) {
-    const { file } = await ajax("/api/editor/file", {
-      method: "POST",
-      body: JSON.stringify({ name: version }),
-      background: true,
-    });
-
-    if (editor) updateContent(editor, file.content);
+    const res = await api.editor.getEditorFile({ name: version });
+    if (editor && res.content) updateContent(editor, res.content);
   }
 
   async function pretty() {
@@ -145,35 +143,26 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
 
   async function deleteBackups() {
     if (!selectedFile) return;
-    const { file } = await ajax("/api/editor/file/delete_backups", {
-      method: "POST",
-      body: JSON.stringify({ name: selectedFile.name }),
-      background: true,
-    });
-
-    selectedFile.versions = file.versions;
+    const res = await api.editor.deleteEditorBackups({ name: selectedFile.name });
+    selectedFile.versions = res.versions || [];
   }
 
   async function save() {
     if (!editor || !selectedFile) return;
     const doc = editor.state.doc;
-    const { errors, saved, synced, file, message } = await ajax("/api/editor/save", {
-      method: "POST",
-      body: JSON.stringify({
-        name: selectedFile.name,
-        content: doc.toString(),
-      }),
-      background: true,
+    const { errors, saved, synced, file, message } = await api.editor.saveEditorFile({
+      name: selectedFile.name,
+      content: doc.toString(),
     });
 
     if (!saved) {
       toast.toast({
-        message: `Failed to save ${selectedFile.name}. reason: ${message}`,
+        message: `Failed to save ${selectedFile.name}. reason: ${message || "Unknown error"}`,
         type: "is-danger",
         duration: 10000,
       });
       if (!isEmpty(errors)) {
-        if (editor) moveToLine(editor, errors[0].line_from);
+        if (editor && errors?.[0]) moveToLine(editor, errors[0].line_from || errors[0].line || 1);
       }
     } else if (synced === false) {
       toast.toast({
@@ -181,8 +170,10 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
         type: "is-warning",
         duration: 10000,
       });
-      filesMap[file.name] = file;
-      selectedFile = file;
+      if (file) {
+        filesMap[file.name] = file as unknown as LedgerFile;
+        selectedFile = file as unknown as LedgerFile;
+      }
       selectedVersion = "";
       $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     } else {
@@ -190,8 +181,10 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
         message: `Saved ${selectedFile.name}`,
         type: "is-success",
       });
-      filesMap[file.name] = file;
-      selectedFile = file;
+      if (file) {
+        filesMap[file.name] = file as unknown as LedgerFile;
+        selectedFile = file as unknown as LedgerFile;
+      }
       selectedVersion = "";
       $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     }
@@ -235,14 +228,10 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/co
   }
 
   async function createFile(destinationFile: string) {
-    const { saved, message } = await ajax("/api/editor/save", {
-      method: "POST",
-      body: JSON.stringify({
-        name: destinationFile,
-        content: "",
-        operation: "create",
-      }),
-      background: true,
+    const { saved, message } = await api.editor.saveEditorFile({
+      name: destinationFile,
+      content: "",
+      operation: "create",
     });
 
     if (saved) {

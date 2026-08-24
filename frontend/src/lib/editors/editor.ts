@@ -1,4 +1,4 @@
-import { ajax } from "../core/utils";
+import { api } from "$lib/api";
 import { ledger } from "./ledger_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
@@ -33,19 +33,20 @@ export { editorState } from "../../store";
 
 async function lint(editor: EditorView): Promise<Diagnostic[]> {
   const doc = editor.state.doc;
-  const response = await ajax("/api/editor/validate", {
-    method: "POST",
-    body: JSON.stringify({ name: "", content: editor.state.doc.toString() }),
-    background: true,
+  const response = await api.editor.validateEditorFile({
+    name: "",
+    content: editor.state.doc.toString(),
   });
 
   editorState.update((current) =>
-    assign({}, current, { errors: response.errors, output: response.output })
+    assign({}, current, { errors: response.errors || [], output: response.output })
   );
 
-  return map(response.errors, (error) => {
-    const lineFrom = doc.line(error.line_from);
-    const lineTo = doc.line(error.line_to);
+  return map(response.errors || [], (error) => {
+    const lineNum = error.line_from || error.line || 1;
+    const safeLineNum = Math.min(Math.max(1, lineNum), doc.lines);
+    const lineFrom = doc.line(safeLineNum);
+    const lineTo = doc.line(error.line_to ? Math.min(Math.max(1, error.line_to), doc.lines) : safeLineNum);
     return {
       message: error.message,
       severity: "error",

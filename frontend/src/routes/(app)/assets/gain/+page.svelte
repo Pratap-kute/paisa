@@ -3,7 +3,8 @@
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import { buildLegends } from "$lib/charts/gain";
   import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
-  import { ajax, formatCurrency, type Gain, type Legend } from "$lib/core/utils";
+  import { formatCurrency, type Gain, type Legend } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
@@ -25,6 +26,7 @@
   let overviewData = $derived(buildGainOverviewComparison(gains));
   let chartEvents = $derived([
     {
+      target: "series.bar" as const,
       event: "click" as const,
       handler: (event: { dataIndex?: number }) => {
         if (typeof event.dataIndex !== "number") return;
@@ -36,7 +38,8 @@
 
   onMount(async () => {
     try {
-      ({ gain_breakdown: gains } = await ajax("/api/gain"));
+      const res = await api.gain.getGain();
+      gains = (res.gain_breakdown as unknown as Gain[]) || [];
       totalGain = sumBy(gains, (g) => g.networth.gainAmount);
       totalInvestment = sumBy(
         gains,

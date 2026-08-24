@@ -3,7 +3,8 @@
   import { flip } from "svelte/animate";
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { ajax, helpUrl, type GoalSummary } from "$lib/core/utils";
+  import { helpUrl, type GoalSummary } from "$lib/core/utils";
+  import { api } from "$lib/api";
   import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";
   import * as toast from "$lib/core/toast";
@@ -12,50 +13,55 @@
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
-import { find, isEmpty as isEmptyValue, sortBy } from "$lib/core/collection";
+  import { find, isEmpty as isEmptyValue, sortBy } from "$lib/core/collection";
 
   const goalDndzone = dndzone;
 
   let isEmpty = $state(false);
   let config: UserConfig;
   let goals: GoalSummary[] = $state([]);
-  const dragDisabled = writable(true);
+  let dragDisabled = writable(true);
 
-  function handleConsider(event: CustomEvent<DndEvent<GoalSummary>>) {
-    goals = event.detail.items;
+  function handleConsider(e: CustomEvent<DndEvent<GoalSummary>>) {
+    goals = e.detail.items;
   }
 
-  async function handleFinalize(event: CustomEvent<DndEvent<GoalSummary>>) {
+  async function handleFinalize(e: CustomEvent<DndEvent<GoalSummary>>) {
+    goals = e.detail.items;
     dragDisabled.set(true);
 
-    goals = event.detail.items;
     for (let i = 0; i < goals.length; i++) {
       const g = goals[i];
       g.priority = goals.length - i;
-      const goalConfig = find(config.goals[g.type] || [], { name: g.name });
+      const list = config.goals?.[g.type] || [];
+      const goalConfig = find(list, (item: any) => item.name === g.name);
       if (goalConfig) {
         goalConfig.priority = g.priority;
       }
     }
+
     await save(config);
   }
 
   async function save(newConfig: UserConfig) {
-    const { success, error } = await ajax("/api/config", {
-      method: "POST",
-      body: JSON.stringify(newConfig),
-      background: true
-    });
-
-    if (success) {
-      globalThis.USER_CONFIG = cloneDeep(newConfig);
+    try {
+      const res = await api.config.saveConfig(newConfig as unknown as string);
+      if (res.success) {
+        globalThis.USER_CONFIG = cloneDeep(newConfig);
+        toast.toast({
+          message: `Updated goal config`,
+          type: "is-success"
+        });
+      } else {
+        toast.toast({
+          message: `Failed to save config: ${res.message || "Unknown error"}`,
+          type: "is-danger",
+          duration: 10000
+        });
+      }
+    } catch (err: unknown) {
       toast.toast({
-        message: `Updated goal config`,
-        type: "is-success"
-      });
-    } else {
-      toast.toast({
-        message: `Failed to save config: ${error}`,
+        message: `Failed to save config: ${err instanceof Error ? err.message : "Unknown error"}`,
         type: "is-danger",
         duration: 10000
       });
@@ -63,8 +69,10 @@ import { find, isEmpty as isEmptyValue, sortBy } from "$lib/core/collection";
   }
 
   onMount(async () => {
-    ({ config } = await ajax("/api/config"));
-    ({ goals } = await ajax("/api/goals"));
+    const configRes = await api.config.getConfig();
+    config = configRes.config as unknown as UserConfig;
+    const goalsRes = await api.goals.getGoals();
+    goals = (goalsRes.goals as unknown as GoalSummary[]) || [];
     goals = sortBy(goals, (g) => -g.priority);
     if (isEmptyValue(goals)) {
       isEmpty = true;
