@@ -4,7 +4,6 @@
     ajax,
     formatCurrency,
     formatFloat,
-    isMobile,
     type Forecast,
     type Point,
     type Posting,
@@ -13,19 +12,15 @@
     restName,
     postingUrl,
   } from "$lib/core/utils";
-  import { onMount, tick, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
     forecast,
-    renderProgress,
     findBreakPoints,
     project,
     solvePMTOrNper,
-    renderInvestmentTimeline,
   } from "$lib/domain/goals";
-  import _ from "lodash";
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
-  import type { PageData } from "./$types";
+    import type { PageData } from "./$types";
   import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
   import { iconGlyph, iconify } from "$lib/core/icon";
   import dayjs from "dayjs";
@@ -35,7 +30,11 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
+import { isEmpty, sortBy } from "$lib/core/collection";
 
   interface Props {
     data: PageData;
@@ -43,8 +42,6 @@
 
   let { data }: Props = $props();
 
-  let svg: Element | undefined = $state();
-  let investmentTimelineSvg: Element | undefined = $state();
   let targetDateObject: dayjs.Dayjs | undefined = $state();
   let savingsTotal = $state(0),
     investmentTotal = $state(0),
@@ -59,35 +56,20 @@
     icon = $state(""),
     progressPercent = $state(0),
     breakPoints: Point[] = $state([]),
-    savingsTimeline: Point[] = [],
-    postings: Posting[] = [],
+    savingsTimeline: Point[] = $state([]),
+    postings: Posting[] = $state([]),
     latestPostings: Posting[] = $state([]),
     balances: Record<string, AssetBreakdown> = $state({}),
-    destroyCallback = () => {},
-    predictionsTimeline: Forecast[] = [];
+    predictionsTimeline: Forecast[] = $state([]);
 
-  onDestroy(async () => {
-    destroyCallback();
-  });
-
-  function repaintProgressChart() {
-    if (!svg || _.isEmpty(savingsTimeline)) return;
-    destroyCallback();
-    svg.replaceChildren();
-    destroyCallback = renderProgress(
-      savingsTimeline,
-      predictionsTimeline,
-      breakPoints,
-      svg,
-      { targetSavings },
-    );
-  }
-
-  function repaintInvestmentChart() {
-    if (!investmentTimelineSvg || _.isEmpty(postings)) return;
-    investmentTimelineSvg.replaceChildren();
-    renderInvestmentTimeline(postings, investmentTimelineSvg, pmt);
-  }
+  let remainingAmount = $derived(Math.max(targetSavings - savingsTotal, 0));
+  let projectedCompletion = $derived(
+    targetDateObject?.isValid()
+      ? targetDateObject.format("DD MMM YYYY")
+      : pmt > 0
+        ? "Based on monthly target"
+        : "Not projected",
+  );
 
   onMount(async () => {
     ({
@@ -110,11 +92,9 @@
     postings = postings || [];
     balances = balances || {};
 
-    latestPostings = _.chain(postings)
-      .sortBy((p: Posting) => p.date)
+    latestPostings = sortBy(postings, (p: Posting) => p.date)
       .reverse()
-      .take(100)
-      .value();
+      .slice(0, 100);
 
     if (targetSavings != 0) {
       progressPercent = (savingsTotal / targetSavings) * 100;
@@ -128,111 +108,147 @@
       targetDate,
     ));
 
-    predictionsTimeline = [];
+    let nextPredictions: Forecast[] = [];
     targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
     if (targetDateObject.isValid()) {
-      predictionsTimeline = project(
+      nextPredictions = project(
         targetSavings,
         rate,
         targetDateObject,
         pmt,
         savingsTotal,
       );
-    } else if (savingsTotal < targetSavings && !_.isEmpty(savingsTimeline)) {
+    } else if (savingsTotal < targetSavings && !isEmpty(savingsTimeline)) {
       const ARIMA = await ARIMAPromise;
-      predictionsTimeline = forecast(savingsTimeline, targetSavings, ARIMA);
+      nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
     }
 
-    await tick();
-    breakPoints = findBreakPoints(
-      savingsTimeline.concat(predictionsTimeline),
+    const nextBreakPoints = findBreakPoints(
+      savingsTimeline.concat(nextPredictions),
       targetSavings,
     );
-    repaintProgressChart();
-    repaintInvestmentChart();
+    predictionsTimeline = nextPredictions;
+    breakPoints = nextBreakPoints;
   });
 </script>
+
+<svelte:head>
+  <title>{name || "Savings Goal"} - Paisa</title>
+</svelte:head>
 
 <Page width="fluid">
   <PageHeader
     title="{iconGlyph(icon)} {name}"
-    description="Savings goal progress, monthly target, and investments"
-  />
+    description="Savings target tracking, timeline, and balance"
+  >
+    {#snippet leading()}
+      <a
+        href="/more/goals"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+      >
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Goals</span>
+      </a>
+    {/snippet}
+  </PageHeader>
 
-  <MetricStrip cols="auto">
-    <LevelItem title={name} value={iconGlyph(icon)} />
-    <LevelItem
-      title="Net Investment"
-      value={formatCurrency(investmentTotal)}
-      color={COLORS.secondary}
-      subtitle={`<b>${formatCurrency(gainTotal)}</b> ${gainTotal >= 0 ? "gain" : "loss"}`}
-    />
-
-    <LevelItem
-      title="Current Savings"
-      value={formatCurrency(savingsTotal)}
-      color={COLORS.gainText}
-      subtitle={`<b>${formatFloat(xirr)}</b> XIRR`}
-    />
-
-    <LevelItem
-      title="Target Savings"
+  <MetricStrip cols={4}>
+    <Metric
+      label="Target Amount"
       value={formatCurrency(targetSavings)}
-      color={COLORS.primary}
-      subtitle={targetDateObject?.isValid()
+      secondary={targetDateObject?.isValid()
         ? targetDateObject.format("DD MMM YYYY")
         : undefined}
+      status="primary"
     />
-
-    {#if pmt > 0}
-      <LevelItem
-        title="Monthly Investment needed"
-        value={formatCurrency(pmt)}
-        color={COLORS.secondary}
-        subtitle={rate > 0
-          ? `Expected <b>${formatFloat(rate, 2)}</b> rate of return`
+    <Metric
+      label="Current Savings"
+      value={formatCurrency(savingsTotal)}
+      secondary="{formatFloat(xirr)} XIRR"
+      status="positive"
+    />
+    <Metric
+      label="Remaining Amount"
+      value={formatCurrency(remainingAmount)}
+      status={remainingAmount > 0 ? "warning" : "positive"}
+    />
+    <Metric
+      label="Projected Completion"
+      value={projectedCompletion}
+      secondary={pmt > 0
+        ? `${formatCurrency(pmt)} monthly target`
+        : rate > 0
+          ? `${formatFloat(rate, 2)} expected return`
           : undefined}
-      />
-    {/if}
+    />
   </MetricStrip>
+
+  {#if pmt > 0}
+    <MetricStrip cols={2}>
+      <Metric
+        label="Net Investment"
+        value={formatCurrency(investmentTotal)}
+        secondary={`${formatCurrency(gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"}`}
+      />
+      <Metric
+        label="Monthly Investment Needed"
+        value={formatCurrency(pmt)}
+        secondary={rate > 0
+          ? `${formatFloat(rate, 2)} expected rate of return`
+          : undefined}
+        status="primary"
+      />
+    </MetricStrip>
+  {/if}
 
   <Section>
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />
   </Section>
 
-  <div class="paisa-goal-detail-layout">
-    <!-- Main Content Panel -->
-    <div class="paisa-goal-detail-main">
+  <div
+    class="paisa-goal-detail-layout grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
+  >
+    <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
       <Section title="{iconGlyph(icon)} {name} Progress">
-        <ChartFrame type="timeline" onresize={repaintProgressChart}>
-          <svg height="400" width="100%" bind:this={svg} />
+        <ChartFrame height="tall">
+          <GoalProgressChart
+            points={savingsTimeline}
+            predictions={predictionsTimeline}
+            {breakPoints}
+            {targetSavings}
+            ariaLabel="{name} savings goal progress timeline"
+            testId="savings-goal-progress-echart"
+          />
         </ChartFrame>
       </Section>
 
       <Section title="Monthly Investment">
-        <ChartFrame type="timeline" onresize={repaintInvestmentChart}>
-          <svg height="300" width="100%" bind:this={investmentTimelineSvg} />
+        <ChartFrame height="tall">
+          <GoalInvestmentChart
+            {postings}
+            {pmt}
+            testId="savings-goal-investment-echart"
+          />
         </ChartFrame>
       </Section>
 
       <Section title="Current Balance">
-        <div class="has-text-grey">
+        <div class="text-[var(--paisa-muted-foreground)]">
           <AssetsBalance breakdowns={balances} indent={false} />
         </div>
       </Section>
     </div>
 
-    <!-- Side Postings Panel -->
-    <div class="paisa-goal-detail-side">
+    <div class="paisa-goal-detail-side flex min-w-0 flex-col gap-4">
       <Section title="Recent Postings">
         <PostingGroup postings={latestPostings} groupFormat="MMM YYYY">
           {#snippet children({ groupedPostings })}
             <div>
               {#each groupedPostings as posting}
                 <a
-                  class="paisa-posting-row"
+                  class="paisa-posting-row mb-2 flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)]"
                   href={postingUrl(posting)}
-                  style="--paisa-row-accent: {posting.amount >= 0
+                  style="border-left: 2px solid {posting.amount >= 0
                     ? posting.account.startsWith('Income:CapitalGains')
                       ? COLORS.tertiary
                       : COLORS.secondary
@@ -240,19 +256,26 @@
                       ? COLORS.secondary
                       : COLORS.tertiary}"
                 >
-                  <span class="paisa-posting-main">
-                    <span class="paisa-posting-payee">{posting.payee}</span>
-                    <span class="paisa-posting-date"
+                  <span class="flex min-w-0 items-center justify-between gap-2">
+                    <span
+                      class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-secondary)]"
+                      >{posting.payee}</span
+                    >
+                    <span
+                      class="shrink-0 text-xs text-[var(--paisa-text-muted)]"
                       >{posting.date.format("DD MMM YYYY")}</span
                     >
                   </span>
-                  <span class="paisa-posting-meta">
-                    <span class="paisa-posting-account custom-icon">
+                  <span class="flex min-w-0 items-center justify-between gap-2">
+                    <span
+                      class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-muted)]"
+                    >
                       {iconify(restName(posting.account), {
                         group: firstName(posting.account),
                       })}
                     </span>
-                    <span class="paisa-posting-amount"
+                    <span
+                      class="shrink-0 font-semibold text-[var(--paisa-text-primary)]"
                       >{formatCurrency(posting.amount)}</span
                     >
                   </span>
@@ -265,85 +288,3 @@
     </div>
   </div>
 </Page>
-
-<style lang="scss">
-  .paisa-goal-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-5);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
-    }
-  }
-
-  .paisa-goal-detail-main,
-  .paisa-goal-detail-side {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-
-  .paisa-posting-row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-1);
-    min-height: 54px;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    border-left: 2px solid var(--paisa-row-accent);
-    border-radius: var(--paisa-radius-md);
-    border-top: 1px solid var(--paisa-border-default);
-    border-right: 1px solid var(--paisa-border-default);
-    border-bottom: 1px solid var(--paisa-border-default);
-    background: var(--paisa-surface-card);
-    color: var(--paisa-text-secondary);
-    text-decoration: none;
-    margin-bottom: var(--paisa-space-2);
-  }
-
-  .paisa-posting-row:hover {
-    border-color: var(--paisa-border-strong);
-    color: var(--paisa-text-primary);
-  }
-
-  .paisa-posting-main,
-  .paisa-posting-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    min-width: 0;
-  }
-
-  .paisa-posting-payee,
-  .paisa-posting-account {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-posting-payee {
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-posting-date,
-  .paisa-posting-account {
-    flex: 0 0 auto;
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-posting-account {
-    flex: 1 1 auto;
-  }
-
-  .paisa-posting-amount {
-    flex: 0 0 auto;
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-  }
-</style>

@@ -40,7 +40,6 @@ import {
   secondName,
   setColorPreference,
   setNow,
-  skipTicks,
   sumPostings,
   tooltip,
   transactionTotal,
@@ -152,17 +151,6 @@ describe("core utilities", () => {
     expect(rem(10)).toBe(8.57);
   });
 
-  test("selects tick labels", () => {
-    const scale = { range: () => [0, 100], ticks: () => [1, 2, 3, 4] };
-    const formatter = skipTicks(40, scale as never, (value) => String(value));
-    expect([0, 1, 2, 3].map((i) => formatter(i, i))).toEqual([
-      "0",
-      null,
-      "2",
-      null,
-    ]);
-  });
-
   test("handles dates, colors, and theme preferences", () => {
     USER_CONFIG.financial_year_starting_month = 1;
     expect(financialYear(dayjs("2023-02-01"))).toBe("2023");
@@ -175,6 +163,9 @@ describe("core utilities", () => {
     expect(darkLightColor("black", "white")).toBe("black");
     expect(darkenOrLighten("#ffffff")).not.toBe("#ffffff");
     expect(darkenOrLighten("#000000")).not.toBe("#000000");
+    expect(darkenOrLighten("#ffffff")).toBe("#9b9b9b");
+    expect(darkenOrLighten("#000000")).toBe("#555555");
+    expect(darkenOrLighten("rgb(120, 80, 40)")).toBe("#ddab7f");
   });
 
   test("handles posting calculations and transformations", () => {
@@ -224,13 +215,15 @@ describe("core utilities", () => {
     expect(isZero(0.00001)).toBe(true);
     expect(isZero(0.1)).toBe(false);
     expect(dueDateIcon(dayjs("2024-01-01"), null).color).toBe(
-      "has-text-danger",
+      "paisa-text-danger",
     );
-    expect(dueDateIcon(dayjs("2024-02-01"), null).color).toBe("has-text-grey");
+    expect(dueDateIcon(dayjs("2024-02-01"), null).color).toBe(
+      "paisa-text-muted",
+    );
     expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-01")).color)
-      .toBe("has-text-success");
+      .toBe("paisa-text-success");
     expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-02")).color)
-      .toBe("has-text-warning-dark");
+      .toBe("paisa-text-warning");
   });
 
   test("tracks authentication token state", () => {

@@ -1,4 +1,4 @@
-import type { RenderError, RenderedRow } from "./spreadsheet";
+import type { RenderedRow, RenderError } from "./spreadsheet";
 
 export const emptyRenderMetadata = {
   content: "",

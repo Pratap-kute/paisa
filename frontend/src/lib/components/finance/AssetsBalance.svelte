@@ -1,6 +1,6 @@
 <script lang="ts">
   import { type AssetBreakdown, buildTree } from "$lib/core/utils";
-  import _ from "lodash";
+  import { onMount } from "svelte";
   import Table from "$lib/components/ui/Table.svelte";
   import type { ColumnDefinition } from "tabulator-tables";
   import {
@@ -9,15 +9,30 @@
     indendedAssetAccountName,
     nonZeroCurrency,
     nonZeroFloatChange,
-    nonZeroPercentageChange
+    nonZeroPercentageChange,
   } from "$lib/tables/formatters";
 
   interface Props {
     breakdowns: Record<string, AssetBreakdown>;
     indent?: boolean;
+    compact?: boolean;
   }
 
-  let { breakdowns, indent = true }: Props = $props();
+  let { breakdowns, indent = true, compact: compactProp }: Props = $props();
+
+  let compactView = $state(false);
+  let compact = $derived(compactProp ?? compactView);
+
+  onMount(() => {
+    if (compactProp !== undefined) return;
+    const mq = globalThis.matchMedia("(max-width: 767px)");
+    const update = () => {
+      compactView = mq.matches;
+    };
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  });
 
   let columns: ColumnDefinition[] = $derived([
     {
@@ -26,40 +41,66 @@
       formatter: indent ? indendedAssetAccountName : accountName,
       minWidth: 220,
       widthGrow: 2,
-      frozen: true
+      frozen: true,
     },
     {
       title: "Investment Amount",
       field: "investmentAmount",
       hozAlign: "right",
       vertAlign: "middle",
-      formatter: nonZeroCurrency
+      formatter: nonZeroCurrency,
+      cssClass: "paisa-tabular-nums",
     },
     {
       title: "Withdrawal Amount",
       field: "withdrawalAmount",
       hozAlign: "right",
-      formatter: nonZeroCurrency
+      formatter: nonZeroCurrency,
+      cssClass: "paisa-tabular-nums",
+      visible: !compact,
     },
     {
       title: "Balance Units",
       field: "balanceUnits",
       hozAlign: "right",
-      formatter: nonZeroCurrency
+      formatter: nonZeroCurrency,
+      cssClass: "paisa-tabular-nums",
+      visible: !compact,
     },
-    { title: "Market Value", field: "marketAmount", hozAlign: "right", formatter: nonZeroCurrency },
-    { title: "Change", field: "gainAmount", hozAlign: "right", formatter: formatCurrencyChange },
-    { title: "XIRR", field: "xirr", hozAlign: "right", formatter: nonZeroFloatChange },
+    {
+      title: "Market Value",
+      field: "marketAmount",
+      hozAlign: "right",
+      formatter: nonZeroCurrency,
+      cssClass: "paisa-tabular-nums",
+    },
+    {
+      title: "Change",
+      field: "gainAmount",
+      hozAlign: "right",
+      formatter: formatCurrencyChange,
+      cssClass: "paisa-tabular-nums",
+    },
+    {
+      title: "XIRR",
+      field: "xirr",
+      hozAlign: "right",
+      formatter: nonZeroFloatChange,
+      cssClass: "paisa-tabular-nums",
+      visible: !compact,
+    },
     {
       title: "Absolute Return",
       field: "absoluteReturn",
       hozAlign: "right",
-      formatter: nonZeroPercentageChange
-    }
+      formatter: nonZeroPercentageChange,
+      cssClass: "paisa-tabular-nums",
+      visible: !compact,
+    },
   ]);
 
   let tree: AssetBreakdown[] = $derived(
-    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : []
+    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : [],
   );
 </script>
 

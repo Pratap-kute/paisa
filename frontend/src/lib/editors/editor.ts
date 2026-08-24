@@ -16,7 +16,6 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import _ from "lodash";
 import { editorState, initialEditorState } from "../../store";
 import {
   autocompletion,
@@ -28,6 +27,7 @@ import {
 import { MergeView } from "@codemirror/merge";
 import { schedulePlugin } from "../domain/transaction_tag";
 import dayjs from "dayjs";
+import { assign, map } from "$lib/core/collection";
 
 export { editorState } from "../../store";
 
@@ -40,10 +40,10 @@ async function lint(editor: EditorView): Promise<Diagnostic[]> {
   });
 
   editorState.update((current) =>
-    _.assign({}, current, { errors: response.errors, output: response.output })
+    assign({}, current, { errors: response.errors, output: response.output })
   );
 
-  return _.map(response.errors, (error) => {
+  return map(response.errors, (error) => {
     const lineFrom = doc.line(error.line_from);
     const lineTo = doc.line(error.line_to);
     return {
@@ -110,7 +110,7 @@ export function createEditor(
             }
             return null;
           },
-          ..._.map(
+          ...map(
             opts.autocompletions || [],
             (options: string[], node) =>
               ifIn([node], completeFromList(options)),
@@ -120,7 +120,7 @@ export function createEditor(
       keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
         editorState.update((current) =>
-          _.assign({}, current, {
+          assign({}, current, {
             hasUnsavedChanges: current.hasUnsavedChanges ||
               viewUpdate.docChanged,
             undoDepth: undoDepth(viewUpdate.state),

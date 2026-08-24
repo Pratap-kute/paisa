@@ -51,7 +51,7 @@
   </div>
 </section>
 
-<style lang="scss">
+<style>
   .paisa-section {
     min-width: 0;
     margin-bottom: var(--paisa-space-5);

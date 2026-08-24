@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Card from "$lib/components/ui/Card.svelte";
   import { iconText } from "$lib/core/icon";
   import {
     formatCurrency,
@@ -8,7 +9,6 @@
     now,
     type CreditCardBill
   } from "$lib/core/utils";
-  import _ from "lodash";
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
 
@@ -19,17 +19,17 @@
   let { creditCard }: Props = $props();
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
-    return _.find(_.reverse(_.clone(creditCard.bills)), (b) => {
-      return b.statementEndDate.isSameOrBefore(now());
-    });
+    return creditCard.bills.findLast((b) =>
+      b.statementEndDate.isSameOrBefore(now())
+    );
   }
 
   let bill = $derived(lastBill(creditCard));
 </script>
 
-<div class="credit-card box p-3 m-0 is-flex-direction-column is-justify-content-space-between">
-  <div class="is-flex is-justify-content-space-between has-text-weight-bold is-size-5">
-    <div class="credit-card-chip is-flex is-align-items-center paisa-opacity-20">
+<Card padding="sm" variant="flat" class="credit-card flex flex-col justify-between m-0">
+  <div class="flex items-center justify-between font-bold text-xl">
+    <div class="credit-card-chip flex items-center opacity-20">
       <svg
         class="chip"
         xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@
     </div>
     <div>
       <a
-        class="secondary-link has-text-grey"
+        class="secondary-link text-[var(--paisa-muted-foreground)]"
         href="/liabilities/credit_cards/{encodeURIComponent(creditCard.account)}"
       >
         <span class="custom-icon">{iconText(creditCard.account)}</span>
@@ -67,27 +67,27 @@
       </a>
     </div>
   </div>
-  <div class="is-flex is-justify-content-space-between">
-    <div class="is-flex is-flex-direction-column">
+  <div class="flex justify-between">
+    <div class="flex flex-col">
       {#if bill}
-        <div class="is-size-7">
-          <span class="has-text-grey">Amount Due</span>
+        <div class="text-xs">
+          <span class="text-[var(--paisa-muted-foreground)]">Amount Due</span>
         </div>
         <div>
-          <span class="is-size-4 has-text-grey-dark">{formatCurrency(bill.closingBalance)}</span>
+          <span class="text-2xl text-[var(--paisa-foreground)]">{formatCurrency(bill.closingBalance)}</span>
         </div>
-        <div class="is-size-7 has-text-grey">
+        <div class="text-xs text-[var(--paisa-muted-foreground)]">
           <DueDate dueDate={bill.dueDate} paidDate={bill.paidDate} amountDue={bill.closingBalance} />
         </div>
       {/if}
     </div>
-    <div class="is-flex is-flex-direction-column">
-      <div class="is-size-7">
-        <span class="has-text-grey">Balance</span>
+    <div class="flex flex-col">
+      <div class="text-xs">
+        <span class="text-[var(--paisa-muted-foreground)]">Balance</span>
       </div>
-      <div class="is-flex is-flex-direction-column">
-        <span class="is-size-4 has-text-grey-dark">{formatCurrency(creditCard.balance)}</span>
-        <span class="is-size-7 has-text-grey"
+      <div class="flex flex-col">
+        <span class="text-2xl text-[var(--paisa-foreground)]">{formatCurrency(creditCard.balance)}</span>
+        <span class="text-xs text-[var(--paisa-muted-foreground)]"
           >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
             creditCard.creditLimit
           )}
@@ -95,18 +95,59 @@
       </div>
     </div>
   </div>
-  <div class="is-flex is-justify-content-space-between is-align-items-flex-end">
-    <div class="has-text-weight-bold is-size-5 is-inline-flex is-align-items-center">
-      <span class="paisa-opacity-40 is-inline-flex is-flex-direction-column mr-2 credit-card-valid-thru">
+  <div class="flex justify-between items-end">
+    <div class="font-bold text-xl inline-flex items-center">
+      <span class="opacity-40 inline-flex flex-col mr-2 credit-card-valid-thru">
         <span>VALID</span>
         <span>THRU</span>
       </span>
-      <span class="paisa-opacity-30"
+      <span class="opacity-30"
         >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * * * &nbsp; {creditCard.number}</span
       >
     </div>
-    <div class="paisa-opacity-15">
+    <div class="opacity-15">
       <CreditCardNetwork size={48} name={creditCard.network} />
     </div>
   </div>
-</div>
+</Card>
+
+<style>
+  :global(.paisa-card.credit-card) {
+    aspect-ratio: 3.375 / 2.125;
+    max-width: 25rem;
+    min-width: 19rem;
+    width: 100%;
+    flex: 1;
+    border-radius: var(--paisa-radius-lg, 0.7rem);
+    border: 1px solid var(--paisa-border-subtle);
+    box-shadow: var(--paisa-shadow-md);
+    background: linear-gradient(
+      345deg,
+      var(--paisa-surface-bg) 0%,
+      var(--paisa-surface-bg) 60%,
+      var(--paisa-surface-hover) calc(60% + 1px),
+      var(--paisa-surface-hover) 85%,
+      var(--paisa-surface-active) calc(85% + 1px),
+      var(--paisa-surface-active) 95%,
+      var(--paisa-border-strong) calc(95% + 1px),
+      var(--paisa-border-strong) 100%
+    );
+  }
+
+  .credit-card-chip {
+    margin: 2.25rem 0 0 1rem;
+  }
+
+  .credit-card-valid-thru {
+    font-size: 0.5rem;
+    line-height: 1;
+  }
+
+  .chip {
+    color: var(--paisa-warning);
+  }
+
+  .nfc {
+    color: var(--paisa-text-primary);
+  }
+</style>

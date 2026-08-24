@@ -43,10 +43,9 @@ if (pdfjs.GlobalWorkerOptions) {
 import Handlebars from "handlebars";
 import helpers from "$lib/importing/template_helpers";
 import * as toast from "$lib/core/toast";
-import _ from "lodash";
-
+import { mapValues } from "es-toolkit";
 Handlebars.registerHelper(
-  _.mapValues(helpers, (helper, name) => {
+  mapValues(helpers, (helper, name) => {
     return function (this: any, ...args: any[]) {
       try {
         return helper.apply(this, args);
@@ -99,8 +98,8 @@ function formatError(error: any): string {
 
 const footer = `
 <p class="mt-3">
-  Please report this issue at <a href="https://github.com/ananthakumaran/paisa/issues"
-    >https://github.com/ananthakumaran/paisa/issues</a
+  Please report this issue at <a href="https://github.com/Pratap-kute/paisa/issues"
+    >https://github.com/Pratap-kute/paisa/issues</a
   >. Closing and reopening the app may help.
 </p>
 `;

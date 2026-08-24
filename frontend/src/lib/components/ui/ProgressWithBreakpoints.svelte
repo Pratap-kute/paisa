@@ -1,7 +1,7 @@
 <script lang="ts">
   import Progress from "$lib/components/ui/Progress.svelte";
   import { formatCurrencyCrude, type Point } from "$lib/core/utils";
-  import _ from "lodash";
+  import { range } from "es-toolkit";
   interface Props {
     progressPercent: number;
     breakPoints: Point[];
@@ -9,30 +9,30 @@
 
   let { progressPercent, breakPoints }: Props = $props();
 
-  let spacers = $derived(_.range(breakPoints.length, 4));
+  let spacers = $derived(range(breakPoints.length, 4));
 </script>
 
 <div>
-  {#if !_.isEmpty(breakPoints)}
-    <div class="is-flex is-justify-content-space-between">
+  {#if breakPoints.length > 0}
+    <div class="paisa-breakpoints-row">
       <div></div>
       {#each breakPoints as point, i}
-        <div class="breakpoint is-hidden-mobile box py-1 px-4 mb-3 has-text-centered">
-          <div class="has-text-grey-light has-text-weight-bold is-size-7">
+        <div class="paisa-breakpoint-card">
+          <div class="paisa-breakpoint-date">
             {point.date.format("DD MMM YYYY")}
           </div>
-          <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-baseline">
-            <div class="mr-2">
+          <div class="paisa-breakpoint-body">
+            <div class="paisa-breakpoint-check">
               <span
-                class="icon is-small {progressPercent >= (i + 1) * 25
-                  ? 'has-text-success'
-                  : 'has-text-grey'}"
+                class="paisa-breakpoint-icon {progressPercent >= (i + 1) * 25
+                  ? 'paisa-breakpoint-icon-complete'
+                  : 'paisa-breakpoint-icon-pending'}"
               >
-                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
               </span>
             </div>
             <div>{(i + 1) * 25}%</div>
-            <div class="ml-1 has-text-grey-light has-text-weight-bold is-size-7">
+            <div class="paisa-breakpoint-value">
               {formatCurrencyCrude(point.value)}
             </div>
           </div>
@@ -46,5 +46,66 @@
   <Progress {progressPercent} />
 </div>
 
-<style lang="scss">
+<style>
+  .paisa-breakpoints-row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--paisa-space-2, 0.5rem);
+  }
+
+  .paisa-breakpoint-card {
+    display: none;
+    margin-bottom: var(--paisa-space-3, 0.75rem);
+    padding: var(--paisa-space-1, 0.25rem) var(--paisa-space-4, 1rem);
+    border: 1px solid var(--paisa-border-subtle);
+    border-radius: var(--paisa-radius-md, 6px);
+    background-color: var(--paisa-surface);
+    text-align: center;
+    box-shadow: var(--paisa-shadow-sm);
+  }
+
+  @media screen and (min-width: 769px) {
+    .paisa-breakpoint-card {
+      display: block;
+    }
+  }
+
+  .paisa-breakpoint-date {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--paisa-muted-foreground);
+  }
+
+  .paisa-breakpoint-body {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--paisa-space-2, 0.5rem);
+  }
+
+  .paisa-breakpoint-check {
+    margin-right: var(--paisa-space-1, 0.25rem);
+  }
+
+  .paisa-breakpoint-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+  }
+
+  .paisa-breakpoint-icon-complete {
+    color: var(--paisa-positive);
+  }
+
+  .paisa-breakpoint-icon-pending {
+    color: var(--paisa-muted-foreground);
+  }
+
+  .paisa-breakpoint-value {
+    margin-left: var(--paisa-space-1, 0.25rem);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--paisa-muted-foreground);
+  }
 </style>

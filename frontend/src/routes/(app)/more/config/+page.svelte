@@ -3,12 +3,15 @@
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
   import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
-  import _ from "lodash";
+  import { cloneDeep, isEqual, startCase } from "es-toolkit";
   import * as toast from "$lib/core/toast";
   import { refresh } from "../../../../store";
   import { sync } from "$lib/api/sync";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Tabs from "$lib/components/ui/Tabs.svelte";
   import Button from "$lib/components/ui/Button.svelte";
   import Badge from "$lib/components/ui/Badge.svelte";
 
@@ -28,19 +31,14 @@
   const SECTION_META: Record<string, { icon: string; description: string }> = {
     general: {
       icon: "fa-sliders",
-      description: "Journal paths, locale, currency, and display",
-    },
-    budget: { icon: "fa-wallet", description: "Budget rollover behaviour" },
-    goals: { icon: "fa-flag", description: "Retirement and savings targets" },
-    prediction: {
-      icon: "fa-wand-magic-sparkles",
-      description: "Merchant rules for import account prediction",
+      description: "Journal paths, locale, currency, and display formatting",
     },
     accounts: { icon: "fa-folder", description: "Account icons and labels" },
     allocation_targets: {
       icon: "fa-chart-pie",
       description: "Target mix for asset classes",
     },
+    budget: { icon: "fa-wallet", description: "Budget rollover behaviour" },
     commodities: {
       icon: "fa-coins",
       description: "Mutual funds, stocks, and price providers",
@@ -49,9 +47,14 @@
       icon: "fa-credit-card",
       description: "Limits, due dates, and statement cycles",
     },
+    goals: { icon: "fa-flag", description: "Retirement and savings targets" },
     import_templates: {
       icon: "fa-file-import",
       description: "Handlebars templates for statement import",
+    },
+    prediction: {
+      icon: "fa-wand-magic-sparkles",
+      description: "Merchant rules for import account prediction",
     },
     schedule_al: {
       icon: "fa-file-invoice",
@@ -78,7 +81,7 @@
       config = data.config;
       schema = data.schema;
       accounts = data.accounts || [];
-      lastConfig = _.cloneDeep(config);
+      lastConfig = cloneDeep(config);
     } finally {
       loaded = true;
     }
@@ -113,7 +116,7 @@
       list.push({
         id: key,
         key,
-        label: _.startCase(key),
+        label: startCase(key),
         kind: "key",
         icon: meta.icon,
         description: meta.description,
@@ -142,17 +145,35 @@
     return (schema.properties?.[activeSection.key!] as Schema) || null;
   });
 
-  let sectionCount = $derived.by(() => {
-    if (!config || !activeSection || activeSection.kind === "general") return null;
-    const value = (config as Record<string, unknown>)[activeSection.key!];
+  function getSectionCount(sectionId: string): number | null {
+    if (!config || sectionId === "general") return null;
+    const section = sections.find((s) => s.id === sectionId);
+    if (!section?.key) return null;
+    const value = (config as Record<string, unknown>)[section.key];
     if (Array.isArray(value)) return value.length;
     if (value && typeof value === "object") {
-      return Object.values(value).reduce((sum: number, item) => {
-        return sum + (Array.isArray(item) ? item.length : 0);
-      }, 0) || null;
+      return (
+        Object.values(value).reduce((sum: number, item) => {
+          return sum + (Array.isArray(item) ? item.length : 0);
+        }, 0) || null
+      );
     }
     return null;
-  });
+  }
+
+  let sectionCount = $derived(getSectionCount(activeSection?.id || ""));
+
+  let tabOptions = $derived(
+    sections.map((sec) => {
+      const count = getSectionCount(sec.id);
+      return {
+        label: sec.label,
+        value: sec.id,
+        icon: sec.icon,
+        badge: count != null ? count : undefined,
+      };
+    }),
+  );
 
   async function resetToDefault() {
     if (
@@ -163,10 +184,10 @@
       return;
     }
     if (lastConfig) {
-        save({
-          journal_path: lastConfig.journal_path,
-          db_path: lastConfig.db_path,
-        });
+      save({
+        journal_path: lastConfig.journal_path,
+        db_path: lastConfig.db_path,
+      });
     }
   }
 
@@ -184,9 +205,9 @@
       error = respError;
 
       if (success) {
-        lastConfig = _.cloneDeep(newConfig);
-        config = _.cloneDeep(newConfig);
-        globalThis.USER_CONFIG = _.cloneDeep(newConfig) as UserConfig;
+        lastConfig = cloneDeep(newConfig);
+        config = cloneDeep(newConfig);
+        globalThis.USER_CONFIG = cloneDeep(newConfig) as UserConfig;
         configUpdated();
         refresh();
         toast.toast({
@@ -201,65 +222,93 @@
   }
 
   function discard() {
-    config = _.cloneDeep(lastConfig);
+    config = cloneDeep(lastConfig);
   }
 
-  let hasChanges = $derived(!_.isEqual(config, lastConfig));
+  let hasChanges = $derived(!isEqual(config, lastConfig));
+
+  function handleKeydown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+      event.preventDefault();
+      if (hasChanges && !isLoading) {
+        save(config);
+      }
+    }
+  }
 </script>
 
-<Page width="standard" loading={!loaded} loadingMessage="Loading configuration…">
-  <div class="paisa-settings">
-    <PageHeader
-      title="Configuration"
-      description="Edit paisa.yaml by section. Save writes the file and re-syncs the journal."
-      help="config"
-    >
-      {#snippet actions()}
-        {#if hasChanges}
-          <Badge variant="warning" size="sm">Unsaved changes</Badge>
-        {/if}
-      {/snippet}
-    </PageHeader>
+<svelte:window onkeydown={handleKeydown} />
 
+<svelte:head>
+  <title>Configuration - Paisa</title>
+</svelte:head>
+
+<Page width="analysis" loading={!loaded} loadingMessage="Loading configuration…">
+  <PageHeader
+    title="Configuration"
+    description="Edit paisa.yaml by section. Save writes the configuration file and re-syncs your ledger."
+    help="config"
+  >
+    {#snippet actions()}
+      {#if hasChanges}
+        <Badge variant="warning" size="sm" rounded dot>Unsaved changes</Badge>
+      {/if}
+    {/snippet}
+  </PageHeader>
+
+  <Section>
     {#if schema && config && activeSection && activeSchema}
-      <div class="paisa-settings-shell">
-        <nav class="paisa-settings-nav" aria-label="Configuration sections">
-          {#each sections as section}
-            <button
-              type="button"
-              class="paisa-settings-nav-item"
-              class:is-active={section.id === activeSection.id}
-              onclick={() => (activeId = section.id)}
-            >
-              <span class="icon is-small">
-                <i class="fas {section.icon}"></i>
-              </span>
-              <span>{section.label}</span>
-            </button>
-          {/each}
+      <div class="flex flex-col gap-4">
+        <!-- Horizontal Section Navigation Tabs -->
+        <nav class="w-full overflow-x-auto pb-1" aria-label="Configuration sections">
+          <Tabs
+            bind:value={activeId}
+            options={tabOptions}
+            variant="boxed"
+            size="sm"
+          />
         </nav>
 
-        <div class="paisa-settings-main">
-          <div class="paisa-settings-panel">
-            <div class="paisa-settings-panel-head">
-              <div>
-                <h2 class="paisa-settings-title">{activeSection.label}</h2>
-                {#if activeSection.description}
-                  <p class="paisa-settings-copy">{activeSection.description}</p>
-                {/if}
+        <!-- Full-Width Configuration Form Card -->
+        <Card padding="none" class="w-full overflow-hidden">
+          <!-- Section Title Bar -->
+          <div class="border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] p-4 sm:p-5">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-brand-primary)] shadow-sm">
+                  <i class="fas {activeSection.icon} text-base"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="m-0 text-base font-bold text-[var(--paisa-text-primary)]">
+                      {activeSection.label}
+                    </h2>
+                    {#if sectionCount != null}
+                      <Badge variant="neutral" size="sm" rounded>{sectionCount}</Badge>
+                    {/if}
+                  </div>
+                  {#if activeSection.description}
+                    <p class="mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">
+                      {activeSection.description}
+                    </p>
+                  {/if}
+                </div>
               </div>
-              {#if sectionCount != null}
-                <Badge variant="neutral" size="sm">{sectionCount}</Badge>
-              {/if}
             </div>
+          </div>
 
+          <!-- Form Fields Content -->
+          <div class="p-4 sm:p-6">
             {#if error}
-              <article class="message is-danger paisa-settings-error">
-                <div class="message-body">{error}</div>
-              </article>
+              <div
+                class="mb-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] px-4 py-3 text-xs font-mono whitespace-pre-wrap text-[var(--paisa-danger)] shadow-sm"
+                role="alert"
+              >
+                {error}
+              </div>
             {/if}
 
-            <div class="paisa-settings-body">
+            <div>
               {#key activeSection.id}
                 {#if activeSection.kind === "general"}
                   <JsonSchemaForm
@@ -282,164 +331,48 @@
             </div>
           </div>
 
-          <div class="paisa-settings-bar">
-            <Button variant="ghost" onclick={() => resetToDefault()}>
+          <!-- Sticky Action Bar -->
+          <div
+            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] px-4 py-3 sm:px-6"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              class="max-lg:w-full max-lg:justify-center text-xs"
+              onclick={() => resetToDefault()}
+            >
+              <i class="fas fa-arrow-rotate-left mr-1"></i>
               Reset to defaults
             </Button>
-            <div class="paisa-settings-bar-actions">
-              <Button variant="outline" disabled={!hasChanges} onclick={discard}>
-                Cancel
+            <div
+              class="ml-auto flex gap-2 max-lg:ml-0 max-lg:w-full max-lg:flex-col"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!hasChanges}
+                class="max-lg:w-full max-lg:justify-center"
+                onclick={discard}
+              >
+                Discard
               </Button>
               <Button
                 variant="primary"
+                size="sm"
                 loading={isLoading}
                 disabled={!hasChanges}
+                class="max-lg:w-full max-lg:justify-center"
                 onclick={() => save(config)}
               >
-                Save
+                {#snippet icon()}
+                  <i class="fas fa-floppy-disk"></i>
+                {/snippet}
+                Save Changes
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     {/if}
-  </div>
+  </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-settings {
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 6rem);
-  }
-
-  .paisa-settings-shell {
-    display: grid;
-    grid-template-columns: 13.5rem minmax(0, 1fr);
-    gap: var(--paisa-space-5);
-    align-items: start;
-    flex: 1;
-  }
-
-  .paisa-settings-nav {
-    position: sticky;
-    top: var(--paisa-space-4);
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    padding: var(--paisa-space-2);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    background: var(--paisa-surface-card);
-  }
-
-  .paisa-settings-nav-item {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-2);
-    width: 100%;
-    border: 0;
-    border-radius: var(--paisa-radius-sm);
-    background: transparent;
-    color: var(--paisa-text-secondary);
-    font-size: var(--paisa-font-size-sm);
-    font-weight: var(--paisa-font-weight-medium);
-    text-align: left;
-    padding: 0.45rem 0.65rem;
-    cursor: pointer;
-
-    &:hover {
-      background: var(--paisa-surface-hover);
-      color: var(--paisa-text-primary);
-    }
-
-    &.is-active {
-      background: var(--paisa-brand-primary-light);
-      color: var(--paisa-brand-primary);
-    }
-  }
-
-  .paisa-settings-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: calc(100vh - 11rem);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    background: var(--paisa-surface-card);
-    overflow: hidden;
-  }
-
-  .paisa-settings-panel {
-    flex: 1;
-    min-width: 0;
-    padding: var(--paisa-space-5);
-  }
-
-  .paisa-settings-panel-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--paisa-space-3);
-    margin-bottom: var(--paisa-space-5);
-  }
-
-  .paisa-settings-title {
-    margin: 0;
-    font-size: var(--paisa-font-size-lg);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    line-height: var(--paisa-line-height-tight);
-  }
-
-  .paisa-settings-copy {
-    margin: var(--paisa-space-1) 0 0;
-    font-size: var(--paisa-font-size-sm);
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-settings-error {
-    margin-bottom: var(--paisa-space-4);
-
-    :global(.message-body) {
-      white-space: pre-wrap;
-      overflow: auto;
-      font-size: var(--paisa-font-size-sm);
-    }
-  }
-
-  .paisa-settings-bar {
-    position: sticky;
-    bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    flex-wrap: wrap;
-    padding: var(--paisa-space-3) var(--paisa-space-5);
-    border-top: 1px solid var(--paisa-border-subtle);
-    background: var(--paisa-surface-card);
-  }
-
-  .paisa-settings-bar-actions {
-    display: flex;
-    gap: var(--paisa-space-2);
-    margin-left: auto;
-  }
-
-  @media screen and (max-width: 900px) {
-    .paisa-settings-shell {
-      grid-template-columns: 1fr;
-    }
-
-    .paisa-settings-nav {
-      position: static;
-      flex-direction: row;
-      flex-wrap: wrap;
-    }
-
-    .paisa-settings-nav-item {
-      width: auto;
-    }
-  }
-</style>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { iconify } from "$lib/core/icon";
-  import _ from "lodash";
   import Select from "svelte-select";
 
   interface Props {
@@ -14,7 +13,7 @@
   let customAccountItems: { value: string; label: string; created?: boolean }[] = $state([]);
 
   let baseAccountItems = $derived(
-    _.map(allAccounts, (account) => ({
+    allAccounts.map((account) => ({
       value: account,
       label: account
     }))
@@ -23,7 +22,7 @@
   let allAccountItems = $derived([...baseAccountItems, ...customAccountItems]);
 
   let accountItems = $derived(
-    _.map(accounts, (account) => ({
+    accounts.map((account) => ({
       value: account,
       label: account
     }))
@@ -41,9 +40,9 @@
   function handleChange(e: any) {
     let items: any[];
     if (e.type === "clear") {
-      items = _.without(accountItems, e.detail);
+      items = accountItems.filter((item) => item.value !== e.detail?.value);
     } else {
-      items = _.cloneDeep(e.detail) || [];
+      items = structuredClone(e.detail) || [];
     }
 
     accounts = items.map((i) => i.value);
@@ -53,7 +52,7 @@
 <Select
   --list-z-index="5"
   multiple
-  class="is-small is-expandable custom-icon"
+  class="paisa-select-expandable custom-icon"
   items={allAccountItems}
   value={accountItems}
   showChevron={true}
@@ -72,3 +71,10 @@
     {iconify(item.label)}
   </div>
 </Select>
+
+<style>
+  :global(.paisa-select-expandable) {
+    --max-height: 200px;
+  }
+</style>
+

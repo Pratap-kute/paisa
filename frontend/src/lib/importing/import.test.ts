@@ -10,7 +10,7 @@ import {
   renderWithMetadata,
 } from "./spreadsheet";
 import helpers from "./template_helpers";
-import _ from "lodash";
+import { mapValues, trim } from "es-toolkit";
 import Handlebars from "handlebars";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
@@ -24,10 +24,11 @@ dayjs.extend(timezone);
 import localeData from "dayjs/plugin/localeData.js";
 dayjs.extend(localeData);
 import updateLocale from "dayjs/plugin/updateLocale.js";
+import { find } from "$lib/core/collection";
 dayjs.extend(updateLocale);
 
 Handlebars.registerHelper(
-  _.mapValues(helpers, (helper, name) => {
+  mapValues(helpers, (helper, name) => {
     return function (this: any, ...args: any[]) {
       try {
         return helper.apply(this, args);
@@ -72,7 +73,7 @@ describe("import", () => {
         for (const file of files) {
           const [name, extension] = file.split(".");
           if (extension === "ledger") {
-            const inputFile = _.find(
+            const inputFile = find(
               files,
               (f) => f != file && f.startsWith(name),
             );
@@ -95,7 +96,7 @@ describe("import", () => {
 
             const actual = render(rows, compiled, { trim: true });
 
-            expect(actual).toBe(_.trim(output));
+            expect(actual).toBe(trim(output));
           }
         }
       });

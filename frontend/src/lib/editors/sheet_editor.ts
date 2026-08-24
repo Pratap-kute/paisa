@@ -22,7 +22,6 @@ import {
   lintKeymap,
 } from "@codemirror/lint";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
-import _ from "lodash";
 import { initialSheetEditorState, sheetEditorState } from "../../store";
 import { fullEditorExtensions } from "./base";
 import { sheetExtension, sheetLanguage } from "../sheet/language";
@@ -32,6 +31,7 @@ import { functions } from "../sheet/functions";
 
 import { buildAST, Environment } from "../sheet/interpreter";
 import type { Posting } from "../core/utils";
+import { assign, map } from "$lib/core/collection";
 
 let latestIdentifiers: string[] = [];
 
@@ -75,7 +75,7 @@ function lint(env: Environment) {
           diagnostics.push(...ast.validate());
           if (diagnostics.length > 0) {
             const endTime = performance.now();
-            return _.assign({}, current, {
+            return assign({}, current, {
               pendingEval: false,
               evalDuration: endTime - startTime,
             });
@@ -88,7 +88,7 @@ function lint(env: Environment) {
         }
         const endTime = performance.now();
 
-        return _.assign({}, current, {
+        return assign({}, current, {
           pendingEval: false,
           evalDuration: endTime - startTime,
           results,
@@ -177,7 +177,7 @@ export function createEditor(
 
             return null;
           },
-          ..._.map(
+          ...map(
             autocompletions,
             (options, node) => ifIn([node], completeFromList(options)),
           ),
@@ -195,7 +195,7 @@ export function createEditor(
             pendingEval = true;
           }
 
-          return _.assign({}, current, {
+          return assign({}, current, {
             pendingEval,
             doc,
             currentLine: currentLine.number,

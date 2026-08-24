@@ -8,7 +8,7 @@
   let open = $state(false);
   let dropdownEl: HTMLElement | undefined = $state();
 
-  async function syncWithLoader(request: Record<string, any>) {
+  async function syncWithLoader(request: Record<string, boolean>) {
     open = false;
     try {
       await sync(request);
@@ -41,83 +41,83 @@
       open = false;
     }
   }
+
+  const menuItemClass =
+    "flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-primary)]";
 </script>
 
 <svelte:window onclick={onWindowClick} />
 
-<div
-  bind:this={dropdownEl}
-  class="dropdown ml-2 {isMobile() ? 'is-left' : 'is-right'}"
-  class:is-active={open}
->
-  <div class="dropdown-trigger dropdown-icon">
-    <button
-      type="button"
-      class="button is-large"
-      aria-label="More actions"
-      aria-haspopup="true"
-      aria-expanded={open}
-      onclick={(e) => {
-        e.stopPropagation();
-        open = !open;
-      }}
+<div bind:this={dropdownEl} class="relative">
+  <button
+    type="button"
+    class="inline-flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-md border-0 bg-transparent text-[var(--paisa-muted-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]"
+    aria-label="More actions"
+    aria-haspopup="true"
+    aria-expanded={open}
+    onclick={(e) => {
+      e.stopPropagation();
+      open = !open;
+    }}
+  >
+    <i class="fas fa-ellipsis-vertical text-base" aria-hidden="true"></i>
+  </button>
+
+  {#if open}
+    <div
+      role="menu"
+      class="absolute top-full z-50 mt-1 min-w-max rounded-md border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1 shadow-[var(--paisa-shadow-lg)] {isMobile()
+        ? 'left-0'
+        : 'right-0'}"
     >
-      <span class="icon">
-        <i class="fas fa-ellipsis-vertical"></i>
-      </span>
-    </button>
-  </div>
-  <div class="dropdown-menu" id="dropdown-menu4" role="menu">
-    <div class="dropdown-content">
       <button
         type="button"
+        role="menuitem"
         onclick={() => syncWithLoader({ journal: true })}
-        class="dropdown-item icon-text"
+        class={menuItemClass}
       >
-        <span class="icon is-small">
-          <i class="fa-regular fa-file-lines"></i>
-        </span>
+        <i class="fa-regular fa-file-lines w-5 text-center text-xs" aria-hidden="true"></i>
         <span>Sync Journal</span>
       </button>
       <button
         type="button"
+        role="menuitem"
         onclick={() => syncWithLoader({ prices: true })}
-        class="dropdown-item icon-text"
+        class={menuItemClass}
       >
-        <span class="icon is-small">
-          <i class="fas fa-dollar-sign"></i>
-        </span>
+        <i class="fas fa-dollar-sign w-5 text-center text-xs" aria-hidden="true"></i>
         <span>Update Prices</span>
       </button>
       <button
         type="button"
+        role="menuitem"
         onclick={() => syncWithLoader({ portfolios: true })}
-        class="dropdown-item icon-text"
+        class={menuItemClass}
       >
-        <span class="icon is-small">
-          <i class="fas fa-layer-group"></i>
-        </span>
-        <span>Update Mutual Fund Portfolios</span>
+        <i class="fas fa-layer-group w-5 text-center text-xs" aria-hidden="true"></i>
+        <span>Update MF Portfolios</span>
       </button>
-      <hr class="dropdown-divider" />
-      <div class="dropdown-item icon-text">
-        <label for={obscureId} class="paisa-clickable paisa-full-width is-inline-block">
-          <input bind:checked={$obscure} id={obscureId} type="checkbox" class="is-hidden" />
-          <span class="ml-0 icon is-small">
-            <i class="fas {$obscure ? 'fa-eye-slash' : 'fa-eye'}"></i>
-          </span>
+      <hr class="my-1 border-0 border-t border-[var(--paisa-border-subtle)]" />
+      <div role="none" class="px-4 py-2">
+        <label
+          for={obscureId}
+          class="flex w-full cursor-pointer items-center gap-2 text-sm text-[var(--paisa-foreground)] transition-colors hover:text-[var(--paisa-primary)]"
+        >
+          <input bind:checked={$obscure} id={obscureId} type="checkbox" class="sr-only" />
+          <i
+            class="fas {$obscure ? 'fa-eye-slash' : 'fa-eye'} w-5 text-center text-xs"
+            aria-hidden="true"
+          ></i>
           <span>{$obscure ? "Show" : "Hide"} numbers</span>
         </label>
       </div>
       {#if showLogout}
-        <hr class="dropdown-divider" />
-        <button type="button" onclick={() => doLogout()} class="dropdown-item icon-text">
-          <span class="icon is-small">
-            <i class="fas fa-arrow-right-from-bracket"></i>
-          </span>
+        <hr class="my-1 border-0 border-t border-[var(--paisa-border-subtle)]" />
+        <button type="button" role="menuitem" onclick={() => doLogout()} class={menuItemClass}>
+          <i class="fas fa-arrow-right-from-bracket w-5 text-center text-xs" aria-hidden="true"></i>
           <span>Logout</span>
         </button>
       {/if}
     </div>
-  </div>
+  {/if}
 </div>

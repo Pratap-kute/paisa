@@ -51,14 +51,18 @@
 
 <button
   {type}
-  class="button paisa-button {variantClasses[variant]} {sizeClasses[size]} {loading ? 'is-loading' : ''} {className}"
+  class="paisa-button {variantClasses[variant]} {sizeClasses[size]} {loading ? 'paisa-button-loading' : ''} {className}"
   disabled={disabled || loading}
   aria-label={ariaLabel}
+  aria-busy={loading || undefined}
   {title}
   {onclick}
 >
-  {#if icon}
-    <span class="icon is-small">
+  {#if loading}
+    <span class="paisa-button-spinner" aria-hidden="true"></span>
+  {/if}
+  {#if icon && !loading}
+    <span class="paisa-button-icon">
       {@render icon()}
     </span>
   {/if}
@@ -69,124 +73,141 @@
   {/if}
 </button>
 
-<style lang="scss">
+<style>
   .paisa-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--paisa-space-2);
-    font-family: var(--paisa-font-sans);
-    font-weight: var(--paisa-font-weight-medium);
-    border-radius: var(--paisa-radius-md);
+    gap: var(--paisa-space-2, 0.5rem);
+    margin: 0;
+    appearance: none;
+    font: inherit;
+    font-weight: 500;
+    border-radius: var(--paisa-radius-md, 6px);
     cursor: pointer;
     border: 1px solid transparent;
-    transition: background-color var(--paisa-transition-fast), border-color var(--paisa-transition-fast), color var(--paisa-transition-fast), box-shadow var(--paisa-transition-fast);
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
     line-height: normal;
-
-    &:focus-visible {
-      outline: none;
-      box-shadow: var(--paisa-focus-ring);
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
   }
 
-  /* Sizes */
+  .paisa-button:focus-visible {
+    outline: 2px solid var(--paisa-primary);
+    outline-offset: 2px;
+  }
+
+  .paisa-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
   .paisa-button-xs {
     height: 28px;
-    padding: 0 var(--paisa-space-2);
-    font-size: var(--paisa-font-size-xs);
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
   }
 
   .paisa-button-sm {
     height: 32px;
-    padding: 0 var(--paisa-space-3);
-    font-size: var(--paisa-font-size-sm);
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
   }
 
   .paisa-button-md {
     height: 36px;
-    padding: 0 var(--paisa-space-4);
-    font-size: var(--paisa-font-size-sm);
+    padding: 0 1rem;
+    font-size: 0.875rem;
   }
 
   .paisa-button-lg {
     height: 40px;
-    padding: 0 var(--paisa-space-5);
-    font-size: var(--paisa-font-size-base);
+    padding: 0 1.25rem;
+    font-size: 1rem;
   }
 
-  /* Variants */
   .paisa-button-primary {
-    background-color: var(--paisa-brand-primary);
-    color: var(--paisa-text-inverse);
-    border-color: var(--paisa-brand-primary);
+    background-color: var(--paisa-primary);
+    color: var(--paisa-inverse-foreground, #fff);
+    border-color: var(--paisa-primary);
+  }
 
-    &:hover:not(:disabled) {
-      background-color: var(--paisa-brand-primary-hover);
-      border-color: var(--paisa-brand-primary-hover);
-      color: var(--paisa-text-inverse);
-    }
+  .paisa-button-primary:hover:not(:disabled) {
+    filter: brightness(1.05);
   }
 
   .paisa-button-secondary {
-    background-color: var(--paisa-brand-primary-light);
-    color: var(--paisa-brand-primary);
-    border-color: transparent;
+    background-color: var(--paisa-primary-subtle);
+    color: var(--paisa-primary);
+  }
 
-    &:hover:not(:disabled) {
-      background-color: var(--paisa-surface-active);
-      color: var(--paisa-brand-primary-hover);
-    }
+  .paisa-button-secondary:hover:not(:disabled) {
+    background-color: var(--paisa-surface-hover);
   }
 
   .paisa-button-ghost {
     background-color: transparent;
-    color: var(--paisa-text-secondary);
-    border-color: transparent;
+    color: var(--paisa-muted-foreground);
+  }
 
-    &:hover:not(:disabled) {
-      background-color: var(--paisa-surface-hover);
-      color: var(--paisa-text-primary);
-    }
+  .paisa-button-ghost:hover:not(:disabled) {
+    background-color: var(--paisa-surface-hover);
+    color: var(--paisa-foreground);
   }
 
   .paisa-button-danger {
-    background-color: var(--paisa-danger);
-    color: var(--paisa-text-inverse);
-    border-color: var(--paisa-danger);
+    background-color: var(--paisa-negative);
+    color: var(--paisa-inverse-foreground, #fff);
+    border-color: var(--paisa-negative);
+  }
 
-    &:hover:not(:disabled) {
-      background-color: #dc2626;
-      color: var(--paisa-text-inverse);
-    }
+  .paisa-button-danger:hover:not(:disabled) {
+    filter: brightness(1.05);
   }
 
   .paisa-button-link {
     background-color: transparent;
-    color: var(--paisa-brand-primary);
-    border-color: transparent;
+    color: var(--paisa-primary);
     padding-left: 0;
     padding-right: 0;
+  }
 
-    &:hover:not(:disabled) {
-      text-decoration: underline;
-      color: var(--paisa-brand-primary-hover);
-    }
+  .paisa-button-link:hover:not(:disabled) {
+    text-decoration: underline;
   }
 
   .paisa-button-outline {
     background-color: transparent;
     border-color: var(--paisa-border-strong);
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
+  }
 
-    &:hover:not(:disabled) {
-      border-color: var(--paisa-brand-primary);
-      color: var(--paisa-brand-primary);
-      background-color: var(--paisa-surface-hover);
+  .paisa-button-outline:hover:not(:disabled) {
+    border-color: var(--paisa-primary);
+    color: var(--paisa-primary);
+    background-color: var(--paisa-surface-hover);
+  }
+
+  .paisa-button-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+  }
+
+  .paisa-button-spinner {
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: paisa-button-spin 0.6s linear infinite;
+  }
+
+  @keyframes paisa-button-spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 </style>

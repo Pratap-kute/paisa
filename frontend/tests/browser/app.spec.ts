@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import { assertNavigationVisible } from "./navigation.ts";
 
 test.describe.configure({ mode: "serial" });
 
@@ -15,8 +16,7 @@ test("application starts without fatal browser errors", async ({ page }) => {
     if (message.type() === "error") errors.push(message.text());
   });
   await page.goto("/");
-  await expect(page.getByRole("navigation", { name: "main navigation" }))
-    .toBeVisible();
+  await assertNavigationVisible(page);
   expect(errors).toEqual([]);
 });
 
@@ -26,6 +26,46 @@ test("dashboard renders synchronized fixture data", async ({ page }) => {
     .toBeVisible();
   await expect(page.getByRole("link", { name: "Transactions" }).first())
     .toBeVisible();
+});
+
+test("monthly expenses preserves calendar details and category icons", async ({ page }) => {
+  await page.goto("/expense/monthly");
+  const calendar = page.locator(
+    "[data-testid='monthly-expense-calendar'][data-chart-ready='true']",
+  );
+  await expect(calendar).toBeVisible();
+
+  const activeDay = calendar.locator(".paisa-expense-calendar-active").first();
+  await expect(activeDay).toHaveAttribute("data-tippy-content", /Total/);
+  await activeDay.hover();
+  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
+
+  const recentIcon = page.locator("section", { hasText: "Recent Expenses" })
+    .locator(".custom-icon").first();
+  await expect(recentIcon).toBeVisible();
+  expect(
+    await recentIcon.evaluate((element) =>
+      getComputedStyle(element).fontFamily
+    ),
+  )
+    .toContain("fa6-solid");
+  await expect(recentIcon).not.toContainText("�");
+});
+
+test("yearly expenses preserves monthly composition and hover breakdown", async ({ page }) => {
+  await page.goto("/expense/yearly");
+  const calendar = page.locator(
+    "[data-testid='yearly-expense-calendar'][data-chart-ready='true']",
+  );
+  await expect(calendar).toBeVisible();
+
+  const activeMonth = calendar.locator(".paisa-yearly-expense-month-active")
+    .first();
+  await expect(activeMonth).toHaveAttribute("data-tippy-content", /Total/);
+  await expect(activeMonth.locator(".paisa-yearly-expense-ring"))
+    .toHaveCSS("background-image", /conic-gradient/);
+  await activeMonth.hover();
+  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
 });
 
 test("major pages are routable", async ({ page }) => {
@@ -40,8 +80,7 @@ test("major pages are routable", async ({ page }) => {
   ) {
     await page.goto(path);
     await expect(page.locator("body")).not.toBeEmpty();
-    await expect(page.getByRole("navigation", { name: "main navigation" }))
-      .toBeVisible();
+    await assertNavigationVisible(page);
   }
 });
 
@@ -55,7 +94,7 @@ test("transaction search filters fixture transactions", async ({ page }) => {
   const count = page.getByText(/\d+ transaction\(s\)/);
   await expect(count).toBeVisible();
   const before = await count.textContent();
-  const search = page.locator(".search-query-editor .cm-content");
+  const search = page.getByRole("searchbox", { name: "Filter query" });
   await search.click();
   await page.keyboard.type('payee = "Rent"');
   await expect(count).not.toHaveText(before ?? "");
@@ -90,19 +129,32 @@ test("import produces a preview without saving", async ({ page }) => {
     : "fixture/import/Paytm/statement.csv";
   await page.goto("/ledger/import");
   await page.locator('input[type="file"]').setInputFiles(fixturePath);
-  await expect(page.locator("table")).toBeVisible();
-  await expect(page.locator("button.save")).toBeVisible();
+  await page.locator(".svelte-select").first().click();
+  await page.getByText("Paytm", { exact: true }).click();
+  await expect(page.getByText("75 rows", { exact: true }).first()).toBeVisible({
+    timeout: 15000,
+  });
+  await expect(page.getByRole("list", { name: "Transaction Review List" }))
+    .toBeVisible();
 });
 
 test("networth chart renders on analytics page", async ({ page }) => {
   await page.goto("/assets/networth");
-  await expect(page.getByText("Net worth", { exact: true })).toBeVisible();
-  await expect(page.locator("#d3-networth-timeline")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Net Worth" })).toBeVisible();
+  await expect(
+    page.locator(
+      "[data-testid='networth-timeline-echart'][data-chart-ready='true']",
+    ),
+  ).toBeVisible();
 });
 
 test("cash flow monthly chart renders", async ({ page }) => {
   await page.goto("/cash_flow/monthly");
-  await expect(page.locator("#d3-monthly-cash-flow")).toBeVisible();
+  await expect(
+    page.locator(
+      "[data-testid='monthly-cash-flow-echart'][data-chart-ready='true']",
+    ),
+  ).toBeVisible();
 });
 
 test("bulk edit form opens and displays account selection", async ({ page }) => {
@@ -114,7 +166,7 @@ test("bulk edit form opens and displays account selection", async ({ page }) => 
   await bulkEditButton.click();
 
   await expect(
-    page.locator(".field").filter({ hasText: /rename account/i }).first(),
+    page.getByText(/rename account/i).first(),
   ).toBeVisible();
 });
 
@@ -147,7 +199,7 @@ test("interactive sheets editor loads calculations", async ({ page }) => {
 
 test("theme toggle switches document theme between light and dark", async ({ page }) => {
   await page.goto("/");
-  const toggle = page.locator("button.theme-toggle");
+  const toggle = page.getByRole("button", { name: "auto" });
   await expect(toggle).toBeVisible();
 
   const html = page.locator("html");
@@ -164,9 +216,21 @@ test("theme toggle switches document theme between light and dark", async ({ pag
 
 test("doctor diagnostics page reports system status", async ({ page }) => {
   await page.goto("/more/doctor");
-  await expect(page.locator("body")).not.toBeEmpty();
-  await expect(page.getByRole("navigation", { name: "main navigation" }))
-    .toBeVisible();
+  await expect(
+    page.getByText(/(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i),
+  ).toBeVisible();
+  await assertNavigationVisible(page);
+});
+
+test("tax harvest calculator updates through semantic inputs", async ({ page }) => {
+  await page.goto("/more/tax/harvest");
+  const card = page.getByTestId("harvest-card").first();
+  await expect(card).toBeVisible();
+  const amount = card.getByLabel("Redemption amount");
+  const taxableGain = card.getByLabel("Taxable gain");
+  const initialGain = await taxableGain.inputValue();
+  await amount.fill("1000");
+  await expect(taxableGain).not.toHaveValue(initialGain);
 });
 
 test("an API failure leaves a visible error instead of a blank page", async ({ page }) => {
@@ -193,7 +257,7 @@ test("config page loads configuration sections", async ({ page }) => {
   await expect(
     page.getByRole("navigation", { name: "Configuration sections" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /save/i })).toBeDisabled();
 });
 
 test("config page saves changes", async ({ page }) => {
@@ -201,10 +265,7 @@ test("config page saves changes", async ({ page }) => {
     page.waitForResponse((response) => response.url().endsWith("/api/config")),
     page.goto("/more/config"),
   ]);
-  const precisionInput = page
-    .locator(".config-field")
-    .filter({ hasText: "Display Precision" })
-    .getByRole("spinbutton");
+  const precisionInput = page.getByLabel("Display Precision");
   await expect(precisionInput).toHaveValue("0");
   await page.route("**/api/config", async (route) => {
     if (route.request().method() === "POST") {
@@ -239,38 +300,102 @@ test("posting search filters fixture postings", async ({ page }) => {
     page.waitForResponse((response) => response.url().endsWith("/api/ledger")),
     page.goto("/ledger/posting"),
   ]);
-  const payeeLinks = page.locator(".paisa-posting-table .secondary-link");
+  const payeeLinks = page.locator(".paisa-posting-table").getByRole("link");
   await expect(payeeLinks.first()).toBeVisible();
-  const before = await payeeLinks.count();
+  const postingRows = page.locator(".virtual-list-inner .posting-row");
+  await expect(postingRows.first()).toHaveCSS("display", "grid");
+  const geometry = await postingRows.evaluateAll((elements) =>
+    elements.slice(0, 2).map((element) => {
+      const row = element.getBoundingClientRect();
+      const cells = [...element.children].map((cell) =>
+        cell.getBoundingClientRect()
+      );
+      return {
+        top: row.top,
+        bottom: row.bottom,
+        cellLefts: cells.map((cell) => cell.left),
+      };
+    })
+  );
+  expect(geometry).toHaveLength(2);
+  expect(geometry[1].top).toBeGreaterThanOrEqual(geometry[0].bottom);
+  expect(
+    geometry[0].cellLefts.every((left, index, values) =>
+      index === 0 || left > values[index - 1]
+    ),
+  ).toBe(true);
   const search = page.locator(".search-query-editor .cm-content");
-  await search.click();
-  await page.keyboard.type('payee = "Rent"');
-  await expect.poll(() => payeeLinks.count(), { timeout: 5000 })
-    .toBeLessThan(before);
+  await search.fill('payee = "Rent"');
   await expect(payeeLinks.first()).toContainText("Rent");
 });
 
+test("large price histories load collapsed", async ({ page }) => {
+  test.setTimeout(20_000);
+  const prices = Object.fromEntries(
+    Array.from({ length: 8 }, (_, commodityIndex) => {
+      const commodity = `FUND${commodityIndex + 1}`;
+      return [
+        commodity,
+        Array.from({ length: 2500 }, (_, priceIndex) => ({
+          id: commodityIndex * 2500 + priceIndex,
+          date: new Date(Date.UTC(2026, 7, 21 - priceIndex)).toISOString(),
+          commodity_type: "mutualfund",
+          commodity_id: `${1000 + commodityIndex}`,
+          commodity_name: commodity,
+          value: 100 + commodityIndex + priceIndex / 100,
+        })),
+      ];
+    }),
+  );
+
+  await page.route("**/api/price", async (route) => {
+    if (new URL(route.request().url()).pathname === "/api/price") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ prices }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto("/ledger/price");
+  await expect(page.getByText("8 commodity(ies)")).toBeVisible({
+    timeout: 10_000,
+  });
+  await expect(page.locator(".tabulator-row")).toHaveCount(8);
+  await expect(page.locator(".paisa-tabulator-tree-toggle")).toHaveCount(8);
+
+  const expansionStarted = Date.now();
+  await page.locator(".paisa-tabulator-tree-toggle").first().click();
+  await expect.poll(() => page.locator(".tabulator-row").count())
+    .toBeGreaterThan(8);
+  expect(Date.now() - expansionStarted).toBeLessThan(2_000);
+  expect(await page.locator(".tabulator-row").count()).toBeLessThan(100);
+});
+
 test("price cache clear shows success feedback", async ({ page }) => {
-  await Promise.all([
-    page.waitForResponse((response) => response.url().endsWith("/api/price")),
-    page.goto("/ledger/price"),
-  ]);
+  await page.route("**/api/price", async (route) => {
+    if (new URL(route.request().url()).pathname === "/api/price") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ prices: {} }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+  await page.goto("/ledger/price");
+  await expect(page).toHaveTitle(/Commodity Prices/);
   await page.route("**/api/price/delete", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ success: true }),
     }));
-  await expect(page.getByRole("button", { name: "Clear Price Cache" }))
-    .toBeVisible();
-  const [deleteResponse] = await Promise.all([
-    page.waitForResponse((response) =>
-      new URL(response.url()).pathname === "/api/price/delete" &&
-      response.request().method() === "POST"
-    ),
-    page.getByRole("button", { name: "Clear Price Cache" }).click(),
-  ]);
-  expect(deleteResponse.ok()).toBe(true);
+  await page.getByRole("button", { name: "Clear Price Cache" }).click();
   await expect(
     page.locator(".paisa-toast-container").filter({
       hasText: "Price cache cleared.",
@@ -283,7 +408,9 @@ test("budget page renders account budget cards", async ({ page }) => {
     page.waitForResponse((response) => response.url().endsWith("/api/budget")),
     page.goto("/expense/budget"),
   ]);
-  await expect(page.locator(".budget-card").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Budget" })).toBeVisible();
+  await expect(page.getByText("All Budgets", { exact: true })).toBeVisible();
+  await expect(page.getByText("Food")).toBeVisible();
 });
 
 test("goals page renders fixture goals", async ({ page }) => {

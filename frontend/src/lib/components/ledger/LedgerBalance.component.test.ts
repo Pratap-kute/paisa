@@ -39,7 +39,8 @@ test("renders multi-commodity balances with long names correctly without hiding 
   // Debt:MF heading and leaf commodities should be rendered
   expect(screen.getByText("Debt:MF")).toBeInTheDocument();
   expect(screen.getAllByText("FundA").length).toBeGreaterThanOrEqual(1);
-  expect(screen.getAllByText("VeryLongFundCommodityName").length).toBeGreaterThanOrEqual(1);
+  expect(screen.getAllByText("VeryLongFundCommodityName").length)
+    .toBeGreaterThanOrEqual(1);
 
   // Equity:OpeningBalance should be rendered
   expect(screen.getByText("Equity:OpeningBalance")).toBeInTheDocument();
@@ -114,4 +115,3 @@ test("renders simple single-account balance", () => {
   expect(screen.getAllByText("$500")).toHaveLength(2); // 1 in row, 1 in net balance
   expect(screen.getByText("Net balance")).toBeInTheDocument();
 });
-

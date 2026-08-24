@@ -1,0 +1,57 @@
+@import "@fortawesome/fontawesome-free/css/fontawesome.min.css";
+@import "@fortawesome/fontawesome-free/css/regular.min.css";
+@import "@fortawesome/fontawesome-free/css/solid.min.css";
+
+@font-face {
+  font-family: "arcticons";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/arcticons.woff2") format("woff2");
+  unicode-range: U+F0001-F1D3D;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "fa6-brands";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/fa6-brands.woff2") format("woff2");
+  unicode-range: U+F2356-F2544;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "fa6-regular";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/fa6-regular.woff2") format("woff2");
+  unicode-range: U+F22B2-F2355;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "fa6-solid";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/fa6-solid.woff2") format("woff2");
+  unicode-range: U+F1D3E-F22B1;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "fluent-emoji-high-contrast";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/fluent-emoji-high-contrast.woff2") format("woff2");
+  unicode-range: U+F5B53-F615C;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "mdi";
+  font-style: normal;
+  font-weight: 900;
+  src: url("../../../fonts/mdi.woff2") format("woff2");
+  unicode-range: U+F2545-F5B52;
+  font-display: block;
+}

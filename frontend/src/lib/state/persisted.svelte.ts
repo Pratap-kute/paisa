@@ -1,4 +1,5 @@
-import { browser } from "$app/environment";
+const isBrowser = typeof window !== "undefined" &&
+  typeof localStorage !== "undefined";
 
 export class PersistedState<T> {
   #key: string;
@@ -6,7 +7,7 @@ export class PersistedState<T> {
 
   constructor(key: string, initialValue: T) {
     this.#key = key;
-    if (browser) {
+    if (isBrowser) {
       const stored = localStorage.getItem(key);
       if (stored !== null) {
         try {
@@ -28,7 +29,7 @@ export class PersistedState<T> {
 
   set value(newValue: T) {
     this.#value = newValue;
-    if (browser) {
+    if (isBrowser) {
       localStorage.setItem(this.#key, JSON.stringify(newValue));
     }
   }

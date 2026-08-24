@@ -1,7 +1,10 @@
 <script lang="ts">
   import Select from "svelte-select";
-  import Modal from "$lib/components/ui/Modal.svelte";
-  import _ from "lodash";
+  import Dialog from "$lib/components/ui/Dialog.svelte";
+  import FormField from "$lib/components/layout/FormField.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
+  import SelectField from "$lib/components/ui/Select.svelte";
   import { createEventDispatcher, onMount } from "svelte";
   import { ajax, type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
 
@@ -16,7 +19,7 @@
   let providers: PriceProvider[] = $state([]);
   let selectedProvider: PriceProvider = $state(null);
 
-  let filters: Record<string, AutoCompleteItem> = $state({});
+  let filters: Record<string, AutoCompleteItem | string | null> = $state({});
 
   onMount(async () => {
     ({ providers } = await ajax("/api/price/providers", { background: true }));
@@ -46,25 +49,28 @@
   function reset() {
     code = "";
     filters = {};
-    for (let i = 0; i < _.max(_.map(providers, (p) => p.fields.length)); i++) {
+    const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
+    for (let i = 0; i < maxLen; i++) {
       clearCache(i);
     }
   }
 
   function makeAutoComplete(
     field: string,
-    filters: Record<string, AutoCompleteItem>,
+    filters: Record<string, AutoCompleteItem | string | null>,
     i: number,
     provider: PriceProvider
   ) {
     return async function autocomplete(filterText: string): Promise<AutoCompleteItem[]> {
       for (let j = 0; j < i; j++) {
-        if (_.isEmpty(filters[provider.fields[j].id])) {
+        if (!filters[provider.fields[j].id]) {
           return [];
         }
       }
 
-      const queryFilters = _.mapValues(filters, (v) => (_.isString(v) ? v : v?.id));
+      const queryFilters = Object.fromEntries(
+        Object.entries(filters).map(([k, v]) => [k, typeof v === "string" ? v : v?.id]),
+      );
       queryFilters[field] = filterText;
       const { completions } = await ajax("/api/price/autocomplete", {
         method: "POST",
@@ -80,41 +86,63 @@
   }
 
   const dispatch = createEventDispatcher();
+
+  let providerOptions = $derived(
+    providers.map((p) => ({ value: p.code, label: p.label }))
+  );
+
+  let selectedProviderCode = $derived(selectedProvider?.code ?? "");
+
+  function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
+    const provider = providers.find((p) => p.code === e.currentTarget.value);
+    if (provider) {
+      selectedProvider = provider;
+      reset();
+    }
+  }
 </script>
 
-<Modal bind:active={open} footerClass="is-justify-content-space-between">
-  {#snippet head({ close })}
-  
-      <p class="modal-card-title">{label}</p>
-      <button class="delete" aria-label="close" onclick={(e) => close(e)}></button>
-    
+<Dialog bind:open footerClass="flex justify-between items-center gap-2">
+  {#snippet header({ close })}
+    <div class="paisa4-dialog-header w-full">
+      <p class="paisa4-dialog-title">{label}</p>
+      <button type="button" class="paisa4-icon-action" aria-label="Close dialog" onclick={() => close()}>×</button>
+    </div>
   {/snippet}
-  {#snippet body()}
-    <div style="min-height: 500px;" >
+  {#snippet children()}
+    <div style="min-height: 500px;">
       {#if selectedProvider}
-        <div class="field">
-          <label class="label" for="">Provider</label>
-          <div class="control">
-            <div class="select">
-              <select bind:value={selectedProvider} required onchange={(_e) => reset()}>
-                {#each providers as provider}
-                  <option value={provider}>{provider.label}</option>
-                {/each}
-              </select>
-            </div>
-            <div class="help">{@html selectedProvider.description}</div>
-          </div>
-        </div>
-        <div class="field">
+        <FormField id="price-provider" label="Provider">
+          {#snippet children()}
+            <SelectField
+              value={selectedProviderCode}
+              options={providerOptions}
+              size="md"
+              fullwidth
+              onchange={handleProviderChange}
+            />
+            {#if selectedProvider.description}
+              <p class="mt-1 text-xs text-[var(--paisa-muted-foreground)]">{@html selectedProvider.description}</p>
+            {/if}
+          {/snippet}
+        </FormField>
+        <div class="mt-4">
           {#each selectedProvider.fields as field, i}
-            <div class="field">
-              <label class="label" for="">{field.label}</label>
-              <div class="control">
+            <FormField id="price-field-{field.id}" label={field.label}>
+              {#snippet children()}
                 {#if field.inputType == "text"}
                   {#if i === selectedProvider.fields.length - 1}
-                    <input class="input" type="text" bind:value={code} required />
+                    <Input type="text" bind:value={code} size="md" required />
                   {:else}
-                    <input class="input" type="text" bind:value={filters[field.id]} required />
+                    <Input
+                      type="text"
+                      value={String(filters[field.id] ?? "")}
+                      oninput={(e) => {
+                        filters[field.id] = e.currentTarget.value;
+                      }}
+                      size="md"
+                      required
+                    />
                   {/if}
                 {:else}
                   {#key autocompleteCache[i]}
@@ -129,7 +157,7 @@
                       searchable={true}
                       clearable={false}
                       on:change={() => {
-                        _.each(selectedProvider.fields, (f, j) => {
+                        selectedProvider.fields.forEach((f, j) => {
                           if (j > i) {
                             clearCache(j);
                             filters[f.id] = null;
@@ -137,7 +165,8 @@
                         });
 
                         if (i === selectedProvider.fields.length - 1) {
-                          code = filters[field.id].id;
+                          const item = filters[field.id];
+                          code = typeof item === "object" && item ? item.id : "";
                         } else {
                           code = "";
                         }
@@ -145,36 +174,43 @@
                     ></Select>
                   {/key}
                 {/if}
-                <p class="help">{@html field.help}</p>
-              </div>
-            </div>
+                {#if field.help}
+                  <p class="mt-1 text-xs text-[var(--paisa-muted-foreground)]">{@html field.help}</p>
+                {/if}
+              {/snippet}
+            </FormField>
           {/each}
         </div>
       {/if}
     </div>
   {/snippet}
-  {#snippet foot({ close })}
-  
-      <div>
-        <button
-          class="button is-success"
-          disabled={_.isEmpty(code)}
-          onclick={(e) => {
+  {#snippet footer({ close })}
+    <div class="flex items-center gap-2">
+      <Button
+        variant="primary"
+        size="md"
+        disabled={!code.trim()}
+        onclick={() => {
           dispatch("select", { code: code, provider: selectedProvider.code });
           reset();
-          close(e);
-        }}>Select</button
-        >
-        <button class="button" onclick={(e) => close(e)}>Cancel</button>
-      </div>
+          close();
+        }}
+      >
+        Select
+      </Button>
+      <Button variant="ghost" size="md" onclick={() => close()}>Cancel</Button>
+    </div>
 
-      <div>
-        <button
-          onclick={(_e) => clearProviderCache()}
-          class="button is-danger {isLoading && 'is-loading'}"
-          disabled={!selectedProvider}>Clear Provider Cache</button
-        >
-      </div>
-    
+    <div>
+      <Button
+        variant="danger"
+        size="md"
+        loading={isLoading}
+        disabled={!selectedProvider}
+        onclick={() => clearProviderCache()}
+      >
+        Clear Provider Cache
+      </Button>
+    </div>
   {/snippet}
-</Modal>
+</Dialog>

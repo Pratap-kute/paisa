@@ -1,37 +1,65 @@
 <script lang="ts">
   import Logo from "$lib/components/layout/Logo.svelte";
-  const links = [
-    { name: "Chat", href: "https://matrix.to/#/#paisa:matrix.org", icon: "fa-solid fa-headset" },
-    { name: "Issue", href: "https://github.com/ananthakumaran/paisa/issues", icon: "fas fa-bug" },
+  import Card from "$lib/components/ui/Card.svelte";
+  import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Section from "$lib/components/layout/Section.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+
+  const resources = [
     {
-      name: "Discussions",
-      href: "https://github.com/ananthakumaran/paisa/discussions",
-      icon: "fa-regular fa-comments"
+      name: "Documentation",
+      desc: "Guides, tutorials, and ledger configuration reference",
+      href: "https://paisa.fyi",
+      icon: "fa-solid fa-book",
+      badge: "Docs",
     },
     {
       name: "Source Code",
-      href: "https://github.com/ananthakumaran/paisa",
-      icon: "fa-solid fa-code"
-    },
-    { name: "Documentation", href: "https://paisa.fyi", icon: "fa-solid fa-book" },
-    {
-      name: "Releases",
-      href: "https://github.com/ananthakumaran/paisa/releases",
-      icon: "fa-solid fa-download"
+      desc: "GitHub repository (Fork maintained by Pratap Kute)",
+      href: "https://github.com/Pratap-kute/paisa",
+      icon: "fa-brands fa-github",
+      badge: "GitHub",
     },
     {
-      name: "Demo",
+      name: "Releases & Changelog",
+      desc: "Latest release downloads, updates, and release notes",
+      href: "https://github.com/Pratap-kute/paisa/releases",
+      icon: "fa-solid fa-download",
+      badge: "v0.8.1",
+    },
+    {
+      name: "Live Demo",
+      desc: "Interactive demo environment with sample ledger data",
       href: "https://demo.paisa.fyi",
-      icon: "fa-solid fa-video"
-    }
+      icon: "fa-solid fa-desktop",
+      badge: "Demo",
+    },
+    {
+      name: "Community Discussions",
+      desc: "Ask questions, share workflows, and request features",
+      href: "https://github.com/Pratap-kute/paisa/discussions",
+      icon: "fa-regular fa-comments",
+      badge: "Community",
+    },
+    {
+      name: "Issue Tracker",
+      desc: "Report bugs or submit feature suggestions",
+      href: "https://github.com/Pratap-kute/paisa/issues",
+      icon: "fas fa-bug",
+      badge: "Support",
+    },
+    {
+      name: "Matrix Chat",
+      desc: "Real-time discussion with community contributors",
+      href: "https://matrix.to/#/#paisa:matrix.org",
+      icon: "fa-solid fa-comments",
+      badge: "Chat",
+    },
   ];
 
-  import Card from "$lib/components/ui/Card.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-
   function externalLink(url: string) {
-    if (window.runtime) {
+    if (typeof window !== "undefined" && window.runtime?.BrowserOpenURL) {
       window.runtime.BrowserOpenURL(url);
     } else {
       window.open(url, "_blank");
@@ -39,42 +67,153 @@
   }
 </script>
 
+<svelte:head>
+  <title>About - Paisa</title>
+</svelte:head>
+
 <Page width="analysis">
+  <PageHeader
+    title="About Paisa"
+    description="Personal finance management with plain text accounting, privacy-first analytics, and portfolio tracking"
+  />
+
   <Section>
-    <div class="paisa-about-centered">
-      <Card padding="sm" class="has-text-centered">
-        <div><Logo size={128} /></div>
-        <div class="is-size-3 is-primary-color">Paisa</div>
-        <div>
-          Version: <b>0.8.1</b>
+    <div class="flex flex-col gap-6">
+      <!-- Hero Branding Card -->
+      <Card padding="lg" class="w-full overflow-hidden">
+        <div class="flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
+          <div class="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
+            <div class="shrink-0 transition-transform duration-300 hover:scale-105">
+              <Logo size={96} />
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+                <h1 class="text-2xl font-bold tracking-tight text-[var(--paisa-text-primary)]">
+                  Paisa
+                </h1>
+                <Badge variant="primary" size="sm" rounded>v0.8.1</Badge>
+                <Badge variant="neutral" size="sm" rounded>AGPL-3.0</Badge>
+              </div>
+              <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">
+                Local-first, privacy-focused financial analytics & plain text accounting for personal ledgers.
+              </p>
+              <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs md:justify-start">
+                <span class="font-medium text-[var(--paisa-text-primary)]">
+                  Maintained by <strong class="text-[var(--paisa-brand-primary)]">Pratap Kute</strong>
+                </span>
+                <span class="text-[var(--paisa-text-muted)]">•</span>
+                <span class="text-[var(--paisa-text-secondary)]">
+                  Originally created by <strong class="text-[var(--paisa-text-primary)]">Ananthakumaran</strong>
+                </span>
+              </div>
+              <div class="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--paisa-text-secondary)] md:justify-start">
+                <span class="inline-flex items-center gap-1">
+                  <i class="fas fa-shield-halved text-[var(--paisa-positive)]"></i>
+                  100% Offline & Private
+                </span>
+                <span>•</span>
+                <span class="inline-flex items-center gap-1">
+                  <i class="fas fa-scale-balanced text-[var(--paisa-brand-primary)]"></i>
+                  Double-Entry Ledger
+                </span>
+                <span>•</span>
+                <span class="inline-flex items-center gap-1">
+                  <i class="fas fa-bolt text-[var(--paisa-warning)]"></i>
+                  Fast Local Analytics
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 flex-col items-center gap-2 md:items-end">
+            <button
+              type="button"
+              class="inline-flex cursor-pointer items-center gap-2 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-3 py-1.5 text-xs font-semibold text-[var(--paisa-text-primary)] transition-colors hover:border-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)]"
+              onclick={() => externalLink("https://github.com/Pratap-kute/paisa")}
+            >
+              <i class="fa-brands fa-github"></i>
+              <span>Star on GitHub</span>
+            </button>
+            <span class="text-[0.6875rem] text-[var(--paisa-text-muted)]">Licensed under GNU AGPL-3.0</span>
+          </div>
         </div>
       </Card>
 
-      <Card padding="sm">
-        <h3 class="is-size-5 mb-1">Links</h3>
-        <ul>
-          {#each links as link}
-            <li>
-              <a href={link.href} onclick={(e) => { e.preventDefault(); externalLink(link.href); }}>
-                <span class="icon is-small">
-                  <i class={link.icon}></i>
-                </span>
-                <span>{link.name}</span>
-              </a>
-            </li>
+      <!-- Key Resources & Links Grid -->
+      <div>
+        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+          Resources & Community
+        </h2>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {#each resources as item}
+            <a
+              href={item.href}
+              class="group flex flex-col justify-between rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] p-3.5 transition-all hover:border-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)] hover:shadow-sm"
+              onclick={(e) => {
+                e.preventDefault();
+                externalLink(item.href);
+              }}
+            >
+              <div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)] group-hover:text-[var(--paisa-brand-primary)]">
+                    <i class="{item.icon} w-4 text-center text-[var(--paisa-text-muted)] group-hover:text-[var(--paisa-brand-primary)]"></i>
+                    <span>{item.name}</span>
+                  </div>
+                  <span class="inline-flex items-center rounded bg-[var(--paisa-surface-2)] px-1.5 py-0.5 text-[0.6875rem] font-mono text-[var(--paisa-text-secondary)] border border-[var(--paisa-border-subtle)]">
+                    {item.badge}
+                  </span>
+                </div>
+                <p class="mt-1.5 text-xs text-[var(--paisa-muted-foreground)]">
+                  {item.desc}
+                </p>
+              </div>
+
+              <div class="mt-3 flex items-center text-[0.6875rem] font-medium text-[var(--paisa-text-muted)] group-hover:text-[var(--paisa-brand-primary)]">
+                <span>Visit link</span>
+                <i class="fas fa-arrow-up-right-from-square ml-1 text-[0.625rem]"></i>
+              </div>
+            </a>
           {/each}
-        </ul>
-      </Card>
+        </div>
+      </div>
+
+      <!-- System & Environment Highlights -->
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Card padding="md" class="w-full">
+          <div class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
+            <i class="fas fa-keyboard text-[var(--paisa-brand-primary)]"></i>
+            <span>Keyboard Shortcuts</span>
+          </div>
+          <div class="mt-2.5 flex flex-col gap-2 text-xs text-[var(--paisa-text-secondary)]">
+            <div class="flex items-center justify-between">
+              <span>Command Palette</span>
+              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + K / ⌘K</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Save File in Editor</span>
+              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + S / ⌘S</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Format Journal</span>
+              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + Shift + I</kbd>
+            </div>
+          </div>
+        </Card>
+
+        <Card padding="md" class="w-full">
+          <div class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
+            <i class="fas fa-cube text-[var(--paisa-brand-primary)]"></i>
+            <span>Architecture & Privacy</span>
+          </div>
+          <div class="mt-2.5 flex flex-col gap-1.5 text-xs text-[var(--paisa-muted-foreground)]">
+            <p>• Plain text ledger engine supporting standard double-entry bookkeeping format.</p>
+            <p>• Data never leaves your machine. Zero tracking, zero telemetry, 100% offline.</p>
+            <p>• Built with modern web technologies: Svelte 5, TypeScript, and ECharts.</p>
+          </div>
+        </Card>
+      </div>
     </div>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-about-centered {
-    max-width: 480px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-</style>

@@ -3,15 +3,16 @@ import { createRawSnippet } from "svelte";
 import { expect, test } from "vitest";
 import ChartFrame from "./ChartFrame.svelte";
 
-test("renders chart frame with semantic type and size class", () => {
+test("renders chart frame with one explicit height intent", () => {
   const { container, unmount } = render(ChartFrame, {
-    type: "timeline",
+    height: "tall",
     title: "Monthly Cash Flow",
   });
 
   const frame = container.querySelector(".paisa-chart-frame");
   expect(frame).toBeInTheDocument();
-  expect(frame).toHaveClass("paisa-chart-type-timeline");
+  expect(frame).toHaveClass("paisa-chart-height-tall");
+  expect(frame).not.toHaveClass("paisa-chart-row-aware");
   expect(container.querySelector(".paisa-chart-frame-title")).toHaveTextContent(
     "Monthly Cash Flow",
   );
@@ -20,7 +21,6 @@ test("renders chart frame with semantic type and size class", () => {
 
 test("renders empty state message when empty prop is true", () => {
   const { container, unmount } = render(ChartFrame, {
-    size: "standard",
     empty: true,
     emptyMessage: "No data available",
   });
@@ -28,6 +28,19 @@ test("renders empty state message when empty prop is true", () => {
   expect(container.querySelector(".paisa-chart-frame-empty"))
     .toBeInTheDocument();
   expect(container).toHaveTextContent("No data available");
+  unmount();
+});
+
+test("enables row-aware height only when rows are provided", () => {
+  const { container, unmount } = render(ChartFrame, {
+    height: "compact",
+    rows: 7,
+  });
+
+  const frame = container.querySelector(".paisa-chart-frame");
+  expect(frame).toHaveClass("paisa-chart-height-compact");
+  expect(frame).toHaveClass("paisa-chart-row-aware");
+  expect(frame?.getAttribute("style")).toContain("--paisa-chart-rows: 7");
   unmount();
 });
 

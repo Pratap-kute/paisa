@@ -1,0 +1,279 @@
+/**
+ * CodeMirror editor integration
+ */
+
+.cm-editor .cm-gutters {
+  background-color: var(--paisa-surface-muted);
+  color: var(--paisa-text-muted);
+  border: none;
+  border-top-left-radius: var(--paisa-radius-xs);
+  border-bottom-left-radius: var(--paisa-radius-xs);
+}
+
+.cm-editor .cm-activeLineGutter {
+  background-color: var(--paisa-surface-hover) !important;
+  color: var(--paisa-text-primary);
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-activeLine {
+  background-color: transparent !important;
+}
+
+.cm-editor .cm-selectionBackground {
+  background-color: var(--paisa-surface-active) !important;
+}
+
+.cm-editor .cm-line .tok-heading {
+  font-weight: var(--paisa-font-weight-bold);
+  color: var(--paisa-text-primary);
+}
+
+.cm-editor .cm-line .tok-link {
+  text-decoration: underline;
+}
+
+.cm-editor .cm-line .tok-number {
+  color: #6c71c4;
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-line .tok-string,
+.cm-editor .cm-line .tok-string2 {
+  color: #c82829;
+}
+
+.cm-editor .cm-line .tok-keyword {
+  color: #8959a8;
+}
+
+.cm-editor .cm-line .tok-comment {
+  color: var(--paisa-text-muted);
+}
+
+.cm-editor .cm-line .tok-strong {
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-line .tok-typeName {
+  color: #718c00;
+}
+
+.cm-editor .cm-line .tok-variableName {
+  color: #4271ae;
+}
+
+.cm-editor .cm-line .tok-variableName2 {
+  color: #3e999f;
+}
+
+.cm-editor .cm-line .tok-operator {
+  color: #f5871f;
+}
+
+.cm-editor .cm-line .ͼd {
+  color: var(--paisa-brand-primary);
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-line .ͼg {
+  color: var(--paisa-brand-primary);
+}
+
+.cm-editor .cm-line .ͼm {
+  color: var(--paisa-text-muted);
+}
+
+.cm-editor .cm-line .ͼ9 {
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-cursor,
+.cm-editor .cm-dropCursor {
+  border-left-color: var(--paisa-text-primary);
+  border-width: 2px;
+}
+
+.cm-editor .cm-tooltip {
+  border: 1px solid var(--paisa-border-default);
+  box-shadow: var(--paisa-shadow-md);
+  background-color: var(--paisa-surface-bg);
+  color: var(--paisa-text-primary);
+}
+
+.cm-editor .cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background-color: var(--paisa-brand-primary-light);
+  color: var(--paisa-brand-primary);
+}
+
+.cm-editor .cm-completionMatchedText {
+  font-weight: var(--paisa-font-weight-bold);
+}
+
+.cm-editor .cm-tooltip-autocomplete > ul > li {
+  background-color: var(--paisa-surface-bg);
+  color: var(--paisa-text-primary);
+}
+
+.cm-editor .cm-panels-bottom {
+  border-top: 1px solid var(--paisa-border-subtle);
+}
+
+.cm-editor .cm-lintRange-active {
+  background-color: transparent !important;
+}
+
+.cm-editor .cm-diagnostic {
+  background: var(--paisa-surface-bg) !important;
+  color: var(--paisa-text-primary);
+  font-size: var(--paisa-font-size-sm);
+  box-shadow: var(--paisa-shadow-md);
+  border: 1px solid var(--paisa-border-default);
+}
+
+.cm-editor .cm-panel.cm-search {
+  background: var(--paisa-surface-bg);
+  color: var(--paisa-text-primary);
+  border-top: 1px solid var(--paisa-border-default);
+}
+
+.cm-editor .cm-panel.cm-search .cm-button,
+.cm-editor .cm-panel.cm-search .cm-textfield {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: var(--paisa-radius-sm);
+  padding: calc(0.5em - 1px) calc(0.75em - 1px);
+  line-height: 1.5;
+  background: var(--paisa-surface-bg);
+  border: 1px solid var(--paisa-input-border);
+  color: var(--paisa-text-primary);
+  font-size: var(--paisa-font-size-sm);
+}
+
+.cm-editor .cm-panel.cm-search .cm-textfield {
+  min-width: 300px;
+}
+
+.cm-editor .cm-panel.cm-search .cm-button {
+  cursor: pointer;
+}
+
+.cm-editor .cm-panel.cm-search .cm-button:hover {
+  border-color: var(--paisa-input-border-hover);
+}
+
+.cm-editor .cm-panel.cm-search label {
+  display: inline-flex;
+  margin: 10px 15px 0 0;
+  align-items: center;
+  justify-content: left;
+}
+
+.cm-editor .cm-panel.cm-search [name="close"] {
+  font-size: var(--paisa-font-size-base);
+  color: var(--paisa-text-primary);
+}
+
+.cm-editor .cm-searchMatch {
+  background-color: rgba(255, 215, 0, 0.4);
+}
+
+.cm-editor .cm-searchMatch.cm-searchMatch-selected {
+  background-color: rgba(255, 87, 51, 0.4);
+}
+
+.cm-editor .cm-collapsedLines {
+  color: var(--paisa-text-secondary);
+  background: var(--paisa-surface-muted);
+}
+
+.cm-editor.cm-merge-a .cm-changedLine {
+  background-color: var(--paisa-danger-light);
+}
+
+.cm-editor.cm-merge-a .cm-changedText {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.cm-editor.cm-merge-b .cm-changedLine {
+  background-color: var(--paisa-success-light);
+}
+
+.cm-editor.cm-merge-b .cm-changedText {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.cm-editor .cm-changedText {
+  border: none;
+}
+
+.cm-editor .cm-changedText ins,
+.cm-editor .cm-changedText del {
+  text-decoration: none !important;
+}
+
+.cm-editor .cm-changedText ins span,
+.cm-editor .cm-changedText del span {
+  color: var(--paisa-text-primary) !important;
+}
+
+.template-editor .cm-editor {
+  height: 200px;
+}
+
+.sheet-result {
+  border-left: 1px solid var(--paisa-border-subtle);
+}
+
+.preview-editor {
+  min-height: 35px;
+}
+
+.paisa-search-query-container .search-query-editor {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+}
+
+.paisa-search-query-container .search-query-editor .cm-editor {
+  width: 100%;
+  background: transparent;
+}
+
+.paisa-search-query-container .search-query-editor .cm-scroller {
+  overflow-x: auto;
+}
+
+.full-height,
+.editor .cm-editor {
+  max-height: calc(100vh - 45.5px - 7px - 15.75px - 21px - 57.75px - 10.5px -
+    10.5px);
+}
+
+.cm-scroller {
+  overflow: auto;
+  font-family: var(--paisa-font-mono) !important;
+  font-size: 0.9285714285714286rem;
+}
+
+.cm-focused {
+  outline: none !important;
+}
+
+.cm-tooltip-hover {
+  font-family: var(--paisa-font-mono);
+}
+
+.cm-tag {
+  height: 1.5em !important;
+}

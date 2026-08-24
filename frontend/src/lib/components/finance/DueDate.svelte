@@ -14,8 +14,8 @@
 </script>
 
 <span title="due on {dueDate.format('DD MMM YYYY')}">
-  <span class="icon is-small {icon.color}">
-    <i class="fas {icon.icon}"></i>
+  <span class="inline-flex items-center text-xs {icon.color}">
+    <i class="fas {icon.icon}" aria-hidden="true"></i>
   </span>
   {#if amountDue !== undefined && amountDue <= 0}
     <span>no dues</span>

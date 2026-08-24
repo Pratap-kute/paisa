@@ -17,9 +17,9 @@ export function indendedAssetAccountName(cell: CellComponent) {
   }
   return `
 <span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
-  <span class="has-text-grey custom-icon">${iconText(account)}</span>
+  <span class="paisa-text-muted custom-icon">${iconText(account)}</span>
   <a href="/assets/gain/${account}">${lastName(account)}</a>
-  <span class="has-text-grey-light is-size-7">${children}</span>
+  <span class="paisa-text-muted text-xs">${children}</span>
 </span>
 `;
 }
@@ -33,9 +33,9 @@ export function indendedLiabilityAccountName(cell: CellComponent) {
   }
   return `
 <span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
-  <span class="has-text-grey custom-icon">${iconText(account)}</span>
+  <span class="paisa-text-muted custom-icon">${iconText(account)}</span>
   <span>${lastName(account)}</span>
-  <span class="has-text-grey-light is-size-7">${children}</span>
+  <span class="paisa-text-muted text-xs">${children}</span>
 </span>
 `;
 }
@@ -44,7 +44,7 @@ export function accountName(cell: CellComponent) {
   const account = cell.getValue();
   return `
 <span class="paisa-nowrap" style="max-width: max(15rem, 33.33vw); overflow: hidden;">
-  <span class="has-text-grey custom-icon">${iconText(account)}</span>
+  <span class="paisa-text-muted custom-icon">${iconText(account)}</span>
   <a href="/assets/gain/${account}">${account}</a>
 </span>
 `;
@@ -53,9 +53,9 @@ export function accountName(cell: CellComponent) {
 function calculateChangeClass(gain: number) {
   let changeClass = "";
   if (gain > 0) {
-    changeClass = "has-text-success";
+    changeClass = "paisa-text-positive";
   } else if (gain < 0) {
-    changeClass = "has-text-danger";
+    changeClass = "paisa-text-negative";
   }
   return changeClass;
 }

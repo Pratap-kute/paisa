@@ -10,7 +10,7 @@ export function coverageThreshold(): number {
 export const sharedResolve = {
   alias: {
     "$app/navigation": fileURLToPath(
-      new URL("./src/test/navigation.ts", import.meta.url),
+      new URL("./tests/setup/navigation.ts", import.meta.url),
     ),
     $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
     xlsx: fileURLToPath(

@@ -1,13 +1,10 @@
 <script lang="ts">
-  import COLORS, {
-    generateColorScheme,
-    genericBarColor,
-  } from "$lib/core/colors";
-  import { renderAccountOverview, buildLegends } from "$lib/charts/gain";
+  import COLORS from "$lib/core/colors";
+  import { buildLegends } from "$lib/charts/gain";
   import {
+    buildPortfolioComparison,
     filterCommodityBreakdowns,
-    renderPortfolioBreakdown,
-  } from "$lib/charts/portfolio";
+  } from "$lib/charts/hierarchy_data";
   import {
     ajax,
     type Posting,
@@ -23,18 +20,21 @@
     restName,
     postingUrl,
   } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount, onDestroy } from "svelte";
+  import { last } from "es-toolkit";
+  import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
-  import LevelItem from "$lib/components/ui/LevelItem.svelte";
   import { iconify } from "$lib/core/icon";
   import LegendCard from "$lib/components/ui/LegendCard.svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
   import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
+  import Metric from "$lib/components/layout/Metric.svelte";
   import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
+  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+import { sortBy } from "$lib/core/collection";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);
@@ -42,7 +42,10 @@
   let name_and_security_type: PortfolioAggregate[] = $state([]);
   let rating: PortfolioAggregate[] = $state([]);
   let industry: PortfolioAggregate[] = $state([]);
-  let color: any = $state();
+  let securityTypeData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(security_type, selectedCommodities)));
+  let ratingData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(rating, selectedCommodities)));
+  let industryData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(industry, selectedCommodities)));
+  let portfolioData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(name_and_security_type, selectedCommodities)));
 
   let securityTypeEmpty: boolean = $state(false);
   let nameAndSecurityTypeEmpty: boolean = $state(false);
@@ -59,17 +62,7 @@
   let assetBreakdown: AssetBreakdown = $state();
   let legends = buildLegends();
 
-  let destroyCallback = () => {};
   let postings: Posting[] = $state([]);
-
-  let securityTypeR: any = $state(),
-    portfolioR: any = $state(),
-    industryR: any = $state(),
-    ratingR: any = $state(null);
-
-  onDestroy(async () => {
-    destroyCallback();
-  });
 
   onMount(async () => {
     ({
@@ -84,127 +77,72 @@
       },
     } = await ajax("/api/gain/:name", null, data));
 
-    overview = _.last(gain.networthTimeline);
-    postings = _.chain(gain.postings)
-      .sortBy((p) => p.date)
+    overview = last(gain.networthTimeline);
+    postings = sortBy(gain.postings, (p) => p.date)
       .reverse()
-      .take(100)
-      .value();
-    destroyCallback = renderAccountOverview(
-      gain.networthTimeline,
-      gain.postings,
-      "d3-account-timeline-breakdown",
-    );
-
+      .slice(0, 100);
     selectedCommodities = [...commodities];
-    ({ renderer: securityTypeR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-type",
-      security_type,
-      {
-        small: true,
-      },
-    ));
-    ({ renderer: ratingR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-rating",
-      rating,
-      {
-        small: true,
-      },
-    ));
-    ({ renderer: industryR } = renderPortfolioBreakdown(
-      "#d3-portfolio-security-industry",
-      industry,
-      {
-        small: true,
-        z: [genericBarColor()],
-      },
-    ));
-    ({ renderer: portfolioR } = renderPortfolioBreakdown(
-      "#d3-portfolio",
-      name_and_security_type,
-      {
-        small: true,
-      },
-    ));
-
-    if (commodities.length !== 0) {
-      color = generateColorScheme(commodities);
-    }
-
     securityTypeEmpty = security_type.length === 0;
     nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
     ratingEmpty = rating.length === 0;
     industryEmpty = industry.length === 0;
   });
 
-  $effect(() => {
-    if (securityTypeR && ratingR && industryR && portfolioR) {
-      securityTypeR(
-        filterCommodityBreakdowns(security_type, selectedCommodities),
-        color,
-      );
-      ratingR(filterCommodityBreakdowns(rating, selectedCommodities), color);
-      industryR(
-        filterCommodityBreakdowns(industry, selectedCommodities),
-        color,
-      );
-      portfolioR(
-        filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-        color,
-      );
-    }
-  });
 </script>
+
+<svelte:head>
+  <title>{data.name || "Asset Gain"} - Paisa</title>
+</svelte:head>
 
 <Page width="fluid">
   <PageHeader
     title={data.name || "Asset Gain"}
-    description="Account performance, asset allocation, and transaction history"
-  />
+    description="Lot-by-lot gain, performance timeline, and transaction history"
+  >
+    {#snippet leading()}
+      <a
+        href="/assets/gain"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+      >
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Gain</span>
+      </a>
+    {/snippet}
+  </PageHeader>
 
-  <div class="paisa-gain-slug-layout">
-    <!-- Side Context Panel: Metrics + Postings -->
-    <div class="paisa-gain-slug-side">
-      {#if overview}
-        <Section title="Overview">
-          <MetricStrip cols={2}>
-            <LevelItem
-              narrow
-              title="Balance"
-              value={formatCurrency(overview.balanceAmount)}
-            />
-            <LevelItem
-              narrow
-              title="Net Investment"
-              value={formatCurrency(overview.netInvestmentAmount)}
-            />
-            <LevelItem
-              narrow
-              title="Gain / Loss"
-              color={overview.gainAmount >= 0
-                ? COLORS.gainText
-                : COLORS.lossText}
-              value={formatCurrency(overview.gainAmount)}
-            />
-            <LevelItem
-              narrow
-              title="XIRR"
-              value={formatFloat(gain.xirr)}
-              subtitle={assetBreakdown
-                ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
-                : ""}
-            />
-          </MetricStrip>
-        </Section>
-      {/if}
+  {#if overview}
+    <MetricStrip cols={4}>
+      <Metric label="Balance" value={formatCurrency(overview.balanceAmount)} />
+      <Metric
+        label="Net Investment"
+        value={formatCurrency(overview.netInvestmentAmount)}
+      />
+      <Metric
+        label="Gain / Loss"
+        value={formatCurrency(overview.gainAmount)}
+        status={overview.gainAmount >= 0 ? "positive" : "negative"}
+      />
+      <Metric
+        label="XIRR"
+        value={formatFloat(gain?.xirr)}
+        secondary={assetBreakdown
+          ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
+          : undefined}
+      />
+    </MetricStrip>
+  {/if}
 
+  <div class="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+    <div class="flex min-w-0 flex-col gap-4">
       <Section title="Postings">
-        <div class="paisa-postings-list">
+        <div
+          class="flex max-h-[min(720px,calc(100vh-300px))] min-h-[280px] flex-col gap-2 overflow-y-auto pr-1 max-lg:max-h-[400px] max-lg:min-h-0"
+        >
           {#each postings as posting}
             <a
-              class="paisa-posting-row"
+              class="paisa-posting-row flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)]"
               href={postingUrl(posting)}
-              style="--paisa-row-accent: {posting.amount >= 0
+              style="border-left: 2px solid {posting.amount >= 0
                 ? posting.account.startsWith('Income:CapitalGains')
                   ? COLORS.loss
                   : COLORS.secondary
@@ -212,19 +150,26 @@
                   ? COLORS.gain
                   : COLORS.tertiary}"
             >
-              <span class="paisa-posting-main">
-                <span class="paisa-posting-payee">{posting.payee}</span>
-                <span class="paisa-posting-date"
+              <span class="flex min-w-0 items-center justify-between gap-2">
+                <span
+                  class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-secondary)]"
+                  >{posting.payee}</span
+                >
+                <span
+                  class="shrink-0 text-xs text-[var(--paisa-text-muted)]"
                   >{posting.date.format("DD MMM YYYY")}</span
                 >
               </span>
-              <span class="paisa-posting-meta">
-                <span class="paisa-posting-account custom-icon">
+              <span class="flex min-w-0 items-center justify-between gap-2">
+                <span
+                  class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-muted)]"
+                >
                   {iconify(restName(posting.account), {
                     group: firstName(posting.account),
                   })}
                 </span>
-                <span class="paisa-posting-amount"
+                <span
+                  class="shrink-0 font-semibold text-[var(--paisa-text-primary)]"
                   >{formatCurrency(posting.amount)}</span
                 >
               </span>
@@ -234,28 +179,35 @@
       </Section>
     </div>
 
-    <!-- Main Analysis Panel: Timeline + Portfolio breakdown -->
-    <div class="paisa-gain-slug-main">
+    <div class="flex min-w-0 flex-col gap-4">
       {#if overview}
         <Section>
-          <div class="paisa-gain-snapshot-bar">
-            <span class="custom-icon is-size-5">{iconify(data.name)}</span>
-            <div class="paisa-gain-meta-item">
-              <span class="paisa-gain-meta-label">Investment</span>
-              <span class="has-text-weight-bold"
+          <div
+            class="flex flex-wrap items-center gap-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-4 py-3"
+          >
+            <span class="custom-icon text-xl">{iconify(data.name)}</span>
+            <div class="flex items-baseline gap-2">
+              <span class="text-xs text-[var(--paisa-text-muted)]"
+                >Investment</span
+              >
+              <span class="font-semibold text-[var(--paisa-foreground)]"
                 >{formatCurrency(overview.investmentAmount)}</span
               >
             </div>
-            <div class="paisa-gain-meta-item">
-              <span class="paisa-gain-meta-label">Withdrawal</span>
-              <span class="has-text-weight-bold"
+            <div class="flex items-baseline gap-2">
+              <span class="text-xs text-[var(--paisa-text-muted)]"
+                >Withdrawal</span
+              >
+              <span class="font-semibold text-[var(--paisa-foreground)]"
                 >{formatCurrency(overview.withdrawalAmount)}</span
               >
             </div>
             {#if overview.balanceUnits > 0}
-              <div class="paisa-gain-meta-item">
-                <span class="paisa-gain-meta-label">Balance Units</span>
-                <span class="has-text-weight-bold"
+              <div class="flex items-baseline gap-2">
+                <span class="text-xs text-[var(--paisa-text-muted)]"
+                  >Balance Units</span
+                >
+                <span class="font-semibold text-[var(--paisa-foreground)]"
                   >{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span
                 >
               </div>
@@ -266,68 +218,45 @@
 
       <Section title="Timeline">
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-        <ChartFrame type="timeline" onresize={() => {
-          document.getElementById("d3-account-timeline-breakdown")?.replaceChildren();
-          if (gain) {
-            destroyCallback = renderAccountOverview(
-              gain.networthTimeline,
-              gain.postings,
-              "d3-account-timeline-breakdown",
-            );
-          }
-        }}>
-          <svg id="d3-account-timeline-breakdown" width="100%" height="450" />
+        <ChartFrame height="tall">
+          {#if gain}
+            <GainAccountTimelineChart points={gain.networthTimeline} />
+          {/if}
         </ChartFrame>
       </Section>
 
-      <div class="paisa-portfolio-breakdown-grid">
-        <div class="paisa-portfolio-sub-charts">
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div class="flex min-w-0 flex-col gap-4">
           {#if !securityTypeEmpty}
             <Section title="Security Type">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-type-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-type" width="100%" />
+              <ChartFrame height="compact" rows={Math.max(4, securityTypeData.points.length)}>
+                <ComparisonBarChart data={securityTypeData} ariaLabel="Asset security type breakdown" testId="gain-security-type-echart" />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !ratingEmpty}
             <Section title="Security Rating">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-rating-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-rating" width="100%" />
+              <ChartFrame height="compact" rows={Math.max(4, ratingData.points.length)}>
+                <ComparisonBarChart data={ratingData} ariaLabel="Asset security rating breakdown" testId="gain-security-rating-echart" />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !industryEmpty}
             <Section title="Industry">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-security-industry-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio-security-industry" width="100%" />
+              <ChartFrame height="compact" rows={Math.max(4, industryData.points.length)}>
+                <ComparisonBarChart data={industryData} ariaLabel="Asset industry breakdown" testId="gain-industry-echart" />
               </ChartFrame>
             </Section>
           {/if}
         </div>
 
         {#if !nameAndSecurityTypeEmpty}
-          <div class="paisa-portfolio-security-chart">
+          <div class="min-w-0">
             <Section title="Security">
-              <ChartFrame type="distribution">
-                <div
-                  id="d3-portfolio-treemap"
-                  style="width: 100%; position: relative"
-                ></div>
-                <svg id="d3-portfolio" width="100%" />
+              <ChartFrame height="compact" rows={Math.max(4, portfolioData.points.length)}>
+                <ComparisonBarChart data={portfolioData} ariaLabel="Asset security breakdown" testId="gain-security-echart" />
               </ChartFrame>
             </Section>
           </div>
@@ -336,136 +265,3 @@
     </div>
   </div>
 </Page>
-
-<style lang="scss">
-  .paisa-gain-slug-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-5);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(280px, 1fr) minmax(0, 3fr);
-    }
-  }
-
-  .paisa-gain-slug-side,
-  .paisa-gain-slug-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-4);
-  }
-
-  .paisa-postings-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-2);
-    max-height: min(720px, calc(100vh - 300px));
-    min-height: 280px;
-    overflow-y: auto;
-    padding-right: var(--paisa-space-1);
-
-    @media screen and (max-width: 1023px) {
-      max-height: 400px;
-      min-height: 0;
-    }
-  }
-
-  .paisa-posting-row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-1);
-    min-height: 54px;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    border-left: 2px solid var(--paisa-row-accent);
-    border-radius: var(--paisa-radius-md);
-    border-top: 1px solid var(--paisa-border-default);
-    border-right: 1px solid var(--paisa-border-default);
-    border-bottom: 1px solid var(--paisa-border-default);
-    background: var(--paisa-surface-card);
-    color: var(--paisa-text-secondary);
-    text-decoration: none;
-  }
-
-  .paisa-posting-row:hover {
-    border-color: var(--paisa-border-strong);
-    color: var(--paisa-text-primary);
-  }
-
-  .paisa-posting-main,
-  .paisa-posting-meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    min-width: 0;
-  }
-
-  .paisa-posting-payee,
-  .paisa-posting-account {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-posting-payee {
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-secondary);
-  }
-
-  .paisa-posting-date,
-  .paisa-posting-account {
-    flex: 0 0 auto;
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-posting-account {
-    flex: 1 1 auto;
-  }
-
-  .paisa-posting-amount {
-    flex: 0 0 auto;
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-  }
-
-  .paisa-gain-snapshot-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-4);
-    padding: var(--paisa-space-3) var(--paisa-space-4);
-    background: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-md);
-    flex-wrap: wrap;
-  }
-
-  .paisa-gain-meta-item {
-    display: flex;
-    align-items: baseline;
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-gain-meta-label {
-    font-size: var(--paisa-font-size-xs);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-portfolio-breakdown-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-4);
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .paisa-portfolio-sub-charts,
-  .paisa-portfolio-security-chart {
-    min-width: 0;
-  }
-</style>

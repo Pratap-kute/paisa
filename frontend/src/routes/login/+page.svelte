@@ -2,14 +2,18 @@
   import { goto } from "$app/navigation";
   import Logo from "$lib/components/layout/Logo.svelte";
   import { login } from "$lib/core/utils";
-  import _ from "lodash";
+  import Button from "$lib/components/ui/Button.svelte";
+  import FormField from "$lib/components/layout/FormField.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
+import { isEmpty } from "$lib/core/collection";
+  
   let username = $state("");
   let password = $state("");
 
   let invalid = $state(false);
   let invalidErrorMessage = $state("");
 
-  let loginDisabled = $derived(_.isEmpty(username) || _.isEmpty(password));
+  let loginDisabled = $derived(isEmpty(username) || isEmpty(password));
 
   async function tryLogin() {
     if (loginDisabled) return;
@@ -24,43 +28,50 @@
   }
 </script>
 
-<section class="section m-0 p-0 paisa-login-section">
-  <div class="container is-max-tablet">
-    <div class="columns is-centered">
-      <div class="column is-12-mobile is-8-tablet is-6-desktop">
-        <div class="box paisa-login-card">
-          <div class="paisa-login-brand">
-            <div class="mr-2"><Logo size={32} /></div>
-            <div class="is-size-3">
-              <a href="https://paisa.fyi" class="is-primary-color">Paisa</a>
-            </div>
-          </div>
-          <form onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
-            <div class="field">
-              <label for="username" class="label paisa-login-label">Username</label>
-              <div class="control">
-                <input id="username" class="input paisa-login-input" type="text" bind:value={username} />
-              </div>
-            </div>
+<svelte:head>
+  <title>Login — Paisa</title>
+</svelte:head>
 
-            <div class="field">
-              <label for="password" class="label paisa-login-label">Password</label>
-              <div class="control">
-                <input id="password" class="input paisa-login-input" type="password" bind:value={password} />
-              </div>
-              {#if invalid}
-                <p class="help is-danger">{invalidErrorMessage}</p>
-              {/if}
-            </div>
-
-            <div class="field mt-5 mb-0">
-              <div class="control">
-                <button class="button is-primary paisa-login-button" disabled={loginDisabled}>Login</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
+<main
+  class="grid min-h-screen place-items-center p-6"
+  style="background: var(--paisa-canvas-bg);"
+>
+  <div
+    class="w-full max-w-[26rem] rounded-[var(--paisa-radius-lg)] border p-6 shadow-[var(--paisa-shadow-md)]"
+    style="border-color: var(--paisa-login-card-border); background: var(--paisa-login-card-bg);"
+  >
+    <div class="mb-4 flex items-center justify-center gap-2">
+      <Logo size={32} />
+      <a
+        href="https://paisa.fyi"
+        class="text-3xl font-semibold text-[var(--paisa-primary)] no-underline hover:underline"
+      >
+        Paisa
+      </a>
     </div>
+
+    <form class="space-y-4" onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
+      <FormField id="username" label="Username">
+        {#snippet children()}
+          <Input id="username" type="text" size="lg" bind:value={username} />
+        {/snippet}
+      </FormField>
+
+      <FormField id="password" label="Password" error={invalid ? invalidErrorMessage : undefined}>
+        {#snippet children()}
+          <Input id="password" type="password" size="lg" bind:value={password} />
+        {/snippet}
+      </FormField>
+
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        class="!w-full !font-semibold"
+        disabled={loginDisabled}
+      >
+        Login
+      </Button>
+    </form>
   </div>
-</section>
+</main>

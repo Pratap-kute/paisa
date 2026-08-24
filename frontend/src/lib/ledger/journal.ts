@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 interface State {
   inTransaction: boolean;
   lines: string[];
@@ -33,7 +31,7 @@ function formatLine(line: string, state: State) {
     return line;
   }
 
-  if (_.isEmpty(_.trim(line)) || line.match(/^[^ \t]/)) {
+  if (line.trim().length === 0 || line.match(/^[^ \t]/)) {
     state.inTransaction = false;
   }
 

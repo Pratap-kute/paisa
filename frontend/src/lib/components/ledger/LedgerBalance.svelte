@@ -362,7 +362,7 @@
 
 <div class="paisa-ledger-balance">
   <div class="paisa-ledger-balance-context">
-    <span class="icon is-small" aria-hidden="true">
+    <span class="inline-flex items-center text-xs" aria-hidden="true">
       <i class="fa-solid fa-circle-info"></i>
     </span>
     <span>
@@ -444,7 +444,7 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-ledger-balance {
     display: flex;
     height: 100%;
@@ -465,7 +465,7 @@
     font-size: 0.675rem;
     line-height: 1.35;
 
-    .icon {
+    > span:first-child {
       margin-top: 1px;
       color: var(--paisa-brand-primary);
       flex-shrink: 0;

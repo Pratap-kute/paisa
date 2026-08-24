@@ -2,7 +2,6 @@
   import { getColorPreference, setColorPreference } from "$lib/core/utils";
   import { onMount } from "svelte";
   import * as store from "../../../store";
-  import { refresh } from "../../../store";
 
   let theme = getColorPreference();
   store.theme.set(theme);
@@ -15,24 +14,27 @@
   }
 
   const toggle = () => {
-    if (refresh()) {
-      setTheme(theme === "light" ? "dark" : "light");
-    }
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const reflectPreference = () => {
-    document.firstElementChild.setAttribute("data-theme", theme);
+    if (typeof document !== "undefined") {
+      document.firstElementChild?.setAttribute("data-theme", theme);
+    }
   };
 
   reflectPreference();
 
-  onMount(async () => {
+  onMount(() => {
     reflectPreference();
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", ({ matches: isDark }) => {
-        setTheme(isDark ? "dark" : "light");
-      });
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = ({ matches: isDark }: MediaQueryListEvent) => {
+      setTheme(isDark ? "dark" : "light");
+    };
+    media.addEventListener("change", handler);
+    return () => {
+      media.removeEventListener("change", handler);
+    };
   });
 </script>
 

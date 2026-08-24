@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { ajax, isMobile, type LedgerFile, type Transaction as T } from "$lib/core/utils";
-  import _ from "lodash";
+  import { ajax, type LedgerFile, type Transaction as T } from "$lib/core/utils";
+  import { debounce } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import Transaction from "$lib/components/transactions/Transaction.svelte";
@@ -13,11 +13,11 @@
   import { editorState } from "$lib/editors/search_query_editor";
   import { get } from "svelte/store";
   import { download } from "$lib/importing/export";
-  import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+import { filter } from "$lib/core/collection";
 
-  let buldEditOpen = $state(false);
+  let bulkEditOpen = $state(false);
   let transactions: T[] = $state(null);
   let filtered: T[] = $state([]);
   let files: LedgerFile[] = $state([]);
@@ -26,42 +26,51 @@
   let openPreviewModal = $state(false);
   let accounts: string[] = $state([]);
   let commodities: string[] = $state([]);
+  let listHeight = $state(600);
+  let isSmallScreen = $state(false);
 
   const debits = (t: T) => {
-    return _.filter(t.postings, (p) => p.amount < 0);
+    return filter(t.postings, (p) => p.amount < 0);
   };
 
   const credits = (t: T) => {
-    return _.filter(t.postings, (p) => p.amount >= 0);
+    return filter(t.postings, (p) => p.amount >= 0);
   };
 
   function handleInputRaw(predicate: (t: T) => boolean) {
-    filtered = _.filter(transactions, predicate);
+    if (!transactions) return;
+    filtered = filter(transactions, predicate);
   }
 
-  const handleInput = _.debounce(handleInputRaw, 100);
+  const handleInput = debounce(handleInputRaw, 100);
 
   const unsubscribe = editorState.subscribe((state) => {
     handleInput(state.predicate);
   });
 
-  onDestroy(async () => {
+  onDestroy(() => {
     unsubscribe();
   });
 
-  const mobile = isMobile();
-
   const itemSize = (i: number) => {
     const t = filtered[i];
-    const count = mobile ? t.postings.length : Math.max(credits(t).length, debits(t).length);
-    return 8 + count * 22 + (mobile ? 25 : 0);
+    if (!t) return 52;
+    const count = isSmallScreen ? t.postings.length : Math.max(credits(t).length, debits(t).length, 1);
+    return isSmallScreen ? 44 + count * 24 : Math.max(52, count * 26 + 18);
   };
+
+  function updateDimensions() {
+    if (typeof window !== "undefined") {
+      isSmallScreen = window.innerWidth < 768;
+      const offset = isSmallScreen ? (bulkEditOpen ? 420 : 250) : (bulkEditOpen ? 340 : 220);
+      listHeight = Math.max(320, window.innerHeight - offset);
+    }
+  }
 
   async function loadTransactions() {
     ({ files, accounts, commodities } = await ajax("/api/editor/files"));
     ({ transactions } = await ajax("/api/transaction"));
     handleInputRaw(get(editorState).predicate);
-
     newFiles = files;
   }
 
@@ -104,10 +113,19 @@
     await loadTransactions();
   }
 
-  onMount(async () => {
-    await loadTransactions();
+  onMount(() => {
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    loadTransactions();
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+    };
   });
 </script>
+
+<svelte:head>
+  <title>Transactions — Paisa</title>
+</svelte:head>
 
 <DiffViewModal
   on:save={(e) => saveAll(e.detail)}
@@ -117,98 +135,106 @@
   {updatedTransactionsCount}
 />
 
-{#if transactions}
-  <Page width="fluid">
-    <PageHeader
-      title="Transactions"
-      description="Journal transactions, search, and bulk edits"
-    />
+<div class="flex w-full min-w-0 max-w-full flex-col gap-5">
+  <PageHeader
+    title="Transactions"
+    description="Journal transactions, search, and bulk edits"
+  />
 
-    <Section>
-      <div class="paisa-transaction-toolbar-bar">
-        <div class="paisa-transaction-search-controls">
-          <div class="control is-expanded">
-            <SearchQuery
-              autocomplete={{
-                account: accounts,
-                commodity: commodities,
-                filename: files.map((f) => f.name)
-              }}
-            />
-          </div>
-          <button
-            class="button is-link is-light invertable"
-            onclick={(_e) => (buldEditOpen = !buldEditOpen)}
-          >
-            <span>Bulk Edit</span>
-            <span class="icon is-small">
-              <i class="fas {buldEditOpen ? 'fa-angle-up' : 'fa-angle-down'}"></i>
-            </span>
-          </button>
+  <div class="flex w-full min-w-0 flex-col gap-4">
+    <div class="flex w-full flex-wrap items-center justify-between gap-3.5 max-md:flex-col max-md:items-stretch max-md:gap-2.5">
+      <div class="min-w-0 max-w-full flex-[1_1_320px] max-md:w-full max-md:flex-none">
+        <SearchQuery
+          autocomplete={{
+            account: accounts,
+            commodity: commodities,
+            filename: files.map((f) => f.name)
+          }}
+        />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5 max-md:w-full max-md:flex-col max-md:items-stretch max-md:gap-2">
+        <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2.5 py-1.5 text-[0.8125rem] text-[var(--paisa-muted-foreground)] max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
+          <p class="m-0 inline"><b class="text-[var(--paisa-foreground)]">{filtered.length}</b> transaction(s)</p>
         </div>
 
-        <div class="paisa-transaction-meta-actions">
-          <p class="is-6"><b>{filtered.length}</b> transaction(s)</p>
+        <div class="inline-flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-2">
           <button
             type="button"
-            class="paisa-button-reset has-text-link is-inline-flex is-align-items-center"
-            onclick={(_e) => downloadTransactions()}
+            class="inline-flex h-9 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[var(--paisa-radius-md)] border px-3 text-[0.8125rem] font-medium transition-[background-color,border-color,color] duration-[var(--paisa-transition-fast)] max-md:min-h-11 max-md:w-full max-md:justify-center {bulkEditOpen ? 'border-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'border-[var(--paisa-border)] bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] hover:border-[var(--paisa-border-strong)] hover:bg-[var(--paisa-surface-hover)]'}"
+            onclick={() => {
+              bulkEditOpen = !bulkEditOpen;
+              setTimeout(updateDimensions, 200);
+            }}
           >
-            <span class="icon is-small">
-              <i class="fa-solid fa-file-arrow-down"></i>
-            </span>
-            <span class="ml-1">download</span>
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Bulk Edit</span>
+            <i class="fas {bulkEditOpen ? 'fa-angle-up' : 'fa-angle-down'}"></i>
           </button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            class="max-md:min-h-11 max-md:w-full max-md:justify-center"
+            title="Download balanced transactions"
+            onclick={downloadTransactions}
+          >
+            {#snippet icon()}
+              <i class="fa-solid fa-file-arrow-down"></i>
+            {/snippet}
+            Download
+          </Button>
         </div>
       </div>
+    </div>
 
-      {#if buldEditOpen}
-        <div class="mt-4" transition:slide>
-          <BulkEditForm {accounts} on:preview={(e) => showPreview(e.detail)} />
+    {#if bulkEditOpen}
+      <div class="w-full" transition:slide={{ duration: 180 }}>
+        <BulkEditForm {accounts} on:preview={(e) => showPreview(e.detail)} />
+      </div>
+    {/if}
+
+    {#if transactions}
+      <div class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
+        <div class="hidden grid-cols-[200px_1fr_1fr] gap-4 border-b border-[var(--paisa-border)] bg-[var(--paisa-surface-raised)] px-3 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)] md:grid">
+          <div class="truncate">Date & Payee</div>
+          <div class="truncate">Debits</div>
+          <div class="truncate">Credits</div>
         </div>
-      {/if}
-    </Section>
 
-    <Section>
-      <div class="box p-0">
-        <VirtualList
-          width="100%"
-          height={window.innerHeight - 260}
-          itemCount={filtered.length}
-          {itemSize}
-        >
-          <svelte:fragment slot="item" let:index let:style>
-            {@const t = filtered[index]}
-            <div {style}>
-              <Transaction {t} />
+        {#if filtered.length > 0}
+          <div class="w-full overflow-x-hidden">
+            <VirtualList
+              width="100%"
+              height={listHeight}
+              itemCount={filtered.length}
+              {itemSize}
+            >
+              <svelte:fragment slot="item" let:index let:style>
+                {@const t = filtered[index]}
+                <div {style} class="box-border w-full">
+                  <Transaction {t} />
+                </div>
+              </svelte:fragment>
+            </VirtualList>
+          </div>
+        {:else}
+          <div class="flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
+              <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-          </svelte:fragment>
-        </VirtualList>
+            <div class="mb-1 text-[0.9375rem] font-semibold text-[var(--paisa-foreground)]">No transactions match your search</div>
+            <div class="max-w-[360px] text-[0.8125rem] text-[var(--paisa-muted-foreground)]">
+              Try adjusting your query terms, account filters, or date range.
+            </div>
+          </div>
+        {/if}
       </div>
-    </Section>
-  </Page>
-{/if}
-
-<style lang="scss">
-  .paisa-transaction-toolbar-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--paisa-space-3);
-  }
-
-  .paisa-transaction-search-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    flex-grow: 1;
-    min-width: 280px;
-  }
-
-  .paisa-transaction-meta-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-4);
-  }
-</style>
+    {:else}
+      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] px-6 py-16 text-sm text-[var(--paisa-muted-foreground)]">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paisa-border-strong)] border-t-[var(--paisa-primary)]"></div>
+        <span>Loading transactions...</span>
+      </div>
+    {/if}
+  </div>
+</div>

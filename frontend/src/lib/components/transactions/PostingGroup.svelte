@@ -1,6 +1,5 @@
 <script lang="ts">
   import { formatCurrency, type Posting } from "$lib/core/utils";
-  import _ from "lodash";
 
   interface Props {
     postings: Posting[];
@@ -46,7 +45,11 @@
   }
 
   let groupedPostings: GroupedPosting[] = $derived(group(postings));
-  let isGrouped = $derived(_.some(groupedPostings, (groupedPosting) => groupedPosting.postings.length > 1));
+  let isGrouped = $derived(
+    groupedPostings.some((groupedPosting) =>
+      groupedPosting.postings.length > 1
+    ),
+  );
 </script>
 
 <div>
@@ -54,7 +57,7 @@
     <div class={isGrouped && "mb-3"}>
       {#if isGrouped}
         <div
-          class="is-flex is-justify-content-space-between paisa-negative-mb-1 has-text-weight-bold has-text-grey-light"
+          class="flex justify-between paisa-negative-mb-1 text-sm font-bold text-[var(--paisa-muted-foreground)]"
         >
           <div>{groupedPosting.key}</div>
           <div>{formatCurrency(groupedPosting.total)}</div>

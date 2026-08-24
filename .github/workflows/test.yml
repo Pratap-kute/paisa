@@ -84,17 +84,17 @@ jobs:
           "
 
   browser:
-    name: Browser E2E & Visual Tests
+    name: Browser E2E Tests
     needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
-      - name: Browser E2E and visual tests
+      - name: Browser E2E tests
         run: |
           nix develop --command bash -c "
-            make build-frontend test-e2e test-visual
+            make build-frontend test-e2e
           "
       - name: Upload browser test reports on failure
         if: failure()

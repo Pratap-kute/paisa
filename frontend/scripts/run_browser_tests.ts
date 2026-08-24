@@ -57,6 +57,7 @@ try {
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
+    env: { ...Deno.env.toObject(), PAISA_E2E_DEV_UI: "1" },
   }).spawn().status;
   Deno.exitCode = status.code;
 } finally {

@@ -1,11 +1,26 @@
 import { expect, type Page, test } from "@playwright/test";
 import {
-  chartSnapshotVariants,
   chartSnapshots,
+  chartSnapshotVariants,
   visualRoutes,
 } from "./routes.ts";
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "parallel" });
+
+const browserErrors = new WeakMap<Page, string[]>();
+
+test.beforeEach(({ page }) => {
+  const errors: string[] = [];
+  browserErrors.set(page, errors);
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+});
+
+test.afterEach(({ page }) => {
+  expect(browserErrors.get(page) ?? []).toEqual([]);
+});
 
 const mockLogs = {
   logs: [
@@ -45,6 +60,7 @@ const mockLogs = {
 const variants = [
   { name: "desktop-light", width: 1440, height: 900, theme: "light" },
   { name: "desktop-dark", width: 1440, height: 900, theme: "dark" },
+  { name: "tablet-light", width: 768, height: 900, theme: "light" },
   { name: "mobile-light", width: 390, height: 844, theme: "light" },
   { name: "mobile-dark", width: 390, height: 844, theme: "dark" },
 ] as const;
@@ -64,7 +80,67 @@ async function waitForStableLayout(page: Page) {
     null,
     { polling: 100 },
   );
-  await page.waitForTimeout(100);
+}
+
+async function expectStableChartSurfaces(page: Page) {
+  const charts = page.locator("[data-chart-ready='true']");
+  const count = await charts.count();
+  if (count === 0) return;
+
+  const first = await charts.evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      const parent = element.parentElement?.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        parentWidth: parent?.width ?? 0,
+      };
+    })
+  );
+  await page.evaluate(() =>
+    new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    )
+  );
+  const second = await charts.evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect();
+      const parent = element.parentElement?.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        parentWidth: parent?.width ?? 0,
+      };
+    })
+  );
+
+  expect(second).toHaveLength(first.length);
+  second.forEach((size, index) => {
+    expect(size.width).toBeGreaterThan(0);
+    expect(size.height).toBeGreaterThan(0);
+    expect(Math.abs(size.width - first[index].width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(size.height - first[index].height)).toBeLessThanOrEqual(1);
+    expect(size.width).toBeLessThanOrEqual(size.parentWidth + 1);
+  });
+}
+
+async function expectDarkSelectTheme(page: Page) {
+  const control = page.locator(".svelte-select").first();
+  await expect(control).toBeVisible();
+  const colors = await control.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      foreground: style.color,
+      inputBackground: style.getPropertyValue("--paisa-input-bg").trim(),
+      inputForeground: style.getPropertyValue("--paisa-input-text").trim(),
+    };
+  });
+  expect(colors.background).toBe("rgb(15, 23, 42)");
+  expect(colors.foreground).toBe("rgb(248, 250, 252)");
+  expect(colors.inputBackground).toBe("#0f172a");
+  expect(colors.inputForeground).toBe("#f8fafc");
 }
 
 async function applyVariant(
@@ -105,24 +181,75 @@ for (const route of visualRoutes) {
             body: JSON.stringify(mockLogs),
           }));
       }
+      if (route.name === "ledger-price") {
+        await page.route("**/api/price", async (apiRoute) => {
+          if (new URL(apiRoute.request().url()).pathname === "/api/price") {
+            await apiRoute.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({ prices: {} }),
+            });
+            return;
+          }
+          await apiRoute.continue();
+        });
+      }
 
       await page.goto(route.path);
       await page.waitForLoadState("networkidle");
+      if (route.name === "cash-flow-yearly") {
+        await page.getByRole("combobox").selectOption({ label: "2021 - 22" });
+      }
       await expect(routeReady(page, route).first()).toBeVisible();
       if (route.name === "dashboard") {
-        await expect(page.locator("#d3-current-cash-flow")).toBeVisible();
-        await expect(page.locator("#d3-current-month-breakdown")).toBeVisible();
+        await expect(
+          page.locator(
+            "[data-testid='dashboard-cash-flow-echart'][data-chart-ready='true']",
+          ),
+        ).toBeVisible();
+        await expect(
+          page.locator(
+            "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
+          ),
+        ).toBeVisible();
       }
       if (route.name === "savings-goal" || route.name === "retirement-goal") {
-        await expect(page.locator(".paisa-goal-detail-main svg").nth(0).locator("g").first())
+        const prefix = route.name === "savings-goal" ? "savings" : "retirement";
+        await expect(
+          page.locator(
+            `[data-testid='${prefix}-goal-progress-echart'][data-chart-ready='true']`,
+          ),
+        )
           .toBeVisible({ timeout: 15_000 });
-        await expect(page.locator(".paisa-goal-detail-main svg").nth(1).locator("g").first())
+        await expect(
+          page.locator(
+            `[data-testid='${prefix}-goal-investment-echart'][data-chart-ready='true']`,
+          ),
+        )
           .toBeVisible({ timeout: 15_000 });
-        await expect(page.locator(".paisa-goal-detail-side .paisa-posting-row").first())
+        await expect(
+          page.locator(".paisa-goal-detail-side .paisa-posting-row").first(),
+        )
           .toBeVisible();
       }
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
+      await expectStableChartSurfaces(page);
+      if (variant.theme === "dark" && route.name === "ledger-import") {
+        await expectDarkSelectTheme(page);
+        await page.locator(".svelte-select").click();
+        await expect(page.locator(".svelte-select-list")).toBeVisible();
+        const listBackground = await page.locator(".svelte-select-list")
+          .evaluate((element) => getComputedStyle(element).backgroundColor);
+        expect(listBackground).toBe("rgb(30, 41, 59)");
+        await page.keyboard.press("Escape");
+        await expect(page.locator(".svelte-select-list")).toBeHidden();
+      }
+      if (variant.theme === "dark" && route.name === "config") {
+        await page.getByRole("tab", { name: "Allocation Targets" }).click();
+        await page.getByRole("button", { name: "Add" }).click();
+        await expectDarkSelectTheme(page);
+      }
       await expect(page).toHaveScreenshot(
         `${route.name}-${variant.name}.png`,
         { fullPage: true },
@@ -137,17 +264,25 @@ for (const chart of chartSnapshots) {
       await applyVariant(page, variant);
       await page.goto(chart.path);
       await page.waitForLoadState("networkidle");
-      if ("readyText" in chart && chart.readyText) {
+      if ("selectOption" in chart) {
+        await page.getByRole("combobox").selectOption({
+          label: chart.selectOption,
+        });
+      }
+      if ("readyText" in chart && typeof chart.readyText === "string") {
         await expect(page.getByText(chart.readyText, { exact: true }))
           .toBeVisible();
       }
-      const chartLocator = page.locator(chart.locator);
+      const chartLocator = page.locator(
+        `${chart.locator}[data-chart-ready='true']`,
+      );
       await expect(chartLocator).toBeVisible();
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
+      await expectStableChartSurfaces(page);
       await expect(chartLocator).toHaveScreenshot(
         `chart-${chart.name}-${variant.name}.png`,
-        { maxDiffPixelRatio: 0.05 },
+        { maxDiffPixelRatio: chart.name === "networth" ? 0.01 : 0.005 },
       );
     });
   }

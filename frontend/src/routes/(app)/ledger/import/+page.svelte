@@ -1,27 +1,25 @@
 <script lang="ts">
   import Select from "svelte-select";
-  import {
-    createEditor as createTemplateEditor,
-    editorState as templateEditorState,
-    updateContent as updateTemplateContent,
-  } from "$lib/editors/template_editor";
+  import Handlebars from "handlebars";
+  import { editorState as templateEditorState } from "$lib/editors/template_editor";
   import {
     createEditor as createPreviewEditor,
-    updateContent as updatePreviewContent,
+    updateContent as updatePreviewContent
   } from "$lib/editors/editor";
+  import TemplateEditorDrawer from "$lib/components/import/TemplateEditorDrawer.svelte";
   import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
   import {
     parse,
     asRows,
     renderWithMetadata,
-    type RenderMetadata,
+    type RenderMetadata
   } from "$lib/importing/spreadsheet";
   import {
     commitParseOutcome,
     displayCell,
     emptyRenderMetadata,
   } from "$lib/importing/import_commit";
-  import _ from "lodash";
+  import { range } from "es-toolkit";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
   import { ajax, type ImportTemplate } from "$lib/core/utils";
@@ -29,37 +27,46 @@
   import * as toast from "$lib/core/toast";
   import { ensureFileExtension } from "$lib/ledger/file";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
-  import Modal from "$lib/components/ui/Modal.svelte";
+  import Dialog from "$lib/components/ui/Dialog.svelte";
   import Page from "$lib/components/layout/Page.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
+  import Drawer from "$lib/components/ui/Drawer.svelte";
+  import Switch from "$lib/components/ui/Switch.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import FormField from "$lib/components/layout/FormField.svelte";
+  import Input from "$lib/components/ui/Input.svelte";
+  import IconButton from "$lib/components/ui/IconButton.svelte";
   import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
   import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
   import PredictionDetail from "$lib/components/prediction/PredictionDetail.svelte";
+  import SourceReviewList from "$lib/components/import/SourceReviewList.svelte";
   import {
     predictionSession,
     rowMatchesFilter,
     type ConfidenceFilter,
   } from "$lib/prediction/session";
   import type { Confidence, PredictionResult } from "$lib/prediction/types";
+import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 
   let templates: ImportTemplate[] = $state([]);
-  let selectedTemplate: ImportTemplate | undefined = $state();
-  let saveAsName: string = $state("");
+  let selectedTemplate: ImportTemplate = $state();
+  let saveAsName: string = $state();
   let preview = $state("");
-  let parseErrorMessage: string | null = $state(null);
+  let parseErrorMessage: string = $state(null);
   let columnCount: number = $state(0);
   let data: any[][] = $state([]);
   let rows: Array<Record<string, any>> = $state([]);
-  let options: { reverse: boolean; trim: boolean } = $state({
-    reverse: false,
-    trim: true,
-  });
+  let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
   let loading = $state(false);
   let activeFileName = $state("");
   let templateDrawerOpen = $state(false);
   let selectedSourceRowIndex: number | null = $state(null);
   let predictionTick = $state(0);
   let predictionFilter: ConfidenceFilter = $state(null);
+  let sourceViewMode: "review" | "raw" = $state("review");
+  let mobileActiveTab: "source" | "preview" = $state("source");
+  let advancedOptionsOpen = $state(false);
+  let mobileInspectorOpen = $state(false);
   let predictionCounts = $state({
     high: 0,
     medium: 0,
@@ -77,6 +84,24 @@
     }>
   >([]);
 
+  let templateItems = $derived(
+    templates.map((t) => ({
+      value: t,
+      label: t.name,
+      template_type: t.template_type,
+    }))
+  );
+
+  let selectedTemplateOption = $derived(
+    selectedTemplate
+      ? {
+          value: selectedTemplate,
+          label: selectedTemplate.name,
+          template_type: selectedTemplate.template_type,
+        }
+      : null
+  );
+
   function refreshPredictionReview() {
     try {
       predictionSession.finalizeCurrentImport();
@@ -92,23 +117,20 @@
     content: "",
     rows: [],
     generatedCount: 0,
-    errors: [],
+    errors: []
   });
 
-  let templateEditorDom: Element | undefined = $state();
-  let templateEditor: EditorView | undefined = $state();
+  let previewEditorDom: Element = $state();
+  let previewEditor: EditorView = $state();
+  let showSaveAsModal = $state(false);
+  let showFileModal = $state(false);
 
-  let previewEditorDom: Element | undefined = $state();
-  let previewEditor: EditorView | undefined = $state();
-
-  function onSelectTemplate(tmpl: ImportTemplate) {
-    if (!tmpl) return;
-    selectedTemplate = tmpl;
-    saveAsName = tmpl.name;
-    if (templateEditor) {
-      updateTemplateContent(templateEditor, tmpl.content);
+  let fileColumns = $derived.by(() => {
+    if (rows && rows.length > 0) {
+      return Object.keys(rows[0]).filter((k) => k !== "index");
     }
-  }
+    return [];
+  });
 
   onMount(async () => {
     const [tfidf, historyResponse] = await Promise.all([
@@ -119,97 +141,77 @@
     predictionSession.loadHistory(historyResponse.history || []);
     ({ templates } = await ajax("/api/templates"));
     if (templates.length > 0) {
-      selectedTemplate = templates[0];
-      saveAsName = selectedTemplate.name;
-      if (templateEditorDom) {
-        templateEditor = createTemplateEditor(
-          selectedTemplate.content,
-          templateEditorDom,
-        );
-      }
-    }
-    if (previewEditorDom) {
-      previewEditor = createPreviewEditor(preview, previewEditorDom, {
-        readonly: true,
-      });
+      onSelectTemplate(templates[0]);
     }
   });
 
-  let saveAsNameDuplicate = $derived(
-    !!_.find(templates, { name: saveAsName, template_type: "custom" }),
-  );
-  let selectedTemplateIsBuiltin = $derived(
-    selectedTemplate?.template_type == "builtin",
-  );
-  let templateSaveDisabled = $derived(
-    !$templateEditorState.hasUnsavedChanges || !selectedTemplate,
-  );
-  let templateSaveTooltip = $derived(
-    !$templateEditorState.hasUnsavedChanges
-      ? "No Unsaved Changes"
-      : selectedTemplateIsBuiltin
-        ? "Save edited builtin template as custom"
-        : "Save Template",
-  );
+  function initPreviewEditor(node: HTMLElement) {
+    previewEditorDom = node;
+    previewEditor = createPreviewEditor(preview, node, { readonly: true });
+    if (preview) {
+      updatePreviewContent(previewEditor, preview);
+    }
+    return {
+      destroy() {
+        previewEditor?.destroy?.();
+      }
+    };
+  }
 
-  async function save() {
+  let saveAsNameDuplicate = $derived(!!find(templates, { name: saveAsName, template_type: "custom" }));
+  let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
+
+  async function handleSaveTemplate(name: string, content: string) {
     const { template, saved, message } = await ajax("/api/templates/upsert", {
       method: "POST",
       body: JSON.stringify({
-        name: saveAsName,
-        content: templateEditor ? templateEditor.state.doc.toString() : "",
+        name,
+        content
       }),
-      background: true,
+      background: true
     });
-
     if (!saved) {
       toast.toast({
-        message: `Failed to save ${saveAsName}. reason: ${message}`,
+        message: `Failed to save template ${name}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000,
+        duration: 10000
       });
       return;
     }
-
-    ({ templates } = await ajax("/api/templates", { background: true }));
-    const savedTmpl = _.find(templates, { id: template.id });
-    if (savedTmpl) {
-      onSelectTemplate(savedTmpl);
-    }
     toast.toast({
-      message: `Saved ${saveAsName}`,
-      type: "is-success",
+      message: `Saved ${name}`,
+      type: "is-success"
     });
-
-    $templateEditorState = _.assign({}, $templateEditorState, {
-      hasUnsavedChanges: false,
-    });
+    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
+    ({ templates } = await ajax("/api/templates", { background: true }));
+    selectedTemplate = template;
   }
 
-  async function remove() {
-    if (!selectedTemplate) {
-      return;
+  function builtinNotAllowed(action: string, template: ImportTemplate) {
+    if (template?.template_type == "builtin") {
+      return `Builtin template can't be ${action}`;
     }
-    const oldName = selectedTemplate.name;
-    const confirmed = confirm(
-      `Are you sure you want to delete ${oldName} template?`,
-    );
+    return "";
+  }
+
+  async function handleDeleteTemplate(templateToDelete: ImportTemplate) {
+    const oldName = templateToDelete.name;
+    const confirmed = confirm(`Are you sure you want to delete ${oldName} template?`);
     if (!confirmed) {
       return;
     }
     const { success, message } = await ajax("/api/templates/delete", {
       method: "POST",
       body: JSON.stringify({
-        name: selectedTemplate.name,
+        name: templateToDelete.name
       }),
-      background: true,
+      background: true
     });
-
     if (!success) {
       toast.toast({
         message: `Failed to remove ${oldName}. reason: ${message}`,
         type: "is-danger",
-        duration: 10000,
+        duration: 10000
       });
       return;
     }
@@ -220,12 +222,10 @@
     }
     toast.toast({
       message: `Removed ${oldName}`,
-      type: "is-success",
+      type: "is-success"
     });
 
-    $templateEditorState = _.assign({}, $templateEditorState, {
-      hasUnsavedChanges: false,
-    });
+    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
   }
 
   $effect(() => {
@@ -235,7 +235,7 @@
     const currentTrim = options.trim;
     const _tick = predictionTick;
 
-    if (!_.isEmpty(currentRows) && currentTemplate && previewEditor) {
+    if (!isEmpty(currentRows) && currentTemplate) {
       try {
         predictionSession.beginRender();
       } catch (error) {
@@ -244,29 +244,29 @@
       try {
         const generated = renderWithMetadata(currentRows, currentTemplate, {
           reverse: currentReverse,
-          trim: currentTrim,
+          trim: currentTrim
         });
         renderMetadata = generated;
         preview = generated.content;
-        updatePreviewContent(previewEditor, generated.content);
+        if (previewEditor) {
+          updatePreviewContent(previewEditor, generated.content);
+        }
       } catch (e) {
         console.error(e);
         renderMetadata = emptyRenderMetadata;
         preview = "";
-        updatePreviewContent(previewEditor, "");
+        if (previewEditor) {
+          updatePreviewContent(previewEditor, "");
+        }
       }
       refreshPredictionReview();
-    } else if (_.isEmpty(currentRows) && previewEditor) {
+    } else if (isEmpty(currentRows)) {
       renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
       preview = "";
-      updatePreviewContent(previewEditor, "");
-      predictionCounts = {
-        high: 0,
-        medium: 0,
-        review: 0,
-        unknown: 0,
-        transfer: 0,
-      };
+      if (previewEditor) {
+        updatePreviewContent(previewEditor, "");
+      }
+      predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
       predictionRows = [];
       predictionReviewFailed = false;
     }
@@ -295,8 +295,14 @@
         predictionFilter = null;
         predictionTick += 1;
 
-        columnCount = _.maxBy(data, (row) => row.length)?.length || 0;
-        _.each(data, (row) => {
+        // Auto-select template if statement filename matches a known template
+        const match = templates.find((t) => fileName.toLowerCase().includes(t.name.toLowerCase()));
+        if (match) {
+          onSelectTemplate(match);
+        }
+
+        columnCount = maxBy(data, (row) => row.length)?.length || 0;
+        each(data, (row) => {
           row.length = columnCount;
         });
       }
@@ -315,20 +321,13 @@
   }
 
   function clearLoadedFile() {
-    activeFileName = "";
     data = [];
     rows = [];
-    columnCount = 0;
+    activeFileName = "";
     selectedSourceRowIndex = null;
     predictionSession.clearPreview();
     predictionFilter = null;
-    predictionCounts = {
-      high: 0,
-      medium: 0,
-      review: 0,
-      unknown: 0,
-      transfer: 0,
-    };
+    predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
     predictionRows = [];
     predictionReviewFailed = false;
     renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
@@ -340,35 +339,37 @@
 
   function selectSourceRow(rowIndex: number) {
     selectedSourceRowIndex = rowIndex;
-    const renderedRow = _.find(renderMetadata.rows, {
-      sourceRowIndex: rowIndex,
-    });
+    if (typeof window !== "undefined" && window.innerWidth <= 860) {
+      mobileInspectorOpen = true;
+    }
+    const renderedRow = find(renderMetadata.rows, { sourceRowIndex: rowIndex });
     if (!renderedRow?.lineRange || !previewEditor) {
       return;
     }
 
     const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
     previewEditor.dispatch({
-      effects: EditorView.scrollIntoView(line.from, { y: "center" }),
+      effects: EditorView.scrollIntoView(line.from, { y: "center" })
     });
   }
 
   function summaryForRow(rowIndex: number) {
     try {
-      return _.find(predictionRows, { rowIndex });
+      return find(predictionRows, { rowIndex });
     } catch (_error) {
       return undefined;
     }
   }
 
   function rowIsVisible(rowIndex: number) {
-    return rowMatchesFilter(summaryForRow(rowIndex), predictionFilter);
+    const summary = summaryForRow(rowIndex);
+    return rowMatchesFilter(summary, predictionFilter);
   }
 
   let selectedPrediction = $derived(
     selectedSourceRowIndex == null
       ? null
-      : summaryForRow(selectedSourceRowIndex)?.results[0] || null,
+      : (summaryForRow(selectedSourceRowIndex)?.results[0] || null)
   );
 
   function overrideSelected(account: string) {
@@ -391,1051 +392,581 @@
       selectedPrediction.helperInvocationIndex,
     );
     predictionTick += 1;
+    toast.toast({
+      message: `Applied account to similar transactions`,
+      type: "is-info",
+      duration: 3000
+    });
   }
 
   function alwaysUseMerchant(account: string) {
     if (!selectedPrediction) return;
-    predictionSession.alwaysUseMerchant(
-      selectedPrediction.merchantKey,
-      selectedPrediction.prefix,
-      account,
-    );
-    if (selectedSourceRowIndex != null) {
-      predictionSession.setOverride(
-        selectedSourceRowIndex,
-        selectedPrediction.prefix,
-        account,
-        selectedPrediction.helperInvocationIndex,
-      );
-    }
+    const key = selectedPrediction.merchantKey || "";
+    predictionSession.alwaysUseMerchant(key, selectedPrediction.prefix, account);
     predictionTick += 1;
+    toast.toast({
+      message: `Saved rule: ${key} -> ${account}`,
+      type: "is-success",
+      duration: 4000
+    });
   }
 
-  async function copyToClipboard() {
-    try {
-      await navigator.clipboard.writeText(preview);
+  function confirmNextReview() {
+    const reviewQueue = predictionRows.filter((r) => r.confidence === "NEEDS_REVIEW" || r.confidence === "UNKNOWN");
+    if (reviewQueue.length === 0) {
+      selectedSourceRowIndex = null;
+      mobileInspectorOpen = false;
       toast.toast({
-        message: "Copied to clipboard",
-        type: "is-success",
+        message: "All low-confidence rows reviewed!",
+        type: "is-success"
       });
-    } catch (e) {
-      console.log(e);
-      toast.toast({
-        message: "Failed to copy to clipboard",
-        type: "is-danger",
-      });
+      return;
+    }
+    const currentPos = reviewQueue.findIndex((r) => r.rowIndex === selectedSourceRowIndex);
+    const nextRow = reviewQueue[currentPos + 1] || reviewQueue[0];
+    if (nextRow) {
+      selectSourceRow(nextRow.rowIndex);
+    } else {
+      selectedSourceRowIndex = null;
+      mobileInspectorOpen = false;
     }
   }
 
-  let modalOpen = $state(false);
+  function onSelectTemplate(template: ImportTemplate) {
+    selectedTemplate = template;
+    saveAsName = template.name;
+    let compiled: any = null;
+    try {
+      compiled = Handlebars.compile(template.content, { noEscape: true });
+    } catch (e) {
+      console.warn("Handlebars compile error on select:", e);
+    }
+    $templateEditorState = assign({}, $templateEditorState, {
+      template: compiled,
+      content: template.content,
+      hasUnsavedChanges: false
+    });
+  }
+
   function openSaveModal() {
-    modalOpen = true;
+    if (!isEmpty(preview)) {
+      showFileModal = true;
+    }
   }
 
   async function saveToFile(destinationFile: string) {
-    destinationFile = ensureFileExtension(destinationFile, ".ledger");
+    const finalName = ensureFileExtension(destinationFile, ".ledger");
     const { saved, message } = await ajax("/api/editor/save", {
       method: "POST",
-      body: JSON.stringify({
-        name: destinationFile,
-        content: preview,
-        operation: "overwrite",
-      }),
-      background: true,
+      body: JSON.stringify({ name: finalName, content: preview, operation: "overwrite" }),
+      background: true
     });
 
     if (saved) {
       toast.toast({
-        message: `Saved <b><a href="/ledger/editor/${encodeURIComponent(
-          destinationFile,
-        )}">${destinationFile}</a></b>`,
+        message: `Saved <b><a href="/ledger/editor/${encodeURIComponent(finalName)}">${finalName}</a></b>`,
         type: "is-success",
-        duration: 5000,
       });
-      try {
-        const historyResponse = await ajax("/api/prediction/history");
-        predictionSession.loadHistory(historyResponse.history || []);
-        predictionTick += 1;
-      } catch (error) {
-        console.error(error);
-      }
     } else {
       toast.toast({
-        message: `Failed to save ${destinationFile}. reason: ${message}`,
+        message: `Failed to save ${finalName}. reason: ${message}`,
         type: "is-danger",
         duration: 10000,
       });
     }
   }
 
-  function builtinNotAllowed(
-    action: string,
-    template: ImportTemplate | undefined,
-  ) {
-    if (template?.template_type == "builtin") {
-      return `Not allowed to ${action.toLowerCase()} builtin template`;
-    }
-    return action;
-  }
-
-  let templateCreateModalOpen = $state(false);
-  function openTemplateCreateModal() {
-    templateCreateModalOpen = true;
+  function copyToClipboard() {
+    if (!preview) return;
+    navigator.clipboard.writeText(preview).then(() => {
+      toast.toast({
+        message: "Generated ledger copied to clipboard",
+        type: "is-success",
+        duration: 3000
+      });
+    });
   }
 </script>
 
-<Modal bind:active={templateCreateModalOpen}>
-  {#snippet head({ close })}
-    <p class="modal-card-title">Create Template</p>
-    <button class="delete" aria-label="close" onclick={(e) => close(e)}
-    ></button>
-  {/snippet}
-  {#snippet body()}
-    <div class="field">
-      <label class="label" for="save-filename">Template Name</label>
-      <div class="control" id="save-filename">
-        <input
-          class="input"
-          type="text"
-          bind:value={saveAsName}
-          placeholder="e.g. HDFC Bank Statement"
-        />
-        {#if saveAsNameDuplicate}
-          <p class="help is-danger">
-            Template with the same name already exists
-          </p>
-        {/if}
-      </div>
-    </div>
-  {/snippet}
-  {#snippet foot({ close })}
-    <button
-      class="button is-success"
-      disabled={_.isEmpty(saveAsName) || saveAsNameDuplicate}
-      onclick={async (e) => {
-        await save();
-        close(e);
-      }}>Create</button
-    >
-    <button class="button" onclick={(e) => close(e)}>Cancel</button>
-  {/snippet}
-</Modal>
+<svelte:head>
+  <title>Ledger Import - Paisa</title>
+</svelte:head>
 
-<FileModal bind:open={modalOpen} on:save={(e) => saveToFile(e.detail)} />
+<Page
+  width="fluid"
+  class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&_.paisa-page-content]:h-full [&_.paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
+>
+  <div class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
+    <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
+      <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)]">
+        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
+          <h1 class="m-0 text-lg font-bold text-[var(--paisa-text-primary)]">Ledger Import</h1>
 
-<Page width="fluid">
-  <Section class="paisa-py-1">
-    <div class="paisa-import-workspace">
-      <div class="paisa-import-topbar">
-        <div class="paisa-import-template-block">
-          <div class="paisa-import-select-wrapper">
-            <Select
-              bind:value={selectedTemplate}
-              --list-z-index="100"
-              showChevron={true}
-              items={templates}
-              label="name"
-              itemId="id"
-              searchable={true}
-              clearable={false}
-              floatingConfig={{ strategy: "fixed" }}
-              on:change={(e) => {
-                onSelectTemplate(e.detail);
-              }}
-            >
-              <div
-                slot="selection"
-                let:selection
-                class="paisa-select-item-rendered"
-              >
-                <span class="paisa-template-name">{selection.name}</span>
-                <span
-                  class="tag is-small {selection.template_type === 'builtin'
-                    ? 'is-info is-light'
-                    : 'is-success is-light'}"
-                >
-                  {selection.template_type}
-                </span>
-              </div>
-              <div slot="item" let:item class="paisa-select-item-option">
-                <span class="name">{item.name}</span>
-                <span
-                  class="tag is-small {item.template_type === 'builtin'
-                    ? 'is-info is-light'
-                    : 'is-success is-light'}"
-                >
-                  {item.template_type}
-                </span>
-              </div>
-            </Select>
-          </div>
-
-          <div class="paisa-import-topbar-actions">
-            <button
-              class="button is-small is-link is-light"
-              onclick={() => (templateDrawerOpen = true)}
-            >
-              <span class="icon is-small"><i class="fas fa-code"></i></span>
-              <span>Edit Template</span>
-              {#if $templateEditorState.hasUnsavedChanges}
-                <span class="tag is-warning is-light is-small ml-1"
-                  >Unsaved</span
-                >
-              {/if}
-            </button>
-            <button
-              class="button is-small"
-              data-tippy-content="Create New Template"
-              aria-label="Create Template"
-              onclick={(_e) => openTemplateCreateModal()}
-            >
-              <span class="icon is-small"><i class="fas fa-plus"></i></span>
-            </button>
-            <button
-              class="button is-small"
-              data-tippy-content={templateSaveTooltip}
-              aria-label="Save Template"
-              onclick={(_e) => save()}
-              disabled={templateSaveDisabled}
-            >
-              <span class="icon is-small"
-                ><i class="fas fa-floppy-disk"></i></span
-              >
-            </button>
-            <button
-              class="button is-small is-danger is-light"
-              data-tippy-content={builtinNotAllowed("Delete", selectedTemplate)}
-              aria-label="Delete Template"
-              onclick={(_e) => remove()}
-              disabled={!selectedTemplate ||
-                selectedTemplate.template_type == "builtin"}
-            >
-              <span class="icon is-small"><i class="fas fa-trash-can"></i></span
-              >
-            </button>
-          </div>
-        </div>
-
-        <div class="paisa-import-file-block">
           {#if activeFileName}
-            <span class="icon has-text-link"
-              ><i class="fas fa-file-csv"></i></span
-            >
-            <span class="paisa-file-name" title={activeFileName}
-              >{activeFileName}</span
-            >
-            <span class="tag is-info is-light is-small">{data.length} rows</span
-            >
-            <span class="tag is-light is-small">{columnCount} cols</span>
-            <button class="button is-small is-light" onclick={clearLoadedFile}>
-              <span class="icon is-small"
-                ><i class="fas fa-arrows-rotate"></i></span
+            <div class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5">
+              <i class="fas fa-file-csv text-xs text-[var(--paisa-brand-primary)]"></i>
+              <span class="max-w-[180px] truncate text-xs font-semibold text-[var(--paisa-text-primary)]" title={activeFileName}>{activeFileName}</span>
+              <span class="rounded-[var(--paisa-radius-full)] bg-[var(--paisa-brand-primary-light)] px-1.5 py-0.5 text-[0.6875rem] font-medium text-[var(--paisa-brand-primary)]">{data.length} rows</span>
+              <button
+                type="button"
+                class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
+                onclick={clearLoadedFile}
+                title="Replace with another file"
+                aria-label="Replace File"
               >
-              <span>Replace File</span>
-            </button>
-          {:else}
-            <span class="icon has-text-grey"
-              ><i class="fas fa-file-import"></i></span
-            >
-            <span class="has-text-grey is-size-7">No file loaded</span>
+                <i class="fas fa-arrow-rotate-right text-xs"></i>
+                <span class="hidden sm:inline">Replace</span>
+              </button>
+            </div>
           {/if}
         </div>
 
-        <div class="paisa-data-controls">
-          <div class="field color-switch mb-0">
-            <input
-              id="import-reverse"
-              type="checkbox"
-              bind:checked={options.reverse}
-              class="switch is-rounded is-small"
-            />
-            <label for="import-reverse" class="is-size-7">Reverse</label>
+        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
+          <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
+            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:text-xs">
+              <Select
+                items={templateItems}
+                value={selectedTemplateOption}
+                placeholder="Select Template…"
+                showChevron={true}
+                searchable={true}
+                clearable={false}
+                on:change={(e) => {
+                  if (e.detail?.value) onSelectTemplate(e.detail.value);
+                }}
+              >
+                <div slot="item" let:item class="flex w-full items-center justify-between gap-[var(--paisa-space-2)] overflow-hidden">
+                  <span class="truncate font-semibold text-[var(--paisa-text-primary)]">{item.label}</span>
+                  <Badge variant={item.template_type === "builtin" ? "info" : "primary"} size="sm">
+                    {item.template_type}
+                  </Badge>
+                </div>
+              </Select>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                title="Edit active Handlebars template"
+                ariaLabel="Edit Template"
+                onclick={() => (templateDrawerOpen = true)}
+              >
+                {#snippet icon()}
+                  <i class="fas fa-code"></i>
+                {/snippet}
+                <span class="hidden sm:inline">Edit Template</span>
+                {#if $templateEditorState.hasUnsavedChanges}
+                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-warning)]"></span>
+                {/if}
+              </Button>
+
+              <IconButton
+                variant="outline"
+                size="sm"
+                ariaLabel="Create Template"
+                title="Create New Template"
+                onclick={() => {
+                  showSaveAsModal = true;
+                  setTimeout(() => document.getElementById("template-name-input")?.focus(), 50);
+                }}
+              >
+                <i class="fas fa-plus"></i>
+              </IconButton>
+            </div>
           </div>
-          <div class="field color-switch mb-0">
-            <input
-              id="trim-reverse"
-              type="checkbox"
-              bind:checked={options.trim}
-              class="switch is-rounded is-small"
-            />
-            <label for="trim-reverse" class="is-size-7">Trim</label>
-          </div>
+
+          <button
+            type="button"
+            class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
+            onclick={() => (advancedOptionsOpen = !advancedOptionsOpen)}
+            aria-expanded={advancedOptionsOpen}
+          >
+            <span>Advanced Options</span>
+            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs"></i>
+          </button>
         </div>
       </div>
 
-      <div class="paisa-import-main-grid">
-        <div class="paisa-import-pane paisa-source-pane">
-          <div class="paisa-pane-header">
-            <div class="paisa-pane-title">
-              <span class="icon is-small has-text-link"
-                ><i class="fas fa-table-cells"></i></span
-              >
-              <span>Source Data</span>
+      {#if advancedOptionsOpen}
+        <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)] border-t border-dashed border-[var(--paisa-border-subtle)] pt-[var(--paisa-space-2)]">
+          <div class="flex items-center gap-[var(--paisa-space-4)]">
+            <Switch id="import-reverse" bind:checked={options.reverse} size="sm" label="Reverse Row Order" />
+            <Switch id="trim-reverse" bind:checked={options.trim} size="sm" label="Trim Whitespace" />
+          </div>
+          <span class="text-xs text-[var(--paisa-text-muted)]">Adjust row sequence or clean generated spacing</span>
+        </div>
+      {/if}
+    </div>
+
+    {#if isEmpty(data) && !loading}
+      <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
+        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-[var(--paisa-border-default)] [&_.paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&_.paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
+          <FileDropzone
+            multiple={false}
+            accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
+            on:drop={handleFilesSelect}
+          >
+            <div class="flex flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center">
+              <div class="mb-[var(--paisa-space-3)] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--paisa-brand-primary-light)] text-[var(--paisa-brand-primary)]">
+                <i class="fas fa-cloud-arrow-up fa-2x"></i>
+              </div>
+              <h2 class="mb-2 text-xl font-semibold text-[var(--paisa-text-primary)]">Drop your bank or card statement here</h2>
+              <p class="mb-4 text-base text-[var(--paisa-text-secondary)]">Turn your financial statements into clean, verified ledger transactions</p>
+              <div class="mb-4 flex flex-wrap items-center justify-center gap-1.5">
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">CSV</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">TXT</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">XLS / XLSX</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">PDF</span>
+              </div>
+              <div class="inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-[filter] hover:brightness-110">
+                <i class="fas fa-folder-open text-xs"></i>
+                <span>Choose File</span>
+              </div>
             </div>
-            {#if !predictionReviewFailed && !_.isEmpty(data) && predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
-              <PredictionReviewBar
-                counts={predictionCounts}
-                filter={predictionFilter}
-                onFilter={(next) => (predictionFilter = next)}
-              />
+          </FileDropzone>
+        </div>
+
+        {#if parseErrorMessage}
+          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+              <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
+            </div>
+          </div>
+        {/if}
+      </div>
+    {:else if loading}
+      <div class="flex flex-1 flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-[var(--paisa-text-primary)]">
+        <i class="fas fa-spinner fa-pulse fa-2x text-[var(--paisa-brand-primary)]"></i>
+        <p class="mt-2 text-base font-semibold">Parsing Spreadsheet Data…</p>
+        <p class="text-xs text-[var(--paisa-text-secondary)]">Extracting tabular rows and columns</p>
+      </div>
+    {:else}
+      <div class="hidden shrink-0 grid-cols-2 gap-2 max-[860px]:grid">
+        <button
+          type="button"
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'source' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
+          onclick={() => (mobileActiveTab = "source")}
+        >
+          <i class="fas fa-table-cells text-xs"></i>
+          <span>Source Data</span>
+        </button>
+        <button
+          type="button"
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'preview' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
+          onclick={() => (mobileActiveTab = "preview")}
+        >
+          <i class="fas fa-file-invoice-dollar text-xs"></i>
+          <span>Ledger Preview</span>
+          {#if renderMetadata.generatedCount > 0}
+            <span class="rounded-[var(--paisa-radius-full)] bg-white/25 px-1.5 py-0.5 text-[0.6875rem]">{renderMetadata.generatedCount}</span>
+          {/if}
+        </button>
+      </div>
+
+      <div class="grid min-h-0 flex-1 grid-cols-[minmax(380px,35%)_1fr] gap-[var(--paisa-space-2)] overflow-hidden max-[860px]:grid-cols-1">
+        <div class="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'preview' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
+            <div class="inline-flex shrink-0 gap-0.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-0.5">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                onclick={() => (sourceViewMode = "review")}
+              >
+                <i class="fas fa-list-check text-xs"></i>
+                <span>Review</span>
+              </button>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                onclick={() => (sourceViewMode = "raw")}
+              >
+                <i class="fas fa-table text-xs"></i>
+                <span>Raw Data</span>
+              </button>
+            </div>
+
+            {#if !predictionReviewFailed && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
+              <div class="max-w-full overflow-x-auto">
+                <PredictionReviewBar
+                  counts={predictionCounts}
+                  filter={predictionFilter}
+                  onFilter={(next) => (predictionFilter = next)}
+                />
+              </div>
             {/if}
           </div>
 
           {#if parseErrorMessage}
-            <div class="notification is-danger is-light p-3 m-3">
-              <div class="is-flex is-align-items-center">
-                <span class="icon mr-2"
-                  ><i class="fas fa-triangle-exclamation"></i></span
-                >
-                <div class="is-size-7">
-                  <strong>Failed to parse document:</strong>
-                  {parseErrorMessage}
-                </div>
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+                <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
               </div>
             </div>
           {/if}
 
-          <div
-            class="paisa-dropzone-container"
-            class:has-file={!_.isEmpty(data)}
-          >
-            <FileDropzone
-              multiple={false}
-              accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
-              on:drop={handleFilesSelect}
-            >
-              {#if _.isEmpty(data)}
-                <div class="paisa-dropzone-content-empty">
-                  <div class="paisa-dropzone-icon-circle">
-                    <i class="fas fa-cloud-arrow-up fa-2x"></i>
-                  </div>
-                  <h4 class="title is-6 mb-1">
-                    Drag & drop your bank / broker statement
-                  </h4>
-                  <p class="subtitle is-7 has-text-grey mb-3">
-                    Supports CSV, TXT, XLS, XLSX, and PDF
-                  </p>
-                  <div class="tags are-small is-centered mb-0">
-                    <span class="tag is-rounded is-light">CSV</span>
-                    <span class="tag is-rounded is-light">XLS / XLSX</span>
-                    <span class="tag is-rounded is-light">PDF</span>
-                  </div>
-                </div>
-              {:else}
-                <div class="paisa-dropzone-compact">
-                  <span class="icon is-small mr-2"
-                    ><i class="fas fa-arrows-rotate"></i></span
-                  >
-                  <span class="is-size-7"
-                    >Drop a different file to replace current data</span
-                  >
-                </div>
-              {/if}
-            </FileDropzone>
-          </div>
-
-          {#if loading}
-            <div class="paisa-data-loading-state">
-              <span class="icon is-large has-text-link">
-                <i class="fas fa-spinner fa-pulse fa-2x"></i>
-              </span>
-              <p class="is-size-6 mt-2 has-text-weight-semibold">
-                Parsing Spreadsheet Data…
-              </p>
-              <p class="is-size-7 has-text-grey">
-                Extracting tabular rows and columns
-              </p>
-            </div>
-          {/if}
-
-          {#if !_.isEmpty(data) && !loading}
-            <div class="paisa-spreadsheet-grid-wrapper">
-              <table
-                class="table is-bordered is-size-7 is-narrow paisa-sheet-table"
-              >
-                <thead>
-                  <tr>
-                    <th class="paisa-sheet-corner-cell">#</th>
-                    {#each _.range(0, columnCount) as ci}
-                      <th class="paisa-sheet-col-header">
-                        <span class="paisa-col-letter"
-                          >{String.fromCharCode(65 + ci)}</span
-                        >
-                        <span class="paisa-col-tag"
-                          >ROW.{String.fromCharCode(65 + ci)}</span
-                        >
-                      </th>
-                    {/each}
-                  </tr>
-                </thead>
-                <tbody>
-                  {#each data as row, ri}
-                    <tr
-                      class:selected={selectedSourceRowIndex === ri}
-                      class:is-filtered={!rowIsVisible(ri)}
-                      onclick={() => selectSourceRow(ri)}
-                    >
-                      <th class="paisa-sheet-row-header">
-                        <span>{ri}</span>
-                        <PredictionRowBadge
-                          confidence={predictionReviewFailed
-                            ? null
-                            : summaryForRow(ri)?.confidence}
-                          possibleTransfer={predictionReviewFailed
-                            ? false
-                            : summaryForRow(ri)?.possibleTransfer}
-                        />
-                      </th>
-                      {#each row as cell}
-                        <td
-                          class="paisa-sheet-data-cell"
-                          title={displayCell(cell)}>{displayCell(cell)}</td
-                        >
+          <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+            {#if sourceViewMode === "review"}
+              <SourceReviewList
+                {data}
+                {renderMetadata}
+                {predictionRows}
+                {selectedSourceRowIndex}
+                {predictionFilter}
+                onSelectRow={selectSourceRow}
+              />
+            {:else}
+              <div class="h-full min-h-0 flex-1 overflow-auto bg-[var(--paisa-table-bg)]">
+                <table class="m-0 w-full min-w-full border-separate border-spacing-0 text-xs">
+                  <thead>
+                    <tr>
+                      <th class="sticky left-0 top-0 z-[15] w-10 min-w-10 border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">#</th>
+                      {#each range(0, columnCount) as ci}
+                        <th class="sticky top-0 z-10 min-w-[110px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">
+                          <span class="block text-sm font-bold">{String.fromCharCode(65 + ci)}</span>
+                          <span class="block font-mono text-[0.68rem] text-[var(--paisa-brand-primary)]">ROW.{String.fromCharCode(65 + ci)}</span>
+                        </th>
                       {/each}
                     </tr>
-                  {/each}
-                </tbody>
-              </table>
-            </div>
-            {#if !predictionReviewFailed}
+                  </thead>
+                  <tbody>
+                    {#each data as row, ri}
+                      <tr
+                        class="cursor-pointer hover:[&_.paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&_.paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&_.paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&_.paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&_.paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
+                        onclick={() => selectSourceRow(ri)}
+                      >
+                        <th class="paisa-sheet-row-header sticky left-0 z-[5] w-[88px] min-w-[88px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center align-middle font-semibold text-[var(--paisa-table-header-text)]">
+                          <span>{ri}</span>
+                          <PredictionRowBadge
+                            confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
+                            possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
+                          />
+                        </th>
+                        {#each row as cell}
+                          <td class="paisa-sheet-data-cell max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-[var(--paisa-text-primary)]" title={displayCell(cell)}>{displayCell(cell)}</td>
+                        {/each}
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </div>
+            {/if}
+          </div>
+
+          {#if !predictionReviewFailed && selectedPrediction}
+            <div class="max-h-[280px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
               <PredictionDetail
                 result={selectedPrediction}
                 accounts={predictionSession.index?.accounts || []}
                 onOverride={overrideSelected}
                 onApplySimilar={applySimilar}
                 onAlwaysUse={alwaysUseMerchant}
+                onConfirmNext={confirmNextReview}
+                onClose={() => (selectedSourceRowIndex = null)}
               />
-            {/if}
+            </div>
           {/if}
         </div>
 
-        <div class="paisa-import-pane paisa-preview-pane">
-          <div class="paisa-pane-header">
-            <div class="paisa-pane-title">
-              <span class="icon is-small has-text-success"
-                ><i class="fas fa-file-invoice-dollar"></i></span
-              >
+        <div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'source' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
+            <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
+              <i class="fas fa-file-invoice-dollar text-xs text-[var(--paisa-success)]"></i>
               <span>Ledger Preview</span>
               {#if renderMetadata.generatedCount > 0}
-                <span class="tag is-success is-light is-small"
-                  >{renderMetadata.generatedCount} generated</span
-                >
+                <Badge variant="success" size="sm">{renderMetadata.generatedCount} generated</Badge>
               {/if}
               {#if renderMetadata.errors.length > 0}
-                <span class="tag is-danger is-light is-small"
-                  >{renderMetadata.errors.length} errors</span
-                >
+                <Badge variant="danger" size="sm">{renderMetadata.errors.length} errors</Badge>
               {/if}
             </div>
-            <div class="paisa-editor-card-actions">
-              <button
-                data-tippy-content="Copy Generated Ledger"
-                aria-label="Copy to Clipboard"
-                class="button is-small clipboard"
-                disabled={_.isEmpty(preview)}
+            <div class="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="sm"
+                title="Copy Generated Ledger"
+                ariaLabel="Copy to Clipboard"
+                class="clipboard"
+                disabled={isEmpty(preview)}
                 onclick={copyToClipboard}
               >
-                <span class="icon is-small"><i class="fas fa-copy"></i></span>
-                <span>Copy</span>
-              </button>
-              <button
-                data-tippy-content="Save to Ledger File"
-                aria-label="Save"
-                class="button is-small is-link save"
-                disabled={_.isEmpty(preview)}
+                {#snippet icon()}
+                  <i class="fas fa-copy"></i>
+                {/snippet}
+                Copy
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                title="Save to Ledger File"
+                ariaLabel="Save to Ledger"
+                class="save"
+                disabled={isEmpty(preview)}
                 onclick={openSaveModal}
               >
-                <span class="icon is-small"
-                  ><i class="fas fa-floppy-disk"></i></span
-                >
-                <span>Save</span>
-              </button>
+                {#snippet icon()}
+                  <i class="fas fa-floppy-disk"></i>
+                {/snippet}
+                Save to Ledger
+              </Button>
             </div>
           </div>
-          <div class="paisa-preview-body">
-            <div class="preview-editor" bind:this={previewEditorDom}></div>
-            {#if _.isEmpty(preview) && _.isEmpty(data)}
-              <div class="paisa-preview-placeholder">
-                <span class="icon has-text-grey-light mb-2"
-                  ><i class="fas fa-arrow-left fa-2x"></i></span
-                >
-                <p>
-                  Upload a statement to inspect generated journal transactions.
-                </p>
+
+          {#if renderMetadata.errors.length > 0}
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-warning)]/20 bg-[var(--paisa-warning-light)] p-3">
+              <div class="text-xs"><strong>Template Errors:</strong> {renderMetadata.errors.length} rows encountered template rendering issues. Check Handlebars syntax or column mappings.</div>
+            </div>
+          {/if}
+
+          <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
+            <div class="preview-editor h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.8125rem] [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto" use:initPreviewEditor></div>
+            {#if isEmpty(preview) && isEmpty(data)}
+              <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-[var(--paisa-text-muted)]">
+                <i class="fas fa-arrow-left fa-2x mb-2 text-[var(--paisa-text-muted)]"></i>
+                <p>Upload a statement to inspect generated journal transactions.</p>
               </div>
             {/if}
           </div>
         </div>
       </div>
 
-      <div class="paisa-import-statusbar">
-        {#if parseErrorMessage}
-          <span class="has-text-danger"
-            ><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span
-          >
-        {:else if loading}
-          <span class="has-text-link"
-            ><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data</span
-          >
-        {:else if renderMetadata.generatedCount > 0}
-          <span class="has-text-success"
-            ><i class="fas fa-circle-check mr-1"></i>
-            {renderMetadata.generatedCount} transactions generated</span
-          >
-          {#if renderMetadata.errors.length > 0}
-            <span class="has-text-danger"
-              ><i class="fas fa-triangle-exclamation mr-1"></i>
-              {renderMetadata.errors.length} rows failed</span
-            >
-          {/if}
-          {#if selectedSourceRowIndex !== null}
-            <span class="has-text-grey"
-              >Row {selectedSourceRowIndex} selected</span
-            >
-          {/if}
-          {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
-            <span class="has-text-grey">High {predictionCounts.high}</span>
-            <span class="has-text-grey">Medium {predictionCounts.medium}</span>
-            <span class="has-text-warning"
-              >Review {predictionCounts.review}</span
-            >
-            <span class="has-text-danger"
-              >Unknown {predictionCounts.unknown}</span
-            >
-            {#if predictionCounts.transfer > 0}
-              <span class="has-text-warning"
-                >Transfers {predictionCounts.transfer}</span
-              >
+      <div class="flex shrink-0 items-center justify-between gap-[var(--paisa-space-3)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1 text-xs shadow-[var(--paisa-shadow-sm)]">
+        <div class="flex min-w-0 items-center gap-[var(--paisa-space-3)] overflow-x-auto">
+          {#if parseErrorMessage}
+            <span class="text-[var(--paisa-danger)]"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+          {:else if loading}
+            <span class="text-[var(--paisa-brand-primary)]"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
+          {:else if renderMetadata.generatedCount > 0}
+            <span class="text-[var(--paisa-success)]"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
+            {#if renderMetadata.errors.length > 0}
+              <span class="text-[var(--paisa-danger)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
             {/if}
+            {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
+              <span class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review}</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown}</span>
+              </span>
+            {/if}
+          {:else if activeFileName}
+            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
+          {:else}
+            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
           {/if}
-        {:else if activeFileName}
-          <span class="has-text-grey"
-            ><i class="fas fa-circle-info mr-1"></i> No transactions generated</span
+        </div>
+
+        <div class="hidden max-[860px]:flex">
+          <Button
+            variant="primary"
+            size="sm"
+            class="min-h-11 px-4 text-[0.8125rem]"
+            disabled={isEmpty(preview)}
+            onclick={openSaveModal}
           >
-        {:else}
-          <span class="has-text-grey"
-            ><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span
-          >
-        {/if}
+            {#snippet icon()}
+              <i class="fas fa-floppy-disk"></i>
+            {/snippet}
+            Save to Ledger
+          </Button>
+        </div>
       </div>
-    </div>
-  </Section>
+    {/if}
+  </div>
 </Page>
 
-<div class="paisa-template-drawer" class:is-open={templateDrawerOpen}>
-  <button
-    class="paisa-template-drawer-backdrop"
-    aria-label="Close Template Definition"
-    onclick={() => (templateDrawerOpen = false)}
-  ></button>
-  <aside class="paisa-template-drawer-panel" aria-label="Template Definition">
-    <div class="paisa-template-drawer-header">
-      <div class="paisa-pane-title">
-        <span class="icon is-small has-text-link"
-          ><i class="fas fa-code"></i></span
-        >
-        <span>Template Definition</span>
-        <span class="tag is-small is-link is-light">Handlebars</span>
+<!-- MOBILE INSPECTOR DRAWER -->
+<Drawer title="Selected Row Review" bind:open={mobileInspectorOpen} side="right">
+  {#snippet children()}
+    {#if selectedPrediction}
+      <PredictionDetail
+        result={selectedPrediction}
+        accounts={predictionSession.index?.accounts || []}
+        onOverride={overrideSelected}
+        onApplySimilar={applySimilar}
+        onAlwaysUse={alwaysUseMerchant}
+        onConfirmNext={confirmNextReview}
+        onClose={() => (mobileInspectorOpen = false)}
+      />
+    {:else}
+      <div class="p-4 text-center text-sm text-gray-500">
+        Select a row from the Review or Raw Data list to inspect and override.
       </div>
-      <div class="paisa-template-drawer-actions">
-        {#if $templateEditorState.hasUnsavedChanges}
-          <span class="tag is-warning is-light is-small">
-            <span class="paisa-unsaved-dot"></span> Unsaved
-          </span>
-        {/if}
-        <button
-          class="button is-small is-ghost"
-          aria-label="Close Template Definition"
-          onclick={() => (templateDrawerOpen = false)}
-        >
-          <span class="icon is-small"><i class="fas fa-xmark"></i></span>
-        </button>
-      </div>
-    </div>
-    <div class="paisa-template-drawer-body">
-      <div class="template-editor" bind:this={templateEditorDom}></div>
-    </div>
-    <div class="paisa-template-drawer-footer">
-      <button
-        class="button is-small"
-        onclick={() => (templateDrawerOpen = false)}>Cancel</button
+    {/if}
+  {/snippet}
+</Drawer>
+
+<!-- TEMPLATE EDITOR DRAWER -->
+<TemplateEditorDrawer
+  bind:open={templateDrawerOpen}
+  {selectedTemplate}
+  {templates}
+  columns={fileColumns}
+  onsave={handleSaveTemplate}
+  ondelete={handleDeleteTemplate}
+/>
+
+<!-- FILE SAVE MODAL -->
+<FileModal bind:open={showFileModal} onsave={saveToFile} />
+
+<!-- TEMPLATE CREATE MODAL -->
+<Dialog
+  bind:open={showSaveAsModal}
+  title="Create Import Template"
+  onclose={() => (showSaveAsModal = false)}
+>
+  {#snippet children()}
+    <FormField
+      id="template-name-input"
+      label="Template Name"
+      error={saveAsNameDuplicate ? "A custom template with this name already exists." : undefined}
+    >
+      {#snippet children()}
+        <Input
+          id="template-name-input"
+          size="sm"
+          bind:value={saveAsName}
+          placeholder="e.g. HDFC Bank Statement"
+        />
+      {/snippet}
+    </FormField>
+  {/snippet}
+  {#snippet footer({ close })}
+    <div class="flex w-full justify-end gap-2">
+      <Button variant="ghost" size="sm" onclick={() => close()}>Cancel</Button>
+      <Button
+        variant="primary"
+        size="sm"
+        disabled={!saveAsName || saveAsNameDuplicate}
+        onclick={async () => {
+          close();
+          const { template, saved, message } = await ajax("/api/templates/upsert", {
+            method: "POST",
+            body: JSON.stringify({
+              name: saveAsName,
+              content: selectedTemplate?.content || ""
+            }),
+            background: true
+          });
+          if (saved) {
+            ({ templates } = await ajax("/api/templates", { background: true }));
+            onSelectTemplate(template);
+            toast.toast({
+              message: `Created template ${saveAsName}`,
+              type: "is-success"
+            });
+          } else {
+            toast.toast({
+              message: `Failed to create template: ${message}`,
+              type: "is-danger"
+            });
+          }
+        }}
       >
-      <button
-        class="button is-small is-link"
-        data-tippy-content={templateSaveTooltip}
-        onclick={save}
-        disabled={templateSaveDisabled}
-      >
-        <span class="icon is-small"><i class="fas fa-floppy-disk"></i></span>
-        <span>{selectedTemplateIsBuiltin ? "Save as Custom" : "Save"}</span>
-      </button>
+        Create
+      </Button>
     </div>
-  </aside>
-</div>
-
-<style lang="scss">
-  .paisa-import-workspace {
-    display: flex;
-    flex-direction: column;
-    gap: var(--paisa-space-2);
-    flex: 1 1 auto;
-    min-height: 0;
-  }
-
-  .paisa-import-topbar,
-  .paisa-import-statusbar,
-  .paisa-import-pane {
-    background-color: var(--paisa-surface-card);
-    border: 1px solid var(--paisa-border-default);
-    border-radius: var(--paisa-radius-md);
-    box-shadow: var(--paisa-shadow-sm);
-  }
-
-  .paisa-import-topbar,
-  .paisa-import-statusbar {
-    flex-shrink: 0;
-  }
-
-  .paisa-import-topbar {
-    position: relative;
-    z-index: 20;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    align-content: flex-start;
-    gap: var(--paisa-space-2);
-    padding: var(--paisa-space-2);
-    min-height: fit-content;
-  }
-
-  .paisa-import-template-block,
-  .paisa-import-file-block,
-  .paisa-import-topbar-actions,
-  .paisa-data-controls,
-  .paisa-pane-title,
-  .paisa-editor-card-actions,
-  .paisa-template-drawer-actions,
-  .paisa-template-drawer-footer {
-    display: flex;
-    align-items: center;
-  }
-
-  .paisa-import-template-block,
-  .paisa-import-file-block {
-    gap: var(--paisa-space-2);
-    min-width: 0;
-    flex-wrap: wrap;
-  }
-
-  .paisa-import-template-block {
-    flex: 1 1 28rem;
-    max-width: 100%;
-  }
-
-  .paisa-import-file-block {
-    flex: 1 1 12rem;
-    max-width: 100%;
-  }
-
-  .paisa-import-select-wrapper {
-    flex: 1;
-    min-width: 180px;
-
-    :global(.svelte-select) {
-      border: 1px solid var(--paisa-border-default);
-      background-color: var(--paisa-canvas-bg);
-      border-radius: var(--paisa-radius-sm);
-    }
-  }
-
-  .paisa-select-item-rendered,
-  .paisa-select-item-option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    width: 100%;
-    overflow: hidden;
-  }
-
-  .paisa-template-name,
-  .paisa-file-name {
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .paisa-file-name {
-    max-width: 220px;
-    font-size: var(--paisa-font-size-sm);
-  }
-
-  .paisa-import-topbar-actions,
-  .paisa-editor-card-actions {
-    gap: var(--paisa-space-1);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-
-  .paisa-data-controls {
-    gap: var(--paisa-space-2);
-    flex: 0 0 auto;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    align-self: center;
-    min-height: 2.5em;
-  }
-
-  .paisa-import-main-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
-    gap: var(--paisa-space-2);
-    flex: 1;
-    min-height: 0;
-  }
-
-  .paisa-import-pane {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .paisa-pane-header,
-  .paisa-template-drawer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--paisa-space-2);
-    min-height: 42px;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    background-color: var(--paisa-surface-muted);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-  }
-
-  .paisa-pane-title {
-    gap: var(--paisa-space-2);
-    min-width: 0;
-    font-size: var(--paisa-font-size-xs);
-    font-weight: var(--paisa-font-weight-semibold);
-    color: var(--paisa-text-primary);
-    text-transform: uppercase;
-    letter-spacing: 0;
-  }
-
-  .paisa-preview-body,
-  .paisa-template-drawer-body {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    background-color: var(--paisa-canvas-bg);
-  }
-
-  .paisa-preview-body {
-    :global(.cm-editor) {
-      height: 100%;
-      min-height: 100%;
-      font-size: 0.85rem;
-    }
-
-    :global(.cm-scroller) {
-      height: 100%;
-    }
-  }
-
-  .paisa-preview-placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--paisa-space-4);
-    color: var(--paisa-text-muted);
-    font-size: var(--paisa-font-size-xs);
-    pointer-events: none;
-  }
-
-  .paisa-dropzone-container {
-    padding: var(--paisa-space-3);
-    border-bottom: 1px solid var(--paisa-border-subtle);
-
-    &.has-file {
-      padding: var(--paisa-space-2);
-    }
-
-    :global(.paisa-file-dropzone) {
-      width: 100%;
-      border: 2px dashed var(--paisa-border-default);
-      background-color: var(--paisa-canvas-bg);
-      border-radius: var(--paisa-radius-md);
-      transition: all var(--paisa-transition-fast);
-      cursor: pointer;
-
-      &:hover {
-        border-color: var(--paisa-brand-primary);
-        background-color: var(--paisa-brand-primary-light);
-      }
-    }
-  }
-
-  .paisa-dropzone-content-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--paisa-space-5) var(--paisa-space-4);
-    text-align: center;
-
-    .paisa-dropzone-icon-circle {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background-color: var(--paisa-brand-primary-light);
-      color: var(--paisa-brand-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: var(--paisa-space-3);
-    }
-  }
-
-  .paisa-dropzone-compact {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--paisa-space-2);
-    color: var(--paisa-text-muted);
-  }
-
-  .paisa-data-loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--paisa-space-6) var(--paisa-space-4);
-    color: var(--paisa-text-primary);
-  }
-
-  .paisa-spreadsheet-grid-wrapper {
-    flex: 1;
-    min-height: 0;
-    overflow: auto;
-    background-color: var(--paisa-table-bg);
-  }
-
-  .paisa-sheet-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 0;
-    width: 100%;
-    min-width: 100%;
-
-    thead th {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background-color: var(--paisa-table-header-bg);
-      color: var(--paisa-table-header-text);
-      border-color: var(--paisa-table-border);
-      text-align: center;
-      padding: var(--paisa-space-1) var(--paisa-space-2);
-      font-size: var(--paisa-font-size-xs);
-    }
-
-    tbody tr {
-      cursor: pointer;
-
-      &.selected {
-        .paisa-sheet-row-header,
-        .paisa-sheet-data-cell {
-          background-color: var(--paisa-brand-primary-light);
-          color: var(--paisa-text-primary);
-        }
-      }
-
-      &:hover {
-        .paisa-sheet-row-header {
-          background-color: var(--paisa-surface-hover);
-          color: var(--paisa-brand-primary);
-        }
-
-        .paisa-sheet-data-cell {
-          background-color: var(--paisa-table-row-hover);
-        }
-      }
-    }
-
-    .paisa-sheet-corner-cell {
-      position: sticky;
-      left: 0;
-      top: 0;
-      z-index: 15;
-      background-color: var(--paisa-table-header-bg);
-      border-color: var(--paisa-table-border);
-      width: 40px;
-      min-width: 40px;
-    }
-
-    .paisa-sheet-col-header {
-      min-width: 110px;
-
-      .paisa-col-letter {
-        display: block;
-        font-weight: var(--paisa-font-weight-bold);
-        font-size: var(--paisa-font-size-sm);
-      }
-
-      .paisa-col-tag {
-        display: block;
-        font-size: 0.68rem;
-        color: var(--paisa-brand-primary);
-        font-family: monospace;
-      }
-    }
-
-    .paisa-sheet-row-header {
-      position: sticky;
-      left: 0;
-      z-index: 5;
-      background-color: var(--paisa-table-header-bg);
-      color: var(--paisa-table-header-text);
-      border-color: var(--paisa-table-border);
-      text-align: center;
-      width: 88px;
-      min-width: 88px;
-      font-weight: var(--paisa-font-weight-semibold);
-      vertical-align: middle;
-    }
-
-    tbody tr.is-filtered {
-      display: none;
-    }
-
-    .paisa-sheet-data-cell {
-      border-color: var(--paisa-table-border);
-      background-color: var(--paisa-table-bg);
-      color: var(--paisa-text-primary);
-      max-width: 250px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: var(--paisa-space-1) var(--paisa-space-2);
-    }
-  }
-
-  .paisa-import-statusbar {
-    display: flex;
-    align-items: center;
-    gap: var(--paisa-space-3);
-    min-height: 34px;
-    padding: var(--paisa-space-1) var(--paisa-space-3);
-    font-size: var(--paisa-font-size-xs);
-  }
-
-  .paisa-template-drawer {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    pointer-events: none;
-  }
-
-  .paisa-template-drawer-backdrop {
-    position: absolute;
-    inset: 0;
-    padding: 0;
-    border: 0;
-    background-color: rgba(15, 23, 42, 0.32);
-    cursor: default;
-    opacity: 0;
-    transition: opacity var(--paisa-transition-fast);
-  }
-
-  .paisa-template-drawer-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    width: min(40vw, 560px);
-    min-width: 420px;
-    height: 100%;
-    background-color: var(--paisa-surface-card);
-    border-left: 1px solid var(--paisa-border-default);
-    box-shadow: var(--paisa-shadow-lg);
-    transform: translateX(100%);
-    transition: transform var(--paisa-transition-fast);
-  }
-
-  .paisa-template-drawer.is-open {
-    pointer-events: auto;
-
-    .paisa-template-drawer-backdrop {
-      opacity: 1;
-    }
-
-    .paisa-template-drawer-panel {
-      transform: translateX(0);
-    }
-  }
-
-  .paisa-template-drawer-actions,
-  .paisa-template-drawer-footer {
-    gap: var(--paisa-space-2);
-  }
-
-  .paisa-template-drawer-body {
-    overflow: hidden;
-
-    :global(.cm-editor) {
-      height: 100%;
-      min-height: 100%;
-      font-size: 0.85rem;
-    }
-
-    :global(.cm-scroller) {
-      height: 100%;
-    }
-  }
-
-  .paisa-template-drawer-footer {
-    justify-content: flex-end;
-    padding: var(--paisa-space-2) var(--paisa-space-3);
-    border-top: 1px solid var(--paisa-border-subtle);
-  }
-
-  .paisa-unsaved-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--paisa-warning);
-    margin-right: 4px;
-  }
-
-  .color-switch {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
-
-    :global(.switch[type="checkbox"]:checked + label::before),
-    :global(.switch[type="checkbox"]:checked + label:before) {
-      background: var(--paisa-brand-primary);
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    .paisa-import-main-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .paisa-template-drawer-panel {
-      width: 100%;
-      min-width: 0;
-    }
-  }
-</style>
+  {/snippet}
+</Dialog>

@@ -1,27 +1,15 @@
-import * as d3 from "d3";
-import _ from "lodash";
+import { groupBy, mapValues, sumBy } from "es-toolkit";
 import { type Posting, secondName } from "../core/utils";
 
-export function pieData(expenses: Posting[]) {
-  return d3
-    .pie<{ category: string; total: number }>()
-    .value((g) => g.total)
-    .sort((a, b) => a.category.localeCompare(b.category))(
-      _.values(byExpenseGroup(expenses)),
-    );
-}
-
 export function byExpenseGroup(expenses: Posting[]) {
-  return _.chain(expenses)
-    .groupBy(expenseGroup)
-    .mapValues((ps, category) => {
-      return {
-        category: category,
-        postings: ps,
-        total: _.sumBy(ps, (p) => p.amount),
-      };
-    })
-    .value();
+  return mapValues(
+    groupBy(expenses, expenseGroup),
+    (ps, category) => ({
+      category: category,
+      postings: ps,
+      total: sumBy(ps, (p) => p.amount),
+    }),
+  );
 }
 
 export function expenseGroup(posting: Posting) {

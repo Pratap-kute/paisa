@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import { delayedLoading, delayedUnLoading } from "../../../store";
+  import { delayedLoading } from "../../../store";
   import Logo from "$lib/components/layout/Logo.svelte";
   interface Props {
     children?: import('svelte').Snippet;
@@ -13,7 +13,7 @@
 <div class="paisa-spinner-shell">
   <div
     class="paisa-spinner-content"
-    style={$delayedUnLoading || $delayedLoading ? "visibility: hidden" : ""}
+    style={$delayedLoading ? "visibility: hidden" : ""}
   >
     {@render children?.()}
   </div>
@@ -24,7 +24,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-spinner-shell,
   .paisa-spinner-content {
     display: flex;

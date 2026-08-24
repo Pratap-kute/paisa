@@ -33,7 +33,7 @@
   {/if}
 </div>
 
-<style lang="scss">
+<style>
   .paisa-page-toolbar {
     width: 100%;
     margin-bottom: var(--paisa-space-4);

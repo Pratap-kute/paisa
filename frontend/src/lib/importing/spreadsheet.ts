@@ -1,8 +1,9 @@
 import Papa from "papaparse";
 import type * as XLSXTypes from "xlsx";
-import _ from "lodash";
+import { trim } from "es-toolkit";
 import { format } from "../ledger/journal";
 import { pdf2array } from "./pdf";
+import { assign, each, isEmpty, map } from "$lib/core/collection";
 
 interface Result {
   data: string[][];
@@ -57,7 +58,7 @@ export function columnIndexToLetter(index: number): string {
 }
 
 export function asRows(result: Result): SpreadsheetRow[] {
-  return _.map(result.data, (row, i) => {
+  return map(result.data, (row, i) => {
     return Object.fromEntries([
       ...Array.from(
         row,
@@ -85,12 +86,12 @@ export function render(
   options: { reverse?: boolean; trim?: boolean } = {},
 ) {
   const output: string[] = [];
-  _.each(rows, (row) => {
-    let rendered = template(_.assign({ ROW: row, SHEET: rows }, COLUMN_REFS));
+  each(rows, (row) => {
+    let rendered = template(assign({ ROW: row, SHEET: rows }, COLUMN_REFS));
     if (options.trim) {
-      rendered = _.trim(rendered);
+      rendered = trim(rendered);
     }
-    if (!_.isEmpty(rendered)) {
+    if (!isEmpty(rendered)) {
       output.push(rendered);
     }
   });
@@ -114,13 +115,13 @@ export function renderWithMetadata(
   const renderedRows: RenderedRow[] = [];
   const errors: RenderError[] = [];
 
-  _.each(rows, (row, sourceRowIndex) => {
+  each(rows, (row, sourceRowIndex) => {
     try {
-      let rendered = template(_.assign({ ROW: row, SHEET: rows }, COLUMN_REFS));
+      let rendered = template(assign({ ROW: row, SHEET: rows }, COLUMN_REFS));
       if (options.trim) {
-        rendered = _.trim(rendered);
+        rendered = trim(rendered);
       }
-      if (!_.isEmpty(rendered)) {
+      if (!isEmpty(rendered)) {
         output.push(rendered);
         renderedRows.push({
           sourceRowIndex,
@@ -147,7 +148,7 @@ export function renderWithMetadata(
   let nextLine = 1;
   const blankLinesBetweenRows = options.trim ? 1 : 0;
 
-  _.each(renderedRows, (row, index) => {
+  each(renderedRows, (row, index) => {
     const lineCount = row.formattedRendered.split("\n").length;
     row.lineRange = {
       from: nextLine,
@@ -224,8 +225,8 @@ async function parseXLSX(file: File): Promise<Result> {
         const sheet = workbook.sheet(0);
         if (sheet) {
           let json = sheet.usedRange().value();
-          json = _.map(json, (row) => {
-            return _.map(row, (cell) => {
+          json = map(json, (row) => {
+            return map(row, (cell) => {
               if (cell) {
                 return cell.toString();
               }

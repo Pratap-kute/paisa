@@ -2,25 +2,28 @@
   import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
   import ZeroState from "$lib/components/ui/ZeroState.svelte";
   import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
-  import _ from "lodash";
-  import { onMount } from "svelte";
+    import { onMount } from "svelte";
   import Page from "$lib/components/layout/Page.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+import { isEmpty as isEmptyValue } from "$lib/core/collection";
 
   let isEmpty = $state(false);
   let creditCards: CreditCardSummary[] = $state([]);
 
   onMount(async () => {
     ({ creditCards } = await ajax("/api/credit_cards"));
-    if (_.isEmpty(creditCards)) {
+    if (isEmptyValue(creditCards)) {
       isEmpty = true;
     }
   });
 </script>
 
-<Page width="fluid">
+<svelte:head>
+  <title>Credit Cards - Paisa</title>
+</svelte:head>
+
+<Page width="analysis">
   <PageHeader
     title="Credit Cards"
     description="Credit card balances, utilization, and billing statements"
@@ -28,14 +31,18 @@
 
   <Section>
     <ZeroState item={!isEmpty}>
-      <strong>Oops!</strong> You haven't configured any credit cards yet. Checkout the
-      <a href={helpUrl("credit-card")}>docs</a> page to get started.
+      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <strong class="text-[var(--paisa-foreground)]">Oops!</strong> You haven't configured any credit cards yet. Checkout the
+        <a href={helpUrl("credit-card")} class="text-[var(--paisa-primary)] underline">docs</a> page to get started.
+      </p>
     </ZeroState>
 
-    <ResponsiveGrid variant="cards">
-      {#each creditCards as creditCard}
-        <CreditCardCard {creditCard} />
-      {/each}
-    </ResponsiveGrid>
+    {#if !isEmpty}
+      <div class="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(19rem,25rem))]">
+        {#each creditCards as creditCard}
+          <CreditCardCard {creditCard} />
+        {/each}
+      </div>
+    {/if}
   </Section>
 </Page>

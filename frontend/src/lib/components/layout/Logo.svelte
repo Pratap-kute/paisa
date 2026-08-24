@@ -1,6 +1,5 @@
 <script lang="ts">
   import COLORS from "$lib/core/colors";
-  import _ from "lodash";
 
   interface Props {
     size?: number;

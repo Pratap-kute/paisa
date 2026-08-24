@@ -23,29 +23,34 @@
 </script>
 
 <Card padding="xs" interactive>
-  <div class="is-flex is-justify-content-space-between is-align-items-baseline">
-    <div class="has-text-grey is-size-7 paisa-truncate">
+  <div class="flex items-baseline justify-between">
+    <div class="truncate text-xs text-[var(--paisa-muted-foreground)]">
       <PostingStatus {posting} />
       <TransactionNote transaction={t} />
-      <a class="secondary-link has-text-weight-medium" href={postingUrl(posting)}>{posting.payee}</a>
+      <a
+        class="font-medium text-[var(--paisa-primary)] hover:underline"
+        href={postingUrl(posting)}>{posting.payee}</a>
     </div>
-    <div class="has-text-grey min-w-[110px] has-text-right is-size-7">
-      <span class="icon is-small has-text-grey-light">
-        <i class="fas fa-calendar"></i>
+    <div class="min-w-[110px] text-right text-xs text-[var(--paisa-muted-foreground)]">
+      <span class="text-[var(--paisa-muted-foreground)]">
+        <i class="fas fa-calendar text-[10px]" aria-hidden="true"></i>
       </span>
       {posting.date.format("DD MMM YYYY")}
     </div>
   </div>
   <hr class="my-1" />
   {#each t.postings as posting}
-    <div class="my-1 is-flex is-justify-content-space-between is-align-items-center">
-      <div class="has-text-grey paisa-truncate custom-icon mr-2 is-size-7" title={posting.account}>
+    <div class="my-1 flex items-center justify-between">
+      <div
+        class="mr-2 truncate text-xs text-[var(--paisa-muted-foreground)] custom-icon"
+        title={posting.account}
+      >
         <span style={accountColorStyle(firstName(posting.account))}
           >{iconText(posting.account)}</span
         >
         {restName(posting.account)}
       </div>
-      <div class="has-text-weight-bold is-size-6 paisa-nowrap">
+      <div class="text-base font-bold paisa-nowrap tabular-nums">
         {formatCurrency(posting.amount)}
       </div>
     </div>

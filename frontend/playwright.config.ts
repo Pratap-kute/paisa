@@ -1,10 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
-import process from "node:process";
+
+const requestedWorkers = Number(Deno.env.get("PAISA_PLAYWRIGHT_WORKERS") ?? 5);
+const workers = Number.isFinite(requestedWorkers) && requestedWorkers > 0
+  ? Math.floor(requestedWorkers)
+  : 5;
 
 export default defineConfig({
   testDir: "./tests/browser",
   fullyParallel: false,
-  workers: process.env.CI ? 4 : undefined,
+  workers,
   timeout: 45_000,
   expect: {
     timeout: 10_000,

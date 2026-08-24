@@ -2,7 +2,6 @@
   import FileTree from "./FileTree.svelte";
 
   import type { Directory, LedgerFile } from "$lib/core/utils";
-  import _ from "lodash";
   import { createEventDispatcher } from "svelte";
 
   interface Props {
@@ -31,11 +30,11 @@
   }
 
   function fileName(path: string) {
-    return _.last(path.split("/"));
+    return path.split("/").at(-1) ?? "";
   }
 
   function join(paths: string[]) {
-    return _.filter(paths, (p: any) => !_.isEmpty(p)).join("/");
+    return paths.filter(Boolean).join("/");
   }
 
   function isOpen(file: Directory | LedgerFile) {
@@ -102,7 +101,7 @@
   {/each}
 </ul>
 
-<style lang="scss">
+<style>
   ul.ledger-file-tree {
     margin: 0;
     padding: 0;

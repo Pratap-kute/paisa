@@ -1,7 +1,8 @@
 // deno-lint-ignore-file no-explicit-any -- Handlebars invokes helpers with heterogeneous positional values and option objects.
 import dayjs from "dayjs";
-import _ from "lodash";
+import { capitalize, isString, round, trim } from "es-toolkit";
 import { predictionSession } from "../prediction/session";
+import { isEmpty } from "$lib/core/collection";
 
 const STOP_WORDS = ["", "fof", "growth", "direct", "plan", "the"];
 
@@ -20,7 +21,7 @@ function nextChar(key: string): string {
 }
 
 function scrubAmount(str: string) {
-  const amount = _.trim(str)
+  const amount = trim(str)
     .replace(/\((.+)\)/, "-$1")
     .replace(/[^0-9.-]/g, "");
 
@@ -56,7 +57,7 @@ export default {
     parseAmount(a) < parseAmount(b),
   negate: (value: string) => parseAmount(value) * -1,
   round(str: string, options: any) {
-    return _.round(parseAmount(str), options.hash.precision || 0);
+    return round(parseAmount(str), options.hash.precision || 0);
   },
   and(...args: any[]) {
     return Array.prototype.every.call(
@@ -72,30 +73,30 @@ export default {
     }
   },
   isDate(str: string, format: string) {
-    if (!_.isString(str)) {
+    if (!isString(str)) {
       return false;
     }
-    return dayjs(_.trim(str), format, true).isValid();
+    return dayjs(trim(str), format, true).isValid();
   },
   predictAccount(...args: any) {
     const options = args.pop();
     return predictionSession.predictFromHelper(args, options).account;
   },
   isBlank(str: string) {
-    return _.isEmpty(str) || _.trim(str) === "";
+    return isEmpty(str) || trim(str) === "";
   },
   amount(str: string, options: any) {
     const amount = scrubAmount(str);
     return amount || options.hash.default || "";
   },
   date(str: string, format: string) {
-    return dayjs(_.trim(str), format, true).format("YYYY/MM/DD");
+    return dayjs(trim(str), format, true).format("YYYY/MM/DD");
   },
   trim(str: string) {
-    return _.trim(str);
+    return trim(str);
   },
   oneline(str: string) {
-    if (!_.isString(str)) {
+    if (!isString(str)) {
       return;
     }
     return str
@@ -104,7 +105,7 @@ export default {
       .trim();
   },
   replace(str: string, search: string, replace: string) {
-    if (!_.isString(str)) {
+    if (!isString(str)) {
       return;
     }
     return str.replaceAll(search, replace);
@@ -125,14 +126,14 @@ export default {
     return cells.join(options.hash.separator || " ");
   },
   regexpTest(str: string, regexp: string) {
-    if (!_.isString(str)) {
+    if (!isString(str)) {
       return;
     }
 
     return new RegExp(regexp).test(str);
   },
   regexpMatch(str: string, regexp: string, options: any) {
-    if (!_.isString(str)) {
+    if (!isString(str)) {
       return;
     }
 
@@ -190,12 +191,11 @@ export default {
     return null;
   },
   acronym(str: string) {
-    return _.chain(str.replaceAll(/[^a-zA-Z ]/g, "").split(" "))
-      .filter((s) => !_.includes(STOP_WORDS, s.toLowerCase()))
-      .map((s) => {
-        return s[0].toUpperCase();
-      })
-      .value()
+    return str
+      .replaceAll(/[^a-zA-Z ]/g, "")
+      .split(" ")
+      .filter((s) => s.length > 0 && !STOP_WORDS.includes(s.toLowerCase()))
+      .map((s) => s[0].toUpperCase())
       .join("");
   },
   toLowerCase(str: string) {
@@ -205,6 +205,6 @@ export default {
     return str.toUpperCase();
   },
   capitalize(str: string) {
-    return _.capitalize(str);
+    return capitalize(str);
   },
 };

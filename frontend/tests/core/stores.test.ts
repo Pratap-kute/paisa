@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { get } from "svelte/store";
 import { persisted } from "../../src/lib/core/persisted";
 import {
@@ -8,6 +8,11 @@ import {
   toastPosition,
   toasts,
 } from "../../src/lib/core/toast";
+import {
+  delayedLoading,
+  delayedUnLoading,
+  loading,
+} from "../../src/lib/state/store";
 
 describe("persisted stores", () => {
   test("reads, writes, updates, and recovers from invalid values", () => {
@@ -54,5 +59,65 @@ describe("toast store", () => {
     dismissToast(id);
     expect(get(toasts)).toHaveLength(1);
     expect(() => toast({ message: "" })).toThrow("message is required");
+  });
+});
+
+describe("loading and delayedLoading stores", () => {
+  test("does not trigger delayedLoading for fast operations under 200ms", () => {
+    vi.useFakeTimers();
+    let currentDelayed = false;
+    const unsubscribe = delayedLoading.subscribe((val) => {
+      currentDelayed = val;
+    });
+
+    loading.set(true);
+    vi.advanceTimersByTime(50);
+    expect(currentDelayed).toBe(false);
+
+    loading.set(false);
+    vi.advanceTimersByTime(200);
+    expect(currentDelayed).toBe(false);
+
+    unsubscribe();
+    vi.useRealTimers();
+  });
+
+  test("activates delayedLoading only for sustained operations over 200ms", () => {
+    vi.useFakeTimers();
+    let currentDelayed = false;
+    const unsubscribe = delayedLoading.subscribe((val) => {
+      currentDelayed = val;
+    });
+
+    loading.set(true);
+    vi.advanceTimersByTime(200);
+    expect(currentDelayed).toBe(true);
+
+    loading.set(false);
+    vi.advanceTimersByTime(200);
+    expect(currentDelayed).toBe(false);
+
+    unsubscribe();
+    vi.useRealTimers();
+  });
+
+  test("delayedUnLoading mirrors delayedLoading and does not trigger immediately", () => {
+    vi.useFakeTimers();
+    let currentUnLoading = false;
+    const unsubscribe = delayedUnLoading.subscribe((val) => {
+      currentUnLoading = val;
+    });
+
+    loading.set(true);
+    expect(currentUnLoading).toBe(false);
+    vi.advanceTimersByTime(100);
+    expect(currentUnLoading).toBe(false);
+
+    loading.set(false);
+    vi.advanceTimersByTime(200);
+    expect(currentUnLoading).toBe(false);
+
+    unsubscribe();
+    vi.useRealTimers();
   });
 });

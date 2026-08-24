@@ -3,8 +3,7 @@ import { expect } from "@std/expect";
 
 import { applyChanges } from "./bulk_edit";
 import type { LedgerFile } from "../core/utils";
-import _ from "lodash";
-
+import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {
     Deno.statSync(`../fixture/${path}`);
@@ -46,8 +45,8 @@ describe("bulk_editor", () => {
             const {
               newFiles: [newLedgerFile],
             } = applyChanges([ledgerFile], transactions, dir, args);
-            expect(_.trim(newLedgerFile.content)).toBe(
-              _.trim(after.toString()),
+            expect(trim(newLedgerFile.content)).toBe(
+              trim(after.toString()),
             );
           }
         }

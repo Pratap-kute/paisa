@@ -52,18 +52,13 @@
   </div>
 </div>
 
-<style lang="scss">
+<style>
   .paisa-page-container {
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    padding: var(--paisa-space-4) var(--paisa-space-4) var(--paisa-space-6);
-
-    @media screen and (max-width: 768px) {
-      padding: var(--paisa-space-3) var(--paisa-space-3) var(--paisa-space-5);
-    }
   }
 
   .paisa-page-content {

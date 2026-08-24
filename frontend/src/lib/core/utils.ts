@@ -1,14 +1,23 @@
 // deno-lint-ignore-file no-explicit-any -- Shared API overloads bridge heterogeneous JSON and third-party scale/texture types.
 import { sha256Hex } from "./crypto";
 import dayjs from "dayjs";
-import _ from "lodash";
-import * as d3 from "d3";
+import {
+  drop,
+  dropRight,
+  groupBy as groupByItems,
+  isString,
+  last,
+  mapValues,
+  sumBy,
+  take,
+  trim,
+} from "es-toolkit";
 import { loading } from "../../store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
-import chroma from "chroma-js";
 import { iconGlyph } from "./icon";
+import { each, first, isEmpty, max, sortBy } from "$lib/core/collection";
 
 export interface AutoCompleteItem {
   label: string;
@@ -405,10 +414,11 @@ export interface SavingsGoalProgress {
 }
 
 export interface Legend {
-  shape: "line" | "square" | "texture";
+  shape: "line" | "square";
   color: string;
   label: string;
-  texture?: any;
+  symbol?: "solid" | "diagonal-stripe";
+  value?: string;
   onClick?: (legend: Legend) => void;
 
   selected?: boolean;
@@ -440,10 +450,10 @@ export function buildDirectoryTree<T extends File>(files: T[]) {
     children: [],
   };
 
-  for (const file of _.sortBy(files, (f) => f.name)) {
+  for (const file of sortBy(files, (f) => f.name)) {
     const parts = file.name.split("/");
     let current = root;
-    for (const part of _.dropRight(parts, 1)) {
+    for (const part of dropRight(parts, 1)) {
       let found = current.children.find((c) => c.name === part);
       if (!found) {
         found = {
@@ -830,8 +840,8 @@ export async function ajax(
     loading.set(true);
   }
 
-  if (!_.isEmpty(params)) {
-    _.each(params, (value, key) => {
+  if (!isEmpty(params)) {
+    each(params, (value, key) => {
       route = route.replace(`:${key}`, value);
     });
   }
@@ -843,7 +853,7 @@ export async function ajax(
   };
 
   const requestToken = localStorage.getItem(tokenKey);
-  if (!_.isEmpty(requestToken)) {
+  if (!isEmpty(requestToken)) {
     options.headers["X-Auth"] = requestToken;
   }
 
@@ -869,7 +879,7 @@ export async function ajax(
 
   return JSON.parse(body, (key, value) => {
     if (
-      _.isString(value) &&
+      isString(value) &&
       /Date|date|time|now/.test(key) &&
       /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/
         .test(
@@ -888,7 +898,7 @@ export async function login(username: string, password: string) {
 }
 
 export function isLoggedIn() {
-  return !_.isEmpty(localStorage.getItem(tokenKey));
+  return !isEmpty(localStorage.getItem(tokenKey));
 }
 
 export function logout() {
@@ -935,11 +945,11 @@ export {
 } from "../formatters/date";
 
 export function firstName(account: string) {
-  return _.first(account.split(":"));
+  return first(account.split(":"));
 }
 
 export function lastName(account: string) {
-  return _.last(account.split(":"));
+  return last(account.split(":"));
 }
 
 export function secondName(account: string) {
@@ -947,58 +957,22 @@ export function secondName(account: string) {
 }
 
 export function firstNames(account: string, n: number) {
-  return _.take(account.split(":"), n).join(":");
+  return take(account.split(":"), n).join(":");
 }
 
 export function restName(account: string) {
-  return _.drop(account.split(":")).join(":");
+  return drop(account.split(":"), 1).join(":");
 }
 
 export function parentName(account: string) {
-  return _.dropRight(account.split(":"), 1).join(":");
+  return dropRight(account.split(":"), 1).join(":");
 }
 
 export function depth(account: string) {
   return account.split(":").length;
 }
 
-export function skipTicks<Domain>(
-  minWidth: number,
-  scale: d3.AxisScale<Domain>,
-  cb: (data: d3.AxisDomain, index: number) => string,
-  points?: number,
-) {
-  const range = scale.range();
-  const width = Math.abs(range[1] - range[0]);
-  const s = scale as any;
-  points = points || (s.ticks ? s.ticks().length : s.domain().length);
-  return function (data: d3.AxisDomain, index: number) {
-    let skip = Math.round((minWidth * points) / width);
-    skip = Math.max(1, skip);
-
-    return index % skip === 0 ? cb(data, index) : null;
-  };
-}
-
-export function rainbowScale(keys: string[]) {
-  const x = d3
-    .scaleLinear()
-    .domain([0, _.size(keys) - 1])
-    .range([0, 0.9]);
-  return d3.scaleOrdinal(
-    _.map(keys, (_value, i) => d3.interpolateRainbow(x(i))),
-  ).domain(keys);
-}
-
-export function darkenOrLighten(backgroundColor: string, intensity = 2) {
-  const color = d3.rgb(backgroundColor);
-  // http://www.w3.org/TR/AERT#color-contrast
-  const brightness = (color.r * 299 + color.g * 587 + color.b) / 1000;
-  if (brightness > 125) {
-    return chroma(backgroundColor).darken(intensity).hex();
-  }
-  return chroma(backgroundColor).brighten(intensity).hex();
-}
+export { darkenOrLighten } from "./color";
 
 export function tooltip(
   rows: Array<Array<string | string[]>>,
@@ -1009,8 +983,8 @@ export function tooltip(
 ) {
   if (options.total && rows.length > 0) {
     const totalRow: Array<string | string[]> = [
-      ["Total", "has-text-weight-bold"],
-      [options.total, "has-text-weight-bold has-text-right"],
+      ["Total", "paisa-text-bold"],
+      [options.total, "paisa-text-bold paisa-text-right"],
     ];
 
     for (let i = 2; i < rows[0].length; i++) {
@@ -1024,7 +998,7 @@ export function tooltip(
     const headerRow: Array<string | string[]> = [
       [
         options.header,
-        "has-text-weight-bold has-text-centered",
+        "paisa-text-bold paisa-text-centered",
         rows[0].length.toString(),
       ],
     ];
@@ -1049,7 +1023,7 @@ export function tooltip(
       return `<tr>${cells}</tr>`;
     })
     .join("\n");
-  return `<table class='table is-narrow is-size-7 popup-table'><tbody>${trs}</tbody></table>`;
+  return `<table class='paisa-popup-table popup-table'><tbody>${trs}</tbody></table>`;
 }
 
 export function isMobile() {
@@ -1140,19 +1114,6 @@ export function prefixMinutesSeconds(cronExpression: string) {
     .join("|");
 }
 
-export function svgTruncate(width: number) {
-  return function () {
-    const self = d3.select(this);
-    let textLength = self.node().getComputedTextLength(),
-      text = self.text();
-    while (textLength > width && text.length > 0) {
-      text = text.slice(0, -1);
-      self.text(text + "...");
-      textLength = self.node().getComputedTextLength();
-    }
-  };
-}
-
 export function sumPostings(postings: Posting[]) {
   return postings.reduce(
     (
@@ -1166,21 +1127,24 @@ export function sumPostings(postings: Posting[]) {
 }
 
 export function transactionTotal(transaction: Transaction) {
-  return _.sumBy(transaction.postings, (t) => _.max([0, t.amount]));
+  return sumBy(transaction.postings, (t) => max([0, t.amount]));
 }
 
 export function formatTextAsHtml(text: string) {
-  return `<p>${_.trim(text).replaceAll("\n", "<br />")}</p>`;
+  return `<p>${trim(text).replaceAll("\n", "<br />")}</p>`;
 }
 
 export function groupSumBy(
   postings: Posting[],
-  groupBy: _.ValueIteratee<Posting>,
+  groupBy: ((posting: Posting) => string) | keyof Posting | string,
 ) {
-  return _.chain(postings)
-    .groupBy(groupBy)
-    .mapValues((ps) => _.sumBy(ps, (p) => p.amount))
-    .value();
+  const fn = typeof groupBy === "function"
+    ? groupBy
+    : (p: Posting) => (p as Record<string, any>)[groupBy as string];
+  return mapValues(
+    groupByItems(postings, fn),
+    (ps) => sumBy(ps, (p) => p.amount),
+  );
 }
 
 export function asTransaction(p: Posting): Transaction {
@@ -1207,34 +1171,29 @@ export function dueDateIcon(
 ) {
   let icon = "fa-circle-check";
   let glyph = iconGlyph("fa6-solid:circle-check");
-  let color = "has-text-success";
-  let svgColor = "svg-text-success";
+  let color = "paisa-text-success";
 
   if (amountDue !== undefined && amountDue <= 0) {
-    return { icon, color, svgColor, glyph };
+    return { icon, color, glyph };
   }
 
   if (!clearedDate) {
     if (dueDate.isBefore(now(), "day")) {
-      color = "has-text-danger";
+      color = "paisa-text-danger";
       icon = "fa-exclamation-triangle";
       glyph = iconGlyph("fa6-solid:triangle-exclamation");
-      svgColor = "svg-text-danger";
     } else {
-      color = "has-text-grey";
-      svgColor = "svg-text-grey";
+      color = "paisa-text-muted";
     }
   } else {
     if (clearedDate.isSameOrBefore(dueDate, "day")) {
-      color = "has-text-success";
-      svgColor = "svg-text-success";
+      color = "paisa-text-success";
     } else {
-      color = "has-text-warning-dark";
-      svgColor = "svg-text-warning-dark";
+      color = "paisa-text-warning";
     }
   }
 
-  return { icon, color, svgColor, glyph };
+  return { icon, color, glyph };
 }
 
 export function buildTree<I>(
@@ -1243,7 +1202,7 @@ export function buildTree<I>(
 ): I[] {
   const result: I[] = [];
 
-  const sorted = _.sortBy(items, accountAccessor);
+  const sorted = sortBy(items, accountAccessor);
 
   for (const item of sorted) {
     const account = accountAccessor(item);

@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { renderBudget } from "$lib/charts/budget";
   import { iconify } from "$lib/core/icon";
-  import type { Action } from "svelte/action";
   import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
-  import _ from "lodash";
+  import Card from "$lib/components/ui/Card.svelte";
 
   interface Props {
     compact?: boolean;
@@ -16,79 +14,125 @@
     return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
   }
 
-  function color(accountBudget: AccountBudget): string {
-    if (accountBudget.available == 0) {
-      return "info";
-    } else if (accountBudget.available > 0) {
-      return "success";
-    } else {
-      return "danger";
+  function availableStatus(accountBudget: AccountBudget): "positive" | "negative" | "neutral" {
+    if (accountBudget.available === 0) {
+      return "neutral";
     }
+    return accountBudget.available > 0 ? "positive" : "negative";
   }
 
-  const chart: Action<HTMLElement, { ab: AccountBudget }> = (element, props) => {
-    renderBudget(element, props.ab);
-    return {};
-  };
-
-  import Card from "$lib/components/ui/Card.svelte";
+  const statusClasses = {
+    positive: "bg-[var(--paisa-success-light)] text-[var(--paisa-success)]",
+    negative: "bg-[var(--paisa-danger-light)] text-[var(--paisa-danger)]",
+    neutral: "bg-[var(--paisa-info-light)] text-[var(--paisa-info)]",
+  } as const;
 
   let tooltipContent = $derived(
     tooltip(
       accountBudget.expenses.map((e) => {
         return [
           e.date.format("DD MMM YYYY"),
-          [e.payee, "is-clipped"],
-          [formatCurrency(e.amount), "has-text-weight-bold has-text-right"]
+          [e.payee, "paisa-truncate"],
+          [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
         ];
-      })
-    )
+      }),
+    ),
+  );
+
+  let availableTone = $derived(availableStatus(accountBudget));
+  let progressMax = $derived(
+    Math.max(
+      0,
+      accountBudget.forecast,
+      accountBudget.actual,
+      accountBudget.actual - accountBudget.rollover,
+    ),
+  );
+  let rolloverUsed = $derived(
+    accountBudget.rollover > 0 && accountBudget.actual > accountBudget.forecast
+      ? Math.min(accountBudget.actual - accountBudget.forecast, accountBudget.rollover)
+      : 0,
+  );
+  let overspent = $derived(
+    accountBudget.actual > accountBudget.forecast
+      ? Math.max(accountBudget.actual - accountBudget.forecast - Math.max(accountBudget.rollover, 0), 0)
+      : 0,
+  );
+  let withinBudget = $derived(Math.min(accountBudget.forecast, accountBudget.actual));
+  let widthPercent = $derived((amount: number) =>
+    progressMax > 0 ? `${Math.min(100, Math.max(0, (amount / progressMax) * 100))}%` : "0%"
   );
 </script>
 
 <Card
   padding="sm"
-  class="budget-card my-3"
-  data-tippy-content={_.isEmpty(accountBudget.expenses) ? null : tooltipContent}
+  variant="flat"
+  class="m-0"
+  data-tippy-content={accountBudget.expenses.length === 0 ? null : tooltipContent}
 >
-  <div class="paisa-is-flex-tablet is-justify-content-space-between">
+  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div
-      class="has-text-weight-bold has-text-grey ml-2 paisa-truncate custom-icon"
+      class="min-w-0 truncate pl-2 text-sm font-semibold text-[var(--paisa-muted-foreground)] custom-icon"
       title={accountBudget.account}
     >
       {iconify(restName(accountBudget.account), { group: firstName(accountBudget.account) })}
     </div>
-    <div class="is-flex is-justify-content-flex-end mr-2 is-align-items-center paisa-nowrap">
+
+    <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 pr-2">
       {#if !compact}
-        <div class="mr-3">
-          <span class="budget-label mr-1">Budget</span>
-          <span class="budget-amount">{formatCurrency(accountBudget.forecast)}</span>
+        <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
+          <span class="text-[var(--paisa-muted-foreground)]">Budget</span>
+          <span class="font-semibold text-[var(--paisa-foreground)]">
+            {formatCurrency(accountBudget.forecast)}
+          </span>
         </div>
-        <div class="mr-3">
-          <span class="budget-label mr-1">Spent</span>
-          <span class="budget-amount">{formatCurrency(accountBudget.actual)}</span>
-        </div>
-      {/if}
-      {#if !compact && accountBudget.rollover != 0}
-        <div class="mr-3">
-          <span class="budget-label mr-1">Rollover</span>
-          <span class="budget-amount warn">{formatCurrency(accountBudget.rollover)}</span>
+        <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
+          <span class="text-[var(--paisa-muted-foreground)]">Spent</span>
+          <span class="font-semibold text-[var(--paisa-foreground)]">
+            {formatCurrency(accountBudget.actual)}
+          </span>
         </div>
       {/if}
-      <div>
-        <span class="budget-label mr-1"
-          >{accountBudget.available >= 0 ? "Available" : "Overspent"}</span
-        >
-        <span class="budget-amount {color(accountBudget)}"
-          >{formatCurrency(Math.abs(accountBudget.available))}</span
-        >
+      {#if !compact && accountBudget.rollover !== 0}
+        <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
+          <span class="text-[var(--paisa-muted-foreground)]">Rollover</span>
+          <span
+            class="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[var(--paisa-warning-light)] text-[var(--paisa-warning)]"
+          >
+            {formatCurrency(accountBudget.rollover)}
+          </span>
+        </div>
+      {/if}
+      <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
+        <span class="text-[var(--paisa-muted-foreground)]">
+          {accountBudget.available >= 0 ? "Available" : "Overspent"}
+        </span>
+        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClasses[availableTone]}">
+          {formatCurrency(Math.abs(accountBudget.available))}
+        </span>
       </div>
     </div>
   </div>
 
   {#if canShow(accountBudget)}
-    <div use:chart={{ ab: accountBudget }}>
-      <svg height="10" width="100%"></svg>
+    <div class="relative mt-3 h-2 overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
+      <div
+        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-danger)]"
+        style="width: {widthPercent(withinBudget + rolloverUsed + overspent)}"
+      ></div>
+      <div
+        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-warning)]"
+        style="width: {widthPercent(withinBudget + rolloverUsed)}"
+      ></div>
+      <div
+        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-success)]"
+        style="width: {widthPercent(withinBudget)}"
+      ></div>
+      <div
+        class="absolute inset-y-[-1px] w-px bg-[var(--paisa-foreground)] opacity-45"
+        style="left: {widthPercent(accountBudget.forecast)}"
+        aria-hidden="true"
+      ></div>
     </div>
   {/if}
 </Card>

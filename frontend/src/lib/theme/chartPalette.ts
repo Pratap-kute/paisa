@@ -1,12 +1,10 @@
 /**
  * Paisa Financial Visualization & Chart Palette
- * Dedicated color palettes and generators for D3 SVG charts and data visualizations.
+ * Engine-neutral color palettes and resolvers for financial visualizations.
  */
 
-import chroma from "chroma-js";
-import _ from "lodash";
+import { desaturateRgb, rgbToHex } from "../core/color";
 import { getColorPreference } from "../core/utils";
-import * as d3 from "d3";
 
 export const MaterialUI = {
   red: {
@@ -352,18 +350,45 @@ export const chartColors = {
 
 export default chartColors;
 
-export function generateColorScheme(domain: string[]) {
+export type CategoryColorResolver = (key: string) => string;
+
+function sinebowColor(t: number): string {
+  const angle = (0.5 - t) * Math.PI;
+  const third = Math.PI / 3;
+  const channel = (offset: number) => {
+    const value = Math.sin(angle + offset);
+    return Math.round(255 * value * value);
+  };
+  const [r, g, b] = desaturateRgb(
+    channel(0),
+    channel(third),
+    channel(2 * third),
+    1.5,
+  );
+  return rgbToHex(r, g, b);
+}
+
+function stableColorIndex(key: string, colorCount: number): number {
+  if (colorCount <= 0) return 0;
+  let hash = 2166136261;
+  for (const character of key.normalize("NFKC").trim().toLowerCase()) {
+    hash ^= character.codePointAt(0) ?? 0;
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) % colorCount;
+}
+
+export function generateColorScheme(domain: string[]): CategoryColorResolver {
   let colors: string[];
   const n = domain.length;
 
-  if (_.every(domain, (d) => _.has(chartColors, d.toLowerCase()))) {
-    colors = _.map(
-      domain,
+  if (domain.every((d) => d.toLowerCase() in chartColors)) {
+    colors = domain.map(
       (d) => (chartColors as Record<string, string>)[d.toLowerCase()],
     );
   } else {
     if (n <= 12) {
-      colors = {
+      colors = ({
         1: ["#7570b3"],
         2: ["#7fc97f", "#fdc086"],
         3: ["#66c2a5", "#fc8d62", "#8da0cb"],
@@ -439,17 +464,25 @@ export function generateColorScheme(domain: string[]) {
           "#ccebc5",
           "#ffed6f",
         ],
-      }[n];
+      } as Record<number, string[]>)[n] ?? [];
     } else {
-      const z = d3
-        .scaleSequential()
-        .domain([0, n - 1])
-        .interpolator(d3.interpolateSinebow);
-      colors = _.map(_.range(0, n), (n) => chroma(z(n)).desaturate(1.5).hex());
+      const normalize = 1 / (n - 1);
+      colors = Array.from(
+        { length: n },
+        (_, index) => sinebowColor(index * normalize),
+      );
     }
   }
 
-  return d3.scaleOrdinal<string>().domain(domain).range(colors);
+  const byKey = new Map<string, string>();
+  domain.forEach((key, index) => {
+    if (!byKey.has(key)) byKey.set(key, colors[index % colors.length]);
+  });
+
+  return (key: string) =>
+    byKey.get(key) ??
+      colors[stableColorIndex(key, colors.length)] ??
+      chartColors.neutral;
 }
 
 export function genericBarColor() {
@@ -479,8 +512,7 @@ export function accountColorStyle(account: string) {
   let color = "hsl(0, 0%, 48%)";
 
   if (
-    _.includes(
-      ["assets", "expenses", "income", "liabilities", "equity"],
+    ["assets", "expenses", "income", "liabilities", "equity"].includes(
       normalized,
     )
   ) {

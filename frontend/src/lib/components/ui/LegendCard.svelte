@@ -1,6 +1,4 @@
 <script lang="ts">
-  import * as d3 from "d3";
-  import type { Action } from "svelte/action";
   import type { Legend } from "$lib/core/utils";
 
   interface Props {
@@ -10,102 +8,113 @@
 
   let { clazz = "", legends }: Props = $props();
 
-  const textureScale = 14;
-  const texture: Action<SVGSVGElement, { texture: any }> = (element, props) => {
-    const svg = d3.select(element);
-    svg.call(props.texture);
-    svg
-      .append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("height", textureScale)
-      .attr("width", textureScale)
-      .attr("fill", props.texture.url());
+  let selectedLegendIndex: number | null = $state(null);
 
-    return {};
-  };
-
-  let selectedLegend: Legend = $state();
-
-  function onClick(legend: Legend) {
+  function onClick(legend: Legend, index: number) {
     if (!legend.onClick) {
       return;
     }
 
     legend.onClick(legend);
-    if (selectedLegend == legend) {
-      // toggle
+    if (selectedLegendIndex === index) {
       legend.selected = false;
-      selectedLegend = null;
+      selectedLegendIndex = null;
     } else {
-      selectedLegend && (selectedLegend.selected = false);
+      if (selectedLegendIndex !== null) legends[selectedLegendIndex].selected = false;
       legend.selected = true;
-      selectedLegend = legend;
+      selectedLegendIndex = index;
     }
   }
 </script>
 
-<div class="is-flex is-flex-wrap-wrap is-align-items-center gap-2 mb-2 {clazz}">
-  {#each legends as legend}
+<div class="flex flex-wrap items-center gap-2 mb-2 {clazz}">
+  {#each legends as legend, index}
     {#if legend.onClick}
       <button
         type="button"
-        class="is-inline-flex is-align-items-center gap-2 px-2 py-1 legend-box paisa-clickable"
-        style="border: none; background: transparent; margin: 0; font: inherit; color: inherit; text-align: inherit;"
-        onclick={(_e) => onClick(legend)}
-        class:selected={selectedLegend == legend}
+        class="legend-box inline-flex items-center gap-2 px-2 py-1 rounded-[var(--paisa-radius-sm)] border-0 bg-transparent m-0 font-inherit text-inherit text-left cursor-pointer hover:bg-[var(--paisa-surface-hover)]"
+        onclick={() => onClick(legend, index)}
+        aria-pressed={selectedLegendIndex === index}
+        class:selected={selectedLegendIndex === index}
       >
-        {#if legend.texture}
-          <svg
-            use:texture={{ texture: legend.texture }}
-            class="is-flex-shrink-0"
-            height="0.875rem"
-            width="0.875rem"
-            viewBox="0 0 {textureScale} {textureScale}"
-          ></svg>
-        {:else if legend.shape == "square"}
+        {#if legend.shape == "square"}
           <div
-            class="is-flex-shrink-0"
-            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem; border-radius: var(--paisa-radius-xs);"
+            data-testid="legend-symbol"
+            class="shrink-0 rounded-[var(--paisa-radius-sm)]"
+            class:legend-pattern-diagonal={legend.symbol == "diagonal-stripe"}
+            style="--legend-color: {legend.color}; background-color: {legend.color}; height: 0.875rem; width: 0.875rem;"
           ></div>
         {:else if legend.shape == "line"}
           <div
-            class="is-flex-shrink-0"
+            data-testid="legend-symbol"
+            class="shrink-0"
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label paisa-whitespace-pre is-size-7 has-text-grey custom-icon">
+        <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
+          {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
         </div>
       </button>
     {:else}
       <div
-        class="is-inline-flex is-align-items-center gap-2 px-2 py-1 legend-box"
-        class:selected={selectedLegend == legend}
+        class="legend-box inline-flex items-center gap-2 px-2 py-1"
+        class:selected={selectedLegendIndex === index}
       >
-        {#if legend.texture}
-          <svg
-            use:texture={{ texture: legend.texture }}
-            class="is-flex-shrink-0"
-            height="0.875rem"
-            width="0.875rem"
-            viewBox="0 0 {textureScale} {textureScale}"
-          ></svg>
-        {:else if legend.shape == "square"}
+        {#if legend.shape == "square"}
           <div
-            class="is-flex-shrink-0"
-            style="background-color: {legend.color}; height: 0.875rem; width: 0.875rem; border-radius: var(--paisa-radius-xs);"
+            data-testid="legend-symbol"
+            class="shrink-0 rounded-[var(--paisa-radius-sm)]"
+            class:legend-pattern-diagonal={legend.symbol == "diagonal-stripe"}
+            style="--legend-color: {legend.color}; background-color: {legend.color}; height: 0.875rem; width: 0.875rem;"
           ></div>
         {:else if legend.shape == "line"}
           <div
-            class="is-flex-shrink-0"
+            data-testid="legend-symbol"
+            class="shrink-0"
             style="border-top: 3px solid {legend.color}; height: 0.1rem; width: 1.5rem;"
           ></div>
         {/if}
-        <div class="legend-label paisa-whitespace-pre is-size-7 has-text-grey custom-icon">
+        <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
+          {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
         </div>
       </div>
     {/if}
   {/each}
 </div>
+
+<style>
+  .legend-label {
+    color: var(--paisa-chart-text);
+    font-family: var(--paisa-font-sans);
+    font-size: var(--paisa-font-size-sm);
+    text-transform: capitalize;
+    text-align: center;
+    line-height: var(--paisa-line-height-normal);
+  }
+
+  .legend-box {
+    border-radius: var(--paisa-radius-sm);
+    transition: background-color var(--paisa-transition-fast);
+  }
+
+  .legend-box:hover {
+    background-color: var(--paisa-surface-hover);
+  }
+
+  .legend-box.selected {
+    background-color: var(--paisa-surface-active);
+    box-shadow: inset 0 0 0 1px var(--paisa-brand-primary);
+  }
+
+  .legend-pattern-diagonal {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 3px,
+      color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 3px,
+      color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 5px
+    );
+  }
+</style>

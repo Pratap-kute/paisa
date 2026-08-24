@@ -23,36 +23,36 @@
 </script>
 
 <Card padding="xs" class="my-2" style="border-left: 2px solid {color}">
-  <div class="is-flex is-justify-content-space-between">
-    <div class="has-text-grey is-size-7 paisa-truncate">
+  <div class="flex justify-between">
+    <div class="truncate text-xs text-[var(--paisa-muted-foreground)]">
       <PostingStatus {posting} />
       <PostingNote {posting} />
-      <a class="secondary-link" href={postingUrl(posting)}>{posting.payee}</a>
+      <a class="text-[var(--paisa-primary)] hover:underline" href={postingUrl(posting)}>{posting.payee}</a>
     </div>
-    <div class="has-text-grey min-w-[110px] has-text-right">
-      <span class="icon is-small has-text-grey-light">
-        <i class="fas fa-calendar"></i>
+    <div class="min-w-[110px] text-right text-[var(--paisa-muted-foreground)]">
+      <span class="text-[var(--paisa-muted-foreground)]">
+        <i class="fas fa-calendar text-[10px]" aria-hidden="true"></i>
       </span>
       {posting.date.format("DD MMM YYYY")}
     </div>
   </div>
   <hr class="my-1" />
-  <div class="is-flex is-justify-content-space-between">
-    <div class="has-text-grey paisa-truncate custom-icon">
+  <div class="flex justify-between">
+    <div class="truncate text-[var(--paisa-muted-foreground)] custom-icon">
       {#if icon}
         {iconify(restName(posting.account), { group: firstName(posting.account) })}
       {:else}
         {posting.account}
       {/if}
     </div>
-    <div class="is-flex is-align-items-baseline">
+    <div class="flex items-baseline">
       <div
-        class="has-text-grey mr-1 paisa-truncate is-size-7"
-        class:is-hidden={posting.quantity == posting.amount}
+        class="mr-1 truncate text-xs text-[var(--paisa-muted-foreground)]"
+        class:hidden={posting.quantity == posting.amount}
       >
         {formatFloat(posting.quantity, 4)} @ {formatFloat(posting.amount / posting.quantity, 3)}
       </div>
-      <div class="has-text-weight-bold is-size-6">{formatCurrency(posting.amount)}</div>
+      <div class="text-base font-bold tabular-nums">{formatCurrency(posting.amount)}</div>
     </div>
   </div>
 </Card>

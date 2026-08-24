@@ -12,7 +12,7 @@
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/core/toast";
-  import _ from "lodash";
+  import { isNumber } from "es-toolkit";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
@@ -20,7 +20,13 @@
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
   import Page from "$lib/components/layout/Page.svelte";
+  import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import Section from "$lib/components/layout/Section.svelte";
+  import Button from "$lib/components/ui/Button.svelte";
+  import Badge from "$lib/components/ui/Badge.svelte";
+  import Card from "$lib/components/ui/Card.svelte";
+  import Select from "$lib/components/ui/Select.svelte";
+import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/core/collection";
 
   let ledgerFiles: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);
@@ -72,7 +78,7 @@
         cancel();
         cancelled = true;
       } else {
-        $sheetEditorState = _.assign({}, $sheetEditorState, {
+        $sheetEditorState = assign({}, $sheetEditorState, {
           hasUnsavedChanges: false,
         });
       }
@@ -90,8 +96,8 @@
 
   onMount(async () => {
     loadFiles(data.name);
-    const line = _.toNumber($page.url.hash.substring(1));
-    if (_.isNumber(line)) {
+    const line = toNumber($page.url.hash.substring(1));
+    if (isNumber(line)) {
       lineNumber = line;
     }
   });
@@ -104,10 +110,10 @@
       commodities,
     } = await ajax("/api/editor/files"));
     ({ files, postings } = await ajax("/api/sheets/files"));
-    filesMap = _.fromPairs(_.map(files, (f) => [f.name, f]));
-    if (!_.isEmpty(files)) {
+    filesMap = fromPairs(map(files, (f) => [f.name, f]));
+    if (!isEmpty(files)) {
       selectedFile =
-        _.find(files, (f) => f.name == selectedFileName) || files[0];
+        find(files, (f) => f.name == selectedFileName) || files[0];
     }
   }
 
@@ -165,7 +171,7 @@
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = null;
-      $sheetEditorState = _.assign({}, $sheetEditorState, {
+      $sheetEditorState = assign({}, $sheetEditorState, {
         hasUnsavedChanges: false,
       });
     }
@@ -245,173 +251,206 @@
   help="Filename without any extension"
 />
 
+<svelte:head>
+  <title>{selectedFile?.name || data.name || "Sheet"} - Paisa</title>
+</svelte:head>
+
 <Page width="fluid">
-  <Section>
-    <div class="mb-2">
-      <div
-        class="box p-3 is-flex is-align-items-center paisa-overflow-x-auto"
-        style="width: 100%"
+  <PageHeader
+    title={selectedFile?.name || data.name || "Sheet"}
+    description="Edit and evaluate this .paisa calculation sheet"
+  >
+    {#snippet leading()}
+      <a
+        href="/more/sheets"
+        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
       >
-        <div class="field has-addons mb-0">
-          <p class="control">
-            <button
-              class="button is-small is-link invertable is-light"
-              disabled={$sheetEditorState.hasUnsavedChanges}
-              onclick={(_e) => openCreateModal()}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-file-circle-plus"></i>
-              </span>
-              <span>Create</span>
-            </button>
-          </p>
-        </div>
+        <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
+        <span>Sheets</span>
+      </a>
+    {/snippet}
 
-        <div class="field has-addons ml-5 mb-0">
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.hasUnsavedChanges == false}
-              onclick={(_e) => save()}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-floppy-disk"></i>
-              </span>
-              <span>Save</span>
-            </button>
-          </p>
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.undoDepth == 0}
-              onclick={undoEdit}
-            >
-              <span class="icon is-small">
-                <i class="fas fa-arrow-left"></i>
-              </span>
-              <span>Undo</span>
-            </button>
-          </p>
-          <p class="control">
-            <button
-              class="button is-small"
-              disabled={$sheetEditorState.redoDepth == 0}
-              onclick={redoEdit}
-            >
-              <span>Redo</span>
-              <span class="icon is-small">
-                <i class="fas fa-arrow-right"></i>
-              </span>
-            </button>
-          </p>
-        </div>
-
-        {#if !_.isEmpty(selectedFile?.versions)}
-          <div class="field has-addons ml-5 mb-0">
-            <p class="control">
-              <button
-                class="button is-small"
-                disabled={!selectedVersion}
-                onclick={(_e) => revert(selectedVersion)}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-clock-rotate-left"></i>
-                </span>
-                <span>Revert</span>
-              </button>
-            </p>
-
-            <div class="control">
-              <div class="select is-small">
-                <select bind:value={selectedVersion}>
-                  {#each selectedFile.versions as version}
-                    <option>{version}</option>
-                  {/each}
-                </select>
-              </div>
-            </div>
-
-            <p class="control">
-              <button
-                class="button is-small"
-                aria-label="Delete backups"
-                onclick={(_e) => deleteBackups()}
-              >
-                <span class="icon is-small">
-                  <i class="fas fa-trash-can"></i>
-                </span>
-              </button>
-            </p>
-          </div>
+    {#snippet actions()}
+      <div class="flex items-center gap-2">
+        {#if $sheetEditorState.hasUnsavedChanges}
+          <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
         {/if}
-
+        <Badge variant="neutral" size="sm">
+          {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
+        </Badge>
         {#if $sheetEditorState.errors.length > 0}
-          <div class="control ml-5">
-            <button
-              type="button"
-              class="button is-ghost p-0"
-              onclick={(_e) =>
-                moveToLine(editor, $sheetEditorState.errors[0].line_from)}
-              ><span class="ml-1 tag invertable is-danger is-light"
-                >{$sheetEditorState.errors.length} error(s) found</span
-              ></button
-            >
-          </div>
-        {/if}
-
-        <div class="control ml-5">
           <button
-            class:is-loading={$sheetEditorState.pendingEval}
-            class="is-loading button is-small pointer-events-none px-0"
-            style="border: none"
+            type="button"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-danger-light)] px-2.5 py-0.5 text-xs font-semibold text-[var(--paisa-danger)] transition-colors hover:bg-[var(--paisa-danger)] hover:text-[var(--paisa-text-inverse)]"
+            onclick={() => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+            title="Click to jump to error"
           >
-            {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-danger)]"></span>
+            <span>{$sheetEditorState.errors.length} error(s)</span>
+          </button>
+        {/if}
+      </div>
+    {/snippet}
+  </PageHeader>
+
+  <Section>
+    <!-- Full-Width IDE Container -->
+    <div class="grid h-[calc(100vh-13.5rem)] min-h-[520px] w-full grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+      <!-- File Tree Sidebar -->
+      <aside class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden">
+        <div class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2">
+          <span class="text-[0.725rem] font-bold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            <i class="fa-regular fa-folder-open mr-1"></i>
+            SHEETS
+          </span>
+          <Badge variant="neutral" size="sm" rounded>{values(filesMap).length}</Badge>
+          <button
+            type="button"
+            class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
+            title="Create new sheet"
+            onclick={() => openCreateModal()}
+          >
+            <i class="fas fa-plus"></i>
           </button>
         </div>
-      </div>
-    </div>
-    <div class="paisa-sheets-layout">
-      <div class="paisa-sheets-sidebar">
-        <div class="box px-2 full-height paisa-overflow-y-auto">
-          <aside class="menu">
-            <FileTree
-              path=""
-              on:select={(e) => selectFile(e.detail)}
-              files={buildDirectoryTree(_.values(filesMap))}
-              selectedFileName={selectedFile?.name}
-              hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
-            />
-          </aside>
+        <div class="relative flex-1 overflow-y-auto p-2">
+          <FileTree
+            path=""
+            on:select={(e) => selectFile(e.detail)}
+            files={buildDirectoryTree(values(filesMap))}
+            selectedFileName={selectedFile?.name ?? ""}
+            hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
+          />
         </div>
-      </div>
-      <div class="paisa-sheets-editor">
-        <div class="is-flex paisa-overflow-x-auto">
-          <div
-            class="box box-r-none py-0 pr-1 mb-0"
-            style="min-width: min(75%,24rem); max-width: min(75%,48rem);"
-          >
-            <div class="sheet-editor" bind:this={editorDom}></div>
+      </aside>
+
+      <!-- Main Editor & Live Results Pane -->
+      <main class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]">
+        <!-- Integrated Toolbar Header -->
+        <div class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-bg)] px-3 py-1.5">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5 font-mono text-xs font-semibold text-[var(--paisa-text-primary)]">
+              <i class="fa-regular fa-file-lines text-[var(--paisa-brand-primary)]"></i>
+              <span class="max-w-[240px] truncate">{selectedFile?.name || "Sheet"}</span>
+              {#if $sheetEditorState.hasUnsavedChanges}
+                <span class="text-[0.75rem] leading-none text-[var(--paisa-warning)]" title="Unsaved changes">●</span>
+              {/if}
+            </div>
           </div>
+
+          <div class="flex items-center gap-1.5">
+            <Button
+              variant={$sheetEditorState.hasUnsavedChanges ? "primary" : "secondary"}
+              size="xs"
+              disabled={$sheetEditorState.hasUnsavedChanges === false}
+              onclick={() => save()}
+              title="Save sheet (Ctrl+S)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-floppy-disk"></i>
+              {/snippet}
+              <span>Save</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.undoDepth === 0}
+              onclick={undoEdit}
+              title="Undo edit (Ctrl+Z)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-arrow-rotate-left"></i>
+              {/snippet}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.redoDepth === 0}
+              onclick={redoEdit}
+              title="Redo edit (Ctrl+Y)"
+            >
+              {#snippet icon()}
+                <i class="fas fa-arrow-rotate-right"></i>
+              {/snippet}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="xs"
+              disabled={$sheetEditorState.hasUnsavedChanges}
+              onclick={() => openCreateModal()}
+              title="Create new sheet file"
+            >
+              {#snippet icon()}
+                <i class="fas fa-plus"></i>
+              {/snippet}
+              <span>New</span>
+            </Button>
+
+            {#if !isEmpty(selectedFile?.versions)}
+              <div class="ml-1 flex items-center gap-1 border-l border-[var(--paisa-border-default)] pl-2">
+                <i class="fas fa-clock-rotate-left text-[0.75rem] text-[var(--paisa-text-muted)]" title="Backup versions"></i>
+                <Select bind:value={selectedVersion} size="sm" class="max-w-[150px] font-mono text-xs">
+                  <option value="" disabled>Select backup...</option>
+                  {#each selectedFile?.versions ?? [] as version}
+                    <option value={version}>{version}</option>
+                  {/each}
+                </Select>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  disabled={!selectedVersion}
+                  onclick={() => {
+                    if (selectedVersion) revert(selectedVersion);
+                  }}
+                  title="Revert to backup version"
+                >
+                  Revert
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  ariaLabel="Clear all backup versions"
+                  title="Delete backup history"
+                  onclick={() => deleteBackups()}
+                >
+                  {#snippet icon()}
+                    <i class="fas fa-trash-can"></i>
+                  {/snippet}
+                </Button>
+              </div>
+            {/if}
+          </div>
+        </div>
+
+        <!-- Split Editor & Results Workspace -->
+        <div class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--paisa-surface)]">
+          <!-- CodeMirror Editor Pane -->
           <div
-            class="box box-l-none has-text-right sheet-result"
-            style="padding: 4px 0; width: min(25%,200px);"
+            class="relative flex-1 min-w-0 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.sheet-editor]:h-full"
+          >
+            <div class="sheet-editor h-full" bind:this={editorDom}></div>
+          </div>
+
+          <!-- Live Calculated Evaluation Results Pane -->
+          <div
+            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
           >
             {#each $sheetEditorState.results as result, i}
               <div
-                class={i + 1 === $sheetEditorState.currentLine
-                  ? "has-background-grey-lightest has-text-grey-dark has-text-weight-bold"
-                  : ""}
-                style="padding: 0 0.5rem"
+                class="px-3 leading-[1.4] {i + 1 === $sheetEditorState.currentLine
+                  ? 'bg-[var(--paisa-surface-hover)] font-bold text-[var(--paisa-text-primary)]'
+                  : 'text-[var(--paisa-text-secondary)]'}"
               >
                 <div
                   title={result.result}
-                  class:underline={result.underline}
-                  class:font-bold={result.bold}
-                  class:text-left={result.align === "left"}
-                  class="m-0 p-0 paisa-truncate {result.error
-                    ? 'has-text-danger'
-                    : ''}"
-                  style="font-size: 0.9285714285714286rem; line-height: 1.4"
+                  class="paisa-truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
+                    ? 'font-bold text-[var(--paisa-danger)]'
+                    : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
+                    ? 'font-bold text-[var(--paisa-text-primary)]'
+                    : ''} {result.underline ? 'underline' : ''}"
                 >
                   &nbsp;{result.result}
                 </div>
@@ -419,25 +458,7 @@
             {/each}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   </Section>
 </Page>
-
-<style lang="scss">
-  .paisa-sheets-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--paisa-space-4);
-    width: 100%;
-
-    @media screen and (min-width: 1024px) {
-      grid-template-columns: minmax(180px, 1fr) minmax(0, 4fr);
-    }
-  }
-
-  .paisa-sheets-sidebar,
-  .paisa-sheets-editor {
-    min-width: 0;
-  }
-</style>
