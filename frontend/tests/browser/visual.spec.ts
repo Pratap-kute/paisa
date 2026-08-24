@@ -246,14 +246,7 @@ for (const route of visualRoutes) {
         await expect(page.locator(".svelte-select-list")).toBeHidden();
       }
       if (variant.theme === "dark" && route.name === "config") {
-        if (variant.width < 1024) {
-          await page.getByLabel("Section", { exact: true }).selectOption({
-            label: "Allocation Targets",
-          });
-        } else {
-          await page.getByRole("button", { name: "Allocation Targets" })
-            .click();
-        }
+        await page.getByRole("tab", { name: "Allocation Targets" }).click();
         await page.getByRole("button", { name: "Add" }).click();
         await expectDarkSelectTheme(page);
       }

@@ -66,7 +66,8 @@ export const visualRoutes: VisualRoute[] = [
   {
     name: "cash-flow-yearly",
     path: "/cash_flow/yearly",
-    ready: "[data-testid='cash-flow-yearly-echart'][data-chart-ready='true']",
+    ready:
+      "[data-testid='cash-flow-yearly-treemap-echart'][data-chart-ready='true']",
   },
   { name: "expense-budget", path: "/expense/budget", readyText: "All Budgets" },
   {
@@ -222,7 +223,7 @@ export const chartSnapshots = [
   {
     name: "cash-flow-yearly",
     path: "/cash_flow/yearly",
-    locator: "[data-testid='cash-flow-yearly-echart']",
+    locator: "[data-testid='cash-flow-yearly-treemap-echart']",
     selectOption: "2021 - 22",
   },
   {
