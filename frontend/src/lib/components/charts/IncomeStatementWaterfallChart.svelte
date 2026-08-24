@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IncomeStatementWaterfallData } from "$lib/charts/income_statement_data";
-  import { buildIncomeStatementWaterfallOption } from "$lib/charts/echarts/waterfall";
-  import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
+  import { buildIncomeStatementWaterfallOption } from "$lib/shared/charts/echarts/waterfall";
+  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import EChartSurface from "./EChartSurface.svelte";
   import { theme } from "../../../store";
 

@@ -1,19 +1,19 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import { buildLegends } from "$lib/charts/gain";
   import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
   import { formatCurrency, type Gain, type Legend } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 
   let legends: Legend[] = $state([]);

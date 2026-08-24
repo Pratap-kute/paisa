@@ -23,7 +23,7 @@ import {
 } from "@codemirror/lint";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import { initialSheetEditorState, sheetEditorState } from "../../store";
-import { fullEditorExtensions } from "./base";
+import { fullEditorExtensions } from "$lib/shared/editor/base";
 import { sheetExtension, sheetLanguage } from "../sheet/language";
 import { schedulePlugin } from "../domain/transaction_tag";
 export { sheetEditorState } from "../../store";
@@ -31,7 +31,7 @@ import { functions } from "../sheet/functions";
 
 import { buildAST, Environment } from "../sheet/interpreter";
 import type { Posting } from "../core/utils";
-import { assign, map } from "$lib/core/collection";
+import { assign, map } from "$lib/shared/utils/collection";
 
 let latestIdentifiers: string[] = [];
 

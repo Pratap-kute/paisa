@@ -6,7 +6,7 @@
     type TransactionSchedule,
     type TransactionSequence,
   } from "$lib/core/utils";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
   import RecurringSchedule from "./RecurringSchedule.svelte";
 
   interface Props {

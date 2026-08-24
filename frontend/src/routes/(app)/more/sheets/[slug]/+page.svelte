@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEditor, sheetEditorState } from "$lib/editors/sheet_editor";
-  import { focus, moveToLine, updateContent } from "$lib/editors/editor";
+  import { focus, moveToLine, updateContent } from "$lib/shared/editor/editor";
   import {
     ajax,
     buildDirectoryTree,
@@ -11,7 +11,7 @@
   } from "$lib/core/utils";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
-  import * as toast from "$lib/core/toast";
+  import * as toast from "$lib/shared/ui/toast";
   import { isNumber } from "es-toolkit";
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
@@ -19,14 +19,14 @@
   import FileTree from "$lib/components/ledger/FileTree.svelte";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { page } from "$app/stores";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Select from "$lib/components/ui/Select.svelte";
-import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/core/collection";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Select from "$lib/shared/ui/Select.svelte";
+import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/shared/utils/collection";
 
   let ledgerFiles: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);

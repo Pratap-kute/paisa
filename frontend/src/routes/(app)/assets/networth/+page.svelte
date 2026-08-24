@@ -15,17 +15,17 @@
     dateRangeOption,
     setAllowedDateRange,
   } from "../../../../store";
-  import DateRange from "$lib/components/ui/DateRange.svelte";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import DateRange from "$lib/shared/ui/DateRange.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import NetworthTimelineChart from "$lib/components/charts/NetworthTimelineChart.svelte";
   import { buildNetworthSeries } from "$lib/charts/time_series_data";
-import { filter, map } from "$lib/core/collection";
+import { filter, map } from "$lib/shared/utils/collection";
 
   let networth = $state(0);
   let investment = $state(0);

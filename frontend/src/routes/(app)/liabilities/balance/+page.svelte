@@ -2,10 +2,10 @@
   import LiabilitiesBalance from "$lib/components/finance/LiabilitiesBalance.svelte";
   import { ajax, type LiabilityBreakdown } from "$lib/core/utils";
   import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 
   let breakdowns: LiabilityBreakdown[] = $state([]);
   let isLoading = $state(true);

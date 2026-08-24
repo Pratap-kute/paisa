@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/core/colors";
-  import { iconText } from "$lib/core/icon";
+  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { iconText } from "$lib/shared/ui/icon";
   import { firstName, formatCurrency, formatFloatUptoPrecision, type Posting } from "$lib/core/utils";
 
   const unlessDefaultCurrency = (p: Posting) => {

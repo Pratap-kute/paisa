@@ -2,11 +2,11 @@
   import { goto } from "$app/navigation";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
   import { ajax } from "$lib/core/utils";
-  import * as toast from "$lib/core/toast";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
+  import * as toast from "$lib/shared/ui/toast";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
 
   let modalOpen = $state(false);
   function openCreateModal() {

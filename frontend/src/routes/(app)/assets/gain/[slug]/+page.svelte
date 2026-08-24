@@ -1,5 +1,5 @@
 <script lang="ts">
-  import COLORS from "$lib/core/colors";
+  import COLORS from "$lib/shared/theme/colors";
   import { buildLegends } from "$lib/charts/gain";
   import {
     buildPortfolioComparison,
@@ -24,14 +24,14 @@
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
 
-  import { iconify } from "$lib/core/icon";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import { iconify } from "$lib/shared/ui/icon";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
 

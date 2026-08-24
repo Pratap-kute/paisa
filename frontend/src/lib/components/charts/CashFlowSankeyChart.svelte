@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { buildCashFlowSankeyData, buildCashFlowSankeyOption } from "$lib/charts/echarts/cash_flow_sankey";
-  import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
+  import { buildCashFlowSankeyData, buildCashFlowSankeyOption } from "$lib/shared/charts/echarts/cash_flow_sankey";
+  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import type { Graph } from "$lib/core/utils";
   import EChartSurface from "./EChartSurface.svelte";
   import { theme } from "../../../store";

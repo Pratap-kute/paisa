@@ -5,10 +5,10 @@
     buildAllocationHierarchy,
   } from "$lib/charts/hierarchy_data";
   import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
-  import COLORS from "$lib/core/colors";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Table from "$lib/components/ui/Table.svelte";
-  import { accountName, nonZeroCurrency } from "$lib/tables/formatters";
+  import COLORS from "$lib/shared/theme/colors";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Table from "$lib/shared/ui/Table.svelte";
+  import { accountName, nonZeroCurrency } from "$lib/shared/tables/formatters";
   import {
     ajax,
     formatPercentage,
@@ -19,14 +19,14 @@
   import { last, sumBy } from "es-toolkit";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { filter, isEmpty, map, max as arrayMax, values } from "$lib/core/collection";
+import { filter, isEmpty, map, max as arrayMax, values } from "$lib/shared/utils/collection";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});

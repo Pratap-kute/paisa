@@ -5,21 +5,21 @@
     buildTopHoldingsComparison,
     filterCommodityBreakdowns,
   } from "$lib/charts/hierarchy_data";
-  import COLORS from "$lib/core/colors";
+  import COLORS from "$lib/shared/theme/colors";
   import { ajax, formatPercentage, type PortfolioAggregate } from "$lib/core/utils";
-  import { nonZeroCurrency } from "$lib/tables/formatters";
+  import { nonZeroCurrency } from "$lib/shared/tables/formatters";
     import { onMount } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import Table from "$lib/components/ui/Table.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-import { isEmpty as isEmptyValue, max, some } from "$lib/core/collection";
+  import Table from "$lib/shared/ui/Table.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+import { isEmpty as isEmptyValue, max, some } from "$lib/shared/utils/collection";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);

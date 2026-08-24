@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildComparisonBarOption } from "$lib/charts/echarts/bar_comparison";
-import { buildFinancialHierarchyOption } from "$lib/charts/echarts/hierarchy";
+import { buildComparisonBarOption } from "$lib/shared/charts/echarts/bar_comparison";
+import { buildFinancialHierarchyOption } from "$lib/shared/charts/echarts/hierarchy";
 import {
   buildAllocationCategoryComparison,
   buildFlattenedHoldings,
   buildTopHoldingsComparison,
 } from "$lib/charts/hierarchy_data";
-import { buildPeriodSeriesOption } from "$lib/charts/echarts/period_series";
-import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
+import { buildPeriodSeriesOption } from "$lib/shared/charts/echarts/period_series";
+import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
 
 const theme = {
   fontFamily: "Paisa Sans",

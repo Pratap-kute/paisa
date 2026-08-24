@@ -12,7 +12,7 @@
     type Harvestable,
     restName,
   } from "$lib/core/utils";
-  import Card from "$lib/components/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     harvestable: Harvestable;

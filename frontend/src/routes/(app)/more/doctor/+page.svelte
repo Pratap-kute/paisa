@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { ajax, type Issue } from "$lib/core/utils";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
 
   let issues: Issue[] = $state([]);
   let isLoading = $state(true);

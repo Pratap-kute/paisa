@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Card from "$lib/components/ui/Card.svelte";
-  import { iconText } from "$lib/core/icon";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import { iconText } from "$lib/shared/ui/icon";
   import {
     formatCurrency,
     formatPercentage,

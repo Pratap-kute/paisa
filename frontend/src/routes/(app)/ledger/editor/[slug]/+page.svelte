@@ -6,13 +6,13 @@
     moveToEnd,
     moveToLine,
     updateContent,
-  } from "$lib/editors/editor";
+  } from "$lib/shared/editor/editor";
   import { insertTab } from "@codemirror/commands";
   import { buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
-  import * as toast from "$lib/core/toast";
+  import * as toast from "$lib/shared/ui/toast";
   import { format } from "$lib/ledger/journal";
   import { isNumber, last } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
@@ -20,14 +20,14 @@
   import type { PageData } from "./$types";
   import FileTree from "$lib/components/ledger/FileTree.svelte";
   import FileModal from "$lib/components/ledger/FileModal.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import Select from "$lib/components/ui/Select.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Select from "$lib/shared/ui/Select.svelte";
   import { page } from "$app/stores";
-  import Page from "$lib/components/layout/Page.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
   import LedgerBalance from "$lib/components/ledger/LedgerBalance.svelte";
-import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/core/collection";
+import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/shared/utils/collection";
 
   interface Props {
     data: PageData;

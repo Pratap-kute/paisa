@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import {
     buildMonthlyInvestmentSeries,
     buildYearlyInvestmentSeries,
@@ -13,18 +13,18 @@
   import { api } from "$lib/api";
   import { orderBy, sumBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
   import InvestmentYearlyCard from "$lib/components/finance/InvestmentYearlyCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import MonthlyInvestmentChart from "$lib/components/charts/MonthlyInvestmentChart.svelte";
   import YearlyInvestmentChart from "$lib/components/charts/YearlyInvestmentChart.svelte";
-import { isEmpty } from "$lib/core/collection";
+import { isEmpty } from "$lib/shared/utils/collection";
 
   let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
   let yearlyInvestmentTimelineLegends: Legend[] = $state([]);

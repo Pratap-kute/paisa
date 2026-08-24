@@ -1,15 +1,15 @@
 <script lang="ts">
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import { buildRepaymentSeries } from "$lib/charts/time_series_data";
   import { ajax, type Legend, type Posting } from "$lib/core/utils";
     import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import RepaymentTimelineChart from "$lib/components/charts/RepaymentTimelineChart.svelte";
-import { isEmpty as isEmptyValue } from "$lib/core/collection";
+import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);

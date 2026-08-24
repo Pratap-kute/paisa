@@ -1,10 +1,10 @@
 <script lang="ts">
   import Select from "svelte-select";
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import SelectField from "$lib/components/ui/Select.svelte";
+  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import SelectField from "$lib/shared/ui/Select.svelte";
   import { createEventDispatcher, onMount } from "svelte";
   import { type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
   import { api } from "$lib/api";

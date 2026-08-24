@@ -3,7 +3,7 @@
   import type { Confidence, PredictionResult } from "$lib/prediction/types";
   import { rowMatchesFilter, type ConfidenceFilter } from "$lib/prediction/session";
   import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
-import { maxBy } from "$lib/core/collection";
+import { maxBy } from "$lib/shared/utils/collection";
   
   interface Props {
     data: any[][];

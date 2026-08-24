@@ -1,8 +1,8 @@
 import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
 import type dayjs from "dayjs";
-import { generateColorScheme } from "$lib/core/colors";
-import COLORS from "$lib/core/colors";
-import { financialColors } from "$lib/theme/chartPalette";
+import { generateColorScheme } from "$lib/shared/theme/colors";
+import COLORS from "$lib/shared/theme/colors";
+import { financialColors } from "$lib/shared/theme/chartPalette";
 import {
   forEachMonth,
   type Forecast,
@@ -20,13 +20,13 @@ import {
   secondName,
   sumPostings,
 } from "$lib/core/utils";
-import { iconify } from "$lib/core/icon";
+import { iconify } from "$lib/shared/ui/icon";
 import type {
   PeriodSeriesChartData,
   PeriodSeriesDefinition,
   PeriodSeriesPoint,
-} from "$lib/charts/echarts/period_series";
-import { minBy, sortBy } from "$lib/core/collection";
+} from "$lib/shared/charts/echarts/period_series";
+import { minBy, sortBy } from "$lib/shared/utils/collection";
 
 function financialYear(
   card: { start_date: dayjs.Dayjs; end_date: dayjs.Dayjs },

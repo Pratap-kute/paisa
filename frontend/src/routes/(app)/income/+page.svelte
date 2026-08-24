@@ -6,17 +6,17 @@
   import { ajax, formatCurrency, type Income, type IncomeYearlyCard, type Legend } from "$lib/core/utils";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import MonthlyIncomeChart from "$lib/components/charts/MonthlyIncomeChart.svelte";
   import YearlyIncomeChart from "$lib/components/charts/YearlyIncomeChart.svelte";
-import { isEmpty } from "$lib/core/collection";
+import { isEmpty } from "$lib/shared/utils/collection";
 
   let grossIncome = $state(0);
   let netTax = $state(0);

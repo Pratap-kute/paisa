@@ -4,7 +4,7 @@ import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data
 import {
   buildIncomeStatementWaterfallOption,
   incomeStatementAxisRange,
-} from "$lib/charts/echarts/waterfall";
+} from "$lib/shared/charts/echarts/waterfall";
 import type { IncomeStatement } from "$lib/core/utils";
 
 describe("income statement waterfall adapter", () => {

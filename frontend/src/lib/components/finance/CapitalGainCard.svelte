@@ -5,8 +5,8 @@
     type CapitalGain,
   } from "$lib/core/utils";
   import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
-  import Toggleable from "$lib/components/ui/Toggleable.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
+  import Toggleable from "$lib/shared/ui/Toggleable.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     financialYear: string;

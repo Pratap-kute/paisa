@@ -6,13 +6,13 @@
   } from "$lib/charts/interest_data";
   import { ajax, formatCurrency, formatFloat, type Interest } from "$lib/core/utils";
     import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { isEmpty as isEmptyValue, some } from "$lib/core/collection";
+import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);

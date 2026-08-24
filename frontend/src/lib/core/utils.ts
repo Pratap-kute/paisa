@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any -- Shared API overloads bridge heterogeneous JSON and third-party scale/texture types.
-import { sha256Hex } from "./crypto";
+import { sha256Hex } from "$lib/shared/utils/crypto";
 import dayjs from "dayjs";
 import {
   drop,
@@ -12,12 +12,12 @@ import {
   take,
   trim,
 } from "es-toolkit";
-import { loading } from "../../store";
+import { loading } from "$lib/state/store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
-import { iconGlyph } from "./icon";
-import { each, first, isEmpty, max, sortBy } from "$lib/core/collection";
+import { iconGlyph } from "$lib/shared/ui/icon";
+import { each, first, isEmpty, max, sortBy } from "$lib/shared/utils/collection";
 
 export interface AutoCompleteItem {
   label: string;
@@ -936,14 +936,14 @@ export {
   formatPercentage,
   normalize,
   unicodeMinus,
-} from "../formatters/currency";
+} from "$lib/shared/formatters/currency";
 
 export {
   beginningOfFinancialYear,
   forEachFinancialYear,
   forEachMonth,
   forEachYear,
-} from "../formatters/date";
+} from "$lib/shared/formatters/date";
 
 export function firstName(account: string) {
   return first(account.split(":"));
@@ -973,7 +973,7 @@ export function depth(account: string) {
   return account.split(":").length;
 }
 
-export { darkenOrLighten } from "./color";
+export { darkenOrLighten } from "$lib/shared/theme/color";
 
 export function tooltip(
   rows: Array<Array<string | string[]>>,

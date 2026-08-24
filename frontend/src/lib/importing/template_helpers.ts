@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 import { capitalize, isString, round, trim } from "es-toolkit";
 import { predictionSession } from "../prediction/session";
-import { isEmpty } from "$lib/core/collection";
+import { isEmpty } from "$lib/shared/utils/collection";
 
 const STOP_WORDS = ["", "fof", "growth", "direct", "plan", "the"];
 

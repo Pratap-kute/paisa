@@ -24,7 +24,7 @@ dayjs.extend(timezone);
 import localeData from "dayjs/plugin/localeData.js";
 dayjs.extend(localeData);
 import updateLocale from "dayjs/plugin/updateLocale.js";
-import { find } from "$lib/core/collection";
+import { find } from "$lib/shared/utils/collection";
 dayjs.extend(updateLocale);
 
 Handlebars.registerHelper(

@@ -14,7 +14,7 @@ export const sharedResolve = {
     ),
     $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
     xlsx: fileURLToPath(
-      new URL("./src/lib/vendor/xlsx.mjs", import.meta.url),
+      new URL("./src/lib/shared/vendor/xlsx.mjs", import.meta.url),
     ),
   },
 };

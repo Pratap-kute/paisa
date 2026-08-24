@@ -11,13 +11,13 @@
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import { month, setAllowedDateRange } from "../../../../store";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-import { isEmpty as isEmptyValue } from "$lib/core/collection";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
   const monthStart = now().startOf("month");
   let budgetsByMonth: Record<string, Budget> = $state({});

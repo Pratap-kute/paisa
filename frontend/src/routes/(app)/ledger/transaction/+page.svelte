@@ -8,15 +8,15 @@
   import BulkEditForm from "$lib/components/ledger/BulkEditForm.svelte";
   import { slide } from "svelte/transition";
   import * as bulkEdit from "$lib/ledger/bulk_edit";
-  import * as toast from "$lib/core/toast";
+  import * as toast from "$lib/shared/ui/toast";
   import DiffViewModal from "$lib/components/ledger/DiffViewModal.svelte";
   import SearchQuery from "$lib/components/ledger/SearchQuery.svelte";
   import { editorState } from "$lib/editors/search_query_editor";
   import { get } from "svelte/store";
   import { download } from "$lib/importing/export";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-import { filter } from "$lib/core/collection";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+import { filter } from "$lib/shared/utils/collection";
 
   let bulkEditOpen = $state(false);
   let transactions: T[] = $state(null);

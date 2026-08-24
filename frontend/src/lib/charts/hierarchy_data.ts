@@ -1,7 +1,7 @@
 import { sumBy } from "es-toolkit";
 import type { Aggregate, PortfolioAggregate } from "$lib/core/utils";
-import type { ComparisonBarChartData } from "$lib/charts/echarts/bar_comparison";
-import { sortBy } from "$lib/core/collection";
+import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
+import { sortBy } from "$lib/shared/utils/collection";
 
 export interface FinancialHierarchyNode {
   id: string;

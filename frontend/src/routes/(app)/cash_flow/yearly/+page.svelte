@@ -15,15 +15,15 @@
     cashflowIncomeDepthAllowed,
     cashflowViewMode,
   } from "../../../../persisted_store";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
-  import InputRange from "$lib/components/ui/InputRange.svelte";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { max as arrayMax, minBy } from "$lib/core/collection";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+  import InputRange from "$lib/shared/ui/InputRange.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
 
   let graph: Record<string, Graph> = $state();
   let expenses: Posting[] = $state([]);

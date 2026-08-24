@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type AssetBreakdown, buildTree } from "$lib/core/utils";
   import { onMount } from "svelte";
-  import Table from "$lib/components/ui/Table.svelte";
+  import Table from "$lib/shared/ui/Table.svelte";
   import type { ColumnDefinition } from "tabulator-tables";
   import {
     accountName,
@@ -10,7 +10,7 @@
     nonZeroCurrency,
     nonZeroFloatChange,
     nonZeroPercentageChange,
-  } from "$lib/tables/formatters";
+  } from "$lib/shared/tables/formatters";
 
   interface Props {
     breakdowns: Record<string, AssetBreakdown>;

@@ -9,21 +9,21 @@
   import { expenseGroup } from "$lib/charts/expense";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
-  import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+  import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import YearlyExpenseCalendar from "$lib/components/charts/YearlyExpenseCalendar.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
+import { isEmpty, map, maxBy, minBy } from "$lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);
   let expenses: Posting[] = $state([]),

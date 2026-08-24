@@ -2,8 +2,8 @@
   import {
     buildPeriodSeriesOption,
     type PeriodSeriesChartData,
-  } from "$lib/charts/echarts/period_series";
-  import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
+  } from "$lib/shared/charts/echarts/period_series";
+  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import EChartSurface from "./EChartSurface.svelte";
   import { theme } from "../../../store";
 

@@ -3,7 +3,7 @@ import type * as XLSXTypes from "xlsx";
 import { trim } from "es-toolkit";
 import { format } from "../ledger/journal";
 import { pdf2array } from "./pdf";
-import { assign, each, isEmpty, map } from "$lib/core/collection";
+import { assign, each, isEmpty, map } from "$lib/shared/utils/collection";
 
 interface Result {
   data: string[][];

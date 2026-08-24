@@ -10,17 +10,17 @@
     firstName,
   } from "$lib/core/utils";
   import { dateMin, dateMax, year } from "../../../../store";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
-  import { iconify } from "$lib/core/icon";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+  import { iconify } from "$lib/shared/ui/icon";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import IncomeStatementWaterfallChart from "$lib/components/charts/IncomeStatementWaterfallChart.svelte";
-import { keys, maxBy, minBy, some, sortBy, values } from "$lib/core/collection";
+import { keys, maxBy, minBy, some, sortBy, values } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);

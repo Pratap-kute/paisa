@@ -1,8 +1,8 @@
 import type { Arima } from "arima/async";
 import dayjs from "dayjs";
-import * as financial from "../core/financial";
-import type { Forecast, Point } from "../core/utils";
-import { now } from "../core/utils";
+import * as financial from "./financial";
+import type { Forecast, Point } from "$lib/core/utils";
+import { now } from "$lib/core/utils";
 
 const WHEN = financial.PaymentDueTime.Begin;
 

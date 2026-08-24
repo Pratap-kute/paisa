@@ -3,7 +3,7 @@
   import DueDate from "$lib/components/finance/DueDate.svelte";
   import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
   import { buildCreditCardYearlySpendsComparison } from "$lib/charts/bar_comparison_data";
-  import { iconify } from "$lib/core/icon";
+  import { iconify } from "$lib/shared/ui/icon";
   import {
     ajax,
     formatCurrency,
@@ -14,15 +14,15 @@
   import { clone } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import Select from "$lib/components/ui/Select.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import Select from "$lib/shared/ui/Select.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-import { findIndex, now, reverse } from "$lib/core/collection";
+import { findIndex, now, reverse } from "$lib/shared/utils/collection";
 
   interface Props {
     data: PageData;

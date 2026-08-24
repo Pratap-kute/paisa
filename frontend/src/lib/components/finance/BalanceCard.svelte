@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/core/colors";
-  import { iconText } from "$lib/core/icon";
+  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { iconText } from "$lib/shared/ui/icon";
   import { restName, type AssetBreakdown, formatCurrency, firstName } from "$lib/core/utils";
 
-  import Card from "$lib/components/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     assetBreakdown: AssetBreakdown;

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Card from "$lib/components/ui/Card.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
   import {
     formatCurrency,
     formatFloat,

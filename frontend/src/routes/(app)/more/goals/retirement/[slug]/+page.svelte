@@ -1,5 +1,5 @@
 <script lang="ts">
-  import COLORS from "$lib/core/colors";
+  import COLORS from "$lib/shared/theme/colors";
   import {
     ajax,
     formatCurrency,
@@ -19,20 +19,20 @@
     findBreakPoints,
   } from "$lib/domain/goals";
   import type { PageData } from "./$types";
-  import { iconGlyph } from "$lib/core/icon";
+  import { iconGlyph } from "$lib/shared/ui/icon";
     import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
-  import { iconify } from "$lib/core/icon";
-  import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
+  import { iconify } from "$lib/shared/ui/icon";
+  import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
   import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
   import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
   interface Props {
     data: PageData;

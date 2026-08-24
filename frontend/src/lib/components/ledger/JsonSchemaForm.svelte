@@ -1,18 +1,18 @@
 <script lang="ts">
   import JsonSchemaForm from "./JsonSchemaForm.svelte";
-  import { sha256Hex } from "$lib/core/crypto";
+  import { sha256Hex } from "$lib/shared/utils/crypto";
   import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
   import Select from "svelte-select";
   import { isEqual, startCase } from "es-toolkit";
   import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
-  import { iconGlyph, iconsList } from "$lib/core/icon";
+  import { iconGlyph, iconsList } from "$lib/shared/ui/icon";
   import AccountSelect from "./AccountsSelect.svelte";
   import { untrack } from "svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import UiSelect from "$lib/components/ui/Select.svelte";
-  import IconButton from "$lib/components/ui/IconButton.svelte";
-import { sortBy } from "$lib/core/collection";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import UiSelect from "$lib/shared/ui/Select.svelte";
+  import IconButton from "$lib/shared/ui/IconButton.svelte";
+import { sortBy } from "$lib/shared/utils/collection";
 
   interface Schema extends JSONSchema7 {
     "ui:header"?: string;

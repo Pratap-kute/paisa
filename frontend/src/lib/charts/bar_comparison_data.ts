@@ -1,6 +1,6 @@
 import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
-import COLORS, { generateColorScheme } from "$lib/core/colors";
-import { iconify } from "$lib/core/icon";
+import COLORS, { generateColorScheme } from "$lib/shared/theme/colors";
+import { iconify } from "$lib/shared/ui/icon";
 import {
   type AllocationTarget,
   financialYear,
@@ -8,9 +8,9 @@ import {
   type Posting,
   restName,
 } from "$lib/core/utils";
-import type { ComparisonBarChartData } from "$lib/charts/echarts/bar_comparison";
+import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
 import { byExpenseGroup, expenseGroup } from "$lib/charts/expense";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
 export function buildExpenseBreakdownComparison(
   postings: Posting[],

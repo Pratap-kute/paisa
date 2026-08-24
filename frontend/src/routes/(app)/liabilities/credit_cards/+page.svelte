@@ -1,12 +1,12 @@
 <script lang="ts">
   import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
     import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-import { isEmpty as isEmptyValue } from "$lib/core/collection";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let creditCards: CreditCardSummary[] = $state([]);

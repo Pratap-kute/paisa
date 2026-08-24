@@ -11,7 +11,7 @@ import {
 import dayjs from "dayjs";
 import { type CronExprs, parse } from "@datasert/cronjs-parser";
 import { getFutureMatches } from "@datasert/cronjs-matcher";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
 const end = now().add(36, "month");
 

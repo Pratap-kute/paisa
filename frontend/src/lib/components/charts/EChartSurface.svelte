@@ -5,7 +5,7 @@
     type EChartSurfaceController,
     type EChartRenderer,
     type PaisaChartEventHandler,
-  } from "$lib/charts/echarts/surface_lifecycle";
+  } from "$lib/shared/charts/echarts/surface_lifecycle";
   import type { EChartsCoreOption } from "echarts/core";
   import { untrack } from "svelte";
 
@@ -37,7 +37,7 @@
   async function ensureChart() {
     if (!element || controller || typeof window === "undefined") return;
 
-    const echarts = await import("$lib/charts/echarts/core");
+    const echarts = await import("$lib/shared/charts/echarts/core");
     if (!element?.isConnected || controller) return;
     controller = createEChartSurfaceController({
       element,

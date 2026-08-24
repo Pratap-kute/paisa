@@ -7,12 +7,12 @@
     updateContent,
   } from "$lib/editors/template_editor";
   import type { ImportTemplate } from "$lib/core/utils";
-  import Button from "$lib/components/ui/Button.svelte";
-  import IconButton from "$lib/components/ui/IconButton.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import IconButton from "$lib/shared/ui/IconButton.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
 
   interface Props {
     open?: boolean;

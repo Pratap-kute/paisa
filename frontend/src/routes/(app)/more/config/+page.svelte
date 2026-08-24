@@ -5,16 +5,16 @@
   import type { JSONSchema7 } from "json-schema";
   import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
   import { cloneDeep, isEqual, startCase } from "es-toolkit";
-  import * as toast from "$lib/core/toast";
+  import * as toast from "$lib/shared/ui/toast";
   import { refresh } from "../../../../store";
   import { sync } from "$lib/api/sync";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Tabs from "$lib/components/ui/Tabs.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Tabs from "$lib/shared/ui/Tabs.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Schema extends JSONSchema7 {
     "ui:widget"?: string;

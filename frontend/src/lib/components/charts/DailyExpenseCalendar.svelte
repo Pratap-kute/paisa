@@ -6,7 +6,7 @@
     formatCurrency,
     tooltip,
   } from "$lib/core/utils";
-  import { iconText } from "$lib/core/icon";
+  import { iconText } from "$lib/shared/ui/icon";
 
   interface Props {
     data: ExpenseHeatmapData;

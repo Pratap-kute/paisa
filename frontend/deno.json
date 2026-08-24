@@ -97,7 +97,7 @@
     "vite": "npm:vite@^8.2.1",
     "vitest": "npm:vitest@^4",
     "vitest/config": "npm:vitest@^4/config",
-    "xlsx": "./src/lib/vendor/xlsx.mjs",
+    "xlsx": "./src/lib/shared/vendor/xlsx.mjs",
     "xlsx-populate": "npm:xlsx-populate@^1.21.0"
   },
   "compilerOptions": {
@@ -113,7 +113,7 @@
       "src/lib/api/generated/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
-      "src/lib/vendor/",
+      "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
   },
@@ -128,7 +128,7 @@
       "src/lib/api/generated/",
       "src/lib/search/parser/parser.js",
       "src/lib/sheet/parser.js",
-      "src/lib/vendor/",
+      "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
   },

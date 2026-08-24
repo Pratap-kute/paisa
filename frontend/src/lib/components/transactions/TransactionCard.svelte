@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/core/colors";
-  import { iconText } from "$lib/core/icon";
+  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { iconText } from "$lib/shared/ui/icon";
   import {
     formatCurrency,
     postingUrl,
@@ -12,7 +12,7 @@
   import PostingStatus from "./PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
-  import Card from "$lib/components/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     t: Transaction;

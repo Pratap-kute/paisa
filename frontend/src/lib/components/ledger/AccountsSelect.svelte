@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { iconify } from "$lib/core/icon";
+  import { iconify } from "$lib/shared/ui/icon";
   import Select from "svelte-select";
 
   interface Props {

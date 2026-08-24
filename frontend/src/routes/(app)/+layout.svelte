@@ -1,10 +1,10 @@
 <script lang="ts">
   import { afterNavigate, beforeNavigate } from "$app/navigation";
   import { followCursor, delegate, hideAll } from "tippy.js";
-    import AppShell from "$lib/components/layout/AppShell.svelte";
+    import AppShell from "$lib/shared/layout/AppShell.svelte";
   import { willClearTippy, willRefresh } from "../../store";
   import type { Snippet } from "svelte";
-import { isEmpty } from "$lib/core/collection";
+import { isEmpty } from "$lib/shared/utils/collection";
 
   interface Props {
     children?: Snippet;

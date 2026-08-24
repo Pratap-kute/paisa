@@ -4,15 +4,15 @@
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import { dateMin, dateMax, dateRange, dateRangeOption, setAllowedDateRange } from "../../../../store";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import DateRange from "$lib/components/ui/DateRange.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import DateRange from "$lib/shared/ui/DateRange.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { filter, map, some } from "$lib/core/collection";
+import { filter, map, some } from "$lib/shared/utils/collection";
 
   let cashFlows: CashFlow[] = $state([]);
   let isLoading = $state(true);

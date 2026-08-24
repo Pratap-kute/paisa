@@ -1,16 +1,16 @@
 <script lang="ts">
   import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
   import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import LastNMonths from "$lib/components/ui/LastNMonths.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
   import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
   import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
   import { refresh } from "../../store";
@@ -42,7 +42,7 @@
   import { sumBy, take } from "es-toolkit";
   import dayjs from "dayjs";
   import { onMount } from "svelte";
-import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/core/collection";
+import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/shared/utils/collection";
 
   let cashflowLegends: Legend[] = $state([]);
   let month = $state(now().format("YYYY-MM"));

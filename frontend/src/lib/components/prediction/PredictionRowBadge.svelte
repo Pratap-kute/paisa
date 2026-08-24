@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
   import type { Confidence } from "$lib/prediction/types";
   import { confidenceLabel } from "$lib/prediction/explain";
 

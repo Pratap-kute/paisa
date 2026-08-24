@@ -1,7 +1,7 @@
 import { groupBy } from "es-toolkit";
 import { format } from "./journal";
 import type { LedgerFile, Transaction } from "../core/utils";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
 interface OperationResult {
   updated: boolean;

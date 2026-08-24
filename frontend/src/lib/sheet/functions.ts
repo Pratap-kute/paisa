@@ -2,7 +2,7 @@ import type { Posting } from "../core/utils";
 import { groupBy } from "es-toolkit";
 import { assertType, type Environment, type Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
 type PostingsOrQuery = Posting[] | Query;
 

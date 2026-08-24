@@ -2,9 +2,9 @@
   import {
     buildComparisonBarOption,
     type ComparisonBarChartData,
-  } from "$lib/charts/echarts/bar_comparison";
-  import type { PaisaChartEventHandler } from "$lib/charts/echarts/surface_lifecycle";
-  import { readPaisaChartTheme } from "$lib/charts/echarts/theme";
+  } from "$lib/shared/charts/echarts/bar_comparison";
+  import type { PaisaChartEventHandler } from "$lib/shared/charts/echarts/surface_lifecycle";
+  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import EChartSurface from "./EChartSurface.svelte";
   import { theme } from "../../../store";
 

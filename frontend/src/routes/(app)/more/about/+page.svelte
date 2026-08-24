@@ -1,10 +1,10 @@
 <script lang="ts">
-  import Logo from "$lib/components/layout/Logo.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Logo from "$lib/shared/layout/Logo.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
 
   const resources = [
     {

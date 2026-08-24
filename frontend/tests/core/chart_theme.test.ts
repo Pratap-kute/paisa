@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { chartFormatters } from "$lib/charts/echarts/formatters";
+import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,
   categorySeriesColor,
   categorySeriesIndex,
   normalizeCategoryKey,
   readPaisaChartTheme,
-} from "$lib/charts/echarts/theme";
+} from "$lib/shared/charts/echarts/theme";
 import {
   formatCurrency,
   formatCurrencyCrude,

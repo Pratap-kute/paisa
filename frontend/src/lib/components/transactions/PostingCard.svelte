@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { iconify } from "$lib/core/icon";
+  import { iconify } from "$lib/shared/ui/icon";
   import {
     formatCurrency,
     formatFloat,
@@ -11,7 +11,7 @@
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 
-  import Card from "$lib/components/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     posting: Posting;

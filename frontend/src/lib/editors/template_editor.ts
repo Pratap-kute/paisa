@@ -2,7 +2,7 @@ import type { LedgerFileError } from "../core/utils";
 import { handlebars } from "./handlebars_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, keymap } from "@codemirror/view";
-import { fullEditorExtensions } from "./base";
+import { fullEditorExtensions } from "$lib/shared/editor/base";
 import {
   history,
   historyKeymap,
@@ -24,7 +24,7 @@ import {
   ifIn,
 } from "@codemirror/autocomplete";
 import Handlebars from "handlebars";
-import { assign, map } from "$lib/core/collection";
+import { assign, map } from "$lib/shared/utils/collection";
 
 interface EditorState {
   hasUnsavedChanges: boolean;

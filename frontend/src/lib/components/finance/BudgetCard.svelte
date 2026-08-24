@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { iconify } from "$lib/core/icon";
+  import { iconify } from "$lib/shared/ui/icon";
   import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
-  import Card from "$lib/components/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {
     compact?: boolean;

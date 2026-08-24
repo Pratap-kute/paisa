@@ -1,17 +1,17 @@
 <script lang="ts">
-  import Table from "$lib/components/ui/Table.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import Table from "$lib/shared/ui/Table.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import { ajax, formatCurrency, type Price } from "$lib/core/utils";
-  import { nonZeroPercentageChange } from "$lib/tables/formatters";
-  import { toast } from "$lib/core/toast";
+  import { nonZeroPercentageChange } from "$lib/shared/tables/formatters";
+  import { toast } from "$lib/shared/ui/toast";
   import { omitBy } from "es-toolkit";
   import { onMount } from "svelte";
   import type { CellComponent, ColumnDefinition } from "tabulator-tables";
   import type dayjs from "dayjs";
-import { find } from "$lib/core/collection";
+import { find } from "$lib/shared/utils/collection";
 
   interface PriceRow {
     commodity_name: string;

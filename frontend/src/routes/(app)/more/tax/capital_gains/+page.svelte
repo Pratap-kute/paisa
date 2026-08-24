@@ -2,17 +2,17 @@
   import type { CapitalGain, FYCapitalGain } from "$lib/core/utils";
   import { formatCurrency } from "$lib/core/utils";
   import CapitalGainCard from "$lib/components/finance/CapitalGainCard.svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
   import { ajax } from "$lib/core/utils";
   import { sumBy, uniq } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { values } from "$lib/core/collection";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import { values } from "$lib/shared/utils/collection";
 
   let years: string[] = $state([]);
   let selectedYear: string = $state("");

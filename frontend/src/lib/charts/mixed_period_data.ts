@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
-import { categorySeriesIndex } from "$lib/charts/echarts/theme";
-import type { PeriodSeriesChartData } from "$lib/charts/echarts/period_series";
+import { categorySeriesIndex } from "$lib/shared/charts/echarts/theme";
+import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
 import { expenseGroup } from "$lib/charts/expense";
 import {
   type Aggregate,
@@ -14,7 +14,7 @@ import {
   type Posting,
   secondName,
 } from "$lib/core/utils";
-import { maxBy, minBy } from "$lib/core/collection";
+import { maxBy, minBy } from "$lib/shared/utils/collection";
 
 export const categoryColor = (key: string) =>
   `var(--paisa-chart-series-${categorySeriesIndex(key, 12) + 1})`;

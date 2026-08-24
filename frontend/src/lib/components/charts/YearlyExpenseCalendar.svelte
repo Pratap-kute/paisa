@@ -2,7 +2,7 @@
   import type { ExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
   import { categoryColor } from "$lib/charts/mixed_period_data";
   import { formatCurrency, formatPercentage, tooltip } from "$lib/core/utils";
-  import { iconText } from "$lib/core/icon";
+  import { iconText } from "$lib/shared/ui/icon";
 
   interface Props {
     data: ExpenseHeatmapData;

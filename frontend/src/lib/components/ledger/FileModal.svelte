@@ -1,8 +1,8 @@
 <script lang="ts">
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
+  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
   import { createEventDispatcher } from "svelte";
 
   interface Props {

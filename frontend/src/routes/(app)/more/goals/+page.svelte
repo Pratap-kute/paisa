@@ -2,18 +2,18 @@
   import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
   import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import { helpUrl, type GoalSummary } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";
-  import * as toast from "$lib/core/toast";
+  import * as toast from "$lib/shared/ui/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import { find, isEmpty as isEmptyValue, sortBy } from "$lib/core/collection";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import { find, isEmpty as isEmptyValue, sortBy } from "$lib/shared/utils/collection";
 
   const goalDndzone = dndzone;
 

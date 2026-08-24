@@ -1,7 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
   import { getColorPreference } from "$lib/core/utils";
-  import ToastContainer from "$lib/components/ui/ToastContainer.svelte";
+  import ToastContainer from "$lib/shared/ui/ToastContainer.svelte";
   interface Props {
     children?: import('svelte').Snippet;
   }

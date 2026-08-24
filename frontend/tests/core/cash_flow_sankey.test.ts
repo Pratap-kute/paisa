@@ -3,7 +3,7 @@ import {
   buildCashFlowSankeyData,
   buildCashFlowSankeyOption,
   findDirectedCycles,
-} from "$lib/charts/echarts/cash_flow_sankey";
+} from "$lib/shared/charts/echarts/cash_flow_sankey";
 import type { Graph } from "$lib/core/utils";
 import browserExpense from "../fixture/browser/expense.json" with {
   type: "json",

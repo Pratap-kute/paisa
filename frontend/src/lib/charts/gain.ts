@@ -1,4 +1,4 @@
-import COLORS from "$lib/core/colors";
+import COLORS from "$lib/shared/theme/colors";
 import type { Legend } from "$lib/core/utils";
 
 const areaKeys = ["gain", "loss"] as const;

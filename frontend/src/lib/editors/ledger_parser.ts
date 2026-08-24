@@ -1,5 +1,5 @@
 import type { StreamParser, StringStream } from "@codemirror/language";
-import { includes } from "$lib/core/collection";
+import { includes } from "$lib/shared/utils/collection";
 
 const DATE = /^\d{4}[/-]\d{2}[/-]\d{2}/;
 const DATE_TIME = /^\d{4}[/-]\d{2}[/-]\d{2} \d{2}:\d{2}:\d{2}/;

@@ -6,7 +6,7 @@
     totalRecurring
   } from "$lib/domain/transaction_sequence";
   import { formatCurrencyCrude, now, type TransactionSequence } from "$lib/core/utils";
-  import Badge from "$lib/components/ui/Badge.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {
     transactionSequece: TransactionSequence;
