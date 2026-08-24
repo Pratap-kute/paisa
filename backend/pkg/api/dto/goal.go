@@ -14,5 +14,10 @@ type GoalSummaryResponse struct {
 }
 
 type GoalSummariesResponse struct {
-	GoalSummaries []GoalSummaryResponse `json:"goal_summaries"`
+	Goals []GoalSummaryResponse `json:"goals"`
+}
+
+type GoalDetailResponse struct {
+	Summary  GoalSummaryResponse    `json:"summary"`
+	Timeline map[string]interface{} `json:"timeline,omitempty"`
 }

@@ -42,3 +42,7 @@ audit vulncheck: ensure-static ## Run govulncheck vulnerability scanner
 
 format fmt: ## Format Go source code
 	gofmt -s -w .
+
+swagger: ## Generate Swagger API documentation specification and Go package
+	go run github.com/swaggo/swag/cmd/swag init -g pkg/server/swagger.go -o docs --parseDependency --parseInternal
+

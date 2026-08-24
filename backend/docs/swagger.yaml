@@ -1,0 +1,2283 @@
+basePath: /api
+definitions:
+  dto.AccountBudgetResponse:
+    properties:
+      account:
+        type: string
+      actual:
+        type: number
+      available:
+        type: number
+      date:
+        type: string
+      expenses:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      forecast:
+        type: number
+      rollover:
+        type: number
+    type: object
+  dto.AccountGainResponse:
+    properties:
+      account:
+        type: string
+      networthTimeline:
+        items:
+          $ref: '#/definitions/dto.NetworthTimelineItemResponse'
+        type: array
+      portfolioGroups: {}
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      xirr:
+        type: number
+    type: object
+  dto.AggregateResponse:
+    properties:
+      account:
+        type: string
+      date:
+        type: string
+      market_amount:
+        type: number
+    type: object
+  dto.AllocationResponse:
+    properties:
+      aggregates:
+        additionalProperties:
+          $ref: '#/definitions/dto.AggregateResponse'
+        type: object
+      aggregates_timeline:
+        items:
+          additionalProperties:
+            $ref: '#/definitions/dto.AggregateResponse'
+          type: object
+        type: array
+      allocation_targets:
+        items:
+          $ref: '#/definitions/dto.AllocationTargetResponse'
+        type: array
+    type: object
+  dto.AllocationTargetResponse:
+    properties:
+      aggregates:
+        additionalProperties:
+          $ref: '#/definitions/dto.AggregateResponse'
+        type: object
+      current:
+        type: number
+      name:
+        type: string
+      target:
+        type: number
+    type: object
+  dto.AssetBreakdownResponse:
+    properties:
+      absoluteReturn:
+        type: number
+      balanceUnits:
+        type: number
+      gainAmount:
+        type: number
+      group:
+        type: string
+      investmentAmount:
+        type: number
+      latestPrice:
+        type: number
+      marketAmount:
+        type: number
+      withdrawalAmount:
+        type: number
+      xirr:
+        type: number
+    type: object
+  dto.AssetsBalanceResponse:
+    properties:
+      asset_breakdowns:
+        additionalProperties:
+          $ref: '#/definitions/dto.AssetBreakdownResponse'
+        type: object
+    type: object
+  dto.AutoCompleteResponse:
+    properties:
+      value:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.BalancedPostingResponse:
+    properties:
+      from:
+        $ref: '#/definitions/dto.PostingResponse'
+      to:
+        $ref: '#/definitions/dto.PostingResponse'
+    type: object
+  dto.BudgetResponse:
+    properties:
+      accounts:
+        items:
+          $ref: '#/definitions/dto.AccountBudgetResponse'
+        type: array
+      availableThisMonth:
+        type: number
+      date:
+        type: string
+      endOfMonthBalance:
+        type: number
+      forecast:
+        type: number
+    type: object
+  dto.BudgetsSummaryResponse:
+    properties:
+      availableForBudgeting:
+        type: number
+      budgetsByMonth:
+        additionalProperties:
+          $ref: '#/definitions/dto.BudgetResponse'
+        type: object
+      checkingBalance:
+        type: number
+    type: object
+  dto.CapitalGainResponse:
+    properties:
+      account:
+        type: string
+      fy:
+        additionalProperties:
+          $ref: '#/definitions/dto.FYCapitalGainResponse'
+        type: object
+      tax_category:
+        type: string
+    type: object
+  dto.CapitalGainsResponse:
+    properties:
+      capital_gains:
+        additionalProperties:
+          $ref: '#/definitions/dto.CapitalGainResponse'
+        type: object
+    type: object
+  dto.CashFlowResponse:
+    properties:
+      balance:
+        type: number
+      checking:
+        type: number
+      date:
+        type: string
+      expenses:
+        type: number
+      income:
+        type: number
+      investment:
+        type: number
+      liabilities:
+        type: number
+      tax:
+        type: number
+    type: object
+  dto.CashFlowsResponse:
+    properties:
+      cash_flows:
+        items:
+          $ref: '#/definitions/dto.CashFlowResponse'
+        type: array
+    type: object
+  dto.CommodityBreakdownResponse:
+    properties:
+      amount:
+        type: number
+      commodity_name:
+        type: string
+      parent_commodity_id:
+        type: string
+      percentage:
+        type: number
+      security_id:
+        type: string
+      security_industry:
+        type: string
+      security_name:
+        type: string
+      security_rating:
+        type: string
+      security_type:
+        type: string
+    type: object
+  dto.CreditCardBillResponse:
+    properties:
+      closingBalance:
+        type: number
+      credits:
+        type: number
+      debits:
+        type: number
+      dueDate:
+        type: string
+      openingBalance:
+        type: number
+      paidDate:
+        type: string
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      statementEndDate:
+        type: string
+      statementStartDate:
+        type: string
+      transactions:
+        items:
+          $ref: '#/definitions/dto.TransactionResponse'
+        type: array
+    type: object
+  dto.CreditCardSummaryResponse:
+    properties:
+      account:
+        type: string
+      balance:
+        type: number
+      bills:
+        items:
+          $ref: '#/definitions/dto.CreditCardBillResponse'
+        type: array
+      creditLimit:
+        type: number
+      expirationDate:
+        type: string
+      network:
+        type: string
+      number:
+        type: string
+      yearlySpends:
+        additionalProperties:
+          additionalProperties:
+            type: number
+          type: object
+        type: object
+    type: object
+  dto.CreditCardsResponse:
+    properties:
+      creditCards:
+        items:
+          $ref: '#/definitions/dto.CreditCardSummaryResponse'
+        type: array
+    type: object
+  dto.CurrentNetworthResponse:
+    properties:
+      networth:
+        $ref: '#/definitions/dto.NetworthTimelineItemResponse'
+      xirr:
+        type: number
+    type: object
+  dto.DashboardResponse:
+    properties:
+      budget:
+        $ref: '#/definitions/dto.BudgetResponse'
+      cashFlows:
+        $ref: '#/definitions/dto.CashFlowResponse'
+      checkingBalances: {}
+      expenses:
+        $ref: '#/definitions/dto.PeriodicPostingsSummaryResponse'
+      goalSummaries:
+        items:
+          $ref: '#/definitions/dto.GoalSummaryResponse'
+        type: array
+      networth:
+        $ref: '#/definitions/dto.CurrentNetworthResponse'
+      transactionSequences:
+        items:
+          $ref: '#/definitions/dto.TransactionSequenceResponse'
+        type: array
+      transactions:
+        items:
+          $ref: '#/definitions/dto.TransactionResponse'
+        type: array
+    type: object
+  dto.DiagnosisResponse:
+    properties:
+      issues:
+        items:
+          $ref: '#/definitions/dto.IssueResponse'
+        type: array
+    type: object
+  dto.EditorFilesResponse:
+    properties:
+      accounts:
+        items:
+          type: string
+        type: array
+      commodities:
+        items:
+          type: string
+        type: array
+      files:
+        items:
+          $ref: '#/definitions/dto.LedgerFileResponse'
+        type: array
+      payees:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.EditorSaveResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/dto.LedgerErrorResponse'
+        type: array
+      message:
+        type: string
+      saved:
+        type: boolean
+    type: object
+  dto.EditorValidateResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/dto.LedgerErrorResponse'
+        type: array
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  dto.ExpenseResponse:
+    properties:
+      expenses:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      graph:
+        additionalProperties:
+          $ref: '#/definitions/dto.GraphResponse'
+        type: object
+      month_wise:
+        $ref: '#/definitions/dto.PeriodicPostingsSummaryResponse'
+      year_wise:
+        $ref: '#/definitions/dto.PeriodicPostingsSummaryResponse'
+    type: object
+  dto.FYCapitalGainResponse:
+    properties:
+      posting_pairs:
+        items:
+          $ref: '#/definitions/dto.TaxPostingPairResponse'
+        type: array
+      purchase_price:
+        type: number
+      sell_price:
+        type: number
+      tax:
+        $ref: '#/definitions/dto.TaxResponse'
+      units:
+        type: number
+    type: object
+  dto.GainResponse:
+    properties:
+      account:
+        type: string
+      networth:
+        $ref: '#/definitions/dto.NetworthTimelineItemResponse'
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      xirr:
+        type: number
+    type: object
+  dto.GainsResponse:
+    properties:
+      gain_breakdown:
+        items:
+          $ref: '#/definitions/dto.GainResponse'
+        type: array
+    type: object
+  dto.GoalDetailResponse:
+    properties:
+      summary:
+        $ref: '#/definitions/dto.GoalSummaryResponse'
+      timeline:
+        additionalProperties: true
+        type: object
+    type: object
+  dto.GoalSummariesResponse:
+    properties:
+      goals:
+        items:
+          $ref: '#/definitions/dto.GoalSummaryResponse'
+        type: array
+    type: object
+  dto.GoalSummaryResponse:
+    properties:
+      current:
+        type: number
+      icon:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      priority:
+        type: integer
+      target:
+        type: number
+      targetDate:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.GraphResponse:
+    properties:
+      links:
+        items:
+          $ref: '#/definitions/dto.LinkResponse'
+        type: array
+      nodes:
+        items:
+          $ref: '#/definitions/dto.NodeResponse'
+        type: array
+    type: object
+  dto.HarvestBreakdownResponse:
+    properties:
+      current_price:
+        type: number
+      purchase_date:
+        type: string
+      purchase_price:
+        type: number
+      purchase_unit_price:
+        type: number
+      tax:
+        $ref: '#/definitions/dto.TaxResponse'
+      units:
+        type: number
+    type: object
+  dto.HarvestResponse:
+    properties:
+      harvestables:
+        additionalProperties:
+          $ref: '#/definitions/dto.HarvestableResponse'
+        type: object
+    type: object
+  dto.HarvestableResponse:
+    properties:
+      account:
+        type: string
+      current_unit_date:
+        type: string
+      current_unit_price:
+        type: number
+      harvest_breakdown:
+        items:
+          $ref: '#/definitions/dto.HarvestBreakdownResponse'
+        type: array
+      harvestable_units:
+        type: number
+      tax_category:
+        type: string
+      taxable_unrealized_gain:
+        type: number
+      total_units:
+        type: number
+      unrealized_gain:
+        type: number
+    type: object
+  dto.IncomeResponse:
+    properties:
+      income_timeline:
+        items:
+          $ref: '#/definitions/dto.IncomeTimelineItemResponse'
+        type: array
+      tax_timeline:
+        items:
+          $ref: '#/definitions/dto.TaxTimelineItemResponse'
+        type: array
+      yearly_cards:
+        items:
+          $ref: '#/definitions/dto.IncomeYearlyCardResponse'
+        type: array
+    type: object
+  dto.IncomeStatementItemResponse:
+    properties:
+      date:
+        type: string
+      endingBalance:
+        type: number
+      equity:
+        additionalProperties:
+          type: number
+        type: object
+      expenses:
+        additionalProperties:
+          type: number
+        type: object
+      income:
+        additionalProperties:
+          type: number
+        type: object
+      interest:
+        additionalProperties:
+          type: number
+        type: object
+      liabilities:
+        additionalProperties:
+          type: number
+        type: object
+      pnl:
+        additionalProperties:
+          type: number
+        type: object
+      startingBalance:
+        type: number
+      tax:
+        additionalProperties:
+          type: number
+        type: object
+    type: object
+  dto.IncomeStatementResponse:
+    properties:
+      yearly:
+        additionalProperties:
+          $ref: '#/definitions/dto.IncomeStatementItemResponse'
+        type: object
+    type: object
+  dto.IncomeTimelineItemResponse:
+    properties:
+      date:
+        type: string
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+    type: object
+  dto.IncomeYearlyCardResponse:
+    properties:
+      end_date:
+        type: string
+      gross_income:
+        type: number
+      net_income:
+        type: number
+      net_tax:
+        type: number
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      start_date:
+        type: string
+    type: object
+  dto.IndexResponse:
+    properties:
+      docs:
+        additionalProperties:
+          additionalProperties:
+            format: int64
+            type: integer
+          type: object
+        type: object
+      tokens:
+        additionalProperties:
+          additionalProperties:
+            format: int64
+            type: integer
+          type: object
+        type: object
+    type: object
+  dto.InvestmentResponse:
+    properties:
+      assets:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      yearly_cards:
+        items:
+          $ref: '#/definitions/dto.InvestmentYearlyCardResponse'
+        type: array
+    type: object
+  dto.InvestmentYearlyCardResponse:
+    properties:
+      end_date:
+        type: string
+      gross_other_income:
+        type: number
+      gross_salary_income:
+        type: number
+      net_expense:
+        type: number
+      net_income:
+        type: number
+      net_investment:
+        type: number
+      net_tax:
+        type: number
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      savings_rate:
+        type: number
+      start_date:
+        type: string
+    type: object
+  dto.IssueResponse:
+    properties:
+      description:
+        type: string
+      details:
+        type: string
+      level:
+        type: string
+      summary:
+        type: string
+    type: object
+  dto.LedgerErrorResponse:
+    properties:
+      file:
+        type: string
+      line:
+        type: integer
+      message:
+        type: string
+    type: object
+  dto.LedgerFileRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.LedgerFileResponse:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      operation:
+        type: string
+      versions:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.LiabilitiesBalanceResponse:
+    properties:
+      liability_breakdowns:
+        additionalProperties:
+          $ref: '#/definitions/dto.LiabilityBreakdownResponse'
+        type: object
+    type: object
+  dto.LiabilitiesInterestResponse:
+    properties:
+      interest_timeline_breakdown:
+        items:
+          $ref: '#/definitions/dto.LiabilityInterestResponse'
+        type: array
+    type: object
+  dto.LiabilitiesRepaymentResponse:
+    properties:
+      repayments:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+    type: object
+  dto.LiabilityBreakdownResponse:
+    properties:
+      apr:
+        type: number
+      balance_amount:
+        type: number
+      drawn_amount:
+        type: number
+      group:
+        type: string
+      interest_amount:
+        type: number
+      repaid_amount:
+        type: number
+    type: object
+  dto.LiabilityInterestResponse:
+    properties:
+      account:
+        type: string
+      apr:
+        type: number
+      overview_timeline:
+        items:
+          $ref: '#/definitions/dto.LiabilityOverviewResponse'
+        type: array
+    type: object
+  dto.LiabilityOverviewResponse:
+    properties:
+      date:
+        type: string
+      drawn_amount:
+        type: number
+      interest_amount:
+        type: number
+      repaid_amount:
+        type: number
+    type: object
+  dto.LinkResponse:
+    properties:
+      source:
+        type: integer
+      target:
+        type: integer
+      value:
+        type: number
+    type: object
+  dto.NetworthResponse:
+    properties:
+      networthTimeline:
+        items:
+          $ref: '#/definitions/dto.NetworthTimelineItemResponse'
+        type: array
+      xirr:
+        type: number
+    type: object
+  dto.NetworthTimelineItemResponse:
+    properties:
+      balanceAmount:
+        type: number
+      balanceUnits:
+        type: number
+      date:
+        type: string
+      gainAmount:
+        type: number
+      investmentAmount:
+        type: number
+      netInvestmentAmount:
+        type: number
+      withdrawalAmount:
+        type: number
+    type: object
+  dto.NodeResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.PeriodicPostingsSummaryResponse:
+    properties:
+      expenses:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.PostingResponse'
+          type: array
+        type: object
+      incomes:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.PostingResponse'
+          type: array
+        type: object
+      investments:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.PostingResponse'
+          type: array
+        type: object
+      taxes:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.PostingResponse'
+          type: array
+        type: object
+    type: object
+  dto.PortfolioAggregateResponse:
+    properties:
+      amount:
+        type: number
+      breakdowns:
+        items:
+          $ref: '#/definitions/dto.CommodityBreakdownResponse'
+        type: array
+      group:
+        type: string
+      id:
+        type: string
+      percentage:
+        type: number
+      sub_group:
+        type: string
+    type: object
+  dto.PortfolioAllocationGroupsResponse:
+    properties:
+      commodities:
+        items:
+          type: string
+        type: array
+      industry:
+        items:
+          $ref: '#/definitions/dto.PortfolioAggregateResponse'
+        type: array
+      name_and_security_type:
+        items:
+          $ref: '#/definitions/dto.PortfolioAggregateResponse'
+        type: array
+      rating:
+        items:
+          $ref: '#/definitions/dto.PortfolioAggregateResponse'
+        type: array
+      security_type:
+        items:
+          $ref: '#/definitions/dto.PortfolioAggregateResponse'
+        type: array
+    type: object
+  dto.PortfolioAllocationResponse:
+    properties:
+      portfolio_allocation:
+        $ref: '#/definitions/dto.PortfolioAllocationGroupsResponse'
+    type: object
+  dto.PostingResponse:
+    properties:
+      account:
+        type: string
+      amount:
+        type: number
+      balance:
+        type: number
+      commodity:
+        type: string
+      date:
+        type: string
+      file_name:
+        type: string
+      forecast:
+        type: boolean
+      id:
+        type: integer
+      market_amount:
+        type: number
+      note:
+        type: string
+      payee:
+        type: string
+      quantity:
+        type: number
+      status:
+        type: string
+      tag_period:
+        type: string
+      tag_recurring:
+        type: string
+      transaction_begin_line:
+        type: integer
+      transaction_end_line:
+        type: integer
+      transaction_id:
+        type: string
+      transaction_note:
+        type: string
+    type: object
+  dto.PredictionHistoryEntryResponse:
+    properties:
+      absoluteAmount:
+        type: number
+      amount:
+        type: number
+      categoryAccount:
+        type: string
+      commodity:
+        type: string
+      date:
+        type: string
+      direction:
+        type: string
+      payee:
+        type: string
+      sourceAccount:
+        type: string
+      transactionId:
+        type: string
+    type: object
+  dto.PriceItemResponse:
+    properties:
+      commodity_id:
+        type: string
+      commodity_name:
+        type: string
+      commodity_type:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      value:
+        type: number
+    type: object
+  dto.PriceProviderResponse:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      fields:
+        items:
+          type: string
+        type: array
+      label:
+        type: string
+    type: object
+  dto.PriceProvidersResponse:
+    properties:
+      providers:
+        items:
+          $ref: '#/definitions/dto.PriceProviderResponse'
+        type: array
+    type: object
+  dto.PricesResponse:
+    properties:
+      prices:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/dto.PriceItemResponse'
+          type: array
+        type: object
+    type: object
+  dto.PublicConfigResponse:
+    properties:
+      accounts:
+        items:
+          type: string
+        type: array
+      config: {}
+      now:
+        type: string
+      schema:
+        additionalProperties: true
+        type: object
+    type: object
+  dto.RecurringTransactionsResponse:
+    properties:
+      transaction_sequences:
+        items:
+          $ref: '#/definitions/dto.TransactionSequenceResponse'
+        type: array
+    type: object
+  dto.ScheduleALEntryResponse:
+    properties:
+      amount:
+        type: number
+      section:
+        $ref: '#/definitions/dto.ScheduleALSectionResponse'
+    type: object
+  dto.ScheduleALMapResponse:
+    properties:
+      schedule_als:
+        additionalProperties:
+          $ref: '#/definitions/dto.ScheduleALResponse'
+        type: object
+    type: object
+  dto.ScheduleALResponse:
+    properties:
+      date:
+        type: string
+      entries:
+        items:
+          $ref: '#/definitions/dto.ScheduleALEntryResponse'
+        type: array
+    type: object
+  dto.ScheduleALSectionResponse:
+    properties:
+      code:
+        type: string
+      details:
+        type: string
+      section:
+        type: string
+    type: object
+  dto.SheetFileRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.SheetFileResponse:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+      operation:
+        type: string
+      versions:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.SheetSaveResponse:
+    properties:
+      message:
+        type: string
+      saved:
+        type: boolean
+    type: object
+  dto.SheetsResponse:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/dto.SheetFileResponse'
+        type: array
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+    type: object
+  dto.SuccessResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  dto.TaxPostingPairResponse:
+    properties:
+      purchase:
+        $ref: '#/definitions/dto.PostingResponse'
+      sell:
+        $ref: '#/definitions/dto.PostingResponse'
+      tax:
+        $ref: '#/definitions/dto.TaxResponse'
+    type: object
+  dto.TaxResponse:
+    properties:
+      gain:
+        type: number
+      long_term:
+        type: number
+      short_term:
+        type: number
+      slab:
+        type: number
+      taxable:
+        type: number
+    type: object
+  dto.TaxTimelineItemResponse:
+    properties:
+      end_date:
+        type: string
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      start_date:
+        type: string
+    type: object
+  dto.TemplateDeleteRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.TemplateResponse:
+    properties:
+      content:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      template_type:
+        type: string
+    type: object
+  dto.TemplateSaveResponse:
+    properties:
+      message:
+        type: string
+      saved:
+        type: boolean
+      template:
+        $ref: '#/definitions/dto.TemplateResponse'
+    type: object
+  dto.TemplateUpsertRequest:
+    properties:
+      content:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.TemplatesResponse:
+    properties:
+      templates:
+        items:
+          $ref: '#/definitions/dto.TemplateResponse'
+        type: array
+    type: object
+  dto.TfIdfResponse:
+    properties:
+      index:
+        $ref: '#/definitions/dto.IndexResponse'
+      tf_idf:
+        additionalProperties:
+          additionalProperties:
+            format: float64
+            type: number
+          type: object
+        type: object
+    type: object
+  dto.TransactionResponse:
+    properties:
+      beginLine:
+        type: integer
+      date:
+        type: string
+      endLine:
+        type: integer
+      fileName:
+        type: string
+      id:
+        type: string
+      note:
+        type: string
+      payee:
+        type: string
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+      tag_period:
+        type: string
+      tag_recurring:
+        type: string
+    type: object
+  dto.TransactionSequenceResponse:
+    properties:
+      interval:
+        type: integer
+      key:
+        type: string
+      period:
+        type: string
+      transactions:
+        items:
+          $ref: '#/definitions/dto.TransactionResponse'
+        type: array
+    type: object
+  dto.TransactionsResponse:
+    properties:
+      transactions:
+        items:
+          $ref: '#/definitions/dto.TransactionResponse'
+        type: array
+    type: object
+  server.AutoCompleteRequest:
+    properties:
+      field:
+        type: string
+      filters:
+        additionalProperties:
+          type: string
+        type: object
+      provider:
+        type: string
+    type: object
+  server.SyncRequest:
+    properties:
+      journal:
+        type: boolean
+      portfolios:
+        type: boolean
+      prices:
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: Paisa is a local-first personal finance application. This API powers
+    the Paisa frontend and exposes financial analysis, journal editing, configuration,
+    price data, goals, transactions, and related application operations.
+  title: Paisa API
+  version: 0.1.0
+paths:
+  /account/tf_idf:
+    get:
+      description: Returns TF-IDF prediction model data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TfIdfResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get TF-IDF machine learning model for payee-account prediction
+      tags:
+      - Predictions
+  /allocation:
+    get:
+      description: Returns asset allocation targets and current asset distribution
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AllocationResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get asset class allocations
+      tags:
+      - Allocation
+  /assets/balance:
+    get:
+      description: Returns balance breakdown for asset accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AssetsBalanceResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get current asset balances and breakdowns
+      tags:
+      - Assets
+  /budget:
+    get:
+      description: Returns monthly budget allocations, spending actuals, variances,
+        and rollover balances
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.BudgetsSummaryResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get budget forecasts and actuals
+      tags:
+      - Budget
+  /capital_gains:
+    get:
+      description: Computes FIFO realized capital gains grouped by financial year
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CapitalGainsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get FIFO realized capital gains
+      tags:
+      - Tax
+  /cash_flow:
+    get:
+      description: Returns monthly cash flow breakdown including inflows, outflows,
+        and net changes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CashFlowsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get monthly cash flow statement
+      tags:
+      - Cash Flow
+  /config:
+    get:
+      description: Returns public configuration, account list, current time override,
+        and JSON validation schema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PublicConfigResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get application configuration and metadata
+      tags:
+      - Configuration
+    post:
+      consumes:
+      - application/json
+      - text/plain
+      description: Overwrites the paisa.yaml configuration file. No-op in readonly
+        mode.
+      parameters:
+      - description: Configuration YAML text
+        in: body
+        name: config
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Save configuration YAML
+      tags:
+      - Configuration
+  /credit_cards:
+    get:
+      description: Returns credit card balances, due dates, and statements
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CreditCardsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get all credit cards summaries and billing cycles
+      tags:
+      - Credit Cards
+  /credit_cards/{account}:
+    get:
+      description: Returns credit card details for a single account
+      parameters:
+      - description: Credit card account name (e.g. Liabilities:CreditCard:AmazonPay)
+        in: path
+        name: account
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CreditCardSummaryResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get credit card summary for a specific account
+      tags:
+      - Credit Cards
+  /dashboard:
+    get:
+      description: Returns consolidated KPI summaries across net worth, expenses,
+        budgets, and investments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DashboardResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get dashboard financial summary
+      tags:
+      - Dashboard
+  /diagnosis:
+    get:
+      description: Runs system diagnostics and returns detected issues
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DiagnosisResponse'
+      security:
+      - PaisaAuth: []
+      summary: Run system diagnostic health checks
+      tags:
+      - Diagnosis
+  /editor/file:
+    post:
+      consumes:
+      - application/json
+      description: Returns contents and version history of a ledger file
+      parameters:
+      - description: Ledger file query
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LedgerFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LedgerFileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Read a specific ledger file and its backup versions
+      tags:
+      - Editor
+  /editor/file/delete_backups:
+    post:
+      consumes:
+      - application/json
+      description: Deletes all timestamped backup files for a ledger file
+      parameters:
+      - description: Ledger file
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LedgerFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LedgerFileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Delete backup versions for a ledger file
+      tags:
+      - Editor
+  /editor/files:
+    get:
+      description: Returns all ledger files and their current postings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EditorFilesResponse'
+      security:
+      - PaisaAuth: []
+      summary: List all ledger files in journal directory
+      tags:
+      - Editor
+  /editor/save:
+    post:
+      consumes:
+      - application/json
+      description: Atomically writes ledger file with automatic timestamped backup.
+        No-op in readonly mode.
+      parameters:
+      - description: Ledger file content
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LedgerFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EditorSaveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Save ledger file and trigger database synchronization
+      tags:
+      - Editor
+  /editor/validate:
+    post:
+      consumes:
+      - application/json
+      description: Parses and validates ledger file syntax without saving
+      parameters:
+      - description: Ledger file to validate
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LedgerFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EditorValidateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Validate ledger file syntax
+      tags:
+      - Editor
+  /expense:
+    get:
+      description: Computes hierarchical flow graph and periodic expense summaries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ExpenseResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get expense hierarchy graph and breakdown
+      tags:
+      - Expenses
+  /gain:
+    get:
+      description: Computes realized, unrealized gains and annualized XIRR returns
+        across accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GainsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get investment gains and XIRR performance
+      tags:
+      - Gains
+  /gain/{account}:
+    get:
+      description: Computes realized and unrealized gain for a single investment account
+      parameters:
+      - description: Account name (e.g. Assets:Equity:Nifty)
+        in: path
+        name: account
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AccountGainResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get investment gain for a specific account
+      tags:
+      - Gains
+  /goals:
+    get:
+      description: Returns summary and progress percentage for all configured goals
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GoalSummariesResponse'
+      security:
+      - PaisaAuth: []
+      summary: List savings and retirement goals summaries
+      tags:
+      - Goals
+  /goals/{type}/{name}:
+    get:
+      description: Returns progress, projections, and monthly timeline for a single
+        goal
+      parameters:
+      - description: Goal type (savings or retirement)
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: Goal name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GoalDetailResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get details for a specific goal
+      tags:
+      - Goals
+  /harvest:
+    get:
+      description: Returns tax harvesting opportunities and current gains
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HarvestResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get tax harvesting opportunities
+      tags:
+      - Tax
+  /income:
+    get:
+      description: Returns gross income, taxes, net income, and periodic income timelines
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.IncomeResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get income timeline and yearly summary
+      tags:
+      - Income
+  /income_statement:
+    get:
+      description: Returns yearly income statements with income, expenses, interest,
+        and taxes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.IncomeStatementResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get financial-year income statements
+      tags:
+      - Income Statement
+  /init:
+    post:
+      description: Generates demo ledger data and configuration. No-op in readonly
+        mode.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Initialize demo data
+      tags:
+      - Initialization
+  /investment:
+    get:
+      description: Returns yearly investment cards and savings rate metrics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.InvestmentResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get investment summary and savings rate
+      tags:
+      - Investments
+  /ledger:
+    get:
+      description: Returns flat array of all journal postings with computed balances
+        and market values
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PostingResponse'
+            type: array
+      security:
+      - PaisaAuth: []
+      summary: Get all ledger postings with market valuation
+      tags:
+      - Ledger
+  /liabilities/balance:
+    get:
+      description: Computes outstanding loan balances
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LiabilitiesBalanceResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get loan balances and breakdowns
+      tags:
+      - Liabilities
+  /liabilities/interest:
+    get:
+      description: Computes interest payments and effective APR across loans
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LiabilitiesInterestResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get loan interest and APR calculations
+      tags:
+      - Liabilities
+  /liabilities/repayment:
+    get:
+      description: Returns loan repayment postings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LiabilitiesRepaymentResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get loan repayment history
+      tags:
+      - Liabilities
+  /logs:
+    get:
+      description: Returns recent application log lines
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - PaisaAuth: []
+      summary: Get application log entries
+      tags:
+      - Logs
+  /networth:
+    get:
+      description: Returns the current net-worth analysis and historical timeline
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.NetworthResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get net worth
+      tags:
+      - Net Worth
+  /ping:
+    get:
+      description: Returns success indicator when service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+      summary: Health check / ping
+      tags:
+      - System
+  /portfolio_allocation:
+    get:
+      description: Returns asset allocations grouped by portfolio
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PortfolioAllocationResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get portfolio-grouped allocations
+      tags:
+      - Allocation
+  /prediction/history:
+    get:
+      description: Returns prediction history records
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PredictionHistoryEntryResponse'
+            type: array
+      security:
+      - PaisaAuth: []
+      summary: Get prediction history
+      tags:
+      - Predictions
+  /price:
+    get:
+      description: Returns price histories grouped by commodity
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PricesResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get all cached commodity prices
+      tags:
+      - Prices
+  /price/autocomplete:
+    post:
+      consumes:
+      - application/json
+      description: Searches ticker symbols from configured scrapers
+      parameters:
+      - description: Autocomplete query
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.AutoCompleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AutoCompleteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Autocomplete commodity or ticker symbols
+      tags:
+      - Prices
+  /price/delete:
+    post:
+      description: Clears in-memory and database cached commodity prices. No-op in
+        readonly mode.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+      security:
+      - PaisaAuth: []
+      summary: Clear cached market prices
+      tags:
+      - Prices
+  /price/providers:
+    get:
+      description: Returns registered price scraping providers and their sync status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PriceProvidersResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get configured price providers
+      tags:
+      - Prices
+  /price/providers/delete/{provider}:
+    post:
+      description: Clears cached commodity prices for a specific provider. No-op in
+        readonly mode.
+      parameters:
+      - description: Provider code (e.g. yahoo)
+        in: path
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+      security:
+      - PaisaAuth: []
+      summary: Clear price cache for a specific provider
+      tags:
+      - Prices
+  /recurring:
+    get:
+      description: Returns recurring monthly or periodic transaction sequences
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RecurringTransactionsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get recurring transaction sequences
+      tags:
+      - Recurring
+  /schedule_al:
+    get:
+      description: Computes Schedule AL assets and liabilities report
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ScheduleALMapResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get Schedule AL assets and liabilities report
+      tags:
+      - Tax
+  /sheets/file:
+    post:
+      consumes:
+      - application/json
+      description: Returns contents and version history of a sheet file
+      parameters:
+      - description: Sheet file query
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SheetFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SheetFileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Read a specific .paisa sheet file
+      tags:
+      - Sheets
+  /sheets/file/delete_backups:
+    post:
+      consumes:
+      - application/json
+      description: Deletes all timestamped backup files for a sheet file
+      parameters:
+      - description: Sheet file
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SheetFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SheetFileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Delete backup versions for a sheet file
+      tags:
+      - Sheets
+  /sheets/files:
+    get:
+      description: Returns list of .paisa sheet files
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SheetsResponse'
+      security:
+      - PaisaAuth: []
+      summary: List all .paisa sheet query files
+      tags:
+      - Sheets
+  /sheets/save:
+    post:
+      consumes:
+      - application/json
+      description: Atomically writes .paisa sheet file with timestamped backup. No-op
+        in readonly mode.
+      parameters:
+      - description: Sheet file content
+        in: body
+        name: file
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SheetFileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SheetSaveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Save a .paisa sheet file
+      tags:
+      - Sheets
+  /sync:
+    post:
+      consumes:
+      - application/json
+      description: Parses journal files, scrapes external commodity prices, and synchronizes
+        portfolio data into SQLite
+      parameters:
+      - description: Sync options
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/server.SyncRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Synchronize journal, prices, and portfolios into SQLite
+      tags:
+      - Sync
+  /templates:
+    get:
+      description: Returns builtin and custom transaction templates
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TemplatesResponse'
+      security:
+      - PaisaAuth: []
+      summary: List all transaction templates
+      tags:
+      - Templates
+  /templates/delete:
+    post:
+      consumes:
+      - application/json
+      description: Deletes a custom transaction template from paisa.yaml. No-op in
+        readonly mode.
+      parameters:
+      - description: Template name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TemplateDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+      security:
+      - PaisaAuth: []
+      summary: Delete a transaction template
+      tags:
+      - Templates
+  /templates/upsert:
+    post:
+      consumes:
+      - application/json
+      description: Saves a custom transaction template in paisa.yaml. No-op in readonly
+        mode.
+      parameters:
+      - description: Template data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TemplateUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TemplateSaveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.TemplateSaveResponse'
+      security:
+      - PaisaAuth: []
+      summary: Create or update a transaction template
+      tags:
+      - Templates
+  /transaction:
+    get:
+      description: Returns transactions with embedded postings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TransactionsResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get all journal transactions
+      tags:
+      - Transactions
+  /transaction/balanced:
+    get:
+      description: Returns balanced from/to posting pairs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.BalancedPostingResponse'
+            type: array
+      security:
+      - PaisaAuth: []
+      summary: Get balanced posting pairs
+      tags:
+      - Transactions
+securityDefinitions:
+  PaisaAuth:
+    description: Credentials formatted as 'username:password'. Required for all /api
+      endpoints when user accounts are configured in paisa.yaml.
+    in: header
+    name: X-Auth
+    type: apiKey
+swagger: "2.0"

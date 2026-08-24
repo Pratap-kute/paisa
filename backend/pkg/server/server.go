@@ -5,7 +5,6 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,20 +12,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ananthakumaran/paisa/pkg/accounting"
-	"github.com/ananthakumaran/paisa/pkg/api/dto"
-	"github.com/ananthakumaran/paisa/pkg/api/mapper"
+	_ "github.com/ananthakumaran/paisa/docs"
 	"github.com/ananthakumaran/paisa/pkg/auth"
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/ananthakumaran/paisa/pkg/generator"
-	"github.com/ananthakumaran/paisa/pkg/ledger"
-	"github.com/ananthakumaran/paisa/pkg/model/template"
-	"github.com/ananthakumaran/paisa/pkg/prediction"
-	"github.com/ananthakumaran/paisa/pkg/server/assets"
-	"github.com/ananthakumaran/paisa/pkg/server/goal"
-	"github.com/ananthakumaran/paisa/pkg/server/liabilities"
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/ananthakumaran/paisa/web"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
@@ -96,9 +88,9 @@ func registerStaticAndMetaRoutes(router *gin.Engine) {
 		c.FileFromFS("/static"+c.Request.URL.Path, http.FS(web.Static))
 	})
 
-	router.GET("/api/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"success": true})
-	})
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	router.GET("/api/ping", PingHandler)
 
 	router.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api/") || c.Request.URL.Path == "/api" {
@@ -113,420 +105,80 @@ func registerStaticAndMetaRoutes(router *gin.Engine) {
 }
 
 func registerConfigAndInitRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/api/config", func(c *gin.Context) {
-		var now *time.Time
-		if utils.IsNowDefined() {
-			n := utils.Now()
-			now = &n
-		}
-		c.JSON(200, gin.H{"config": config.GetPublicConfig(), "accounts": accounting.AllAccounts(db), "now": now, "schema": config.GetSchema()})
-	})
-
-	router.POST("/api/config", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": true})
-			return
-		}
-
-		body, err := io.ReadAll(c.Request.Body)
-		if err != nil {
-			var maxBytesErr *http.MaxBytesError
-			if errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "request body too large") {
-				c.JSON(http.StatusRequestEntityTooLarge, gin.H{"success": false, "error": "Request body exceeds maximum allowed size"})
-				return
-			}
-			c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
-			return
-		}
-
-		err = config.SaveConfig(body)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": err.Error()})
-			return
-		}
-
-		c.JSON(200, gin.H{"success": true})
-	})
-
-	router.POST("/api/init", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": true})
-			return
-		}
-
-		if err := generator.Demo(config.GetConfigDir()); err != nil {
-			log.Errorf("Failed to generate demo data: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
-			return
-		}
-		config.LoadConfigFile(config.GetConfigPath())
-		Sync(db, SyncRequest{Journal: true, Prices: true, Portfolios: true})
-		c.JSON(200, gin.H{"success": true})
-	})
+	router.GET("/api/config", GetConfigHandler(db))
+	router.POST("/api/config", MaxBodySize(DefaultJSONLimit), SaveConfigHandler)
+	router.POST("/api/init", MaxBodySize(DefaultJSONLimit), InitDemoDataHandler(db))
 }
 
 func registerSyncAndPriceRoutes(router *gin.Engine, db *gorm.DB) {
-	router.POST("/api/sync", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": true})
-			return
-		}
-
-		var syncRequest SyncRequest
-		if err := c.ShouldBindJSON(&syncRequest); err != nil {
-			var maxBytesErr *http.MaxBytesError
-			if errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "request body too large") {
-				c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "Request body exceeds maximum allowed size"})
-				return
-			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(200, Sync(db, syncRequest))
-	})
-
-	router.POST("/api/price/delete", func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": true})
-			return
-		}
-
-		c.JSON(200, ClearPriceCache(db))
-	})
-
-	router.GET("/api/price", func(c *gin.Context) {
-		c.JSON(200, GetPrices(db))
-	})
-
-	router.GET("/api/price/providers", func(c *gin.Context) {
-		c.JSON(200, GetPriceProviders(db))
-	})
-
-	router.POST("/api/price/providers/delete/:provider", func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"success": true})
-			return
-		}
-
-		provider := c.Param("provider")
-		c.JSON(200, ClearPriceProviderCache(db, provider))
-	})
-
-	router.POST("/api/price/autocomplete", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		var autoCompleteRequest AutoCompleteRequest
-		if err := c.ShouldBindJSON(&autoCompleteRequest); err != nil {
-			var maxBytesErr *http.MaxBytesError
-			if errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "request body too large") {
-				c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "Request body exceeds maximum allowed size"})
-				return
-			}
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(200, GetPriceAutoCompletions(db, autoCompleteRequest))
-	})
+	router.POST("/api/sync", MaxBodySize(DefaultJSONLimit), SyncDataHandler(db))
+	router.POST("/api/price/delete", ClearPriceCacheHandler(db))
+	router.GET("/api/price", GetPricesHandler(db))
+	router.GET("/api/price/providers", GetPriceProvidersHandler(db))
+	router.POST("/api/price/providers/delete/:provider", ClearPriceProviderCacheHandler(db))
+	router.POST("/api/price/autocomplete", MaxBodySize(DefaultJSONLimit), GetPriceAutoCompletionsHandler(db))
 }
 
 func registerFinancialRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/api/dashboard", func(c *gin.Context) {
-		c.JSON(200, GetDashboard(db))
-	})
-
-	router.GET("/api/networth", func(c *gin.Context) {
-		c.JSON(200, GetNetworth(db))
-	})
-
-	router.GET("/api/assets/balance", func(c *gin.Context) {
-		c.JSON(200, assets.GetBalance(db))
-	})
-
-	router.GET("/api/investment", func(c *gin.Context) {
-		c.JSON(200, GetInvestment(db))
-	})
-
-	router.GET("/api/gain", func(c *gin.Context) {
-		c.JSON(200, GetGain(db))
-	})
-
-	router.GET("/api/gain/:account", func(c *gin.Context) {
-		account := c.Param("account")
-		c.JSON(200, GetAccountGain(db, account))
-	})
-
-	router.GET("/api/income", func(c *gin.Context) {
-		c.JSON(200, GetIncome(db))
-	})
-
-	router.GET("/api/expense", func(c *gin.Context) {
-		c.JSON(200, GetExpense(db))
-	})
-
-	router.GET("/api/budget", func(c *gin.Context) {
-		c.JSON(200, GetBudget(db))
-	})
-
-	router.GET("/api/cash_flow", func(c *gin.Context) {
-		c.JSON(200, GetCashFlow(db))
-	})
-
-	router.GET("/api/income_statement", func(c *gin.Context) {
-		c.JSON(200, GetIncomeStatement(db))
-	})
-
-	router.GET("/api/recurring", func(c *gin.Context) {
-		c.JSON(200, GetRecurringTransactions(db))
-	})
-
-	router.GET("/api/allocation", func(c *gin.Context) {
-		c.JSON(200, GetAllocation(db))
-	})
-
-	router.GET("/api/portfolio_allocation", func(c *gin.Context) {
-		c.JSON(200, GetPortfolioAllocation(db))
-	})
-
-	router.GET("/api/ledger", func(c *gin.Context) {
-		c.JSON(200, GetLedger(db))
-	})
-
-	router.GET("/api/transaction/balanced", func(c *gin.Context) {
-		c.JSON(200, GetBalancedPostings(db))
-	})
-
-	router.GET("/api/transaction", func(c *gin.Context) {
-		c.JSON(200, GetTransactions(db))
-	})
-
-	router.GET("/api/harvest", func(c *gin.Context) {
-		c.JSON(200, GetHarvest(db))
-	})
-
-	router.GET("/api/capital_gains", func(c *gin.Context) {
-		c.JSON(200, GetCapitalGains(db))
-	})
-
-	router.GET("/api/schedule_al", func(c *gin.Context) {
-		c.JSON(200, GetScheduleAL(db))
-	})
-
-	router.GET("/api/diagnosis", func(c *gin.Context) {
-		c.JSON(200, GetDiagnosis(db))
-	})
-
-	router.GET("/api/liabilities/interest", func(c *gin.Context) {
-		c.JSON(200, liabilities.GetInterest(db))
-	})
-
-	router.GET("/api/liabilities/balance", func(c *gin.Context) {
-		c.JSON(200, liabilities.GetBalance(db))
-	})
-
-	router.GET("/api/liabilities/repayment", func(c *gin.Context) {
-		c.JSON(200, liabilities.GetRepayment(db))
-	})
-
-	router.GET("/api/logs", func(c *gin.Context) {
-		c.JSON(200, GetLogs())
-	})
-
-	router.GET("/api/account/tf_idf", func(c *gin.Context) {
-		c.JSON(200, prediction.GetTfIdf(db))
-	})
-
-	router.GET("/api/prediction/history", func(c *gin.Context) {
-		c.JSON(200, prediction.GetHistory(db))
-	})
-
-	router.GET("/api/credit_cards", func(c *gin.Context) {
-		c.JSON(200, GetCreditCards(db))
-	})
-
-	router.GET("/api/credit_cards/:account", func(c *gin.Context) {
-		c.JSON(200, GetCreditCard(db, c.Param("account")))
-	})
+	router.GET("/api/dashboard", GetDashboardHandler(db))
+	router.GET("/api/networth", GetNetworthHandler(db))
+	router.GET("/api/assets/balance", GetAssetsBalanceHandler(db))
+	router.GET("/api/investment", GetInvestmentHandler(db))
+	router.GET("/api/gain", GetGainHandler(db))
+	router.GET("/api/gain/:account", GetAccountGainHandler(db))
+	router.GET("/api/income", GetIncomeHandler(db))
+	router.GET("/api/expense", GetExpenseHandler(db))
+	router.GET("/api/budget", GetBudgetHandler(db))
+	router.GET("/api/cash_flow", GetCashFlowHandler(db))
+	router.GET("/api/income_statement", GetIncomeStatementHandler(db))
+	router.GET("/api/recurring", GetRecurringTransactionsHandler(db))
+	router.GET("/api/allocation", GetAllocationHandler(db))
+	router.GET("/api/portfolio_allocation", GetPortfolioAllocationHandler(db))
+	router.GET("/api/ledger", GetLedgerHandler(db))
+	router.GET("/api/transaction/balanced", GetBalancedPostingsHandler(db))
+	router.GET("/api/transaction", GetTransactionsHandler(db))
+	router.GET("/api/harvest", GetHarvestHandler(db))
+	router.GET("/api/capital_gains", GetCapitalGainsHandler(db))
+	router.GET("/api/schedule_al", GetScheduleALHandler(db))
+	router.GET("/api/diagnosis", GetDiagnosisHandler(db))
+	router.GET("/api/liabilities/interest", GetLiabilitiesInterestHandler(db))
+	router.GET("/api/liabilities/balance", GetLiabilitiesBalanceHandler(db))
+	router.GET("/api/liabilities/repayment", GetLiabilitiesRepaymentHandler(db))
+	router.GET("/api/logs", GetLogsHandler)
+	router.GET("/api/account/tf_idf", GetTfIdfHandler(db))
+	router.GET("/api/prediction/history", GetPredictionHistoryHandler(db))
+	router.GET("/api/credit_cards", GetCreditCardsHandler(db))
+	router.GET("/api/credit_cards/:account", GetCreditCardHandler(db))
 }
 
 func registerEditorAndSheetRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/api/editor/files", func(c *gin.Context) {
-		c.JSON(200, GetFiles(db))
-	})
+	router.GET("/api/editor/files", GetEditorFilesHandler(db))
+	router.POST("/api/editor/file", MaxBodySize(DefaultEditorLimit), GetEditorFileHandler)
+	router.POST("/api/editor/file/delete_backups", MaxBodySize(DefaultEditorLimit), DeleteEditorBackupsHandler)
+	router.POST("/api/editor/validate", MaxBodySize(DefaultEditorLimit), ValidateEditorFileHandler)
+	router.POST("/api/editor/save", MaxBodySize(DefaultEditorLimit), SaveEditorFileHandler(db))
 
-	router.POST("/api/editor/file", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		var ledgerFile LedgerFile
-		if err := c.ShouldBindJSON(&ledgerFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		res, err := GetFile(ledgerFile)
-		if err != nil {
-			status, body := mapFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, res)
-	})
-
-	router.POST("/api/editor/file/delete_backups", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		var ledgerFile LedgerFile
-		if err := c.ShouldBindJSON(&ledgerFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		res, err := DeleteBackups(ledgerFile)
-		if err != nil {
-			status, body := mapFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, res)
-	})
-
-	router.POST("/api/editor/validate", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		var ledgerFile LedgerFile
-		if err := c.ShouldBindJSON(&ledgerFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, ValidateFile(ledgerFile))
-	})
-
-	router.POST("/api/editor/save", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"errors": []ledger.LedgerFileError{}, "saved": false, "message": "Readonly mode"})
-			return
-		}
-
-		var ledgerFile LedgerFile
-		if err := c.ShouldBindJSON(&ledgerFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, SaveFile(db, ledgerFile))
-	})
-
-	router.GET("/api/sheets/files", func(c *gin.Context) {
-		c.JSON(200, GetSheets(db))
-	})
-
-	router.POST("/api/sheets/file", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		var sheetFile SheetFile
-		if err := c.ShouldBindJSON(&sheetFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		res, err := GetSheet(sheetFile)
-		if err != nil {
-			status, body := mapFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, res)
-	})
-
-	router.POST("/api/sheets/file/delete_backups", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		var sheetFile SheetFile
-		if err := c.ShouldBindJSON(&sheetFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		res, err := DeleteSheetBackups(sheetFile)
-		if err != nil {
-			status, body := mapFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, res)
-	})
-
-	router.POST("/api/sheets/save", MaxBodySize(DefaultEditorLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, gin.H{"saved": false, "message": "Readonly mode"})
-			return
-		}
-
-		var sheetFile SheetFile
-		if err := c.ShouldBindJSON(&sheetFile); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		c.JSON(200, SaveSheetFile(db, sheetFile))
-	})
+	router.GET("/api/sheets/files", GetSheetFilesHandler(db))
+	router.POST("/api/sheets/file", MaxBodySize(DefaultEditorLimit), GetSheetFileHandler)
+	router.POST("/api/sheets/file/delete_backups", MaxBodySize(DefaultEditorLimit), DeleteSheetBackupsHandler)
+	router.POST("/api/sheets/save", MaxBodySize(DefaultEditorLimit), SaveSheetFileHandler(db))
 }
 
 func registerTemplateAndGoalRoutes(router *gin.Engine, db *gorm.DB) {
-	router.GET("/api/templates", func(c *gin.Context) {
-		c.JSON(200, dto.TemplatesResponse{Templates: mapper.TemplatesToDTO(template.All())})
-	})
+	router.GET("/api/templates", GetTemplatesHandler)
+	router.POST("/api/templates/upsert", MaxBodySize(DefaultJSONLimit), UpsertTemplateHandler)
+	router.POST("/api/templates/delete", MaxBodySize(DefaultJSONLimit), DeleteTemplateHandler)
+	router.GET("/api/goals", GetGoalsHandler(db))
+	router.GET("/api/goals/:type/:name", GetGoalDetailsHandler(db))
+}
 
-	router.POST("/api/templates/upsert", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, dto.TemplateSaveResponse{Saved: false, Message: "Readonly mode"})
-			return
-		}
-
-		var req dto.TemplateUpsertRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		tpl, err := template.Upsert(req.Name, req.Content)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, dto.TemplateSaveResponse{Saved: false, Message: err.Error()})
-			return
-		}
-
-		c.JSON(200, dto.TemplateSaveResponse{Template: mapper.TemplateToDTO(tpl), Saved: true})
-	})
-
-	router.POST("/api/templates/delete", MaxBodySize(DefaultJSONLimit), func(c *gin.Context) {
-		if config.GetConfig().Readonly {
-			c.JSON(200, dto.SuccessResponse{Success: false, Message: "Readonly mode"})
-			return
-		}
-
-		var req dto.TemplateDeleteRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			status, body := mapBindingOrFileError(err)
-			c.JSON(status, body)
-			return
-		}
-
-		if err := template.Delete(req.Name); err != nil {
-			c.JSON(http.StatusInternalServerError, dto.SuccessResponse{Success: false, Message: err.Error()})
-			return
-		}
-		c.JSON(200, dto.SuccessResponse{Success: true})
-	})
-
-	router.GET("/api/goals", func(c *gin.Context) {
-		c.JSON(200, gin.H{"goals": goal.GetGoalSummaries(db)})
-	})
-
-	router.GET("/api/goals/:type/:name", func(c *gin.Context) {
-		c.JSON(200, goal.GetGoalDetails(db, c.Param("type"), c.Param("name")))
-	})
+func Listen(db *gorm.DB, host string, port int) {
+	router := Build(db, true)
+	addr := fmt.Sprintf("%s:%d", host, port)
+	srv := NewServer(router, addr)
+	if err := Serve(srv); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func NewServer(handler http.Handler, addr string) *http.Server {
@@ -540,43 +192,42 @@ func NewServer(handler http.Handler, addr string) *http.Server {
 	}
 }
 
-func Listen(db *gorm.DB, host string, port int) {
-	router := Build(db, true)
+func Serve(server *http.Server) error {
+	serverErrors := make(chan error, 1)
 
-	if host == "" {
-		host = "127.0.0.1"
-	}
-	addr := fmt.Sprintf("%s:%d", host, port)
-	log.Infof("Listening on http://%s", addr)
-
-	srv := NewServer(router, addr)
-
-	idleConnsClosed := make(chan struct{})
 	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
-		<-sigint
-
-		log.Info("Server is shutting down gracefully...")
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), DefaultShutdownTimeout)
-		defer cancel()
-
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			log.Errorf("HTTP server graceful shutdown error: %v", err)
+		log.Infof("Starting server on %s", server.Addr)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErrors <- err
 		}
-		close(idleConnsClosed)
 	}()
 
-	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal(err)
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+	select {
+	case err := <-serverErrors:
+		return fmt.Errorf("server error: %w", err)
+
+	case sig := <-shutdown:
+		log.Infof("Shutdown signal received: %v, starting graceful shutdown", sig)
+
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultShutdownTimeout)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			log.Errorf("Graceful shutdown failed, forcing close: %v", err)
+			_ = server.Close()
+			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
+		log.Info("Server stopped cleanly")
 	}
 
-	<-idleConnsClosed
-	log.Info("Server stopped")
+	return nil
 }
 
 func TokenAuthMiddleware() gin.HandlerFunc {
-	store, err := memstore.NewCtx(1000)
+	store, err := memstore.NewCtx(65536)
 	if err != nil {
 		log.Errorf("Failed to initialize auth rate limiter store: %v", err)
 	}
@@ -647,7 +298,13 @@ func mapBindingOrFileError(err error) (int, gin.H) {
 	if errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "request body too large") {
 		return http.StatusRequestEntityTooLarge, gin.H{"error": "Request body exceeds maximum allowed size"}
 	}
-	return mapFileError(err)
+	if errors.Is(err, utils.ErrInvalidPath) {
+		return http.StatusBadRequest, gin.H{"error": "Invalid file path"}
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return http.StatusNotFound, gin.H{"error": "File not found"}
+	}
+	return http.StatusBadRequest, gin.H{"error": err.Error()}
 }
 
 func mapFileError(err error) (int, gin.H) {
