@@ -1,46 +1,48 @@
-import { loading } from "../../store";
-import { error } from "@sveltejs/kit";
-import { goto } from "$app/navigation";
+import { Api, HttpClient } from "./generated/Api";
 
-export interface RequestOptions extends RequestInit {
-  background?: boolean;
+export const tokenKey = "token";
+
+export function getAuthToken(): string | null {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(tokenKey);
 }
 
-export async function apiClient<T = unknown>(
-  url: string,
-  options?: RequestOptions,
-): Promise<T> {
-  const isBackground = options?.background ?? false;
-  if (!isBackground) {
-    loading.set(true);
+export function setAuthToken(token: string): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(tokenKey, token);
   }
+}
 
-  try {
-    const res = await fetch(url, options);
+export function clearAuthToken(): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem(tokenKey);
+  }
+}
 
-    if (res.status === 401) {
-      goto("/login");
-      return {} as T;
-    }
+export interface ClientOptions {
+  baseUrl?: string;
+  customFetch?: typeof fetch;
+}
 
-    if (res.status >= 400) {
-      let bodyText: string;
-      try {
-        bodyText = await res.text();
-      } catch {
-        bodyText = res.statusText;
+export function createApiClient(options: ClientOptions = {}): Api<unknown> {
+  const httpClient = new HttpClient({
+    baseUrl: options.baseUrl ?? "/api",
+    customFetch: options.customFetch ??
+      (typeof fetch !== "undefined" ? fetch : undefined),
+    securityWorker: () => {
+      const token = getAuthToken();
+      if (token && token.trim() !== "") {
+        return {
+          headers: {
+            "X-Auth": token,
+          },
+        };
       }
-      throw error(res.status, bodyText);
-    }
+      return {};
+    },
+  });
 
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return (await res.json()) as T;
-    }
-    return (await res.text()) as unknown as T;
-  } finally {
-    if (!isBackground) {
-      loading.set(false);
-    }
-  }
+  return new Api(httpClient);
 }
+
+export const api = createApiClient();

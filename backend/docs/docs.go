@@ -30,6 +30,7 @@ const docTemplate = `{
                     "Predictions"
                 ],
                 "summary": "Get TF-IDF machine learning model for payee-account prediction",
+                "operationId": "getTfIdf",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -55,6 +56,7 @@ const docTemplate = `{
                     "Allocation"
                 ],
                 "summary": "Get asset class allocations",
+                "operationId": "getAllocation",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -80,6 +82,7 @@ const docTemplate = `{
                     "Assets"
                 ],
                 "summary": "Get current asset balances and breakdowns",
+                "operationId": "getAssetsBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -105,6 +108,7 @@ const docTemplate = `{
                     "Budget"
                 ],
                 "summary": "Get budget forecasts and actuals",
+                "operationId": "getBudget",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -130,6 +134,7 @@ const docTemplate = `{
                     "Tax"
                 ],
                 "summary": "Get FIFO realized capital gains",
+                "operationId": "getCapitalGains",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -155,6 +160,7 @@ const docTemplate = `{
                     "Cash Flow"
                 ],
                 "summary": "Get monthly cash flow statement",
+                "operationId": "getCashFlow",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -180,6 +186,7 @@ const docTemplate = `{
                     "Configuration"
                 ],
                 "summary": "Get application configuration and metadata",
+                "operationId": "getConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -207,6 +214,7 @@ const docTemplate = `{
                     "Configuration"
                 ],
                 "summary": "Save configuration YAML",
+                "operationId": "saveConfig",
                 "parameters": [
                     {
                         "description": "Configuration YAML text",
@@ -255,6 +263,7 @@ const docTemplate = `{
                     "Credit Cards"
                 ],
                 "summary": "Get all credit cards summaries and billing cycles",
+                "operationId": "getCreditCards",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -280,6 +289,7 @@ const docTemplate = `{
                     "Credit Cards"
                 ],
                 "summary": "Get credit card summary for a specific account",
+                "operationId": "getCreditCard",
                 "parameters": [
                     {
                         "type": "string",
@@ -314,6 +324,7 @@ const docTemplate = `{
                     "Dashboard"
                 ],
                 "summary": "Get dashboard financial summary",
+                "operationId": "getDashboard",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -339,6 +350,7 @@ const docTemplate = `{
                     "Diagnosis"
                 ],
                 "summary": "Run system diagnostic health checks",
+                "operationId": "getDiagnosis",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -367,6 +379,7 @@ const docTemplate = `{
                     "Editor"
                 ],
                 "summary": "Read a specific ledger file and its backup versions",
+                "operationId": "getEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file query",
@@ -424,6 +437,7 @@ const docTemplate = `{
                     "Editor"
                 ],
                 "summary": "Delete backup versions for a ledger file",
+                "operationId": "deleteEditorBackups",
                 "parameters": [
                     {
                         "description": "Ledger file",
@@ -472,6 +486,7 @@ const docTemplate = `{
                     "Editor"
                 ],
                 "summary": "List all ledger files in journal directory",
+                "operationId": "getEditorFiles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -500,6 +515,7 @@ const docTemplate = `{
                     "Editor"
                 ],
                 "summary": "Save ledger file and trigger database synchronization",
+                "operationId": "saveEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file content",
@@ -551,6 +567,7 @@ const docTemplate = `{
                     "Editor"
                 ],
                 "summary": "Validate ledger file syntax",
+                "operationId": "validateEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file to validate",
@@ -599,6 +616,7 @@ const docTemplate = `{
                     "Expenses"
                 ],
                 "summary": "Get expense hierarchy graph and breakdown",
+                "operationId": "getExpense",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -624,6 +642,7 @@ const docTemplate = `{
                     "Gains"
                 ],
                 "summary": "Get investment gains and XIRR performance",
+                "operationId": "getGain",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -649,6 +668,7 @@ const docTemplate = `{
                     "Gains"
                 ],
                 "summary": "Get investment gain for a specific account",
+                "operationId": "getAccountGain",
                 "parameters": [
                     {
                         "type": "string",
@@ -683,6 +703,7 @@ const docTemplate = `{
                     "Goals"
                 ],
                 "summary": "List savings and retirement goals summaries",
+                "operationId": "getGoals",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -708,6 +729,7 @@ const docTemplate = `{
                     "Goals"
                 ],
                 "summary": "Get details for a specific goal",
+                "operationId": "getGoalDetails",
                 "parameters": [
                     {
                         "type": "string",
@@ -749,6 +771,7 @@ const docTemplate = `{
                     "Tax"
                 ],
                 "summary": "Get tax harvesting opportunities",
+                "operationId": "getHarvest",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -774,6 +797,7 @@ const docTemplate = `{
                     "Income"
                 ],
                 "summary": "Get income timeline and yearly summary",
+                "operationId": "getIncome",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -799,6 +823,7 @@ const docTemplate = `{
                     "Income Statement"
                 ],
                 "summary": "Get financial-year income statements",
+                "operationId": "getIncomeStatement",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -824,6 +849,7 @@ const docTemplate = `{
                     "Initialization"
                 ],
                 "summary": "Initialize demo data",
+                "operationId": "initDemoData",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -855,6 +881,7 @@ const docTemplate = `{
                     "Investments"
                 ],
                 "summary": "Get investment summary and savings rate",
+                "operationId": "getInvestment",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -880,6 +907,7 @@ const docTemplate = `{
                     "Ledger"
                 ],
                 "summary": "Get all ledger postings with market valuation",
+                "operationId": "getLedger",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -908,6 +936,7 @@ const docTemplate = `{
                     "Liabilities"
                 ],
                 "summary": "Get loan balances and breakdowns",
+                "operationId": "getLiabilitiesBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -933,6 +962,7 @@ const docTemplate = `{
                     "Liabilities"
                 ],
                 "summary": "Get loan interest and APR calculations",
+                "operationId": "getLiabilitiesInterest",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -958,6 +988,7 @@ const docTemplate = `{
                     "Liabilities"
                 ],
                 "summary": "Get loan repayment history",
+                "operationId": "getLiabilitiesRepayment",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -983,6 +1014,7 @@ const docTemplate = `{
                     "Logs"
                 ],
                 "summary": "Get application log entries",
+                "operationId": "getLogs",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1011,6 +1043,7 @@ const docTemplate = `{
                     "Net Worth"
                 ],
                 "summary": "Get net worth",
+                "operationId": "getNetworth",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1057,6 +1090,7 @@ const docTemplate = `{
                     "Allocation"
                 ],
                 "summary": "Get portfolio-grouped allocations",
+                "operationId": "getPortfolioAllocation",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1082,6 +1116,7 @@ const docTemplate = `{
                     "Predictions"
                 ],
                 "summary": "Get prediction history",
+                "operationId": "getPredictionHistory",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1110,6 +1145,7 @@ const docTemplate = `{
                     "Prices"
                 ],
                 "summary": "Get all cached commodity prices",
+                "operationId": "getPrices",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1138,6 +1174,7 @@ const docTemplate = `{
                     "Prices"
                 ],
                 "summary": "Autocomplete commodity or ticker symbols",
+                "operationId": "getPriceAutoCompletions",
                 "parameters": [
                     {
                         "description": "Autocomplete query",
@@ -1186,6 +1223,7 @@ const docTemplate = `{
                     "Prices"
                 ],
                 "summary": "Clear cached market prices",
+                "operationId": "clearPriceCache",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1211,6 +1249,7 @@ const docTemplate = `{
                     "Prices"
                 ],
                 "summary": "Get configured price providers",
+                "operationId": "getPriceProviders",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1236,6 +1275,7 @@ const docTemplate = `{
                     "Prices"
                 ],
                 "summary": "Clear price cache for a specific provider",
+                "operationId": "clearPriceProviderCache",
                 "parameters": [
                     {
                         "type": "string",
@@ -1270,6 +1310,7 @@ const docTemplate = `{
                     "Recurring"
                 ],
                 "summary": "Get recurring transaction sequences",
+                "operationId": "getRecurringTransactions",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1295,6 +1336,7 @@ const docTemplate = `{
                     "Tax"
                 ],
                 "summary": "Get Schedule AL assets and liabilities report",
+                "operationId": "getScheduleAL",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1323,6 +1365,7 @@ const docTemplate = `{
                     "Sheets"
                 ],
                 "summary": "Read a specific .paisa sheet file",
+                "operationId": "getSheetFile",
                 "parameters": [
                     {
                         "description": "Sheet file query",
@@ -1380,6 +1423,7 @@ const docTemplate = `{
                     "Sheets"
                 ],
                 "summary": "Delete backup versions for a sheet file",
+                "operationId": "deleteSheetBackups",
                 "parameters": [
                     {
                         "description": "Sheet file",
@@ -1428,6 +1472,7 @@ const docTemplate = `{
                     "Sheets"
                 ],
                 "summary": "List all .paisa sheet query files",
+                "operationId": "getSheetFiles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1456,6 +1501,7 @@ const docTemplate = `{
                     "Sheets"
                 ],
                 "summary": "Save a .paisa sheet file",
+                "operationId": "saveSheetFile",
                 "parameters": [
                     {
                         "description": "Sheet file content",
@@ -1507,6 +1553,7 @@ const docTemplate = `{
                     "Sync"
                 ],
                 "summary": "Synchronize journal, prices, and portfolios into SQLite",
+                "operationId": "syncData",
                 "parameters": [
                     {
                         "description": "Sync options",
@@ -1555,6 +1602,7 @@ const docTemplate = `{
                     "Templates"
                 ],
                 "summary": "List all transaction templates",
+                "operationId": "getTemplates",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1583,6 +1631,7 @@ const docTemplate = `{
                     "Templates"
                 ],
                 "summary": "Delete a transaction template",
+                "operationId": "deleteTemplate",
                 "parameters": [
                     {
                         "description": "Template name",
@@ -1640,6 +1689,7 @@ const docTemplate = `{
                     "Templates"
                 ],
                 "summary": "Create or update a transaction template",
+                "operationId": "upsertTemplate",
                 "parameters": [
                     {
                         "description": "Template data",
@@ -1694,6 +1744,7 @@ const docTemplate = `{
                     "Transactions"
                 ],
                 "summary": "Get all journal transactions",
+                "operationId": "getTransactions",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1719,6 +1770,7 @@ const docTemplate = `{
                     "Transactions"
                 ],
                 "summary": "Get balanced posting pairs",
+                "operationId": "getBalancedPostings",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2238,10 +2290,16 @@ const docTemplate = `{
                         "$ref": "#/definitions/dto.LedgerErrorResponse"
                     }
                 },
+                "file": {
+                    "$ref": "#/definitions/dto.LedgerFileResponse"
+                },
                 "message": {
                     "type": "string"
                 },
                 "saved": {
+                    "type": "boolean"
+                },
+                "synced": {
                     "type": "boolean"
                 }
             }
@@ -2254,6 +2312,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.LedgerErrorResponse"
                     }
+                },
+                "output": {
+                    "type": "string"
                 }
             }
         },
@@ -2717,6 +2778,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "line": {
+                    "type": "integer"
+                },
+                "line_from": {
+                    "type": "integer"
+                },
+                "line_to": {
                     "type": "integer"
                 },
                 "message": {

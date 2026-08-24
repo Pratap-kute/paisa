@@ -16,6 +16,9 @@
     "parser-build": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar -o src/lib/search/parser/parser",
     "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar --names -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar --names -o src/lib/search/parser/parser",
 
+    "api:generate": "deno run -A scripts/generate_api.ts",
+    "api:check": "deno run -A scripts/generate_api.ts --check",
+
     "test": "deno task test:unit && deno task test:core && deno task test:component",
     "test:core": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=core --maxWorkers=1",
     "test:component": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=component --maxWorkers=1",
@@ -85,6 +88,7 @@
     "svelte-check": "npm:svelte-check@^4.1.0",
     "svelte-dnd-action": "npm:svelte-dnd-action@^0.9.37",
     "svelte-select": "npm:svelte-select@^5.8.0",
+    "swagger-typescript-api": "npm:swagger-typescript-api@13.12.6",
     "svelte-tiny-virtual-list": "npm:svelte-tiny-virtual-list@^2.0.5",
     "tabulator-tables": "npm:tabulator-tables@^6.3.1",
     "tailwindcss": "npm:tailwindcss@^4.3.3",

@@ -755,6 +755,7 @@ export function ajax(
   {
     errors: LedgerFileError[];
     saved: boolean;
+    synced?: boolean;
     file: LedgerFile;
     message: string;
   }

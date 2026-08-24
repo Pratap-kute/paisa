@@ -46,23 +46,24 @@ type SheetExecuteRequest struct {
 	Query string `json:"query"`
 }
 
-type SheetResultResponse struct {
-	Result interface{} `json:"result"`
-}
-
 type LedgerErrorResponse struct {
-	Message string `json:"message"`
-	Line    int    `json:"line"`
-	File    string `json:"file"`
+	Message  string `json:"message"`
+	Line     int    `json:"line,omitempty"`
+	LineFrom int    `json:"line_from,omitempty"`
+	LineTo   int    `json:"line_to,omitempty"`
+	File     string `json:"file,omitempty"`
 }
 
 type EditorValidateResponse struct {
 	Errors []LedgerErrorResponse `json:"errors"`
+	Output string                `json:"output,omitempty"`
 }
 
 type EditorSaveResponse struct {
 	Errors  []LedgerErrorResponse `json:"errors"`
 	Saved   bool                  `json:"saved"`
+	Synced  bool                  `json:"synced"`
+	File    *LedgerFileResponse   `json:"file,omitempty"`
 	Message string                `json:"message,omitempty"`
 }
 

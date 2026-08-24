@@ -37,6 +37,7 @@ func PingHandler(c *gin.Context) {
 
 // GetConfigHandler godoc
 //
+// @ID getConfig
 // @Summary Get application configuration and metadata
 // @Description Returns public configuration, account list, current time override, and JSON validation schema
 // @Tags Configuration
@@ -57,6 +58,7 @@ func GetConfigHandler(db *gorm.DB) gin.HandlerFunc {
 
 // SaveConfigHandler godoc
 //
+// @ID saveConfig
 // @Summary Save configuration YAML
 // @Description Overwrites the paisa.yaml configuration file. No-op in readonly mode.
 // @Tags Configuration
@@ -92,6 +94,7 @@ func SaveConfigHandler(c *gin.Context) {
 
 // InitDemoDataHandler godoc
 //
+// @ID initDemoData
 // @Summary Initialize demo data
 // @Description Generates demo ledger data and configuration. No-op in readonly mode.
 // @Tags Initialization
@@ -120,6 +123,7 @@ func InitDemoDataHandler(db *gorm.DB) gin.HandlerFunc {
 
 // SyncDataHandler godoc
 //
+// @ID syncData
 // @Summary Synchronize journal, prices, and portfolios into SQLite
 // @Description Parses journal files, scrapes external commodity prices, and synchronizes portfolio data into SQLite
 // @Tags Sync
@@ -151,6 +155,7 @@ func SyncDataHandler(db *gorm.DB) gin.HandlerFunc {
 
 // ClearPriceCacheHandler godoc
 //
+// @ID clearPriceCache
 // @Summary Clear cached market prices
 // @Description Clears in-memory and database cached commodity prices. No-op in readonly mode.
 // @Tags Prices
@@ -170,6 +175,7 @@ func ClearPriceCacheHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetPricesHandler godoc
 //
+// @ID getPrices
 // @Summary Get all cached commodity prices
 // @Description Returns price histories grouped by commodity
 // @Tags Prices
@@ -185,6 +191,7 @@ func GetPricesHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetPriceProvidersHandler godoc
 //
+// @ID getPriceProviders
 // @Summary Get configured price providers
 // @Description Returns registered price scraping providers and their sync status
 // @Tags Prices
@@ -200,6 +207,7 @@ func GetPriceProvidersHandler(db *gorm.DB) gin.HandlerFunc {
 
 // ClearPriceProviderCacheHandler godoc
 //
+// @ID clearPriceProviderCache
 // @Summary Clear price cache for a specific provider
 // @Description Clears cached commodity prices for a specific provider. No-op in readonly mode.
 // @Tags Prices
@@ -221,6 +229,7 @@ func ClearPriceProviderCacheHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetPriceAutoCompletionsHandler godoc
 //
+// @ID getPriceAutoCompletions
 // @Summary Autocomplete commodity or ticker symbols
 // @Description Searches ticker symbols from configured scrapers
 // @Tags Prices
@@ -246,6 +255,7 @@ func GetPriceAutoCompletionsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetDashboardHandler godoc
 //
+// @ID getDashboard
 // @Summary Get dashboard financial summary
 // @Description Returns consolidated KPI summaries across net worth, expenses, budgets, and investments
 // @Tags Dashboard
@@ -261,6 +271,7 @@ func GetDashboardHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetNetworthHandler godoc
 //
+// @ID getNetworth
 // @Summary Get net worth
 // @Description Returns the current net-worth analysis and historical timeline
 // @Tags Net Worth
@@ -276,6 +287,7 @@ func GetNetworthHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetAssetsBalanceHandler godoc
 //
+// @ID getAssetsBalance
 // @Summary Get current asset balances and breakdowns
 // @Description Returns balance breakdown for asset accounts
 // @Tags Assets
@@ -291,6 +303,7 @@ func GetAssetsBalanceHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetInvestmentHandler godoc
 //
+// @ID getInvestment
 // @Summary Get investment summary and savings rate
 // @Description Returns yearly investment cards and savings rate metrics
 // @Tags Investments
@@ -306,6 +319,7 @@ func GetInvestmentHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetGainHandler godoc
 //
+// @ID getGain
 // @Summary Get investment gains and XIRR performance
 // @Description Computes realized, unrealized gains and annualized XIRR returns across accounts
 // @Tags Gains
@@ -321,6 +335,7 @@ func GetGainHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetAccountGainHandler godoc
 //
+// @ID getAccountGain
 // @Summary Get investment gain for a specific account
 // @Description Computes realized and unrealized gain for a single investment account
 // @Tags Gains
@@ -338,6 +353,7 @@ func GetAccountGainHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetIncomeHandler godoc
 //
+// @ID getIncome
 // @Summary Get income timeline and yearly summary
 // @Description Returns gross income, taxes, net income, and periodic income timelines
 // @Tags Income
@@ -353,6 +369,7 @@ func GetIncomeHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetExpenseHandler godoc
 //
+// @ID getExpense
 // @Summary Get expense hierarchy graph and breakdown
 // @Description Computes hierarchical flow graph and periodic expense summaries
 // @Tags Expenses
@@ -368,6 +385,7 @@ func GetExpenseHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetBudgetHandler godoc
 //
+// @ID getBudget
 // @Summary Get budget forecasts and actuals
 // @Description Returns monthly budget allocations, spending actuals, variances, and rollover balances
 // @Tags Budget
@@ -383,6 +401,7 @@ func GetBudgetHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetCashFlowHandler godoc
 //
+// @ID getCashFlow
 // @Summary Get monthly cash flow statement
 // @Description Returns monthly cash flow breakdown including inflows, outflows, and net changes
 // @Tags Cash Flow
@@ -398,6 +417,7 @@ func GetCashFlowHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetIncomeStatementHandler godoc
 //
+// @ID getIncomeStatement
 // @Summary Get financial-year income statements
 // @Description Returns yearly income statements with income, expenses, interest, and taxes
 // @Tags Income Statement
@@ -413,6 +433,7 @@ func GetIncomeStatementHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetRecurringTransactionsHandler godoc
 //
+// @ID getRecurringTransactions
 // @Summary Get recurring transaction sequences
 // @Description Returns recurring monthly or periodic transaction sequences
 // @Tags Recurring
@@ -428,6 +449,7 @@ func GetRecurringTransactionsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetAllocationHandler godoc
 //
+// @ID getAllocation
 // @Summary Get asset class allocations
 // @Description Returns asset allocation targets and current asset distribution
 // @Tags Allocation
@@ -443,6 +465,7 @@ func GetAllocationHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetPortfolioAllocationHandler godoc
 //
+// @ID getPortfolioAllocation
 // @Summary Get portfolio-grouped allocations
 // @Description Returns asset allocations grouped by portfolio
 // @Tags Allocation
@@ -458,6 +481,7 @@ func GetPortfolioAllocationHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetLedgerHandler godoc
 //
+// @ID getLedger
 // @Summary Get all ledger postings with market valuation
 // @Description Returns flat array of all journal postings with computed balances and market values
 // @Tags Ledger
@@ -473,6 +497,7 @@ func GetLedgerHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetBalancedPostingsHandler godoc
 //
+// @ID getBalancedPostings
 // @Summary Get balanced posting pairs
 // @Description Returns balanced from/to posting pairs
 // @Tags Transactions
@@ -488,6 +513,7 @@ func GetBalancedPostingsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetTransactionsHandler godoc
 //
+// @ID getTransactions
 // @Summary Get all journal transactions
 // @Description Returns transactions with embedded postings
 // @Tags Transactions
@@ -503,6 +529,7 @@ func GetTransactionsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetHarvestHandler godoc
 //
+// @ID getHarvest
 // @Summary Get tax harvesting opportunities
 // @Description Returns tax harvesting opportunities and current gains
 // @Tags Tax
@@ -518,6 +545,7 @@ func GetHarvestHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetCapitalGainsHandler godoc
 //
+// @ID getCapitalGains
 // @Summary Get FIFO realized capital gains
 // @Description Computes FIFO realized capital gains grouped by financial year
 // @Tags Tax
@@ -533,6 +561,7 @@ func GetCapitalGainsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetScheduleALHandler godoc
 //
+// @ID getScheduleAL
 // @Summary Get Schedule AL assets and liabilities report
 // @Description Computes Schedule AL assets and liabilities report
 // @Tags Tax
@@ -548,6 +577,7 @@ func GetScheduleALHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetDiagnosisHandler godoc
 //
+// @ID getDiagnosis
 // @Summary Run system diagnostic health checks
 // @Description Runs system diagnostics and returns detected issues
 // @Tags Diagnosis
@@ -563,6 +593,7 @@ func GetDiagnosisHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetLiabilitiesInterestHandler godoc
 //
+// @ID getLiabilitiesInterest
 // @Summary Get loan interest and APR calculations
 // @Description Computes interest payments and effective APR across loans
 // @Tags Liabilities
@@ -578,6 +609,7 @@ func GetLiabilitiesInterestHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetLiabilitiesBalanceHandler godoc
 //
+// @ID getLiabilitiesBalance
 // @Summary Get loan balances and breakdowns
 // @Description Computes outstanding loan balances
 // @Tags Liabilities
@@ -593,6 +625,7 @@ func GetLiabilitiesBalanceHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetLiabilitiesRepaymentHandler godoc
 //
+// @ID getLiabilitiesRepayment
 // @Summary Get loan repayment history
 // @Description Returns loan repayment postings
 // @Tags Liabilities
@@ -608,6 +641,7 @@ func GetLiabilitiesRepaymentHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetLogsHandler godoc
 //
+// @ID getLogs
 // @Summary Get application log entries
 // @Description Returns recent application log lines
 // @Tags Logs
@@ -621,6 +655,7 @@ func GetLogsHandler(c *gin.Context) {
 
 // GetTfIdfHandler godoc
 //
+// @ID getTfIdf
 // @Summary Get TF-IDF machine learning model for payee-account prediction
 // @Description Returns TF-IDF prediction model data
 // @Tags Predictions
@@ -636,6 +671,7 @@ func GetTfIdfHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetPredictionHistoryHandler godoc
 //
+// @ID getPredictionHistory
 // @Summary Get prediction history
 // @Description Returns prediction history records
 // @Tags Predictions
@@ -651,6 +687,7 @@ func GetPredictionHistoryHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetCreditCardsHandler godoc
 //
+// @ID getCreditCards
 // @Summary Get all credit cards summaries and billing cycles
 // @Description Returns credit card balances, due dates, and statements
 // @Tags Credit Cards
@@ -666,6 +703,7 @@ func GetCreditCardsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetCreditCardHandler godoc
 //
+// @ID getCreditCard
 // @Summary Get credit card summary for a specific account
 // @Description Returns credit card details for a single account
 // @Tags Credit Cards
@@ -682,6 +720,7 @@ func GetCreditCardHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetEditorFilesHandler godoc
 //
+// @ID getEditorFiles
 // @Summary List all ledger files in journal directory
 // @Description Returns all ledger files and their current postings
 // @Tags Editor
@@ -697,6 +736,7 @@ func GetEditorFilesHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetEditorFileHandler godoc
 //
+// @ID getEditorFile
 // @Summary Read a specific ledger file and its backup versions
 // @Description Returns contents and version history of a ledger file
 // @Tags Editor
@@ -729,6 +769,7 @@ func GetEditorFileHandler(c *gin.Context) {
 
 // DeleteEditorBackupsHandler godoc
 //
+// @ID deleteEditorBackups
 // @Summary Delete backup versions for a ledger file
 // @Description Deletes all timestamped backup files for a ledger file
 // @Tags Editor
@@ -760,6 +801,7 @@ func DeleteEditorBackupsHandler(c *gin.Context) {
 
 // ValidateEditorFileHandler godoc
 //
+// @ID validateEditorFile
 // @Summary Validate ledger file syntax
 // @Description Parses and validates ledger file syntax without saving
 // @Tags Editor
@@ -784,6 +826,7 @@ func ValidateEditorFileHandler(c *gin.Context) {
 
 // SaveEditorFileHandler godoc
 //
+// @ID saveEditorFile
 // @Summary Save ledger file and trigger database synchronization
 // @Description Atomically writes ledger file with automatic timestamped backup. No-op in readonly mode.
 // @Tags Editor
@@ -815,6 +858,7 @@ func SaveEditorFileHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetSheetFilesHandler godoc
 //
+// @ID getSheetFiles
 // @Summary List all .paisa sheet query files
 // @Description Returns list of .paisa sheet files
 // @Tags Sheets
@@ -830,6 +874,7 @@ func GetSheetFilesHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetSheetFileHandler godoc
 //
+// @ID getSheetFile
 // @Summary Read a specific .paisa sheet file
 // @Description Returns contents and version history of a sheet file
 // @Tags Sheets
@@ -862,6 +907,7 @@ func GetSheetFileHandler(c *gin.Context) {
 
 // DeleteSheetBackupsHandler godoc
 //
+// @ID deleteSheetBackups
 // @Summary Delete backup versions for a sheet file
 // @Description Deletes all timestamped backup files for a sheet file
 // @Tags Sheets
@@ -893,6 +939,7 @@ func DeleteSheetBackupsHandler(c *gin.Context) {
 
 // SaveSheetFileHandler godoc
 //
+// @ID saveSheetFile
 // @Summary Save a .paisa sheet file
 // @Description Atomically writes .paisa sheet file with timestamped backup. No-op in readonly mode.
 // @Tags Sheets
@@ -924,6 +971,7 @@ func SaveSheetFileHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetTemplatesHandler godoc
 //
+// @ID getTemplates
 // @Summary List all transaction templates
 // @Description Returns builtin and custom transaction templates
 // @Tags Templates
@@ -937,6 +985,7 @@ func GetTemplatesHandler(c *gin.Context) {
 
 // UpsertTemplateHandler godoc
 //
+// @ID upsertTemplate
 // @Summary Create or update a transaction template
 // @Description Saves a custom transaction template in paisa.yaml. No-op in readonly mode.
 // @Tags Templates
@@ -973,6 +1022,7 @@ func UpsertTemplateHandler(c *gin.Context) {
 
 // DeleteTemplateHandler godoc
 //
+// @ID deleteTemplate
 // @Summary Delete a transaction template
 // @Description Deletes a custom transaction template from paisa.yaml. No-op in readonly mode.
 // @Tags Templates
@@ -1007,6 +1057,7 @@ func DeleteTemplateHandler(c *gin.Context) {
 
 // GetGoalsHandler godoc
 //
+// @ID getGoals
 // @Summary List savings and retirement goals summaries
 // @Description Returns summary and progress percentage for all configured goals
 // @Tags Goals
@@ -1022,6 +1073,7 @@ func GetGoalsHandler(db *gorm.DB) gin.HandlerFunc {
 
 // GetGoalDetailsHandler godoc
 //
+// @ID getGoalDetails
 // @Summary Get details for a specific goal
 // @Description Returns progress, projections, and monthly timeline for a single goal
 // @Tags Goals

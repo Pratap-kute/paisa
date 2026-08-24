@@ -1,6 +1,6 @@
-# Paisa API & Swagger Documentation
+# Paisa API & Generated Client Documentation
 
-Paisa features interactive API documentation powered by the Go Swaggo ecosystem and Swagger UI.
+Paisa features interactive API documentation powered by the Go Swaggo ecosystem, Swagger UI, and end-to-end typed TypeScript code generation via `swagger-typescript-api`.
 
 ## Endpoints
 
@@ -11,12 +11,14 @@ When running Paisa locally (`paisa serve` or `make dev`), the API documentation 
 
 ---
 
-## Authentication in Swagger UI
+## Authentication in Swagger UI and Frontend
 
 Paisa's API uses the `X-Auth` HTTP header for token-based authentication when user accounts are configured in `paisa.yaml`:
 
 - Header Name: `X-Auth`
 - Format: `username:password`
+
+The frontend automatically injects this header via `frontend/src/lib/api/client.ts` using stored credentials.
 
 To test authenticated endpoints in Swagger UI:
 1. Click the **Authorize** button at the top right of the Swagger UI interface.
@@ -25,41 +27,76 @@ To test authenticated endpoints in Swagger UI:
 
 ---
 
-## Generating Swagger Specification
+## Code Generation Pipeline
 
-The specification is derived from Go handler annotations in `backend/pkg/server/handlers.go` and DTO definitions in `backend/pkg/api/dto/`.
+The specification is derived from Go handler annotations in `backend/pkg/server/handlers.go` and DTO definitions in `backend/pkg/api/dto/`. The frontend TypeScript types and native Fetch API client are generated directly from `backend/docs/swagger.json`.
+
+```
+Go DTOs & Handlers
+       │ (swag)
+       ▼
+backend/docs/swagger.json
+       │ (swagger-typescript-api)
+       ▼
+frontend/src/lib/api/generated/Api.ts
+       │
+       ▼
+frontend/src/lib/api/client.ts
+```
 
 ### Commands
 
-From repository root:
-```bash
-make swagger
-```
+- **Full End-to-End Generation (Backend + Frontend)**:
+  ```bash
+  make api
+  ```
+  *(or `make generate`)*
 
-Or from `backend/`:
-```bash
-go generate ./...
-```
+- **Backend Swagger Spec Only**:
+  ```bash
+  make swagger
+  ```
 
-Generated artifacts are committed in `backend/docs/`:
-- `docs.go`
-- `swagger.json`
-- `swagger.yaml`
+- **Frontend TypeScript Client Only**:
+  ```bash
+  cd frontend && deno task api:generate
+  ```
 
-> **Note**: Do not edit `backend/docs/*` manually. All modifications should be made via Go doc annotations and DTO structs.
+- **Verify Frontend Generation Drift (CI Check)**:
+  ```bash
+  cd frontend && deno task api:check
+  ```
 
 ---
 
-## Developer Workflow: Adding a New Endpoint
+## Generated Artifacts
+
+- **Backend Specification**:
+  - `backend/docs/docs.go`
+  - `backend/docs/swagger.json`
+  - `backend/docs/swagger.yaml`
+
+- **Frontend API Client**:
+  - `frontend/src/lib/api/generated/Api.ts` (Auto-generated Fetch client and DTO contracts)
+  - `frontend/src/lib/api/client.ts` (Runtime wrapper with `X-Auth` header injection)
+  - `frontend/src/lib/api/errors.ts` (Typed API error definitions)
+  - `frontend/src/lib/api/index.ts` (Entrypoint barrel export)
+
+> **Important**: Do not edit `backend/docs/*` or `frontend/src/lib/api/generated/*` manually. All modifications should be made via Go doc annotations, DTO structs, and regeneration.
+
+---
+
+## Developer Workflow: Adding or Modifying an Endpoint
 
 When adding or modifying an HTTP endpoint:
 
 1. **Define DTOs**: Add explicit Request and Response DTOs in `backend/pkg/api/dto/`.
 2. **Implement Logic**: Implement domain calculations in `pkg/service/` or `pkg/query/` (never inside HTTP handlers).
-3. **Write Handler**: Write the named handler function in `backend/pkg/server/handlers.go` with complete Swagger annotations:
+3. **Write Handler**: Write the named handler function in `backend/pkg/server/handlers.go` with complete Swagger and `@ID` annotations:
    ```go
    // GetExampleHandler godoc
    //
+   // @ID getExample
    // @Summary Short summary
    // @Description Detailed description
    // @Tags ExampleTag
@@ -75,5 +112,7 @@ When adding or modifying an HTTP endpoint:
    }
    ```
 4. **Register Route**: Wire the handler in `backend/pkg/server/server.go`.
-5. **Regenerate Swagger**: Run `make swagger`.
-6. **Verify Coverage**: Run `go test -v ./pkg/server -run "TestSwagger|TestArchitecture"`.
+5. **Regenerate Full Pipeline**: Run `make api`.
+6. **Verify Coverage & Types**:
+   - Backend: `cd backend && go test -v ./pkg/server -run "TestSwagger|TestArchitecture"`
+   - Frontend: `cd frontend && deno task check && deno task test`

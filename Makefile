@@ -177,9 +177,11 @@ parsers parser: ## Rebuild Lezer sheet and search query grammars
 swagger: ## Generate Swagger API documentation specification and Go package
 	$(MAKE) -C backend swagger
 
+api: swagger ## Generate Swagger specification and frontend TypeScript API client
+	$(MAKE) -C frontend api
 
-generate-fonts: ## Download SVGs and generate custom icon font
-	$(MAKE) -C frontend generate-fonts
+generate: swagger api ## Run full backend and frontend code generation pipeline
+
 
 regen regen-fixtures: build ## Re-generate integration test JSON fixtures
 	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration

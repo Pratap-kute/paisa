@@ -329,9 +329,13 @@ definitions:
         items:
           $ref: '#/definitions/dto.LedgerErrorResponse'
         type: array
+      file:
+        $ref: '#/definitions/dto.LedgerFileResponse'
       message:
         type: string
       saved:
+        type: boolean
+      synced:
         type: boolean
     type: object
   dto.EditorValidateResponse:
@@ -340,6 +344,8 @@ definitions:
         items:
           $ref: '#/definitions/dto.LedgerErrorResponse'
         type: array
+      output:
+        type: string
     type: object
   dto.ErrorResponse:
     properties:
@@ -642,6 +648,10 @@ definitions:
       file:
         type: string
       line:
+        type: integer
+      line_from:
+        type: integer
+      line_to:
         type: integer
       message:
         type: string
@@ -1205,6 +1215,7 @@ paths:
   /account/tf_idf:
     get:
       description: Returns TF-IDF prediction model data
+      operationId: getTfIdf
       produces:
       - application/json
       responses:
@@ -1220,6 +1231,7 @@ paths:
   /allocation:
     get:
       description: Returns asset allocation targets and current asset distribution
+      operationId: getAllocation
       produces:
       - application/json
       responses:
@@ -1235,6 +1247,7 @@ paths:
   /assets/balance:
     get:
       description: Returns balance breakdown for asset accounts
+      operationId: getAssetsBalance
       produces:
       - application/json
       responses:
@@ -1251,6 +1264,7 @@ paths:
     get:
       description: Returns monthly budget allocations, spending actuals, variances,
         and rollover balances
+      operationId: getBudget
       produces:
       - application/json
       responses:
@@ -1266,6 +1280,7 @@ paths:
   /capital_gains:
     get:
       description: Computes FIFO realized capital gains grouped by financial year
+      operationId: getCapitalGains
       produces:
       - application/json
       responses:
@@ -1282,6 +1297,7 @@ paths:
     get:
       description: Returns monthly cash flow breakdown including inflows, outflows,
         and net changes
+      operationId: getCashFlow
       produces:
       - application/json
       responses:
@@ -1298,6 +1314,7 @@ paths:
     get:
       description: Returns public configuration, account list, current time override,
         and JSON validation schema
+      operationId: getConfig
       produces:
       - application/json
       responses:
@@ -1316,6 +1333,7 @@ paths:
       - text/plain
       description: Overwrites the paisa.yaml configuration file. No-op in readonly
         mode.
+      operationId: saveConfig
       parameters:
       - description: Configuration YAML text
         in: body
@@ -1346,6 +1364,7 @@ paths:
   /credit_cards:
     get:
       description: Returns credit card balances, due dates, and statements
+      operationId: getCreditCards
       produces:
       - application/json
       responses:
@@ -1361,6 +1380,7 @@ paths:
   /credit_cards/{account}:
     get:
       description: Returns credit card details for a single account
+      operationId: getCreditCard
       parameters:
       - description: Credit card account name (e.g. Liabilities:CreditCard:AmazonPay)
         in: path
@@ -1383,6 +1403,7 @@ paths:
     get:
       description: Returns consolidated KPI summaries across net worth, expenses,
         budgets, and investments
+      operationId: getDashboard
       produces:
       - application/json
       responses:
@@ -1398,6 +1419,7 @@ paths:
   /diagnosis:
     get:
       description: Runs system diagnostics and returns detected issues
+      operationId: getDiagnosis
       produces:
       - application/json
       responses:
@@ -1415,6 +1437,7 @@ paths:
       consumes:
       - application/json
       description: Returns contents and version history of a ledger file
+      operationId: getEditorFile
       parameters:
       - description: Ledger file query
         in: body
@@ -1451,6 +1474,7 @@ paths:
       consumes:
       - application/json
       description: Deletes all timestamped backup files for a ledger file
+      operationId: deleteEditorBackups
       parameters:
       - description: Ledger file
         in: body
@@ -1481,6 +1505,7 @@ paths:
   /editor/files:
     get:
       description: Returns all ledger files and their current postings
+      operationId: getEditorFiles
       produces:
       - application/json
       responses:
@@ -1499,6 +1524,7 @@ paths:
       - application/json
       description: Atomically writes ledger file with automatic timestamped backup.
         No-op in readonly mode.
+      operationId: saveEditorFile
       parameters:
       - description: Ledger file content
         in: body
@@ -1531,6 +1557,7 @@ paths:
       consumes:
       - application/json
       description: Parses and validates ledger file syntax without saving
+      operationId: validateEditorFile
       parameters:
       - description: Ledger file to validate
         in: body
@@ -1561,6 +1588,7 @@ paths:
   /expense:
     get:
       description: Computes hierarchical flow graph and periodic expense summaries
+      operationId: getExpense
       produces:
       - application/json
       responses:
@@ -1577,6 +1605,7 @@ paths:
     get:
       description: Computes realized, unrealized gains and annualized XIRR returns
         across accounts
+      operationId: getGain
       produces:
       - application/json
       responses:
@@ -1592,6 +1621,7 @@ paths:
   /gain/{account}:
     get:
       description: Computes realized and unrealized gain for a single investment account
+      operationId: getAccountGain
       parameters:
       - description: Account name (e.g. Assets:Equity:Nifty)
         in: path
@@ -1613,6 +1643,7 @@ paths:
   /goals:
     get:
       description: Returns summary and progress percentage for all configured goals
+      operationId: getGoals
       produces:
       - application/json
       responses:
@@ -1629,6 +1660,7 @@ paths:
     get:
       description: Returns progress, projections, and monthly timeline for a single
         goal
+      operationId: getGoalDetails
       parameters:
       - description: Goal type (savings or retirement)
         in: path
@@ -1655,6 +1687,7 @@ paths:
   /harvest:
     get:
       description: Returns tax harvesting opportunities and current gains
+      operationId: getHarvest
       produces:
       - application/json
       responses:
@@ -1670,6 +1703,7 @@ paths:
   /income:
     get:
       description: Returns gross income, taxes, net income, and periodic income timelines
+      operationId: getIncome
       produces:
       - application/json
       responses:
@@ -1686,6 +1720,7 @@ paths:
     get:
       description: Returns yearly income statements with income, expenses, interest,
         and taxes
+      operationId: getIncomeStatement
       produces:
       - application/json
       responses:
@@ -1702,6 +1737,7 @@ paths:
     post:
       description: Generates demo ledger data and configuration. No-op in readonly
         mode.
+      operationId: initDemoData
       produces:
       - application/json
       responses:
@@ -1721,6 +1757,7 @@ paths:
   /investment:
     get:
       description: Returns yearly investment cards and savings rate metrics
+      operationId: getInvestment
       produces:
       - application/json
       responses:
@@ -1737,6 +1774,7 @@ paths:
     get:
       description: Returns flat array of all journal postings with computed balances
         and market values
+      operationId: getLedger
       produces:
       - application/json
       responses:
@@ -1754,6 +1792,7 @@ paths:
   /liabilities/balance:
     get:
       description: Computes outstanding loan balances
+      operationId: getLiabilitiesBalance
       produces:
       - application/json
       responses:
@@ -1769,6 +1808,7 @@ paths:
   /liabilities/interest:
     get:
       description: Computes interest payments and effective APR across loans
+      operationId: getLiabilitiesInterest
       produces:
       - application/json
       responses:
@@ -1784,6 +1824,7 @@ paths:
   /liabilities/repayment:
     get:
       description: Returns loan repayment postings
+      operationId: getLiabilitiesRepayment
       produces:
       - application/json
       responses:
@@ -1799,6 +1840,7 @@ paths:
   /logs:
     get:
       description: Returns recent application log lines
+      operationId: getLogs
       produces:
       - application/json
       responses:
@@ -1816,6 +1858,7 @@ paths:
   /networth:
     get:
       description: Returns the current net-worth analysis and historical timeline
+      operationId: getNetworth
       produces:
       - application/json
       responses:
@@ -1845,6 +1888,7 @@ paths:
   /portfolio_allocation:
     get:
       description: Returns asset allocations grouped by portfolio
+      operationId: getPortfolioAllocation
       produces:
       - application/json
       responses:
@@ -1860,6 +1904,7 @@ paths:
   /prediction/history:
     get:
       description: Returns prediction history records
+      operationId: getPredictionHistory
       produces:
       - application/json
       responses:
@@ -1877,6 +1922,7 @@ paths:
   /price:
     get:
       description: Returns price histories grouped by commodity
+      operationId: getPrices
       produces:
       - application/json
       responses:
@@ -1894,6 +1940,7 @@ paths:
       consumes:
       - application/json
       description: Searches ticker symbols from configured scrapers
+      operationId: getPriceAutoCompletions
       parameters:
       - description: Autocomplete query
         in: body
@@ -1925,6 +1972,7 @@ paths:
     post:
       description: Clears in-memory and database cached commodity prices. No-op in
         readonly mode.
+      operationId: clearPriceCache
       produces:
       - application/json
       responses:
@@ -1940,6 +1988,7 @@ paths:
   /price/providers:
     get:
       description: Returns registered price scraping providers and their sync status
+      operationId: getPriceProviders
       produces:
       - application/json
       responses:
@@ -1956,6 +2005,7 @@ paths:
     post:
       description: Clears cached commodity prices for a specific provider. No-op in
         readonly mode.
+      operationId: clearPriceProviderCache
       parameters:
       - description: Provider code (e.g. yahoo)
         in: path
@@ -1977,6 +2027,7 @@ paths:
   /recurring:
     get:
       description: Returns recurring monthly or periodic transaction sequences
+      operationId: getRecurringTransactions
       produces:
       - application/json
       responses:
@@ -1992,6 +2043,7 @@ paths:
   /schedule_al:
     get:
       description: Computes Schedule AL assets and liabilities report
+      operationId: getScheduleAL
       produces:
       - application/json
       responses:
@@ -2009,6 +2061,7 @@ paths:
       consumes:
       - application/json
       description: Returns contents and version history of a sheet file
+      operationId: getSheetFile
       parameters:
       - description: Sheet file query
         in: body
@@ -2045,6 +2098,7 @@ paths:
       consumes:
       - application/json
       description: Deletes all timestamped backup files for a sheet file
+      operationId: deleteSheetBackups
       parameters:
       - description: Sheet file
         in: body
@@ -2075,6 +2129,7 @@ paths:
   /sheets/files:
     get:
       description: Returns list of .paisa sheet files
+      operationId: getSheetFiles
       produces:
       - application/json
       responses:
@@ -2093,6 +2148,7 @@ paths:
       - application/json
       description: Atomically writes .paisa sheet file with timestamped backup. No-op
         in readonly mode.
+      operationId: saveSheetFile
       parameters:
       - description: Sheet file content
         in: body
@@ -2126,6 +2182,7 @@ paths:
       - application/json
       description: Parses journal files, scrapes external commodity prices, and synchronizes
         portfolio data into SQLite
+      operationId: syncData
       parameters:
       - description: Sync options
         in: body
@@ -2156,6 +2213,7 @@ paths:
   /templates:
     get:
       description: Returns builtin and custom transaction templates
+      operationId: getTemplates
       produces:
       - application/json
       responses:
@@ -2174,6 +2232,7 @@ paths:
       - application/json
       description: Deletes a custom transaction template from paisa.yaml. No-op in
         readonly mode.
+      operationId: deleteTemplate
       parameters:
       - description: Template name
         in: body
@@ -2211,6 +2270,7 @@ paths:
       - application/json
       description: Saves a custom transaction template in paisa.yaml. No-op in readonly
         mode.
+      operationId: upsertTemplate
       parameters:
       - description: Template data
         in: body
@@ -2245,6 +2305,7 @@ paths:
   /transaction:
     get:
       description: Returns transactions with embedded postings
+      operationId: getTransactions
       produces:
       - application/json
       responses:
@@ -2260,6 +2321,7 @@ paths:
   /transaction/balanced:
     get:
       description: Returns balanced from/to posting pairs
+      operationId: getBalancedPostings
       produces:
       - application/json
       responses:

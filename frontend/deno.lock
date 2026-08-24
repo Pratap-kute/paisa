@@ -2220,6 +2220,7 @@
       "npm:svelte-select@^5.8.0",
       "npm:svelte-tiny-virtual-list@^2.0.5",
       "npm:svelte@^5.56.9",
+      "npm:swagger-typescript-api@13.12.6",
       "npm:tabulator-tables@^6.3.1",
       "npm:tailwindcss@^4.3.3",
       "npm:tippy.js@^6.3.7",

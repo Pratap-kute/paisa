@@ -23,6 +23,7 @@
                     "Predictions"
                 ],
                 "summary": "Get TF-IDF machine learning model for payee-account prediction",
+                "operationId": "getTfIdf",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -48,6 +49,7 @@
                     "Allocation"
                 ],
                 "summary": "Get asset class allocations",
+                "operationId": "getAllocation",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -73,6 +75,7 @@
                     "Assets"
                 ],
                 "summary": "Get current asset balances and breakdowns",
+                "operationId": "getAssetsBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -98,6 +101,7 @@
                     "Budget"
                 ],
                 "summary": "Get budget forecasts and actuals",
+                "operationId": "getBudget",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -123,6 +127,7 @@
                     "Tax"
                 ],
                 "summary": "Get FIFO realized capital gains",
+                "operationId": "getCapitalGains",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -148,6 +153,7 @@
                     "Cash Flow"
                 ],
                 "summary": "Get monthly cash flow statement",
+                "operationId": "getCashFlow",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -173,6 +179,7 @@
                     "Configuration"
                 ],
                 "summary": "Get application configuration and metadata",
+                "operationId": "getConfig",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -200,6 +207,7 @@
                     "Configuration"
                 ],
                 "summary": "Save configuration YAML",
+                "operationId": "saveConfig",
                 "parameters": [
                     {
                         "description": "Configuration YAML text",
@@ -248,6 +256,7 @@
                     "Credit Cards"
                 ],
                 "summary": "Get all credit cards summaries and billing cycles",
+                "operationId": "getCreditCards",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -273,6 +282,7 @@
                     "Credit Cards"
                 ],
                 "summary": "Get credit card summary for a specific account",
+                "operationId": "getCreditCard",
                 "parameters": [
                     {
                         "type": "string",
@@ -307,6 +317,7 @@
                     "Dashboard"
                 ],
                 "summary": "Get dashboard financial summary",
+                "operationId": "getDashboard",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -332,6 +343,7 @@
                     "Diagnosis"
                 ],
                 "summary": "Run system diagnostic health checks",
+                "operationId": "getDiagnosis",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -360,6 +372,7 @@
                     "Editor"
                 ],
                 "summary": "Read a specific ledger file and its backup versions",
+                "operationId": "getEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file query",
@@ -417,6 +430,7 @@
                     "Editor"
                 ],
                 "summary": "Delete backup versions for a ledger file",
+                "operationId": "deleteEditorBackups",
                 "parameters": [
                     {
                         "description": "Ledger file",
@@ -465,6 +479,7 @@
                     "Editor"
                 ],
                 "summary": "List all ledger files in journal directory",
+                "operationId": "getEditorFiles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -493,6 +508,7 @@
                     "Editor"
                 ],
                 "summary": "Save ledger file and trigger database synchronization",
+                "operationId": "saveEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file content",
@@ -544,6 +560,7 @@
                     "Editor"
                 ],
                 "summary": "Validate ledger file syntax",
+                "operationId": "validateEditorFile",
                 "parameters": [
                     {
                         "description": "Ledger file to validate",
@@ -592,6 +609,7 @@
                     "Expenses"
                 ],
                 "summary": "Get expense hierarchy graph and breakdown",
+                "operationId": "getExpense",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -617,6 +635,7 @@
                     "Gains"
                 ],
                 "summary": "Get investment gains and XIRR performance",
+                "operationId": "getGain",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -642,6 +661,7 @@
                     "Gains"
                 ],
                 "summary": "Get investment gain for a specific account",
+                "operationId": "getAccountGain",
                 "parameters": [
                     {
                         "type": "string",
@@ -676,6 +696,7 @@
                     "Goals"
                 ],
                 "summary": "List savings and retirement goals summaries",
+                "operationId": "getGoals",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -701,6 +722,7 @@
                     "Goals"
                 ],
                 "summary": "Get details for a specific goal",
+                "operationId": "getGoalDetails",
                 "parameters": [
                     {
                         "type": "string",
@@ -742,6 +764,7 @@
                     "Tax"
                 ],
                 "summary": "Get tax harvesting opportunities",
+                "operationId": "getHarvest",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -767,6 +790,7 @@
                     "Income"
                 ],
                 "summary": "Get income timeline and yearly summary",
+                "operationId": "getIncome",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -792,6 +816,7 @@
                     "Income Statement"
                 ],
                 "summary": "Get financial-year income statements",
+                "operationId": "getIncomeStatement",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -817,6 +842,7 @@
                     "Initialization"
                 ],
                 "summary": "Initialize demo data",
+                "operationId": "initDemoData",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -848,6 +874,7 @@
                     "Investments"
                 ],
                 "summary": "Get investment summary and savings rate",
+                "operationId": "getInvestment",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -873,6 +900,7 @@
                     "Ledger"
                 ],
                 "summary": "Get all ledger postings with market valuation",
+                "operationId": "getLedger",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -901,6 +929,7 @@
                     "Liabilities"
                 ],
                 "summary": "Get loan balances and breakdowns",
+                "operationId": "getLiabilitiesBalance",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -926,6 +955,7 @@
                     "Liabilities"
                 ],
                 "summary": "Get loan interest and APR calculations",
+                "operationId": "getLiabilitiesInterest",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -951,6 +981,7 @@
                     "Liabilities"
                 ],
                 "summary": "Get loan repayment history",
+                "operationId": "getLiabilitiesRepayment",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -976,6 +1007,7 @@
                     "Logs"
                 ],
                 "summary": "Get application log entries",
+                "operationId": "getLogs",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1004,6 +1036,7 @@
                     "Net Worth"
                 ],
                 "summary": "Get net worth",
+                "operationId": "getNetworth",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1050,6 +1083,7 @@
                     "Allocation"
                 ],
                 "summary": "Get portfolio-grouped allocations",
+                "operationId": "getPortfolioAllocation",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1075,6 +1109,7 @@
                     "Predictions"
                 ],
                 "summary": "Get prediction history",
+                "operationId": "getPredictionHistory",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1103,6 +1138,7 @@
                     "Prices"
                 ],
                 "summary": "Get all cached commodity prices",
+                "operationId": "getPrices",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1131,6 +1167,7 @@
                     "Prices"
                 ],
                 "summary": "Autocomplete commodity or ticker symbols",
+                "operationId": "getPriceAutoCompletions",
                 "parameters": [
                     {
                         "description": "Autocomplete query",
@@ -1179,6 +1216,7 @@
                     "Prices"
                 ],
                 "summary": "Clear cached market prices",
+                "operationId": "clearPriceCache",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1204,6 +1242,7 @@
                     "Prices"
                 ],
                 "summary": "Get configured price providers",
+                "operationId": "getPriceProviders",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1229,6 +1268,7 @@
                     "Prices"
                 ],
                 "summary": "Clear price cache for a specific provider",
+                "operationId": "clearPriceProviderCache",
                 "parameters": [
                     {
                         "type": "string",
@@ -1263,6 +1303,7 @@
                     "Recurring"
                 ],
                 "summary": "Get recurring transaction sequences",
+                "operationId": "getRecurringTransactions",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1288,6 +1329,7 @@
                     "Tax"
                 ],
                 "summary": "Get Schedule AL assets and liabilities report",
+                "operationId": "getScheduleAL",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1316,6 +1358,7 @@
                     "Sheets"
                 ],
                 "summary": "Read a specific .paisa sheet file",
+                "operationId": "getSheetFile",
                 "parameters": [
                     {
                         "description": "Sheet file query",
@@ -1373,6 +1416,7 @@
                     "Sheets"
                 ],
                 "summary": "Delete backup versions for a sheet file",
+                "operationId": "deleteSheetBackups",
                 "parameters": [
                     {
                         "description": "Sheet file",
@@ -1421,6 +1465,7 @@
                     "Sheets"
                 ],
                 "summary": "List all .paisa sheet query files",
+                "operationId": "getSheetFiles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1449,6 +1494,7 @@
                     "Sheets"
                 ],
                 "summary": "Save a .paisa sheet file",
+                "operationId": "saveSheetFile",
                 "parameters": [
                     {
                         "description": "Sheet file content",
@@ -1500,6 +1546,7 @@
                     "Sync"
                 ],
                 "summary": "Synchronize journal, prices, and portfolios into SQLite",
+                "operationId": "syncData",
                 "parameters": [
                     {
                         "description": "Sync options",
@@ -1548,6 +1595,7 @@
                     "Templates"
                 ],
                 "summary": "List all transaction templates",
+                "operationId": "getTemplates",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1576,6 +1624,7 @@
                     "Templates"
                 ],
                 "summary": "Delete a transaction template",
+                "operationId": "deleteTemplate",
                 "parameters": [
                     {
                         "description": "Template name",
@@ -1633,6 +1682,7 @@
                     "Templates"
                 ],
                 "summary": "Create or update a transaction template",
+                "operationId": "upsertTemplate",
                 "parameters": [
                     {
                         "description": "Template data",
@@ -1687,6 +1737,7 @@
                     "Transactions"
                 ],
                 "summary": "Get all journal transactions",
+                "operationId": "getTransactions",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1712,6 +1763,7 @@
                     "Transactions"
                 ],
                 "summary": "Get balanced posting pairs",
+                "operationId": "getBalancedPostings",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2231,10 +2283,16 @@
                         "$ref": "#/definitions/dto.LedgerErrorResponse"
                     }
                 },
+                "file": {
+                    "$ref": "#/definitions/dto.LedgerFileResponse"
+                },
                 "message": {
                     "type": "string"
                 },
                 "saved": {
+                    "type": "boolean"
+                },
+                "synced": {
                     "type": "boolean"
                 }
             }
@@ -2247,6 +2305,9 @@
                     "items": {
                         "$ref": "#/definitions/dto.LedgerErrorResponse"
                     }
+                },
+                "output": {
+                    "type": "string"
                 }
             }
         },
@@ -2710,6 +2771,12 @@
                     "type": "string"
                 },
                 "line": {
+                    "type": "integer"
+                },
+                "line_from": {
+                    "type": "integer"
+                },
+                "line_to": {
                     "type": "integer"
                 },
                 "message": {

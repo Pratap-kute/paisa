@@ -180,12 +180,15 @@ export interface DtoEditorFilesResponse {
 
 export interface DtoEditorSaveResponse {
   errors?: DtoLedgerErrorResponse[];
+  file?: DtoLedgerFileResponse;
   message?: string;
   saved?: boolean;
+  synced?: boolean;
 }
 
 export interface DtoEditorValidateResponse {
   errors?: DtoLedgerErrorResponse[];
+  output?: string;
 }
 
 export interface DtoErrorResponse {
@@ -339,6 +342,8 @@ export interface DtoIssueResponse {
 export interface DtoLedgerErrorResponse {
   file?: string;
   line?: number;
+  line_from?: number;
+  line_to?: number;
   message?: string;
 }
 
@@ -647,18 +652,10 @@ export interface ServerSyncRequest {
   prices?: boolean;
 }
 
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  HeadersDefaults,
-  ResponseType,
-} from "axios";
-import axios from "axios";
-
 export type QueryParamsType = Record<string | number, any>;
+export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams extends Omit<RequestInit, "body"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -668,9 +665,13 @@ export interface FullRequestParams
   /** query params */
   query?: QueryParamsType;
   /** format of response (i.e. response.json() -> format: "json") */
-  format?: ResponseType;
+  format?: ResponseFormat;
   /** request body */
   body?: unknown;
+  /** base url */
+  baseUrl?: string;
+  /** request cancellation token */
+  cancelToken?: CancelToken;
 }
 
 export type RequestParams = Omit<
@@ -678,14 +679,22 @@ export type RequestParams = Omit<
   "body" | "method" | "query" | "path"
 >;
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+export interface ApiConfig<SecurityDataType = unknown> {
+  baseUrl?: string;
+  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
   securityWorker?: (
     securityData: SecurityDataType | null,
-  ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
-  secure?: boolean;
-  format?: ResponseType;
+  ) => Promise<RequestParams | void> | RequestParams | void;
+  customFetch?: typeof fetch;
 }
+
+export interface HttpResponse<D extends unknown, E extends unknown = unknown>
+  extends Response {
+  data: D;
+  error: E;
+}
+
+type CancelToken = Symbol | string | number;
 
 export enum ContentType {
   Json = "application/json",
@@ -696,130 +705,206 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public instance: AxiosInstance;
+  public baseUrl: string = "/api";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
-  private secure?: boolean;
-  private format?: ResponseType;
+  private abortControllers = new Map<CancelToken, AbortController>();
+  private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
+    fetch(...fetchParams);
 
-  constructor({
-    securityWorker,
-    secure,
-    format,
-    ...axiosConfig
-  }: ApiConfig<SecurityDataType> = {}) {
-    this.instance = axios.create({
-      ...axiosConfig,
-      baseURL: axiosConfig.baseURL || "/api",
-    });
-    this.secure = secure;
-    this.format = format;
-    this.securityWorker = securityWorker;
+  private baseApiParams: RequestParams = {
+    credentials: "same-origin",
+    headers: {},
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+  };
+
+  constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
+    Object.assign(this, apiConfig);
   }
 
   public setSecurityData = (data: SecurityDataType | null) => {
     this.securityData = data;
   };
 
-  protected mergeRequestParams(
-    params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig,
-  ): AxiosRequestConfig {
-    const method = params1.method || (params2 && params2.method);
+  protected encodeQueryParam(key: string, value: any) {
+    const encodedKey = encodeURIComponent(key);
+    return `${encodedKey}=${
+      encodeURIComponent(typeof value === "number" ? value : `${value}`)
+    }`;
+  }
 
+  protected addQueryParam(query: QueryParamsType, key: string) {
+    return this.encodeQueryParam(key, query[key]);
+  }
+
+  protected addArrayQueryParam(query: QueryParamsType, key: string) {
+    const value = query[key];
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
+  }
+
+  protected toQueryString(rawQuery?: QueryParamsType): string {
+    const query = rawQuery || {};
+    const keys = Object.keys(query).filter(
+      (key) => "undefined" !== typeof query[key],
+    );
+    return keys
+      .map((key) =>
+        Array.isArray(query[key])
+          ? this.addArrayQueryParam(query, key)
+          : this.addQueryParam(query, key)
+      )
+      .join("&");
+  }
+
+  protected addQueryParams(rawQuery?: QueryParamsType): string {
+    const queryString = this.toQueryString(rawQuery);
+    return queryString ? `?${queryString}` : "";
+  }
+
+  private contentFormatters: Record<ContentType, (input: any) => any> = {
+    [ContentType.Json]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.JsonApi]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.Text]: (input: any) =>
+      input !== null && typeof input !== "string"
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.FormData]: (input: any) => {
+      if (input instanceof FormData) {
+        return input;
+      }
+
+      return Object.keys(input || {}).reduce((formData, key) => {
+        const property = input[key];
+        formData.append(
+          key,
+          property instanceof Blob
+            ? property
+            : typeof property === "object" && property !== null
+            ? JSON.stringify(property)
+            : `${property}`,
+        );
+        return formData;
+      }, new FormData());
+    },
+    [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
+  };
+
+  protected mergeRequestParams(
+    params1: RequestParams,
+    params2?: RequestParams,
+  ): RequestParams {
     return {
-      ...this.instance.defaults,
+      ...this.baseApiParams,
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
-          {}),
+        ...(this.baseApiParams.headers || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
     };
   }
 
-  protected stringifyFormItem(formItem: unknown) {
-    if (typeof formItem === "object" && formItem !== null) {
-      return JSON.stringify(formItem);
-    } else {
-      return `${formItem}`;
-    }
-  }
-
-  protected createFormData(input: Record<string, unknown>): FormData {
-    if (input instanceof FormData) {
-      return input;
-    }
-    return Object.keys(input || {}).reduce((formData, key) => {
-      const property = input[key];
-      const propertyContent: any[] =
-        property instanceof Array ? property : [property];
-
-      for (const formItem of propertyContent) {
-        const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem),
-        );
+  protected createAbortSignal = (
+    cancelToken: CancelToken,
+  ): AbortSignal | undefined => {
+    if (this.abortControllers.has(cancelToken)) {
+      const abortController = this.abortControllers.get(cancelToken);
+      if (abortController) {
+        return abortController.signal;
       }
+      return void 0;
+    }
 
-      return formData;
-    }, new FormData());
-  }
+    const abortController = new AbortController();
+    this.abortControllers.set(cancelToken, abortController);
+    return abortController.signal;
+  };
 
-  public request = async <T = any, _E = any>({
+  public abortRequest = (cancelToken: CancelToken) => {
+    const abortController = this.abortControllers.get(cancelToken);
+
+    if (abortController) {
+      abortController.abort();
+      this.abortControllers.delete(cancelToken);
+    }
+  };
+
+  public request = async <T = any, E = any>({
+    body,
     secure,
     path,
     type,
     query,
     format,
-    body,
+    baseUrl,
+    cancelToken,
     ...params
   }: FullRequestParams): Promise<T> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.secure) &&
+      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
     const requestParams = this.mergeRequestParams(params, secureParams);
-    const responseFormat = format || this.format || undefined;
+    const queryString = query && this.toQueryString(query);
+    const payloadFormatter = this.contentFormatters[type || ContentType.Json];
+    const responseFormat = format || requestParams.format;
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === "object"
-    ) {
-      body = this.createFormData(body as Record<string, unknown>);
-    }
-
-    if (
-      type === ContentType.Text &&
-      body &&
-      body !== null &&
-      typeof body !== "string"
-    ) {
-      body = JSON.stringify(body);
-    }
-
-    return this.instance
-      .request({
+    return this.customFetch(
+      `${baseUrl || this.baseUrl || ""}${path}${
+        queryString ? `?${queryString}` : ""
+      }`,
+      {
         ...requestParams,
         headers: {
           ...(requestParams.headers || {}),
-          ...(type ? { "Content-Type": type } : {}),
+          ...(type && type !== ContentType.FormData
+            ? { "Content-Type": type }
+            : {}),
         },
-        params: query,
-        responseType: responseFormat,
-        data: body,
-        url: path,
-      })
-      .then((response) => response.data);
+        signal:
+          (cancelToken
+            ? this.createAbortSignal(cancelToken)
+            : requestParams.signal) || null,
+        body: typeof body === "undefined" || body === null
+          ? null
+          : payloadFormatter(body),
+      },
+    ).then(async (response) => {
+      const r = response as HttpResponse<T, E>;
+      r.data = null as unknown as T;
+      r.error = null as unknown as E;
+
+      const responseToParse = responseFormat ? response.clone() : response;
+      const data = !responseFormat ? r : await responseToParse[responseFormat]()
+        .then((data) => {
+          if (r.ok) {
+            r.data = data;
+          } else {
+            r.error = data;
+          }
+          return r;
+        })
+        .catch((e) => {
+          r.error = e;
+          return r;
+        });
+
+      if (cancelToken) {
+        this.abortControllers.delete(cancelToken);
+      }
+
+      if (!response.ok) throw data;
+      return data.data;
+    });
   };
 }
 
@@ -843,12 +928,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns TF-IDF prediction model data
      *
      * @tags Predictions
-     * @name TfIdfList
+     * @name GetTfIdf
      * @summary Get TF-IDF machine learning model for payee-account prediction
      * @request GET:/account/tf_idf
      * @secure
      */
-    tfIdfList: (params: RequestParams = {}) =>
+    getTfIdf: (params: RequestParams = {}) =>
       this.http.request<DtoTfIdfResponse, any>({
         path: `/account/tf_idf`,
         method: "GET",
@@ -862,12 +947,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns asset allocation targets and current asset distribution
      *
      * @tags Allocation
-     * @name AllocationList
+     * @name GetAllocation
      * @summary Get asset class allocations
      * @request GET:/allocation
      * @secure
      */
-    allocationList: (params: RequestParams = {}) =>
+    getAllocation: (params: RequestParams = {}) =>
       this.http.request<DtoAllocationResponse, any>({
         path: `/allocation`,
         method: "GET",
@@ -881,12 +966,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns balance breakdown for asset accounts
      *
      * @tags Assets
-     * @name BalanceList
+     * @name GetAssetsBalance
      * @summary Get current asset balances and breakdowns
      * @request GET:/assets/balance
      * @secure
      */
-    balanceList: (params: RequestParams = {}) =>
+    getAssetsBalance: (params: RequestParams = {}) =>
       this.http.request<DtoAssetsBalanceResponse, any>({
         path: `/assets/balance`,
         method: "GET",
@@ -900,12 +985,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns monthly budget allocations, spending actuals, variances, and rollover balances
      *
      * @tags Budget
-     * @name BudgetList
+     * @name GetBudget
      * @summary Get budget forecasts and actuals
      * @request GET:/budget
      * @secure
      */
-    budgetList: (params: RequestParams = {}) =>
+    getBudget: (params: RequestParams = {}) =>
       this.http.request<DtoBudgetsSummaryResponse, any>({
         path: `/budget`,
         method: "GET",
@@ -919,12 +1004,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes FIFO realized capital gains grouped by financial year
      *
      * @tags Tax
-     * @name CapitalGainsList
+     * @name GetCapitalGains
      * @summary Get FIFO realized capital gains
      * @request GET:/capital_gains
      * @secure
      */
-    capitalGainsList: (params: RequestParams = {}) =>
+    getCapitalGains: (params: RequestParams = {}) =>
       this.http.request<DtoCapitalGainsResponse, any>({
         path: `/capital_gains`,
         method: "GET",
@@ -938,12 +1023,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns monthly cash flow breakdown including inflows, outflows, and net changes
      *
      * @tags Cash Flow
-     * @name CashFlowList
+     * @name GetCashFlow
      * @summary Get monthly cash flow statement
      * @request GET:/cash_flow
      * @secure
      */
-    cashFlowList: (params: RequestParams = {}) =>
+    getCashFlow: (params: RequestParams = {}) =>
       this.http.request<DtoCashFlowsResponse, any>({
         path: `/cash_flow`,
         method: "GET",
@@ -957,12 +1042,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns public configuration, account list, current time override, and JSON validation schema
      *
      * @tags Configuration
-     * @name ConfigList
+     * @name GetConfig
      * @summary Get application configuration and metadata
      * @request GET:/config
      * @secure
      */
-    configList: (params: RequestParams = {}) =>
+    getConfig: (params: RequestParams = {}) =>
       this.http.request<DtoPublicConfigResponse, any>({
         path: `/config`,
         method: "GET",
@@ -975,12 +1060,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Overwrites the paisa.yaml configuration file. No-op in readonly mode.
      *
      * @tags Configuration
-     * @name ConfigCreate
+     * @name SaveConfig
      * @summary Save configuration YAML
      * @request POST:/config
      * @secure
      */
-    configCreate: (config: string, params: RequestParams = {}) =>
+    saveConfig: (config: string, params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, DtoErrorResponse>({
         path: `/config`,
         method: "POST",
@@ -996,12 +1081,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns credit card balances, due dates, and statements
      *
      * @tags Credit Cards
-     * @name CreditCardsList
+     * @name GetCreditCards
      * @summary Get all credit cards summaries and billing cycles
      * @request GET:/credit_cards
      * @secure
      */
-    creditCardsList: (params: RequestParams = {}) =>
+    getCreditCards: (params: RequestParams = {}) =>
       this.http.request<DtoCreditCardsResponse, any>({
         path: `/credit_cards`,
         method: "GET",
@@ -1014,12 +1099,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns credit card details for a single account
      *
      * @tags Credit Cards
-     * @name CreditCardsDetail
+     * @name GetCreditCard
      * @summary Get credit card summary for a specific account
      * @request GET:/credit_cards/{account}
      * @secure
      */
-    creditCardsDetail: (account: string, params: RequestParams = {}) =>
+    getCreditCard: (account: string, params: RequestParams = {}) =>
       this.http.request<DtoCreditCardSummaryResponse, any>({
         path: `/credit_cards/${account}`,
         method: "GET",
@@ -1033,12 +1118,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns consolidated KPI summaries across net worth, expenses, budgets, and investments
      *
      * @tags Dashboard
-     * @name DashboardList
+     * @name GetDashboard
      * @summary Get dashboard financial summary
      * @request GET:/dashboard
      * @secure
      */
-    dashboardList: (params: RequestParams = {}) =>
+    getDashboard: (params: RequestParams = {}) =>
       this.http.request<DtoDashboardResponse, any>({
         path: `/dashboard`,
         method: "GET",
@@ -1052,12 +1137,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Runs system diagnostics and returns detected issues
      *
      * @tags Diagnosis
-     * @name DiagnosisList
+     * @name GetDiagnosis
      * @summary Run system diagnostic health checks
      * @request GET:/diagnosis
      * @secure
      */
-    diagnosisList: (params: RequestParams = {}) =>
+    getDiagnosis: (params: RequestParams = {}) =>
       this.http.request<DtoDiagnosisResponse, any>({
         path: `/diagnosis`,
         method: "GET",
@@ -1071,12 +1156,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns contents and version history of a ledger file
      *
      * @tags Editor
-     * @name FileCreate
+     * @name GetEditorFile
      * @summary Read a specific ledger file and its backup versions
      * @request POST:/editor/file
      * @secure
      */
-    fileCreate: (file: DtoLedgerFileRequest, params: RequestParams = {}) =>
+    getEditorFile: (file: DtoLedgerFileRequest, params: RequestParams = {}) =>
       this.http.request<DtoLedgerFileResponse, DtoErrorResponse>({
         path: `/editor/file`,
         method: "POST",
@@ -1091,12 +1176,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Deletes all timestamped backup files for a ledger file
      *
      * @tags Editor
-     * @name FileDeleteBackupsCreate
+     * @name DeleteEditorBackups
      * @summary Delete backup versions for a ledger file
      * @request POST:/editor/file/delete_backups
      * @secure
      */
-    fileDeleteBackupsCreate: (
+    deleteEditorBackups: (
       file: DtoLedgerFileRequest,
       params: RequestParams = {},
     ) =>
@@ -1114,12 +1199,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns all ledger files and their current postings
      *
      * @tags Editor
-     * @name FilesList
+     * @name GetEditorFiles
      * @summary List all ledger files in journal directory
      * @request GET:/editor/files
      * @secure
      */
-    filesList: (params: RequestParams = {}) =>
+    getEditorFiles: (params: RequestParams = {}) =>
       this.http.request<DtoEditorFilesResponse, any>({
         path: `/editor/files`,
         method: "GET",
@@ -1132,12 +1217,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Atomically writes ledger file with automatic timestamped backup. No-op in readonly mode.
      *
      * @tags Editor
-     * @name SaveCreate
+     * @name SaveEditorFile
      * @summary Save ledger file and trigger database synchronization
      * @request POST:/editor/save
      * @secure
      */
-    saveCreate: (file: DtoLedgerFileRequest, params: RequestParams = {}) =>
+    saveEditorFile: (file: DtoLedgerFileRequest, params: RequestParams = {}) =>
       this.http.request<DtoEditorSaveResponse, DtoErrorResponse>({
         path: `/editor/save`,
         method: "POST",
@@ -1152,12 +1237,15 @@ export class Api<SecurityDataType extends unknown> {
      * @description Parses and validates ledger file syntax without saving
      *
      * @tags Editor
-     * @name ValidateCreate
+     * @name ValidateEditorFile
      * @summary Validate ledger file syntax
      * @request POST:/editor/validate
      * @secure
      */
-    validateCreate: (file: DtoLedgerFileRequest, params: RequestParams = {}) =>
+    validateEditorFile: (
+      file: DtoLedgerFileRequest,
+      params: RequestParams = {},
+    ) =>
       this.http.request<DtoEditorValidateResponse, DtoErrorResponse>({
         path: `/editor/validate`,
         method: "POST",
@@ -1173,12 +1261,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes hierarchical flow graph and periodic expense summaries
      *
      * @tags Expenses
-     * @name ExpenseList
+     * @name GetExpense
      * @summary Get expense hierarchy graph and breakdown
      * @request GET:/expense
      * @secure
      */
-    expenseList: (params: RequestParams = {}) =>
+    getExpense: (params: RequestParams = {}) =>
       this.http.request<DtoExpenseResponse, any>({
         path: `/expense`,
         method: "GET",
@@ -1192,12 +1280,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes realized, unrealized gains and annualized XIRR returns across accounts
      *
      * @tags Gains
-     * @name GainList
+     * @name GetGain
      * @summary Get investment gains and XIRR performance
      * @request GET:/gain
      * @secure
      */
-    gainList: (params: RequestParams = {}) =>
+    getGain: (params: RequestParams = {}) =>
       this.http.request<DtoGainsResponse, any>({
         path: `/gain`,
         method: "GET",
@@ -1210,12 +1298,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes realized and unrealized gain for a single investment account
      *
      * @tags Gains
-     * @name GainDetail
+     * @name GetAccountGain
      * @summary Get investment gain for a specific account
      * @request GET:/gain/{account}
      * @secure
      */
-    gainDetail: (account: string, params: RequestParams = {}) =>
+    getAccountGain: (account: string, params: RequestParams = {}) =>
       this.http.request<DtoAccountGainResponse, any>({
         path: `/gain/${account}`,
         method: "GET",
@@ -1229,12 +1317,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns summary and progress percentage for all configured goals
      *
      * @tags Goals
-     * @name GoalsList
+     * @name GetGoals
      * @summary List savings and retirement goals summaries
      * @request GET:/goals
      * @secure
      */
-    goalsList: (params: RequestParams = {}) =>
+    getGoals: (params: RequestParams = {}) =>
       this.http.request<DtoGoalSummariesResponse, any>({
         path: `/goals`,
         method: "GET",
@@ -1247,12 +1335,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns progress, projections, and monthly timeline for a single goal
      *
      * @tags Goals
-     * @name GoalsDetail
+     * @name GetGoalDetails
      * @summary Get details for a specific goal
      * @request GET:/goals/{type}/{name}
      * @secure
      */
-    goalsDetail: (type: string, name: string, params: RequestParams = {}) =>
+    getGoalDetails: (type: string, name: string, params: RequestParams = {}) =>
       this.http.request<DtoGoalDetailResponse, any>({
         path: `/goals/${type}/${name}`,
         method: "GET",
@@ -1266,12 +1354,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns tax harvesting opportunities and current gains
      *
      * @tags Tax
-     * @name HarvestList
+     * @name GetHarvest
      * @summary Get tax harvesting opportunities
      * @request GET:/harvest
      * @secure
      */
-    harvestList: (params: RequestParams = {}) =>
+    getHarvest: (params: RequestParams = {}) =>
       this.http.request<DtoHarvestResponse, any>({
         path: `/harvest`,
         method: "GET",
@@ -1285,12 +1373,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns gross income, taxes, net income, and periodic income timelines
      *
      * @tags Income
-     * @name IncomeList
+     * @name GetIncome
      * @summary Get income timeline and yearly summary
      * @request GET:/income
      * @secure
      */
-    incomeList: (params: RequestParams = {}) =>
+    getIncome: (params: RequestParams = {}) =>
       this.http.request<DtoIncomeResponse, any>({
         path: `/income`,
         method: "GET",
@@ -1304,12 +1392,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns yearly income statements with income, expenses, interest, and taxes
      *
      * @tags Income Statement
-     * @name IncomeStatementList
+     * @name GetIncomeStatement
      * @summary Get financial-year income statements
      * @request GET:/income_statement
      * @secure
      */
-    incomeStatementList: (params: RequestParams = {}) =>
+    getIncomeStatement: (params: RequestParams = {}) =>
       this.http.request<DtoIncomeStatementResponse, any>({
         path: `/income_statement`,
         method: "GET",
@@ -1323,12 +1411,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Generates demo ledger data and configuration. No-op in readonly mode.
      *
      * @tags Initialization
-     * @name InitCreate
+     * @name InitDemoData
      * @summary Initialize demo data
      * @request POST:/init
      * @secure
      */
-    initCreate: (params: RequestParams = {}) =>
+    initDemoData: (params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, DtoErrorResponse>({
         path: `/init`,
         method: "POST",
@@ -1342,12 +1430,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns yearly investment cards and savings rate metrics
      *
      * @tags Investments
-     * @name InvestmentList
+     * @name GetInvestment
      * @summary Get investment summary and savings rate
      * @request GET:/investment
      * @secure
      */
-    investmentList: (params: RequestParams = {}) =>
+    getInvestment: (params: RequestParams = {}) =>
       this.http.request<DtoInvestmentResponse, any>({
         path: `/investment`,
         method: "GET",
@@ -1361,12 +1449,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns flat array of all journal postings with computed balances and market values
      *
      * @tags Ledger
-     * @name LedgerList
+     * @name GetLedger
      * @summary Get all ledger postings with market valuation
      * @request GET:/ledger
      * @secure
      */
-    ledgerList: (params: RequestParams = {}) =>
+    getLedger: (params: RequestParams = {}) =>
       this.http.request<DtoPostingResponse[], any>({
         path: `/ledger`,
         method: "GET",
@@ -1380,12 +1468,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes outstanding loan balances
      *
      * @tags Liabilities
-     * @name BalanceList
+     * @name GetLiabilitiesBalance
      * @summary Get loan balances and breakdowns
      * @request GET:/liabilities/balance
      * @secure
      */
-    balanceList: (params: RequestParams = {}) =>
+    getLiabilitiesBalance: (params: RequestParams = {}) =>
       this.http.request<DtoLiabilitiesBalanceResponse, any>({
         path: `/liabilities/balance`,
         method: "GET",
@@ -1398,12 +1486,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes interest payments and effective APR across loans
      *
      * @tags Liabilities
-     * @name InterestList
+     * @name GetLiabilitiesInterest
      * @summary Get loan interest and APR calculations
      * @request GET:/liabilities/interest
      * @secure
      */
-    interestList: (params: RequestParams = {}) =>
+    getLiabilitiesInterest: (params: RequestParams = {}) =>
       this.http.request<DtoLiabilitiesInterestResponse, any>({
         path: `/liabilities/interest`,
         method: "GET",
@@ -1416,12 +1504,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns loan repayment postings
      *
      * @tags Liabilities
-     * @name RepaymentList
+     * @name GetLiabilitiesRepayment
      * @summary Get loan repayment history
      * @request GET:/liabilities/repayment
      * @secure
      */
-    repaymentList: (params: RequestParams = {}) =>
+    getLiabilitiesRepayment: (params: RequestParams = {}) =>
       this.http.request<DtoLiabilitiesRepaymentResponse, any>({
         path: `/liabilities/repayment`,
         method: "GET",
@@ -1435,12 +1523,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns recent application log lines
      *
      * @tags Logs
-     * @name LogsList
+     * @name GetLogs
      * @summary Get application log entries
      * @request GET:/logs
      * @secure
      */
-    logsList: (params: RequestParams = {}) =>
+    getLogs: (params: RequestParams = {}) =>
       this.http.request<string[], any>({
         path: `/logs`,
         method: "GET",
@@ -1454,12 +1542,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns the current net-worth analysis and historical timeline
      *
      * @tags Net Worth
-     * @name NetworthList
+     * @name GetNetworth
      * @summary Get net worth
      * @request GET:/networth
      * @secure
      */
-    networthList: (params: RequestParams = {}) =>
+    getNetworth: (params: RequestParams = {}) =>
       this.http.request<DtoNetworthResponse, any>({
         path: `/networth`,
         method: "GET",
@@ -1473,11 +1561,11 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns success indicator when service is healthy
      *
      * @tags System
-     * @name PingList
+     * @name GetPing
      * @summary Health check / ping
      * @request GET:/ping
      */
-    pingList: (params: RequestParams = {}) =>
+    getPing: (params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, any>({
         path: `/ping`,
         method: "GET",
@@ -1490,12 +1578,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns asset allocations grouped by portfolio
      *
      * @tags Allocation
-     * @name PortfolioAllocationList
+     * @name GetPortfolioAllocation
      * @summary Get portfolio-grouped allocations
      * @request GET:/portfolio_allocation
      * @secure
      */
-    portfolioAllocationList: (params: RequestParams = {}) =>
+    getPortfolioAllocation: (params: RequestParams = {}) =>
       this.http.request<DtoPortfolioAllocationResponse, any>({
         path: `/portfolio_allocation`,
         method: "GET",
@@ -1509,12 +1597,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns prediction history records
      *
      * @tags Predictions
-     * @name HistoryList
+     * @name GetPredictionHistory
      * @summary Get prediction history
      * @request GET:/prediction/history
      * @secure
      */
-    historyList: (params: RequestParams = {}) =>
+    getPredictionHistory: (params: RequestParams = {}) =>
       this.http.request<DtoPredictionHistoryEntryResponse[], any>({
         path: `/prediction/history`,
         method: "GET",
@@ -1528,12 +1616,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns price histories grouped by commodity
      *
      * @tags Prices
-     * @name PriceList
+     * @name GetPrices
      * @summary Get all cached commodity prices
      * @request GET:/price
      * @secure
      */
-    priceList: (params: RequestParams = {}) =>
+    getPrices: (params: RequestParams = {}) =>
       this.http.request<DtoPricesResponse, any>({
         path: `/price`,
         method: "GET",
@@ -1546,12 +1634,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Searches ticker symbols from configured scrapers
      *
      * @tags Prices
-     * @name AutocompleteCreate
+     * @name GetPriceAutoCompletions
      * @summary Autocomplete commodity or ticker symbols
      * @request POST:/price/autocomplete
      * @secure
      */
-    autocompleteCreate: (
+    getPriceAutoCompletions: (
       request: ServerAutoCompleteRequest,
       params: RequestParams = {},
     ) =>
@@ -1569,12 +1657,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Clears in-memory and database cached commodity prices. No-op in readonly mode.
      *
      * @tags Prices
-     * @name DeleteCreate
+     * @name ClearPriceCache
      * @summary Clear cached market prices
      * @request POST:/price/delete
      * @secure
      */
-    deleteCreate: (params: RequestParams = {}) =>
+    clearPriceCache: (params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, any>({
         path: `/price/delete`,
         method: "POST",
@@ -1587,12 +1675,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns registered price scraping providers and their sync status
      *
      * @tags Prices
-     * @name ProvidersList
+     * @name GetPriceProviders
      * @summary Get configured price providers
      * @request GET:/price/providers
      * @secure
      */
-    providersList: (params: RequestParams = {}) =>
+    getPriceProviders: (params: RequestParams = {}) =>
       this.http.request<DtoPriceProvidersResponse, any>({
         path: `/price/providers`,
         method: "GET",
@@ -1605,12 +1693,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Clears cached commodity prices for a specific provider. No-op in readonly mode.
      *
      * @tags Prices
-     * @name ProvidersDeleteCreate
+     * @name ClearPriceProviderCache
      * @summary Clear price cache for a specific provider
      * @request POST:/price/providers/delete/{provider}
      * @secure
      */
-    providersDeleteCreate: (provider: string, params: RequestParams = {}) =>
+    clearPriceProviderCache: (provider: string, params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, any>({
         path: `/price/providers/delete/${provider}`,
         method: "POST",
@@ -1624,12 +1712,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns recurring monthly or periodic transaction sequences
      *
      * @tags Recurring
-     * @name RecurringList
+     * @name GetRecurringTransactions
      * @summary Get recurring transaction sequences
      * @request GET:/recurring
      * @secure
      */
-    recurringList: (params: RequestParams = {}) =>
+    getRecurringTransactions: (params: RequestParams = {}) =>
       this.http.request<DtoRecurringTransactionsResponse, any>({
         path: `/recurring`,
         method: "GET",
@@ -1643,12 +1731,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Computes Schedule AL assets and liabilities report
      *
      * @tags Tax
-     * @name ScheduleAlList
+     * @name GetScheduleAl
      * @summary Get Schedule AL assets and liabilities report
      * @request GET:/schedule_al
      * @secure
      */
-    scheduleAlList: (params: RequestParams = {}) =>
+    getScheduleAl: (params: RequestParams = {}) =>
       this.http.request<DtoScheduleALMapResponse, any>({
         path: `/schedule_al`,
         method: "GET",
@@ -1662,12 +1750,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns contents and version history of a sheet file
      *
      * @tags Sheets
-     * @name FileCreate
+     * @name GetSheetFile
      * @summary Read a specific .paisa sheet file
      * @request POST:/sheets/file
      * @secure
      */
-    fileCreate: (file: DtoSheetFileRequest, params: RequestParams = {}) =>
+    getSheetFile: (file: DtoSheetFileRequest, params: RequestParams = {}) =>
       this.http.request<DtoSheetFileResponse, DtoErrorResponse>({
         path: `/sheets/file`,
         method: "POST",
@@ -1682,12 +1770,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Deletes all timestamped backup files for a sheet file
      *
      * @tags Sheets
-     * @name FileDeleteBackupsCreate
+     * @name DeleteSheetBackups
      * @summary Delete backup versions for a sheet file
      * @request POST:/sheets/file/delete_backups
      * @secure
      */
-    fileDeleteBackupsCreate: (
+    deleteSheetBackups: (
       file: DtoSheetFileRequest,
       params: RequestParams = {},
     ) =>
@@ -1705,12 +1793,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns list of .paisa sheet files
      *
      * @tags Sheets
-     * @name FilesList
+     * @name GetSheetFiles
      * @summary List all .paisa sheet query files
      * @request GET:/sheets/files
      * @secure
      */
-    filesList: (params: RequestParams = {}) =>
+    getSheetFiles: (params: RequestParams = {}) =>
       this.http.request<DtoSheetsResponse, any>({
         path: `/sheets/files`,
         method: "GET",
@@ -1723,12 +1811,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Atomically writes .paisa sheet file with timestamped backup. No-op in readonly mode.
      *
      * @tags Sheets
-     * @name SaveCreate
+     * @name SaveSheetFile
      * @summary Save a .paisa sheet file
      * @request POST:/sheets/save
      * @secure
      */
-    saveCreate: (file: DtoSheetFileRequest, params: RequestParams = {}) =>
+    saveSheetFile: (file: DtoSheetFileRequest, params: RequestParams = {}) =>
       this.http.request<DtoSheetSaveResponse, DtoErrorResponse>({
         path: `/sheets/save`,
         method: "POST",
@@ -1744,12 +1832,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Parses journal files, scrapes external commodity prices, and synchronizes portfolio data into SQLite
      *
      * @tags Sync
-     * @name SyncCreate
+     * @name SyncData
      * @summary Synchronize journal, prices, and portfolios into SQLite
      * @request POST:/sync
      * @secure
      */
-    syncCreate: (request: ServerSyncRequest, params: RequestParams = {}) =>
+    syncData: (request: ServerSyncRequest, params: RequestParams = {}) =>
       this.http.request<DtoSuccessResponse, DtoErrorResponse>({
         path: `/sync`,
         method: "POST",
@@ -1765,12 +1853,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns builtin and custom transaction templates
      *
      * @tags Templates
-     * @name TemplatesList
+     * @name GetTemplates
      * @summary List all transaction templates
      * @request GET:/templates
      * @secure
      */
-    templatesList: (params: RequestParams = {}) =>
+    getTemplates: (params: RequestParams = {}) =>
       this.http.request<DtoTemplatesResponse, any>({
         path: `/templates`,
         method: "GET",
@@ -1783,12 +1871,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Deletes a custom transaction template from paisa.yaml. No-op in readonly mode.
      *
      * @tags Templates
-     * @name DeleteCreate
+     * @name DeleteTemplate
      * @summary Delete a transaction template
      * @request POST:/templates/delete
      * @secure
      */
-    deleteCreate: (
+    deleteTemplate: (
       request: DtoTemplateDeleteRequest,
       params: RequestParams = {},
     ) =>
@@ -1809,12 +1897,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Saves a custom transaction template in paisa.yaml. No-op in readonly mode.
      *
      * @tags Templates
-     * @name UpsertCreate
+     * @name UpsertTemplate
      * @summary Create or update a transaction template
      * @request POST:/templates/upsert
      * @secure
      */
-    upsertCreate: (
+    upsertTemplate: (
       request: DtoTemplateUpsertRequest,
       params: RequestParams = {},
     ) =>
@@ -1836,12 +1924,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns transactions with embedded postings
      *
      * @tags Transactions
-     * @name TransactionList
+     * @name GetTransactions
      * @summary Get all journal transactions
      * @request GET:/transaction
      * @secure
      */
-    transactionList: (params: RequestParams = {}) =>
+    getTransactions: (params: RequestParams = {}) =>
       this.http.request<DtoTransactionsResponse, any>({
         path: `/transaction`,
         method: "GET",
@@ -1854,12 +1942,12 @@ export class Api<SecurityDataType extends unknown> {
      * @description Returns balanced from/to posting pairs
      *
      * @tags Transactions
-     * @name BalancedList
+     * @name GetBalancedPostings
      * @summary Get balanced posting pairs
      * @request GET:/transaction/balanced
      * @secure
      */
-    balancedList: (params: RequestParams = {}) =>
+    getBalancedPostings: (params: RequestParams = {}) =>
       this.http.request<DtoBalancedPostingResponse[], any>({
         path: `/transaction/balanced`,
         method: "GET",
