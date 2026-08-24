@@ -15,9 +15,28 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
-	"github.com/snowzach/rotatefilehook"
 	"github.com/spf13/cobra"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+type LumberjackLogrusHook struct {
+	Writer    *lumberjack.Logger
+	LogLevels []log.Level
+	Formatter log.Formatter
+}
+
+func (h *LumberjackLogrusHook) Levels() []log.Level {
+	return h.LogLevels
+}
+
+func (h *LumberjackLogrusHook) Fire(entry *log.Entry) error {
+	line, err := h.Formatter.Format(entry)
+	if err != nil {
+		return err
+	}
+	_, err = h.Writer.Write(line)
+	return err
+}
 
 var (
 	configFile string
@@ -82,17 +101,22 @@ func InitLogger(desktop bool, hook log.Hook) {
 	if os.Getenv("PAISA_DISABLE_LOG_FILE") != envTrue {
 		p, err := config.EnsureLogFilePath()
 		if err == nil {
-			rotateFileHook, err := rotatefilehook.NewRotateFileHook(rotatefilehook.RotateFileConfig{
-				Filename:   p,
-				MaxSize:    50,
-				MaxBackups: 7,
-				MaxAge:     30,
-				Level:      log.InfoLevel,
-				Formatter:  &log.JSONFormatter{},
+			log.AddHook(&LumberjackLogrusHook{
+				Writer: &lumberjack.Logger{
+					Filename:   p,
+					MaxSize:    50,
+					MaxBackups: 7,
+					MaxAge:     30,
+				},
+				LogLevels: []log.Level{
+					log.PanicLevel,
+					log.FatalLevel,
+					log.ErrorLevel,
+					log.WarnLevel,
+					log.InfoLevel,
+				},
+				Formatter: &log.JSONFormatter{},
 			})
-			if err == nil {
-				log.AddHook(rotateFileHook)
-			}
 		}
 	}
 

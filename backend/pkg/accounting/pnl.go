@@ -1,11 +1,12 @@
 package accounting
 
 import (
+	"slices"
+
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
 )
 
 type BalancedPosting struct {

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/google/btree"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -48,10 +48,6 @@ type TimeSeriesDailyReponse struct {
 type AlphaVantageExchangePrice struct {
 	Date  time.Time
 	Close decimal.Decimal
-}
-
-func (p AlphaVantageExchangePrice) Less(o btree.Item) bool {
-	return p.Date.Before(o.(AlphaVantageExchangePrice).Date)
 }
 
 func fetch[R any](url string, response *R) error {
@@ -107,7 +103,7 @@ func getHistory(code, commodityName string) ([]*price.Price, error) {
 		return nil, err
 	}
 
-	var exchangePrice *btree.BTree
+	var exchangePrice []AlphaVantageExchangePrice
 	needExchangePrice := false
 	if !utils.IsCurrency(currency) {
 		needExchangePrice = true
@@ -119,7 +115,7 @@ func getHistory(code, commodityName string) ([]*price.Price, error) {
 			return nil, err
 		}
 
-		exchangePrice = btree.New(2)
+		exchangePrice = make([]AlphaVantageExchangePrice, 0, len(response.TimeSeriesFX))
 		for date, value := range response.TimeSeriesFX {
 			dateTime, err := time.ParseInLocation("2006-01-02", date, config.TimeZone())
 			if err != nil {
@@ -130,8 +126,11 @@ func getHistory(code, commodityName string) ([]*price.Price, error) {
 				return nil, err
 			}
 
-			exchangePrice.ReplaceOrInsert(AlphaVantageExchangePrice{Date: dateTime, Close: value})
+			exchangePrice = append(exchangePrice, AlphaVantageExchangePrice{Date: dateTime, Close: value})
 		}
+		slices.SortFunc(exchangePrice, func(a, b AlphaVantageExchangePrice) int {
+			return a.Date.Compare(b.Date)
+		})
 	}
 
 	var prices []*price.Price
@@ -146,8 +145,12 @@ func getHistory(code, commodityName string) ([]*price.Price, error) {
 		}
 
 		if needExchangePrice {
-			exchangePrice := utils.BTreeDescendFirstLessOrEqual(exchangePrice, AlphaVantageExchangePrice{Date: dateTime})
-			value = value.Mul(exchangePrice.Close)
+			ep, ok := utils.FindLatestLessOrEqual(exchangePrice, dateTime.UnixNano(), func(p AlphaVantageExchangePrice) int64 {
+				return p.Date.UnixNano()
+			})
+			if ok && !ep.Close.IsZero() {
+				value = value.Mul(ep.Close)
+			}
 		}
 
 		if value.IsZero() {

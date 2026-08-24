@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/google/btree"
 	"github.com/shopspring/decimal"
 )
 
@@ -17,10 +16,6 @@ type Price struct {
 	CommodityID   string               `gorm:"index:idx_prices_type_name_id,priority:3" json:"commodity_id"`
 	CommodityName string               `gorm:"index:idx_prices_type_name_id,priority:2" json:"commodity_name"`
 	Value         decimal.Decimal      `json:"value"`
-}
-
-func (p Price) Less(o btree.Item) bool {
-	return p.Date.Before(o.(Price).Date)
 }
 
 func DeleteAll(db *gorm.DB) error {

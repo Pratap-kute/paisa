@@ -1,12 +1,14 @@
 package cache
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/kelindar/binary"
-	"github.com/mitchellh/hashstructure/v2"
 	"gorm.io/gorm"
 )
 
@@ -40,25 +42,31 @@ func maybeGarbageCollect(db *gorm.DB) {
 	}
 }
 
+func computeHashKey(key any) string {
+	b, err := json.Marshal(key)
+	if err != nil {
+		b = []byte(fmt.Sprintf("%#v", key))
+	}
+	h := sha256.Sum256(b)
+	return hex.EncodeToString(h[:])
+}
+
 func Lookup[I any, K any](db *gorm.DB, key K, fallback func() I) I {
 	var item I
 	var cache Cache
 
 	maybeGarbageCollect(db)
 
-	hash, err := hashstructure.Hash(key, hashstructure.FormatV2, nil)
-	hashKey := fmt.Sprintf("%d", hash)
+	hashKey := computeHashKey(key)
+	err := db.Where("hash_key = ?", hashKey).First(&cache).Error
 	if err == nil {
-		err := db.Where("hash_key = ?", hashKey).First(&cache).Error
-		if err == nil {
-			if time.Now().Before(cache.ExpiresAt) {
-				err := binary.Unmarshal(cache.Value, &item)
-				if err == nil {
-					return item
-				}
-			} else {
-				_ = DeleteExpired(db)
+		if time.Now().Before(cache.ExpiresAt) {
+			err := binary.Unmarshal(cache.Value, &item)
+			if err == nil {
+				return item
 			}
+		} else {
+			_ = DeleteExpired(db)
 		}
 	}
 

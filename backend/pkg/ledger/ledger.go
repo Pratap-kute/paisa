@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gofrs/uuid"
-	"github.com/google/btree"
+	"github.com/gofrs/uuid/v5"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -781,7 +781,7 @@ func execHLedgerCommand(journalPath string, prices []price.Price, flags []string
 	return postings, nil
 }
 
-func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map[string]*btree.BTree, date time.Time) ([]*posting.Posting, error) {
+func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map[string][]price.Price, date time.Time) ([]*posting.Posting, error) {
 	forecast := false
 	postings := []*posting.Posting{}
 
@@ -883,24 +883,26 @@ func buildHLedgerPostings(p HLedgerPosting, t HLedgerTransaction, pricesTree map
 	return postings, nil
 }
 
-func buildPricesTree(prices []price.Price) map[string]*btree.BTree {
-	pricesTree := make(map[string]*btree.BTree)
-	for _, price := range prices {
-		if pricesTree[price.CommodityName] == nil {
-			pricesTree[price.CommodityName] = btree.New(2)
-		}
-
-		pricesTree[price.CommodityName].ReplaceOrInsert(price)
+func buildPricesTree(prices []price.Price) map[string][]price.Price {
+	pricesTree := make(map[string][]price.Price)
+	for _, p := range prices {
+		pricesTree[p.CommodityName] = append(pricesTree[p.CommodityName], p)
 	}
-
+	for commodity := range pricesTree {
+		slices.SortFunc(pricesTree[commodity], func(a, b price.Price) int {
+			return a.Date.Compare(b.Date)
+		})
+	}
 	return pricesTree
 }
 
-func lookupPrice(pricesTree map[string]*btree.BTree, commodity string, date time.Time) decimal.Decimal {
-	pt := pricesTree[commodity]
-	if pt != nil {
-		pc := utils.BTreeDescendFirstLessOrEqual(pt, price.Price{Date: date})
-		if !pc.Value.Equal(decimal.Zero) {
+func lookupPrice(pricesTree map[string][]price.Price, commodity string, date time.Time) decimal.Decimal {
+	prices := pricesTree[commodity]
+	if len(prices) > 0 {
+		pc, ok := utils.FindLatestLessOrEqual(prices, date.UnixNano(), func(p price.Price) int64 {
+			return p.Date.UnixNano()
+		})
+		if ok && !pc.Value.Equal(decimal.Zero) {
 			return pc.Value
 		}
 	}

@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"slices"
+
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/ananthakumaran/paisa/pkg/scraper/mutualfund"
 	"github.com/ananthakumaran/paisa/pkg/scraper/nps"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/google/btree"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ type GeneratorState struct {
 	NiftyBalance  float64
 }
 
-var pricesTree map[string]*btree.BTree
+var pricesTree map[string][]price.Price
 
 func MinimalConfig(cwd string) error {
 	configFilePath := filepath.Join(cwd, "paisa.yaml")
@@ -198,7 +199,9 @@ func emitTransaction(file *os.File, date time.Time, payee string, from string, t
 }
 
 func emitCommodityBuy(file *os.File, date time.Time, commodity string, from string, to string, amount float64) float64 {
-	pc := utils.BTreeDescendFirstLessOrEqual(pricesTree[commodity], price.Price{Date: date})
+	pc, _ := utils.FindLatestLessOrEqual(pricesTree[commodity], date.UnixNano(), func(p price.Price) int64 {
+		return p.Date.UnixNano()
+	})
 	priceVal := pc.Value.InexactFloat64()
 	if priceVal <= 0 {
 		priceVal = 10.0
@@ -213,7 +216,9 @@ func emitCommodityBuy(file *os.File, date time.Time, commodity string, from stri
 }
 
 func emitCommoditySell(file *os.File, date time.Time, commodity string, from string, to string, amount float64, availableUnits float64) (float64, float64) {
-	pc := utils.BTreeDescendFirstLessOrEqual(pricesTree[commodity], price.Price{Date: date})
+	pc, _ := utils.FindLatestLessOrEqual(pricesTree[commodity], date.UnixNano(), func(p price.Price) int64 {
+		return p.Date.UnixNano()
+	})
 	priceVal := pc.Value.InexactFloat64()
 	if priceVal <= 0 {
 		priceVal = 10.0
@@ -277,7 +282,7 @@ func generateFallbackPrices(schemeCode string, commodityType config.CommodityTyp
 	return prices
 }
 
-func loadPrices(schemeCode string, commodityType config.CommodityType, commodityName string, pricesTree map[string]*btree.BTree) {
+func loadPrices(schemeCode string, commodityType config.CommodityType, commodityName string, pricesTree map[string][]price.Price) {
 	var prices []*price.Price
 	var err error
 
@@ -297,10 +302,14 @@ func loadPrices(schemeCode string, commodityType config.CommodityType, commodity
 		prices = generateFallbackPrices(schemeCode, commodityType, commodityName)
 	}
 
-	pricesTree[commodityName] = btree.New(2)
+	pricesList := make([]price.Price, 0, len(prices))
 	for _, p := range prices {
-		pricesTree[commodityName].ReplaceOrInsert(*p)
+		pricesList = append(pricesList, *p)
 	}
+	slices.SortFunc(pricesList, func(a, b price.Price) int {
+		return a.Date.Compare(b.Date)
+	})
+	pricesTree[commodityName] = pricesList
 }
 
 func formatFloat(num float64) string {
@@ -537,7 +546,7 @@ func generateJournalFile(cwd string) error {
 		return err
 	}
 
-	pricesTree = make(map[string]*btree.BTree)
+	pricesTree = make(map[string][]price.Price)
 	loadPrices("120716", config.MutualFund, "NIFTY", pricesTree)
 	loadPrices("122639", config.MutualFund, "PPFAS", pricesTree)
 	loadPrices("119533", config.MutualFund, "ABCBF", pricesTree)

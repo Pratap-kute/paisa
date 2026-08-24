@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cmp"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -13,34 +14,30 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/google/btree"
-	gorm_logrus "github.com/onrik/gorm-logrus"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/exp/constraints"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func BTreeDescendFirstLessOrEqual[I btree.Item](tree *btree.BTree, item I) I {
-	var hit I
-	tree.DescendLessOrEqual(item, func(item btree.Item) bool {
-		hit = item.(I)
-		return false
+// FindLatestLessOrEqual returns the element with the maximum key <= target.
+// items must be sorted in ascending order by key.
+func FindLatestLessOrEqual[T any, K cmp.Ordered](items []T, target K, keyFn func(T) K) (T, bool) {
+	var zero T
+	if len(items) == 0 {
+		return zero, false
+	}
+	idx, found := slices.BinarySearchFunc(items, target, func(item T, t K) int {
+		return cmp.Compare(keyFn(item), t)
 	})
-
-	return hit
-}
-
-func BTreeToSlice[I btree.Item](tree *btree.BTree) []I {
-	items := make([]I, 0)
-	tree.Descend(func(item btree.Item) bool {
-		items = append(items, item.(I))
-		return true
-	})
-
-	return items
+	if found {
+		return items[idx], true
+	}
+	if idx > 0 {
+		return items[idx-1], true
+	}
+	return zero, false
 }
 
 func FY(date time.Time) string {
@@ -263,7 +260,7 @@ func SumBy[C any](collection []C, iteratee func(item C) decimal.Decimal) decimal
 	}, decimal.Zero)
 }
 
-func SortedKeys[K constraints.Ordered, V any](m map[K]V) []K {
+func SortedKeys[K cmp.Ordered, V any](m map[K]V) []K {
 	keys := lo.Keys(m)
 	slices.Sort(keys)
 	return keys
@@ -286,7 +283,7 @@ func UnQuote(str string) string {
 }
 
 func OpenDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(config.GetDBPath()), &gorm.Config{Logger: gorm_logrus.New()})
+	db, err := gorm.Open(sqlite.Open(config.GetDBPath()), &gorm.Config{Logger: NewGormLogger()})
 	return db, err
 }
 

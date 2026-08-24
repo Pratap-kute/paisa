@@ -6,13 +6,13 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
 	"gorm.io/gorm"
 
-	"github.com/google/btree"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
 
@@ -81,10 +81,6 @@ type ExchangePrice struct {
 	Close     float64
 }
 
-func (p ExchangePrice) Less(o btree.Item) bool {
-	return p.Timestamp < o.(ExchangePrice).Timestamp
-}
-
 func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 	log.Info("Fetching stock price history from Yahoo")
 	response, err := getTicker(ticker)
@@ -110,7 +106,7 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 	}
 
 	needExchangePrice := false
-	var exchangePrice *btree.BTree
+	var exchangePrice []ExchangePrice
 
 	if !utils.IsCurrency(currency) {
 		needExchangePrice = true
@@ -124,12 +120,20 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 		}
 
 		exchangeResult := exchangeResponse.Chart.Result[0]
-		exchangePrice = btree.New(2)
+		exchangePrice = make([]ExchangePrice, 0, len(exchangeResult.Timestamp))
 		for i, t := range exchangeResult.Timestamp {
 			if i < len(exchangeResult.Indicators.Quote[0].Close) {
-				exchangePrice.ReplaceOrInsert(ExchangePrice{Timestamp: t, Close: exchangeResult.Indicators.Quote[0].Close[i]})
+				exchangePrice = append(exchangePrice, ExchangePrice{Timestamp: t, Close: exchangeResult.Indicators.Quote[0].Close[i]})
 			}
 		}
+		slices.SortFunc(exchangePrice, func(a, b ExchangePrice) int {
+			if a.Timestamp < b.Timestamp {
+				return -1
+			} else if a.Timestamp > b.Timestamp {
+				return 1
+			}
+			return 0
+		})
 	}
 
 	for i, timestamp := range result.Timestamp {
@@ -140,8 +144,10 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 		value := result.Indicators.Quote[0].Close[i] * scale
 
 		if needExchangePrice {
-			rate := utils.BTreeDescendFirstLessOrEqual(exchangePrice, ExchangePrice{Timestamp: timestamp})
-			if rate.Close > 0 {
+			rate, ok := utils.FindLatestLessOrEqual(exchangePrice, timestamp, func(p ExchangePrice) int64 {
+				return p.Timestamp
+			})
+			if ok && rate.Close > 0 {
 				value *= rate.Close
 			}
 		}

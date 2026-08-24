@@ -1,7 +1,7 @@
 package service
 
 import (
-	"sort"
+	"slices"
 	"sync"
 	"time"
 
@@ -9,7 +9,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/google/btree"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
@@ -19,13 +18,13 @@ import (
 type priceCache struct {
 	mu                sync.RWMutex
 	initialized       bool
-	pricesTree        map[string]*btree.BTree
-	postingPricesTree map[string]*btree.BTree
+	pricesTree        map[string][]price.Price
+	postingPricesTree map[string][]price.Price
 }
 
 var pcache priceCache
 
-func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btree.BTree) {
+func (c *priceCache) getTrees(db *gorm.DB, commodity string) ([]price.Price, []price.Price) {
 	c.mu.RLock()
 	if c.initialized {
 		pt := c.pricesTree[commodity]
@@ -39,22 +38,24 @@ func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btr
 	defer c.mu.Unlock()
 	if !c.initialized {
 		var prices []price.Price
-		result := db.Where("commodity_type != ?", config.Unknown).Find(&prices)
+		result := db.Where("commodity_type != ?", config.Unknown).Order("date asc").Find(&prices)
 		if result.Error != nil {
 			log.Warn(result.Error)
 		}
-		pricesTree := make(map[string]*btree.BTree)
-		postingPricesTree := make(map[string]*btree.BTree)
+		pricesTree := make(map[string][]price.Price)
+		postingPricesTree := make(map[string][]price.Price)
 
 		for _, p := range prices {
-			if pricesTree[p.CommodityName] == nil {
-				pricesTree[p.CommodityName] = btree.New(2)
-			}
-			pricesTree[p.CommodityName].ReplaceOrInsert(p)
+			pricesTree[p.CommodityName] = append(pricesTree[p.CommodityName], p)
+		}
+		for name := range pricesTree {
+			slices.SortFunc(pricesTree[name], func(a, b price.Price) int {
+				return a.Date.Compare(b.Date)
+			})
 		}
 
 		var unknownPrices []price.Price
-		result = db.Where("commodity_type = ?", config.Unknown).Find(&unknownPrices)
+		result = db.Where("commodity_type = ?", config.Unknown).Order("date asc").Find(&unknownPrices)
 		if result.Error != nil {
 			log.Warn(result.Error)
 		}
@@ -70,14 +71,13 @@ func (c *priceCache) getTrees(db *gorm.DB, commodity string) (*btree.BTree, *btr
 		for _, commodityName := range commodities {
 			if !utils.IsCurrency(commodityName) {
 				if pricesList, ok := unknownByCommodity[commodityName]; ok {
-					ppt := btree.New(2)
-					for _, p := range pricesList {
-						ppt.ReplaceOrInsert(p)
-					}
-					postingPricesTree[commodityName] = ppt
+					slices.SortFunc(pricesList, func(a, b price.Price) int {
+						return a.Date.Compare(b.Date)
+					})
+					postingPricesTree[commodityName] = pricesList
 
-					if pricesTree[commodityName] == nil {
-						pricesTree[commodityName] = ppt
+					if len(pricesTree[commodityName]) == 0 {
+						pricesTree[commodityName] = pricesList
 					}
 				}
 			}
@@ -102,22 +102,29 @@ func ClearPriceCache() {
 	pcache.clear()
 }
 
+func findPriceOnOrBefore(prices []price.Price, date time.Time) price.Price {
+	p, _ := utils.FindLatestLessOrEqual(prices, date.UnixNano(), func(p price.Price) int64 {
+		return p.Date.UnixNano()
+	})
+	return p
+}
+
 func GetUnitPrice(db *gorm.DB, commodity string, date time.Time) price.Price {
 	pt, ppt := pcache.getTrees(db, commodity)
 
 	var pc price.Price
-	if pt != nil {
-		pc = utils.BTreeDescendFirstLessOrEqual(pt, price.Price{Date: date})
+	if len(pt) > 0 {
+		pc = findPriceOnOrBefore(pt, date)
 	}
 	if !pc.Value.Equal(decimal.Zero) {
 		return pc
 	}
 
-	if ppt != nil {
-		pc = utils.BTreeDescendFirstLessOrEqual(ppt, price.Price{Date: date})
+	if len(ppt) > 0 {
+		pc = findPriceOnOrBefore(ppt, date)
 	}
 
-	if pt == nil && ppt == nil {
+	if len(pt) == 0 && len(ppt) == 0 {
 		log.Warn("Price not found ", commodity)
 		return pc
 	}
@@ -128,27 +135,24 @@ func GetUnitPrice(db *gorm.DB, commodity string, date time.Time) price.Price {
 func GetAllPrices(db *gorm.DB, commodity string) []price.Price {
 	pricesPt, pt := pcache.getTrees(db, commodity)
 
-	if pt == nil && pricesPt == nil {
+	if len(pt) == 0 && len(pricesPt) == 0 {
 		log.Warn("Price not found ", commodity)
 		return []price.Price{}
 	}
 
 	pmap := make(map[string]price.Price)
 
-	if pt != nil {
-		for _, p := range utils.BTreeToSlice[price.Price](pt) {
-			pmap[p.Date.String()] = p
-		}
+	for _, p := range pt {
+		pmap[p.Date.String()] = p
 	}
 
-	if pricesPt != nil {
-		for _, p := range utils.BTreeToSlice[price.Price](pricesPt) {
-			pmap[p.Date.String()] = p
-		}
+	for _, p := range pricesPt {
+		pmap[p.Date.String()] = p
 	}
 
 	keys := lo.Keys(pmap)
-	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+	slices.Sort(keys)
+	slices.Reverse(keys)
 	prices := make([]price.Price, 0, len(keys))
 	for _, key := range keys {
 		prices = append(prices, pmap[key])
