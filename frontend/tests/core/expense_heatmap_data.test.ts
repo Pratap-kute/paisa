@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildMonthlyExpenseHeatmapData,
   buildYearlyExpenseHeatmapData,
-} from "$lib/charts/expense_heatmap_data";
+} from "$lib/features/expense/expense_heatmap_data";
 import type { Posting } from "$lib/core/utils";
 
 function posting(

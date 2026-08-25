@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import type { Posting } from "$lib/core/utils";
-import { expenseGroup } from "$lib/charts/expense";
+import { expenseGroup } from "$lib/features/expense/expense";
 
 export interface ExpenseHeatmapTooltipRow {
   label: string;

@@ -1,4 +1,4 @@
-import type { Dimensions } from "$lib/charts/resize";
+import type { Dimensions } from "$lib/features/charts/resize";
 import type { ECharts, EChartsCoreOption } from "echarts/core";
 
 export type EChartRenderer = "canvas";

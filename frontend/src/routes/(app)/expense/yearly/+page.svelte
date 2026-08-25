@@ -3,10 +3,10 @@
   import { sumBy, uniq } from "es-toolkit";
   import { financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
   import { api } from "$lib/api";
-  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
-  import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import { expenseGroup } from "$lib/charts/expense";
+  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/features/charts/mixed_period_data";
+  import { buildYearlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
+  import { expenseGroup } from "$lib/features/expense/expense";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";

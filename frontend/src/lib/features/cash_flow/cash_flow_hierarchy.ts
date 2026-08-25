@@ -1,6 +1,6 @@
 import { sumBy } from "es-toolkit";
 import type { Graph } from "$lib/core/utils";
-import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
+import type { FinancialHierarchyNode } from "$lib/features/charts/hierarchy_data";
 import type { FinancialHierarchyChartData } from "$lib/shared/charts/echarts/hierarchy";
 
 function parentAccount(account: string): string | undefined {

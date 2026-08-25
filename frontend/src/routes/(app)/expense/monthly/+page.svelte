@@ -12,10 +12,10 @@
     restName,
   } from "$lib/core/utils";
   import { api } from "$lib/api";
-  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
-  import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import { expenseGroup } from "$lib/charts/expense";
+  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/features/charts/mixed_period_data";
+  import { buildMonthlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
+  import { expenseGroup } from "$lib/features/expense/expense";
   import { iconify } from "$lib/shared/ui/icon";
   import { dateRange, month, dateMin, dateMax, setAllowedDateRange } from "../../../../store";
   import { writable } from "svelte/store";

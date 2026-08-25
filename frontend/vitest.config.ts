@@ -19,9 +19,7 @@ const coreProject = defineConfig({
       include: [
         "src/lib/core/**/*.ts",
         "src/lib/domain/**/*.ts",
-        "src/lib/features/importing/**/*.ts",
-        "src/lib/features/prediction/**/*.ts",
-        "src/lib/ledger/**/*.ts",
+        "src/lib/features/**/*.ts",
         "src/lib/sheet/**/*.ts",
         "src/lib/shared/**/*.ts",
       ],

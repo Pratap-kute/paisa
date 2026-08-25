@@ -3,7 +3,7 @@
     buildInterestOverviewComparison,
     buildInterestTimelineSeries,
     interestSummary,
-  } from "$lib/charts/interest_data";
+  } from "$lib/features/liabilities/interest_data";
   import { ajax, formatCurrency, formatFloat, type Interest } from "$lib/core/utils";
     import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";

@@ -4,8 +4,8 @@ import {
   harvestablePercentage,
   unitsRequiredFromAmount,
   unitsRequiredFromGain,
-} from "$lib/charts/harvest_data";
-import { scheduleALTotal } from "$lib/charts/schedule_al_data";
+} from "$lib/features/tax/harvest_data";
+import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
 import type { Harvestable, ScheduleALEntry } from "$lib/core/utils";
 
 function harvestable(overrides: Partial<Harvestable> = {}): Harvestable {

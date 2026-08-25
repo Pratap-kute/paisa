@@ -9,7 +9,7 @@ import {
   restName,
 } from "$lib/core/utils";
 import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
-import { byExpenseGroup, expenseGroup } from "$lib/charts/expense";
+import { byExpenseGroup, expenseGroup } from "$lib/features/expense/expense";
 import { sortBy } from "$lib/shared/utils/collection";
 
 export function buildExpenseBreakdownComparison(

@@ -7,7 +7,7 @@ import {
   buildCashFlowSeries,
   buildMonthlyExpenseTimelineSeries,
   buildYearlyExpenseTimelineSeries,
-} from "$lib/charts/mixed_period_data";
+} from "$lib/features/charts/mixed_period_data";
 import type { Aggregate, CashFlow, Posting } from "$lib/core/utils";
 
 dayjs.extend(isSameOrBefore);

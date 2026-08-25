@@ -13,7 +13,7 @@
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/shared/ui/toast";
-  import { format } from "$lib/ledger/journal";
+  import { format } from "$lib/features/ledger/journal";
   import { isNumber, last } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";

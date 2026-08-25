@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { ExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { categoryColor } from "$lib/charts/mixed_period_data";
+  import type { ExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
+  import { categoryColor } from "$lib/features/charts/mixed_period_data";
   import { formatCurrency, formatPercentage, tooltip } from "$lib/core/utils";
   import { iconText } from "$lib/shared/ui/icon";
 

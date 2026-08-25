@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildYearlyInvestmentSeries } from "$lib/charts/time_series_data";
+  import { buildYearlyInvestmentSeries } from "$lib/features/charts/time_series_data";
   import type { InvestmentYearlyCard } from "$lib/core/utils";
   import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 

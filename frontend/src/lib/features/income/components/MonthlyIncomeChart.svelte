@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildMonthlyIncomeSeries } from "$lib/charts/time_series_data";
+  import { buildMonthlyIncomeSeries } from "$lib/features/charts/time_series_data";
   import type { Income } from "$lib/core/utils";
   import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { buildAllocationTimelineSeries } from "$lib/charts/mixed_period_data";
+  import { buildAllocationTimelineSeries } from "$lib/features/charts/mixed_period_data";
   import {
     buildAllocationCategoryComparison,
     buildAllocationHierarchy,
-  } from "$lib/charts/hierarchy_data";
-  import { buildAllocationTargetComparison } from "$lib/charts/bar_comparison_data";
+  } from "$lib/features/charts/hierarchy_data";
+  import { buildAllocationTargetComparison } from "$lib/features/charts/bar_comparison_data";
   import COLORS from "$lib/shared/theme/colors";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import Table from "$lib/shared/ui/Table.svelte";

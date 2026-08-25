@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
+  import { buildCashFlowSeries } from "$lib/features/charts/mixed_period_data";
   import { type CashFlow } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { onMount } from "svelte";

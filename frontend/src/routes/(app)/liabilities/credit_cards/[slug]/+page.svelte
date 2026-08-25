@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
   import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
-  import { buildCreditCardYearlySpendsComparison } from "$lib/charts/bar_comparison_data";
+  import { buildCreditCardYearlySpendsComparison } from "$lib/features/charts/bar_comparison_data";
   import { iconify } from "$lib/shared/ui/icon";
   import {
     ajax,

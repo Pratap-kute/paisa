@@ -1,6 +1,6 @@
 <script lang="ts">
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import { buildRepaymentSeries } from "$lib/charts/time_series_data";
+  import { buildRepaymentSeries } from "$lib/features/charts/time_series_data";
   import { ajax, type Legend, type Posting } from "$lib/core/utils";
     import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";

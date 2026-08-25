@@ -6,7 +6,7 @@ import {
   interestSummary,
   padTimeDomain,
   timelineDomain,
-} from "$lib/charts/interest_data";
+} from "$lib/features/liabilities/interest_data";
 import type { Interest } from "$lib/core/utils";
 
 const interest: Interest = {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { scheduleALTotal } from "$lib/charts/schedule_al_data";
+  import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
     import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";

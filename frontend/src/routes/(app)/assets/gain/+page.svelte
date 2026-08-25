@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import { buildLegends } from "$lib/charts/gain";
-  import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
+  import { buildLegends } from "$lib/features/assets/gain";
+  import { buildGainOverviewComparison } from "$lib/features/charts/bar_comparison_data";
   import { formatCurrency, type Gain, type Legend } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { sumBy } from "es-toolkit";

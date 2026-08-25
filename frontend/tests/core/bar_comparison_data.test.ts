@@ -5,7 +5,7 @@ import {
   buildCreditCardYearlySpendsComparison,
   buildExpenseBreakdownComparison,
   buildGainOverviewComparison,
-} from "$lib/charts/bar_comparison_data";
+} from "$lib/features/charts/bar_comparison_data";
 import { buildComparisonBarOption } from "$lib/shared/charts/echarts/bar_comparison";
 import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
 import type { AllocationTarget, Gain, Posting } from "$lib/core/utils";

@@ -5,7 +5,7 @@ import {
   buildPortfolioComparison,
   buildPortfolioHierarchy,
   filterCommodityBreakdowns,
-} from "$lib/charts/hierarchy_data";
+} from "$lib/features/charts/hierarchy_data";
 import type { Aggregate, PortfolioAggregate } from "$lib/core/utils";
 
 describe("financial hierarchy adapters", () => {

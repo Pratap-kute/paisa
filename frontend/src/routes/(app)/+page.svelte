@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { buildCashFlowSeries } from "$lib/charts/mixed_period_data";
-  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
+  import { buildCashFlowSeries } from "$lib/features/charts/mixed_period_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
   import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";

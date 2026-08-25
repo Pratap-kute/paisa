@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { describe, expect, it } from "vitest";
-import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
+import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
 import {
   buildIncomeStatementWaterfallOption,
   incomeStatementAxisRange,

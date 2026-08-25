@@ -5,7 +5,7 @@ import {
   type PaisaChartTheme,
 } from "$lib/shared/charts/echarts/theme";
 import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
-import type { FinancialHierarchyNode } from "$lib/charts/hierarchy_data";
+import type { FinancialHierarchyNode } from "$lib/features/charts/hierarchy_data";
 
 export interface FinancialHierarchyChartData {
   roots: FinancialHierarchyNode[];

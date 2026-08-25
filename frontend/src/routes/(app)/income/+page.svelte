@@ -2,7 +2,7 @@
   import {
     buildMonthlyIncomeSeries,
     buildYearlyIncomeComparisonSeries,
-  } from "$lib/charts/time_series_data";
+  } from "$lib/features/charts/time_series_data";
   import { ajax, formatCurrency, type Income, type IncomeYearlyCard, type Legend } from "$lib/core/utils";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";

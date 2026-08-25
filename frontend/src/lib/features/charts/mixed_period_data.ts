@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
 import { categorySeriesIndex } from "$lib/shared/charts/echarts/theme";
 import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import { expenseGroup } from "$lib/charts/expense";
+import { expenseGroup } from "$lib/features/expense/expense";
 import {
   type Aggregate,
   type CashFlow,

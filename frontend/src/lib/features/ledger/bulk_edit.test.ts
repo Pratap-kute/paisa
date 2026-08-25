@@ -1,8 +1,7 @@
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { describe, expect, test } from "vitest";
 
 import { applyChanges } from "./bulk_edit";
-import type { LedgerFile } from "../core/utils";
+import type { LedgerFile } from "$lib/core/utils";
 import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {

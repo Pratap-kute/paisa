@@ -3,7 +3,7 @@
   import {
     buildMonthlyInvestmentSeries,
     buildYearlyInvestmentSeries,
-  } from "$lib/charts/time_series_data";
+  } from "$lib/features/charts/time_series_data";
   import {
     formatCurrency,
     type InvestmentYearlyCard as InvestmentYearlyCardType,

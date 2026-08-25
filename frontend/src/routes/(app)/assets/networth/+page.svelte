@@ -24,7 +24,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
-  import { buildNetworthSeries } from "$lib/charts/time_series_data";
+  import { buildNetworthSeries } from "$lib/features/charts/time_series_data";
 import { filter, map } from "$lib/shared/utils/collection";
 
   let networth = $state(0);

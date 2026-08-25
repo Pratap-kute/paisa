@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildGainAccountSeries } from "$lib/charts/time_series_data";
+  import { buildGainAccountSeries } from "$lib/features/charts/time_series_data";
   import type { Networth } from "$lib/core/utils";
   import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 

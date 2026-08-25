@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { partition } from "es-toolkit";
-  import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
-  import { buildCashFlowHierarchyData } from "$lib/charts/cash_flow_hierarchy";
+  import { buildCashFlowSankeyData } from "$lib/features/cash_flow/cash_flow_sankey_data";
+  import { buildCashFlowHierarchyData } from "$lib/features/cash_flow/cash_flow_hierarchy";
   import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
   import FinancialHierarchyChart from "$lib/features/charts/components/FinancialHierarchyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";

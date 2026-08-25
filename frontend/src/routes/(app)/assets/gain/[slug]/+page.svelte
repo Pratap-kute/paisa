@@ -1,10 +1,10 @@
 <script lang="ts">
   import COLORS from "$lib/shared/theme/colors";
-  import { buildLegends } from "$lib/charts/gain";
+  import { buildLegends } from "$lib/features/assets/gain";
   import {
     buildPortfolioComparison,
     filterCommodityBreakdowns,
-  } from "$lib/charts/hierarchy_data";
+  } from "$lib/features/charts/hierarchy_data";
   import {
     type Posting,
     formatCurrency,

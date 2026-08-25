@@ -7,7 +7,7 @@
   import Transaction from "$lib/features/transactions/components/Transaction.svelte";
   import BulkEditForm from "$lib/features/ledger/components/BulkEditForm.svelte";
   import { slide } from "svelte/transition";
-  import * as bulkEdit from "$lib/ledger/bulk_edit";
+  import * as bulkEdit from "$lib/features/ledger/bulk_edit";
   import * as toast from "$lib/shared/ui/toast";
   import DiffViewModal from "$lib/features/ledger/components/DiffViewModal.svelte";
   import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";

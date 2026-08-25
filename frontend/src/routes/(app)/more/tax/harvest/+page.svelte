@@ -2,7 +2,7 @@
   import {
     filterHarvestables,
     harvestablePercentage,
-  } from "$lib/charts/harvest_data";
+  } from "$lib/features/tax/harvest_data";
   import {
     ajax,
     formatCurrency,

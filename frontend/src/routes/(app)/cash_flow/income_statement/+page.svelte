@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-    import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
+    import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
   import {
     ajax,
     formatCurrency,

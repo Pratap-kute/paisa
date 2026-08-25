@@ -25,7 +25,7 @@
   import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
   import * as toast from "$lib/shared/ui/toast";
-  import { ensureFileExtension } from "$lib/ledger/file";
+  import { ensureFileExtension } from "$lib/features/ledger/file";
   import FileModal from "$lib/features/ledger/components/FileModal.svelte";
   import Dialog from "$lib/shared/ui/Dialog.svelte";
   import Page from "$lib/shared/layout/Page.svelte";

@@ -5,7 +5,7 @@
     harvestablePercentage,
     unitsRequiredFromAmount,
     unitsRequiredFromGain,
-  } from "$lib/charts/harvest_data";
+  } from "$lib/features/tax/harvest_data";
   import {
     formatCurrency,
     formatFloat,

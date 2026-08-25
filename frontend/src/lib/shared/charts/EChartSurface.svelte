@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { observeElementSize, type Dimensions } from "$lib/charts/resize";
+  import { observeElementSize, type Dimensions } from "$lib/features/charts/resize";
   import {
     createEChartSurfaceController,
     type EChartSurfaceController,

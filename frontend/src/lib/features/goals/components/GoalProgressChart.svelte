@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { buildGoalProgressSeries } from "$lib/charts/time_series_data";
+  import { buildGoalProgressSeries } from "$lib/features/charts/time_series_data";
   import type { Forecast, Point } from "$lib/core/utils";
   import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 

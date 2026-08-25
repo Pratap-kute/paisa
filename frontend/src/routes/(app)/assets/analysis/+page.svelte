@@ -4,7 +4,7 @@
     buildPortfolioComparison,
     buildTopHoldingsComparison,
     filterCommodityBreakdowns,
-  } from "$lib/charts/hierarchy_data";
+  } from "$lib/features/charts/hierarchy_data";
   import COLORS from "$lib/shared/theme/colors";
   import { ajax, formatPercentage, type PortfolioAggregate } from "$lib/core/utils";
   import { nonZeroCurrency } from "$lib/shared/tables/formatters";
