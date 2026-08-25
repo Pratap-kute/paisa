@@ -3,7 +3,7 @@ import JsonSchemaForm from "./JsonSchemaForm.svelte";
 import { sha256Hex } from "$lib/shared/utils/crypto";
 import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import Select from "svelte-select";
-import { isEqual, startCase } from "es-toolkit";
+import { cloneDeep, isEqual, startCase } from "es-toolkit";
 import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
 import { iconGlyph, iconsList } from "$lib/shared/ui/icon";
 import AccountSelect from "./AccountsSelect.svelte";
@@ -63,7 +63,7 @@ let itemTitle = $derived(
 
 function newItem(listSchema: any) {
   if (listSchema.default?.[0] != null) {
-    return structuredClone(listSchema.default[0]);
+    return cloneDeep(listSchema.default[0]);
   }
   return {};
 }
@@ -91,7 +91,7 @@ function sortedProperties(schema: Schema): [string, Schema][] {
 
 function defaultValueForSchema(s: Schema) {
   if (s.default !== undefined) {
-    return structuredClone(s.default);
+    return cloneDeep(s.default);
   }
   if (s.type === "array") {
     return [];

@@ -1,8 +1,9 @@
-import { render, waitFor } from "@testing-library/svelte";
+import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
 import type { JSONSchema7 } from "json-schema";
 import { api } from "$lib/api";
 import JsonSchemaForm from "./JsonSchemaForm.svelte";
+import JsonSchemaFormHarness from "./JsonSchemaForm.test-harness.svelte";
 
 test("normalizes a null nested object before binding children", async () => {
   const value = { nested: null as Record<string, unknown> | null };
@@ -92,4 +93,13 @@ test("normalizes an empty price widget value to an object", async () => {
     expect(providersSpy).toHaveBeenCalled();
   });
   providersSpy.mockRestore();
+});
+
+test("adds a default item from a reactive schema", async () => {
+  const { getByRole, unmount } = render(JsonSchemaFormHarness);
+
+  await fireEvent.click(getByRole("button", { name: "Add" }));
+
+  expect(getByRole("textbox", { name: "Username" })).toHaveValue("john.doe");
+  unmount();
 });
