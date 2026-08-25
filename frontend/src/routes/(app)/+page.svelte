@@ -11,8 +11,8 @@
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
   import { refresh } from "../../store";
   import {
     enrichTrantionSequence,

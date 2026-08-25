@@ -16,7 +16,7 @@
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
   import Table from "$lib/shared/ui/Table.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
 import { isEmpty as isEmptyValue, max, some } from "$lib/shared/utils/collection";

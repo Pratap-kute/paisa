@@ -10,8 +10,8 @@
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);

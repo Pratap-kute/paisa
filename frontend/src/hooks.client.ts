@@ -41,7 +41,7 @@ if (pdfjs.GlobalWorkerOptions) {
 }
 
 import Handlebars from "handlebars";
-import helpers from "$lib/importing/template_helpers";
+import helpers from "$lib/features/importing/template_helpers";
 import * as toast from "$lib/shared/ui/toast";
 import { mapValues } from "es-toolkit";
 Handlebars.registerHelper(

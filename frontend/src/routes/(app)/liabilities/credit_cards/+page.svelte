@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
+  import CreditCardCard from "$lib/features/liabilities/components/CreditCardCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
     import { onMount } from "svelte";

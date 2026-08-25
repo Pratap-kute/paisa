@@ -3,8 +3,8 @@
   import { partition } from "es-toolkit";
   import { buildCashFlowSankeyData } from "$lib/charts/cash_flow_sankey_data";
   import { buildCashFlowHierarchyData } from "$lib/charts/cash_flow_hierarchy";
-  import CashFlowSankeyChart from "$lib/components/charts/CashFlowSankeyChart.svelte";
-  import FinancialHierarchyChart from "$lib/components/charts/FinancialHierarchyChart.svelte";
+  import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
+  import FinancialHierarchyChart from "$lib/features/charts/components/FinancialHierarchyChart.svelte";
   import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
   import { dateMin, dateMax, year } from "../../../../store";
   import {

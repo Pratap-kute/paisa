@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LiabilitiesBalance from "$lib/components/finance/LiabilitiesBalance.svelte";
+  import LiabilitiesBalance from "$lib/features/liabilities/components/LiabilitiesBalance.svelte";
   import { ajax, type LiabilityBreakdown } from "$lib/core/utils";
   import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";

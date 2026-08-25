@@ -14,7 +14,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
 
   let legends: Legend[] = $state([]);
   let gains: Gain[] = $state([]);

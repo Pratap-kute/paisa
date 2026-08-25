@@ -18,15 +18,15 @@
   import { onDestroy, onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/ledger/FileTree.svelte";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import FileTree from "$lib/features/ledger/components/FileTree.svelte";
+  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import Select from "$lib/shared/ui/Select.svelte";
   import { page } from "$app/stores";
   import Page from "$lib/shared/layout/Page.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
-  import LedgerBalance from "$lib/components/ledger/LedgerBalance.svelte";
+  import LedgerBalance from "$lib/features/ledger/components/LedgerBalance.svelte";
 import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/shared/utils/collection";
 
   interface Props {

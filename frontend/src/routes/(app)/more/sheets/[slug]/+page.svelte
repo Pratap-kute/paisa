@@ -16,8 +16,8 @@
   import { onMount } from "svelte";
   import { beforeNavigate, goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/components/ledger/FileTree.svelte";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import FileTree from "$lib/features/ledger/components/FileTree.svelte";
+  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
   import { page } from "$app/stores";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";

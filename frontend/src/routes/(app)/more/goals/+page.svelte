@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
-  import GoalSummaryCard from "$lib/components/finance/GoalSummaryCard.svelte";
+  import GoalSummaryCard from "$lib/features/goals/components/GoalSummaryCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import { helpUrl, type GoalSummary } from "$lib/core/utils";
   import { api } from "$lib/api";

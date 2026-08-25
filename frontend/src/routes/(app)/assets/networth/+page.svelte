@@ -23,7 +23,7 @@
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import NetworthTimelineChart from "$lib/components/charts/NetworthTimelineChart.svelte";
+  import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
   import { buildNetworthSeries } from "$lib/charts/time_series_data";
 import { filter, map } from "$lib/shared/utils/collection";
 

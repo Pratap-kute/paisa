@@ -24,8 +24,8 @@
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 import { filter, isEmpty, map, max as arrayMax, values } from "$lib/shared/utils/collection";
 
   let allocationTargets: AllocationTarget[] = $state([]);

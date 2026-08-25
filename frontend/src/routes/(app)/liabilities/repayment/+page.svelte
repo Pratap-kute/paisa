@@ -8,7 +8,7 @@
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import RepaymentTimelineChart from "$lib/components/charts/RepaymentTimelineChart.svelte";
+  import RepaymentTimelineChart from "$lib/features/liabilities/components/RepaymentTimelineChart.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);

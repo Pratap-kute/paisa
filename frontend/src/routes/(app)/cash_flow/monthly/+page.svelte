@@ -11,7 +11,7 @@
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 import { filter, map, some } from "$lib/shared/utils/collection";
 
   let cashFlows: CashFlow[] = $state([]);

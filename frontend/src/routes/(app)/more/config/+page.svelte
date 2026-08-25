@@ -3,7 +3,7 @@
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
-  import JsonSchemaForm from "$lib/components/ledger/JsonSchemaForm.svelte";
+  import JsonSchemaForm from "$lib/features/ledger/components/JsonSchemaForm.svelte";
   import { cloneDeep, isEqual, startCase } from "es-toolkit";
   import * as toast from "$lib/shared/ui/toast";
   import { refresh } from "../../../../store";

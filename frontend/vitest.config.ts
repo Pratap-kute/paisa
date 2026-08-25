@@ -19,16 +19,20 @@ const coreProject = defineConfig({
       include: [
         "src/lib/core/**/*.ts",
         "src/lib/domain/**/*.ts",
-        "src/lib/importing/**/*.ts",
+        "src/lib/features/importing/**/*.ts",
+        "src/lib/features/prediction/**/*.ts",
         "src/lib/ledger/**/*.ts",
         "src/lib/sheet/**/*.ts",
+        "src/lib/shared/**/*.ts",
       ],
       exclude: [
         "src/**/*.test.ts",
         "src/**/*.d.ts",
-        "src/lib/core/{colors,icon}.ts",
+        "src/lib/shared/theme/colors.ts",
+        "src/lib/shared/ui/icon.ts",
+        "src/lib/shared/vendor/**",
         "src/lib/domain/transaction_tag.ts",
-        "src/lib/importing/{export,pdf}.ts",
+        "src/lib/features/importing/{export,pdf}.ts",
         "src/lib/sheet/{language,parser,parser.terms}.ts",
       ],
       thresholds: {

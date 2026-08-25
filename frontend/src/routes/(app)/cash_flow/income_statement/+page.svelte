@@ -19,7 +19,7 @@
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import IncomeStatementWaterfallChart from "$lib/components/charts/IncomeStatementWaterfallChart.svelte";
+  import IncomeStatementWaterfallChart from "$lib/features/cash_flow/components/IncomeStatementWaterfallChart.svelte";
 import { keys, maxBy, minBy, some, sortBy, values } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);

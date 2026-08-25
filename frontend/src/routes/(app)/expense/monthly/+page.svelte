@@ -31,9 +31,9 @@
   import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import DailyExpenseCalendar from "$lib/components/charts/DailyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { CapitalGain, FYCapitalGain } from "$lib/core/utils";
   import { formatCurrency } from "$lib/core/utils";
-  import CapitalGainCard from "$lib/components/finance/CapitalGainCard.svelte";
+  import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
   import Card from "$lib/shared/ui/Card.svelte";
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";

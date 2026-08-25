@@ -1,5 +1,5 @@
 <script lang="ts">
-  import BudgetCard from "$lib/components/finance/BudgetCard.svelte";
+  import BudgetCard from "$lib/features/expense/components/BudgetCard.svelte";
   import {
     formatCurrency,
     restName,

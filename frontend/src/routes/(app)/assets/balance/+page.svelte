@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
+  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
   import { type AssetBreakdown } from "$lib/core/utils";
   import { api } from "$lib/api";
   import { onMount } from "svelte";

@@ -1,5 +1,5 @@
 import type { StreamParser, StringStream } from "@codemirror/language";
-import helpers from "../importing/template_helpers";
+import helpers from "$lib/features/importing/template_helpers";
 import { includes, keys } from "$lib/shared/utils/collection";
 
 const KEYWORDS = /^(?:[#/](?:if|with|true|false|unless|each)|(?:else if|else))/;

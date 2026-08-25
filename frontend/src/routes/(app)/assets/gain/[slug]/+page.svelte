@@ -32,8 +32,8 @@
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);

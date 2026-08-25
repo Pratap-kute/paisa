@@ -21,19 +21,19 @@
     solvePMTOrNper,
   } from "$lib/domain/goals";
     import type { PageData } from "./$types";
-  import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
+  import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
   import { iconGlyph, iconify } from "$lib/shared/ui/icon";
   import dayjs from "dayjs";
   import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
+  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
-  import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
+  import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
 import { isEmpty, sortBy } from "$lib/shared/utils/collection";
 
   interface Props {

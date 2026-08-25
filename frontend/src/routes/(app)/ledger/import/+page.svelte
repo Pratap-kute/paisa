@@ -6,19 +6,19 @@
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent
   } from "$lib/shared/editor/editor";
-  import TemplateEditorDrawer from "$lib/components/import/TemplateEditorDrawer.svelte";
+  import TemplateEditorDrawer from "$lib/features/importing/components/TemplateEditorDrawer.svelte";
   import FileDropzone from "$lib/shared/ui/FileDropzone.svelte";
   import {
     parse,
     asRows,
     renderWithMetadata,
     type RenderMetadata
-  } from "$lib/importing/spreadsheet";
+  } from "$lib/features/importing/spreadsheet";
   import {
     commitParseOutcome,
     displayCell,
     emptyRenderMetadata,
-  } from "$lib/importing/import_commit";
+  } from "$lib/features/importing/import_commit";
   import { range } from "es-toolkit";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
@@ -26,7 +26,7 @@
   import { accountTfIdf } from "../../../../store";
   import * as toast from "$lib/shared/ui/toast";
   import { ensureFileExtension } from "$lib/ledger/file";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
   import Dialog from "$lib/shared/ui/Dialog.svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import Drawer from "$lib/shared/ui/Drawer.svelte";
@@ -36,16 +36,16 @@
   import FormField from "$lib/shared/layout/FormField.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
   import IconButton from "$lib/shared/ui/IconButton.svelte";
-  import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
-  import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
-  import PredictionDetail from "$lib/components/prediction/PredictionDetail.svelte";
-  import SourceReviewList from "$lib/components/import/SourceReviewList.svelte";
+  import PredictionReviewBar from "$lib/features/prediction/components/PredictionReviewBar.svelte";
+  import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
+  import PredictionDetail from "$lib/features/prediction/components/PredictionDetail.svelte";
+  import SourceReviewList from "$lib/features/importing/components/SourceReviewList.svelte";
   import {
     predictionSession,
     rowMatchesFilter,
     type ConfidenceFilter,
-  } from "$lib/prediction/session";
-  import type { Confidence, PredictionResult } from "$lib/prediction/types";
+  } from "$lib/features/prediction/session";
+  import type { Confidence, PredictionResult } from "$lib/features/prediction/types";
 import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection";
 
   let templates: ImportTemplate[] = $state([]);

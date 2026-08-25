@@ -14,11 +14,11 @@
   import { api } from "$lib/api";
   import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import RecurringCard from "$lib/components/finance/RecurringCard.svelte";
+  import RecurringCard from "$lib/features/cash_flow/components/RecurringCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import type { Dayjs } from "dayjs";
-  import RecurringDay from "$lib/components/finance/RecurringDay.svelte";
+  import RecurringDay from "$lib/features/cash_flow/components/RecurringDay.svelte";
   import dayjs from "dayjs";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";

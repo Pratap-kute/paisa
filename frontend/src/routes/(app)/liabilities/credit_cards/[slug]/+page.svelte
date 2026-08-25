@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import DueDate from "$lib/components/finance/DueDate.svelte";
-  import TransactionCard from "$lib/components/transactions/TransactionCard.svelte";
+  import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
+  import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
   import { buildCreditCardYearlySpendsComparison } from "$lib/charts/bar_comparison_data";
   import { iconify } from "$lib/shared/ui/icon";
   import {
@@ -21,7 +21,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import Select from "$lib/shared/ui/Select.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
 import { findIndex, now, reverse } from "$lib/shared/utils/collection";
 
   interface Props {

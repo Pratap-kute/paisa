@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
-import helpers from "../../src/lib/importing/template_helpers";
-import { predictionSession } from "../../src/lib/prediction/session";
+import helpers from "$lib/features/importing/template_helpers";
+import { predictionSession } from "$lib/features/prediction/session";
 
 dayjs.extend(customParseFormat);
 

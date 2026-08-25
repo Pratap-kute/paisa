@@ -20,7 +20,7 @@
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import HarvestCard from "$lib/components/tax/HarvestCard.svelte";
+  import HarvestCard from "$lib/features/tax/components/HarvestCard.svelte";
 
   let isLoading = $state(true);
   let harvestables: Harvestable[] = $state([]);

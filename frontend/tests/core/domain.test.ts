@@ -3,21 +3,21 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
-import { change } from "../../src/lib/domain/posting";
+import { change } from "$lib/domain/posting";
 import {
   findBreakPoints,
   forecast,
   project,
   solvePMTOrNper,
-} from "../../src/lib/domain/goals";
+} from "$lib/domain/goals";
 import {
   intervalText,
   nextUnpaidSchedule,
   scheduleIcon,
   sortTrantionSequence,
   totalRecurring,
-} from "../../src/lib/domain/transaction_sequence";
-import { setNow } from "../../src/lib/core/utils";
+} from "$lib/domain/transaction_sequence";
+import { setNow } from "$lib/core/utils";
 
 beforeAll(() => {
   dayjs.extend(isSameOrBefore);

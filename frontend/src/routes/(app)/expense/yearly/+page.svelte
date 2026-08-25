@@ -20,9 +20,9 @@
   import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
   import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import YearlyExpenseCalendar from "$lib/components/charts/YearlyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import YearlyExpenseCalendar from "$lib/features/expense/components/YearlyExpenseCalendar.svelte";
+  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
 import { isEmpty, map, maxBy, minBy } from "$lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);

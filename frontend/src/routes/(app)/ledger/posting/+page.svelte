@@ -1,8 +1,8 @@
 <script lang="ts">
   import { accountColorStyle } from "$lib/shared/theme/colors";
-  import PostingNote from "$lib/components/transactions/PostingNote.svelte";
-  import PostingStatus from "$lib/components/transactions/PostingStatus.svelte";
-  import SearchQuery from "$lib/components/ledger/SearchQuery.svelte";
+  import PostingNote from "$lib/features/transactions/components/PostingNote.svelte";
+  import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
+  import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
   import { iconText } from "$lib/shared/ui/icon";
   import { change } from "$lib/domain/posting";
   import { editorState } from "$lib/editors/search_query_editor";

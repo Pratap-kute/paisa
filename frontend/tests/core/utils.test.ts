@@ -43,7 +43,7 @@ import {
   sumPostings,
   tooltip,
   transactionTotal,
-} from "../../src/lib/core/utils";
+} from "$lib/core/utils";
 
 dayjs.extend(isSameOrBefore);
 

@@ -20,10 +20,10 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
-  import InvestmentYearlyCard from "$lib/components/finance/InvestmentYearlyCard.svelte";
+  import InvestmentYearlyCard from "$lib/features/assets/components/InvestmentYearlyCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import MonthlyInvestmentChart from "$lib/components/charts/MonthlyInvestmentChart.svelte";
-  import YearlyInvestmentChart from "$lib/components/charts/YearlyInvestmentChart.svelte";
+  import MonthlyInvestmentChart from "$lib/features/assets/components/MonthlyInvestmentChart.svelte";
+  import YearlyInvestmentChart from "$lib/features/assets/components/YearlyInvestmentChart.svelte";
 import { isEmpty } from "$lib/shared/utils/collection";
 
   let monthlyInvestmentTimelineLegends: Legend[] = $state([]);

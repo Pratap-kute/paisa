@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
+  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
   import { ajax } from "$lib/core/utils";
   import * as toast from "$lib/shared/ui/toast";
   import Page from "$lib/shared/layout/Page.svelte";

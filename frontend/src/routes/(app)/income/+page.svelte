@@ -14,8 +14,8 @@
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import MonthlyIncomeChart from "$lib/components/charts/MonthlyIncomeChart.svelte";
-  import YearlyIncomeChart from "$lib/components/charts/YearlyIncomeChart.svelte";
+  import MonthlyIncomeChart from "$lib/features/income/components/MonthlyIncomeChart.svelte";
+  import YearlyIncomeChart from "$lib/features/income/components/YearlyIncomeChart.svelte";
 import { isEmpty } from "$lib/shared/utils/collection";
 
   let grossIncome = $state(0);
