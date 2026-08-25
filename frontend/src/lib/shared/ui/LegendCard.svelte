@@ -17,13 +17,8 @@ function onClick(legend: Legend, index: number) {
 
   legend.onClick(legend);
   if (selectedLegendIndex === index) {
-    legend.selected = false;
     selectedLegendIndex = null;
   } else {
-    if (selectedLegendIndex !== null) {
-      legends[selectedLegendIndex].selected = false;
-    }
-    legend.selected = true;
     selectedLegendIndex = index;
   }
 }

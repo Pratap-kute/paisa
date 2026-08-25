@@ -5,8 +5,6 @@ export interface Legend {
   symbol?: "solid" | "diagonal-stripe";
   value?: string;
   onClick?: (legend: Legend) => void;
-
-  selected?: boolean;
 }
 
 export interface Node {

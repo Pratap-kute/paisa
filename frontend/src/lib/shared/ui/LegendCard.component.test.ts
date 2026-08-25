@@ -26,13 +26,15 @@ test("renders renderer-neutral line, square, and hatch symbols", () => {
   unmount();
 });
 
-test("preserves typed callbacks and a single selected legend", async () => {
+test("keeps selection local without mutating the supplied legends", async () => {
   const onFirst = vi.fn();
   const onSecond = vi.fn();
   const legends: Legend[] = [
     { label: "Food", color: "red", shape: "square", onClick: onFirst },
     { label: "Travel", color: "blue", shape: "square", onClick: onSecond },
   ];
+  Object.freeze(legends);
+  legends.forEach(Object.freeze);
 
   const { getByRole, unmount } = render(LegendCard, { legends });
   const food = getByRole("button", { name: "Food" });
@@ -46,7 +48,5 @@ test("preserves typed callbacks and a single selected legend", async () => {
   expect(onSecond).toHaveBeenCalledWith(legends[1]);
   expect(food).toHaveAttribute("aria-pressed", "false");
   expect(travel).toHaveAttribute("aria-pressed", "true");
-  expect(legends[0].selected).toBe(false);
-  expect(legends[1].selected).toBe(true);
   unmount();
 });
