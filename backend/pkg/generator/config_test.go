@@ -68,3 +68,22 @@ func TestDemo(t *testing.T) {
 	require.NoError(t, err)
 	assert.Greater(t, ledgerStat.Size(), int64(1000), "Ledger file should contain multiple transactions")
 }
+
+func TestDemoExpensesPreserveCheckingReserve(t *testing.T) {
+	ledgerPath := filepath.Join(t.TempDir(), "main.ledger")
+	ledgerFile, err := os.Create(ledgerPath)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, ledgerFile.Close()) })
+
+	state := GeneratorState{
+		Balance:      20_000,
+		Ledger:       ledgerFile,
+		Rent:         10_000,
+		LoanBalance:  2_500_000,
+		YearlySalary: 1_000_000,
+	}
+	emitExpense(&state, time.Date(2014, time.January, 1, 0, 0, 0, 0, time.UTC))
+
+	assert.GreaterOrEqual(t, state.Balance, 10_000.0)
+	assert.LessOrEqual(t, state.CreditBalance, 0.0)
+}

@@ -28,6 +28,8 @@ func GetFiles(db *gorm.DB) dto.EditorFilesResponse {
 	db.Model(&posting.Posting{}).Distinct().Pluck("Account", &accounts)
 	db.Model(&posting.Posting{}).Distinct().Pluck("Payee", &payees)
 	db.Model(&posting.Posting{}).Distinct().Pluck("Commodity", &commodities)
+	sort.Strings(accounts)
+	sort.Strings(commodities)
 
 	path := config.GetJournalPath()
 	if err := ensureJournalFile(path, config.GetConfig().Readonly); err != nil {

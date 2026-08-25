@@ -1,39 +1,34 @@
 {
-  "accounts": [
-    "Income:Salary:Acme",
-    "Assets:Checking",
-    "Assets:House",
-    "Liabilities:HomeLoan",
-    "Expenses:Rent",
-    "Expenses:Food",
-    "Liabilities:CreditCard:Freedom",
-    "Assets:Equity:NIFTY",
-    "Assets:Equity:ABNB",
-    "Assets:Equity:AAPL",
-    "Income:CapitalGains:Equity:AAPL",
-    "Expenses:Charges",
-    "Assets:Dollar",
-    "Income:Interest:Checking",
-    "Expenses:Interest:HomeLoan",
-    "Expenses:Shopping",
-    "Expenses:Utilities"
-  ],
-  "commodities": [
-    "INR",
-    "NIFTY",
-    "ABNB",
-    "USD",
-    "AAPL"
-  ],
   "files": [
     {
       "name": "main.ledger",
-      "content": "commodity INR 9,99,99,999.00\n\nP 2022/01/07 00:00:00 NIFTY 100 INR\nP 2022/02/07 00:00:00 NIFTY 100.273 INR\n\n2022/01/01 Salary\n    Income:Salary:Acme                      -100,000 INR\n    Assets:Checking                          100,000 INR\n\n2022/01/02 Home purchase\n    Assets:House                             500,000 INR\n    Liabilities:HomeLoan                    -500,000 INR\n\n2022/01/03 Rent\n    ; Recurring: Rent\n    ; Period: 1 * ?\n    Assets:Checking                          -20,000 INR\n    Expenses:Rent\n\n2022/01/05 Groceries\n    Expenses:Food                               4,000 INR\n    Liabilities:CreditCard:Freedom\n\n2022/01/06 Bonus\n    Income:Salary:Acme                       -20,000 INR\n    Assets:Checking                           20,000 INR\n\n2022/01/07 Investment\n    Assets:Checking                          -80,000 INR\n    Assets:Equity:NIFTY                          800 NIFTY @ 100 INR\n\n2022/01/08 Buy ABNB\n    Assets:Equity:ABNB                          0.76 ABNB @ 131.27 USD\n    Assets:Checking\n\n2022/01/09 Buy Apple\n    Assets:Equity:AAPL                           100 AAPL @ 100 INR\n    Assets:Checking\n\n2022/01/10 Sell\n    Assets:Equity:AAPL                          -100 AAPL {100 INR} @ 100.273 INR\n    Income:CapitalGains:Equity:AAPL            -27.3 INR\n    Assets:Checking                          10027.3 INR\n\n2022/01/11 Multi Currency Debit\n    Expenses:Charges                             100 INR\n    Assets:Dollar                                 10 USD\n    Assets:Checking\n\n2022/01/20 Card payment\n    Liabilities:CreditCard:Freedom               4,000 INR\n    Assets:Checking\n\nP 2022/01/08 00:00:00 USD 80.442048 INR\n\n2022/01/31 Interest\n    ; Global note\n    ; :interest:\n    Income:Interest:Checking                  -1,000 INR ; Posting note\n    Assets:Checking\n\n2022/02/02 Home loan payment\n    Liabilities:HomeLoan                      10,000 INR\n    Expenses:Interest:HomeLoan                 5,000 INR\n    Assets:Checking                           -15,000 INR\n\n2022/02/03 Rent\n    ; Recurring: Rent\n    ; Period: 1 * ?\n    Assets:Checking                          -20,000 INR\n    Expenses:Rent\n\n2022/02/05 Shopping\n    Expenses:Shopping                           6,000 INR\n    Liabilities:CreditCard:Freedom\n\n~ Monthly from 2022-01-01 to 2022-04-01\n    Expenses:Rent                              20,000 INR\n    Expenses:Food                               8,000 INR\n    Expenses:Utilities                          3,000 INR\n    Assets:Checking\n\n2022/01/31 * Asset balance\n  Assets:Equity:NIFTY  =800 NIFTY\n",
+      "content": "commodity INR 9,99,99,999.00\n\nP 2022/01/07 00:00:00 NIFTY 100 INR\nP 2022/02/07 00:00:00 NIFTY 100.273 INR\nP 2022/01/08 00:00:00 ABNB 10559.627641 INR\n\n2022/01/01 Opening balance\n    Assets:Checking                           50,000 INR\n    Equity:OpeningBalances                   -50,000 INR\n\n2022/01/01 Salary\n    Income:Salary:Acme                      -100,000 INR\n    Assets:Checking                          100,000 INR\n\n2022/01/02 Home purchase\n    Assets:House                             500,000 INR\n    Liabilities:HomeLoan                    -500,000 INR\n\n2022/01/03 Rent\n    ; Recurring: Rent\n    ; Period: 1 * ?\n    Assets:Checking                          -20,000 INR\n    Expenses:Rent\n\n2022/01/05 Groceries\n    Expenses:Food                               4,000 INR\n    Liabilities:CreditCard:Freedom\n\n2022/01/06 Bonus\n    Income:Salary:Acme                       -20,000 INR\n    Assets:Checking                           20,000 INR\n\n2022/01/07 Investment\n    Assets:Checking                          -80,000 INR\n    Assets:Equity:NIFTY                          800 NIFTY @ 100 INR\n\n2022/01/08 Buy ABNB\n    Assets:Equity:ABNB                          0.76 ABNB @ 131.27 USD\n    Assets:Checking\n\n2022/01/09 Buy Apple\n    Assets:Equity:AAPL                           100 AAPL @ 100 INR\n    Assets:Checking\n\n2022/01/10 Sell\n    Assets:Equity:AAPL                          -100 AAPL {100 INR} @ 100.273 INR\n    Income:CapitalGains:Equity:AAPL            -27.3 INR\n    Assets:Checking                          10027.3 INR\n\n2022/01/11 Multi Currency Debit\n    Expenses:Charges                             100 INR\n    Assets:Dollar                                 10 USD\n    Assets:Checking\n\n2022/01/20 Card payment\n    Liabilities:CreditCard:Freedom               4,000 INR\n    Assets:Checking\n\nP 2022/01/08 00:00:00 USD 80.442048 INR\n\n2022/01/31 Interest\n    ; Global note\n    ; :interest:\n    Income:Interest:Checking                  -1,000 INR ; Posting note\n    Assets:Checking\n\n2022/02/02 Home loan payment\n    Liabilities:HomeLoan                      10,000 INR\n    Expenses:Interest:HomeLoan                 5,000 INR\n    Assets:Checking                           -15,000 INR\n\n2022/02/03 Rent\n    ; Recurring: Rent\n    ; Period: 1 * ?\n    Assets:Checking                          -20,000 INR\n    Expenses:Rent\n\n2022/02/05 Shopping\n    Expenses:Shopping                           6,000 INR\n    Liabilities:CreditCard:Freedom\n\n~ Monthly from 2022-01-01 to 2022-04-01\n    Expenses:Rent                              20,000 INR\n    Expenses:Food                               8,000 INR\n    Expenses:Utilities                          3,000 INR\n    Assets:Checking\n\n2022/01/31 * Asset balance\n  Assets:Equity:NIFTY  =800 NIFTY\n",
       "versions": [],
       "operation": ""
     }
   ],
+  "accounts": [
+    "Assets:Checking",
+    "Assets:Dollar",
+    "Assets:Equity:AAPL",
+    "Assets:Equity:ABNB",
+    "Assets:Equity:NIFTY",
+    "Assets:House",
+    "Equity:OpeningBalances",
+    "Expenses:Charges",
+    "Expenses:Food",
+    "Expenses:Interest:HomeLoan",
+    "Expenses:Rent",
+    "Expenses:Shopping",
+    "Expenses:Utilities",
+    "Income:CapitalGains:Equity:AAPL",
+    "Income:Interest:Checking",
+    "Income:Salary:Acme",
+    "Liabilities:CreditCard:Freedom",
+    "Liabilities:HomeLoan"
+  ],
   "payees": [
+    "Opening balance",
     "Salary",
     "Home purchase",
     "Rent",
@@ -49,5 +44,12 @@
     "Home loan payment",
     "Shopping",
     "Budget transaction"
+  ],
+  "commodities": [
+    "AAPL",
+    "ABNB",
+    "INR",
+    "NIFTY",
+    "USD"
   ]
 }

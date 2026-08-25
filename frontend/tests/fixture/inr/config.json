@@ -1,15 +1,15 @@
 {
   "accounts": [
-    "Income:Salary:Acme",
     "Assets:Checking",
-    "Expenses:Rent",
-    "Assets:Equity:NIFTY",
-    "Assets:Equity:ABNB",
-    "Assets:Equity:AAPL",
-    "Income:CapitalGains:Equity:AAPL",
-    "Expenses:Charges",
     "Assets:Dollar",
-    "Income:Interest:Checking"
+    "Assets:Equity:AAPL",
+    "Assets:Equity:ABNB",
+    "Assets:Equity:NIFTY",
+    "Expenses:Charges",
+    "Expenses:Rent",
+    "Income:CapitalGains:Equity:AAPL",
+    "Income:Interest:Checking",
+    "Income:Salary:Acme"
   ],
   "config": {
     "journal_path": "main.ledger",
@@ -1288,7 +1288,6 @@
           "properties": {
             "password": {
               "description": "Password for the account",
-              "pattern": "^sha256:[A-Fa-f0-9]{64}$",
               "type": "string",
               "ui:order": 2,
               "ui:widget": "password"
@@ -1302,8 +1301,7 @@
             }
           },
           "required": [
-            "username",
-            "password"
+            "username"
           ],
           "type": "object",
           "ui:header": "username"

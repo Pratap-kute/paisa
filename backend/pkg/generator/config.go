@@ -105,6 +105,8 @@ allocation_targets:
     target: 40
     accounts:
       - Assets:Debt:*
+      - Assets:Checking:*
+      - Assets:House
   - name: Equity
     target: 60
     accounts:
@@ -357,27 +359,25 @@ func taxRate(amount float64) float64 {
 	}
 }
 
-func emitChitFund(state *GeneratorState) {
-	start := lo.Must(time.Parse("02-01-2006", "01-01-2016"))
-	end := lo.Must(time.Parse("02-01-2006", "01-11-2016"))
+func emitChitFund(state *GeneratorState, start time.Time) {
+	if start.Year() != 2016 || start.Month() >= time.November {
+		return
+	}
 
-	for ; start.Before(end); start = start.AddDate(0, 1, 0) {
-		price := 10000 - ((time.November - start.Month()) * 100)
-		amount := fmt.Sprintf("1 CHIT @ %d", price)
+	price := 10000 - ((time.November - start.Month()) * 100)
+	amount := fmt.Sprintf("1 CHIT @ %d", price)
+	account := "Assets:Debt:Chit"
+	if start.Month() >= time.June {
+		account = "Liabilities:Chit"
+	}
+	emitTransaction(state.Ledger, start, "Chit installment", "Assets:Checking:SBI", account, amount)
+	state.Balance -= float64(price)
 
-		if start.Month() >= time.June {
-			emitTransaction(state.Ledger, start, "Chit installment", "Assets:Checking:SBI", "Liabilities:Chit", amount)
-		} else {
-			emitTransaction(state.Ledger, start, "Chit installment", "Assets:Checking:SBI", "Assets:Debt:Chit", amount)
-		}
-
-		if start.Month() == time.June {
-			amount = fmt.Sprintf("-5 CHIT @ %d", price)
-			emitTransaction(state.Ledger, start, "Chit withdraw", "Assets:Checking:SBI", "Assets:Debt:Chit", amount)
-			amount = fmt.Sprintf("-5 CHIT @ %d", price)
-			emitTransaction(state.Ledger, start, "Chit withdraw", "Assets:Checking:SBI", "Liabilities:Chit", amount)
-		}
-
+	if start.Month() == time.June {
+		amount = fmt.Sprintf("-5 CHIT @ %d", price)
+		emitTransaction(state.Ledger, start, "Chit withdraw", "Assets:Checking:SBI", "Assets:Debt:Chit", amount)
+		emitTransaction(state.Ledger, start, "Chit withdraw", "Assets:Checking:SBI", "Liabilities:Chit", amount)
+		state.Balance += float64(10 * price)
 	}
 }
 
@@ -441,8 +441,11 @@ func emitExpense(state *GeneratorState, start time.Time) {
 	emitExpense("Eat out", "Expenses:Restaurants", 2500, 0.5)
 	emitExpense("Groceries", "Expenses:Food", 5000, 0.9)
 
-	if state.LoanBalance > 0 {
-		emi := math.Min(state.Balance-10000, 30000.0)
+	creditCardDue := -state.CreditBalance
+	availableAfterCardPayment := state.Balance - creditCardDue - 10000
+	monthlyInterest := state.LoanBalance * 0.08 / 12
+	if state.LoanBalance > 0 && availableAfterCardPayment >= monthlyInterest {
+		emi := math.Min(availableAfterCardPayment, 30000.0)
 		interest := (state.LoanBalance * 0.08 / 12)
 		principal := emi - interest
 		state.LoanBalance -= principal
@@ -450,18 +453,18 @@ func emitExpense(state *GeneratorState, start time.Time) {
 		emit("EMI", "Liabilities:Homeloan", principal, 1.0)
 	}
 
-	if state.Balance < 10000 {
-		emit("Pay Credit Card Bill", "Liabilities:CreditCard:Freedom", -state.CreditBalance, 1.0)
-		state.CreditBalance = 0
-		return
-	}
-
 	if lo.Contains([]time.Month{time.January, time.April, time.November, time.December}, start.Month()) {
-		emit("Dress", "Expenses:Clothing", 5000, 0.5)
+		clothingBudget := math.Max(state.Balance-creditCardDue-10000, 0)
+		if clothingBudget > 0 {
+			emit("Dress", "Expenses:Clothing", math.Min(5000, clothingBudget), 0.5)
+		}
 	}
 
-	emit("Pay Credit Card Bill", "Liabilities:CreditCard:Freedom", -state.CreditBalance, 1.0)
-	state.CreditBalance = 0
+	cardPayment := math.Min(-state.CreditBalance, math.Max(state.Balance-10000, 0))
+	if cardPayment > 0 {
+		emit("Pay Credit Card Bill", "Liabilities:CreditCard:Freedom", cardPayment, 1.0)
+		state.CreditBalance += cardPayment
+	}
 }
 
 func emitInvestment(state *GeneratorState, start time.Time) {
@@ -521,7 +524,7 @@ func generateJournalFile(cwd string) error {
     ; Recurring: EPF
 
 = Liabilities:Homeloan
-    ; Recurring: EMI Principle
+    ; Recurring: EMI Principal
 
 = Expenses:Interest:Homeloan
     ; Recurring: EMI Interest
@@ -560,11 +563,10 @@ func generateJournalFile(cwd string) error {
 
 	for ; start.Before(end); start = start.AddDate(0, 1, 0) {
 		emitSalary(&state, start)
+		emitChitFund(&state, start)
 		emitExpense(&state, start)
 		emitInvestment(&state, start)
 	}
-
-	emitChitFund(&state)
 	return nil
 }
 
