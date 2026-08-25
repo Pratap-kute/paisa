@@ -155,7 +155,86 @@ func SortAsc(postings []posting.Posting) []posting.Posting {
 
 func SortDesc(postings []posting.Posting) []posting.Posting {
 	sort.Slice(postings, func(i, j int) bool { return postings[i].Date.After(postings[j].Date) })
+	stabilizeEquivalentPostings(postings)
 	return postings
+}
+
+type equivalentPostingKey struct {
+	date      int64
+	account   string
+	commodity string
+	quantity  string
+	amount    string
+}
+
+func equivalentKey(p posting.Posting) equivalentPostingKey {
+	return equivalentPostingKey{
+		date: p.Date.Unix(), account: p.Account, commodity: p.Commodity,
+		quantity: p.Quantity.String(), amount: p.Amount.String(),
+	}
+}
+
+func postingSourceLess(a, b posting.Posting) bool {
+	if a.FileName != b.FileName {
+		return a.FileName < b.FileName
+	}
+	if a.TransactionBeginLine != b.TransactionBeginLine {
+		return a.TransactionBeginLine < b.TransactionBeginLine
+	}
+	if a.Payee != b.Payee {
+		return a.Payee < b.Payee
+	}
+	return a.Note < b.Note
+}
+
+// stabilizeEquivalentPostings makes otherwise indistinguishable accounting
+// entries deterministic without changing the established order of other
+// same-day postings. This matters when two transactions have the same date,
+// account, commodity and amount, as their database insertion order can vary
+// between ledger CLIs.
+func stabilizeEquivalentPostings(postings []posting.Posting) {
+	groups := make(map[equivalentPostingKey][]int)
+	for i, p := range postings {
+		groups[equivalentKey(p)] = append(groups[equivalentKey(p)], i)
+	}
+	for _, indices := range groups {
+		if len(indices) < 2 {
+			continue
+		}
+		values := make([]posting.Posting, len(indices))
+		for i, index := range indices {
+			values[i] = postings[index]
+		}
+		sort.Slice(values, func(i, j int) bool {
+			return postingSourceLess(values[i], values[j])
+		})
+		for i, index := range indices {
+			postings[index] = values[i]
+		}
+	}
+}
+
+func stabilizeEquivalentBalances(postings []posting.Posting) {
+	groups := make(map[equivalentPostingKey][]int)
+	for i, p := range postings {
+		groups[equivalentKey(p)] = append(groups[equivalentKey(p)], i)
+	}
+	for _, indices := range groups {
+		if len(indices) < 2 {
+			continue
+		}
+		balances := make([]decimal.Decimal, len(indices))
+		sort.Slice(indices, func(i, j int) bool {
+			return postingSourceLess(postings[indices[i]], postings[indices[j]])
+		})
+		for i, index := range indices {
+			balances[i] = postings[index].Balance
+		}
+		sort.Slice(balances, func(i, j int) bool { return balances[i].LessThan(balances[j]) })
+		for i, index := range indices {
+			postings[index].Balance = balances[i]
+		}
+	}
 }
 
 func PopulateBalance(postings []posting.Posting) []posting.Posting {
@@ -166,6 +245,7 @@ func PopulateBalance(postings []posting.Posting) []posting.Posting {
 		accumulator[postings[i].Account] = accumulator[postings[i].Account].Add(postings[i].Quantity)
 		postings[i].Balance = accumulator[postings[i].Account]
 	}
+	stabilizeEquivalentBalances(postings)
 	return postings
 }
 
