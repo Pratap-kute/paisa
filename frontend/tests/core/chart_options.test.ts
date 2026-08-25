@@ -48,20 +48,18 @@ describe("chart option contracts", () => {
         },
       ],
     }, { theme }) as {
-      baseOption: {
-        animation: boolean;
-        color: string[];
-        series: Array<{ data: Array<number | null>; connectNulls: boolean }>;
-      };
+      animation: boolean;
+      color: string[];
+      series: Array<{ data: Array<number | null>; connectNulls: boolean }>;
       media: Array<{ query: { maxWidth: number }; option: unknown }>;
     };
 
-    expect(option.baseOption.animation).toBe(false);
-    expect(option.baseOption.series[0].data).toEqual([10, null]);
-    expect(option.baseOption.series[1].data).toEqual([null, 20]);
-    expect(option.baseOption.series.every((series) => !series.connectNulls))
+    expect(option.animation).toBe(false);
+    expect(option.series[0].data).toEqual([10, null]);
+    expect(option.series[1].data).toEqual([null, 20]);
+    expect(option.series.every((series) => !series.connectNulls))
       .toBe(true);
-    expect(new Set(option.baseOption.color).size).toBe(2);
+    expect(new Set(option.color).size).toBe(2);
     expect(option.media[0].query).toEqual({ maxWidth: 639 });
   });
 
@@ -72,13 +70,11 @@ describe("chart option contracts", () => {
         { key: "rent", label: "Rent", value: 100, categoryKey: "rent" },
       ],
     }, { theme }) as {
-      baseOption: {
-        animation: boolean;
-        grid: { left: number; right: number; containLabel: boolean };
-        tooltip: { backgroundColor: string; textStyle: { color: string } };
-        xAxis: { splitNumber: number };
-        series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
-      };
+      animation: boolean;
+      grid: { left: number; right: number; containLabel: boolean };
+      tooltip: { backgroundColor: string; textStyle: { color: string } };
+      xAxis: { splitNumber: number };
+      series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
       media: Array<{
         option: {
           grid: { left: number; right: number; containLabel: boolean };
@@ -86,7 +82,7 @@ describe("chart option contracts", () => {
         };
       }>;
     };
-    const desktop = option.baseOption;
+    const desktop = option;
     const compact = option.media[0].option;
 
     expect(desktop.animation).toBe(false);
@@ -132,17 +128,15 @@ describe("chart option contracts", () => {
         },
       ],
     }, { theme }) as {
-      baseOption: {
-        series: Array<{
-          data: Array<{
-            itemStyle: { color: string };
-            children: Array<{ itemStyle: { color: string } }>;
-          }>;
+      series: Array<{
+        data: Array<{
+          itemStyle: { color: string };
+          children: Array<{ itemStyle: { color: string } }>;
         }>;
-      };
+      }>;
     };
 
-    const [energy, technology] = option.baseOption.series[0].data;
+    const [energy, technology] = option.series[0].data;
     expect(energy.itemStyle.color).not.toBe(technology.itemStyle.color);
     expect(energy.children[0].itemStyle.color).toBe(energy.itemStyle.color);
     expect(technology.children[0].itemStyle.color).toBe(
@@ -165,19 +159,17 @@ describe("chart option contracts", () => {
         },
       ],
     }, { theme }) as {
-      baseOption: {
-        series: Array<{
-          type: string;
-          data: Array<{
-            name: string;
-            children: Array<{ name: string }>;
-          }>;
+      series: Array<{
+        type: string;
+        data: Array<{
+          name: string;
+          children: Array<{ name: string }>;
         }>;
-      };
+      }>;
     };
 
-    expect(option.baseOption.series[0].type).toBe("treemap");
-    expect(option.baseOption.series[0].data[0].children.length).toBe(2);
+    expect(option.series[0].type).toBe("treemap");
+    expect(option.series[0].data[0].children.length).toBe(2);
   });
 
   it("flattens and ranks portfolio holdings across multiple commodities", () => {

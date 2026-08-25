@@ -59,16 +59,14 @@ describe("bar/comparison ECharts adapters", () => {
       seriesColors: ["series-1", "series-2", "series-3", "series-4"],
     } as PaisaChartTheme;
     const option = buildComparisonBarOption(data, { theme }) as {
-      baseOption: {
-        series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
-      };
+      series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
     };
 
-    expect(option.baseOption.series[0].data[0].itemStyle.color).toBe(
+    expect(option.series[0].data[0].itemStyle.color).toBe(
       "semantic-override",
     );
     expect(theme.seriesColors).toContain(
-      option.baseOption.series[0].data[1].itemStyle.color,
+      option.series[0].data[1].itemStyle.color,
     );
   });
 

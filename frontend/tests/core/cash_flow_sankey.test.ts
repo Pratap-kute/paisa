@@ -94,11 +94,11 @@ describe("cash-flow Sankey ECharts adapter", () => {
     ]]);
 
     const option = buildCashFlowSankeyOption(data);
-    expect(option.baseOption.series[0].type).toBe("graph");
-    expect(option.baseOption.series[0].data.map((node) => node.nodeId)).toEqual(
+    expect(option.series[0].type).toBe("graph");
+    expect(option.series[0].data.map((node) => node.nodeId)).toEqual(
       [1, 2, 3],
     );
-    expect(option.baseOption.series[0].links.map((link) => ({
+    expect(option.series[0].links.map((link) => ({
       source: link.sourceId,
       target: link.targetId,
       value: link.value,
