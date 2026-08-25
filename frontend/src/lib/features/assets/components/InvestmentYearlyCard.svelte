@@ -1,11 +1,8 @@
 <script lang="ts">
   import Card from "$lib/shared/ui/Card.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
-  import {
-    formatCurrency,
-    formatFloat,
-    type InvestmentYearlyCard as InvestmentYearlyCardType,
-  } from "$lib/core/utils";
+  import type { InvestmentYearlyCard as InvestmentYearlyCardType } from "$lib/domain/assets";
+  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
 
   interface Props {
     card: InvestmentYearlyCardType;

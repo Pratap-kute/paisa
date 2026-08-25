@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { helpUrl } from "$lib/core/utils";
+  import { helpUrl } from "$lib/shared/browser/navigation";
   import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {

@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import CreditCardCard from "$lib/features/liabilities/components/CreditCardCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
+  import { helpUrl } from "$lib/shared/browser/navigation";
+import type { CreditCardSummary } from "$lib/domain/liabilities";
     import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
@@ -12,7 +14,9 @@ import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
   let creditCards: CreditCardSummary[] = $state([]);
 
   onMount(async () => {
-    ({ creditCards } = await ajax("/api/credit_cards"));
+    ({ creditCards } = await api.creditCards.getCreditCards() as unknown as {
+      creditCards: CreditCardSummary[];
+    });
     if (isEmptyValue(creditCards)) {
       isEmpty = true;
     }

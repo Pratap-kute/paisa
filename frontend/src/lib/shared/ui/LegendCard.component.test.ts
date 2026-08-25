@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
-import type { Legend } from "$lib/core/utils";
+import type { Legend } from "$lib/shared/charts/types";
 import LegendCard from "./LegendCard.svelte";
 
 test("renders renderer-neutral line, square, and hatch symbols", () => {

@@ -1,14 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { restName, firstName } from "$lib/domain/account";
+import type { IncomeStatement } from "$lib/domain/cash_flow";
+import { onMount } from "svelte";
     import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
-  import {
-    ajax,
-    formatCurrency,
-    formatPercentage,
-    restName,
-    type IncomeStatement,
-    firstName,
-  } from "$lib/core/utils";
   import { dateMin, dateMax, year } from "../../../../store";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
@@ -92,7 +89,9 @@ import { keys, maxBy, minBy, some, sortBy, values } from "$lib/shared/utils/coll
 
   onMount(async () => {
     try {
-      ({ yearly } = await ajax("/api/income_statement"));
+      ({ yearly } = await api.incomeStatement.getIncomeStatement() as unknown as {
+        yearly: Record<string, IncomeStatement>;
+      });
       const statements = values(yearly);
       const earliest = minBy(statements, (statement) => statement.date);
       const latest = maxBy(statements, (statement) => statement.date);

@@ -4,7 +4,7 @@ import {
   buildCashFlowSankeyOption,
   findDirectedCycles,
 } from "$lib/shared/charts/echarts/cash_flow_sankey";
-import type { Graph } from "$lib/core/utils";
+import type { Graph } from "$lib/shared/charts/types";
 import browserExpense from "../fixture/browser/expense.json" with {
   type: "json",
 };

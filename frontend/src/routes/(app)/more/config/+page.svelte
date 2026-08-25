@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { configUpdated } from "$lib/core/utils";
+  import { configUpdated } from "$lib/shared/browser/config";
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";

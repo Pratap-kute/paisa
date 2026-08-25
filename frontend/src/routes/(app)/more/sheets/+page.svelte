@@ -1,7 +1,7 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import { goto } from "$app/navigation";
   import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-  import { ajax } from "$lib/core/utils";
   import * as toast from "$lib/shared/ui/toast";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
@@ -15,10 +15,9 @@
 
   async function createFile(destinationFile: string) {
     destinationFile = destinationFile.trim() + ".paisa";
-    const { saved, message } = await ajax("/api/sheets/save", {
-      method: "POST",
-      body: JSON.stringify({ name: destinationFile, content: "", operation: "create" }),
-      background: true
+    const { saved, message } = await api.sheets.saveSheetFile({
+      name: destinationFile,
+      content: "",
     });
 
     if (saved) {

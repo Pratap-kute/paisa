@@ -1,4 +1,4 @@
-import type { Harvestable } from "$lib/core/utils";
+import type { Harvestable } from "$lib/domain/tax";
 
 export type HarvestCalculation = [units: number, amount: number, gain: number];
 

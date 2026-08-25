@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { forEachFinancialYear } from "$lib/shared/formatters/date";
+import { page } from "$app/stores";
   import { afterNavigate } from "$app/navigation";
   import { onMount, type Snippet } from "svelte";
   import Logo from "./Logo.svelte";
@@ -8,10 +9,7 @@
   import CommandPalette from "./CommandPalette.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import {
-    financialYear,
-    forEachFinancialYear,
-  } from "$lib/core/utils";
+  import { financialYear } from "$lib/domain/time";
   import {
     month,
     year,

@@ -4,22 +4,17 @@ import { COVERAGE_THRESHOLD } from "../vitest.shared.ts";
 await ensureDir("coverage");
 
 const CORE_COVERAGE_FILES = [
-  "src/lib/core/",
   "src/lib/domain/",
-  "src/lib/importing/",
-  "src/lib/ledger/",
-  "src/lib/sheet/",
+  "src/lib/features/",
+  "src/lib/shared/",
 ];
 
 const CORE_COVERAGE_EXCLUDES = new Set([
-  "src/lib/core/colors.ts",
-  "src/lib/core/icon.ts",
-  "src/lib/domain/transaction_tag.ts",
-  "src/lib/importing/export.ts",
-  "src/lib/importing/pdf.ts",
-  "src/lib/sheet/language.ts",
-  "src/lib/sheet/parser.ts",
-  "src/lib/sheet/parser.terms.ts",
+  "src/lib/shared/theme/colors.ts",
+  "src/lib/shared/ui/icon.ts",
+  "src/lib/features/importing/export.ts",
+  "src/lib/features/importing/pdf.ts",
+  "src/lib/features/editor/schedule_extension.ts",
 ]);
 
 type CoverageMetric = {

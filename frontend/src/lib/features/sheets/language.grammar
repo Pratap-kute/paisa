@@ -85,6 +85,6 @@ BinaryOperator<expr> { expr }
   whitespace | Comment | comment
 }
 
-@external propSource sheetHighlighting from "./highlight"
+@external propSource sheetHighlighting from "../../shared/editor/sheet_highlight.js"
 
 @detectDelim

@@ -2,11 +2,8 @@
   import { Dialog as BitsDialog } from "bits-ui";
   import type { EditorView } from "@codemirror/view";
   import {
-    createEditor,
-    editorState as templateEditorState,
-    updateContent,
-  } from "$lib/features/editor/template_editor";
-  import type { ImportTemplate } from "$lib/core/utils";
+    createEditor, editorState as templateEditorState, updateContent, } from "$lib/features/editor/template_editor";
+  import type { ImportTemplate } from "$lib/features/importing/types";
   import Button from "$lib/shared/ui/Button.svelte";
   import IconButton from "$lib/shared/ui/IconButton.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";

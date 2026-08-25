@@ -1,14 +1,18 @@
 import dayjs from "dayjs";
+import type { Gain } from "$lib/domain/assets";
+import type { Posting } from "$lib/domain/ledger";
 import { describe, expect, it } from "vitest";
 import {
-  buildAllocationTargetComparison,
-  buildCreditCardYearlySpendsComparison,
   buildExpenseBreakdownComparison,
+} from "$lib/features/expense/chart_comparison_data";
+import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
+import {
+  buildAllocationTargetComparison,
   buildGainOverviewComparison,
-} from "$lib/features/charts/bar_comparison_data";
+} from "$lib/features/assets/chart_comparison_data";
 import { buildComparisonBarOption } from "$lib/shared/charts/echarts/bar_comparison";
 import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-import type { AllocationTarget, Gain, Posting } from "$lib/core/utils";
+import type { AllocationTarget } from "$lib/domain/assets";
 
 function posting(
   account: string,

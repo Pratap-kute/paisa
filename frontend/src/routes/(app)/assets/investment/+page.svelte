@@ -1,15 +1,13 @@
 <script lang="ts">
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import type { InvestmentYearlyCard as InvestmentYearlyCardType } from "$lib/domain/assets";
+  import type { Legend } from "$lib/shared/charts/types";
+  import type { Posting } from "$lib/domain/ledger";
   import {
     buildMonthlyInvestmentSeries,
     buildYearlyInvestmentSeries,
-  } from "$lib/features/charts/time_series_data";
-  import {
-    formatCurrency,
-    type InvestmentYearlyCard as InvestmentYearlyCardType,
-    type Legend,
-    type Posting,
-  } from "$lib/core/utils";
+  } from "$lib/features/assets/time_series_data";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import { api } from "$lib/api";
   import { orderBy, sumBy } from "es-toolkit";
   import { onMount } from "svelte";

@@ -25,7 +25,7 @@ import {
   ifIn,
 } from "@codemirror/autocomplete";
 import { MergeView } from "@codemirror/merge";
-import { schedulePlugin } from "$lib/domain/transaction_tag";
+import { schedulePlugin } from "$lib/features/editor/schedule_extension";
 import dayjs from "dayjs";
 import { assign, map } from "$lib/shared/utils/collection";
 

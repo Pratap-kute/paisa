@@ -13,11 +13,11 @@ import {
 import {
   intervalText,
   nextUnpaidSchedule,
-  scheduleIcon,
   sortTrantionSequence,
   totalRecurring,
 } from "$lib/domain/transaction_sequence";
-import { setNow } from "$lib/core/utils";
+import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
+import { setNow } from "$lib/domain/time";
 
 beforeAll(() => {
   dayjs.extend(isSameOrBefore);

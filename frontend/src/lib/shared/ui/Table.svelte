@@ -1,7 +1,11 @@
 <script lang="ts">
-  import { rem } from "$lib/core/utils";
+  import { rem } from "$lib/shared/browser/responsive";
   import { onMount, onDestroy } from "svelte";
-  import { TabulatorFull as Tabulator, type ColumnDefinition, type Options } from "tabulator-tables";
+  import {
+    TabulatorFull as Tabulator,
+    type ColumnDefinition,
+    type Options,
+  } from "tabulator-tables";
 
   interface Props {
     data?: any[];

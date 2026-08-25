@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getColorPreference, setColorPreference } from "$lib/core/utils";
+  import { getColorPreference, setColorPreference } from "$lib/shared/browser/theme";
   import { onMount } from "svelte";
   import * as store from "../../../store";
 

@@ -5,8 +5,9 @@
   import Button from "$lib/shared/ui/Button.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
   import SelectField from "$lib/shared/ui/Select.svelte";
-  import { createEventDispatcher, onMount } from "svelte";
-  import { type AutoCompleteItem, type PriceProvider } from "$lib/core/utils";
+  import type { PriceProvider } from "$lib/features/ledger/types";
+import { createEventDispatcher, onMount } from "svelte";
+  import type { AutoCompleteItem } from "$lib/features/ledger/types";
   import { api } from "$lib/api";
 
   let label = "Choose Price Provider";

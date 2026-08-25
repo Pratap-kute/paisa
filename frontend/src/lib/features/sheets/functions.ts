@@ -1,6 +1,6 @@
-import type { Posting } from "$lib/core/utils";
+import type { Posting } from "$lib/domain/ledger";
 import { groupBy } from "es-toolkit";
-import { assertType, type Environment, type Query } from "./interpreter";
+import { assertType, Environment, Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";
 import { sortBy } from "$lib/shared/utils/collection";
 

@@ -1,6 +1,19 @@
 <script lang="ts">
-  import { buildCashFlowSeries } from "$lib/features/charts/mixed_period_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
+  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { now } from "$lib/domain/time";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { restName } from "$lib/domain/account";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import type { Networth } from "$lib/domain/assets";
+import type { Budget, CashFlow } from "$lib/domain/cash_flow";
+import type { GoalSummary } from "$lib/domain/goals_models";
+import type { Legend } from "$lib/shared/charts/types";
+import type { Posting, Transaction } from "$lib/domain/ledger";
+import type { TransactionSequence } from "$lib/domain/recurring";
+import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
   import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
@@ -11,34 +24,13 @@
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
   import { refresh } from "../../store";
   import {
-    enrichTrantionSequence,
-    intervalText,
-    nextUnpaidSchedule,
-    sortTrantionSequence,
-    totalRecurring
+    enrichTrantionSequence, intervalText, nextUnpaidSchedule, sortTrantionSequence, totalRecurring
   } from "$lib/domain/transaction_sequence";
-  import {
-    formatCurrency,
-    formatCurrencyCrude,
-    formatFloat,
-    formatPercentage,
-    now,
-    postingUrl,
-    restName,
-    type AssetBreakdown,
-    type Budget,
-    type CashFlow,
-    type GoalSummary,
-    type Legend,
-    type Networth,
-    type Posting,
-    type Transaction,
-    type TransactionSequence
-  } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import { sumBy, take } from "es-toolkit";
   import dayjs from "dayjs";
   import { onMount } from "svelte";

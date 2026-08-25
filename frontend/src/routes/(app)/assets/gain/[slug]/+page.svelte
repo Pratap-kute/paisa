@@ -1,24 +1,17 @@
 <script lang="ts">
   import COLORS from "$lib/shared/theme/colors";
-  import { buildLegends } from "$lib/features/assets/gain";
+  import type { Networth } from "$lib/domain/assets";
+import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+import { firstName, restName } from "$lib/domain/account";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import type { AccountGain, PortfolioAggregate } from "$lib/domain/assets";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import { buildLegends } from "$lib/features/assets/gain";
   import {
-    buildPortfolioComparison,
-    filterCommodityBreakdowns,
-  } from "$lib/features/charts/hierarchy_data";
-  import {
-    type Posting,
-    formatCurrency,
-    formatFloat,
-    type AccountGain,
-    type Networth,
-    type PortfolioAggregate,
-    type AssetBreakdown,
-    formatPercentage,
-    formatFloatUptoPrecision,
-    firstName,
-    restName,
-    postingUrl,
-  } from "$lib/core/utils";
+    buildPortfolioComparison, filterCommodityBreakdowns, } from "$lib/features/assets/hierarchy_data";
+  import type { Posting } from "$lib/domain/ledger";
   import { api } from "$lib/api";
   import { last, sortBy } from "es-toolkit";
   import { onMount } from "svelte";
@@ -33,7 +26,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);

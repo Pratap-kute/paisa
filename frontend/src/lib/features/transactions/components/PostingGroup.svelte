@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { formatCurrency, type Posting } from "$lib/core/utils";
+  import type { Posting } from "$lib/domain/ledger";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 
   interface Props {
     postings: Posting[];

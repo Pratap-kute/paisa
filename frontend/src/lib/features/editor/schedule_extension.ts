@@ -9,7 +9,7 @@ import {
   ViewPlugin,
   type ViewUpdate,
 } from "@codemirror/view";
-import { prefixMinutesSeconds } from "../core/utils";
+import { prefixMinutesSeconds } from "$lib/domain/time";
 
 class SchedulePreview extends WidgetType {
   constructor(readonly period: string) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type LedgerFile, type Transaction as T } from "$lib/core/utils";
+  import type { LedgerFile, Transaction as T } from "$lib/domain/ledger";
   import { api } from "$lib/api";
   import { debounce } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";

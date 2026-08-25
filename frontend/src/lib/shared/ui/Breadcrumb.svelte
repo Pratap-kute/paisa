@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { helpUrl } from "$lib/core/utils";
+  import { helpUrl } from "$lib/shared/browser/navigation";
   import Badge from "./Badge.svelte";
 
   export interface BreadcrumbItem {

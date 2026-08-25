@@ -1,6 +1,6 @@
 <script lang="ts">
   import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
-  import { type AssetBreakdown } from "$lib/core/utils";
+  import type { AssetBreakdown } from "$lib/domain/assets";
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";

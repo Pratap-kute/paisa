@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { CapitalGain, FYCapitalGain } from "$lib/core/utils";
-  import { formatCurrency } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import type { CapitalGain } from "$lib/domain/tax";
+import type { FYCapitalGain } from "$lib/domain/tax";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
   import Card from "$lib/shared/ui/Card.svelte";
   import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
   import Metric from "$lib/shared/layout/Metric.svelte";
-  import { ajax } from "$lib/core/utils";
   import { sumBy, uniq } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
@@ -91,7 +92,9 @@
 
   onMount(async () => {
     try {
-      const { capital_gains } = await ajax("/api/capital_gains");
+      const { capital_gains } = await api.capitalGains.getCapitalGains() as unknown as {
+        capital_gains: Record<string, CapitalGain>;
+      };
 
       years = uniq(
         Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),

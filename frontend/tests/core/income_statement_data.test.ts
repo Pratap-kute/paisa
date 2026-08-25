@@ -5,7 +5,7 @@ import {
   buildIncomeStatementWaterfallOption,
   incomeStatementAxisRange,
 } from "$lib/shared/charts/echarts/waterfall";
-import type { IncomeStatement } from "$lib/core/utils";
+import type { IncomeStatement } from "$lib/domain/cash_flow";
 
 describe("income statement waterfall adapter", () => {
   it("preserves ordered start, delta, end, and breakdown values", () => {

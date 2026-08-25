@@ -1,5 +1,6 @@
+import { secondName } from "$lib/domain/account";
 import { groupBy, mapValues, sumBy } from "es-toolkit";
-import { type Posting, secondName } from "$lib/core/utils";
+import type { Posting } from "$lib/domain/ledger";
 
 export function byExpenseGroup(expenses: Posting[]) {
   return mapValues(

@@ -4,7 +4,7 @@
  */
 
 import { desaturateRgb, rgbToHex } from "./color";
-import { getColorPreference } from "$lib/core/utils";
+import { getColorPreference } from "$lib/shared/browser/theme";
 
 export const MaterialUI = {
   red: {

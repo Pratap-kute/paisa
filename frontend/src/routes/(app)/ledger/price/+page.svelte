@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import Table from "$lib/shared/ui/Table.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import { ajax, formatCurrency, type Price } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import type { Price } from "$lib/domain/assets";
   import { nonZeroPercentageChange } from "$lib/shared/tables/formatters";
   import { toast } from "$lib/shared/ui/toast";
   import { omitBy } from "es-toolkit";
@@ -187,7 +189,7 @@ import { find } from "$lib/shared/utils/collection";
   let commodityCount = $derived(tableData.length);
 
   async function clearPriceCache() {
-    const { success, message } = await ajax("/api/price/delete", { method: "POST" });
+    const { success, message } = await api.price.clearPriceCache();
     if (!success) {
       toast({
         message: `Failed to clear price cache. reason: ${message}`,
@@ -204,7 +206,9 @@ import { find } from "$lib/shared/utils/collection";
   }
 
   async function fetchPrice() {
-    const { prices: loadedPrices } = await ajax("/api/price");
+    const { prices: loadedPrices } = await api.price.getPrices() as unknown as {
+      prices: Record<string, Price[]>;
+    };
     prices = omitBy(loadedPrices, (v) => v.length === 0);
   }
 

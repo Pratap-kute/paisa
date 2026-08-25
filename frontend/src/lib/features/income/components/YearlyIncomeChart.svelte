@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildYearlyIncomeComparisonSeries } from "$lib/features/charts/time_series_data";
-  import type { IncomeYearlyCard } from "$lib/core/utils";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import { buildYearlyIncomeComparisonSeries } from "$lib/features/income/time_series_data";
+  import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     yearlyCards: IncomeYearlyCard[];

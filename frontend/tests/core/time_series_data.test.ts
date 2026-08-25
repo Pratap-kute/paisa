@@ -1,28 +1,29 @@
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
+import type { Income } from "$lib/domain/cash_flow";
+import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
+import type { InvestmentYearlyCard, Networth } from "$lib/domain/assets";
+import type { Point } from "$lib/domain/goals_models";
+import type { Posting } from "$lib/domain/ledger";
 import { describe, expect, it } from "vitest";
 import {
   buildGainAccountSeries,
-  buildGoalInvestmentSeries,
-  buildGoalProgressSeries,
-  buildMonthlyIncomeSeries,
   buildMonthlyInvestmentSeries,
   buildNetworthSeries,
-  buildRepaymentSeries,
+  buildYearlyInvestmentSeries,
+} from "$lib/features/assets/time_series_data";
+import {
+  buildGoalInvestmentSeries,
+  buildGoalProgressSeries,
+} from "$lib/features/goals/time_series_data";
+import {
+  buildMonthlyIncomeSeries,
   buildYearlyIncomeComparisonSeries,
   buildYearlyIncomeSeries,
   buildYearlyIncomeValueSeries,
-  buildYearlyInvestmentSeries,
-} from "$lib/features/charts/time_series_data";
-import type {
-  Forecast,
-  Income,
-  IncomeYearlyCard,
-  InvestmentYearlyCard,
-  Networth,
-  Point,
-  Posting,
-} from "$lib/core/utils";
+} from "$lib/features/income/time_series_data";
+import { buildRepaymentSeries } from "$lib/features/liabilities/time_series_data";
+import type { Forecast } from "$lib/domain/goals_models";
 
 dayjs.extend(isSameOrBefore);
 

@@ -1,14 +1,11 @@
 <script lang="ts">
-  import { createEditor, sheetEditorState } from "$lib/features/editor/sheet_editor";
-  import { focus, moveToLine, updateContent } from "$lib/shared/editor/editor";
-  import {
-    ajax,
-    buildDirectoryTree,
-    formatFloatUptoPrecision,
-    type LedgerFile,
-    type Posting,
-    type SheetFile,
-  } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import { buildDirectoryTree } from "$lib/shared/utils/tree";
+import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+import type { LedgerFile, Posting } from "$lib/domain/ledger";
+import type { SheetFile } from "$lib/domain/ledger";
+import { createEditor, sheetEditorState } from "$lib/features/editor/sheet_editor";
+  import { focus, moveToLine, updateContent } from "$lib/features/editor/runtime";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";
   import * as toast from "$lib/shared/ui/toast";
@@ -108,8 +105,15 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/sh
       files: ledgerFiles,
       accounts,
       commodities,
-    } = await ajax("/api/editor/files"));
-    ({ files, postings } = await ajax("/api/sheets/files"));
+    } = await api.editor.getEditorFiles() as unknown as {
+      files: LedgerFile[];
+      accounts: string[];
+      commodities: string[];
+    });
+    ({ files, postings } = await api.sheets.getSheetFiles() as unknown as {
+      files: SheetFile[];
+      postings: Posting[];
+    });
     filesMap = fromPairs(map(files, (f) => [f.name, f]));
     if (!isEmpty(files)) {
       selectedFile =
@@ -127,35 +131,23 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/sh
   }
 
   async function revert(version: string) {
-    const { file } = await ajax("/api/sheets/file", {
-      method: "POST",
-      body: JSON.stringify({ name: version }),
-      background: true,
-    });
+    const { file } = await api.sheets.getSheetFile({ name: version }) as unknown as { file: SheetFile };
 
     updateContent(editor, file.content);
   }
 
   async function deleteBackups() {
-    const { file } = await ajax("/api/sheets/file/delete_backups", {
-      method: "POST",
-      body: JSON.stringify({ name: selectedFile.name }),
-      background: true,
-    });
+    const { file } = await api.sheets.deleteSheetBackups({ name: selectedFile.name }) as unknown as { file: SheetFile };
 
     selectedFile.versions = file.versions;
   }
 
   async function save() {
     const doc = editor.state.doc;
-    const { saved, file, message } = await ajax("/api/sheets/save", {
-      method: "POST",
-      body: JSON.stringify({
-        name: selectedFile.name,
-        content: doc.toString(),
-      }),
-      background: true,
-    });
+    const { saved, file, message } = await api.sheets.saveSheetFile({
+      name: selectedFile.name,
+      content: doc.toString(),
+    }) as unknown as { saved: boolean; file: SheetFile; message: string };
 
     if (!saved) {
       toast.toast({
@@ -208,14 +200,9 @@ import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/sh
 
   async function createFile(destinationFile: string) {
     destinationFile = destinationFile.trim() + ".paisa";
-    const { saved, message } = await ajax("/api/sheets/save", {
-      method: "POST",
-      body: JSON.stringify({
-        name: destinationFile,
-        content: "",
-        operation: "create",
-      }),
-      background: true,
+    const { saved, message } = await api.sheets.saveSheetFile({
+      name: destinationFile,
+      content: "",
     });
 
     if (saved) {

@@ -61,6 +61,6 @@ DateValue { "[" dateChar+ "]" }
 
 @skip { whitespace }
 
-@external propSource queryHighlighting from "./highlight"
+@external propSource queryHighlighting from "../../shared/editor/query_highlight.js"
 
 @detectDelim

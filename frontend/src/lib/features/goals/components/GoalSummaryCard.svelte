@@ -1,7 +1,9 @@
 <script lang="ts">
   import Card from "$lib/shared/ui/Card.svelte";
-  import { iconGlyph } from "$lib/shared/ui/icon";
-  import { formatCurrency, formatPercentage, type GoalSummary } from "$lib/core/utils";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { GoalSummary } from "$lib/domain/goals_models";
+import { iconGlyph } from "$lib/shared/ui/icon";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import Metric from "$lib/shared/layout/Metric.svelte";
   import Progress from "$lib/shared/ui/Progress.svelte";
   import dayjs from "dayjs";

@@ -1,12 +1,10 @@
 <script lang="ts">
-  import { scheduleIcon } from "$lib/domain/transaction_sequence";
-  import {
-    formatCurrency,
-    formatCurrencyCrude,
-    postingUrl,
-    tooltip,
-    type TransactionSchedule,
-  } from "$lib/core/utils";
+  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { tooltip } from "$lib/shared/charts/tooltip";
+import type { TransactionSchedule } from "$lib/domain/recurring";
+import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
 
   interface Props {
     schedule: TransactionSchedule;

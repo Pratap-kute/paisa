@@ -1,17 +1,13 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import COLORS from "$lib/shared/theme/colors";
-  import {
-    ajax,
-    formatCurrency,
-    formatFloat,
-    type AssetBreakdown,
-    type Forecast,
-    type Point,
-    type Posting,
-    firstName,
-    restName,
-    postingUrl,
-  } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { firstName, restName } from "$lib/domain/account";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import type { Forecast, Point, RetirementGoalProgress } from "$lib/domain/goals_models";
+import type { Posting } from "$lib/domain/ledger";
   import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
@@ -72,7 +68,7 @@ import { sortBy } from "$lib/shared/utils/collection";
       name,
       postings,
       balances,
-    } = await ajax("/api/goals/retirement/:name", null as any, data as Record<string, string>));
+    } = await api.goals.getGoalDetails("retirement", data.name) as unknown as RetirementGoalProgress);
     targetSavings = yearlyExpense * (100 / swr);
 
     latestPostings = sortBy(postings, (p: Posting) => p.date)

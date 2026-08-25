@@ -1,14 +1,8 @@
 <script lang="ts">
-  import {
-    createEditor,
-    editorState,
-    focus,
-    moveToEnd,
-    moveToLine,
-    updateContent,
-  } from "$lib/shared/editor/editor";
+  import type { LedgerFile } from "$lib/domain/ledger";
+import { createEditor, editorState, focus, moveToEnd, moveToLine, updateContent, } from "$lib/features/editor/runtime";
   import { insertTab } from "@codemirror/commands";
-  import { buildDirectoryTree, type LedgerFile } from "$lib/core/utils";
+  import { buildDirectoryTree } from "$lib/shared/utils/tree";
   import { api } from "$lib/api";
   import { redo, undo } from "@codemirror/commands";
   import type { KeyBinding, EditorView } from "@codemirror/view";

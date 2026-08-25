@@ -1,28 +1,24 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import Select from "svelte-select";
   import Handlebars from "handlebars";
-  import { editorState as templateEditorState } from "$lib/features/editor/template_editor";
+  import type { ImportTemplate } from "$lib/features/importing/types";
+  import type { PredictionHistoryEntry } from "$lib/features/prediction/types_api";
+  import type { AccountTfIdf } from "$lib/shared/state/models";
+import { editorState as templateEditorState } from "$lib/features/editor/template_editor";
   import {
-    createEditor as createPreviewEditor,
-    updateContent as updatePreviewContent
-  } from "$lib/shared/editor/editor";
+    createEditor as createPreviewEditor, updateContent as updatePreviewContent
+  } from "$lib/features/editor/runtime";
   import TemplateEditorDrawer from "$lib/features/importing/components/TemplateEditorDrawer.svelte";
   import FileDropzone from "$lib/shared/ui/FileDropzone.svelte";
   import {
-    parse,
-    asRows,
-    renderWithMetadata,
-    type RenderMetadata
+    parse, asRows, renderWithMetadata, type RenderMetadata
   } from "$lib/features/importing/spreadsheet";
   import {
-    commitParseOutcome,
-    displayCell,
-    emptyRenderMetadata,
-  } from "$lib/features/importing/import_commit";
+    commitParseOutcome, displayCell, emptyRenderMetadata, } from "$lib/features/importing/import_commit";
   import { range } from "es-toolkit";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
-  import { ajax, type ImportTemplate } from "$lib/core/utils";
   import { accountTfIdf } from "../../../../store";
   import * as toast from "$lib/shared/ui/toast";
   import { ensureFileExtension } from "$lib/features/ledger/file";
@@ -74,6 +70,12 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
     unknown: 0,
     transfer: 0,
   });
+
+  async function loadTemplates() {
+    return await api.templates.getTemplates() as unknown as {
+      templates: ImportTemplate[];
+    };
+  }
   let predictionReviewFailed = $state(false);
   let predictionRows = $state<
     Array<{
@@ -134,12 +136,12 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
 
   onMount(async () => {
     const [tfidf, historyResponse] = await Promise.all([
-      ajax("/api/account/tf_idf"),
-      ajax("/api/prediction/history"),
+      api.account.getTfIdf(),
+      api.prediction.getPredictionHistory(),
     ]);
-    accountTfIdf.set(tfidf);
-    predictionSession.loadHistory(historyResponse.history || []);
-    ({ templates } = await ajax("/api/templates"));
+    accountTfIdf.set(tfidf as unknown as AccountTfIdf);
+    predictionSession.loadHistory(historyResponse as unknown as PredictionHistoryEntry[]);
+    ({ templates } = await loadTemplates());
     if (templates.length > 0) {
       onSelectTemplate(templates[0]);
     }
@@ -162,14 +164,11 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
   let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
 
   async function handleSaveTemplate(name: string, content: string) {
-    const { template, saved, message } = await ajax("/api/templates/upsert", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        content
-      }),
-      background: true
-    });
+    const { template, saved, message } = await api.templates.upsertTemplate({ name, content }) as unknown as {
+      template: ImportTemplate;
+      saved: boolean;
+      message?: string;
+    };
     if (!saved) {
       toast.toast({
         message: `Failed to save template ${name}. reason: ${message}`,
@@ -183,7 +182,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
       type: "is-success"
     });
     $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
-    ({ templates } = await ajax("/api/templates", { background: true }));
+    ({ templates } = await loadTemplates());
     selectedTemplate = template;
   }
 
@@ -200,13 +199,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
     if (!confirmed) {
       return;
     }
-    const { success, message } = await ajax("/api/templates/delete", {
-      method: "POST",
-      body: JSON.stringify({
-        name: templateToDelete.name
-      }),
-      background: true
-    });
+    const { success, message } = await api.templates.deleteTemplate({ name: templateToDelete.name });
     if (!success) {
       toast.toast({
         message: `Failed to remove ${oldName}. reason: ${message}`,
@@ -216,7 +209,7 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
       return;
     }
 
-    ({ templates } = await ajax("/api/templates", { background: true }));
+    ({ templates } = await loadTemplates());
     if (templates.length > 0) {
       onSelectTemplate(templates[0]);
     }
@@ -456,10 +449,10 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
 
   async function saveToFile(destinationFile: string) {
     const finalName = ensureFileExtension(destinationFile, ".ledger");
-    const { saved, message } = await ajax("/api/editor/save", {
-      method: "POST",
-      body: JSON.stringify({ name: finalName, content: preview, operation: "overwrite" }),
-      background: true
+    const { saved, message } = await api.editor.saveEditorFile({
+      name: finalName,
+      content: preview,
+      operation: "overwrite",
     });
 
     if (saved) {
@@ -942,16 +935,12 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/shared/utils/collection
         disabled={!saveAsName || saveAsNameDuplicate}
         onclick={async () => {
           close();
-          const { template, saved, message } = await ajax("/api/templates/upsert", {
-            method: "POST",
-            body: JSON.stringify({
-              name: saveAsName,
-              content: selectedTemplate?.content || ""
-            }),
-            background: true
-          });
+          const { template, saved, message } = await api.templates.upsertTemplate({
+            name: saveAsName,
+            content: selectedTemplate?.content || "",
+          }) as unknown as { template: ImportTemplate; saved: boolean; message?: string };
           if (saved) {
-            ({ templates } = await ajax("/api/templates", { background: true }));
+            ({ templates } = await loadTemplates());
             onSelectTemplate(template);
             toast.toast({
               message: `Created template ${saveAsName}`,

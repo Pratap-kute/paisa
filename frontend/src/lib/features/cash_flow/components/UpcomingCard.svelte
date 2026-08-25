@@ -1,11 +1,10 @@
 <script lang="ts">
-  import {
-    intervalText,
-    nextUnpaidSchedule,
-    scheduleIcon,
-    totalRecurring
+  import { now } from "$lib/domain/time";
+import type { TransactionSequence } from "$lib/domain/recurring";
+import { intervalText, nextUnpaidSchedule, totalRecurring
   } from "$lib/domain/transaction_sequence";
-  import { formatCurrencyCrude, now, type TransactionSequence } from "$lib/core/utils";
+import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
+  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
   import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {

@@ -1,14 +1,12 @@
 <script lang="ts">
   import Card from "$lib/shared/ui/Card.svelte";
-  import { iconText } from "$lib/shared/ui/icon";
-  import {
-    formatCurrency,
-    formatPercentage,
-    restName,
-    type CreditCardSummary,
-    now,
-    type CreditCardBill
-  } from "$lib/core/utils";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+import { restName } from "$lib/domain/account";
+import { now } from "$lib/domain/time";
+import type { CreditCardSummary } from "$lib/domain/liabilities";
+import type { CreditCardBill } from "$lib/domain/liabilities";
+import { iconText } from "$lib/shared/ui/icon";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
 

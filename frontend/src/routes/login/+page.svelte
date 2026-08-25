@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Logo from "$lib/shared/layout/Logo.svelte";
-  import { login } from "$lib/core/utils";
+  import { login } from "$lib/shared/browser/auth";
   import Button from "$lib/shared/ui/Button.svelte";
   import FormField from "$lib/shared/layout/FormField.svelte";
   import Input from "$lib/shared/ui/Input.svelte";

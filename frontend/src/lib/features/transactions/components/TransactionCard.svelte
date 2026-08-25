@@ -1,14 +1,11 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+import { restName, firstName } from "$lib/domain/account";
+import type { Posting } from "$lib/domain/ledger";
+import type { Transaction } from "$lib/domain/ledger";
+import { accountColorStyle } from "$lib/shared/theme/colors";
   import { iconText } from "$lib/shared/ui/icon";
-  import {
-    formatCurrency,
-    postingUrl,
-    restName,
-    type Posting,
-    type Transaction,
-    firstName
-  } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import PostingStatus from "./PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 

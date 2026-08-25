@@ -1,10 +1,8 @@
 <script lang="ts">
-  import {
-    formatCurrency,
-    formatFloat,
-    type Legend,
-    type Networth,
-  } from "$lib/core/utils";
+  import { formatFloat } from "$lib/shared/formatters/currency";
+import type { Legend } from "$lib/shared/charts/types";
+import type { Networth } from "$lib/domain/assets";
+import { formatCurrency } from "$lib/shared/formatters/currency";
   import { api } from "$lib/api";
   import { last } from "es-toolkit";
   import { onMount } from "svelte";
@@ -24,7 +22,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
-  import { buildNetworthSeries } from "$lib/features/charts/time_series_data";
+  import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
 import { filter, map } from "$lib/shared/utils/collection";
 
   let networth = $state(0);

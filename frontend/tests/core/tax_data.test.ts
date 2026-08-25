@@ -1,3 +1,4 @@
+import type { ScheduleALEntry } from "$lib/domain/tax";
 import { describe, expect, it } from "vitest";
 import {
   filterHarvestables,
@@ -6,7 +7,7 @@ import {
   unitsRequiredFromGain,
 } from "$lib/features/tax/harvest_data";
 import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
-import type { Harvestable, ScheduleALEntry } from "$lib/core/utils";
+import type { Harvestable } from "$lib/domain/tax";
 
 function harvestable(overrides: Partial<Harvestable> = {}): Harvestable {
   return {

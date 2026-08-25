@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any -- CodeMirror syntax-tree nodes expose dynamically shaped parser metadata.
-import type { Posting, Transaction } from "$lib/core/utils";
+import type { Posting, Transaction } from "$lib/domain/ledger";
 import {
   autocompletion,
   closeBrackets,
@@ -20,7 +20,7 @@ import dayjs from "dayjs";
 import { sumBy } from "es-toolkit";
 import { writable } from "svelte/store";
 import * as Terms from "$lib/generated/search/parser.terms.js";
-import { queryExtension } from "$lib/generated/search/query";
+import { queryExtension } from "$lib/features/editor/query_language";
 import { baseEditorExtensions } from "$lib/shared/editor/base";
 import {
   assign,

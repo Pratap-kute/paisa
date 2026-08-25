@@ -28,12 +28,12 @@ import {
 } from "$lib/shared/state/store";
 import { fullEditorExtensions } from "$lib/shared/editor/base";
 import { sheetExtension, sheetLanguage } from "$lib/features/sheets/language";
-import { schedulePlugin } from "$lib/domain/transaction_tag";
+import { schedulePlugin } from "$lib/features/editor/schedule_extension";
 export { sheetEditorState } from "$lib/shared/state/store";
 import { functions } from "$lib/features/sheets/functions";
 
 import { buildAST, Environment } from "$lib/features/sheets/interpreter";
-import type { Posting } from "$lib/core/utils";
+import type { Posting } from "$lib/domain/ledger";
 import { assign, map } from "$lib/shared/utils/collection";
 
 let latestIdentifiers: string[] = [];

@@ -1,4 +1,4 @@
-import type { BalancedPosting } from "$lib/core/utils";
+import type { BalancedPosting } from "$lib/domain/ledger";
 import Papa from "papaparse";
 
 export function download(balancedPostings: BalancedPosting[]) {

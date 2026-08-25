@@ -1,20 +1,19 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { restName } from "$lib/domain/account";
+import type { Posting } from "$lib/domain/ledger";
+import type { Legend } from "$lib/shared/charts/types";
+import { onMount } from "svelte";
   import { sumBy, uniq } from "es-toolkit";
   import dayjs from "dayjs";
-  import {
-    firstName,
-    type Posting,
-    formatCurrency,
-    formatPercentage,
-    type Legend,
-    postingUrl,
-    restName,
-  } from "$lib/core/utils";
+  import { firstName } from "$lib/domain/account";
   import { api } from "$lib/api";
-  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/features/charts/mixed_period_data";
+  import { buildMonthlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+  import { categoryColor, categoryColorResolver, categoryLegends } from "$lib/shared/charts/category";
   import { buildMonthlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
   import { expenseGroup } from "$lib/features/expense/expense";
   import { iconify } from "$lib/shared/ui/icon";
   import { dateRange, month, dateMin, dateMax, setAllowedDateRange } from "../../../../store";
@@ -31,9 +30,9 @@
   import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
   import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);

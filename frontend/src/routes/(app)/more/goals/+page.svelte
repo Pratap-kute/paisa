@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { dndzone } from "svelte-dnd-action";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
   import GoalSummaryCard from "$lib/features/goals/components/GoalSummaryCard.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { helpUrl, type GoalSummary } from "$lib/core/utils";
+  import { helpUrl } from "$lib/shared/browser/navigation";
   import { api } from "$lib/api";
   import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";

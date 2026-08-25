@@ -1,7 +1,7 @@
 <script lang="ts">
   import FileTree from "./FileTree.svelte";
 
-  import type { Directory, LedgerFile } from "$lib/core/utils";
+  import type { Directory, LedgerFile } from "$lib/domain/ledger";
   import { createEventDispatcher } from "svelte";
 
   interface Props {

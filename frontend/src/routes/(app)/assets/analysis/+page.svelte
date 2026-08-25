@@ -1,12 +1,9 @@
 <script lang="ts">
-  import {
-    buildFlattenedHoldings,
-    buildPortfolioComparison,
-    buildTopHoldingsComparison,
-    filterCommodityBreakdowns,
-  } from "$lib/features/charts/hierarchy_data";
+  import { api } from "$lib/api";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { PortfolioAggregate, PortfolioAllocation } from "$lib/domain/assets";
+import { buildFlattenedHoldings, buildPortfolioComparison, buildTopHoldingsComparison, filterCommodityBreakdowns, } from "$lib/features/assets/hierarchy_data";
   import COLORS from "$lib/shared/theme/colors";
-  import { ajax, formatPercentage, type PortfolioAggregate } from "$lib/core/utils";
   import { nonZeroCurrency } from "$lib/shared/tables/formatters";
     import { onMount } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
@@ -16,7 +13,7 @@
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
   import Table from "$lib/shared/ui/Table.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
 import { isEmpty as isEmptyValue, max, some } from "$lib/shared/utils/collection";
@@ -139,9 +136,7 @@ import { isEmpty as isEmptyValue, max, some } from "$lib/shared/utils/collection
 
   onMount(async () => {
     try {
-      ({ name_and_security_type, security_type, rating, industry, commodities } = await ajax(
-        "/api/portfolio_allocation",
-      ));
+      ({ name_and_security_type, security_type, rating, industry, commodities } = await api.portfolioAllocation.getPortfolioAllocation() as unknown as PortfolioAllocation);
 
       if (isEmptyValue(commodities)) {
         isEmpty = true;

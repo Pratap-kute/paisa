@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Legend } from "$lib/core/utils";
+  import type { Legend } from "$lib/shared/charts/types";
 
   interface Props {
     clazz?: string;

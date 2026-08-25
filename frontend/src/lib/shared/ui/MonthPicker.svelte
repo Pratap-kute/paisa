@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { now } from "$lib/core/utils";
+  import { now } from "$lib/domain/time";
   import dayjs from "dayjs";
 
   interface Props {

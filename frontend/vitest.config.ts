@@ -17,10 +17,8 @@ const coreProject = defineConfig({
       reporter: ["text", "html", "lcov", "json-summary"],
       reportsDirectory: "coverage/core",
       include: [
-        "src/lib/core/**/*.ts",
         "src/lib/domain/**/*.ts",
         "src/lib/features/**/*.ts",
-        "src/lib/sheet/**/*.ts",
         "src/lib/shared/**/*.ts",
       ],
       exclude: [
@@ -29,9 +27,8 @@ const coreProject = defineConfig({
         "src/lib/shared/theme/colors.ts",
         "src/lib/shared/ui/icon.ts",
         "src/lib/shared/vendor/**",
-        "src/lib/domain/transaction_tag.ts",
+        "src/lib/features/editor/schedule_extension.ts",
         "src/lib/features/importing/{export,pdf}.ts",
-        "src/lib/sheet/{language,parser,parser.terms}.ts",
       ],
       thresholds: {
         lines: coverageThreshold(),

@@ -1,12 +1,13 @@
 import dayjs from "dayjs";
+import type { PortfolioAggregate } from "$lib/domain/assets";
 import { describe, expect, it } from "vitest";
 import {
   buildAllocationHierarchy,
   buildPortfolioComparison,
   buildPortfolioHierarchy,
   filterCommodityBreakdowns,
-} from "$lib/features/charts/hierarchy_data";
-import type { Aggregate, PortfolioAggregate } from "$lib/core/utils";
+} from "$lib/features/assets/hierarchy_data";
+import type { Aggregate } from "$lib/domain/assets";
 
 describe("financial hierarchy adapters", () => {
   it("preserves allocation hierarchy and derives parent values without double counting", () => {

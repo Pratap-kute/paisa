@@ -1,8 +1,5 @@
-import type {
-  LedgerFileError,
-  SheetFileError,
-  SheetLineResult,
-} from "$lib/core/utils";
+import type { LedgerFileError, SheetFileError } from "$lib/domain/ledger";
+import type { SheetLineResult } from "$lib/shared/state/models";
 
 export interface EditorState {
   hasUnsavedChanges: boolean;

@@ -1,4 +1,4 @@
-import type { LedgerFileError } from "$lib/core/utils";
+import type { LedgerFileError } from "$lib/domain/ledger";
 import { handlebars } from "./handlebars_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, keymap } from "@codemirror/view";

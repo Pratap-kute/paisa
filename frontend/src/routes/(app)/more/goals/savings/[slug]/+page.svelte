@@ -1,17 +1,14 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import COLORS from "$lib/shared/theme/colors";
-  import {
-    ajax,
-    formatCurrency,
-    formatFloat,
-    type Forecast,
-    type Point,
-    type Posting,
-    type AssetBreakdown,
-    firstName,
-    restName,
-    postingUrl,
-  } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { firstName, restName } from "$lib/domain/account";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
+import type { Point } from "$lib/domain/goals_models";
+import type { Posting } from "$lib/domain/ledger";
+import type { AssetBreakdown } from "$lib/domain/assets";
   import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
@@ -86,7 +83,7 @@ import { isEmpty, sortBy } from "$lib/shared/utils/collection";
       xirr,
       paymentPerPeriod,
       balances,
-    } = await ajax("/api/goals/savings/:name", null as any, data as Record<string, string>));
+    } = await api.goals.getGoalDetails("savings", data.name) as unknown as SavingsGoalProgress);
 
     savingsTimeline = savingsTimeline || [];
     postings = postings || [];

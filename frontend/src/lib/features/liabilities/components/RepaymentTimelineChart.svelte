@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildRepaymentSeries } from "$lib/features/charts/time_series_data";
-  import type { Posting } from "$lib/core/utils";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import { buildRepaymentSeries } from "$lib/features/liabilities/time_series_data";
+  import type { Posting } from "$lib/domain/ledger";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     repayments: Posting[];

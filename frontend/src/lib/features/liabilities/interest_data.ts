@@ -1,10 +1,8 @@
 import dayjs from "dayjs";
 import COLORS from "$lib/shared/theme/colors";
-import {
-  type Interest,
-  type InterestOverview,
-  restName,
-} from "$lib/core/utils";
+import type { Interest } from "$lib/domain/liabilities";
+import type { InterestOverview } from "$lib/domain/liabilities";
+import { restName } from "$lib/domain/account";
 import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
 import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
 import { maxBy, minBy, sortBy } from "$lib/shared/utils/collection";

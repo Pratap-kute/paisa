@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { iconify } from "$lib/shared/ui/icon";
-  import { firstName, formatCurrency, restName, type AccountBudget, tooltip } from "$lib/core/utils";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { restName } from "$lib/domain/account";
+import { tooltip } from "$lib/shared/charts/tooltip";
+import type { AccountBudget } from "$lib/domain/cash_flow";
+import { iconify } from "$lib/shared/ui/icon";
+  import { firstName } from "$lib/domain/account";
   import Card from "$lib/shared/ui/Card.svelte";
 
   interface Props {

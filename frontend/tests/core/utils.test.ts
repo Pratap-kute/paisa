@@ -1,49 +1,40 @@
+import { lastName, parentName } from "$lib/domain/account";
+import { restName } from "$lib/domain/account";
+import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+import { secondName } from "$lib/domain/account";
+import { formatFloat, formatPercentage } from "$lib/shared/formatters/currency";
+import { setColorPreference } from "$lib/shared/browser/theme";
+import { firstNames } from "$lib/domain/account";
+import { now, prefixMinutesSeconds } from "$lib/domain/time";
+import { formatFixedWidthFloat } from "$lib/shared/formatters/currency";
+import { buildDirectoryTree } from "$lib/shared/utils/tree";
+import { getColorPreference } from "$lib/shared/browser/theme";
+import { firstName } from "$lib/domain/account";
+import { monthDays, setNow } from "$lib/domain/time";
+import { forEachMonth, forEachYear } from "$lib/shared/formatters/date";
+import {
+  formatCurrencyCrudeWithPrecision,
+} from "$lib/shared/formatters/currency";
+import { sumPostings, transactionTotal } from "$lib/domain/transactions";
+import { buildTree } from "$lib/shared/utils/tree";
+import { darkenOrLighten } from "$lib/shared/theme/color";
+import { darkLightColor } from "$lib/shared/browser/theme";
+import { depth } from "$lib/domain/account";
+import { dueDateIcon } from "$lib/shared/ui/due_date";
+import { financialYear } from "$lib/domain/time";
+import { forEachFinancialYear } from "$lib/shared/formatters/date";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatTextAsHtml } from "$lib/shared/ui/rich_text";
+import { groupSumBy } from "$lib/domain/transactions";
+import { helpUrl, postingUrl } from "$lib/shared/browser/navigation";
+import { isLoggedIn, logout } from "$lib/shared/browser/auth";
+import { isMobile, rem } from "$lib/shared/browser/responsive";
+import { isZero } from "$lib/shared/utils/number";
+import { tooltip } from "$lib/shared/charts/tooltip";
 import { beforeEach, describe, expect, test } from "vitest";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
-import {
-  asTransaction,
-  buildDirectoryTree,
-  buildTree,
-  darkenOrLighten,
-  darkLightColor,
-  depth,
-  dueDateIcon,
-  financialYear,
-  firstName,
-  firstNames,
-  forEachFinancialYear,
-  forEachMonth,
-  forEachYear,
-  formatCurrency,
-  formatCurrencyCrudeWithPrecision,
-  formatFixedWidthFloat,
-  formatFloat,
-  formatFloatUptoPrecision,
-  formatPercentage,
-  formatTextAsHtml,
-  getColorPreference,
-  groupSumBy,
-  helpUrl,
-  isLoggedIn,
-  isMobile,
-  isZero,
-  lastName,
-  logout,
-  monthDays,
-  now,
-  parentName,
-  postingUrl,
-  prefixMinutesSeconds,
-  rem,
-  restName,
-  secondName,
-  setColorPreference,
-  setNow,
-  sumPostings,
-  tooltip,
-  transactionTotal,
-} from "$lib/core/utils";
+import { asTransaction } from "$lib/domain/transactions";
 
 dayjs.extend(isSameOrBefore);
 

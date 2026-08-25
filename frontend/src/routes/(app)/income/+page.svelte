@@ -1,9 +1,11 @@
 <script lang="ts">
-  import {
-    buildMonthlyIncomeSeries,
-    buildYearlyIncomeComparisonSeries,
-  } from "$lib/features/charts/time_series_data";
-  import { ajax, formatCurrency, type Income, type IncomeYearlyCard, type Legend } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import type { Income } from "$lib/domain/cash_flow";
+import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
+import type { Tax } from "$lib/domain/tax";
+import type { Legend } from "$lib/shared/charts/types";
+import { buildMonthlyIncomeSeries, buildYearlyIncomeComparisonSeries, } from "$lib/features/income/time_series_data";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
@@ -34,7 +36,11 @@ import { isEmpty } from "$lib/shared/utils/collection";
         income_timeline: fetchedIncomes,
         tax_timeline: taxes,
         yearly_cards: fetchedYearlyCards,
-      } = await ajax("/api/income");
+      } = await api.income.getIncome() as unknown as {
+        income_timeline: Income[];
+        tax_timeline: Tax[];
+        yearly_cards: IncomeYearlyCard[];
+      };
 
       incomes = fetchedIncomes ?? [];
       yearlyCards = fetchedYearlyCards ?? [];

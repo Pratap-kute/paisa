@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import type { Legend } from "$lib/core/utils";
+import type { Legend } from "$lib/shared/charts/types";
 import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,

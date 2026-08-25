@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { ajax, type Issue } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import type { Issue } from "$lib/features/diagnosis/types";
+import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
@@ -17,7 +18,7 @@
   async function runDiagnosis() {
     isLoading = true;
     try {
-      const response = await ajax("/api/diagnosis");
+      const response = await api.diagnosis.getDiagnosis() as unknown as { issues: Issue[] };
       issues = response.issues || [];
       lastChecked = new Date();
     } finally {

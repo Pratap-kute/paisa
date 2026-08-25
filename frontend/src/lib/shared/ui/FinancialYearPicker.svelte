@@ -1,6 +1,7 @@
 <script lang="ts">
   import type dayjs from "dayjs";
-  import { financialYear, forEachFinancialYear } from "$lib/core/utils";
+  import { financialYear } from "$lib/domain/time";
+import { forEachFinancialYear } from "$lib/shared/formatters/date";
 
   interface Props {
     value: string;

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { type AssetBreakdown, buildTree } from "$lib/core/utils";
+  import type { AssetBreakdown } from "$lib/domain/assets";
+import { buildTree } from "$lib/shared/utils/tree";
   import { onMount } from "svelte";
   import Table from "$lib/shared/ui/Table.svelte";
   import type { ColumnDefinition } from "tabulator-tables";

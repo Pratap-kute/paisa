@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildGoalInvestmentSeries } from "$lib/features/charts/time_series_data";
-  import type { Posting } from "$lib/core/utils";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import { buildGoalInvestmentSeries } from "$lib/features/goals/time_series_data";
+  import type { Posting } from "$lib/domain/ledger";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     postings: Posting[];

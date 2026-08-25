@@ -1,5 +1,6 @@
 import type { LayoutLoad } from "./$types";
-import { configUpdated, setNow } from "$lib/core/utils";
+import { configUpdated } from "$lib/shared/browser/config";
+import { setNow } from "$lib/domain/time";
 import { createApiClient } from "$lib/api";
 import dayjs from "dayjs";
 

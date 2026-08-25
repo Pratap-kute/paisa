@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { buildGoalProgressSeries } from "$lib/features/charts/time_series_data";
-  import type { Forecast, Point } from "$lib/core/utils";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import type { Point } from "$lib/domain/goals_models";
+import { buildGoalProgressSeries } from "$lib/features/goals/time_series_data";
+  import type { Forecast } from "$lib/domain/goals_models";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     points: Point[];

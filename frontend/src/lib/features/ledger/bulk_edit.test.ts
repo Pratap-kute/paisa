@@ -2,7 +2,7 @@ import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
 import { applyChanges } from "./bulk_edit";
-import type { LedgerFile } from "$lib/core/utils";
+import type { LedgerFile } from "$lib/domain/ledger";
 import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {

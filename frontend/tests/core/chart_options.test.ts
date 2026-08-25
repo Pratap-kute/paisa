@@ -5,7 +5,7 @@ import {
   buildAllocationCategoryComparison,
   buildFlattenedHoldings,
   buildTopHoldingsComparison,
-} from "$lib/features/charts/hierarchy_data";
+} from "$lib/features/assets/hierarchy_data";
 import { buildPeriodSeriesOption } from "$lib/shared/charts/echarts/period_series";
 import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
 

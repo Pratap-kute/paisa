@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { isMobile, now, type TransactionSchedule } from "$lib/core/utils";
+  import { now } from "$lib/domain/time";
+import type { TransactionSchedule } from "$lib/domain/recurring";
+import { isMobile } from "$lib/shared/browser/responsive";
   import type { Dayjs } from "dayjs";
   import RecurringSchedule from "./RecurringSchedule.svelte";
 

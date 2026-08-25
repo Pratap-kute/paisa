@@ -1,17 +1,16 @@
 <script lang="ts">
-  import {
-    buildInterestOverviewComparison,
-    buildInterestTimelineSeries,
-    interestSummary,
-  } from "$lib/features/liabilities/interest_data";
-  import { ajax, formatCurrency, formatFloat, type Interest } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import type { Interest } from "$lib/domain/liabilities";
+import { buildInterestOverviewComparison, buildInterestTimelineSeries, interestSummary, } from "$lib/features/liabilities/interest_data";
     import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
 
   let isEmpty = $state(false);
@@ -32,7 +31,9 @@ import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
 
   onMount(async () => {
     try {
-      const { interest_timeline_breakdown: loadedInterests } = await ajax("/api/liabilities/interest");
+      const { interest_timeline_breakdown: loadedInterests } = await api.liabilities.getLiabilitiesInterest() as unknown as {
+        interest_timeline_breakdown: Interest[];
+      };
 
       if (!hasLiabilityActivity(loadedInterests)) {
         isEmpty = true;

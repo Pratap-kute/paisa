@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { ajax, type Log } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import type { Log } from "$lib/features/logs/types";
+import { onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import { omit } from "es-toolkit";
   import Page from "$lib/shared/layout/Page.svelte";
@@ -27,8 +28,7 @@
   async function fetchLogs() {
     isLoading = true;
     try {
-      const data = await ajax("/api/logs");
-      logs = data.logs || [];
+      logs = await api.logs.getLogs() as unknown as Log[];
     } finally {
       isLoading = false;
     }

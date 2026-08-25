@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatPercentage } from "$lib/core/utils";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
 
   interface Props {
     value: number;

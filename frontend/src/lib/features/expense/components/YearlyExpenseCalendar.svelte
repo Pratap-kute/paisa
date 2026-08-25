@@ -1,7 +1,9 @@
 <script lang="ts">
   import type { ExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { categoryColor } from "$lib/features/charts/mixed_period_data";
-  import { formatCurrency, formatPercentage, tooltip } from "$lib/core/utils";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+import { tooltip } from "$lib/shared/charts/tooltip";
+import { categoryColor } from "$lib/shared/charts/category";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import { iconText } from "$lib/shared/ui/icon";
 
   interface Props {

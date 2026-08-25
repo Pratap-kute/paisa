@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { Legend } from "$lib/shared/charts/types";
+import type { Posting } from "$lib/domain/ledger";
+import { onMount } from "svelte";
   import { sumBy, uniq } from "es-toolkit";
-  import { financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
+  import { financialYear } from "$lib/domain/time";
   import { api } from "$lib/api";
-  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/features/charts/mixed_period_data";
+  import { buildYearlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+  import { categoryColor, categoryColorResolver, categoryLegends } from "$lib/shared/charts/category";
   import { buildYearlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/charts/bar_comparison_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
   import { expenseGroup } from "$lib/features/expense/expense";
   import { dateMin, dateMax, year } from "../../../../store";
   import { writable } from "svelte/store";
@@ -20,9 +25,9 @@
   import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
   import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
   import YearlyExpenseCalendar from "$lib/features/expense/components/YearlyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty, map, maxBy, minBy } from "$lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);

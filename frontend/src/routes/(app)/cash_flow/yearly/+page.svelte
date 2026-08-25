@@ -1,11 +1,16 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { api } from "$lib/api";
+  import { depth } from "$lib/domain/account";
+import { firstName } from "$lib/domain/account";
+import type { Graph } from "$lib/shared/charts/types";
+import type { Legend } from "$lib/shared/charts/types";
+import type { Posting } from "$lib/domain/ledger";
+import { onMount } from "svelte";
   import { partition } from "es-toolkit";
   import { buildCashFlowSankeyData } from "$lib/features/cash_flow/cash_flow_sankey_data";
   import { buildCashFlowHierarchyData } from "$lib/features/cash_flow/cash_flow_hierarchy";
   import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
-  import FinancialHierarchyChart from "$lib/features/charts/components/FinancialHierarchyChart.svelte";
-  import { ajax, depth, firstName, type Graph, type Legend, type Posting } from "$lib/core/utils";
+  import FinancialHierarchyChart from "$lib/shared/charts/FinancialHierarchyChart.svelte";
   import { dateMin, dateMax, year } from "../../../../store";
   import {
     setCashflowDepthAllowed,
@@ -89,7 +94,10 @@
 
   onMount(async () => {
     try {
-      ({ expenses, graph } = await ajax("/api/expense"));
+      ({ expenses, graph } = await api.expense.getExpense() as unknown as {
+        expenses: Posting[];
+        graph: Record<string, Graph>;
+      });
       const firstExpense = minBy(expenses, (e) => e.date);
       if (firstExpense) {
         dateMin.set(firstExpense.date);

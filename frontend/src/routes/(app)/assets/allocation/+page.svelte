@@ -1,21 +1,17 @@
 <script lang="ts">
-  import { buildAllocationTimelineSeries } from "$lib/features/charts/mixed_period_data";
+  import { api } from "$lib/api";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { Aggregate } from "$lib/domain/assets";
+import type { AllocationTarget } from "$lib/domain/assets";
+import type { Legend } from "$lib/shared/charts/types";
+import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
   import {
-    buildAllocationCategoryComparison,
-    buildAllocationHierarchy,
-  } from "$lib/features/charts/hierarchy_data";
-  import { buildAllocationTargetComparison } from "$lib/features/charts/bar_comparison_data";
+    buildAllocationCategoryComparison, buildAllocationHierarchy, } from "$lib/features/assets/hierarchy_data";
+  import { buildAllocationTargetComparison } from "$lib/features/assets/chart_comparison_data";
   import COLORS from "$lib/shared/theme/colors";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import Table from "$lib/shared/ui/Table.svelte";
   import { accountName, nonZeroCurrency } from "$lib/shared/tables/formatters";
-  import {
-    ajax,
-    formatPercentage,
-    type Aggregate,
-    type AllocationTarget,
-    type Legend,
-  } from "$lib/core/utils";
   import { last, sumBy } from "es-toolkit";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
@@ -24,8 +20,8 @@
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { filter, isEmpty, map, max as arrayMax, values } from "$lib/shared/utils/collection";
 
   let allocationTargets: AllocationTarget[] = $state([]);
@@ -93,7 +89,11 @@ import { filter, isEmpty, map, max as arrayMax, values } from "$lib/shared/utils
         aggregates: fetchedAggregates,
         aggregates_timeline: aggregatesTimeline,
         allocation_targets: fetchedTargets,
-      } = await ajax("/api/allocation");
+      } = await api.allocation.getAllocation() as unknown as {
+        aggregates: Record<string, Aggregate>;
+        aggregates_timeline: Record<string, Aggregate>[];
+        allocation_targets: AllocationTarget[];
+      };
 
       aggregates = fetchedAggregates;
       allocationTargets = fetchedTargets || [];

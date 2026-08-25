@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
-    import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import type { ScheduleAL } from "$lib/domain/tax";
+import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
   import Page from "$lib/shared/layout/Page.svelte";
@@ -16,7 +18,9 @@ import { minBy } from "$lib/shared/utils/collection";
   let total = $derived(scheduleALTotal(selectedScheduleAl?.entries ?? []));
 
   onMount(async () => {
-    ({ schedule_als: scheduleAls } = await ajax("/api/schedule_al"));
+    ({ schedule_als: scheduleAls } = await api.scheduleAl.getScheduleAl() as unknown as {
+      schedule_als: Record<string, ScheduleAL>;
+    });
 
     const firstScheduleAl = minBy(Object.values(scheduleAls), (e) => e.date);
     if (firstScheduleAl) {

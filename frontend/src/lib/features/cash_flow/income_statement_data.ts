@@ -1,32 +1,9 @@
-import type { IncomeStatement } from "$lib/core/utils";
-
-export type IncomeStatementCategory =
-  | "start"
-  | "income"
-  | "tax"
-  | "interest"
-  | "pnl"
-  | "equity"
-  | "liabilities"
-  | "expenses"
-  | "end";
-
-export interface WaterfallBreakdown {
-  account: string;
-  value: number;
-}
-export interface WaterfallStep {
-  id: IncomeStatementCategory;
-  label: string;
-  start: number;
-  delta: number;
-  end: number;
-  breakdown: WaterfallBreakdown[];
-}
-export interface IncomeStatementWaterfallData {
-  steps: WaterfallStep[];
-  endingBalance: number;
-}
+import type { IncomeStatement } from "$lib/domain/cash_flow";
+import type {
+  IncomeStatementCategory,
+  IncomeStatementWaterfallData,
+  WaterfallStep,
+} from "$lib/shared/charts/waterfall_data";
 
 const sum = (values: Record<string, number>) =>
   Object.values(values).reduce((acc, v) => acc + v, 0);
@@ -78,3 +55,9 @@ export function buildIncomeStatementWaterfall(
   });
   return { steps, endingBalance: statement.endingBalance };
 }
+
+export type {
+  IncomeStatementCategory,
+  IncomeStatementWaterfallData,
+  WaterfallStep,
+} from "$lib/shared/charts/waterfall_data";

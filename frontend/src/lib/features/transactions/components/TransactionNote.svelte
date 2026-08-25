@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { formatTextAsHtml, type Transaction } from "$lib/core/utils";
+  import type { Transaction } from "$lib/domain/ledger";
+import { formatTextAsHtml } from "$lib/shared/ui/rich_text";
   interface Props {
     transaction: Transaction;
   }

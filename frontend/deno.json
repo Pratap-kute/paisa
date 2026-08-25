@@ -7,20 +7,21 @@
     "build:watch": "deno run -A npm:vite build --watch",
 
     "audit": "deno audit --level=moderate",
-    "check": "deno task typecheck",
+    "check": "deno task architecture && deno task typecheck",
+    "architecture": "deno test --allow-read scripts/check_architecture_test.ts && deno run --allow-read scripts/check_architecture.ts",
     "check:tooling": "deno run -A scripts/check.ts --tooling",
     "format": "deno fmt",
     "lint": "deno lint",
     "typecheck": "deno run -A scripts/check.ts",
 
-    "parser-build": "deno run -A npm:@lezer/generator src/lib/generated/sheet/language.grammar -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/generated/search/query.grammar -o src/lib/generated/search/parser",
-    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/generated/sheet/language.grammar --names -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/generated/search/query.grammar --names -o src/lib/generated/search/parser",
+    "parser-build": "deno run -A npm:@lezer/generator src/lib/features/sheets/language.grammar -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/features/editor/query.grammar -o src/lib/generated/search/parser",
+    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/features/sheets/language.grammar --names -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/features/editor/query.grammar --names -o src/lib/generated/search/parser",
 
     "api:generate": "deno run -A scripts/generate_api.ts",
     "api:check": "deno run -A scripts/generate_api.ts --check",
 
     "test": "deno task test:unit && deno task test:core && deno task test:component",
-    "test:core": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=core --maxWorkers=1",
+    "test:core": "node node_modules/vitest/vitest.mjs run --config vitest.config.ts --project=core --maxWorkers=1",
     "test:component": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=component --maxWorkers=1",
     "test:deno": "deno task test:unit && deno task test:integration",
     "test:coverage": "deno run -A scripts/coverage.ts",
@@ -112,7 +113,9 @@
       "graphify-out/",
       "src/lib/api/generated/",
       "src/lib/generated/search/parser.js",
+      "src/lib/generated/search/parser.terms.js",
       "src/lib/generated/sheet/parser.js",
+      "src/lib/generated/sheet/parser.terms.js",
       "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
@@ -127,7 +130,9 @@
       "graphify-out/",
       "src/lib/api/generated/",
       "src/lib/generated/search/parser.js",
+      "src/lib/generated/search/parser.terms.js",
       "src/lib/generated/sheet/parser.js",
+      "src/lib/generated/sheet/parser.terms.js",
       "src/lib/shared/vendor/",
       "tests/fixture/"
     ]

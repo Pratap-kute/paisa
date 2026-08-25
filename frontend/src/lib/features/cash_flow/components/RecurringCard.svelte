@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { intervalText, totalRecurring } from "$lib/domain/transaction_sequence";
-  import {
-    formatCurrencyCrude,
-    now,
-    type TransactionSchedule,
-    type TransactionSequence,
-  } from "$lib/core/utils";
+  import { now } from "$lib/domain/time";
+import type { TransactionSchedule } from "$lib/domain/recurring";
+import type { TransactionSequence } from "$lib/domain/recurring";
+import { intervalText, totalRecurring } from "$lib/domain/transaction_sequence";
+  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import RecurringSchedule from "./RecurringSchedule.svelte";
 

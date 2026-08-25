@@ -1,16 +1,10 @@
 <script lang="ts">
-  import {
-    enrichTrantionSequence,
-    nextUnpaidSchedule,
-    sortTrantionSequence,
-  } from "$lib/domain/transaction_sequence";
-  import {
-    helpUrl,
-    isMobile,
-    monthDays,
-    type TransactionSchedule,
-    type TransactionSequence,
-  } from "$lib/core/utils";
+  import { isMobile } from "$lib/shared/browser/responsive";
+import { monthDays } from "$lib/domain/time";
+import type { TransactionSchedule } from "$lib/domain/recurring";
+import type { TransactionSequence } from "$lib/domain/recurring";
+import { enrichTrantionSequence, nextUnpaidSchedule, sortTrantionSequence, } from "$lib/domain/transaction_sequence";
+  import { helpUrl } from "$lib/shared/browser/navigation";
   import { api } from "$lib/api";
   import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";

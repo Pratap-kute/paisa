@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import { buildRepaymentSeries } from "$lib/features/charts/time_series_data";
-  import { ajax, type Legend, type Posting } from "$lib/core/utils";
+  import type { Legend } from "$lib/shared/charts/types";
+import type { Posting } from "$lib/domain/ledger";
+import { buildRepaymentSeries } from "$lib/features/liabilities/time_series_data";
     import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
@@ -18,7 +20,9 @@ import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
   onMount(async () => {
     try {
-      ({ repayments } = await ajax("/api/liabilities/repayment"));
+      ({ repayments } = await api.liabilities.getLiabilitiesRepayment() as unknown as {
+        repayments: Posting[];
+      });
       if (isEmptyValue(repayments)) {
         isEmpty = true;
         return;

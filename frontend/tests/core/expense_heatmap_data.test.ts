@@ -4,7 +4,7 @@ import {
   buildMonthlyExpenseHeatmapData,
   buildYearlyExpenseHeatmapData,
 } from "$lib/features/expense/expense_heatmap_data";
-import type { Posting } from "$lib/core/utils";
+import type { Posting } from "$lib/domain/ledger";
 
 function posting(
   date: string,

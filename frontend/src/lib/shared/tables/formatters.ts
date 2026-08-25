@@ -1,11 +1,9 @@
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { isZero } from "$lib/shared/utils/number";
+import { lastName } from "$lib/domain/account";
 import { type CellComponent } from "tabulator-tables";
-import {
-  formatCurrency,
-  formatFloat,
-  formatPercentage,
-  isZero,
-  lastName,
-} from "$lib/core/utils";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { iconText } from "$lib/shared/ui/icon";
 
 export function indendedAssetAccountName(cell: CellComponent) {

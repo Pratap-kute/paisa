@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatPercentage } from "$lib/core/utils";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
   import { dropRight, range } from "es-toolkit";
 import { floor } from "$lib/shared/utils/collection";
   interface Props {

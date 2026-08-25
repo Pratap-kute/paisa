@@ -1,16 +1,11 @@
 <script lang="ts">
-  import {
-    filterHarvestables,
-    harvestablePercentage,
-  } from "$lib/features/tax/harvest_data";
-  import {
-    ajax,
-    formatCurrency,
-    formatFloat,
-    formatPercentage,
-    restName,
-    type Harvestable,
-  } from "$lib/core/utils";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { restName } from "$lib/domain/account";
+import type { Harvestable } from "$lib/domain/tax";
+import { filterHarvestables, harvestablePercentage, } from "$lib/features/tax/harvest_data";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
   import Card from "$lib/shared/ui/Card.svelte";
@@ -72,7 +67,9 @@
 
   onMount(async () => {
     try {
-      const response = await ajax("/api/harvest");
+      const response = await api.harvest.getHarvest() as unknown as {
+        harvestables: Record<string, Harvestable>;
+      };
       harvestables = filterHarvestables(Object.values(response.harvestables));
       if (harvestables.length > 0) {
         selectedAccount = harvestables[0].account;

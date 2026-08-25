@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
+  import type { Gain } from "$lib/domain/assets";
+import type { Legend } from "$lib/shared/charts/types";
+import { goto } from "$app/navigation";
   import LegendCard from "$lib/shared/ui/LegendCard.svelte";
   import { buildLegends } from "$lib/features/assets/gain";
-  import { buildGainOverviewComparison } from "$lib/features/charts/bar_comparison_data";
-  import { formatCurrency, type Gain, type Legend } from "$lib/core/utils";
+  import { buildGainOverviewComparison } from "$lib/features/assets/chart_comparison_data";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import { api } from "$lib/api";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
@@ -14,7 +16,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 
   let legends: Legend[] = $state([]);
   let gains: Gain[] = $state([]);

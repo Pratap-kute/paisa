@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildMonthlyIncomeSeries } from "$lib/features/charts/time_series_data";
-  import type { Income } from "$lib/core/utils";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import { buildMonthlyIncomeSeries } from "$lib/features/income/time_series_data";
+  import type { Income } from "$lib/domain/cash_flow";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     incomes: Income[];

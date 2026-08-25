@@ -1,22 +1,18 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { api } from "$lib/api";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+import { firstName } from "$lib/domain/account";
+import { asTransaction } from "$lib/domain/transactions";
+import type { Posting, LedgerFile } from "$lib/domain/ledger";
+import type { Transaction } from "$lib/domain/ledger";
+import { accountColorStyle } from "$lib/shared/theme/colors";
   import PostingNote from "$lib/features/transactions/components/PostingNote.svelte";
   import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
   import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
   import { iconText } from "$lib/shared/ui/icon";
   import { change } from "$lib/domain/posting";
   import { editorState } from "$lib/features/editor/search_query_editor";
-  import {
-    ajax,
-    postingUrl,
-    type Posting,
-    formatCurrency,
-    formatFloat,
-    firstName,
-    type LedgerFile,
-    type Transaction,
-    asTransaction
-  } from "$lib/core/utils";
   import { debounce } from "es-toolkit";
   import { get } from "svelte/store";
   import { onDestroy, onMount } from "svelte";
@@ -56,8 +52,12 @@ import { map } from "$lib/shared/utils/collection";
   }
 
   async function loadPostings() {
-    ({ files, accounts, commodities } = await ajax("/api/editor/files"));
-    const { postings: loadedPostings } = await ajax("/api/ledger");
+    ({ files, accounts, commodities } = await api.editor.getEditorFiles() as unknown as {
+      files: LedgerFile[];
+      accounts: string[];
+      commodities: string[];
+    });
+    const loadedPostings = await api.ledger.getLedger() as unknown as Posting[];
     postings = loadedPostings;
     rows = map(loadedPostings, (p) => ({
       posting: p,

@@ -28,7 +28,7 @@ if (isCheck) {
     const tempFile = path.join(tempDir, "Api.ts");
     // Format temporary file using deno fmt
     const fmtCmd = new Deno.Command("deno", {
-      args: ["fmt", tempFile],
+      args: ["fmt", "--no-config", tempFile],
       stdout: "null",
       stderr: "null",
     });
@@ -73,7 +73,7 @@ if (isCheck) {
   });
 
   const fmtCmd = new Deno.Command("deno", {
-    args: ["fmt", targetFile],
+    args: ["fmt", "--no-config", targetFile],
     stdout: "inherit",
     stderr: "inherit",
   });

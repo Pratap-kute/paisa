@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+import type { Posting } from "$lib/domain/ledger";
+import { accountColorStyle } from "$lib/shared/theme/colors";
   import { iconText } from "$lib/shared/ui/icon";
-  import { firstName, formatCurrency, formatFloatUptoPrecision, type Posting } from "$lib/core/utils";
+  import { firstName } from "$lib/domain/account";
 
   const unlessDefaultCurrency = (p: Posting) => {
     if (typeof USER_CONFIG !== "undefined" && p.commodity === USER_CONFIG.default_currency) {

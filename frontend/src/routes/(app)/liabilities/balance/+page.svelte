@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { api } from "$lib/api";
   import LiabilitiesBalance from "$lib/features/liabilities/components/LiabilitiesBalance.svelte";
-  import { ajax, type LiabilityBreakdown } from "$lib/core/utils";
+  import type { LiabilityBreakdown } from "$lib/domain/liabilities";
   import { onMount } from "svelte";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
@@ -14,7 +15,9 @@
 
   onMount(async () => {
     try {
-      ({ liability_breakdowns: breakdowns } = await ajax("/api/liabilities/balance"));
+      ({ liability_breakdowns: breakdowns } = await api.liabilities.getLiabilitiesBalance() as unknown as {
+        liability_breakdowns: LiabilityBreakdown[];
+      });
     } finally {
       isLoading = false;
     }

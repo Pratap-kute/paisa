@@ -1,5 +1,5 @@
 import COLORS from "$lib/shared/theme/colors";
-import type { Legend } from "$lib/core/utils";
+import type { Legend } from "$lib/shared/charts/types";
 
 const areaKeys = ["gain", "loss"] as const;
 const lineKeys = ["balance", "investment", "withdrawal"] as const;

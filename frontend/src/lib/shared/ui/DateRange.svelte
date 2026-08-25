@@ -1,7 +1,7 @@
 <script lang="ts">
   import type dayjs from "dayjs";
   import BoxedTabs from "./BoxedTabs.svelte";
-  import { isMobile } from "$lib/core/utils";
+  import { isMobile } from "$lib/shared/browser/responsive";
 
   interface Props {
     value: number;

@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { CreditCardBill } from "$lib/domain/liabilities";
+import type { CreditCardSummary } from "$lib/domain/liabilities";
+import { goto } from "$app/navigation";
   import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
   import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
-  import { buildCreditCardYearlySpendsComparison } from "$lib/features/charts/bar_comparison_data";
+  import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
   import { iconify } from "$lib/shared/ui/icon";
-  import {
-    ajax,
-    formatCurrency,
-    formatPercentage,
-    type CreditCardBill,
-    type CreditCardSummary,
-  } from "$lib/core/utils";
   import { clone } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
@@ -21,7 +19,7 @@
   import Metric from "$lib/shared/layout/Metric.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import Select from "$lib/shared/ui/Select.svelte";
-  import ComparisonBarChart from "$lib/features/charts/components/ComparisonBarChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 import { findIndex, now, reverse } from "$lib/shared/utils/collection";
 
   interface Props {
@@ -68,11 +66,7 @@ import { findIndex, now, reverse } from "$lib/shared/utils/collection";
   });
 
   onMount(async () => {
-    ({ creditCard, found } = await ajax(
-      "/api/credit_cards/:account",
-      null,
-      data,
-    ));
+    ({ creditCard, found } = await api.creditCards.getCreditCard(data.account) as unknown as { creditCard: CreditCardSummary; found: boolean });
     if (!found) {
       return goto("/liabilities/credit_cards");
     }

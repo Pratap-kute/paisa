@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Posting } from "$lib/core/utils";
+  import type { Posting } from "$lib/domain/ledger";
 
   interface Props {
     posting: Posting;

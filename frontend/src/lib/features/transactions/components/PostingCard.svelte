@@ -1,13 +1,10 @@
 <script lang="ts">
-  import { iconify } from "$lib/shared/ui/icon";
-  import {
-    formatCurrency,
-    formatFloat,
-    postingUrl,
-    type Posting,
-    firstName,
-    restName
-  } from "$lib/core/utils";
+  import { formatFloat } from "$lib/shared/formatters/currency";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { firstName, restName } from "$lib/domain/account";
+import type { Posting } from "$lib/domain/ledger";
+import { iconify } from "$lib/shared/ui/icon";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 

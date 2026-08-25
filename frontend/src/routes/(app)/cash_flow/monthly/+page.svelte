@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { buildCashFlowSeries } from "$lib/features/charts/mixed_period_data";
-  import { type CashFlow } from "$lib/core/utils";
+  import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
+  import type { CashFlow } from "$lib/domain/cash_flow";
   import { api } from "$lib/api";
   import { onMount } from "svelte";
   import { dateMin, dateMax, dateRange, dateRangeOption, setAllowedDateRange } from "../../../../store";
@@ -11,7 +11,7 @@
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
   import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import TimeSeriesChart from "$lib/features/charts/components/TimeSeriesChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { filter, map, some } from "$lib/shared/utils/collection";
 
   let cashFlows: CashFlow[] = $state([]);

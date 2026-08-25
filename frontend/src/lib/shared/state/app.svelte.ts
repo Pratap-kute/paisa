@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import type { AccountTfIdf } from "$lib/core/utils";
+import type { AccountTfIdf } from "$lib/shared/state/models";
 import { dayjsExtent } from "$lib/shared/formatters/date";
 
 interface GlobalWithNow {
