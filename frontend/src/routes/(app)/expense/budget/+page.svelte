@@ -19,8 +19,8 @@ import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
 const monthStart = now().startOf("month");
 let budgetsByMonth: Record<string, Budget> = $state({});
-let checkingBalance: number = $state(),
-  availableForBudgeting: number = $state();
+let checkingBalance = $state(0),
+  availableForBudgeting = $state(0);
 let isEmpty = $state(false);
 let isLoading = $state(true);
 

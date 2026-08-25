@@ -67,9 +67,9 @@ interface Props {
 }
 
 let { data }: Props = $props();
-let gain: AccountGain = $state();
-let overview: Networth = $state();
-let assetBreakdown: AssetBreakdown = $state();
+let gain: AccountGain | undefined = $state();
+let overview: Networth | undefined = $state();
+let assetBreakdown: AssetBreakdown | undefined = $state();
 let legends = buildLegends();
 
 let postings: Posting[] = $state([]);
@@ -147,7 +147,7 @@ onMount(async () => {
       />
       <Metric
         label="XIRR"
-        value={formatFloat(gain?.xirr)}
+        value={formatFloat(gain?.xirr ?? 0)}
         secondary={assetBreakdown
           ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
           : undefined}

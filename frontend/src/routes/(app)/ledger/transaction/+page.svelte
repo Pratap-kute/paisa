@@ -19,7 +19,7 @@ import Button from "$lib/shared/ui/Button.svelte";
 import { filter } from "$lib/shared/utils/collection";
 
 let bulkEditOpen = $state(false);
-let transactions: T[] = $state(null);
+let transactions: T[] | null = $state(null);
 let filtered: T[] = $state([]);
 let files: LedgerFile[] = $state([]);
 let newFiles: LedgerFile[] = $state([]);

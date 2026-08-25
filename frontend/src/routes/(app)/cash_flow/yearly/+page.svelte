@@ -30,7 +30,7 @@ import Section from "$lib/shared/layout/Section.svelte";
 import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
 
-let graph: Record<string, Graph> = $state();
+let graph: Record<string, Graph> | undefined = $state();
 let expenses: Posting[] = $state([]);
 let isLoading = $state(true);
 let rawGraph: Graph | undefined = $derived.by(() => {

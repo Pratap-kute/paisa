@@ -61,10 +61,10 @@ import {
 } from "$lib/shared/utils/collection";
 
 let templates: ImportTemplate[] = $state([]);
-let selectedTemplate: ImportTemplate = $state();
-let saveAsName: string = $state();
+let selectedTemplate: ImportTemplate | undefined = $state();
+let saveAsName = $state("");
 let preview = $state("");
-let parseErrorMessage: string = $state(null);
+let parseErrorMessage: string | null = $state(null);
 let columnCount: number = $state(0);
 let data: any[][] = $state([]);
 let rows: Array<Record<string, any>> = $state([]);
@@ -141,8 +141,8 @@ let renderMetadata: RenderMetadata = $state({
   errors: [],
 });
 
-let previewEditorDom: Element = $state();
-let previewEditor: EditorView = $state();
+let previewEditorDom: Element | undefined = $state();
+let previewEditor: EditorView | undefined = $state();
 let showSaveAsModal = $state(false);
 let showFileModal = $state(false);
 

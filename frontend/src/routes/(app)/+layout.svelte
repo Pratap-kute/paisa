@@ -12,7 +12,7 @@ interface Props {
 
 let { children }: Props = $props();
 
-let isBurger: boolean = $state(null);
+let isBurger: boolean | null = $state(null);
 
 function clearTippy() {
   hideAll();

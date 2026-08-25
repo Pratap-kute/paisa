@@ -45,12 +45,12 @@ interface Props {
 }
 
 let { data }: Props = $props();
-let editorDom: Element = $state();
-let editor: EditorView = $state();
+let editorDom: Element | undefined = $state();
+let editor: EditorView | undefined = $state();
 let filesMap: Record<string, SheetFile> = $state({});
 let postings: Posting[] = $state([]);
-let selectedFile: SheetFile = $state(null);
-let selectedVersion: string = $state(null);
+let selectedFile: SheetFile | null = $state(null);
+let selectedVersion: string | null = $state(null);
 let lineNumber = $state(0);
 
 function command(fn: Function) {

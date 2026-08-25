@@ -16,7 +16,7 @@ interface Props {
 
 let { creditCard }: Props = $props();
 
-function lastBill(creditCard: CreditCardSummary): CreditCardBill {
+function lastBill(creditCard: CreditCardSummary): CreditCardBill | undefined {
   return creditCard.bills.findLast((b) =>
     b.statementEndDate.isSameOrBefore(now())
   );

@@ -9,7 +9,7 @@ interface Props {
 }
 
 let { accept = "", multiple = false, children }: Props = $props();
-let input: HTMLInputElement = $state();
+let input: HTMLInputElement | undefined = $state();
 let dragging = $state(false);
 const dispatch = createEventDispatcher<
   { drop: { acceptedFiles: File[]; rejectedFiles: File[] } }
@@ -44,7 +44,7 @@ function select(files: FileList | null) {
   type="button"
   class="dropzone paisa-file-dropzone"
   class:is-dragging={dragging}
-  onclick={() => input.click()}
+  onclick={() => input?.click()}
   ondragenter={(e) => {
     e.preventDefault();
     dragging = true;

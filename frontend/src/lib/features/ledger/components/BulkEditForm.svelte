@@ -12,7 +12,7 @@ let selectItems = $derived(
   accounts.map((account) => ({ id: account, name: account })),
 );
 
-let selectedItem: { id: string; name: string } = $state();
+let selectedItem: { id: string; name: string } | undefined = $state();
 
 const OPERATIONS = [{ id: "rename_account", label: "Rename Account" }];
 let selectedOperation = $state(OPERATIONS[0].id);

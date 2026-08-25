@@ -3,7 +3,6 @@ import type { AssetBreakdown } from "$lib/domain/assets";
 import { buildTree } from "$lib/shared/utils/tree";
 import { onMount } from "svelte";
 import Table from "$lib/shared/ui/Table.svelte";
-import type { ColumnDefinition } from "tabulator-tables";
 import {
   accountName,
   formatCurrencyChange,
@@ -35,7 +34,7 @@ onMount(() => {
   return () => mq.removeEventListener("change", update);
 });
 
-let columns: ColumnDefinition[] = $derived([
+let columns: any[] = $derived([
   {
     title: "Account",
     field: "group",

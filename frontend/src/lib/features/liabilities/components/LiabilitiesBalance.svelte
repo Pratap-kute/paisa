@@ -3,7 +3,6 @@ import type { LiabilityBreakdown } from "$lib/domain/liabilities";
 import { buildTree } from "$lib/shared/utils/tree";
 import { onMount } from "svelte";
 import Table from "$lib/shared/ui/Table.svelte";
-import type { ColumnDefinition } from "tabulator-tables";
 import {
   indendedLiabilityAccountName,
   nonZeroCurrency,
@@ -31,7 +30,7 @@ onMount(() => {
   return () => mq.removeEventListener("change", update);
 });
 
-let columns: ColumnDefinition[] = $derived([
+let columns = $derived([
   {
     title: "Account",
     field: "group",

@@ -25,8 +25,8 @@ let {
   options = {},
 }: Props = $props();
 
-let tableComponent: HTMLElement = $state();
-let tabulator: Tabulator = $state();
+let tableComponent: HTMLElement | undefined = $state();
+let tabulator: Tabulator | undefined = $state();
 let isBuilt = $state(false);
 let renderedData: any[] | undefined;
 

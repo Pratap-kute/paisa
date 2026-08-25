@@ -19,7 +19,7 @@ let {
   children,
 }: Props = $props();
 
-let dropdownEl: HTMLElement = $state();
+let dropdownEl: HTMLElement | undefined = $state();
 
 function toggle() {
   open = !open;

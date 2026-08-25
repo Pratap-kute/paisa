@@ -19,7 +19,7 @@ let { open = $bindable(false) }: Props = $props();
 let code = $state("");
 
 let providers: PriceProvider[] = $state([]);
-let selectedProvider: PriceProvider = $state(null);
+let selectedProvider: PriceProvider | undefined = $state();
 
 let filters: Record<string, AutoCompleteItem | string | null> = $state({});
 
@@ -80,6 +80,7 @@ function makeAutoComplete(
         [k, v],
       ) => [k, typeof v === "string" ? v : v?.id]),
     );
+    if (!selectedProvider) return [];
     queryFilters[field] = filterText;
     const res = await api.price.getPriceAutoCompletions({
       field,

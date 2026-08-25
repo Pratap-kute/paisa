@@ -28,7 +28,7 @@ interface Props {
 
 let { data }: Props = $props();
 
-let creditCard: CreditCardSummary = $state();
+let creditCard: CreditCardSummary | undefined = $state();
 let found = false;
 let selectedBillIndex = $state(0);
 
@@ -66,14 +66,16 @@ $effect(() => {
 });
 
 onMount(async () => {
-  ({ creditCard, found } = await api.creditCards.getCreditCard(
+  const result = await api.creditCards.getCreditCard(
     data.account,
-  ) as unknown as { creditCard: CreditCardSummary; found: boolean });
-  if (!found) {
+  ) as unknown as { creditCard?: CreditCardSummary; found: boolean };
+  found = result.found;
+  if (!found || !result.creditCard) {
     return goto("/liabilities/credit_cards");
   }
 
-  selectedBillIndex = lastBillIndex(creditCard);
+  creditCard = result.creditCard;
+  selectedBillIndex = lastBillIndex(result.creditCard);
 });
 </script>
 

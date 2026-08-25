@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEditor } from "$lib/features/editor/search_query_editor";
 
-let editorDom: HTMLElement = $state();
+let editorDom: HTMLElement | undefined = $state();
 interface Props {
   autocomplete: Record<string, string[]>;
 }

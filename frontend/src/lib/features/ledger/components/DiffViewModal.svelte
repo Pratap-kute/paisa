@@ -3,7 +3,7 @@ import { createEventDispatcher } from "svelte";
 import Dialog from "$lib/shared/ui/Dialog.svelte";
 import { createDiffEditor } from "$lib/features/editor/runtime";
 import type { LedgerFile } from "$lib/domain/ledger";
-let editorDom: Element = $state();
+let editorDom: Element | undefined = $state();
 let selectedFileIndex = $state(0);
 
 const dispatch = createEventDispatcher();
