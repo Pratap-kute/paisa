@@ -1,5 +1,5 @@
 <script lang="ts">
-import { dueDateIcon } from "$lib/shared/ui/due_date";
+  import { dueDateIcon } from "$lib/shared/ui/due_date";
   import dayjs from "dayjs";
 
   interface Props {

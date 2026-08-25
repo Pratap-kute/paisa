@@ -1,11 +1,11 @@
 <script lang="ts">
   import Card from "$lib/shared/ui/Card.svelte";
   import { formatPercentage } from "$lib/shared/formatters/currency";
-import { restName } from "$lib/domain/account";
-import { now } from "$lib/domain/time";
-import type { CreditCardSummary } from "$lib/domain/liabilities";
-import type { CreditCardBill } from "$lib/domain/liabilities";
-import { iconText } from "$lib/shared/ui/icon";
+  import { restName } from "$lib/domain/account";
+  import { now } from "$lib/domain/time";
+  import type { CreditCardSummary } from "$lib/domain/liabilities";
+  import type { CreditCardBill } from "$lib/domain/liabilities";
+  import { iconText } from "$lib/shared/ui/icon";
   import { formatCurrency } from "$lib/shared/formatters/currency";
   import CreditCardNetwork from "./CreditCardNetwork.svelte";
   import DueDate from "./DueDate.svelte";
@@ -18,14 +18,18 @@ import { iconText } from "$lib/shared/ui/icon";
 
   function lastBill(creditCard: CreditCardSummary): CreditCardBill {
     return creditCard.bills.findLast((b) =>
-      b.statementEndDate.isSameOrBefore(now())
+      b.statementEndDate.isSameOrBefore(now()),
     );
   }
 
   let bill = $derived(lastBill(creditCard));
 </script>
 
-<Card padding="sm" variant="flat" class="credit-card flex flex-col justify-between m-0">
+<Card
+  padding="sm"
+  variant="flat"
+  class="credit-card flex flex-col justify-between m-0"
+>
   <div class="flex items-center justify-between font-bold text-xl">
     <div class="credit-card-chip flex items-center opacity-20">
       <svg
@@ -58,7 +62,9 @@ import { iconText } from "$lib/shared/ui/icon";
     <div>
       <a
         class="secondary-link text-[var(--paisa-muted-foreground)]"
-        href="/liabilities/credit_cards/{encodeURIComponent(creditCard.account)}"
+        href="/liabilities/credit_cards/{encodeURIComponent(
+          creditCard.account,
+        )}"
       >
         <span class="custom-icon">{iconText(creditCard.account)}</span>
         <span>{restName(restName(creditCard.account))}</span>
@@ -72,10 +78,16 @@ import { iconText } from "$lib/shared/ui/icon";
           <span class="text-[var(--paisa-muted-foreground)]">Amount Due</span>
         </div>
         <div>
-          <span class="text-2xl text-[var(--paisa-foreground)]">{formatCurrency(bill.closingBalance)}</span>
+          <span class="text-2xl text-[var(--paisa-foreground)]"
+            >{formatCurrency(bill.closingBalance)}</span
+          >
         </div>
         <div class="text-xs text-[var(--paisa-muted-foreground)]">
-          <DueDate dueDate={bill.dueDate} paidDate={bill.paidDate} amountDue={bill.closingBalance} />
+          <DueDate
+            dueDate={bill.dueDate}
+            paidDate={bill.paidDate}
+            amountDue={bill.closingBalance}
+          />
         </div>
       {/if}
     </div>
@@ -84,10 +96,12 @@ import { iconText } from "$lib/shared/ui/icon";
         <span class="text-[var(--paisa-muted-foreground)]">Balance</span>
       </div>
       <div class="flex flex-col">
-        <span class="text-2xl text-[var(--paisa-foreground)]">{formatCurrency(creditCard.balance)}</span>
+        <span class="text-2xl text-[var(--paisa-foreground)]"
+          >{formatCurrency(creditCard.balance)}</span
+        >
         <span class="text-xs text-[var(--paisa-muted-foreground)]"
           >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
-            creditCard.creditLimit
+            creditCard.creditLimit,
           )}
         </span>
       </div>
@@ -100,7 +114,8 @@ import { iconText } from "$lib/shared/ui/icon";
         <span>THRU</span>
       </span>
       <span class="opacity-30"
-        >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * * * &nbsp; {creditCard.number}</span
+        >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * *
+        * &nbsp; {creditCard.number}</span
       >
     </div>
     <div class="opacity-15">
