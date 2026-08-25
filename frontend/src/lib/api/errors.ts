@@ -61,9 +61,19 @@ export function normalizeApiError(err: unknown): AppApiError {
 
   if (typeof err === "object" && err !== null) {
     const errorObj = err as Record<string, unknown>;
+    const nestedError = typeof errorObj.error === "object" &&
+        errorObj.error !== null
+      ? errorObj.error as Record<string, unknown>
+      : undefined;
     const message =
       (typeof errorObj.error === "string" ? errorObj.error : undefined) ||
       (typeof errorObj.message === "string" ? errorObj.message : undefined) ||
+      (typeof nestedError?.message === "string"
+        ? nestedError.message
+        : undefined) ||
+      (typeof nestedError?.error === "string"
+        ? nestedError.error
+        : undefined) ||
       "An unexpected error occurred";
     const status = typeof errorObj.status === "number"
       ? errorObj.status
