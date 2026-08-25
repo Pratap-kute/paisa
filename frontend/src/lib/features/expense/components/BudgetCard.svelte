@@ -6,6 +6,7 @@ import type { AccountBudget } from "$lib/domain/cash_flow";
 import { iconify } from "$lib/shared/ui/icon";
 import { firstName } from "$lib/domain/account";
 import Card from "$lib/shared/ui/Card.svelte";
+import Tooltip from "$lib/shared/ui/Tooltip.svelte";
 
 interface Props {
   compact?: boolean;
@@ -81,12 +82,9 @@ let widthPercent = $derived((amount: number) =>
 );
 </script>
 
-<Card
-  padding="sm"
-  variant="flat"
-  class="m-0"
-  data-tippy-content={accountBudget.expenses.length === 0 ? null : tooltipContent}
->
+<Tooltip content={accountBudget.expenses.length === 0 ? null : tooltipContent}>
+{#snippet children(tooltipProps)}
+<Card {...tooltipProps} padding="sm" variant="flat" class="m-0">
   <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div
       class="min-w-0 truncate pl-2 text-sm font-semibold text-[var(--paisa-muted-foreground)] custom-icon"
@@ -153,3 +151,5 @@ let widthPercent = $derived((amount: number) =>
     </div>
   {/if}
 </Card>
+{/snippet}
+</Tooltip>

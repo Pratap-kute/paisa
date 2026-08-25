@@ -7,7 +7,13 @@ interface Props {
   title: string;
   description?: string;
   side?: "right" | "left";
+  contentClass?: string;
+  overlayClass?: string;
+  bodyClass?: string;
+  showHeader?: boolean;
+  unstyled?: boolean;
   trigger?: Snippet;
+  header?: Snippet<[{ close: () => void }]>;
   children?: Snippet<[{ close: () => void }]>;
 }
 
@@ -16,7 +22,13 @@ let {
   title,
   description,
   side = "right",
+  contentClass = "",
+  overlayClass = "",
+  bodyClass = "",
+  showHeader = true,
+  unstyled = false,
   trigger,
+  header,
   children,
 }: Props = $props();
 
@@ -32,8 +44,13 @@ function close() {
     </BitsDialog.Trigger>
   {/if}
   <BitsDialog.Portal>
-    <BitsDialog.Overlay class="paisa4-overlay" />
-    <BitsDialog.Content class="paisa4-drawer paisa4-drawer-{side}">
+    <BitsDialog.Overlay class="{unstyled ? '' : 'paisa4-overlay'} {overlayClass}" />
+    <BitsDialog.Content class="{unstyled ? '' : `paisa4-drawer paisa4-drawer-${side}`} {contentClass}">
+      {#if !showHeader}
+        <BitsDialog.Title class="sr-only">{title}</BitsDialog.Title>
+      {:else if header}
+        {@render header({ close })}
+      {:else}
       <div class="paisa4-dialog-header">
         <div>
           <BitsDialog.Title class="paisa4-dialog-title">{title}</BitsDialog.Title>
@@ -45,7 +62,8 @@ function close() {
         </div>
         <BitsDialog.Close class="paisa4-icon-action" aria-label="Close drawer">x</BitsDialog.Close>
       </div>
-      <div class="paisa4-dialog-body">
+      {/if}
+      <div class="{unstyled ? '' : 'paisa4-dialog-body'} {bodyClass}">
         {@render children?.({ close })}
       </div>
     </BitsDialog.Content>

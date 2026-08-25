@@ -4,6 +4,7 @@ import type { ExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_d
 import { tooltip } from "$lib/shared/charts/tooltip";
 import { categoryColor } from "$lib/shared/charts/category";
 import { formatCurrency } from "$lib/shared/formatters/currency";
+import Tooltip from "$lib/shared/ui/Tooltip.svelte";
 import { iconText } from "$lib/shared/ui/icon";
 
 interface Props {
@@ -83,23 +84,23 @@ function ring(point: ExpenseHeatmapData["points"][number]) {
     </div>
   {/each}
   {#each data.points as point, index}
-    <button
-      type="button"
-      class:paisa-expense-calendar-zero={point.hasActivity && point.value === 0}
-      class:paisa-expense-calendar-active={point.hasActivity}
-      class="paisa-expense-calendar-day"
-      style="--calendar-column: {index === 0 ? firstColumn : 'auto'}; --expense-ring: {ring(point)};"
-      aria-label={detail(index)}
-      data-tippy-content={detailHtml(index)}
-      role="gridcell"
-    >
-      <span class="paisa-expense-calendar-ring" aria-hidden="true">
-        <span>{index + 1}</span>
-      </span>
-      <span class="paisa-expense-calendar-total">
-        {point.value > 0 ? formatCurrency(point.value, 0) : ""}
-      </span>
-    </button>
+    <Tooltip content={detailHtml(index)}>
+      {#snippet children(tooltipProps)}
+        <button
+          {...tooltipProps}
+          type="button"
+          class:paisa-expense-calendar-zero={point.hasActivity && point.value === 0}
+          class:paisa-expense-calendar-active={point.hasActivity}
+          class="paisa-expense-calendar-day"
+          style="--calendar-column: {index === 0 ? firstColumn : 'auto'}; --expense-ring: {ring(point)};"
+          aria-label={detail(index)}
+          role="gridcell"
+        >
+          <span class="paisa-expense-calendar-ring" aria-hidden="true"><span>{index + 1}</span></span>
+          <span class="paisa-expense-calendar-total">{point.value > 0 ? formatCurrency(point.value, 0) : ""}</span>
+        </button>
+      {/snippet}
+    </Tooltip>
   {/each}
 </div>
 

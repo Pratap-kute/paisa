@@ -1,6 +1,6 @@
 <script lang="ts">
 import { setColorPreference } from "$lib/shared/browser/theme";
-import { Dialog as BitsDialog } from "bits-ui";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
 import { goto } from "$app/navigation";
 import { onMount } from "svelte";
 import { getColorPreference } from "$lib/shared/browser/theme";
@@ -448,15 +448,15 @@ onMount(() => {
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<BitsDialog.Root bind:open>
-  <BitsDialog.Portal>
-    <BitsDialog.Overlay
-      class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-150"
-    />
-    <BitsDialog.Content
-      class="fixed left-1/2 top-[12%] z-50 w-full max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-all duration-150 max-sm:top-4 max-sm:w-[94%]"
-      aria-label="Command Palette"
-    >
+<Dialog
+  bind:open
+  title="Command Palette"
+  showHeader={false}
+  unstyled
+  overlayClass="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-150"
+  contentClass="fixed left-1/2 top-[12%] z-50 w-full max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-all duration-150 max-sm:top-4 max-sm:w-[94%]"
+>
+  {#snippet children()}
       <!-- SEARCH INPUT HEADER -->
       <div
         class="flex items-center gap-3 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-3">
@@ -567,6 +567,5 @@ onMount(() => {
             class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">/</kbd>
         </div>
       </div>
-    </BitsDialog.Content>
-  </BitsDialog.Portal>
-</BitsDialog.Root>
+  {/snippet}
+</Dialog>

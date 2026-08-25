@@ -67,6 +67,17 @@ export function classifyViolation(
   const inGenerated = source.startsWith("src/lib/generated/");
 
   if (
+    (imported === "bits-ui" || imported.startsWith("bits-ui/")) &&
+    !source.startsWith("src/lib/shared/ui/")
+  ) {
+    return {
+      source,
+      imported,
+      rule: "bits-ui imports are restricted to src/lib/shared/ui wrappers",
+    };
+  }
+
+  if (
     inDomain && (
       imported === "svelte" || imported.startsWith("svelte/") ||
       imported.startsWith("$app/") || target.endsWith(".svelte") ||

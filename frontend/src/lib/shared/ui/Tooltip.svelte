@@ -1,26 +1,42 @@
 <script lang="ts">
+import { Tooltip as BitsTooltip } from "bits-ui";
 import type { Snippet } from "svelte";
 
 interface Props {
-  content: string;
+  content?: string | null;
   class?: string;
-  children?: Snippet;
+  side?: "top" | "right" | "bottom" | "left";
+  children?: Snippet<[Record<string, unknown>]>;
 }
 
 let {
   content,
   class: className = "",
+  side = "top",
   children,
 }: Props = $props();
 </script>
 
-<span class="paisa-tooltip-wrapper {className}" data-tippy-content={content}>
-  {@render children?.()}
-</span>
-
-<style>
-.paisa-tooltip-wrapper {
-  display: inline-flex;
-  align-items: center;
-}
-</style>
+{#if content}
+  <BitsTooltip.Root>
+  <BitsTooltip.Trigger>
+      {#snippet child({ props })}
+        {@render children?.(props)}
+      {/snippet}
+    </BitsTooltip.Trigger>
+  <BitsTooltip.Portal>
+    <BitsTooltip.Content
+      role="tooltip"
+      {side}
+      sideOffset={6}
+      collisionPadding={8}
+      class="paisa-tooltip-content {className}"
+    >
+        {@html content}
+        <BitsTooltip.Arrow class="paisa-tooltip-arrow" />
+      </BitsTooltip.Content>
+  </BitsTooltip.Portal>
+</BitsTooltip.Root>
+{:else}
+  {@render children?.({})}
+{/if}

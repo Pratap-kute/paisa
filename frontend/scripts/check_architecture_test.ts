@@ -37,7 +37,28 @@ Deno.test("allows intended dependency direction", () => {
       root,
     ),
   ).toBeNull();
+  expect(
+    classifyViolation(
+      `${root}/src/lib/shared/ui/Dialog.svelte`,
+      "bits-ui",
+      root,
+    ),
+  ).toBeNull();
 });
+
+for (
+  const source of [
+    "src/lib/features/assets/Card.svelte",
+    "src/routes/+page.svelte",
+    "src/lib/domain/money.ts",
+    "src/lib/shared/layout/AppShell.svelte",
+  ]
+) {
+  Deno.test(`rejects direct bits-ui import from ${source}`, () => {
+    const violation = classifyViolation(`${root}/${source}`, "bits-ui", root);
+    expect(violation?.rule).toContain("restricted");
+  });
+}
 
 for (
   const [name, source, imported, rule] of [

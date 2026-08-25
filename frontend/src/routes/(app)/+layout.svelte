@@ -1,10 +1,8 @@
 <script lang="ts">
-import { afterNavigate, beforeNavigate } from "$app/navigation";
-import { delegate, followCursor, hideAll } from "tippy.js";
+import { afterNavigate } from "$app/navigation";
 import AppShell from "$lib/shared/layout/AppShell.svelte";
-import { willClearTippy, willRefresh } from "../../store";
+import { willRefresh } from "../../store";
 import type { Snippet } from "svelte";
-import { isEmpty } from "$lib/shared/utils/collection";
 
 interface Props {
   children?: Snippet;
@@ -14,50 +12,8 @@ let { children }: Props = $props();
 
 let isBurger: boolean | null = $state(null);
 
-function clearTippy() {
-  hideAll();
-}
-
-function setupTippy() {
-  delegate("body", {
-    target: "[data-tippy-content]",
-    theme: "light",
-    onShow: (instance) => {
-      const content = instance.reference.getAttribute("data-tippy-content");
-      if (!isEmpty(content)) {
-        instance.setContent(content);
-      } else {
-        return false;
-      }
-    },
-    maxWidth: "none",
-    delay: 0,
-    allowHTML: true,
-    followCursor: true,
-    popperOptions: {
-      modifiers: [
-        {
-          name: "flip",
-          options: {
-            fallbackPlacements: ["auto"],
-          },
-        },
-      ],
-    },
-    plugins: [followCursor],
-  });
-}
-
-willClearTippy.subscribe(clearTippy);
-beforeNavigate(clearTippy);
-willRefresh.subscribe(() => {
-  clearTippy();
-  setupTippy();
-});
-
 afterNavigate(() => {
   isBurger = null;
-  setupTippy();
 });
 </script>
 

@@ -93,7 +93,6 @@
     "svelte-tiny-virtual-list": "npm:svelte-tiny-virtual-list@^2.0.5",
     "tabulator-tables": "npm:tabulator-tables@^6.3.1",
     "tailwindcss": "npm:tailwindcss@^4.3.3",
-    "tippy.js": "npm:tippy.js@^6.3.7",
     "typescript": "npm:typescript@^5.0.0",
     "vite": "npm:vite@^8.2.1",
     "vitest": "npm:vitest@^4",

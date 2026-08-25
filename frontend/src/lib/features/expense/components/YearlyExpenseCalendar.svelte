@@ -4,6 +4,7 @@ import { formatPercentage } from "$lib/shared/formatters/currency";
 import { tooltip } from "$lib/shared/charts/tooltip";
 import { categoryColor } from "$lib/shared/charts/category";
 import { formatCurrency } from "$lib/shared/formatters/currency";
+import Tooltip from "$lib/shared/ui/Tooltip.svelte";
 import { iconText } from "$lib/shared/ui/icon";
 
 interface Props {
@@ -64,23 +65,25 @@ function composition(point: ExpenseHeatmapData["points"][number]) {
   aria-label={ariaLabel}
 >
   {#each data.points as point}
-    <button
-      type="button"
-      class:paisa-yearly-expense-month-active={point.hasActivity}
-      class:paisa-yearly-expense-month-zero={point.hasActivity && point.value === 0}
-      class="paisa-yearly-expense-month"
-      style="--expense-composition: {composition(point)}"
-      aria-label={detail(point)}
-      data-tippy-content={detailHtml(point)}
-    >
-      <span class="paisa-yearly-expense-ring" aria-hidden="true"></span>
-      <span class="paisa-yearly-expense-copy">
-        <span class="paisa-yearly-expense-label">{point.label.slice(0, 3)}</span>
-        <span class="paisa-yearly-expense-total">
-          {point.hasActivity ? formatCurrency(point.value, 0) : "No activity"}
-        </span>
-      </span>
-    </button>
+    <Tooltip content={detailHtml(point)}>
+      {#snippet children(tooltipProps)}
+        <button
+          {...tooltipProps}
+          type="button"
+          class:paisa-yearly-expense-month-active={point.hasActivity}
+          class:paisa-yearly-expense-month-zero={point.hasActivity && point.value === 0}
+          class="paisa-yearly-expense-month"
+          style="--expense-composition: {composition(point)}"
+          aria-label={detail(point)}
+        >
+          <span class="paisa-yearly-expense-ring" aria-hidden="true"></span>
+          <span class="paisa-yearly-expense-copy">
+            <span class="paisa-yearly-expense-label">{point.label.slice(0, 3)}</span>
+            <span class="paisa-yearly-expense-total">{point.hasActivity ? formatCurrency(point.value, 0) : "No activity"}</span>
+          </span>
+        </button>
+      {/snippet}
+    </Tooltip>
   {/each}
 </div>
 

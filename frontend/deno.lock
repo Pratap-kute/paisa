@@ -66,7 +66,6 @@
     "npm:swagger-typescript-api@13.12.6": "13.12.6",
     "npm:tabulator-tables@^6.3.1": "6.5.2",
     "npm:tailwindcss@^4.3.3": "4.3.3",
-    "npm:tippy.js@^6.3.7": "6.3.7",
     "npm:typescript@5": "5.9.3",
     "npm:vite@*": "8.2.2",
     "npm:vite@^8.2.1": "8.2.2",
@@ -457,9 +456,6 @@
     },
     "@polka/url@1.0.0-next.29": {
       "integrity": "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="
-    },
-    "@popperjs/core@2.11.8": {
-      "integrity": "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A=="
     },
     "@rolldown/binding-android-arm-eabi@1.2.5": {
       "integrity": "sha512-DLe/i+l8ynIBY7XEQ191TeZvCoowIGa18R+dIV30GW7DiOtp74i/xX8hs8GUjW5ARV7VZuie3d6AumSmCwbeRA==",
@@ -1982,12 +1978,6 @@
     "tinyrainbow@3.1.1": {
       "integrity": "sha512-yau8yJdTt989Mm0Bd/236QnzEiPf2xLLTqUZRUJOo/3CB078LSwzei343DgtJVmfJKJE3TMINY1u42SQsP6mXw=="
     },
-    "tippy.js@6.3.7": {
-      "integrity": "sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==",
-      "dependencies": [
-        "@popperjs/core"
-      ]
-    },
     "totalist@3.0.1": {
       "integrity": "sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ=="
     },
@@ -2224,7 +2214,6 @@
       "npm:swagger-typescript-api@13.12.6",
       "npm:tabulator-tables@^6.3.1",
       "npm:tailwindcss@^4.3.3",
-      "npm:tippy.js@^6.3.7",
       "npm:typescript@5",
       "npm:vite@^8.2.1",
       "npm:vitest@4",

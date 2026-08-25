@@ -269,17 +269,16 @@ function handleKeydown(event: KeyboardEvent) {
   <Section>
     {#if schema && config && activeSection && activeSchema}
       <div class="flex flex-col gap-4">
-        <!-- Horizontal Section Navigation Tabs -->
-        <nav class="w-full overflow-x-auto pb-1" aria-label="Configuration sections">
+        <div class="w-full overflow-x-auto pb-1">
           <Tabs
             bind:value={activeId}
             options={tabOptions}
             variant="boxed"
             size="sm"
-          />
-        </nav>
-
-        <!-- Full-Width Configuration Form Card -->
+            ariaLabel="Configuration sections"
+          >
+          {#snippet panel(option)}
+          {#if option.value === activeId}
         <Card padding="none" class="w-full overflow-hidden">
           <!-- Section Title Bar -->
           <div class="border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] p-4 sm:p-5">
@@ -382,6 +381,10 @@ function handleKeydown(event: KeyboardEvent) {
             </div>
           </div>
         </Card>
+          {/if}
+          {/snippet}
+          </Tabs>
+        </div>
       </div>
     {/if}
   </Section>

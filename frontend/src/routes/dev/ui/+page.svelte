@@ -185,7 +185,13 @@ const amounts = [
         { label: "Overview", value: "overview" },
         { label: "Details", value: "details" },
         { label: "Disabled", value: "disabled", disabled: true },
-      ]} />
+      ]}>
+        {#snippet panel(option)}
+          <div class="mt-3 rounded-md border border-border p-3 text-sm">
+            {option.label} panel
+          </div>
+        {/snippet}
+      </Tabs>
     </section>
 
     <section class="grid gap-4">

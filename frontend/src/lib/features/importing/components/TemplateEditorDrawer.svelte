@@ -1,5 +1,4 @@
 <script lang="ts">
-import { Dialog as BitsDialog } from "bits-ui";
 import type { EditorView } from "@codemirror/view";
 import {
   createEditor,
@@ -11,6 +10,7 @@ import Button from "$lib/shared/ui/Button.svelte";
 import IconButton from "$lib/shared/ui/IconButton.svelte";
 import Badge from "$lib/shared/ui/Badge.svelte";
 import Dialog from "$lib/shared/ui/Dialog.svelte";
+import Drawer from "$lib/shared/ui/Drawer.svelte";
 import FormField from "$lib/shared/layout/FormField.svelte";
 import Input from "$lib/shared/ui/Input.svelte";
 
@@ -117,14 +117,15 @@ $effect(() => {
 });
 </script>
 
-<BitsDialog.Root bind:open>
-  <BitsDialog.Portal>
-    <BitsDialog.Overlay
-      class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200" />
-    <BitsDialog.Content
-      class="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-transform duration-200 max-sm:max-w-full"
-      aria-label="Template Editor"
-    >
+<Drawer
+  bind:open
+  title="Template Editor"
+  showHeader={false}
+  unstyled
+  overlayClass="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200"
+  contentClass="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-transform duration-200 max-sm:max-w-full"
+>
+  {#snippet children()}
       <!-- HEADER -->
       <div class="flex shrink-0 items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-3">
         <div class="flex min-w-0 items-center gap-2.5">
@@ -312,9 +313,8 @@ $effect(() => {
           </Button>
         </div>
       </div>
-    </BitsDialog.Content>
-  </BitsDialog.Portal>
-</BitsDialog.Root>
+  {/snippet}
+</Drawer>
 
 <!-- SAVE AS / CREATE TEMPLATE MODAL -->
 <Dialog

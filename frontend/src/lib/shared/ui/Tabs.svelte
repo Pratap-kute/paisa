@@ -1,19 +1,24 @@
 <script lang="ts">
-interface TabOption<T = unknown> {
+import { Tabs as BitsTabs } from "bits-ui";
+import type { Snippet } from "svelte";
+
+export interface TabOption {
   label: string;
-  value: T;
+  value: string;
   icon?: string;
   badge?: string | number;
   disabled?: boolean;
 }
 
-interface Props<T = unknown> {
-  options: TabOption<T>[];
-  value: T;
+interface Props {
+  options: TabOption[];
+  value: string;
   variant?: "boxed" | "line" | "pills";
   size?: "sm" | "md";
   class?: string;
-  onchange?: (value: T) => void;
+  ariaLabel?: string;
+  onchange?: (value: string) => void;
+  panel?: Snippet<[TabOption]>;
 }
 
 let {
@@ -22,67 +27,42 @@ let {
   variant = "boxed",
   size = "sm",
   class: className = "",
+  ariaLabel = "Sections",
   onchange,
+  panel,
 }: Props = $props();
-
-function selectTab(val: unknown) {
-  value = val as typeof value;
-  onchange?.(val as typeof value);
-}
 </script>
 
-{#if variant === "boxed"}
-  <div
-  class="flex flex-wrap gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-1 {size === 'md' ? 'text-sm' : 'text-xs'} {className}"
-  role="tablist"
->
+<BitsTabs.Root bind:value onValueChange={onchange}>
+  <BitsTabs.List
+    aria-label={ariaLabel}
+    class={variant === "boxed"
+      ? `flex flex-wrap gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-1 ${size === "md" ? "text-sm" : "text-xs"} ${className}`
+      : `m-0 flex list-none gap-0 border-b border-[var(--paisa-border-subtle)] p-0 ${className}`}
+  >
     {#each options as option}
-      <button
-        type="button"
-        role="tab"
-        aria-selected={option.value === value}
+      <BitsTabs.Trigger
+        value={option.value}
         disabled={option.disabled}
-        class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] px-3 py-1.5 font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] disabled:cursor-not-allowed disabled:opacity-50 {option.value === value ? 'bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] shadow-xs' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-foreground)]'}"
-        onclick={() => selectTab(option.value)}
+        class={variant === "boxed"
+          ? "inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] px-3 py-1.5 font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:bg-[var(--paisa-surface)] data-[state=active]:text-[var(--paisa-foreground)] data-[state=active]:shadow-xs data-[state=inactive]:text-[var(--paisa-muted-foreground)] data-[state=inactive]:hover:text-[var(--paisa-foreground)]"
+          : "inline-flex items-center gap-1.5 border-0 bg-transparent px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:border-[var(--paisa-primary)] data-[state=active]:text-[var(--paisa-primary)] data-[state=inactive]:text-[var(--paisa-muted-foreground)] data-[state=inactive]:hover:text-[var(--paisa-foreground)]"}
       >
         {#if option.icon}
           <i class="fas {option.icon} text-[0.75rem]" aria-hidden="true"></i>
         {/if}
         <span>{option.label}</span>
         {#if option.badge}
-          <span class="ml-1 rounded-full bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 text-[0.625rem] font-semibold"
-            >{option.badge}</span
-          >
+          <span class="ml-1 rounded-full bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 text-[0.625rem] font-semibold">{option.badge}</span>
         {/if}
-      </button>
+      </BitsTabs.Trigger>
     {/each}
-  </div>
-{:else}
-  <div class="border-b border-[var(--paisa-border-subtle)] {className}"
-  role="tablist">
-  <ul class="m-0 flex list-none gap-0 p-0">
-      {#each options as option}
-        <li class="m-0">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={option.value === value}
-            disabled={option.disabled}
-            class="inline-flex items-center gap-1.5 border-0 bg-transparent px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] disabled:cursor-not-allowed disabled:opacity-50 {option.value === value ? 'border-b-2 border-[var(--paisa-primary)] text-[var(--paisa-primary)]' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-foreground)]'}"
-            onclick={() => selectTab(option.value)}
-          >
-            {#if option.icon}
-              <i class="fas {option.icon} text-[0.75rem]" aria-hidden="true"></i>
-            {/if}
-            <span>{option.label}</span>
-            {#if option.badge}
-              <span class="ml-1 rounded-full bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 text-[0.625rem] font-semibold"
-                >{option.badge}</span
-              >
-            {/if}
-          </button>
-        </li>
-      {/each}
-    </ul>
-</div>
-{/if}
+  </BitsTabs.List>
+  {#if panel}
+    {#each options as option}
+      <BitsTabs.Content value={option.value} class="mt-4 outline-none">
+        {@render panel(option)}
+      </BitsTabs.Content>
+    {/each}
+  {/if}
+</BitsTabs.Root>

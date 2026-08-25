@@ -107,8 +107,6 @@ export const delayedLoading = derived(
 
 export const delayedUnLoading = delayedLoading;
 
-export const willClearTippy = writable<number>(0);
-
 export const accountTfIdf = writable<AccountTfIdf | null>(null);
 
 export function setAllowedDateRange(dates: dayjs.Dayjs[]) {

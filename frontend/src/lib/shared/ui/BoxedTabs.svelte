@@ -16,12 +16,11 @@ $effect(() => {
 });
 </script>
 
-<div class="paisa-boxed-tabs" role="tablist">
+<div class="paisa-boxed-tabs" role="group">
   {#each options as option}
     <button
       type="button"
-      role="tab"
-      aria-selected={option.value === value}
+      aria-pressed={option.value === value}
       class="paisa-boxed-tab {option.value === value ? 'paisa-boxed-tab-active' : ''}"
       onclick={() => (value = option.value)}
     >

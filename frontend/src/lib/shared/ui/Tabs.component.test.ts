@@ -1,17 +1,10 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
-import Tabs from "./Tabs.svelte";
+import Tabs from "./Tabs.test-harness.svelte";
 
 test("renders tab list and selects active tab", async () => {
   const handleChange = vi.fn();
-  const options = [
-    { label: "Overview", value: "overview" },
-    { label: "Details", value: "details" },
-  ];
-
   const { getByRole, getAllByRole } = render(Tabs, {
-    options,
-    value: "overview",
     onchange: handleChange,
   });
 
@@ -21,7 +14,10 @@ test("renders tab list and selects active tab", async () => {
   const tabs = getAllByRole("tab");
   expect(tabs[0]).toHaveAttribute("aria-selected", "true");
   expect(tabs[1]).toHaveAttribute("aria-selected", "false");
+  expect(getByRole("tabpanel")).toHaveTextContent("Overview panel");
 
-  await fireEvent.click(tabs[1]);
+  tabs[0].focus();
+  await fireEvent.keyDown(tabs[0], { key: "ArrowRight" });
   expect(handleChange).toHaveBeenCalledWith("details");
+  expect(getByRole("tabpanel")).toHaveTextContent("Details panel");
 });

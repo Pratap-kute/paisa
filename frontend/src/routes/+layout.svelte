@@ -2,6 +2,7 @@
 import { browser } from "$app/environment";
 import { getColorPreference } from "$lib/shared/browser/theme";
 import ToastContainer from "$lib/shared/ui/ToastContainer.svelte";
+import TooltipProvider from "$lib/shared/ui/TooltipProvider.svelte";
 interface Props {
   children?: import("svelte").Snippet;
 }
@@ -14,5 +15,7 @@ if (browser) {
 }
 </script>
 
-{@render children?.()}
+<TooltipProvider>
+  {@render children?.()}
+</TooltipProvider>
 <ToastContainer />

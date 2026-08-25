@@ -23,7 +23,6 @@ class AppState {
   theme = $state<string>("light");
   loading = $state<boolean>(false);
   accountTfIdf = $state<AccountTfIdf | null>(null);
-  willClearTippy = $state<number>(0);
   willRefresh = $state<number>(0);
 
   dateRange = $derived.by(() => {

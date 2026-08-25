@@ -1,11 +1,11 @@
-import { cleanup, render } from "@testing-library/svelte";
+import { cleanup, fireEvent, render, waitFor } from "@testing-library/svelte";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import YearlyExpenseCalendar from "./YearlyExpenseCalendar.svelte";
+import YearlyExpenseCalendar from "./YearlyExpenseCalendar.test-harness.svelte";
 
 afterEach(cleanup);
 
 describe("YearlyExpenseCalendar", () => {
-  it("renders month composition, totals, empty months, and rich detail", () => {
+  it("renders month composition, totals, empty months, and rich detail", async () => {
     const colorFor = vi.fn((key: string) =>
       key === "Food" ? "#00aa00" : "#0000aa"
     );
@@ -22,24 +22,29 @@ describe("YearlyExpenseCalendar", () => {
       hasActivity: index === 0,
     }));
 
-    const { container, getAllByRole } = render(YearlyExpenseCalendar, {
-      data: { granularity: "month", period: "2024", points, maxValue: 150 },
-      ariaLabel: "Yearly expense activity",
-      testId: "yearly-calendar",
-      colorFor,
-    });
+    const { container, getAllByRole, findByRole } = render(
+      YearlyExpenseCalendar,
+      {
+        data: { granularity: "month", period: "2024", points, maxValue: 150 },
+        ariaLabel: "Yearly expense activity",
+        testId: "yearly-calendar",
+        colorFor,
+      },
+    );
 
     const calendar = container.querySelector("[data-testid='yearly-calendar']");
     const months = getAllByRole("button");
     expect(calendar?.getAttribute("data-chart-ready")).toBe("true");
     expect(months).toHaveLength(12);
     expect(months[0].getAttribute("style")).toContain("conic-gradient");
-    expect(months[0].getAttribute("data-tippy-content")).toContain("Food");
-    expect(months[0].getAttribute("data-tippy-content")).toContain("Total");
     expect(months[0]).not.toHaveAttribute("title");
     expect(months[0].getAttribute("aria-label")).toContain("Total");
     expect(months[1].textContent).toContain("No activity");
     expect(colorFor).toHaveBeenCalledWith("Food");
     expect(colorFor).toHaveBeenCalledWith("Travel");
+    await fireEvent.pointerEnter(months[0]);
+    const tooltip = await findByRole("tooltip");
+    await waitFor(() => expect(tooltip).toHaveTextContent("Food"));
+    expect(tooltip).toHaveTextContent("Total");
   });
 });

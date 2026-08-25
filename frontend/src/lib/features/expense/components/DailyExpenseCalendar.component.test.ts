@@ -1,8 +1,8 @@
-import { render } from "@testing-library/svelte";
+import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { expect, test } from "vitest";
-import DailyExpenseCalendar from "./DailyExpenseCalendar.svelte";
+import DailyExpenseCalendar from "./DailyExpenseCalendar.test-harness.svelte";
 
-test("renders aligned dates, category rings, amounts, and hover details", () => {
+test("renders aligned dates, category rings, amounts, and hover details", async () => {
   const points = Array.from({ length: 29 }, (_, index) => ({
     key: `2024-02-${String(index + 1).padStart(2, "0")}`,
     label: `${String(index + 1).padStart(2, "0")} Feb 2024`,
@@ -13,7 +13,7 @@ test("renders aligned dates, category rings, amounts, and hover details", () => 
       ? [{ label: "Rent", detail: "Expenses:Rent", value: 100 }]
       : [],
   }));
-  const { getAllByRole, getByRole } = render(DailyExpenseCalendar, {
+  const { getAllByRole, getByRole, findByRole } = render(DailyExpenseCalendar, {
     data: {
       granularity: "day",
       period: "2024-02",
@@ -29,10 +29,12 @@ test("renders aligned dates, category rings, amounts, and hover details", () => 
   expect(days[0]).toHaveStyle("--calendar-column: 4");
   expect(days[2].getAttribute("style")).toContain("conic-gradient");
   expect(days[2]).toHaveTextContent("100");
-  expect(days[2].getAttribute("data-tippy-content")).toContain("Total");
   expect(days[2]).not.toHaveAttribute("title");
   expect(days[2].getAttribute("aria-label")).toContain("Rent (Expenses:Rent)");
   expect(days[2].getAttribute("aria-label")).toContain("Total");
   expect(getByRole("grid", { name: "February expenses" }))
     .toHaveAttribute("data-chart-ready", "true");
+  await fireEvent.pointerEnter(days[2]);
+  const tooltip = await findByRole("tooltip");
+  await waitFor(() => expect(tooltip).toHaveTextContent("Total"));
 });
