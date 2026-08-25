@@ -2,7 +2,7 @@ import type {
   LedgerFileError,
   SheetFileError,
   SheetLineResult,
-} from "../core/utils";
+} from "$lib/core/utils";
 
 export interface EditorState {
   hasUnsavedChanges: boolean;

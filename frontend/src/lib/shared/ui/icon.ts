@@ -12,7 +12,7 @@ import fluentemoji from "../../../../fonts/fluent-emoji-high-contrast-info.json"
   type: "json",
 };
 import mdi from "../../../../fonts/mdi-info.json" with { type: "json" };
-import { stemmer } from "$lib/core/stemmer";
+import { stemmer } from "$lib/shared/utils/stemmer";
 
 const icons = {
   arcticons: arcticons["codepoints"],

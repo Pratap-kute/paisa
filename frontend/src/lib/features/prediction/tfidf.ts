@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { cosineSimilarity } from "$lib/core/cosine_similarity";
+import { cosineSimilarity } from "./cosine_similarity";
 import { accountTfIdf } from "$lib/state/store";
 import { CONFIDENCE } from "./weights";
 import type { PredictionInput, PredictionResult } from "./types";
