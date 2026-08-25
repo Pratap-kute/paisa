@@ -15,8 +15,11 @@ let invalidErrorMessage = $state("");
 
 let loginDisabled = $derived(isEmpty(username) || isEmpty(password));
 
-async function tryLogin() {
-  if (loginDisabled) return;
+async function tryLogin(form: HTMLFormElement) {
+  const formData = new FormData(form);
+  username = String(formData.get("username") || "");
+  password = String(formData.get("password") || "");
+  if (isEmpty(username) || isEmpty(password)) return;
 
   const { success, error } = await login(username, password);
   invalid = !success;
@@ -51,17 +54,19 @@ async function tryLogin() {
     </div>
 
     <form class="space-y-4"
-      onsubmit={(e) => { e.preventDefault(); tryLogin(); }}>
+      onsubmit={(e) => { e.preventDefault(); tryLogin(e.currentTarget); }}>
       <FormField id="username" label="Username">
         {#snippet children()}
-          <Input id="username" type="text" size="lg" bind:value={username} />
+          <Input id="username" name="username" autocomplete="username"
+            type="text" size="lg" bind:value={username} />
         {/snippet}
       </FormField>
 
       <FormField id="password" label="Password"
         error={invalid ? invalidErrorMessage : undefined}>
         {#snippet children()}
-          <Input id="password" type="password" size="lg" bind:value={password} />
+          <Input id="password" name="password" autocomplete="current-password"
+            type="password" size="lg" bind:value={password} />
         {/snippet}
       </FormField>
 

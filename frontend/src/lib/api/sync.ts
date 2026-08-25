@@ -1,5 +1,6 @@
 import * as toast from "$lib/shared/ui/toast";
 import { api } from "./client";
+import { extractErrorMessage } from "./errors";
 import type { ServerSyncRequest } from "./generated/Api";
 
 export async function sync(request: ServerSyncRequest) {
@@ -11,13 +12,16 @@ export async function sync(request: ServerSyncRequest) {
         type: "is-danger",
         duration: 10000,
       });
+      return false;
     }
+    return true;
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Sync error";
+    const msg = extractErrorMessage(err);
     toast.toast({
       message: `<b>Failed to sync</b>\n${msg}`,
       type: "is-danger",
       duration: 10000,
     });
+    return false;
   }
 }

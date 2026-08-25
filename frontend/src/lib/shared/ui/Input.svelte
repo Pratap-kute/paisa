@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+import type { HTMLInputAttributes } from "svelte/elements";
 
 type InputType =
   | "text"
@@ -15,6 +16,7 @@ type InputSize = "sm" | "md" | "lg";
 interface Props {
   id?: string;
   name?: string;
+  autocomplete?: HTMLInputAttributes["autocomplete"];
   type?: InputType;
   value?: string | number;
   placeholder?: string;
@@ -35,6 +37,7 @@ interface Props {
 let {
   id,
   name,
+  autocomplete,
   type = "text",
   value = $bindable(""),
   placeholder = "",
@@ -64,6 +67,7 @@ const sizeClasses: Record<InputSize, string> = {
   <input
     {id}
     {name}
+    {autocomplete}
     {type}
     bind:value
     {placeholder}

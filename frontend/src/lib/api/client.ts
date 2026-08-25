@@ -79,6 +79,13 @@ export function createApiClient(options: ClientOptions = {}): Api<unknown> {
   const httpClient = new HttpClient({
     baseUrl: options.baseUrl ?? "/api",
     customFetch,
+    baseApiParams: {
+      secure: true,
+      credentials: "same-origin",
+      headers: {},
+      redirect: "follow",
+      referrerPolicy: "no-referrer",
+    },
     securityWorker: () => {
       const token = getAuthToken();
       if (token && token.trim() !== "") {

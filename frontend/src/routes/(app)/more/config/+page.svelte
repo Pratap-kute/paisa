@@ -1,6 +1,8 @@
 <script lang="ts">
 import { configUpdated } from "$lib/shared/browser/config";
-import { api } from "$lib/api";
+import { api, clearAuthToken, getAuthToken, setAuthToken } from "$lib/api";
+import { authTokenAfterAccountSave } from "$lib/shared/browser/auth";
+import { goto } from "$app/navigation";
 import { onMount } from "svelte";
 import type { JSONSchema7 } from "json-schema";
 import JsonSchemaForm from "$lib/features/ledger/components/JsonSchemaForm.svelte";
@@ -214,16 +216,36 @@ async function save(newConfig: Record<string, any> | null) {
     error = respError;
 
     if (success) {
+      const previousAccounts = lastConfig?.user_accounts || [];
+      const nextAccounts = newConfig.user_accounts || [];
+      const nextToken = authTokenAfterAccountSave(
+        getAuthToken(),
+        previousAccounts,
+        nextAccounts,
+      );
+      if (nextToken === null) {
+        clearAuthToken();
+      } else if (nextToken !== undefined) {
+        setAuthToken(nextToken);
+      }
+
       lastConfig = cloneDeep(newConfig);
       config = cloneDeep(newConfig);
       globalThis.USER_CONFIG = cloneDeep(newConfig) as UserConfig;
       configUpdated();
-      refresh();
       toast.toast({
         message: `Saved config`,
         type: "is-success",
       });
-      await sync({ journal: true });
+
+      if (nextAccounts.length > 0 && nextToken === null) {
+        await goto("/login");
+        return;
+      }
+
+      if (await sync({ journal: true })) {
+        refresh();
+      }
     }
   } finally {
     isLoading = false;
