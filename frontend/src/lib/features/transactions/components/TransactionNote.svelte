@@ -9,7 +9,7 @@ interface Props {
 let { transaction }: Props = $props();
 </script>
 
-{#if transaction.note != ""}
+{#if transaction.note}
   <Tooltip content={formatTextAsHtml(transaction.note)}>
     {#snippet children(tooltipProps)}
       <button {...tooltipProps} type="button" class="paisa-note-icon" title={transaction.note}>

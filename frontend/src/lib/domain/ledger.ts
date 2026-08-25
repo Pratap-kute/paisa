@@ -12,8 +12,8 @@ export interface Posting {
   transaction_begin_line: number;
   transaction_end_line: number;
   file_name: string;
-  note: string;
-  transaction_note: string;
+  note?: string | null;
+  transaction_note?: string | null;
 
   market_amount: number;
   balance: number;
@@ -26,7 +26,7 @@ export interface Transaction {
   beginLine: number;
   endLine: number;
   fileName: string;
-  note: string;
+  note?: string | null;
   postings: Posting[];
 }
 

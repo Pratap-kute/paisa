@@ -593,8 +593,8 @@ function getProperty(
     case Terms.Filename:
       return [transaction.fileName];
     case Terms.Note:
-      return [transaction.note].concat(
-        transaction.postings.map((posting) => posting.note),
+      return [transaction.note ?? ""].concat(
+        transaction.postings.map((posting) => posting.note ?? ""),
       );
     default:
       throw new Error(`Unsupported property: ${property}`);

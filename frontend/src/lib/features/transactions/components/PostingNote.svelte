@@ -9,7 +9,7 @@ interface Props {
 let { posting }: Props = $props();
 </script>
 
-{#if posting.note != ""}
+{#if posting.note}
   <Tooltip content={formatTextAsHtml(posting.note)}>
     {#snippet children(tooltipProps)}
       <button {...tooltipProps} type="button" class="inline-flex items-center border-0 bg-transparent p-0 text-xs">
