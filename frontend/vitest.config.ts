@@ -11,7 +11,7 @@ const coreProject = defineConfig({
     name: "core",
     environment: "happy-dom",
     include: ["tests/core/**/*.test.ts"],
-    setupFiles: ["./tests/setup/setup.ts"],
+    setupFiles: ["./tests/setup/core.ts"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov", "json-summary"],

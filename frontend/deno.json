@@ -21,7 +21,7 @@
     "api:check": "deno run -A scripts/generate_api.ts --check",
 
     "test": "deno task test:unit && deno task test:core && deno task test:component",
-    "test:core": "node node_modules/vitest/vitest.mjs run --config vitest.config.ts --project=core --maxWorkers=1",
+    "test:core": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=core --pool=threads --maxWorkers=1 --no-isolate",
     "test:component": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=component --maxWorkers=1",
     "test:deno": "deno task test:unit && deno task test:integration",
     "test:coverage": "deno run -A scripts/coverage.ts",

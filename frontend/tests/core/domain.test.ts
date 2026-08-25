@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
 import utc from "dayjs/plugin/utc.js";
@@ -23,6 +23,9 @@ beforeAll(() => {
   dayjs.extend(isSameOrBefore);
   dayjs.extend(utc);
   dayjs.extend(timezone);
+});
+
+beforeEach(() => {
   setNow(dayjs("2024-01-15"));
 });
 
