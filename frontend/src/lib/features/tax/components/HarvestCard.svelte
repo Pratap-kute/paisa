@@ -1,55 +1,58 @@
 <script lang="ts">
-  import dayjs from "dayjs";
-  import { formatFloat } from "$lib/shared/formatters/currency";
+import dayjs from "dayjs";
+import { formatFloat } from "$lib/shared/formatters/currency";
 import { restName } from "$lib/domain/account";
 import type { Harvestable } from "$lib/domain/tax";
 import { round } from "es-toolkit";
-  import {
-    harvestablePercentage, unitsRequiredFromAmount, unitsRequiredFromGain, } from "$lib/features/tax/harvest_data";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Card from "$lib/shared/ui/Card.svelte";
+import {
+  harvestablePercentage,
+  unitsRequiredFromAmount,
+  unitsRequiredFromGain,
+} from "$lib/features/tax/harvest_data";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import Card from "$lib/shared/ui/Card.svelte";
 
-  interface Props {
-    harvestable: Harvestable;
-    hideHeader?: boolean;
-  }
+interface Props {
+  harvestable: Harvestable;
+  hideHeader?: boolean;
+}
 
-  let { harvestable, hideHeader = false }: Props = $props();
-  let units = $state(0);
-  let amount = $state(0);
-  let taxableGain = $state(0);
-  let initialized = false;
-  const percentage = $derived(harvestablePercentage(harvestable));
-  const barPercentage = $derived(Math.max(0, Math.min(100, percentage)));
+let { harvestable, hideHeader = false }: Props = $props();
+let units = $state(0);
+let amount = $state(0);
+let taxableGain = $state(0);
+let initialized = false;
+const percentage = $derived(harvestablePercentage(harvestable));
+const barPercentage = $derived(Math.max(0, Math.min(100, percentage)));
 
-  $effect(() => {
-    if (initialized) return;
-    const initial = unitsRequiredFromGain(harvestable, 100000);
-    units = initial[0];
-    amount = round(initial[1]);
-    taxableGain = round(initial[2]);
-    initialized = true;
-  });
+$effect(() => {
+  if (initialized) return;
+  const initial = unitsRequiredFromGain(harvestable, 100000);
+  units = initial[0];
+  amount = round(initial[1]);
+  taxableGain = round(initial[2]);
+  initialized = true;
+});
 
-  function updateFromAmount(value: number) {
-    const result = unitsRequiredFromAmount(harvestable, value || 0);
-    units = result[0];
-    amount = round(result[1]);
-    taxableGain = round(result[2]);
-  }
+function updateFromAmount(value: number) {
+  const result = unitsRequiredFromAmount(harvestable, value || 0);
+  units = result[0];
+  amount = round(result[1]);
+  taxableGain = round(result[2]);
+}
 
-  function updateFromGain(value: number) {
-    const result = unitsRequiredFromGain(harvestable, value || 0);
-    units = result[0];
-    amount = round(result[1]);
-    taxableGain = round(result[2]);
-  }
+function updateFromGain(value: number) {
+  const result = unitsRequiredFromGain(harvestable, value || 0);
+  units = result[0];
+  amount = round(result[1]);
+  taxableGain = round(result[2]);
+}
 
-  function gainClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
-  }
+function gainClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
 </script>
 
 <Card padding="none" class="w-full overflow-hidden" data-testid="harvest-card">

@@ -1,16 +1,22 @@
 <script lang="ts">
-  import COLORS from "$lib/shared/theme/colors";
+import COLORS from "$lib/shared/theme/colors";
 
-  interface Props {
-    size?: number;
-    thickness?: number;
-    animation?: boolean;
-  }
+interface Props {
+  size?: number;
+  thickness?: number;
+  animation?: boolean;
+}
 
-  let { size = 256, thickness = 4, animation = false }: Props = $props();
+let { size = 256, thickness = 4, animation = false }: Props = $props();
 
-  let colors = [COLORS.income, COLORS.expenses, COLORS.equity, COLORS.liabilities, COLORS.assets];
-  let dotColor = COLORS.primary;
+let colors = [
+  COLORS.income,
+  COLORS.expenses,
+  COLORS.equity,
+  COLORS.liabilities,
+  COLORS.assets,
+];
+let dotColor = COLORS.primary;
 </script>
 
 <svg
@@ -23,14 +29,15 @@
   <g>
     <g>
       <g transform="rotate(360, 12, 12)"
-        ><path
+      >
+        <path
           d="M12 12Z"
           fill="none"
           stroke={dotColor}
           stroke-width={thickness}
           stroke-linecap="round"
-        /></g
-      >
+        />
+      </g>
     </g>
     <g>
       {#each colors as color, i}

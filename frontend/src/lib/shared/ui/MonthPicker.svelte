@@ -1,67 +1,83 @@
 <script lang="ts">
-  import { now } from "$lib/domain/time";
-  import dayjs from "dayjs";
+import { now } from "$lib/domain/time";
+import dayjs from "dayjs";
 
-  interface Props {
-    min: dayjs.Dayjs;
-    max: dayjs.Dayjs;
-    value: string;
-  }
+interface Props {
+  min: dayjs.Dayjs;
+  max: dayjs.Dayjs;
+  value: string;
+}
 
-  let { min, max, value = $bindable() }: Props = $props();
+let { min, max, value = $bindable() }: Props = $props();
 
-  let open = $state(false);
-  let valueDate = $derived(dayjs(value, "YYYY-MM"));
-  let selectedYear: number = $state(dayjs(value, "YYYY-MM").year());
-  let allowedYears: number[] = $derived(
-    min && max
-      ? Array.from(
-        { length: max.year() - min.year() + 1 },
-        (_, i) => min.year() + i,
-      )
-      : []
-  );
+let open = $state(false);
+let valueDate = $derived(dayjs(value, "YYYY-MM"));
+let selectedYear: number = $state(dayjs(value, "YYYY-MM").year());
+let allowedYears: number[] = $derived(
+  min && max
+    ? Array.from(
+      { length: max.year() - min.year() + 1 },
+      (_, i) => min.year() + i,
+    )
+    : [],
+);
 
-  $effect(() => {
-    selectedYear = valueDate.year();
-  });
+$effect(() => {
+  selectedYear = valueDate.year();
+});
 
-  $effect(() => {
-    if (min && max && !isAllowed(valueDate, min, max)) {
-      if (isAllowed(now(), min, max)) {
-        select(now());
-      } else {
-        select(max);
-      }
+$effect(() => {
+  if (min && max && !isAllowed(valueDate, min, max)) {
+    if (isAllowed(now(), min, max)) {
+      select(now());
+    } else {
+      select(max);
     }
-  });
-
-  function isAllowed(date: dayjs.Dayjs, minDate: dayjs.Dayjs, maxDate: dayjs.Dayjs) {
-    return date.isSameOrAfter(minDate.startOf("month")) && date.isSameOrBefore(maxDate.endOf("month"));
   }
+});
 
-  function select(date: dayjs.Dayjs) {
-    value = date.format("YYYY-MM");
-    selectedYear = date.year();
-    open = false;
-  }
+function isAllowed(
+  date: dayjs.Dayjs,
+  minDate: dayjs.Dayjs,
+  maxDate: dayjs.Dayjs,
+) {
+  return date.isSameOrAfter(minDate.startOf("month")) &&
+    date.isSameOrBefore(maxDate.endOf("month"));
+}
 
-  function selectMonth(month: number) {
-    select(dayjs(`${selectedYear}-${month + 1}`, "YYYY-M"));
-  }
+function select(date: dayjs.Dayjs) {
+  value = date.format("YYYY-MM");
+  selectedYear = date.year();
+  open = false;
+}
 
-  function selectYear(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    selectedYear = parseInt(target.value);
-  }
+function selectMonth(month: number) {
+  select(dayjs(`${selectedYear}-${month + 1}`, "YYYY-M"));
+}
 
-  const MONTHS = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
+function selectYear(event: Event) {
+  const target = event.target as HTMLSelectElement;
+  selectedYear = parseInt(target.value);
+}
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 </script>
 
-<div class="relative inline-flex h-8 items-stretch rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-xs">
+<div
+  class="relative inline-flex h-8 items-stretch rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-xs">
   <button
     type="button"
     class="paisa-month-nav rounded-l-[calc(var(--paisa-radius-md)-1px)] border-r border-[var(--paisa-border-subtle)]"
@@ -158,46 +174,46 @@
 </div>
 
 <style>
-  .paisa-month-nav,
-  .paisa-month-trigger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.375rem;
-    height: 100%;
-    min-width: 1.75rem;
-    padding: 0 0.5rem;
-    border: 0;
-    background: var(--paisa-surface);
-    color: var(--paisa-foreground);
-    font-size: 0.8125rem;
-    cursor: pointer;
-    transition: background-color 150ms ease;
-  }
+.paisa-month-nav,
+.paisa-month-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  height: 100%;
+  min-width: 1.75rem;
+  padding: 0 0.5rem;
+  border: 0;
+  background: var(--paisa-surface);
+  color: var(--paisa-foreground);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
 
-  .paisa-month-nav:hover:not(:disabled),
-  .paisa-month-trigger:hover {
-    background: var(--paisa-surface-hover);
-  }
+.paisa-month-nav:hover:not(:disabled),
+.paisa-month-trigger:hover {
+  background: var(--paisa-surface-hover);
+}
 
-  .paisa-month-nav:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+.paisa-month-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
-  .paisa-month-trigger {
-    min-width: 7.5rem;
-    padding: 0 0.625rem;
-  }
+.paisa-month-trigger {
+  min-width: 7.5rem;
+  padding: 0 0.625rem;
+}
 
-  .paisa-month-year-select {
-    appearance: none;
-    border: 1px solid var(--paisa-border-subtle);
-    border-radius: var(--paisa-radius-sm);
-    background: var(--paisa-surface);
-    color: var(--paisa-foreground);
-    font-weight: 600;
-    font-size: 0.8125rem;
-    padding: 0.25rem 0.5rem;
-  }
+.paisa-month-year-select {
+  appearance: none;
+  border: 1px solid var(--paisa-border-subtle);
+  border-radius: var(--paisa-radius-sm);
+  background: var(--paisa-surface);
+  color: var(--paisa-foreground);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.5rem;
+}
 </style>

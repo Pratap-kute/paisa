@@ -1,19 +1,19 @@
 <script lang="ts">
-  interface Props {
-    width?: string;
-    height?: string;
-    radius?: "sm" | "md" | "lg" | "full";
-    class?: string;
-    label?: string;
-  }
+interface Props {
+  width?: string;
+  height?: string;
+  radius?: "sm" | "md" | "lg" | "full";
+  class?: string;
+  label?: string;
+}
 
-  let {
-    width = "100%",
-    height = "1rem",
-    radius = "md",
-    class: className = "",
-    label = "Loading",
-  }: Props = $props();
+let {
+  width = "100%",
+  height = "1rem",
+  radius = "md",
+  class: className = "",
+  label = "Loading",
+}: Props = $props();
 </script>
 
 <div
@@ -23,4 +23,3 @@
   role="status"
   aria-label={label}
 ></div>
-

@@ -1,41 +1,41 @@
 <script lang="ts">
-  interface TabOption<T = unknown> {
-    label: string;
-    value: T;
-    icon?: string;
-    badge?: string | number;
-    disabled?: boolean;
-  }
+interface TabOption<T = unknown> {
+  label: string;
+  value: T;
+  icon?: string;
+  badge?: string | number;
+  disabled?: boolean;
+}
 
-  interface Props<T = unknown> {
-    options: TabOption<T>[];
-    value: T;
-    variant?: "boxed" | "line" | "pills";
-    size?: "sm" | "md";
-    class?: string;
-    onchange?: (value: T) => void;
-  }
+interface Props<T = unknown> {
+  options: TabOption<T>[];
+  value: T;
+  variant?: "boxed" | "line" | "pills";
+  size?: "sm" | "md";
+  class?: string;
+  onchange?: (value: T) => void;
+}
 
-  let {
-    options,
-    value = $bindable(),
-    variant = "boxed",
-    size = "sm",
-    class: className = "",
-    onchange,
-  }: Props = $props();
+let {
+  options,
+  value = $bindable(),
+  variant = "boxed",
+  size = "sm",
+  class: className = "",
+  onchange,
+}: Props = $props();
 
-  function selectTab(val: unknown) {
-    value = val as typeof value;
-    onchange?.(val as typeof value);
-  }
+function selectTab(val: unknown) {
+  value = val as typeof value;
+  onchange?.(val as typeof value);
+}
 </script>
 
 {#if variant === "boxed"}
   <div
-    class="flex flex-wrap gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-1 {size === 'md' ? 'text-sm' : 'text-xs'} {className}"
-    role="tablist"
-  >
+  class="flex flex-wrap gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-1 {size === 'md' ? 'text-sm' : 'text-xs'} {className}"
+  role="tablist"
+>
     {#each options as option}
       <button
         type="button"
@@ -58,8 +58,9 @@
     {/each}
   </div>
 {:else}
-  <div class="border-b border-[var(--paisa-border-subtle)] {className}" role="tablist">
-    <ul class="m-0 flex list-none gap-0 p-0">
+  <div class="border-b border-[var(--paisa-border-subtle)] {className}"
+  role="tablist">
+  <ul class="m-0 flex list-none gap-0 p-0">
       {#each options as option}
         <li class="m-0">
           <button
@@ -83,5 +84,5 @@
         </li>
       {/each}
     </ul>
-  </div>
+</div>
 {/if}

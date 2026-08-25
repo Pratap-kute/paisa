@@ -1,156 +1,183 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
-import type { PortfolioAggregate, PortfolioAllocation } from "$lib/domain/assets";
-import { buildFlattenedHoldings, buildPortfolioComparison, buildTopHoldingsComparison, filterCommodityBreakdowns, } from "$lib/features/assets/hierarchy_data";
-  import COLORS from "$lib/shared/theme/colors";
-  import { nonZeroCurrency } from "$lib/shared/tables/formatters";
-    import { onMount } from "svelte";
-  import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import Table from "$lib/shared/ui/Table.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-import { isEmpty as isEmptyValue, max, some } from "$lib/shared/utils/collection";
+import { api } from "$lib/api";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import type {
+  PortfolioAggregate,
+  PortfolioAllocation,
+} from "$lib/domain/assets";
+import {
+  buildFlattenedHoldings,
+  buildPortfolioComparison,
+  buildTopHoldingsComparison,
+  filterCommodityBreakdowns,
+} from "$lib/features/assets/hierarchy_data";
+import COLORS from "$lib/shared/theme/colors";
+import { nonZeroCurrency } from "$lib/shared/tables/formatters";
+import { onMount } from "svelte";
+import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import Table from "$lib/shared/ui/Table.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
+import {
+  isEmpty as isEmptyValue,
+  max,
+  some,
+} from "$lib/shared/utils/collection";
 
-  let commodities: string[] = $state([]);
-  let selectedCommodities: string[] = $state([]);
-  let security_type: PortfolioAggregate[] = $state([]);
-  let name_and_security_type: PortfolioAggregate[] = $state([]);
-  let rating: PortfolioAggregate[] = $state([]);
-  let industry: PortfolioAggregate[] = $state([]);
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
-  let searchHoldingQuery = $state("");
+let commodities: string[] = $state([]);
+let selectedCommodities: string[] = $state([]);
+let security_type: PortfolioAggregate[] = $state([]);
+let name_and_security_type: PortfolioAggregate[] = $state([]);
+let rating: PortfolioAggregate[] = $state([]);
+let industry: PortfolioAggregate[] = $state([]);
+let isEmpty = $state(false);
+let isLoading = $state(true);
+let searchHoldingQuery = $state("");
 
-  let filteredSecurityType = $derived(filterCommodityBreakdowns(security_type, selectedCommodities));
-  let filteredRating = $derived(filterCommodityBreakdowns(rating, selectedCommodities));
-  let filteredIndustry = $derived(filterCommodityBreakdowns(industry, selectedCommodities));
-  let filteredPortfolio = $derived(filterCommodityBreakdowns(name_and_security_type, selectedCommodities));
+let filteredSecurityType = $derived(
+  filterCommodityBreakdowns(security_type, selectedCommodities),
+);
+let filteredRating = $derived(
+  filterCommodityBreakdowns(rating, selectedCommodities),
+);
+let filteredIndustry = $derived(
+  filterCommodityBreakdowns(industry, selectedCommodities),
+);
+let filteredPortfolio = $derived(
+  filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+);
 
-  let securityTypeData = $derived(buildPortfolioComparison(filteredSecurityType));
-  let ratingData = $derived(buildPortfolioComparison(filteredRating));
-  let industryData = $derived(buildPortfolioComparison(filteredIndustry));
+let securityTypeData = $derived(buildPortfolioComparison(filteredSecurityType));
+let ratingData = $derived(buildPortfolioComparison(filteredRating));
+let industryData = $derived(buildPortfolioComparison(filteredIndustry));
 
-  let flattenedHoldings = $derived(buildFlattenedHoldings(filteredPortfolio));
-  let topHoldingsData = $derived(buildTopHoldingsComparison(flattenedHoldings, 10));
+let flattenedHoldings = $derived(buildFlattenedHoldings(filteredPortfolio));
+let topHoldingsData = $derived(
+  buildTopHoldingsComparison(flattenedHoldings, 10),
+);
 
-  let filteredHoldingRows = $derived.by(() => {
-    if (!searchHoldingQuery.trim()) return flattenedHoldings;
-    const q = searchHoldingQuery.toLowerCase();
-    return flattenedHoldings.filter(
-      (h) =>
-        h.security_name.toLowerCase().includes(q) ||
-        h.security_type.toLowerCase().includes(q) ||
-        h.commodities.toLowerCase().includes(q),
-    );
-  });
-
-  const holdingColumns = $derived.by((): ColumnDefinition[] => {
-    const maxPercent = max(flattenedHoldings.map((h) => h.percentage)) || 100;
-    return [
-      {
-        title: "#",
-        field: "rank",
-        width: 56,
-        minWidth: 48,
-        maxWidth: 64,
-        hozAlign: "center",
-        headerHozAlign: "center",
-      },
-      {
-        title: "Security Name",
-        field: "security_name",
-        minWidth: 220,
-        widthGrow: 2,
-        headerHozAlign: "left",
-      },
-      {
-        title: "Type",
-        field: "security_type",
-        width: 100,
-        minWidth: 90,
-        headerHozAlign: "left",
-      },
-      {
-        title: "Funds",
-        field: "commodities",
-        minWidth: 140,
-        widthGrow: 1,
-        headerHozAlign: "left",
-      },
-      {
-        title: "Market Value",
-        field: "amount",
-        width: 140,
-        minWidth: 120,
-        hozAlign: "right",
-        headerHozAlign: "right",
-        formatter: nonZeroCurrency,
-      },
-      {
-        title: "Weight",
-        field: "percentage",
-        width: 90,
-        minWidth: 80,
-        hozAlign: "right",
-        headerHozAlign: "right",
-        formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
-      },
-      {
-        title: "Share",
-        field: "percentage",
-        minWidth: 140,
-        widthGrow: 2,
-        hozAlign: "left",
-        headerHozAlign: "left",
-        headerSort: false,
-        formatter: "progress",
-        formatterParams: {
-          color: COLORS.assets,
-          min: 0,
-          max: maxPercent,
-        } as ProgressBarParams,
-      },
-    ];
-  });
-
-  let hasFilteredData = $derived(
-    !isEmpty &&
-      selectedCommodities.length > 0 &&
-      some(
-        [
-          ...filterCommodityBreakdowns(security_type, selectedCommodities),
-          ...filterCommodityBreakdowns(rating, selectedCommodities),
-          ...filterCommodityBreakdowns(industry, selectedCommodities),
-          ...filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-        ],
-        (row) => row.amount > 0,
-      ),
+let filteredHoldingRows = $derived.by(() => {
+  if (!searchHoldingQuery.trim()) return flattenedHoldings;
+  const q = searchHoldingQuery.toLowerCase();
+  return flattenedHoldings.filter(
+    (h) =>
+      h.security_name.toLowerCase().includes(q) ||
+      h.security_type.toLowerCase().includes(q) ||
+      h.commodities.toLowerCase().includes(q),
   );
+});
 
-  onMount(async () => {
-    try {
-      ({ name_and_security_type, security_type, rating, industry, commodities } = await api.portfolioAllocation.getPortfolioAllocation() as unknown as PortfolioAllocation);
+const holdingColumns = $derived.by((): ColumnDefinition[] => {
+  const maxPercent = max(flattenedHoldings.map((h) => h.percentage)) || 100;
+  return [
+    {
+      title: "#",
+      field: "rank",
+      width: 56,
+      minWidth: 48,
+      maxWidth: 64,
+      hozAlign: "center",
+      headerHozAlign: "center",
+    },
+    {
+      title: "Security Name",
+      field: "security_name",
+      minWidth: 220,
+      widthGrow: 2,
+      headerHozAlign: "left",
+    },
+    {
+      title: "Type",
+      field: "security_type",
+      width: 100,
+      minWidth: 90,
+      headerHozAlign: "left",
+    },
+    {
+      title: "Funds",
+      field: "commodities",
+      minWidth: 140,
+      widthGrow: 1,
+      headerHozAlign: "left",
+    },
+    {
+      title: "Market Value",
+      field: "amount",
+      width: 140,
+      minWidth: 120,
+      hozAlign: "right",
+      headerHozAlign: "right",
+      formatter: nonZeroCurrency,
+    },
+    {
+      title: "Weight",
+      field: "percentage",
+      width: 90,
+      minWidth: 80,
+      hozAlign: "right",
+      headerHozAlign: "right",
+      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
+    },
+    {
+      title: "Share",
+      field: "percentage",
+      minWidth: 140,
+      widthGrow: 2,
+      hozAlign: "left",
+      headerHozAlign: "left",
+      headerSort: false,
+      formatter: "progress",
+      formatterParams: {
+        color: COLORS.assets,
+        min: 0,
+        max: maxPercent,
+      } as ProgressBarParams,
+    },
+  ];
+});
 
-      if (isEmptyValue(commodities)) {
-        isEmpty = true;
-        return;
-      }
+let hasFilteredData = $derived(
+  !isEmpty &&
+    selectedCommodities.length > 0 &&
+    some(
+      [
+        ...filterCommodityBreakdowns(security_type, selectedCommodities),
+        ...filterCommodityBreakdowns(rating, selectedCommodities),
+        ...filterCommodityBreakdowns(industry, selectedCommodities),
+        ...filterCommodityBreakdowns(
+          name_and_security_type,
+          selectedCommodities,
+        ),
+      ],
+      (row) => row.amount > 0,
+    ),
+);
 
-      selectedCommodities = [...commodities];
-      isLoading = false;
-    } catch {
+onMount(async () => {
+  try {
+    ({ name_and_security_type, security_type, rating, industry, commodities } =
+      await api.portfolioAllocation
+        .getPortfolioAllocation() as unknown as PortfolioAllocation);
+
+    if (isEmptyValue(commodities)) {
       isEmpty = true;
-    } finally {
-      isLoading = false;
+      return;
     }
-  });
+
+    selectedCommodities = [...commodities];
+    isLoading = false;
+  } catch {
+    isEmpty = true;
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

@@ -1,26 +1,29 @@
 <script lang="ts">
-  import { buildCashFlowSankeyData, buildCashFlowSankeyOption } from "$lib/shared/charts/echarts/cash_flow_sankey";
-  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-  import type { Graph } from "$lib/shared/charts/types";
-  import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/shared/state/store";
+import {
+  buildCashFlowSankeyData,
+  buildCashFlowSankeyOption,
+} from "$lib/shared/charts/echarts/cash_flow_sankey";
+import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
+import type { Graph } from "$lib/shared/charts/types";
+import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
+import { theme } from "$lib/shared/state/store";
 
-  interface Props {
-    graph: Graph;
-  }
+interface Props {
+  graph: Graph;
+}
 
-  let { graph }: Props = $props();
-  let tokenTheme = $state(readPaisaChartTheme());
-  const sankeyData = $derived(buildCashFlowSankeyData(graph));
-  const option = $derived(buildCashFlowSankeyOption(sankeyData, {
-    darkMode: $theme === "dark",
-    theme: tokenTheme,
-  }));
+let { graph }: Props = $props();
+let tokenTheme = $state(readPaisaChartTheme());
+const sankeyData = $derived(buildCashFlowSankeyData(graph));
+const option = $derived(buildCashFlowSankeyOption(sankeyData, {
+  darkMode: $theme === "dark",
+  theme: tokenTheme,
+}));
 
-  $effect(() => {
-    $theme;
-    tokenTheme = readPaisaChartTheme();
-  });
+$effect(() => {
+  $theme;
+  tokenTheme = readPaisaChartTheme();
+});
 </script>
 
 <EChartSurface

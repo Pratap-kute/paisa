@@ -1,39 +1,40 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import type { Legend } from "$lib/shared/charts/types";
+import { api } from "$lib/api";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import type { Legend } from "$lib/shared/charts/types";
 import type { Posting } from "$lib/domain/ledger";
 import { buildRepaymentSeries } from "$lib/features/liabilities/time_series_data";
-    import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import RepaymentTimelineChart from "$lib/features/liabilities/components/RepaymentTimelineChart.svelte";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import RepaymentTimelineChart from "$lib/features/liabilities/components/RepaymentTimelineChart.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
-  let legends: Legend[] = $state([]);
-  let repayments: Posting[] = $state([]);
+let isEmpty = $state(false);
+let isLoading = $state(true);
+let legends: Legend[] = $state([]);
+let repayments: Posting[] = $state([]);
 
-  onMount(async () => {
-    try {
-      ({ repayments } = await api.liabilities.getLiabilitiesRepayment() as unknown as {
+onMount(async () => {
+  try {
+    ({ repayments } = await api.liabilities
+      .getLiabilitiesRepayment() as unknown as {
         repayments: Posting[];
       });
-      if (isEmptyValue(repayments)) {
-        isEmpty = true;
-        return;
-      }
-
-      legends = buildRepaymentSeries(repayments).legends ?? [];
-      isLoading = false;
-    } finally {
-      isLoading = false;
+    if (isEmptyValue(repayments)) {
+      isEmpty = true;
+      return;
     }
-  });
+
+    legends = buildRepaymentSeries(repayments).legends ?? [];
+    isLoading = false;
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

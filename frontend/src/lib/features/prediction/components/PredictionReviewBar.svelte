@@ -1,23 +1,23 @@
 <script lang="ts">
-  import type { ConfidenceFilter } from "$lib/features/prediction/session";
+import type { ConfidenceFilter } from "$lib/features/prediction/session";
 
-  interface Props {
-    counts: {
-      high: number;
-      medium: number;
-      review: number;
-      unknown: number;
-      transfer: number;
-    };
-    filter: ConfidenceFilter;
-    onFilter: (filter: ConfidenceFilter) => void;
-  }
+interface Props {
+  counts: {
+    high: number;
+    medium: number;
+    review: number;
+    unknown: number;
+    transfer: number;
+  };
+  filter: ConfidenceFilter;
+  onFilter: (filter: ConfidenceFilter) => void;
+}
 
-  let { counts, filter, onFilter }: Props = $props();
+let { counts, filter, onFilter }: Props = $props();
 
-  function toggle(next: ConfidenceFilter) {
-    onFilter(filter === next ? null : next);
-  }
+function toggle(next: ConfidenceFilter) {
+  onFilter(filter === next ? null : next);
+}
 </script>
 
 <div class="paisa-prediction-review-bar" data-testid="prediction-review-bar">
@@ -71,77 +71,77 @@
 </div>
 
 <style>
-  .paisa-prediction-review-bar {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    overflow-x: auto;
-    max-width: 100%;
-    scrollbar-width: none;
+.paisa-prediction-review-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+button.paisa-review-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 0.2rem 0.5rem;
+  min-height: 24px;
+  border-radius: var(--paisa-radius-full, 9999px);
+  border: 1px solid var(--paisa-border-subtle);
+  background-color: var(--paisa-surface-card);
+  color: var(--paisa-text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--paisa-surface-hover);
+    color: var(--paisa-text-primary);
+    border-color: var(--paisa-border-default);
   }
 
-  button.paisa-review-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    padding: 0.2rem 0.5rem;
-    min-height: 24px;
-    border-radius: var(--paisa-radius-full, 9999px);
-    border: 1px solid var(--paisa-border-subtle);
-    background-color: var(--paisa-surface-card);
-    color: var(--paisa-text-secondary);
-    cursor: pointer;
-    transition: all 0.12s ease;
-    user-select: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-
-    &:hover {
-      background-color: var(--paisa-surface-hover);
-      color: var(--paisa-text-primary);
-      border-color: var(--paisa-border-default);
-    }
-
-    &.is-active {
-      background-color: var(--paisa-brand-primary-light, rgba(59, 130, 246, 0.12));
-      border-color: var(--paisa-brand-primary, #3b82f6);
-      color: var(--paisa-brand-primary, #3b82f6);
-      font-weight: 600;
-      box-shadow: 0 0 0 1px var(--paisa-brand-primary, #3b82f6);
-    }
+  &.is-active {
+    background-color: var(--paisa-brand-primary-light, rgba(59, 130, 246,
+      0.12));
+    border-color: var(--paisa-brand-primary, #3b82f6);
+    color: var(--paisa-brand-primary, #3b82f6);
+    font-weight: 600;
+    box-shadow: 0 0 0 1px var(--paisa-brand-primary, #3b82f6);
   }
+}
 
-  .paisa-chip-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.paisa-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-  }
+.paisa-chip-dot-high {
+  background-color: var(--paisa-success, #10b981);
+}
 
-  .paisa-chip-dot-high {
-    background-color: var(--paisa-success, #10b981);
-  }
+.paisa-chip-dot-medium {
+  background-color: var(--paisa-info, #3b82f6);
+}
 
-  .paisa-chip-dot-medium {
-    background-color: var(--paisa-info, #3b82f6);
-  }
+.paisa-chip-dot-review {
+  background-color: var(--paisa-warning, #f59e0b);
+}
 
-  .paisa-chip-dot-review {
-    background-color: var(--paisa-warning, #f59e0b);
-  }
+.paisa-chip-dot-unknown {
+  background-color: var(--paisa-danger, #ef4444);
+}
 
-  .paisa-chip-dot-unknown {
-    background-color: var(--paisa-danger, #ef4444);
-  }
-
-  .paisa-chip-dot-transfer {
-    background-color: #8b5cf6;
-  }
+.paisa-chip-dot-transfer {
+  background-color: #8b5cf6;
+}
 </style>

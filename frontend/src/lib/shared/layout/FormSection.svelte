@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    title: string;
-    description?: string;
-    children?: Snippet;
-  }
+interface Props {
+  title: string;
+  description?: string;
+  children?: Snippet;
+}
 
-  let { title, description, children }: Props = $props();
+let { title, description, children }: Props = $props();
 </script>
 
 <section class="paisa4-form-section">
@@ -19,4 +19,3 @@
     {@render children?.()}
   </div>
 </section>
-

@@ -1,31 +1,31 @@
 <script lang="ts">
-  import {
-    buildComparisonBarOption,
-    type ComparisonBarChartData,
-  } from "$lib/shared/charts/echarts/bar_comparison";
-  import type { PaisaChartEventHandler } from "$lib/shared/charts/echarts/surface_lifecycle";
-  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-  import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/shared/state/store";
+import {
+  buildComparisonBarOption,
+  type ComparisonBarChartData,
+} from "$lib/shared/charts/echarts/bar_comparison";
+import type { PaisaChartEventHandler } from "$lib/shared/charts/echarts/surface_lifecycle";
+import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
+import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
+import { theme } from "$lib/shared/state/store";
 
-  interface Props {
-    data: ComparisonBarChartData;
-    ariaLabel: string;
-    testId: string;
-    events?: PaisaChartEventHandler[];
-  }
+interface Props {
+  data: ComparisonBarChartData;
+  ariaLabel: string;
+  testId: string;
+  events?: PaisaChartEventHandler[];
+}
 
-  let { data, ariaLabel, testId, events = [] }: Props = $props();
-  let tokenTheme = $state(readPaisaChartTheme());
-  const option = $derived(buildComparisonBarOption(data, {
-    darkMode: $theme === "dark",
-    theme: tokenTheme,
-  }));
+let { data, ariaLabel, testId, events = [] }: Props = $props();
+let tokenTheme = $state(readPaisaChartTheme());
+const option = $derived(buildComparisonBarOption(data, {
+  darkMode: $theme === "dark",
+  theme: tokenTheme,
+}));
 
-  $effect(() => {
-    $theme;
-    tokenTheme = readPaisaChartTheme();
-  });
+$effect(() => {
+  $theme;
+  tokenTheme = readPaisaChartTheme();
+});
 </script>
 
 <EChartSurface

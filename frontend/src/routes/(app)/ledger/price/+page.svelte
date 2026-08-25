@@ -1,220 +1,225 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import Table from "$lib/shared/ui/Table.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { api } from "$lib/api";
+import Table from "$lib/shared/ui/Table.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import type { Price } from "$lib/domain/assets";
-  import { nonZeroPercentageChange } from "$lib/shared/tables/formatters";
-  import { toast } from "$lib/shared/ui/toast";
-  import { omitBy } from "es-toolkit";
-  import { onMount } from "svelte";
-  import type { CellComponent, ColumnDefinition } from "tabulator-tables";
-  import type dayjs from "dayjs";
+import { nonZeroPercentageChange } from "$lib/shared/tables/formatters";
+import { toast } from "$lib/shared/ui/toast";
+import { omitBy } from "es-toolkit";
+import { onMount } from "svelte";
+import type { CellComponent, ColumnDefinition } from "tabulator-tables";
+import type dayjs from "dayjs";
 import { find } from "$lib/shared/utils/collection";
 
-  interface PriceRow {
-    commodity_name: string;
-    date: dayjs.Dayjs | null;
-    value: number | null;
-    change_1d: number | null;
-    change_1w: number | null;
-    change_4w: number | null;
-    change_1y: number | null;
-    change_3y: number | null;
-    change_5y: number | null;
-    commodity_type: string;
-    commodity_id: string;
-    isHistory?: boolean;
-    _children?: PriceRow[];
+interface PriceRow {
+  commodity_name: string;
+  date: dayjs.Dayjs | null;
+  value: number | null;
+  change_1d: number | null;
+  change_1w: number | null;
+  change_4w: number | null;
+  change_1y: number | null;
+  change_3y: number | null;
+  change_5y: number | null;
+  commodity_type: string;
+  commodity_id: string;
+  isHistory?: boolean;
+  _children?: PriceRow[];
+}
+
+let prices: Record<string, Price[]> | null = $state(null);
+let commodityFilter = $state("");
+
+function change(prices: Price[], days: number, tolerance: number) {
+  const first = prices[0];
+  if (!first) return null;
+
+  const date = first.date.subtract(days, "day");
+  const last = find(prices, (p) => p.date.isSameOrBefore(date, "day"));
+  if (!last) return null;
+
+  const diffDays = first.date.diff(last.date, "day");
+  if (Math.abs(diffDays - days) <= tolerance) {
+    return (first.value - last.value) / last.value;
   }
+  return null;
+}
 
-  let prices: Record<string, Price[]> | null = $state(null);
-  let commodityFilter = $state("");
+function formatPriceDate(cell: CellComponent) {
+  const date = cell.getValue() as dayjs.Dayjs | null;
+  if (!date) return "";
+  return date.format("DD MMM YYYY");
+}
 
-  function change(prices: Price[], days: number, tolerance: number) {
-    const first = prices[0];
-    if (!first) return null;
+function formatPriceValue(cell: CellComponent) {
+  const value = cell.getValue() as number | null;
+  if (value == null) return "";
+  return formatCurrency(value, 4);
+}
 
-    const date = first.date.subtract(days, "day");
-    const last = find(prices, (p) => p.date.isSameOrBefore(date, "day"));
-    if (!last) return null;
-
-    const diffDays = first.date.diff(last.date, "day");
-    if (Math.abs(diffDays - days) <= tolerance) {
-      return (first.value - last.value) / last.value;
-    }
-    return null;
+function formatHistoryAware(
+  cell: CellComponent,
+  formatter: (cell: CellComponent) => string,
+) {
+  const data = cell.getData() as PriceRow;
+  if (
+    data.isHistory && !["date", "value"].includes(cell.getField() as string)
+  ) {
+    return "";
   }
+  return formatter(cell);
+}
 
-  function formatPriceDate(cell: CellComponent) {
-    const date = cell.getValue() as dayjs.Dayjs | null;
-    if (!date) return "";
-    return date.format("DD MMM YYYY");
-  }
+const columns: ColumnDefinition[] = [
+  {
+    title: "Commodity Name",
+    field: "commodity_name",
+    minWidth: 160,
+    widthGrow: 2,
+  },
+  {
+    title: "Last Date",
+    field: "date",
+    minWidth: 120,
+    formatter: (cell) => formatHistoryAware(cell, formatPriceDate),
+  },
+  {
+    title: "Last Price",
+    field: "value",
+    hozAlign: "right",
+    minWidth: 110,
+    formatter: (cell) => formatHistoryAware(cell, formatPriceValue),
+  },
+  {
+    title: "1 Day",
+    field: "change_1d",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "1 Week",
+    field: "change_1w",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "4 Weeks",
+    field: "change_4w",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "1 Year",
+    field: "change_1y",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "3 Years",
+    field: "change_3y",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "5 Years",
+    field: "change_5y",
+    hozAlign: "right",
+    formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
+  },
+  {
+    title: "Commodity Type",
+    field: "commodity_type",
+    minWidth: 120,
+    formatter: (cell) => formatHistoryAware(cell, (c) => c.getValue() ?? ""),
+  },
+  {
+    title: "Commodity ID",
+    field: "commodity_id",
+    minWidth: 120,
+    formatter: (cell) => formatHistoryAware(cell, (c) => c.getValue() ?? ""),
+  },
+];
 
-  function formatPriceValue(cell: CellComponent) {
-    const value = cell.getValue() as number | null;
-    if (value == null) return "";
-    return formatCurrency(value, 4);
-  }
-
-  function formatHistoryAware(cell: CellComponent, formatter: (cell: CellComponent) => string) {
-    const data = cell.getData() as PriceRow;
-    if (data.isHistory && !["date", "value"].includes(cell.getField() as string)) {
-      return "";
-    }
-    return formatter(cell);
-  }
-
-  const columns: ColumnDefinition[] = [
-    {
-      title: "Commodity Name",
-      field: "commodity_name",
-      minWidth: 160,
-      widthGrow: 2,
-    },
-    {
-      title: "Last Date",
-      field: "date",
-      minWidth: 120,
-      formatter: (cell) => formatHistoryAware(cell, formatPriceDate),
-    },
-    {
-      title: "Last Price",
-      field: "value",
-      hozAlign: "right",
-      minWidth: 110,
-      formatter: (cell) => formatHistoryAware(cell, formatPriceValue),
-    },
-    {
-      title: "1 Day",
-      field: "change_1d",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "1 Week",
-      field: "change_1w",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "4 Weeks",
-      field: "change_4w",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "1 Year",
-      field: "change_1y",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "3 Years",
-      field: "change_3y",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "5 Years",
-      field: "change_5y",
-      hozAlign: "right",
-      formatter: (cell) => formatHistoryAware(cell, nonZeroPercentageChange),
-    },
-    {
-      title: "Commodity Type",
-      field: "commodity_type",
-      minWidth: 120,
-      formatter: (cell) => formatHistoryAware(cell, (c) => c.getValue() ?? ""),
-    },
-    {
-      title: "Commodity ID",
-      field: "commodity_id",
-      minWidth: 120,
-      formatter: (cell) => formatHistoryAware(cell, (c) => c.getValue() ?? ""),
-    },
-  ];
-
-  function buildPriceRows(source: Record<string, Price[]>): PriceRow[] {
-    return Object.keys(source).map((commodity) => {
-      const history = source[commodity];
-      const latest = history[0];
-      return {
-        commodity_name: latest.commodity_name,
-        date: latest.date,
-        value: latest.value,
-        change_1d: change(history, 1, 0),
-        change_1w: change(history, 7, 2),
-        change_4w: change(history, 28, 4),
-        change_1y: change(history, 365, 7),
-        change_3y: change(history, 365 * 3, 7),
-        change_5y: change(history, 365 * 5, 7),
-        commodity_type: latest.commodity_type,
-        commodity_id: latest.commodity_id,
-        _children: history.slice(1).map((p) => ({
-          commodity_name: "",
-          date: p.date,
-          value: p.value,
-          change_1d: null,
-          change_1w: null,
-          change_4w: null,
-          change_1y: null,
-          change_3y: null,
-          change_5y: null,
-          commodity_type: "",
-          commodity_id: "",
-          isHistory: true,
-        })),
-      };
-    });
-  }
-
-  let tableData = $derived.by(() => {
-    if (!prices) return [];
-    const rows = buildPriceRows(prices);
-    const query = commodityFilter.trim().toLowerCase();
-    if (!query) return rows;
-    return rows.filter((row) => {
-      const haystack = [row.commodity_name, row.commodity_type, row.commodity_id]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(query);
-    });
-  });
-
-  let commodityCount = $derived(tableData.length);
-
-  async function clearPriceCache() {
-    const { success, message } = await api.price.clearPriceCache();
-    if (!success) {
-      toast({
-        message: `Failed to clear price cache. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000
-      });
-    } else {
-      toast({
-        message: "Price cache cleared.",
-        type: "is-success"
-      });
-    }
-    await fetchPrice();
-  }
-
-  async function fetchPrice() {
-    const { prices: loadedPrices } = await api.price.getPrices() as unknown as {
-      prices: Record<string, Price[]>;
+function buildPriceRows(source: Record<string, Price[]>): PriceRow[] {
+  return Object.keys(source).map((commodity) => {
+    const history = source[commodity];
+    const latest = history[0];
+    return {
+      commodity_name: latest.commodity_name,
+      date: latest.date,
+      value: latest.value,
+      change_1d: change(history, 1, 0),
+      change_1w: change(history, 7, 2),
+      change_4w: change(history, 28, 4),
+      change_1y: change(history, 365, 7),
+      change_3y: change(history, 365 * 3, 7),
+      change_5y: change(history, 365 * 5, 7),
+      commodity_type: latest.commodity_type,
+      commodity_id: latest.commodity_id,
+      _children: history.slice(1).map((p) => ({
+        commodity_name: "",
+        date: p.date,
+        value: p.value,
+        change_1d: null,
+        change_1w: null,
+        change_4w: null,
+        change_1y: null,
+        change_3y: null,
+        change_5y: null,
+        commodity_type: "",
+        commodity_id: "",
+        isHistory: true,
+      })),
     };
-    prices = omitBy(loadedPrices, (v) => v.length === 0);
-  }
-
-  onMount(async () => {
-    await fetchPrice();
   });
+}
+
+let tableData = $derived.by(() => {
+  if (!prices) return [];
+  const rows = buildPriceRows(prices);
+  const query = commodityFilter.trim().toLowerCase();
+  if (!query) return rows;
+  return rows.filter((row) => {
+    const haystack = [row.commodity_name, row.commodity_type, row.commodity_id]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(query);
+  });
+});
+
+let commodityCount = $derived(tableData.length);
+
+async function clearPriceCache() {
+  const { success, message } = await api.price.clearPriceCache();
+  if (!success) {
+    toast({
+      message: `Failed to clear price cache. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
+    });
+  } else {
+    toast({
+      message: "Price cache cleared.",
+      type: "is-success",
+    });
+  }
+  await fetchPrice();
+}
+
+async function fetchPrice() {
+  const { prices: loadedPrices } = await api.price.getPrices() as unknown as {
+    prices: Record<string, Price[]>;
+  };
+  prices = omitBy(loadedPrices, (v) => v.length === 0);
+}
+
+onMount(async () => {
+  await fetchPrice();
+});
 </script>
 
 <svelte:head>

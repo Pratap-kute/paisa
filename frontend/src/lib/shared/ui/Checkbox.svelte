@@ -1,35 +1,35 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    id?: string;
-    name?: string;
-    checked?: boolean;
-    disabled?: boolean;
-    label?: string;
-    description?: string;
-    class?: string;
-    children?: Snippet;
-    onchange?: (checked: boolean) => void;
-  }
+interface Props {
+  id?: string;
+  name?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  label?: string;
+  description?: string;
+  class?: string;
+  children?: Snippet;
+  onchange?: (checked: boolean) => void;
+}
 
-  let {
-    id = `checkbox-${Math.random().toString(36).substring(2, 9)}`,
-    name,
-    checked = $bindable(false),
-    disabled = false,
-    label = "",
-    description = "",
-    class: className = "",
-    children,
-    onchange,
-  }: Props = $props();
+let {
+  id = `checkbox-${Math.random().toString(36).substring(2, 9)}`,
+  name,
+  checked = $bindable(false),
+  disabled = false,
+  label = "",
+  description = "",
+  class: className = "",
+  children,
+  onchange,
+}: Props = $props();
 
-  function handleChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    checked = target.checked;
-    onchange?.(checked);
-  }
+function handleChange(e: Event) {
+  const target = e.target as HTMLInputElement;
+  checked = target.checked;
+  onchange?.(checked);
+}
 </script>
 
 <label

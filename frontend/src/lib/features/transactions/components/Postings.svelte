@@ -1,26 +1,29 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
 import type { Posting } from "$lib/domain/ledger";
 import { accountColorStyle } from "$lib/shared/theme/colors";
-  import { iconText } from "$lib/shared/ui/icon";
-  import { firstName } from "$lib/domain/account";
+import { iconText } from "$lib/shared/ui/icon";
+import { firstName } from "$lib/domain/account";
 
-  const unlessDefaultCurrency = (p: Posting) => {
-    if (typeof USER_CONFIG !== "undefined" && p.commodity === USER_CONFIG.default_currency) {
-      return "";
-    } else {
-      return `${formatFloatUptoPrecision(p.quantity, 3)} ${
-        p.commodity
-      } @ ${formatFloatUptoPrecision(p.amount / p.quantity, 4)}`;
-    }
-  };
-
-  interface Props {
-    postings: Posting[];
+const unlessDefaultCurrency = (p: Posting) => {
+  if (
+    typeof USER_CONFIG !== "undefined" &&
+    p.commodity === USER_CONFIG.default_currency
+  ) {
+    return "";
+  } else {
+    return `${formatFloatUptoPrecision(p.quantity, 3)} ${p.commodity} @ ${
+      formatFloatUptoPrecision(p.amount / p.quantity, 4)
+    }`;
   }
+};
 
-  let { postings }: Props = $props();
+interface Props {
+  postings: Posting[];
+}
+
+let { postings }: Props = $props();
 </script>
 
 <div class="paisa-postings-list">
@@ -45,71 +48,71 @@ import { accountColorStyle } from "$lib/shared/theme/colors";
 </div>
 
 <style>
-  .paisa-postings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    width: 100%;
-  }
+.paisa-postings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  width: 100%;
+}
 
-  .paisa-posting-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    line-height: 1.25rem;
-    min-height: 1.25rem;
-    width: 100%;
-  }
+.paisa-posting-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  min-height: 1.25rem;
+  width: 100%;
+}
 
-  .paisa-posting-account {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--paisa-foreground);
-  }
+.paisa-posting-account {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--paisa-foreground);
+}
 
-  .paisa-account-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    flex-shrink: 0;
-  }
+.paisa-account-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
 
-  .paisa-account-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.paisa-account-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-  .paisa-posting-commodity {
-    font-size: 0.6875rem;
+.paisa-posting-commodity {
+  font-size: 0.6875rem;
+  color: var(--paisa-muted-foreground);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  font-family: var(--paisa-font-mono);
+}
+
+.paisa-posting-amount {
+  font-family: var(--paisa-font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--paisa-foreground);
+  min-width: 5.5rem;
+
+  &.is-negative {
     color: var(--paisa-muted-foreground);
-    text-align: right;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-    font-family: var(--paisa-font-mono);
   }
-
-  .paisa-posting-amount {
-    font-family: var(--paisa-font-mono);
-    font-size: 0.8125rem;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    white-space: nowrap;
-    color: var(--paisa-foreground);
-    min-width: 5.5rem;
-
-    &.is-negative {
-      color: var(--paisa-muted-foreground);
-    }
-  }
+}
 </style>

@@ -1,145 +1,170 @@
 <script lang="ts">
-  import type { RenderMetadata, RenderedRow } from "$lib/features/importing/spreadsheet";
-  import type { Confidence, PredictionResult } from "$lib/features/prediction/types";
-  import { rowMatchesFilter, type ConfidenceFilter } from "$lib/features/prediction/session";
-  import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
+import type {
+  RenderedRow,
+  RenderMetadata,
+} from "$lib/features/importing/spreadsheet";
+import type {
+  Confidence,
+  PredictionResult,
+} from "$lib/features/prediction/types";
+import {
+  type ConfidenceFilter,
+  rowMatchesFilter,
+} from "$lib/features/prediction/session";
+import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
 import { maxBy } from "$lib/shared/utils/collection";
-  
-  interface Props {
-    data: any[][];
-    renderMetadata: RenderMetadata;
-    predictionRows: Array<{
-      rowIndex: number;
-      confidence: Confidence;
-      possibleTransfer: boolean;
-      results: PredictionResult[];
-    }>;
-    selectedSourceRowIndex: number | null;
-    predictionFilter: ConfidenceFilter;
-    onSelectRow: (rowIndex: number) => void;
-  }
 
-  let {
-    data = [],
-    renderMetadata,
-    predictionRows = [],
-    selectedSourceRowIndex = null,
-    predictionFilter = null,
-    onSelectRow,
-  }: Props = $props();
-
-  function summaryForRow(rowIndex: number) {
-    return predictionRows.find((r) => r.rowIndex === rowIndex);
-  }
-
-  interface ParsedReviewItem {
-    sourceRowIndex: number;
-    date: string;
-    payee: string;
-    narration: string;
-    amount: string;
-    isDebit: boolean;
-    account: string;
-    confidence: Confidence | null;
+interface Props {
+  data: any[][];
+  renderMetadata: RenderMetadata;
+  predictionRows: Array<{
+    rowIndex: number;
+    confidence: Confidence;
     possibleTransfer: boolean;
-    isVisible: boolean;
+    results: PredictionResult[];
+  }>;
+  selectedSourceRowIndex: number | null;
+  predictionFilter: ConfidenceFilter;
+  onSelectRow: (rowIndex: number) => void;
+}
+
+let {
+  data = [],
+  renderMetadata,
+  predictionRows = [],
+  selectedSourceRowIndex = null,
+  predictionFilter = null,
+  onSelectRow,
+}: Props = $props();
+
+function summaryForRow(rowIndex: number) {
+  return predictionRows.find((r) => r.rowIndex === rowIndex);
+}
+
+interface ParsedReviewItem {
+  sourceRowIndex: number;
+  date: string;
+  payee: string;
+  narration: string;
+  amount: string;
+  isDebit: boolean;
+  account: string;
+  confidence: Confidence | null;
+  possibleTransfer: boolean;
+  isVisible: boolean;
+}
+
+function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
+  const rowIndex = renderedRow.sourceRowIndex;
+  const summary = summaryForRow(rowIndex);
+  const result = summary?.results[0];
+
+  let date = "";
+  let payee = "";
+  let narration = "";
+  let amount = "";
+  let isDebit = false;
+  let account = result?.account || "";
+
+  const lines = renderedRow.formattedRendered.trim().split("\n");
+  const firstLine = lines[0] || "";
+
+  const dateMatch = firstLine.match(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/);
+  if (dateMatch) {
+    date = dateMatch[1];
   }
 
-  function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
-    const rowIndex = renderedRow.sourceRowIndex;
-    const summary = summaryForRow(rowIndex);
-    const result = summary?.results[0];
+  const quotedMatch = firstLine.match(/"([^"]+)"/) ||
+    firstLine.match(/'([^']+)'/);
+  if (quotedMatch) {
+    payee = quotedMatch[1];
+  } else {
+    const rest = firstLine.replace(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/, "").replace(
+      /^[\s*!]+/,
+      "",
+    ).trim();
+    if (rest) payee = rest;
+  }
 
-    let date = "";
-    let payee = "";
-    let narration = "";
-    let amount = "";
-    let isDebit = false;
-    let account = result?.account || "";
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
 
-    const lines = renderedRow.formattedRendered.trim().split("\n");
-    const firstLine = lines[0] || "";
-
-    const dateMatch = firstLine.match(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/);
-    if (dateMatch) {
-      date = dateMatch[1];
-    }
-
-    const quotedMatch = firstLine.match(/"([^"]+)"/) || firstLine.match(/'([^']+)'/);
-    if (quotedMatch) {
-      payee = quotedMatch[1];
-    } else {
-      const rest = firstLine.replace(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/, "").replace(/^[\s*!]+/, "").trim();
-      if (rest) payee = rest;
-    }
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-
-      if (!amount) {
-        const amtMatch = line.match(/(-?[\d,]+(?:\.\d{2})?)/);
-        if (amtMatch) {
-          amount = amtMatch[1];
-          isDebit = amount.startsWith("-");
-        }
+    if (!amount) {
+      const amtMatch = line.match(/(-?[\d,]+(?:\.\d{2})?)/);
+      if (amtMatch) {
+        amount = amtMatch[1];
+        isDebit = amount.startsWith("-");
       }
+    }
 
-      if (!account) {
-        const parts = line.split(/\s{2,}|\t/);
-        if (parts[0] && !parts[0].includes("Assets:Checking") && !parts[0].includes("Liabilities:CreditCard")) {
-          account = parts[0].trim();
-        }
+    if (!account) {
+      const parts = line.split(/\s{2,}|\t/);
+      if (
+        parts[0] && !parts[0].includes("Assets:Checking") &&
+        !parts[0].includes("Liabilities:CreditCard")
+      ) {
+        account = parts[0].trim();
       }
     }
-
-    if (!payee) {
-      const rawRow = data[rowIndex] || [];
-      const candidate = maxBy(rawRow, (cell) => (typeof cell === "string" ? cell.length : 0));
-      payee = candidate ? String(candidate).trim() : `Transaction #${rowIndex + 1}`;
-    }
-
-    const isVisible = rowMatchesFilter(summary, predictionFilter);
-
-    return {
-      sourceRowIndex: rowIndex,
-      date,
-      payee,
-      narration,
-      amount,
-      isDebit,
-      account,
-      confidence: summary?.confidence || null,
-      possibleTransfer: summary?.possibleTransfer || false,
-      isVisible,
-    };
   }
 
-  let reviewItems: ParsedReviewItem[] = $derived.by(() => {
-    if (renderMetadata && renderMetadata.rows.length > 0) {
-      return renderMetadata.rows.map(parseRenderedRow);
-    }
-    return [];
-  });
-
-  let visibleItems = $derived(reviewItems.filter((item) => item.isVisible));
-
-  function indicatorClass(confidence: Confidence | null, possibleTransfer: boolean) {
-    if (possibleTransfer) return "bg-[var(--paisa-prediction-transfer)]";
-    switch (confidence) {
-      case "HIGH":
-        return "bg-[var(--paisa-prediction-high)]";
-      case "MEDIUM":
-        return "bg-[var(--paisa-prediction-medium)]";
-      case "NEEDS_REVIEW":
-        return "bg-[var(--paisa-prediction-review)]";
-      default:
-        return "bg-[var(--paisa-prediction-unknown)]";
-    }
+  if (!payee) {
+    const rawRow = data[rowIndex] || [];
+    const candidate = maxBy(
+      rawRow,
+      (cell) => (typeof cell === "string" ? cell.length : 0),
+    );
+    payee = candidate
+      ? String(candidate).trim()
+      : `Transaction #${rowIndex + 1}`;
   }
+
+  const isVisible = rowMatchesFilter(summary, predictionFilter);
+
+  return {
+    sourceRowIndex: rowIndex,
+    date,
+    payee,
+    narration,
+    amount,
+    isDebit,
+    account,
+    confidence: summary?.confidence || null,
+    possibleTransfer: summary?.possibleTransfer || false,
+    isVisible,
+  };
+}
+
+let reviewItems: ParsedReviewItem[] = $derived.by(() => {
+  if (renderMetadata && renderMetadata.rows.length > 0) {
+    return renderMetadata.rows.map(parseRenderedRow);
+  }
+  return [];
+});
+
+let visibleItems = $derived(reviewItems.filter((item) => item.isVisible));
+
+function indicatorClass(
+  confidence: Confidence | null,
+  possibleTransfer: boolean,
+) {
+  if (possibleTransfer) return "bg-[var(--paisa-prediction-transfer)]";
+  switch (confidence) {
+    case "HIGH":
+      return "bg-[var(--paisa-prediction-high)]";
+    case "MEDIUM":
+      return "bg-[var(--paisa-prediction-medium)]";
+    case "NEEDS_REVIEW":
+      return "bg-[var(--paisa-prediction-review)]";
+    default:
+      return "bg-[var(--paisa-prediction-unknown)]";
+  }
+}
 </script>
 
-<div class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-[var(--paisa-canvas-bg)]">
+<div
+  class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-[var(--paisa-canvas-bg)]">
   {#if reviewItems.length === 0}
     <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-[var(--paisa-text-secondary)]">
       <i class="fas fa-file-circle-question mb-2 text-3xl text-[var(--paisa-text-muted)]"></i>

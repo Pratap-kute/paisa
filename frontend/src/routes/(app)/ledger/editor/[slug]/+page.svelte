@@ -1,292 +1,314 @@
 <script lang="ts">
-  import type { LedgerFile } from "$lib/domain/ledger";
-import { createEditor, editorState, focus, moveToEnd, moveToLine, updateContent, } from "$lib/features/editor/runtime";
-  import { insertTab } from "@codemirror/commands";
-  import { buildDirectoryTree } from "$lib/shared/utils/tree";
-  import { api } from "$lib/api";
-  import { redo, undo } from "@codemirror/commands";
-  import type { KeyBinding, EditorView } from "@codemirror/view";
-  import * as toast from "$lib/shared/ui/toast";
-  import { format } from "$lib/features/ledger/journal";
-  import { isNumber, last } from "es-toolkit";
-  import { onDestroy, onMount } from "svelte";
-  import { beforeNavigate, goto } from "$app/navigation";
-  import type { PageData } from "./$types";
-  import FileTree from "$lib/features/ledger/components/FileTree.svelte";
-  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import { page } from "$app/stores";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import LedgerBalance from "$lib/features/ledger/components/LedgerBalance.svelte";
-import { assign, find, fromPairs, isEmpty, map, toNumber, values } from "$lib/shared/utils/collection";
+import type { LedgerFile } from "$lib/domain/ledger";
+import {
+  createEditor,
+  editorState,
+  focus,
+  moveToEnd,
+  moveToLine,
+  updateContent,
+} from "$lib/features/editor/runtime";
+import { insertTab } from "@codemirror/commands";
+import { buildDirectoryTree } from "$lib/shared/utils/tree";
+import { api } from "$lib/api";
+import { redo, undo } from "@codemirror/commands";
+import type { EditorView, KeyBinding } from "@codemirror/view";
+import * as toast from "$lib/shared/ui/toast";
+import { format } from "$lib/features/ledger/journal";
+import { isNumber, last } from "es-toolkit";
+import { onDestroy, onMount } from "svelte";
+import { beforeNavigate, goto } from "$app/navigation";
+import type { PageData } from "./$types";
+import FileTree from "$lib/features/ledger/components/FileTree.svelte";
+import FileModal from "$lib/features/ledger/components/FileModal.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Select from "$lib/shared/ui/Select.svelte";
+import { page } from "$app/stores";
+import Page from "$lib/shared/layout/Page.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import LedgerBalance from "$lib/features/ledger/components/LedgerBalance.svelte";
+import {
+  assign,
+  find,
+  fromPairs,
+  isEmpty,
+  map,
+  toNumber,
+  values,
+} from "$lib/shared/utils/collection";
 
-  interface Props {
-    data: PageData;
-  }
+interface Props {
+  data: PageData;
+}
 
-  let { data }: Props = $props();
-  let editorDom: Element | undefined = $state();
-  let editor: EditorView | undefined;
-  let filesMap: Record<string, LedgerFile> = $state({});
-  let selectedFile: LedgerFile | null = $state(null);
-  let accounts: string[] = $state([]);
-  let commodities: string[] = $state([]);
-  let payees: string[] = $state([]);
-  let selectedVersion = $state("");
-  let lineNumber = $state(0);
+let { data }: Props = $props();
+let editorDom: Element | undefined = $state();
+let editor: EditorView | undefined;
+let filesMap: Record<string, LedgerFile> = $state({});
+let selectedFile: LedgerFile | null = $state(null);
+let accounts: string[] = $state([]);
+let commodities: string[] = $state([]);
+let payees: string[] = $state([]);
+let selectedVersion = $state("");
+let lineNumber = $state(0);
 
-  function command(fn: Function) {
-    return () => {
-      fn();
-      return true;
-    };
-  }
-
-  function undoEdit() {
-    if (editor) undo(editor);
-  }
-
-  function redoEdit() {
-    if (editor) redo(editor);
-  }
-
-  const keybindings: readonly KeyBinding[] = [
-    { key: "Tab", run: insertTab },
-    {
-      key: "Ctrl-s",
-      run: command(save),
-      preventDefault: true,
-    },
-    {
-      key: "Ctrl-I",
-      run: command(pretty),
-      preventDefault: true,
-    },
-  ];
-
-  let cancelled = false;
-  beforeNavigate(async ({ cancel }) => {
-    if ($editorState.hasUnsavedChanges) {
-      const confirmed = confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
-      );
-      if (!confirmed) {
-        cancel();
-        cancelled = true;
-      } else {
-        $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
-      }
-    }
-  });
-
-  async function navigate(url: string) {
-    await goto(url, { noScroll: true });
-    if (cancelled) {
-      cancelled = false;
-      return false;
-    }
+function command(fn: Function) {
+  return () => {
+    fn();
     return true;
-  }
+  };
+}
 
-  onMount(() => {
-    loadFiles(data.name);
-    const line = toNumber($page.url.hash.substring(1));
-    if (isNumber(line)) {
-      lineNumber = line;
-    }
-  });
+function undoEdit() {
+  if (editor) undo(editor);
+}
 
-  async function loadFiles(selectedFileName: string) {
-    const res = await api.editor.getEditorFiles();
-    const files = (res.files as unknown as LedgerFile[]) || [];
-    accounts = res.accounts || [];
-    commodities = res.commodities || [];
-    payees = res.payees || [];
-    filesMap = fromPairs(map(files, (f: LedgerFile) => [f.name, f]));
-    if (!isEmpty(files)) {
-      selectedFile =
-        find(files, (f: LedgerFile) => f.name == selectedFileName) ||
-        files[0];
-    }
-  }
+function redoEdit() {
+  if (editor) redo(editor);
+}
 
-  async function selectFile(file: LedgerFile) {
-    const success = await navigate(
-      `/ledger/editor/${encodeURIComponent(file.name)}`,
+const keybindings: readonly KeyBinding[] = [
+  { key: "Tab", run: insertTab },
+  {
+    key: "Ctrl-s",
+    run: command(save),
+    preventDefault: true,
+  },
+  {
+    key: "Ctrl-I",
+    run: command(pretty),
+    preventDefault: true,
+  },
+];
+
+let cancelled = false;
+beforeNavigate(async ({ cancel }) => {
+  if ($editorState.hasUnsavedChanges) {
+    const confirmed = confirm(
+      "You have unsaved changes. Are you sure you want to leave?",
     );
-    if (success) {
-      selectedFile = file;
+    if (!confirmed) {
+      cancel();
+      cancelled = true;
+    } else {
+      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     }
   }
+});
 
-  async function revert(version: string) {
-    const res = await api.editor.getEditorFile({ name: version });
-    if (editor && res.content) updateContent(editor, res.content);
+async function navigate(url: string) {
+  await goto(url, { noScroll: true });
+  if (cancelled) {
+    cancelled = false;
+    return false;
   }
+  return true;
+}
 
-  async function pretty() {
-    if (!editor) return;
-    const formatted = format(editor.state.doc.toString());
-    if (formatted != editor.state.doc.toString()) {
-      updateContent(editor, formatted);
-    }
+onMount(() => {
+  loadFiles(data.name);
+  const line = toNumber($page.url.hash.substring(1));
+  if (isNumber(line)) {
+    lineNumber = line;
   }
+});
 
-  async function deleteBackups() {
-    if (!selectedFile) return;
-    const res = await api.editor.deleteEditorBackups({ name: selectedFile.name });
-    selectedFile.versions = res.versions || [];
+async function loadFiles(selectedFileName: string) {
+  const res = await api.editor.getEditorFiles();
+  const files = (res.files as unknown as LedgerFile[]) || [];
+  accounts = res.accounts || [];
+  commodities = res.commodities || [];
+  payees = res.payees || [];
+  filesMap = fromPairs(map(files, (f: LedgerFile) => [f.name, f]));
+  if (!isEmpty(files)) {
+    selectedFile = find(files, (f: LedgerFile) => f.name == selectedFileName) ||
+      files[0];
   }
+}
 
-  async function save() {
-    if (!editor || !selectedFile) return;
-    const doc = editor.state.doc;
-    const { errors, saved, synced, file, message } = await api.editor.saveEditorFile({
+async function selectFile(file: LedgerFile) {
+  const success = await navigate(
+    `/ledger/editor/${encodeURIComponent(file.name)}`,
+  );
+  if (success) {
+    selectedFile = file;
+  }
+}
+
+async function revert(version: string) {
+  const res = await api.editor.getEditorFile({ name: version });
+  if (editor && res.content) updateContent(editor, res.content);
+}
+
+async function pretty() {
+  if (!editor) return;
+  const formatted = format(editor.state.doc.toString());
+  if (formatted != editor.state.doc.toString()) {
+    updateContent(editor, formatted);
+  }
+}
+
+async function deleteBackups() {
+  if (!selectedFile) return;
+  const res = await api.editor.deleteEditorBackups({ name: selectedFile.name });
+  selectedFile.versions = res.versions || [];
+}
+
+async function save() {
+  if (!editor || !selectedFile) return;
+  const doc = editor.state.doc;
+  const { errors, saved, synced, file, message } = await api.editor
+    .saveEditorFile({
       name: selectedFile.name,
       content: doc.toString(),
     });
 
-    if (!saved) {
-      toast.toast({
-        message: `Failed to save ${selectedFile.name}. reason: ${message || "Unknown error"}`,
-        type: "is-danger",
-        duration: 10000,
-      });
-      if (!isEmpty(errors)) {
-        if (editor && errors?.[0]) moveToLine(editor, errors[0].line_from || errors[0].line || 1);
+  if (!saved) {
+    toast.toast({
+      message: `Failed to save ${selectedFile.name}. reason: ${
+        message || "Unknown error"
+      }`,
+      type: "is-danger",
+      duration: 10000,
+    });
+    if (!isEmpty(errors)) {
+      if (editor && errors?.[0]) {
+        moveToLine(editor, errors[0].line_from || errors[0].line || 1);
       }
-    } else if (synced === false) {
-      toast.toast({
-        message: `Saved ${selectedFile.name}, but failed to sync derived data. ${message || "Please retry sync."}`,
-        type: "is-warning",
-        duration: 10000,
-      });
-      if (file) {
-        filesMap[file.name] = file as unknown as LedgerFile;
-        selectedFile = file as unknown as LedgerFile;
+    }
+  } else if (synced === false) {
+    toast.toast({
+      message: `Saved ${selectedFile.name}, but failed to sync derived data. ${
+        message || "Please retry sync."
+      }`,
+      type: "is-warning",
+      duration: 10000,
+    });
+    if (file) {
+      filesMap[file.name] = file as unknown as LedgerFile;
+      selectedFile = file as unknown as LedgerFile;
+    }
+    selectedVersion = "";
+    $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+  } else {
+    toast.toast({
+      message: `Saved ${selectedFile.name}`,
+      type: "is-success",
+    });
+    if (file) {
+      filesMap[file.name] = file as unknown as LedgerFile;
+      selectedFile = file as unknown as LedgerFile;
+    }
+    selectedVersion = "";
+    $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+  }
+}
+
+onDestroy(() => {
+  if (editor) {
+    editor.destroy();
+  }
+});
+
+$effect(() => {
+  if (selectedFile && editorDom) {
+    if (!editor || editor.state.doc.toString() != selectedFile.content) {
+      if (editor) {
+        editor.destroy();
       }
-      selectedVersion = "";
-      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
-    } else {
-      toast.toast({
-        message: `Saved ${selectedFile.name}`,
-        type: "is-success",
+
+      editor = createEditor(selectedFile.content, editorDom, {
+        keybindings,
+        autocompletions: {
+          string: accounts,
+          strong: payees,
+          unit: commodities,
+        },
       });
-      if (file) {
-        filesMap[file.name] = file as unknown as LedgerFile;
-        selectedFile = file as unknown as LedgerFile;
+      if (lineNumber > 0) {
+        moveToLine(editor, lineNumber, true);
+        focus(editor);
+        lineNumber = 0;
+      } else {
+        moveToEnd(editor);
       }
-      selectedVersion = "";
-      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
     }
   }
+});
 
-  onDestroy(() => {
-    if (editor) {
-      editor.destroy();
-    }
+let modalOpen = $state(false);
+function openCreateModal() {
+  modalOpen = true;
+}
+
+async function createFile(destinationFile: string) {
+  const { saved, message } = await api.editor.saveEditorFile({
+    name: destinationFile,
+    content: "",
+    operation: "create",
   });
 
-  $effect(() => {
-    if (selectedFile && editorDom) {
-      if (!editor || editor.state.doc.toString() != selectedFile.content) {
-        if (editor) {
-          editor.destroy();
-        }
-
-        editor = createEditor(selectedFile.content, editorDom, {
-          keybindings,
-          autocompletions: {
-            string: accounts,
-            strong: payees,
-            unit: commodities,
-          },
-        });
-        if (lineNumber > 0) {
-          moveToLine(editor, lineNumber, true);
-          focus(editor);
-          lineNumber = 0;
-        } else {
-          moveToEnd(editor);
-        }
-      }
-    }
-  });
-
-  let modalOpen = $state(false);
-  function openCreateModal() {
-    modalOpen = true;
-  }
-
-  async function createFile(destinationFile: string) {
-    const { saved, message } = await api.editor.saveEditorFile({
-      name: destinationFile,
-      content: "",
-      operation: "create",
+  if (saved) {
+    toast.toast({
+      message: `Created <b><a href="/ledger/editor/${
+        encodeURIComponent(
+          destinationFile,
+        )
+      }">${destinationFile}</a></b>`,
+      type: "is-success",
+      duration: 5000,
     });
 
-    if (saved) {
-      toast.toast({
-        message: `Created <b><a href="/ledger/editor/${encodeURIComponent(
-          destinationFile,
-        )}">${destinationFile}</a></b>`,
-        type: "is-success",
-        duration: 5000,
-      });
-
-      const success = await navigate(
-        `/ledger/editor/${encodeURIComponent(destinationFile)}`,
-      );
-      if (success) {
-        await loadFiles(destinationFile);
-      }
-    } else {
-      toast.toast({
-        message: `Failed to create ${destinationFile}. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000,
-      });
+    const success = await navigate(
+      `/ledger/editor/${encodeURIComponent(destinationFile)}`,
+    );
+    if (success) {
+      await loadFiles(destinationFile);
     }
+  } else {
+    toast.toast({
+      message: `Failed to create ${destinationFile}. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
+    });
   }
+}
 
-  let sidebarOpen = $state(true);
-  let outputOpen = $state(true);
-  let copiedOutput = $state(false);
+let sidebarOpen = $state(true);
+let outputOpen = $state(true);
+let copiedOutput = $state(false);
 
-  async function copyOutput() {
-    if ($editorState.output) {
-      await navigator.clipboard.writeText($editorState.output);
-      copiedOutput = true;
-      toast.toast({
-        message: "Output copied to clipboard",
-        type: "is-info",
-        duration: 2000,
-      });
-      setTimeout(() => {
-        copiedOutput = false;
-      }, 2000);
-    }
+async function copyOutput() {
+  if ($editorState.output) {
+    await navigator.clipboard.writeText($editorState.output);
+    copiedOutput = true;
+    toast.toast({
+      message: "Output copied to clipboard",
+      type: "is-info",
+      duration: 2000,
+    });
+    setTimeout(() => {
+      copiedOutput = false;
+    }, 2000);
   }
+}
 
+let gridColsClass = $derived.by(() => {
+  const hasSidebar = sidebarOpen;
+  const hasOutput = outputOpen && !isEmpty($editorState.output);
 
-  let gridColsClass = $derived.by(() => {
-    const hasSidebar = sidebarOpen;
-    const hasOutput = outputOpen && !isEmpty($editorState.output);
-
-    if (hasSidebar && hasOutput) {
-      return "grid-cols-1 md:grid-cols-[minmax(180px,200px)_1fr_minmax(220px,280px)] lg:grid-cols-[minmax(200px,240px)_1fr_minmax(260px,340px)]";
-    }
-    if (hasSidebar) {
-      return "grid-cols-1 md:grid-cols-[minmax(180px,220px)_1fr] lg:grid-cols-[minmax(200px,240px)_1fr]";
-    }
-    if (hasOutput) {
-      return "grid-cols-1 md:grid-cols-[1fr_minmax(240px,320px)] lg:grid-cols-[1fr_minmax(260px,340px)]";
-    }
-    return "grid-cols-1";
-  });
+  if (hasSidebar && hasOutput) {
+    return "grid-cols-1 md:grid-cols-[minmax(180px,200px)_1fr_minmax(220px,280px)] lg:grid-cols-[minmax(200px,240px)_1fr_minmax(260px,340px)]";
+  }
+  if (hasSidebar) {
+    return "grid-cols-1 md:grid-cols-[minmax(180px,220px)_1fr] lg:grid-cols-[minmax(200px,240px)_1fr]";
+  }
+  if (hasOutput) {
+    return "grid-cols-1 md:grid-cols-[1fr_minmax(240px,320px)] lg:grid-cols-[1fr_minmax(260px,340px)]";
+  }
+  return "grid-cols-1";
+});
 </script>
 
 <FileModal

@@ -1,106 +1,110 @@
 <script lang="ts">
-  import Select from "svelte-select";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import FormField from "$lib/shared/layout/FormField.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import SelectField from "$lib/shared/ui/Select.svelte";
-  import type { PriceProvider } from "$lib/features/ledger/types";
+import Select from "svelte-select";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
+import FormField from "$lib/shared/layout/FormField.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
+import SelectField from "$lib/shared/ui/Select.svelte";
+import type { PriceProvider } from "$lib/features/ledger/types";
 import { createEventDispatcher, onMount } from "svelte";
-  import type { AutoCompleteItem } from "$lib/features/ledger/types";
-  import { api } from "$lib/api";
+import type { AutoCompleteItem } from "$lib/features/ledger/types";
+import { api } from "$lib/api";
 
-  let label = "Choose Price Provider";
-  interface Props {
-    open?: boolean;
+let label = "Choose Price Provider";
+interface Props {
+  open?: boolean;
+}
+
+let { open = $bindable(false) }: Props = $props();
+let code = $state("");
+
+let providers: PriceProvider[] = $state([]);
+let selectedProvider: PriceProvider = $state(null);
+
+let filters: Record<string, AutoCompleteItem | string | null> = $state({});
+
+onMount(async () => {
+  try {
+    const res = await api.price.getPriceProviders();
+    providers = (res.providers as unknown as PriceProvider[]) || [];
+    selectedProvider = providers[0];
+  } catch {
+    providers = [];
   }
+});
 
-  let { open = $bindable(false) }: Props = $props();
-  let code = $state("");
-
-  let providers: PriceProvider[] = $state([]);
-  let selectedProvider: PriceProvider = $state(null);
-
-  let filters: Record<string, AutoCompleteItem | string | null> = $state({});
-
-  onMount(async () => {
-    try {
-      const res = await api.price.getPriceProviders();
-      providers = (res.providers as unknown as PriceProvider[]) || [];
-      selectedProvider = providers[0];
-    } catch {
-      providers = [];
+let isLoading = $state(false);
+async function clearProviderCache() {
+  isLoading = true;
+  try {
+    if (selectedProvider?.code) {
+      await api.price.clearPriceProviderCache(selectedProvider.code);
     }
-  });
+  } finally {
+    isLoading = false;
+    reset();
+  }
+}
 
-  let isLoading = $state(false);
-  async function clearProviderCache() {
-    isLoading = true;
-    try {
-      if (selectedProvider?.code) {
-        await api.price.clearPriceProviderCache(selectedProvider.code);
+let autocompleteCache: number[] = $state([]);
+function clearCache(i: number) {
+  autocompleteCache[i] = (autocompleteCache[i] || 0) + 1;
+}
+
+function reset() {
+  code = "";
+  filters = {};
+  const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
+  for (let i = 0; i < maxLen; i++) {
+    clearCache(i);
+  }
+}
+
+function makeAutoComplete(
+  field: string,
+  filters: Record<string, AutoCompleteItem | string | null>,
+  i: number,
+  provider: PriceProvider,
+) {
+  return async function autocomplete(
+    filterText: string,
+  ): Promise<AutoCompleteItem[]> {
+    for (let j = 0; j < i; j++) {
+      if (!filters[provider.fields[j].id]) {
+        return [];
       }
-    } finally {
-      isLoading = false;
-      reset();
     }
+
+    const queryFilters = Object.fromEntries(
+      Object.entries(filters).map((
+        [k, v],
+      ) => [k, typeof v === "string" ? v : v?.id]),
+    );
+    queryFilters[field] = filterText;
+    const res = await api.price.getPriceAutoCompletions({
+      field,
+      provider: selectedProvider.code,
+      filters: queryFilters,
+    });
+    return (res.completions as unknown as AutoCompleteItem[]) || [];
+  };
+}
+
+const dispatch = createEventDispatcher();
+
+let providerOptions = $derived(
+  providers.map((p) => ({ value: p.code, label: p.label })),
+);
+
+let selectedProviderCode = $derived(selectedProvider?.code ?? "");
+
+function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
+  const provider = providers.find((p) => p.code === e.currentTarget.value);
+  if (provider) {
+    selectedProvider = provider;
+    reset();
   }
-
-  let autocompleteCache: number[] = $state([]);
-  function clearCache(i: number) {
-    autocompleteCache[i] = (autocompleteCache[i] || 0) + 1;
-  }
-
-  function reset() {
-    code = "";
-    filters = {};
-    const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
-    for (let i = 0; i < maxLen; i++) {
-      clearCache(i);
-    }
-  }
-
-  function makeAutoComplete(
-    field: string,
-    filters: Record<string, AutoCompleteItem | string | null>,
-    i: number,
-    provider: PriceProvider
-  ) {
-    return async function autocomplete(filterText: string): Promise<AutoCompleteItem[]> {
-      for (let j = 0; j < i; j++) {
-        if (!filters[provider.fields[j].id]) {
-          return [];
-        }
-      }
-
-      const queryFilters = Object.fromEntries(
-        Object.entries(filters).map(([k, v]) => [k, typeof v === "string" ? v : v?.id]),
-      );
-      queryFilters[field] = filterText;
-      const res = await api.price.getPriceAutoCompletions({
-        field,
-        provider: selectedProvider.code,
-        filters: queryFilters
-      });
-      return (res.completions as unknown as AutoCompleteItem[]) || [];
-    };
-  }
-
-  const dispatch = createEventDispatcher();
-
-  let providerOptions = $derived(
-    providers.map((p) => ({ value: p.code, label: p.label }))
-  );
-
-  let selectedProviderCode = $derived(selectedProvider?.code ?? "");
-
-  function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
-    const provider = providers.find((p) => p.code === e.currentTarget.value);
-    if (provider) {
-      selectedProvider = provider;
-      reset();
-    }
-  }
+}
 </script>
 
 <Dialog bind:open footerClass="flex justify-between items-center gap-2">

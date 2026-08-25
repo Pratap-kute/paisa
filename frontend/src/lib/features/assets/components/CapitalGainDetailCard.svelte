@@ -1,31 +1,35 @@
 <script lang="ts">
-  import type { FYCapitalGain } from "$lib/domain/tax";
+import type { FYCapitalGain } from "$lib/domain/tax";
 import { formatCurrency } from "$lib/shared/formatters/currency";
-  const DATE_FORMAT = "DD MMM YYYY";
+const DATE_FORMAT = "DD MMM YYYY";
 
-  interface Props {
-    fyCapitalGain: FYCapitalGain;
-  }
+interface Props {
+  fyCapitalGain: FYCapitalGain;
+}
 
-  let { fyCapitalGain }: Props = $props();
+let { fyCapitalGain }: Props = $props();
 
-  function gainClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
-  }
+function gainClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
 </script>
 
-<div class="border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-4 py-3">
+<div
+  class="border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-4 py-3">
   <div class="mb-2 flex items-center justify-between">
-    <span class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+    <span
+      class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
       Realized Lots ({fyCapitalGain.posting_pairs.length})
     </span>
   </div>
-  <div class="w-full overflow-x-auto rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)]">
+  <div
+    class="w-full overflow-x-auto rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)]">
     <table class="w-full min-w-[760px] border-collapse text-xs">
       <thead>
-        <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left font-medium text-[var(--paisa-muted-foreground)]">
+        <tr
+          class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left font-medium text-[var(--paisa-muted-foreground)]">
           <th class="px-3 py-2">Purchase Date</th>
           <th class="px-3 py-2 text-right">Purchase Price</th>
           <th class="px-3 py-2">Sell Date</th>

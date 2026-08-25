@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
 import type { CapitalGain } from "$lib/domain/tax";
 import { formatCurrency } from "$lib/shared/formatters/currency";
-  import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
-  import Toggleable from "$lib/shared/ui/Toggleable.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
+import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
+import Toggleable from "$lib/shared/ui/Toggleable.svelte";
+import Card from "$lib/shared/ui/Card.svelte";
 
-  interface Props {
-    financialYear: string;
-    capitalGains: CapitalGain[];
-    hideHeader?: boolean;
-  }
+interface Props {
+  financialYear: string;
+  capitalGains: CapitalGain[];
+  hideHeader?: boolean;
+}
 
-  let { financialYear, capitalGains, hideHeader = false }: Props = $props();
+let { financialYear, capitalGains, hideHeader = false }: Props = $props();
 
-  let activeGains = $derived(
-    capitalGains.filter((cg) => Boolean(cg.fy[financialYear])),
-  );
+let activeGains = $derived(
+  capitalGains.filter((cg) => Boolean(cg.fy[financialYear])),
+);
 
-  function gainClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
-  }
+function gainClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
 </script>
 
 <Card padding="none" class="w-full overflow-hidden">

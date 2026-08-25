@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { Dialog as BitsDialog } from "bits-ui";
-  import type { Snippet } from "svelte";
+import { Dialog as BitsDialog } from "bits-ui";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    open?: boolean;
-    title: string;
-    description?: string;
-    side?: "right" | "left";
-    trigger?: Snippet;
-    children?: Snippet<[{ close: () => void }]>;
-  }
+interface Props {
+  open?: boolean;
+  title: string;
+  description?: string;
+  side?: "right" | "left";
+  trigger?: Snippet;
+  children?: Snippet<[{ close: () => void }]>;
+}
 
-  let {
-    open = $bindable(false),
-    title,
-    description,
-    side = "right",
-    trigger,
-    children,
-  }: Props = $props();
+let {
+  open = $bindable(false),
+  title,
+  description,
+  side = "right",
+  trigger,
+  children,
+}: Props = $props();
 
-  function close() {
-    open = false;
-  }
+function close() {
+  open = false;
+}
 </script>
 
 <BitsDialog.Root bind:open>
@@ -51,4 +51,3 @@
     </BitsDialog.Content>
   </BitsDialog.Portal>
 </BitsDialog.Root>
-

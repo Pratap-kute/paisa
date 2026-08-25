@@ -1,167 +1,179 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { api } from "$lib/api";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { formatPercentage } from "$lib/shared/formatters/currency";
-import { restName, firstName } from "$lib/domain/account";
+import { firstName, restName } from "$lib/domain/account";
 import type { IncomeStatement } from "$lib/domain/cash_flow";
 import { onMount } from "svelte";
-    import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
-  import { dateMin, dateMax, year } from "../../../../store";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
-  import { iconify } from "$lib/shared/ui/icon";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import IncomeStatementWaterfallChart from "$lib/features/cash_flow/components/IncomeStatementWaterfallChart.svelte";
-import { keys, maxBy, minBy, some, sortBy, values } from "$lib/shared/utils/collection";
+import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
+import { dateMax, dateMin, year } from "../../../../store";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+import { iconify } from "$lib/shared/ui/icon";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import IncomeStatementWaterfallChart from "$lib/features/cash_flow/components/IncomeStatementWaterfallChart.svelte";
+import {
+  keys,
+  maxBy,
+  minBy,
+  some,
+  sortBy,
+  values,
+} from "$lib/shared/utils/collection";
 
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
+let isEmpty = $state(false);
+let isLoading = $state(true);
 
-  let incomeStatement: IncomeStatement | null = $state(null);
-  let yearly: Record<string, IncomeStatement> = $state({});
-  let diff: number = $state(0);
-  let diffPercent: number = $state(0);
-  let years: string[] = $state([]);
-  let waterfallData = $derived(incomeStatement ? buildIncomeStatementWaterfall(incomeStatement) : { steps: [], endingBalance: 0 });
+let incomeStatement: IncomeStatement | null = $state(null);
+let yearly: Record<string, IncomeStatement> = $state({});
+let diff: number = $state(0);
+let diffPercent: number = $state(0);
+let years: string[] = $state([]);
+let waterfallData = $derived(
+  incomeStatement
+    ? buildIncomeStatementWaterfall(incomeStatement)
+    : { steps: [], endingBalance: 0 },
+);
 
-  type AccountGroupName =
-    | "income"
-    | "interest"
-    | "equity"
-    | "pnl"
-    | "liabilities"
-    | "tax"
-    | "expenses";
-  interface AccountGroup {
-    key: AccountGroupName;
-    accounts: string[];
-    label: string;
-    multiplier: number;
+type AccountGroupName =
+  | "income"
+  | "interest"
+  | "equity"
+  | "pnl"
+  | "liabilities"
+  | "tax"
+  | "expenses";
+interface AccountGroup {
+  key: AccountGroupName;
+  accounts: string[];
+  label: string;
+  multiplier: number;
+}
+
+function formatUnlessZero(value: number) {
+  if (value != 0) {
+    return formatCurrency(value);
   }
+  return "";
+}
 
-  function formatUnlessZero(value: number) {
-    if (value != 0) {
-      return formatCurrency(value);
+function changeClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
+
+const sum = (object: Record<string, number>) =>
+  Object.values(object).reduce((a, b) => a + b, 0);
+
+let accountGroups: AccountGroup[] = $state([]);
+
+$effect(() => {
+  if (yearly) {
+    if (yearly[$year] == null) {
+      incomeStatement = null;
+      isEmpty = true;
+    } else {
+      incomeStatement = yearly[$year];
+      years = sortBy(keys(yearly)).reverse();
+      diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
+      diffPercent = diff / incomeStatement.startingBalance;
+
+      isEmpty = false;
     }
-    return "";
   }
+});
 
-  function changeClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
+function uniqueAccounts(statements: IncomeStatement[], key: AccountGroupName) {
+  const accounts = new Set<string>();
+  for (const statement of statements) {
+    for (const account of keys(statement[key])) {
+      accounts.add(account);
+    }
   }
+  return Array.from(accounts).sort();
+}
 
-  const sum = (object: Record<string, number>) => Object.values(object).reduce((a, b) => a + b, 0);
-
-  let accountGroups: AccountGroup[] = $state([]);
-
-  $effect(() => {
-    if (yearly) {
-      if (yearly[$year] == null) {
-        incomeStatement = null;
-        isEmpty = true;
-      } else {
-        incomeStatement = yearly[$year];
-        years = sortBy(keys(yearly)).reverse();
-        diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
-        diffPercent = diff / incomeStatement.startingBalance;
-
-        isEmpty = false;
-      }
+onMount(async () => {
+  try {
+    ({ yearly } = await api.incomeStatement.getIncomeStatement() as unknown as {
+      yearly: Record<string, IncomeStatement>;
+    });
+    const statements = values(yearly);
+    const earliest = minBy(statements, (statement) => statement.date);
+    const latest = maxBy(statements, (statement) => statement.date);
+    if (earliest) {
+      dateMin.set(earliest.date);
     }
-  });
-
-  function uniqueAccounts(statements: IncomeStatement[], key: AccountGroupName) {
-    const accounts = new Set<string>();
-    for (const statement of statements) {
-      for (const account of keys(statement[key])) {
-        accounts.add(account);
-      }
+    if (latest) {
+      dateMax.set(latest.date);
     }
-    return Array.from(accounts).sort();
+    if (!$year) {
+      const sortedYears = Object.keys(yearly).sort();
+      const latestYear = sortedYears[sortedYears.length - 1];
+      if (latestYear) year.set(latestYear);
+    }
+
+    const rawGroups: AccountGroup[] = [
+      {
+        key: "income",
+        accounts: uniqueAccounts(values(yearly), "income"),
+        label: "Income",
+        multiplier: -1,
+      },
+      {
+        key: "tax",
+        accounts: uniqueAccounts(values(yearly), "tax"),
+        label: "Tax",
+        multiplier: -1,
+      },
+      {
+        key: "interest",
+        accounts: uniqueAccounts(values(yearly), "interest"),
+        label: "Interest",
+        multiplier: -1,
+      },
+      {
+        key: "pnl",
+        accounts: uniqueAccounts(values(yearly), "pnl"),
+        label: "Gain / Loss",
+        multiplier: 1,
+      },
+      {
+        key: "equity",
+        accounts: uniqueAccounts(values(yearly), "equity"),
+        label: "Equity",
+        multiplier: -1,
+      },
+      {
+        key: "liabilities",
+        accounts: uniqueAccounts(values(yearly), "liabilities"),
+        label: "Liabilities",
+        multiplier: -1,
+      },
+      {
+        key: "expenses",
+        accounts: uniqueAccounts(values(yearly), "expenses"),
+        label: "Expenses",
+        multiplier: -1,
+      },
+    ];
+    accountGroups = rawGroups.filter(
+      (g) =>
+        g.accounts.length > 0 ||
+        some(values(yearly), (y) => y[g.key] && Math.abs(sum(y[g.key])) > 0),
+    );
+
+    isLoading = false;
+  } catch {
+    isLoading = false;
   }
-
-  onMount(async () => {
-    try {
-      ({ yearly } = await api.incomeStatement.getIncomeStatement() as unknown as {
-        yearly: Record<string, IncomeStatement>;
-      });
-      const statements = values(yearly);
-      const earliest = minBy(statements, (statement) => statement.date);
-      const latest = maxBy(statements, (statement) => statement.date);
-      if (earliest) {
-        dateMin.set(earliest.date);
-      }
-      if (latest) {
-        dateMax.set(latest.date);
-      }
-      if (!$year) {
-        const sortedYears = Object.keys(yearly).sort();
-        const latestYear = sortedYears[sortedYears.length - 1];
-        if (latestYear) year.set(latestYear);
-      }
-
-      const rawGroups: AccountGroup[] = [
-        {
-          key: "income",
-          accounts: uniqueAccounts(values(yearly), "income"),
-          label: "Income",
-          multiplier: -1,
-        },
-        {
-          key: "tax",
-          accounts: uniqueAccounts(values(yearly), "tax"),
-          label: "Tax",
-          multiplier: -1,
-        },
-        {
-          key: "interest",
-          accounts: uniqueAccounts(values(yearly), "interest"),
-          label: "Interest",
-          multiplier: -1,
-        },
-        {
-          key: "pnl",
-          accounts: uniqueAccounts(values(yearly), "pnl"),
-          label: "Gain / Loss",
-          multiplier: 1,
-        },
-        {
-          key: "equity",
-          accounts: uniqueAccounts(values(yearly), "equity"),
-          label: "Equity",
-          multiplier: -1,
-        },
-        {
-          key: "liabilities",
-          accounts: uniqueAccounts(values(yearly), "liabilities"),
-          label: "Liabilities",
-          multiplier: -1,
-        },
-        {
-          key: "expenses",
-          accounts: uniqueAccounts(values(yearly), "expenses"),
-          label: "Expenses",
-          multiplier: -1,
-        },
-      ];
-      accountGroups = rawGroups.filter(
-        (g) =>
-          g.accounts.length > 0 ||
-          some(values(yearly), (y) => y[g.key] && Math.abs(sum(y[g.key])) > 0),
-      );
-
-      isLoading = false;
-    } catch {
-      isLoading = false;
-    }
-  });
+});
 </script>
 
 <svelte:head>

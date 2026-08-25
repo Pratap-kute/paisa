@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+import { page } from "$app/stores";
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-[var(--paisa-background)] p-6">
+<div
+  class="flex min-h-screen items-center justify-center bg-[var(--paisa-background)] p-6">
   <div class="w-full max-w-lg">
     {#if $page.status === 404 || $page.error?.status === 404 || $page.error?.message === "Not found"}
       <div class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)] bg-[var(--paisa-surface)]">

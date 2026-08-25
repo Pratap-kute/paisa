@@ -1,77 +1,82 @@
 <script lang="ts">
-  import BudgetCard from "$lib/features/expense/components/BudgetCard.svelte";
-  import { restName } from "$lib/domain/account";
+import BudgetCard from "$lib/features/expense/components/BudgetCard.svelte";
+import { restName } from "$lib/domain/account";
 import { helpUrl } from "$lib/shared/browser/navigation";
 import { now } from "$lib/domain/time";
 import type { AccountBudget } from "$lib/domain/cash_flow";
 import type { Budget } from "$lib/domain/cash_flow";
 import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { api } from "$lib/api";
-  import { onMount } from "svelte";
-  import { month, setAllowedDateRange } from "../../../../store";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
+import { api } from "$lib/api";
+import { onMount } from "svelte";
+import { month, setAllowedDateRange } from "../../../../store";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
-  const monthStart = now().startOf("month");
-  let budgetsByMonth: Record<string, Budget> = $state({});
-  let checkingBalance: number = $state(), availableForBudgeting: number = $state();
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
+const monthStart = now().startOf("month");
+let budgetsByMonth: Record<string, Budget> = $state({});
+let checkingBalance: number = $state(),
+  availableForBudgeting: number = $state();
+let isEmpty = $state(false);
+let isLoading = $state(true);
 
-  let currentMonthBudget: Budget = $derived(budgetsByMonth[$month]);
-  let currentMonthAccountBudgets: AccountBudget[] = $derived(
-    budgetsByMonth[$month]?.accounts || [],
-  );
-  let showCurrentMonthMetrics = $derived(
-    currentMonthBudget?.date.isSameOrAfter(monthStart) ?? false,
-  );
-  let attentionAccounts: AccountBudget[] = $derived(
-    currentMonthAccountBudgets.filter((accountBudget) => needsAttention(accountBudget)),
-  );
+let currentMonthBudget: Budget = $derived(budgetsByMonth[$month]);
+let currentMonthAccountBudgets: AccountBudget[] = $derived(
+  budgetsByMonth[$month]?.accounts || [],
+);
+let showCurrentMonthMetrics = $derived(
+  currentMonthBudget?.date.isSameOrAfter(monthStart) ?? false,
+);
+let attentionAccounts: AccountBudget[] = $derived(
+  currentMonthAccountBudgets.filter((accountBudget) =>
+    needsAttention(accountBudget)
+  ),
+);
 
-  function needsAttention(accountBudget: AccountBudget): boolean {
-    if (accountBudget.forecast === 0 && accountBudget.actual === 0) {
-      return false;
-    }
-    if (accountBudget.available < 0) {
-      return true;
-    }
-    const percent =
-      accountBudget.forecast > 0 ? (accountBudget.actual / accountBudget.forecast) * 100 : 0;
-    return percent > 85;
+function needsAttention(accountBudget: AccountBudget): boolean {
+  if (accountBudget.forecast === 0 && accountBudget.actual === 0) {
+    return false;
   }
-
-  function budgetProgress(accountBudget: AccountBudget): number {
-    if (accountBudget.forecast <= 0) {
-      return 0;
-    }
-    return (accountBudget.actual / accountBudget.forecast) * 100;
+  if (accountBudget.available < 0) {
+    return true;
   }
+  const percent = accountBudget.forecast > 0
+    ? (accountBudget.actual / accountBudget.forecast) * 100
+    : 0;
+  return percent > 85;
+}
 
-  onMount(async () => {
-    try {
-      const res = await api.budget.getBudget();
-      budgetsByMonth = (res.budgetsByMonth as unknown as Record<string, Budget>) || {};
-      checkingBalance = res.checkingBalance || 0;
-      availableForBudgeting = res.availableForBudgeting || 0;
-      setAllowedDateRange(
-        Object.values(budgetsByMonth)
-          .flat()
-          .map((b) => b.date),
-      );
+function budgetProgress(accountBudget: AccountBudget): number {
+  if (accountBudget.forecast <= 0) {
+    return 0;
+  }
+  return (accountBudget.actual / accountBudget.forecast) * 100;
+}
 
-      if (isEmptyValue(budgetsByMonth)) {
-        isEmpty = true;
-      }
-    } finally {
-      isLoading = false;
+onMount(async () => {
+  try {
+    const res = await api.budget.getBudget();
+    budgetsByMonth =
+      (res.budgetsByMonth as unknown as Record<string, Budget>) || {};
+    checkingBalance = res.checkingBalance || 0;
+    availableForBudgeting = res.availableForBudgeting || 0;
+    setAllowedDateRange(
+      Object.values(budgetsByMonth)
+        .flat()
+        .map((b) => b.date),
+    );
+
+    if (isEmptyValue(budgetsByMonth)) {
+      isEmpty = true;
     }
-  });
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

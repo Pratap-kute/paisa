@@ -1,56 +1,54 @@
 <script lang="ts">
-  import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "$lib/domain/ledger";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 
-  interface Props {
-    postings: Posting[];
-    groupFormat: string;
-    children?: import('svelte').Snippet<[any]>;
-  }
+interface Props {
+  postings: Posting[];
+  groupFormat: string;
+  children?: import("svelte").Snippet<[any]>;
+}
 
-  let { postings, groupFormat, children }: Props = $props();
+let { postings, groupFormat, children }: Props = $props();
 
-  interface GroupedPosting {
-    key: string;
-    postings: Posting[];
-    total: number;
-  }
+interface GroupedPosting {
+  key: string;
+  postings: Posting[];
+  total: number;
+}
 
-  function group(ps: Posting[]) {
-    let groupedPostings: GroupedPosting[] = [];
-    let lastGroup: string;
-    for (const posting of ps) {
-      const group = posting.date.format(groupFormat);
-      if (group !== lastGroup) {
-        groupedPostings.push({
-          key: group,
-          postings: [],
-          total: 0
-        });
-        lastGroup = group;
-      }
-
-      groupedPostings[groupedPostings.length - 1].postings.push(posting);
-      let amount = posting.amount;
-      if (posting.account.startsWith("Income:CapitalGains")) {
-        amount = -amount;
-      }
-      groupedPostings[groupedPostings.length - 1].total += amount;
+function group(ps: Posting[]) {
+  let groupedPostings: GroupedPosting[] = [];
+  let lastGroup: string;
+  for (const posting of ps) {
+    const group = posting.date.format(groupFormat);
+    if (group !== lastGroup) {
+      groupedPostings.push({
+        key: group,
+        postings: [],
+        total: 0,
+      });
+      lastGroup = group;
     }
 
-    if (ps.length == 100) {
-      groupedPostings.pop();
+    groupedPostings[groupedPostings.length - 1].postings.push(posting);
+    let amount = posting.amount;
+    if (posting.account.startsWith("Income:CapitalGains")) {
+      amount = -amount;
     }
-
-    return groupedPostings;
+    groupedPostings[groupedPostings.length - 1].total += amount;
   }
 
-  let groupedPostings: GroupedPosting[] = $derived(group(postings));
-  let isGrouped = $derived(
-    groupedPostings.some((groupedPosting) =>
-      groupedPosting.postings.length > 1
-    ),
-  );
+  if (ps.length == 100) {
+    groupedPostings.pop();
+  }
+
+  return groupedPostings;
+}
+
+let groupedPostings: GroupedPosting[] = $derived(group(postings));
+let isGrouped = $derived(
+  groupedPostings.some((groupedPosting) => groupedPosting.postings.length > 1),
+);
 </script>
 
 <div>

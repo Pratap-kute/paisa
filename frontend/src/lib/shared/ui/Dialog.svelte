@@ -1,47 +1,47 @@
 <script lang="ts">
-  import { Dialog as BitsDialog } from "bits-ui";
-  import type { Snippet } from "svelte";
+import { Dialog as BitsDialog } from "bits-ui";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    open?: boolean;
-    title?: string;
-    description?: string;
-    width?: string;
-    bodyClass?: string;
-    footerClass?: string;
-    onclose?: () => void;
-    trigger?: Snippet;
-    header?: Snippet<[{ close: () => void }]>;
-    footer?: Snippet<[{ close: () => void }]>;
-    children?: Snippet<[{ close: () => void }]>;
+interface Props {
+  open?: boolean;
+  title?: string;
+  description?: string;
+  width?: string;
+  bodyClass?: string;
+  footerClass?: string;
+  onclose?: () => void;
+  trigger?: Snippet;
+  header?: Snippet<[{ close: () => void }]>;
+  footer?: Snippet<[{ close: () => void }]>;
+  children?: Snippet<[{ close: () => void }]>;
+}
+
+let {
+  open = $bindable(false),
+  title,
+  description,
+  width = "min(560px, calc(100vw - 32px))",
+  bodyClass = "",
+  footerClass = "",
+  onclose,
+  trigger,
+  header,
+  footer,
+  children,
+}: Props = $props();
+
+let wasOpen = $state(false);
+
+$effect(() => {
+  if (wasOpen && !open) {
+    onclose?.();
   }
+  wasOpen = open;
+});
 
-  let {
-    open = $bindable(false),
-    title,
-    description,
-    width = "min(560px, calc(100vw - 32px))",
-    bodyClass = "",
-    footerClass = "",
-    onclose,
-    trigger,
-    header,
-    footer,
-    children,
-  }: Props = $props();
-
-  let wasOpen = $state(false);
-
-  $effect(() => {
-    if (wasOpen && !open) {
-      onclose?.();
-    }
-    wasOpen = open;
-  });
-
-  function close() {
-    open = false;
-  }
+function close() {
+  open = false;
+}
 </script>
 
 <BitsDialog.Root bind:open>

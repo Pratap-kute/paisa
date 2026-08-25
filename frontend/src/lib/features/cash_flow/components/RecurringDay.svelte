@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { now } from "$lib/domain/time";
+import { now } from "$lib/domain/time";
 import type { TransactionSchedule } from "$lib/domain/recurring";
 import { isMobile } from "$lib/shared/browser/responsive";
-  import type { Dayjs } from "dayjs";
-  import RecurringSchedule from "./RecurringSchedule.svelte";
+import type { Dayjs } from "dayjs";
+import RecurringSchedule from "./RecurringSchedule.svelte";
 
-  interface Props {
-    month: string;
-    day: Dayjs;
-    schedules: TransactionSchedule[];
-  }
+interface Props {
+  month: string;
+  day: Dayjs;
+  schedules: TransactionSchedule[];
+}
 
-  let { month, day, schedules }: Props = $props();
-  let isToday = $derived(day.isSame(now(), "day"));
-  let isCurrentMonth = $derived(day.format("YYYY-MM") === month);
+let { month, day, schedules }: Props = $props();
+let isToday = $derived(day.isSame(now(), "day"));
+let isCurrentMonth = $derived(day.format("YYYY-MM") === month);
 </script>
 
 <div

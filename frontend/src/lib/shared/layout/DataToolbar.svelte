@@ -1,23 +1,23 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    label?: string;
-    count?: string;
-    search?: Snippet;
-    filters?: Snippet;
-    actions?: Snippet;
-    class?: string;
-  }
+interface Props {
+  label?: string;
+  count?: string;
+  search?: Snippet;
+  filters?: Snippet;
+  actions?: Snippet;
+  class?: string;
+}
 
-  let {
-    label,
-    count,
-    search,
-    filters,
-    actions,
-    class: className = "",
-  }: Props = $props();
+let {
+  label,
+  count,
+  search,
+  filters,
+  actions,
+  class: className = "",
+}: Props = $props();
 </script>
 
 <div class="paisa4-data-toolbar {className}">
@@ -37,4 +37,3 @@
     <div class="paisa4-toolbar-actions">{@render actions()}</div>
   {/if}
 </div>
-

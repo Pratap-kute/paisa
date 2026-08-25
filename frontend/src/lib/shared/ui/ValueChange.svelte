@@ -1,13 +1,17 @@
 <script lang="ts">
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
 
-  interface Props {
-    value: number;
-  }
+interface Props {
+  value: number;
+}
 
-  let { value }: Props = $props();
-  let icon = $derived(value > 0 ? "fa-arrow-up rotate-45" : "fa-arrow-down -rotate-45");
-  let toneClass = $derived(value > 0 ? "paisa-value-change-positive" : "paisa-value-change-negative");
+let { value }: Props = $props();
+let icon = $derived(
+  value > 0 ? "fa-arrow-up rotate-45" : "fa-arrow-down -rotate-45",
+);
+let toneClass = $derived(
+  value > 0 ? "paisa-value-change-positive" : "paisa-value-change-negative",
+);
 </script>
 
 {#if value === null}
@@ -24,29 +28,29 @@
 {/if}
 
 <style>
-  .paisa-value-change {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.125rem;
-    white-space: nowrap;
-  }
+.paisa-value-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  white-space: nowrap;
+}
 
-  .paisa-value-change-positive {
-    color: var(--paisa-positive);
-  }
+.paisa-value-change-positive {
+  color: var(--paisa-positive);
+}
 
-  .paisa-value-change-negative {
-    color: var(--paisa-negative);
-  }
+.paisa-value-change-negative {
+  color: var(--paisa-negative);
+}
 
-  .paisa-value-change-neutral {
-    color: var(--paisa-muted-foreground);
-    white-space: nowrap;
-  }
+.paisa-value-change-neutral {
+  color: var(--paisa-muted-foreground);
+  white-space: nowrap;
+}
 
-  .paisa-value-change-icon {
-    display: inline-flex;
-    align-items: center;
-    font-size: 0.75rem;
-  }
+.paisa-value-change-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+}
 </style>

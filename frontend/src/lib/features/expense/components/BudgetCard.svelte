@@ -1,71 +1,84 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { restName } from "$lib/domain/account";
 import { tooltip } from "$lib/shared/charts/tooltip";
 import type { AccountBudget } from "$lib/domain/cash_flow";
 import { iconify } from "$lib/shared/ui/icon";
-  import { firstName } from "$lib/domain/account";
-  import Card from "$lib/shared/ui/Card.svelte";
+import { firstName } from "$lib/domain/account";
+import Card from "$lib/shared/ui/Card.svelte";
 
-  interface Props {
-    compact?: boolean;
-    accountBudget: AccountBudget;
+interface Props {
+  compact?: boolean;
+  accountBudget: AccountBudget;
+}
+
+let { compact = false, accountBudget }: Props = $props();
+
+function canShow(accountBudget: AccountBudget): boolean {
+  return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
+}
+
+function availableStatus(
+  accountBudget: AccountBudget,
+): "positive" | "negative" | "neutral" {
+  if (accountBudget.available === 0) {
+    return "neutral";
   }
+  return accountBudget.available > 0 ? "positive" : "negative";
+}
 
-  let { compact = false, accountBudget }: Props = $props();
+const statusClasses = {
+  positive: "bg-[var(--paisa-success-light)] text-[var(--paisa-success)]",
+  negative: "bg-[var(--paisa-danger-light)] text-[var(--paisa-danger)]",
+  neutral: "bg-[var(--paisa-info-light)] text-[var(--paisa-info)]",
+} as const;
 
-  function canShow(accountBudget: AccountBudget): boolean {
-    return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
-  }
+let tooltipContent = $derived(
+  tooltip(
+    accountBudget.expenses.map((e) => {
+      return [
+        e.date.format("DD MMM YYYY"),
+        [e.payee, "paisa-truncate"],
+        [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
+      ];
+    }),
+  ),
+);
 
-  function availableStatus(accountBudget: AccountBudget): "positive" | "negative" | "neutral" {
-    if (accountBudget.available === 0) {
-      return "neutral";
-    }
-    return accountBudget.available > 0 ? "positive" : "negative";
-  }
-
-  const statusClasses = {
-    positive: "bg-[var(--paisa-success-light)] text-[var(--paisa-success)]",
-    negative: "bg-[var(--paisa-danger-light)] text-[var(--paisa-danger)]",
-    neutral: "bg-[var(--paisa-info-light)] text-[var(--paisa-info)]",
-  } as const;
-
-  let tooltipContent = $derived(
-    tooltip(
-      accountBudget.expenses.map((e) => {
-        return [
-          e.date.format("DD MMM YYYY"),
-          [e.payee, "paisa-truncate"],
-          [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
-        ];
-      }),
-    ),
-  );
-
-  let availableTone = $derived(availableStatus(accountBudget));
-  let progressMax = $derived(
-    Math.max(
+let availableTone = $derived(availableStatus(accountBudget));
+let progressMax = $derived(
+  Math.max(
+    0,
+    accountBudget.forecast,
+    accountBudget.actual,
+    accountBudget.actual - accountBudget.rollover,
+  ),
+);
+let rolloverUsed = $derived(
+  accountBudget.rollover > 0 && accountBudget.actual > accountBudget.forecast
+    ? Math.min(
+      accountBudget.actual - accountBudget.forecast,
+      accountBudget.rollover,
+    )
+    : 0,
+);
+let overspent = $derived(
+  accountBudget.actual > accountBudget.forecast
+    ? Math.max(
+      accountBudget.actual - accountBudget.forecast -
+        Math.max(accountBudget.rollover, 0),
       0,
-      accountBudget.forecast,
-      accountBudget.actual,
-      accountBudget.actual - accountBudget.rollover,
-    ),
-  );
-  let rolloverUsed = $derived(
-    accountBudget.rollover > 0 && accountBudget.actual > accountBudget.forecast
-      ? Math.min(accountBudget.actual - accountBudget.forecast, accountBudget.rollover)
-      : 0,
-  );
-  let overspent = $derived(
-    accountBudget.actual > accountBudget.forecast
-      ? Math.max(accountBudget.actual - accountBudget.forecast - Math.max(accountBudget.rollover, 0), 0)
-      : 0,
-  );
-  let withinBudget = $derived(Math.min(accountBudget.forecast, accountBudget.actual));
-  let widthPercent = $derived((amount: number) =>
-    progressMax > 0 ? `${Math.min(100, Math.max(0, (amount / progressMax) * 100))}%` : "0%"
-  );
+    )
+    : 0,
+);
+let withinBudget = $derived(
+  Math.min(accountBudget.forecast, accountBudget.actual),
+);
+let widthPercent = $derived((amount: number) =>
+  progressMax > 0
+    ? `${Math.min(100, Math.max(0, (amount / progressMax) * 100))}%`
+    : "0%"
+);
 </script>
 
 <Card

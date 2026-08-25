@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { Popover as BitsPopover } from "bits-ui";
-  import type { Snippet } from "svelte";
+import { Popover as BitsPopover } from "bits-ui";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    open?: boolean;
-    side?: "top" | "right" | "bottom" | "left";
-    trigger: Snippet;
-    children?: Snippet<[{ close: () => void }]>;
-  }
+interface Props {
+  open?: boolean;
+  side?: "top" | "right" | "bottom" | "left";
+  trigger: Snippet;
+  children?: Snippet<[{ close: () => void }]>;
+}
 
-  let {
-    open = $bindable(false),
-    side = "bottom",
-    trigger,
-    children,
-  }: Props = $props();
+let {
+  open = $bindable(false),
+  side = "bottom",
+  trigger,
+  children,
+}: Props = $props();
 
-  function close() {
-    open = false;
-  }
+function close() {
+  open = false;
+}
 </script>
 
 <BitsPopover.Root bind:open>

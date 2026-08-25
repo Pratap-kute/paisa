@@ -1,131 +1,137 @@
 <script lang="ts">
-  import type { LedgerFile, Transaction as T } from "$lib/domain/ledger";
-  import { api } from "$lib/api";
-  import { debounce } from "es-toolkit";
-  import { onDestroy, onMount } from "svelte";
-  import VirtualList from "svelte-tiny-virtual-list";
-  import Transaction from "$lib/features/transactions/components/Transaction.svelte";
-  import BulkEditForm from "$lib/features/ledger/components/BulkEditForm.svelte";
-  import { slide } from "svelte/transition";
-  import * as bulkEdit from "$lib/features/ledger/bulk_edit";
-  import * as toast from "$lib/shared/ui/toast";
-  import DiffViewModal from "$lib/features/ledger/components/DiffViewModal.svelte";
-  import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
-  import { editorState } from "$lib/features/editor/search_query_editor";
-  import { get } from "svelte/store";
-  import { download } from "$lib/features/importing/export";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
+import type { LedgerFile, Transaction as T } from "$lib/domain/ledger";
+import { api } from "$lib/api";
+import { debounce } from "es-toolkit";
+import { onDestroy, onMount } from "svelte";
+import VirtualList from "svelte-tiny-virtual-list";
+import Transaction from "$lib/features/transactions/components/Transaction.svelte";
+import BulkEditForm from "$lib/features/ledger/components/BulkEditForm.svelte";
+import { slide } from "svelte/transition";
+import * as bulkEdit from "$lib/features/ledger/bulk_edit";
+import * as toast from "$lib/shared/ui/toast";
+import DiffViewModal from "$lib/features/ledger/components/DiffViewModal.svelte";
+import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
+import { editorState } from "$lib/features/editor/search_query_editor";
+import { get } from "svelte/store";
+import { download } from "$lib/features/importing/export";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
 import { filter } from "$lib/shared/utils/collection";
 
-  let bulkEditOpen = $state(false);
-  let transactions: T[] = $state(null);
-  let filtered: T[] = $state([]);
-  let files: LedgerFile[] = $state([]);
-  let newFiles: LedgerFile[] = $state([]);
-  let updatedTransactionsCount = $state(0);
-  let openPreviewModal = $state(false);
-  let accounts: string[] = $state([]);
-  let commodities: string[] = $state([]);
-  let listHeight = $state(600);
-  let isSmallScreen = $state(false);
+let bulkEditOpen = $state(false);
+let transactions: T[] = $state(null);
+let filtered: T[] = $state([]);
+let files: LedgerFile[] = $state([]);
+let newFiles: LedgerFile[] = $state([]);
+let updatedTransactionsCount = $state(0);
+let openPreviewModal = $state(false);
+let accounts: string[] = $state([]);
+let commodities: string[] = $state([]);
+let listHeight = $state(600);
+let isSmallScreen = $state(false);
 
-  const debits = (t: T) => {
-    return filter(t.postings, (p) => p.amount < 0);
-  };
+const debits = (t: T) => {
+  return filter(t.postings, (p) => p.amount < 0);
+};
 
-  const credits = (t: T) => {
-    return filter(t.postings, (p) => p.amount >= 0);
-  };
+const credits = (t: T) => {
+  return filter(t.postings, (p) => p.amount >= 0);
+};
 
-  function handleInputRaw(predicate: (t: T) => boolean) {
-    if (!transactions) return;
-    filtered = filter(transactions, predicate);
+function handleInputRaw(predicate: (t: T) => boolean) {
+  if (!transactions) return;
+  filtered = filter(transactions, predicate);
+}
+
+const handleInput = debounce(handleInputRaw, 100);
+
+const unsubscribe = editorState.subscribe((state) => {
+  handleInput(state.predicate);
+});
+
+onDestroy(() => {
+  unsubscribe();
+});
+
+const itemSize = (i: number) => {
+  const t = filtered[i];
+  if (!t) return 52;
+  const count = isSmallScreen
+    ? t.postings.length
+    : Math.max(credits(t).length, debits(t).length, 1);
+  return isSmallScreen ? 44 + count * 24 : Math.max(52, count * 26 + 18);
+};
+
+function updateDimensions() {
+  if (typeof window !== "undefined") {
+    isSmallScreen = window.innerWidth < 768;
+    const offset = isSmallScreen
+      ? (bulkEditOpen ? 420 : 250)
+      : (bulkEditOpen ? 340 : 220);
+    listHeight = Math.max(320, window.innerHeight - offset);
   }
+}
 
-  const handleInput = debounce(handleInputRaw, 100);
+async function loadTransactions() {
+  const editorRes = await api.editor.getEditorFiles();
+  files = (editorRes.files as unknown as LedgerFile[]) || [];
+  accounts = editorRes.accounts || [];
+  commodities = editorRes.commodities || [];
 
-  const unsubscribe = editorState.subscribe((state) => {
-    handleInput(state.predicate);
-  });
+  const txRes = await api.transaction.getTransactions();
+  transactions = (txRes.transactions as unknown as T[]) || [];
+  handleInputRaw(get(editorState).predicate);
+  newFiles = files;
+}
 
-  onDestroy(() => {
-    unsubscribe();
-  });
+async function downloadTransactions() {
+  const balancedPostings = await api.transaction.getBalancedPostings();
+  download(balancedPostings as unknown as any);
+}
 
-  const itemSize = (i: number) => {
-    const t = filtered[i];
-    if (!t) return 52;
-    const count = isSmallScreen ? t.postings.length : Math.max(credits(t).length, debits(t).length, 1);
-    return isSmallScreen ? 44 + count * 24 : Math.max(52, count * 26 + 18);
-  };
+function showPreview(detail: any) {
+  ({ newFiles, updatedTransactionsCount } = bulkEdit.applyChanges(
+    files,
+    filtered,
+    detail.operation,
+    detail.args,
+  ));
+  openPreviewModal = true;
+}
 
-  function updateDimensions() {
-    if (typeof window !== "undefined") {
-      isSmallScreen = window.innerWidth < 768;
-      const offset = isSmallScreen ? (bulkEditOpen ? 420 : 250) : (bulkEditOpen ? 340 : 220);
-      listHeight = Math.max(320, window.innerHeight - offset);
-    }
-  }
+async function saveAll(newFiles: LedgerFile[]) {
+  for (const newFile of newFiles) {
+    const res = await api.editor.saveEditorFile({
+      name: newFile.name,
+      content: newFile.content,
+    });
 
-  async function loadTransactions() {
-    const editorRes = await api.editor.getEditorFiles();
-    files = (editorRes.files as unknown as LedgerFile[]) || [];
-    accounts = editorRes.accounts || [];
-    commodities = editorRes.commodities || [];
-
-    const txRes = await api.transaction.getTransactions();
-    transactions = (txRes.transactions as unknown as T[]) || [];
-    handleInputRaw(get(editorState).predicate);
-    newFiles = files;
-  }
-
-  async function downloadTransactions() {
-    const balancedPostings = await api.transaction.getBalancedPostings();
-    download(balancedPostings as unknown as any);
-  }
-
-  function showPreview(detail: any) {
-    ({ newFiles, updatedTransactionsCount } = bulkEdit.applyChanges(
-      files,
-      filtered,
-      detail.operation,
-      detail.args
-    ));
-    openPreviewModal = true;
-  }
-
-  async function saveAll(newFiles: LedgerFile[]) {
-    for (const newFile of newFiles) {
-      const res = await api.editor.saveEditorFile({
-        name: newFile.name,
-        content: newFile.content,
+    if (!res.saved) {
+      toast.toast({
+        message: `Failed to save ${newFile.name}. reason: ${
+          res.message || "Unknown error"
+        }`,
+        type: "is-danger",
+        duration: 10000,
       });
-
-      if (!res.saved) {
-        toast.toast({
-          message: `Failed to save ${newFile.name}. reason: ${res.message || "Unknown error"}`,
-          type: "is-danger",
-          duration: 10000
-        });
-      } else {
-        toast.toast({
-          message: `Saved ${newFile.name}`,
-          type: "is-success"
-        });
-      }
+    } else {
+      toast.toast({
+        message: `Saved ${newFile.name}`,
+        type: "is-success",
+      });
     }
-    await loadTransactions();
   }
+  await loadTransactions();
+}
 
-  onMount(() => {
-    updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    loadTransactions();
-    return () => {
-      window.removeEventListener("resize", updateDimensions);
-    };
-  });
+onMount(() => {
+  updateDimensions();
+  window.addEventListener("resize", updateDimensions);
+  loadTransactions();
+  return () => {
+    window.removeEventListener("resize", updateDimensions);
+  };
+});
 </script>
 
 <svelte:head>

@@ -1,39 +1,39 @@
 <script lang="ts">
-  import Card from "$lib/shared/ui/Card.svelte";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+import Card from "$lib/shared/ui/Card.svelte";
+import { formatPercentage } from "$lib/shared/formatters/currency";
 import type { GoalSummary } from "$lib/domain/goals_models";
 import { iconGlyph } from "$lib/shared/ui/icon";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import Progress from "$lib/shared/ui/Progress.svelte";
-  import dayjs from "dayjs";
-  import type { Action } from "svelte/action";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import Progress from "$lib/shared/ui/Progress.svelte";
+import dayjs from "dayjs";
+import type { Action } from "svelte/action";
 
-  interface Props {
-    goal: GoalSummary;
-    small?: boolean;
-    action?: Action;
+interface Props {
+  goal: GoalSummary;
+  small?: boolean;
+  action?: Action;
+}
+
+let { goal, small = false, action = null }: Props = $props();
+
+function formatDate(date: string) {
+  const d = dayjs(date, "YYYY-MM-DD", true);
+  if (d.isValid()) {
+    return d.fromNow();
+  }
+  return "";
+}
+
+function percentComplete(goal: GoalSummary) {
+  if (goal.target === 0) {
+    return 0;
   }
 
-  let { goal, small = false, action = null }: Props = $props();
+  return (goal.current / goal.target) * 100;
+}
 
-  function formatDate(date: string) {
-    const d = dayjs(date, "YYYY-MM-DD", true);
-    if (d.isValid()) {
-      return d.fromNow();
-    }
-    return "";
-  }
-
-  function percentComplete(goal: GoalSummary) {
-    if (goal.target === 0) {
-      return 0;
-    }
-
-    return (goal.current / goal.target) * 100;
-  }
-
-  let completed = $derived(percentComplete(goal));
+let completed = $derived(percentComplete(goal));
 </script>
 
 <Card padding="sm" class={small ? "mb-3" : ""}>
@@ -62,11 +62,14 @@ import { iconGlyph } from "$lib/shared/ui/icon";
     {/if}
   </div>
   <div class="grid grid-cols-2 gap-3 mb-3">
-    <Metric label="Current" value={formatCurrency(goal.current)} status="positive" />
-    <Metric label="Target" value={formatCurrency(goal.target)} status="primary" />
+    <Metric label="Current" value={formatCurrency(goal.current)}
+      status="positive" />
+    <Metric label="Target" value={formatCurrency(goal.target)}
+      status="primary" />
   </div>
   <Progress small showPercent={false} progressPercent={completed} />
-  <div class="flex justify-between text-[var(--paisa-muted-foreground)] text-sm mt-1">
+  <div
+    class="flex justify-between text-[var(--paisa-muted-foreground)] text-sm mt-1">
     <div>{formatPercentage(completed / 100, 2)}</div>
     <div>{formatDate(goal.targetDate)}</div>
   </div>

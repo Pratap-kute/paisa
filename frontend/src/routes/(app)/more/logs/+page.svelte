@@ -1,108 +1,111 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import type { Log } from "$lib/features/logs/types";
+import { api } from "$lib/api";
+import type { Log } from "$lib/features/logs/types";
 import { onMount } from "svelte";
-  import VirtualList from "svelte-tiny-virtual-list";
-  import { omit } from "es-toolkit";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import VirtualList from "svelte-tiny-virtual-list";
+import { omit } from "es-toolkit";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Card from "$lib/shared/ui/Card.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 
-  let logs: Log[] = $state([]);
-  let searchQuery = $state("");
-  let selectedLevel = $state("all");
-  let isLoading = $state(true);
-  const ITEM_SIZE = 38;
-  let listHeight = $state(600);
+let logs: Log[] = $state([]);
+let searchQuery = $state("");
+let selectedLevel = $state("all");
+let isLoading = $state(true);
+const ITEM_SIZE = 38;
+let listHeight = $state(600);
 
-  function updateDimensions() {
-    if (typeof window !== "undefined") {
-      listHeight = Math.max(360, window.innerHeight - 250);
-    }
+function updateDimensions() {
+  if (typeof window !== "undefined") {
+    listHeight = Math.max(360, window.innerHeight - 250);
   }
+}
 
-  async function fetchLogs() {
-    isLoading = true;
-    try {
-      logs = await api.logs.getLogs() as unknown as Log[];
-    } finally {
-      isLoading = false;
-    }
+async function fetchLogs() {
+  isLoading = true;
+  try {
+    logs = await api.logs.getLogs() as unknown as Log[];
+  } finally {
+    isLoading = false;
   }
+}
 
-  onMount(() => {
-    updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    fetchLogs();
-    return () => {
-      window.removeEventListener("resize", updateDimensions);
-    };
-  });
+onMount(() => {
+  updateDimensions();
+  window.addEventListener("resize", updateDimensions);
+  fetchLogs();
+  return () => {
+    window.removeEventListener("resize", updateDimensions);
+  };
+});
 
-  // Filter logs by level and search query
-  let filteredLogs = $derived.by(() => {
-    let result = logs;
-    if (selectedLevel !== "all") {
-      result = result.filter(
-        (l) => l.level?.toLowerCase() === selectedLevel.toLowerCase(),
-      );
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      result = result.filter((l) => {
-        const msgMatch = l.msg?.toLowerCase().includes(q);
-        const levelMatch = l.level?.toLowerCase().includes(q);
-        const fieldsMatch = Object.entries(omit(l, ["time", "level", "msg"])).some(
+// Filter logs by level and search query
+let filteredLogs = $derived.by(() => {
+  let result = logs;
+  if (selectedLevel !== "all") {
+    result = result.filter(
+      (l) => l.level?.toLowerCase() === selectedLevel.toLowerCase(),
+    );
+  }
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase().trim();
+    result = result.filter((l) => {
+      const msgMatch = l.msg?.toLowerCase().includes(q);
+      const levelMatch = l.level?.toLowerCase().includes(q);
+      const fieldsMatch = Object.entries(omit(l, ["time", "level", "msg"]))
+        .some(
           ([k, v]) =>
             k.toLowerCase().includes(q) || String(v).toLowerCase().includes(q),
         );
-        return msgMatch || levelMatch || fieldsMatch;
-      });
-    }
-    return result;
-  });
-
-  // Log counts by level
-  let counts = $derived.by(() => {
-    let total = logs.length;
-    let info = 0;
-    let warn = 0;
-    let error = 0;
-    for (const l of logs) {
-      const lvl = l.level?.toLowerCase();
-      if (lvl === "info") info++;
-      else if (lvl === "warning" || lvl === "warn") warn++;
-      else if (lvl === "error" || lvl === "fatal") error++;
-    }
-    return { total, info, warn, error };
-  });
-
-  function levelVariant(level: string): "info" | "warning" | "danger" | "neutral" {
-    switch (level?.toLowerCase()) {
-      case "info":
-        return "info";
-      case "warning":
-      case "warn":
-        return "warning";
-      case "error":
-      case "fatal":
-        return "danger";
-      default:
-        return "neutral";
-    }
+      return msgMatch || levelMatch || fieldsMatch;
+    });
   }
+  return result;
+});
 
-  function formatTime(time: any): string {
-    if (!time) return "";
-    if (typeof time.format === "function") {
-      return time.format("YYYY-MM-DD HH:mm:ss");
-    }
-    return String(time);
+// Log counts by level
+let counts = $derived.by(() => {
+  let total = logs.length;
+  let info = 0;
+  let warn = 0;
+  let error = 0;
+  for (const l of logs) {
+    const lvl = l.level?.toLowerCase();
+    if (lvl === "info") info++;
+    else if (lvl === "warning" || lvl === "warn") warn++;
+    else if (lvl === "error" || lvl === "fatal") error++;
   }
+  return { total, info, warn, error };
+});
+
+function levelVariant(
+  level: string,
+): "info" | "warning" | "danger" | "neutral" {
+  switch (level?.toLowerCase()) {
+    case "info":
+      return "info";
+    case "warning":
+    case "warn":
+      return "warning";
+    case "error":
+    case "fatal":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+function formatTime(time: any): string {
+  if (!time) return "";
+  if (typeof time.format === "function") {
+    return time.format("YYYY-MM-DD HH:mm:ss");
+  }
+  return String(time);
+}
 </script>
 
 <svelte:head>
@@ -138,7 +141,8 @@ import { onMount } from "svelte";
             onclick={() => (selectedLevel = "all")}
           >
             <span>All</span>
-            <span class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.total}</span>
+            <span
+              class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.total}</span>
           </button>
 
           <button
@@ -147,7 +151,8 @@ import { onMount } from "svelte";
             onclick={() => (selectedLevel = "info")}
           >
             <span>Info</span>
-            <span class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.info}</span>
+            <span
+              class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.info}</span>
           </button>
 
           <button
@@ -156,7 +161,8 @@ import { onMount } from "svelte";
             onclick={() => (selectedLevel = "warning")}
           >
             <span>Warning</span>
-            <span class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.warn}</span>
+            <span
+              class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.warn}</span>
           </button>
 
           <button
@@ -165,7 +171,8 @@ import { onMount } from "svelte";
             onclick={() => (selectedLevel = "error")}
           >
             <span>Error</span>
-            <span class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.error}</span>
+            <span
+              class="rounded-full bg-black/20 px-1.5 py-0.2 text-[0.6875rem]">{counts.error}</span>
           </button>
         </div>
 

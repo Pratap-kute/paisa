@@ -1,51 +1,51 @@
 <script lang="ts">
-  import { isMobile } from "$lib/shared/browser/responsive";
+import { isMobile } from "$lib/shared/browser/responsive";
 import { logout } from "$lib/shared/browser/auth";
 import { sync } from "$lib/api/sync";
-  import { isLoggedIn } from "$lib/shared/browser/auth";
-  import { refresh } from "$lib/shared/state/store";
-  import { obscure } from "$lib/shared/state/persisted";
-  import { goto } from "$app/navigation";
+import { isLoggedIn } from "$lib/shared/browser/auth";
+import { refresh } from "$lib/shared/state/store";
+import { obscure } from "$lib/shared/state/persisted";
+import { goto } from "$app/navigation";
 
-  let open = $state(false);
-  let dropdownEl: HTMLElement | undefined = $state();
+let open = $state(false);
+let dropdownEl: HTMLElement | undefined = $state();
 
-  async function syncWithLoader(request: Record<string, boolean>) {
-    open = false;
-    try {
-      await sync(request);
-    } finally {
-      refresh();
-    }
-  }
-
-  const obscureId = "obscure";
-  let initialized = false;
-  $effect(() => {
-    const isObscured = $obscure;
-    if (!initialized) {
-      initialized = true;
-      return;
-    }
+async function syncWithLoader(request: Record<string, boolean>) {
+  open = false;
+  try {
+    await sync(request);
+  } finally {
     refresh();
-  });
+  }
+}
 
-  function doLogout() {
+const obscureId = "obscure";
+let initialized = false;
+$effect(() => {
+  const isObscured = $obscure;
+  if (!initialized) {
+    initialized = true;
+    return;
+  }
+  refresh();
+});
+
+function doLogout() {
+  open = false;
+  logout();
+  goto("/login");
+}
+
+let showLogout = $derived(isLoggedIn());
+
+function onWindowClick(event: MouseEvent) {
+  if (open && dropdownEl && !dropdownEl.contains(event.target as Node)) {
     open = false;
-    logout();
-    goto("/login");
   }
+}
 
-  let showLogout = $derived(isLoggedIn());
-
-  function onWindowClick(event: MouseEvent) {
-    if (open && dropdownEl && !dropdownEl.contains(event.target as Node)) {
-      open = false;
-    }
-  }
-
-  const menuItemClass =
-    "flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-primary)]";
+const menuItemClass =
+  "flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-primary)]";
 </script>
 
 <svelte:window onclick={onWindowClick} />

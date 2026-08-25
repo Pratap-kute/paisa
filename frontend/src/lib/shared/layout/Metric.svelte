@@ -1,27 +1,27 @@
 <script lang="ts">
-  import Skeleton from "$lib/shared/ui/Skeleton.svelte";
+import Skeleton from "$lib/shared/ui/Skeleton.svelte";
 
-  type Status = "neutral" | "positive" | "negative" | "warning" | "primary";
+type Status = "neutral" | "positive" | "negative" | "warning" | "primary";
 
-  interface Props {
-    label: string;
-    value?: string;
-    secondary?: string;
-    trend?: string;
-    status?: Status;
-    loading?: boolean;
-    class?: string;
-  }
+interface Props {
+  label: string;
+  value?: string;
+  secondary?: string;
+  trend?: string;
+  status?: Status;
+  loading?: boolean;
+  class?: string;
+}
 
-  let {
-    label,
-    value = "",
-    secondary,
-    trend,
-    status = "neutral",
-    loading = false,
-    class: className = "",
-  }: Props = $props();
+let {
+  label,
+  value = "",
+  secondary,
+  trend,
+  status = "neutral",
+  loading = false,
+  class: className = "",
+}: Props = $props();
 </script>
 
 <div class="paisa4-metric {className}">
@@ -38,4 +38,3 @@
     </div>
   {/if}
 </div>
-

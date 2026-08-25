@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
 </script>
 
 <Dialog title="Harness dialog" description="Dialog test body">

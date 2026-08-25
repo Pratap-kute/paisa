@@ -1,83 +1,91 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import type { Issue } from "$lib/features/diagnosis/types";
+import { api } from "$lib/api";
+import type { Issue } from "$lib/features/diagnosis/types";
 import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import Card from "$lib/shared/ui/Card.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
 
-  let issues: Issue[] = $state([]);
-  let isLoading = $state(true);
-  let lastChecked = $state<Date | null>(null);
+let issues: Issue[] = $state([]);
+let isLoading = $state(true);
+let lastChecked = $state<Date | null>(null);
 
-  async function runDiagnosis() {
-    isLoading = true;
-    try {
-      const response = await api.diagnosis.getDiagnosis() as unknown as { issues: Issue[] };
-      issues = response.issues || [];
-      lastChecked = new Date();
-    } finally {
-      isLoading = false;
-    }
+async function runDiagnosis() {
+  isLoading = true;
+  try {
+    const response = await api.diagnosis.getDiagnosis() as unknown as {
+      issues: Issue[];
+    };
+    issues = response.issues || [];
+    lastChecked = new Date();
+  } finally {
+    isLoading = false;
   }
+}
 
-  onMount(() => {
-    runDiagnosis();
-  });
+onMount(() => {
+  runDiagnosis();
+});
 
-  const diagnosticChecks = [
-    {
-      title: "Journal Syntax & Balance",
-      desc: "Checks double-entry balance, valid accounts, and transaction formats",
-      icon: "fa-solid fa-scale-balanced",
-    },
-    {
-      title: "Configuration Health",
-      desc: "Validates configuration parameters, file paths, and commodity mappings",
-      icon: "fa-solid fa-gear",
-    },
-    {
-      title: "Price DB & Commodities",
-      desc: "Verifies historical price entries, dates, and currency exchange rates",
-      icon: "fa-solid fa-chart-line",
-    },
-    {
-      title: "Import Rules & Templates",
-      desc: "Validates bank statement regex rules and auto-tagging transformations",
-      icon: "fa-solid fa-file-import",
-    },
-  ];
+const diagnosticChecks = [
+  {
+    title: "Journal Syntax & Balance",
+    desc:
+      "Checks double-entry balance, valid accounts, and transaction formats",
+    icon: "fa-solid fa-scale-balanced",
+  },
+  {
+    title: "Configuration Health",
+    desc:
+      "Validates configuration parameters, file paths, and commodity mappings",
+    icon: "fa-solid fa-gear",
+  },
+  {
+    title: "Price DB & Commodities",
+    desc:
+      "Verifies historical price entries, dates, and currency exchange rates",
+    icon: "fa-solid fa-chart-line",
+  },
+  {
+    title: "Import Rules & Templates",
+    desc:
+      "Validates bank statement regex rules and auto-tagging transformations",
+    icon: "fa-solid fa-file-import",
+  },
+];
 
-  let issueCounts = $derived.by(() => {
-    let warning = 0;
-    let danger = 0;
-    let info = 0;
-    for (const issue of issues) {
-      if (issue.level === "warning") warning++;
-      else if (issue.level === "danger" || issue.level === "error") danger++;
-      else info++;
-    }
-    return { total: issues.length, warning, danger, info };
-  });
-
-  function levelVariant(level: string): "info" | "warning" | "danger" | "neutral" {
-    switch (level?.toLowerCase()) {
-      case "danger":
-      case "error":
-        return "danger";
-      case "warning":
-        return "warning";
-      case "info":
-        return "info";
-      default:
-        return "neutral";
-    }
+let issueCounts = $derived.by(() => {
+  let warning = 0;
+  let danger = 0;
+  let info = 0;
+  for (const issue of issues) {
+    if (issue.level === "warning") warning++;
+    else if (issue.level === "danger" || issue.level === "error") danger++;
+    else info++;
   }
+  return { total: issues.length, warning, danger, info };
+});
+
+function levelVariant(
+  level: string,
+): "info" | "warning" | "danger" | "neutral" {
+  switch (level?.toLowerCase()) {
+    case "danger":
+    case "error":
+      return "danger";
+    case "warning":
+      return "warning";
+    case "info":
+      return "info";
+    default:
+      return "neutral";
+  }
+}
 </script>
 
 <svelte:head>

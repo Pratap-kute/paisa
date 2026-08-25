@@ -1,38 +1,47 @@
 <script lang="ts">
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
 import { postingUrl } from "$lib/shared/browser/navigation";
 import { tooltip } from "$lib/shared/charts/tooltip";
 import type { TransactionSchedule } from "$lib/domain/recurring";
 import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 
-  interface Props {
-    schedule: TransactionSchedule;
-    amount?: string;
-  }
+interface Props {
+  schedule: TransactionSchedule;
+  amount?: string;
+}
 
-  let { schedule, amount }: Props = $props();
+let { schedule, amount }: Props = $props();
 
-  let icon = $derived(scheduleIcon(schedule));
+let icon = $derived(scheduleIcon(schedule));
 
-  let tooltipHtml = $derived(
-    tooltip(
+let tooltipHtml = $derived(
+  tooltip(
+    [
       [
+        "Due Date",
         [
-          "Due Date",
-          [schedule.scheduled.format("DD MMM YYYY"), "paisa-text-bold paisa-text-right"],
+          schedule.scheduled.format("DD MMM YYYY"),
+          "paisa-text-bold paisa-text-right",
         ],
-        [
-          "Cleared On",
-          [schedule.actual?.format("DD MMM YYYY") || "", "paisa-text-bold paisa-text-right"],
-        ],
-        ["Amount", [formatCurrency(schedule.amount), "paisa-text-bold paisa-text-right"]],
       ],
-      { header: schedule.key },
-    ),
-  );
+      [
+        "Cleared On",
+        [
+          schedule.actual?.format("DD MMM YYYY") || "",
+          "paisa-text-bold paisa-text-right",
+        ],
+      ],
+      ["Amount", [
+        formatCurrency(schedule.amount),
+        "paisa-text-bold paisa-text-right",
+      ]],
+    ],
+    { header: schedule.key },
+  ),
+);
 
-  let displayAmount = $derived(amount ?? formatCurrencyCrude(schedule.amount));
+let displayAmount = $derived(amount ?? formatCurrencyCrude(schedule.amount));
 </script>
 
 <div
@@ -56,7 +65,8 @@ import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
       {/if}
     </span>
   </div>
-  <div class="shrink-0 font-semibold tabular-nums text-[var(--paisa-foreground)]">
+  <div
+    class="shrink-0 font-semibold tabular-nums text-[var(--paisa-foreground)]">
     {displayAmount}
   </div>
 </div>

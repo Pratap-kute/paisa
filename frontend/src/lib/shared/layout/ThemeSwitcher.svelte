@@ -1,41 +1,44 @@
 <script lang="ts">
-  import { getColorPreference, setColorPreference } from "$lib/shared/browser/theme";
-  import { onMount } from "svelte";
-  import * as store from "../../../store";
+import {
+  getColorPreference,
+  setColorPreference,
+} from "$lib/shared/browser/theme";
+import { onMount } from "svelte";
+import * as store from "../../../store";
 
-  let theme = getColorPreference();
-  store.theme.set(theme);
+let theme = getColorPreference();
+store.theme.set(theme);
 
-  function setTheme(value: string) {
-    theme = value;
-    setColorPreference(value);
-    reflectPreference();
-    store.theme.set(value);
-  }
-
-  const toggle = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-
-  const reflectPreference = () => {
-    if (typeof document !== "undefined") {
-      document.firstElementChild?.setAttribute("data-theme", theme);
-    }
-  };
-
+function setTheme(value: string) {
+  theme = value;
+  setColorPreference(value);
   reflectPreference();
+  store.theme.set(value);
+}
 
-  onMount(() => {
-    reflectPreference();
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = ({ matches: isDark }: MediaQueryListEvent) => {
-      setTheme(isDark ? "dark" : "light");
-    };
-    media.addEventListener("change", handler);
-    return () => {
-      media.removeEventListener("change", handler);
-    };
-  });
+const toggle = () => {
+  setTheme(theme === "light" ? "dark" : "light");
+};
+
+const reflectPreference = () => {
+  if (typeof document !== "undefined") {
+    document.firstElementChild?.setAttribute("data-theme", theme);
+  }
+};
+
+reflectPreference();
+
+onMount(() => {
+  reflectPreference();
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const handler = ({ matches: isDark }: MediaQueryListEvent) => {
+    setTheme(isDark ? "dark" : "light");
+  };
+  media.addEventListener("change", handler);
+  return () => {
+    media.removeEventListener("change", handler);
+  };
+});
 </script>
 
 <button
@@ -45,12 +48,14 @@
   aria-label="auto"
   aria-live="polite"
 >
-  <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
+  <svg class="sun-and-moon" aria-hidden="true" width="24" height="24"
+    viewBox="0 0 24 24">
     <mask class="moon" id="moon-mask">
       <rect x="0" y="0" width="100%" height="100%" fill="white" />
       <circle cx="24" cy="10" r="6" fill="black" />
     </mask>
-    <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)" fill="currentColor" />
+    <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)"
+      fill="currentColor" />
     <g class="sun-beams" stroke="currentColor">
       <line x1="12" y1="1" x2="12" y2="3" />
       <line x1="12" y1="21" x2="12" y2="23" />

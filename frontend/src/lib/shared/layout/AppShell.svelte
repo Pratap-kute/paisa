@@ -1,244 +1,293 @@
 <script lang="ts">
-  import { forEachFinancialYear } from "$lib/shared/formatters/date";
+import { forEachFinancialYear } from "$lib/shared/formatters/date";
 import { page } from "$app/stores";
-  import { afterNavigate } from "$app/navigation";
-  import { onMount, type Snippet } from "svelte";
-  import Logo from "./Logo.svelte";
-  import ThemeSwitcher from "./ThemeSwitcher.svelte";
-  import Actions from "./Actions.svelte";
-  import CommandPalette from "./CommandPalette.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import { financialYear } from "$lib/domain/time";
-  import {
-    month,
-    year,
-    dateMax,
-    dateMin,
-    dateRangeOption,
-  } from "../../../store";
-  import {
-    cashflowExpenseDepth,
-    cashflowExpenseDepthAllowed,
-    cashflowIncomeDepth,
-    cashflowIncomeDepthAllowed,
-  } from "../../../persisted_store";
-  import DateRange from "$lib/shared/ui/DateRange.svelte";
-  import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
-  import InputRange from "$lib/shared/ui/InputRange.svelte";
+import { afterNavigate } from "$app/navigation";
+import { onMount, type Snippet } from "svelte";
+import Logo from "./Logo.svelte";
+import ThemeSwitcher from "./ThemeSwitcher.svelte";
+import Actions from "./Actions.svelte";
+import CommandPalette from "./CommandPalette.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Spinner from "$lib/shared/ui/Spinner.svelte";
+import { financialYear } from "$lib/domain/time";
+import { dateMax, dateMin, dateRangeOption, month, year } from "../../../store";
+import {
+  cashflowExpenseDepth,
+  cashflowExpenseDepthAllowed,
+  cashflowIncomeDepth,
+  cashflowIncomeDepthAllowed,
+} from "../../../persisted_store";
+import DateRange from "$lib/shared/ui/DateRange.svelte";
+import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
+import InputRange from "$lib/shared/ui/InputRange.svelte";
 
-  import {
-    navigationState,
-    type NavGroup,
-    type NavSection,
-  } from "$lib/shared/state/navigation.svelte";
+import {
+  type NavGroup,
+  navigationState,
+  type NavSection,
+} from "$lib/shared/state/navigation.svelte";
 
-  interface Props {
-    isBurger?: boolean | null;
-    children?: Snippet;
+interface Props {
+  isBurger?: boolean | null;
+  children?: Snippet;
+}
+
+let { isBurger = $bindable(false), children }: Props = $props();
+
+let mobileDrawerOpen = $state(false);
+let commandPaletteOpen = $state(false);
+let isMac = $state(false);
+
+onMount(() => {
+  isMac = typeof navigator !== "undefined" &&
+    /Mac|iPhone|iPod|iPad/i.test(navigator.platform || navigator.userAgent);
+});
+
+afterNavigate(() => {
+  mobileDrawerOpen = false;
+  isBurger = false;
+  const activeGroup = allNavGroups.find((g) =>
+    navigationState.isGroupActive(g, pathname)
+  );
+  navigationState.onNavigate(activeGroup);
+});
+
+$effect(() => {
+  if (typeof document !== "undefined") {
+    document.body.style.overflow = mobileDrawerOpen ? "hidden" : "";
   }
-
-  let { isBurger = $bindable(false), children }: Props = $props();
-
-  let mobileDrawerOpen = $state(false);
-  let commandPaletteOpen = $state(false);
-  let isMac = $state(false);
-
-  onMount(() => {
-    isMac =
-      typeof navigator !== "undefined" &&
-      /Mac|iPhone|iPod|iPad/i.test(navigator.platform || navigator.userAgent);
-  });
-
-  afterNavigate(() => {
-    mobileDrawerOpen = false;
-    isBurger = false;
-    const activeGroup = allNavGroups.find((g) =>
-      navigationState.isGroupActive(g, pathname)
-    );
-    navigationState.onNavigate(activeGroup);
-  });
-
-  $effect(() => {
+  return () => {
     if (typeof document !== "undefined") {
-      document.body.style.overflow = mobileDrawerOpen ? "hidden" : "";
+      document.body.style.overflow = "";
     }
-    return () => {
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "";
-      }
-    };
-  });
+  };
+});
 
-  const readonly = typeof USER_CONFIG !== "undefined" && USER_CONFIG.readonly;
-  const isINR = typeof USER_CONFIG !== "undefined" && USER_CONFIG.default_currency === "INR";
+const readonly = typeof USER_CONFIG !== "undefined" && USER_CONFIG.readonly;
+const isINR = typeof USER_CONFIG !== "undefined" &&
+  USER_CONFIG.default_currency === "INR";
 
-  const navSections: NavSection[] = [
-    {
-      title: "Overview",
-      items: [
-        { kind: "link", label: "Dashboard", href: "/", icon: "fa-solid fa-gauge-high" },
-      ],
-    },
-    {
-      title: "Money",
-      items: [
-        {
-          kind: "group",
-          id: "cash-flow",
-          label: "Cash Flow",
-          icon: "fa-solid fa-arrow-trend-up",
-          children: [
-            { label: "Income Statement", href: "/cash_flow/income_statement" },
-            { label: "Monthly", href: "/cash_flow/monthly" },
-            { label: "Yearly", href: "/cash_flow/yearly" },
-            { label: "Recurring", href: "/cash_flow/recurring" },
-          ],
-        },
-        { kind: "link", label: "Income", href: "/income", icon: "fa-solid fa-money-bill-wave" },
-        {
-          kind: "group",
-          id: "expenses",
-          label: "Expenses",
-          icon: "fa-solid fa-credit-card",
-          children: [
-            { label: "Monthly", href: "/expense/monthly" },
-            { label: "Yearly", href: "/expense/yearly" },
-            { label: "Budget", href: "/expense/budget" },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Wealth",
-      items: [
-        {
-          kind: "group",
-          id: "assets",
-          label: "Assets",
-          icon: "fa-solid fa-wallet",
-          children: [
-            { label: "Balance", href: "/assets/balance" },
-            { label: "Net Worth", href: "/assets/networth" },
-            { label: "Investment", href: "/assets/investment" },
-            { label: "Gain", href: "/assets/gain" },
-            { label: "Allocation", href: "/assets/allocation" },
-            { label: "Analysis", href: "/assets/analysis" },
-          ],
-        },
-        {
-          kind: "group",
-          id: "liabilities",
-          label: "Liabilities",
-          icon: "fa-solid fa-building-columns",
-          children: [
-            { label: "Balance", href: "/liabilities/balance" },
-            { label: "Credit Cards", href: "/liabilities/credit_cards" },
-            { label: "Repayment", href: "/liabilities/repayment" },
-            { label: "Interest", href: "/liabilities/interest" },
-          ],
-        },
-        { kind: "link", label: "Goals", href: "/more/goals", icon: "fa-solid fa-bullseye" },
-      ],
-    },
-    {
-      title: "Ledger",
-      items: [
-        { kind: "link", label: "Transactions", href: "/ledger/transaction", icon: "fa-solid fa-list-check" },
-        { kind: "link", label: "Import", href: "/ledger/import", icon: "fa-solid fa-file-import" },
-        { kind: "link", label: "Editor", href: "/ledger/editor", icon: "fa-solid fa-pen-to-square" },
-        { kind: "link", label: "Postings", href: "/ledger/posting", icon: "fa-solid fa-table-list" },
-        { kind: "link", label: "Prices", href: "/ledger/price", icon: "fa-solid fa-chart-line" },
-      ],
-    },
-    ...(isINR
-      ? [
-          {
-            title: "Tax",
-            items: [
-              {
-                kind: "link" as const,
-                label: "Capital Gains",
-                href: "/more/tax/capital_gains",
-                icon: "fa-solid fa-receipt",
-              },
-              {
-                kind: "link" as const,
-                label: "Tax Harvest",
-                href: "/more/tax/harvest",
-                icon: "fa-solid fa-scissors",
-              },
-              {
-                kind: "link" as const,
-                label: "Schedule AL",
-                href: "/more/tax/schedule_al",
-                icon: "fa-solid fa-file-lines",
-              },
-            ],
-          },
-        ]
-      : []),
-    {
-      title: "Tools",
-      items: [
-        { kind: "link", label: "Sheets", href: "/more/sheets", icon: "fa-solid fa-table" },
-      ],
-    },
-  ];
-
-  const systemSection: NavSection = {
-    title: "System",
+const navSections: NavSection[] = [
+  {
+    title: "Overview",
     items: [
-      { kind: "link", label: "Configuration", href: "/more/config", icon: "fa-solid fa-gear" },
+      {
+        kind: "link",
+        label: "Dashboard",
+        href: "/",
+        icon: "fa-solid fa-gauge-high",
+      },
+    ],
+  },
+  {
+    title: "Money",
+    items: [
       {
         kind: "group",
-        id: "system",
-        label: "System",
-        icon: "fa-solid fa-stethoscope",
+        id: "cash-flow",
+        label: "Cash Flow",
+        icon: "fa-solid fa-arrow-trend-up",
         children: [
-          { label: "Doctor", href: "/more/doctor" },
-          { label: "Logs", href: "/more/logs" },
+          { label: "Income Statement", href: "/cash_flow/income_statement" },
+          { label: "Monthly", href: "/cash_flow/monthly" },
+          { label: "Yearly", href: "/cash_flow/yearly" },
+          { label: "Recurring", href: "/cash_flow/recurring" },
         ],
       },
-      { kind: "link", label: "About", href: "/more/about", icon: "fa-solid fa-circle-info" },
+      {
+        kind: "link",
+        label: "Income",
+        href: "/income",
+        icon: "fa-solid fa-money-bill-wave",
+      },
+      {
+        kind: "group",
+        id: "expenses",
+        label: "Expenses",
+        icon: "fa-solid fa-credit-card",
+        children: [
+          { label: "Monthly", href: "/expense/monthly" },
+          { label: "Yearly", href: "/expense/yearly" },
+          { label: "Budget", href: "/expense/budget" },
+        ],
+      },
     ],
-  };
+  },
+  {
+    title: "Wealth",
+    items: [
+      {
+        kind: "group",
+        id: "assets",
+        label: "Assets",
+        icon: "fa-solid fa-wallet",
+        children: [
+          { label: "Balance", href: "/assets/balance" },
+          { label: "Net Worth", href: "/assets/networth" },
+          { label: "Investment", href: "/assets/investment" },
+          { label: "Gain", href: "/assets/gain" },
+          { label: "Allocation", href: "/assets/allocation" },
+          { label: "Analysis", href: "/assets/analysis" },
+        ],
+      },
+      {
+        kind: "group",
+        id: "liabilities",
+        label: "Liabilities",
+        icon: "fa-solid fa-building-columns",
+        children: [
+          { label: "Balance", href: "/liabilities/balance" },
+          { label: "Credit Cards", href: "/liabilities/credit_cards" },
+          { label: "Repayment", href: "/liabilities/repayment" },
+          { label: "Interest", href: "/liabilities/interest" },
+        ],
+      },
+      {
+        kind: "link",
+        label: "Goals",
+        href: "/more/goals",
+        icon: "fa-solid fa-bullseye",
+      },
+    ],
+  },
+  {
+    title: "Ledger",
+    items: [
+      {
+        kind: "link",
+        label: "Transactions",
+        href: "/ledger/transaction",
+        icon: "fa-solid fa-list-check",
+      },
+      {
+        kind: "link",
+        label: "Import",
+        href: "/ledger/import",
+        icon: "fa-solid fa-file-import",
+      },
+      {
+        kind: "link",
+        label: "Editor",
+        href: "/ledger/editor",
+        icon: "fa-solid fa-pen-to-square",
+      },
+      {
+        kind: "link",
+        label: "Postings",
+        href: "/ledger/posting",
+        icon: "fa-solid fa-table-list",
+      },
+      {
+        kind: "link",
+        label: "Prices",
+        href: "/ledger/price",
+        icon: "fa-solid fa-chart-line",
+      },
+    ],
+  },
+  ...(isINR
+    ? [
+      {
+        title: "Tax",
+        items: [
+          {
+            kind: "link" as const,
+            label: "Capital Gains",
+            href: "/more/tax/capital_gains",
+            icon: "fa-solid fa-receipt",
+          },
+          {
+            kind: "link" as const,
+            label: "Tax Harvest",
+            href: "/more/tax/harvest",
+            icon: "fa-solid fa-scissors",
+          },
+          {
+            kind: "link" as const,
+            label: "Schedule AL",
+            href: "/more/tax/schedule_al",
+            icon: "fa-solid fa-file-lines",
+          },
+        ],
+      },
+    ]
+    : []),
+  {
+    title: "Tools",
+    items: [
+      {
+        kind: "link",
+        label: "Sheets",
+        href: "/more/sheets",
+        icon: "fa-solid fa-table",
+      },
+    ],
+  },
+];
 
-  let allNavGroups = $derived(
-    [...navSections, systemSection].flatMap((sec) =>
-      sec.items.filter((item): item is NavGroup => item.kind === "group")
-    )
-  );
+const systemSection: NavSection = {
+  title: "System",
+  items: [
+    {
+      kind: "link",
+      label: "Configuration",
+      href: "/more/config",
+      icon: "fa-solid fa-gear",
+    },
+    {
+      kind: "group",
+      id: "system",
+      label: "System",
+      icon: "fa-solid fa-stethoscope",
+      children: [
+        { label: "Doctor", href: "/more/doctor" },
+        { label: "Logs", href: "/more/logs" },
+      ],
+    },
+    {
+      kind: "link",
+      label: "About",
+      href: "/more/about",
+      icon: "fa-solid fa-circle-info",
+    },
+  ],
+};
 
-  let pathname = $derived($page.url.pathname);
-  let showDateRange = $derived(
-    pathname === "/cash_flow/monthly" ||
+let allNavGroups = $derived(
+  [...navSections, systemSection].flatMap((sec) =>
+    sec.items.filter((item): item is NavGroup => item.kind === "group")
+  ),
+);
+
+let pathname = $derived($page.url.pathname);
+let showDateRange = $derived(
+  pathname === "/cash_flow/monthly" ||
     pathname === "/expense/monthly" ||
-    pathname === "/assets/networth"
-  );
-  let showMonthPicker = $derived(
-    pathname === "/cash_flow/recurring" ||
+    pathname === "/assets/networth",
+);
+let showMonthPicker = $derived(
+  pathname === "/cash_flow/recurring" ||
     pathname === "/expense/monthly" ||
-    pathname === "/expense/budget"
-  );
-  let showFinancialYearPicker = $derived(
-    pathname === "/cash_flow/income_statement" ||
+    pathname === "/expense/budget",
+);
+let showFinancialYearPicker = $derived(
+  pathname === "/cash_flow/income_statement" ||
     pathname === "/cash_flow/yearly" ||
     pathname === "/expense/yearly" ||
-    pathname === "/more/tax/schedule_al"
-  );
-  let showYearlyDepth = $derived(pathname === "/cash_flow/yearly");
+    pathname === "/more/tax/schedule_al",
+);
+let showYearlyDepth = $derived(pathname === "/cash_flow/yearly");
 
-  const navLinkClass =
-    "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-[var(--paisa-foreground)] no-underline transition-colors hover:bg-[var(--paisa-surface-hover)]";
-  const navLinkActiveClass =
-    "bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]";
-  const navGroupButtonClass =
-    "flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-1.5 text-left text-sm font-medium text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]";
-  const navSubLinkClass =
-    "block rounded px-2.5 py-1.5 text-xs text-[var(--paisa-foreground)]/70 no-underline transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)]";
-  const navSubLinkActiveClass =
-    "font-semibold text-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)]/70";
+const navLinkClass =
+  "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-[var(--paisa-foreground)] no-underline transition-colors hover:bg-[var(--paisa-surface-hover)]";
+const navLinkActiveClass =
+  "bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]";
+const navGroupButtonClass =
+  "flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-1.5 text-left text-sm font-medium text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]";
+const navSubLinkClass =
+  "block rounded px-2.5 py-1.5 text-xs text-[var(--paisa-foreground)]/70 no-underline transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)]";
+const navSubLinkActiveClass =
+  "font-semibold text-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)]/70";
 </script>
 
 {#snippet navPanel(onNavigate?: () => void)}
@@ -367,9 +416,11 @@ import { page } from "$app/stores";
   </div>
 {/snippet}
 
-<svelte:window onkeydown={(e) => e.key === "Escape" && mobileDrawerOpen && (mobileDrawerOpen = false)} />
+<svelte:window
+  onkeydown={(e) => e.key === "Escape" && mobileDrawerOpen && (mobileDrawerOpen = false)} />
 
-<div class="min-h-screen overflow-x-hidden bg-[var(--paisa-canvas-bg)] text-[var(--paisa-foreground)]">
+<div
+  class="min-h-screen overflow-x-hidden bg-[var(--paisa-canvas-bg)] text-[var(--paisa-foreground)]">
   <!-- Desktop Sidebar -->
   <aside
     class="fixed bottom-0 left-0 top-0 z-40 hidden w-64 flex-col border-r border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] lg:flex"

@@ -1,78 +1,80 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { api } from "$lib/api";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { formatPercentage } from "$lib/shared/formatters/currency";
 import type { CreditCardBill } from "$lib/domain/liabilities";
 import type { CreditCardSummary } from "$lib/domain/liabilities";
 import { goto } from "$app/navigation";
-  import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
-  import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
-  import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
-  import { iconify } from "$lib/shared/ui/icon";
-  import { clone } from "es-toolkit";
-  import { onMount } from "svelte";
-  import type { PageData } from "./$types";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
+import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
+import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
+import { iconify } from "$lib/shared/ui/icon";
+import { clone } from "es-toolkit";
+import { onMount } from "svelte";
+import type { PageData } from "./$types";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import Select from "$lib/shared/ui/Select.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 import { findIndex, now, reverse } from "$lib/shared/utils/collection";
 
-  interface Props {
-    data: PageData;
+interface Props {
+  data: PageData;
+}
+
+let { data }: Props = $props();
+
+let creditCard: CreditCardSummary = $state();
+let found = false;
+let selectedBillIndex = $state(0);
+
+let billOptions = $derived(
+  creditCard ? reverse(clone(creditCard.bills)) : [],
+);
+let currentBill = $derived(billOptions[selectedBillIndex]);
+let utilization = $derived(
+  creditCard && creditCard.creditLimit > 0
+    ? creditCard.balance / creditCard.creditLimit
+    : 0,
+);
+let yearlySpendsData = $derived(
+  creditCard
+    ? buildCreditCardYearlySpendsComparison(creditCard.yearlySpends)
+    : undefined,
+);
+
+function lastBillIndex(creditCard: CreditCardSummary): number {
+  const bills = reverse(clone(creditCard.bills));
+  const idx = findIndex(bills, (b) => b.statementEndDate.isSameOrBefore(now()));
+  return idx >= 0 ? idx : 0;
+}
+
+function dueDateSecondary(bill: CreditCardBill): string {
+  if (bill.closingBalance <= 0) return "No dues";
+  if (bill.paidDate) return `Paid ${bill.paidDate.format("DD MMM YYYY")}`;
+  return `Due ${bill.dueDate.fromNow()}`;
+}
+
+$effect(() => {
+  if (billOptions.length > 0 && selectedBillIndex >= billOptions.length) {
+    selectedBillIndex = 0;
+  }
+});
+
+onMount(async () => {
+  ({ creditCard, found } = await api.creditCards.getCreditCard(
+    data.account,
+  ) as unknown as { creditCard: CreditCardSummary; found: boolean });
+  if (!found) {
+    return goto("/liabilities/credit_cards");
   }
 
-  let { data }: Props = $props();
-
-  let creditCard: CreditCardSummary = $state();
-  let found = false;
-  let selectedBillIndex = $state(0);
-
-  let billOptions = $derived(
-    creditCard ? reverse(clone(creditCard.bills)) : [],
-  );
-  let currentBill = $derived(billOptions[selectedBillIndex]);
-  let utilization = $derived(
-    creditCard && creditCard.creditLimit > 0
-      ? creditCard.balance / creditCard.creditLimit
-      : 0,
-  );
-  let yearlySpendsData = $derived(
-    creditCard ? buildCreditCardYearlySpendsComparison(creditCard.yearlySpends) : undefined,
-  );
-
-  function lastBillIndex(creditCard: CreditCardSummary): number {
-    const bills = reverse(clone(creditCard.bills));
-    const idx = findIndex(bills, (b) =>
-      b.statementEndDate.isSameOrBefore(now()),
-    );
-    return idx >= 0 ? idx : 0;
-  }
-
-  function dueDateSecondary(bill: CreditCardBill): string {
-    if (bill.closingBalance <= 0) return "No dues";
-    if (bill.paidDate) return `Paid ${bill.paidDate.format("DD MMM YYYY")}`;
-    return `Due ${bill.dueDate.fromNow()}`;
-  }
-
-  $effect(() => {
-    if (billOptions.length > 0 && selectedBillIndex >= billOptions.length) {
-      selectedBillIndex = 0;
-    }
-  });
-
-  onMount(async () => {
-    ({ creditCard, found } = await api.creditCards.getCreditCard(data.account) as unknown as { creditCard: CreditCardSummary; found: boolean });
-    if (!found) {
-      return goto("/liabilities/credit_cards");
-    }
-
-    selectedBillIndex = lastBillIndex(creditCard);
-  });
+  selectedBillIndex = lastBillIndex(creditCard);
+});
 </script>
 
 <svelte:head>

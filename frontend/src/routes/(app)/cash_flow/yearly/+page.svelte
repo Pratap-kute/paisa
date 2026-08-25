@@ -1,114 +1,114 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { depth } from "$lib/domain/account";
+import { api } from "$lib/api";
+import { depth } from "$lib/domain/account";
 import { firstName } from "$lib/domain/account";
 import type { Graph } from "$lib/shared/charts/types";
 import type { Legend } from "$lib/shared/charts/types";
 import type { Posting } from "$lib/domain/ledger";
 import { onMount } from "svelte";
-  import { partition } from "es-toolkit";
-  import { buildCashFlowSankeyData } from "$lib/features/cash_flow/cash_flow_sankey_data";
-  import { buildCashFlowHierarchyData } from "$lib/features/cash_flow/cash_flow_hierarchy";
-  import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
-  import FinancialHierarchyChart from "$lib/shared/charts/FinancialHierarchyChart.svelte";
-  import { dateMin, dateMax, year } from "../../../../store";
-  import {
-    setCashflowDepthAllowed,
-    cashflowExpenseDepth,
-    cashflowExpenseDepthAllowed,
-    cashflowIncomeDepth,
-    cashflowIncomeDepthAllowed,
-    cashflowViewMode,
-  } from "../../../../persisted_store";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
-  import InputRange from "$lib/shared/ui/InputRange.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
+import { partition } from "es-toolkit";
+import { buildCashFlowSankeyData } from "$lib/features/cash_flow/cash_flow_sankey_data";
+import { buildCashFlowHierarchyData } from "$lib/features/cash_flow/cash_flow_hierarchy";
+import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
+import FinancialHierarchyChart from "$lib/shared/charts/FinancialHierarchyChart.svelte";
+import { dateMax, dateMin, year } from "../../../../store";
+import {
+  cashflowExpenseDepth,
+  cashflowExpenseDepthAllowed,
+  cashflowIncomeDepth,
+  cashflowIncomeDepthAllowed,
+  cashflowViewMode,
+  setCashflowDepthAllowed,
+} from "../../../../persisted_store";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+import InputRange from "$lib/shared/ui/InputRange.svelte";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
 
-  let graph: Record<string, Graph> = $state();
-  let expenses: Posting[] = $state([]);
-  let isLoading = $state(true);
-  let rawGraph: Graph | undefined = $derived.by(() => {
-    if (!graph || isLoading || !graph[$year]) return undefined;
-    return graph[$year];
+let graph: Record<string, Graph> = $state();
+let expenses: Posting[] = $state([]);
+let isLoading = $state(true);
+let rawGraph: Graph | undefined = $derived.by(() => {
+  if (!graph || isLoading || !graph[$year]) return undefined;
+  return graph[$year];
+});
+let selectedGraph: Graph | undefined = $derived.by(() => {
+  if (!graph || isLoading || !graph[$year]) return undefined;
+  return filter(
+    graph[$year],
+    $cashflowIncomeDepth,
+    $cashflowExpenseDepth,
+  );
+});
+let sankeyData = $derived(
+  selectedGraph ? buildCashFlowSankeyData(selectedGraph) : undefined,
+);
+let hierarchyData = $derived(
+  rawGraph
+    ? buildCashFlowHierarchyData(rawGraph)
+    : { roots: [], mode: "treemap" as const },
+);
+let legends: Legend[] = $derived(
+  sankeyData ? sankeyData.legends : [],
+);
+let isEmpty = $derived(!isLoading && Boolean(graph) && !selectedGraph);
+
+let showDepthControls = $derived(
+  $cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1,
+);
+
+function maxDepth(prefix: string) {
+  if (!graph) return 1;
+  const depths = Object.values(graph)
+    .flatMap((g) => g.nodes)
+    .filter((n) => n.name.startsWith(prefix))
+    .map((n) => depth(n.name));
+  const max = arrayMax(depths);
+
+  return max || 1;
+}
+
+function filter(graph: Graph, incomeDepth: number, expenseDepth: number) {
+  if (!graph) return graph;
+
+  const [removed, allowed] = partition(graph.nodes, (n) => {
+    const account = firstName(n.name);
+    if (account === "Income") return depth(n.name) > incomeDepth;
+    if (account === "Expenses") return depth(n.name) > expenseDepth;
+    return false;
   });
-  let selectedGraph: Graph | undefined = $derived.by(() => {
-    if (!graph || isLoading || !graph[$year]) return undefined;
-    return filter(
-      graph[$year],
-      $cashflowIncomeDepth,
-      $cashflowExpenseDepth,
-    );
-  });
-  let sankeyData = $derived(
-    selectedGraph ? buildCashFlowSankeyData(selectedGraph) : undefined,
-  );
-  let hierarchyData = $derived(
-    rawGraph
-      ? buildCashFlowHierarchyData(rawGraph)
-      : { roots: [], mode: "treemap" as const },
-  );
-  let legends: Legend[] = $derived(
-    sankeyData ? sankeyData.legends : [],
-  );
-  let isEmpty = $derived(!isLoading && Boolean(graph) && !selectedGraph);
 
-  let showDepthControls = $derived(
-    $cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1,
-  );
+  const removedIds = removed.map((n) => n.id);
+  return {
+    nodes: allowed,
+    links: graph.links.filter(
+      (l) => !removedIds.includes(l.source) && !removedIds.includes(l.target),
+    ),
+  };
+}
 
-  function maxDepth(prefix: string) {
-    if (!graph) return 1;
-    const depths = Object.values(graph)
-      .flatMap((g) => g.nodes)
-      .filter((n) => n.name.startsWith(prefix))
-      .map((n) => depth(n.name));
-    const max = arrayMax(depths);
-
-    return max || 1;
-  }
-
-  function filter(graph: Graph, incomeDepth: number, expenseDepth: number) {
-    if (!graph) return graph;
-
-    const [removed, allowed] = partition(graph.nodes, (n) => {
-      const account = firstName(n.name);
-      if (account === "Income") return depth(n.name) > incomeDepth;
-      if (account === "Expenses") return depth(n.name) > expenseDepth;
-      return false;
+onMount(async () => {
+  try {
+    ({ expenses, graph } = await api.expense.getExpense() as unknown as {
+      expenses: Posting[];
+      graph: Record<string, Graph>;
     });
-
-    const removedIds = removed.map((n) => n.id);
-    return {
-      nodes: allowed,
-      links: graph.links.filter(
-        (l) => !removedIds.includes(l.source) && !removedIds.includes(l.target),
-      ),
-    };
-  }
-
-  onMount(async () => {
-    try {
-      ({ expenses, graph } = await api.expense.getExpense() as unknown as {
-        expenses: Posting[];
-        graph: Record<string, Graph>;
-      });
-      const firstExpense = minBy(expenses, (e) => e.date);
-      if (firstExpense) {
-        dateMin.set(firstExpense.date);
-      }
-
-      setCashflowDepthAllowed(maxDepth("Expenses"), maxDepth("Income"));
-      isLoading = false;
-    } catch {
-      isLoading = false;
+    const firstExpense = minBy(expenses, (e) => e.date);
+    if (firstExpense) {
+      dateMin.set(firstExpense.date);
     }
-  });
+
+    setCashflowDepthAllowed(maxDepth("Expenses"), maxDepth("Income"));
+    isLoading = false;
+  } catch {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

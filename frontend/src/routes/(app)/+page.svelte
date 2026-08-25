@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
 import { formatFloat } from "$lib/shared/formatters/currency";
 import { formatPercentage } from "$lib/shared/formatters/currency";
 import { now } from "$lib/domain/time";
@@ -13,102 +13,116 @@ import type { Legend } from "$lib/shared/charts/types";
 import type { Posting, Transaction } from "$lib/domain/ledger";
 import type { TransactionSequence } from "$lib/domain/recurring";
 import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-  import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { refresh } from "../../store";
-  import {
-    enrichTrantionSequence, intervalText, nextUnpaidSchedule, sortTrantionSequence, totalRecurring
-  } from "$lib/domain/transaction_sequence";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { sumBy, take } from "es-toolkit";
-  import dayjs from "dayjs";
-  import { onMount } from "svelte";
-import { isEmpty as isEmptyValue, some, sortBy, values } from "$lib/shared/utils/collection";
+import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
+import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+import { refresh } from "../../store";
+import {
+  enrichTrantionSequence,
+  intervalText,
+  nextUnpaidSchedule,
+  sortTrantionSequence,
+  totalRecurring,
+} from "$lib/domain/transaction_sequence";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { sumBy, take } from "es-toolkit";
+import dayjs from "dayjs";
+import { onMount } from "svelte";
+import {
+  isEmpty as isEmptyValue,
+  some,
+  sortBy,
+  values,
+} from "$lib/shared/utils/collection";
 
-  let cashflowLegends: Legend[] = $state([]);
-  let month = $state(now().format("YYYY-MM"));
-  let goalSummaries: GoalSummary[] = $state([]);
-  let transactionSequences: TransactionSequence[] = $state([]);
-  let cashFlows: CashFlow[] = $state([]);
-  let expenses: { [key: string]: Posting[] } = $state({});
-  let xirr = $state(0);
-  let networth: Networth | undefined = $state();
-  let transactions: Transaction[] = $state([]);
-  let budgetsByMonth: Record<string, Budget> = $state({});
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
-  let checkingBalances: Record<string, AssetBreakdown> = $state({});
+let cashflowLegends: Legend[] = $state([]);
+let month = $state(now().format("YYYY-MM"));
+let goalSummaries: GoalSummary[] = $state([]);
+let transactionSequences: TransactionSequence[] = $state([]);
+let cashFlows: CashFlow[] = $state([]);
+let expenses: { [key: string]: Posting[] } = $state({});
+let xirr = $state(0);
+let networth: Networth | undefined = $state();
+let transactions: Transaction[] = $state([]);
+let budgetsByMonth: Record<string, Budget> = $state({});
+let isEmpty = $state(false);
+let isLoading = $state(true);
+let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
-  function hasCashFlowActivity(flows: CashFlow[]) {
-    return some(flows, (c) =>
-      c.income !== 0 ||
-      c.expenses !== 0 ||
-      c.liabilities !== 0 ||
-      c.tax !== 0 ||
-      c.investment !== 0 ||
-      c.checking !== 0 ||
-      c.balance !== 0
-    );
-  }
+function hasCashFlowActivity(flows: CashFlow[]) {
+  return some(flows, (c) =>
+    c.income !== 0 ||
+    c.expenses !== 0 ||
+    c.liabilities !== 0 ||
+    c.tax !== 0 ||
+    c.investment !== 0 ||
+    c.checking !== 0 ||
+    c.balance !== 0);
+}
 
-  let currentBudget = $derived(budgetsByMonth[month]);
-  import { api } from "$lib/api";
+let currentBudget = $derived(budgetsByMonth[month]);
+import { api } from "$lib/api";
 
-  let selectedExpenses: Posting[] = $derived(expenses[month] || []);
-  let totalExpense = $derived(sumBy(selectedExpenses, (p) => p.amount));
-  let selectedExpenseBreakdownData = $derived(
-    buildExpenseBreakdownComparison(selectedExpenses),
-  );
-  let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
-  let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
-  let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
+let selectedExpenses: Posting[] = $derived(expenses[month] || []);
+let totalExpense = $derived(sumBy(selectedExpenses, (p) => p.amount));
+let selectedExpenseBreakdownData = $derived(
+  buildExpenseBreakdownComparison(selectedExpenses),
+);
+let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
+let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
 
-  async function initDemo() {
-    await api.init.initDemoData();
-    refresh();
-  }
+async function initDemo() {
+  await api.init.initDemoData();
+  refresh();
+}
 
-  onMount(async () => {
-    try {
-      const res = await api.dashboard.getDashboard();
-      expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
-      cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
-      goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
-      budgetsByMonth = (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
-      transactionSequences = (res.transactionSequences as unknown as TransactionSequence[]) || [];
-      networth = (res.networth?.networth as unknown as Networth) || null;
-      xirr = res.networth?.xirr || 0;
-      checkingBalances = (res.checkingBalances?.asset_breakdowns as unknown as Record<string, AssetBreakdown>) || {};
-      transactions = (res.transactions as unknown as Transaction[]) || [];
+onMount(async () => {
+  try {
+    const res = await api.dashboard.getDashboard();
+    expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
+    cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
+    goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
+    budgetsByMonth =
+      (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
+    transactionSequences =
+      (res.transactionSequences as unknown as TransactionSequence[]) || [];
+    networth = (res.networth?.networth as unknown as Networth) || null;
+    xirr = res.networth?.xirr || 0;
+    checkingBalances =
+      (res.checkingBalances?.asset_breakdowns as unknown as Record<
+        string,
+        AssetBreakdown
+      >) || {};
+    transactions = (res.transactions as unknown as Transaction[]) || [];
 
-      goalSummaries = sortBy(goalSummaries, (g) => -g.priority);
+    goalSummaries = sortBy(goalSummaries, (g) => -g.priority);
 
-      if (isEmptyValue(transactions)) {
-        isEmpty = true;
-      } else {
-        isEmpty = false;
-      }
-
-      cashflowLegends = cashFlowData.legends ?? [];
-      transactionSequences = take(
-        sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
-        8
-      );
-    } finally {
-      isLoading = false;
+    if (isEmptyValue(transactions)) {
+      isEmpty = true;
+    } else {
+      isEmpty = false;
     }
-  });
+
+    cashflowLegends = cashFlowData.legends ?? [];
+    transactionSequences = take(
+      sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
+      8,
+    );
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <Page width="analysis">

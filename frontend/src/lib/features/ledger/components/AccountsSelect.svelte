@@ -1,52 +1,59 @@
 <script lang="ts">
-  import { iconify } from "$lib/shared/ui/icon";
-  import Select from "svelte-select";
+import { iconify } from "$lib/shared/ui/icon";
+import Select from "svelte-select";
 
-  interface Props {
-    allAccounts: string[];
-    accounts: string[];
-  }
+interface Props {
+  allAccounts: string[];
+  accounts: string[];
+}
 
-  let { allAccounts = [], accounts = $bindable([]) }: Props = $props();
+let { allAccounts = [], accounts = $bindable([]) }: Props = $props();
 
-  let filterText = $state("");
-  let customAccountItems: { value: string; label: string; created?: boolean }[] = $state([]);
+let filterText = $state("");
+let customAccountItems: {
+  value: string;
+  label: string;
+  created?: boolean;
+}[] = $state([]);
 
-  let baseAccountItems = $derived(
-    allAccounts.map((account) => ({
-      value: account,
-      label: account
-    }))
-  );
+let baseAccountItems = $derived(
+  allAccounts.map((account) => ({
+    value: account,
+    label: account,
+  })),
+);
 
-  let allAccountItems = $derived([...baseAccountItems, ...customAccountItems]);
+let allAccountItems = $derived([...baseAccountItems, ...customAccountItems]);
 
-  let accountItems = $derived(
-    accounts.map((account) => ({
-      value: account,
-      label: account
-    }))
-  );
+let accountItems = $derived(
+  accounts.map((account) => ({
+    value: account,
+    label: account,
+  })),
+);
 
-  function handleFilter(e: any) {
-    if (accountItems?.find((i) => i.label === filterText)) return;
-    if (e.detail.length === 0 && filterText.length > 0) {
-      if (!customAccountItems.some((i) => i.value === filterText)) {
-        customAccountItems = [...customAccountItems, { value: filterText, label: filterText, created: true }];
-      }
+function handleFilter(e: any) {
+  if (accountItems?.find((i) => i.label === filterText)) return;
+  if (e.detail.length === 0 && filterText.length > 0) {
+    if (!customAccountItems.some((i) => i.value === filterText)) {
+      customAccountItems = [
+        ...customAccountItems,
+        { value: filterText, label: filterText, created: true },
+      ];
     }
   }
+}
 
-  function handleChange(e: any) {
-    let items: any[];
-    if (e.type === "clear") {
-      items = accountItems.filter((item) => item.value !== e.detail?.value);
-    } else {
-      items = structuredClone(e.detail) || [];
-    }
-
-    accounts = items.map((i) => i.value);
+function handleChange(e: any) {
+  let items: any[];
+  if (e.type === "clear") {
+    items = accountItems.filter((item) => item.value !== e.detail?.value);
+  } else {
+    items = structuredClone(e.detail) || [];
   }
+
+  accounts = items.map((i) => i.value);
+}
 </script>
 
 <Select
@@ -73,8 +80,7 @@
 </Select>
 
 <style>
-  :global(.paisa-select-expandable) {
-    --max-height: 200px;
-  }
+:global(.paisa-select-expandable) {
+  --max-height: 200px;
+}
 </style>
-

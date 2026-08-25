@@ -1,59 +1,71 @@
 <script lang="ts">
-  import { isMobile } from "$lib/shared/browser/responsive";
+import { isMobile } from "$lib/shared/browser/responsive";
 import { monthDays } from "$lib/domain/time";
 import type { TransactionSchedule } from "$lib/domain/recurring";
 import type { TransactionSequence } from "$lib/domain/recurring";
-import { enrichTrantionSequence, nextUnpaidSchedule, sortTrantionSequence, } from "$lib/domain/transaction_sequence";
-  import { helpUrl } from "$lib/shared/browser/navigation";
-  import { api } from "$lib/api";
-  import { compact, flatMap, groupBy } from "es-toolkit";
-  import { onMount } from "svelte";
-  import RecurringCard from "$lib/features/cash_flow/components/RecurringCard.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { month, setAllowedDateRange } from "../../../../store";
-  import type { Dayjs } from "dayjs";
-  import RecurringDay from "$lib/features/cash_flow/components/RecurringDay.svelte";
-  import dayjs from "dayjs";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
+import {
+  enrichTrantionSequence,
+  nextUnpaidSchedule,
+  sortTrantionSequence,
+} from "$lib/domain/transaction_sequence";
+import { helpUrl } from "$lib/shared/browser/navigation";
+import { api } from "$lib/api";
+import { compact, flatMap, groupBy } from "es-toolkit";
+import { onMount } from "svelte";
+import RecurringCard from "$lib/features/cash_flow/components/RecurringCard.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { month, setAllowedDateRange } from "../../../../store";
+import type { Dayjs } from "dayjs";
+import RecurringDay from "$lib/features/cash_flow/components/RecurringDay.svelte";
+import dayjs from "dayjs";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
-  let transactionSequences: TransactionSequence[] = $state([]);
-  let transactionSequencesDelayed: TransactionSequence[] = $state([]);
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
+let transactionSequences: TransactionSequence[] = $state([]);
+let transactionSequencesDelayed: TransactionSequence[] = $state([]);
+let isEmpty = $state(false);
+let isLoading = $state(true);
 
-  let days: Dayjs[] = $derived(monthDays($month).days);
-  let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
-    groupBy(
-      transactionSequences.flatMap(
-        (ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [],
-      ),
-      (s) => s.scheduled.format("YYYY-MM-DD"),
+let days: Dayjs[] = $derived(monthDays($month).days);
+let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
+  groupBy(
+    transactionSequences.flatMap(
+      (ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [],
     ),
-  );
+    (s) => s.scheduled.format("YYYY-MM-DD"),
+  ),
+);
 
-  onMount(async () => {
-    try {
-      const res = await api.recurring.getRecurringTransactions();
-      transactionSequences = (res.transaction_sequences as unknown as TransactionSequence[]) || [];
+onMount(async () => {
+  try {
+    const res = await api.recurring.getRecurringTransactions();
+    transactionSequences =
+      (res.transaction_sequences as unknown as TransactionSequence[]) || [];
 
-      if (isEmptyValue(transactionSequences)) {
-        isEmpty = true;
-      }
-
-      transactionSequences = sortTrantionSequence(enrichTrantionSequence(transactionSequences));
-
-      setAllowedDateRange(
-        compact(flatMap(transactionSequences, (ts) => ts.schedules.map((s) => s.scheduled))),
-      );
-
-      transactionSequencesDelayed = transactionSequences;
-    } finally {
-      isLoading = false;
+    if (isEmptyValue(transactionSequences)) {
+      isEmpty = true;
     }
-  });
+
+    transactionSequences = sortTrantionSequence(
+      enrichTrantionSequence(transactionSequences),
+    );
+
+    setAllowedDateRange(
+      compact(
+        flatMap(
+          transactionSequences,
+          (ts) => ts.schedules.map((s) => s.scheduled),
+        ),
+      ),
+    );
+
+    transactionSequencesDelayed = transactionSequences;
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

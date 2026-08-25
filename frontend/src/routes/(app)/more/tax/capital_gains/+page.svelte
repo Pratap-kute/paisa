@@ -1,115 +1,118 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import type { CapitalGain } from "$lib/domain/tax";
+import { api } from "$lib/api";
+import type { CapitalGain } from "$lib/domain/tax";
 import type { FYCapitalGain } from "$lib/domain/tax";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import { sumBy, uniq } from "es-toolkit";
-  import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { values } from "$lib/shared/utils/collection";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
+import Card from "$lib/shared/ui/Card.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import { sumBy, uniq } from "es-toolkit";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { values } from "$lib/shared/utils/collection";
 
-  let years: string[] = $state([]);
-  let selectedYear: string = $state("");
-  let capitalGains: CapitalGain[] = $state([]);
-  let isLoading = $state(true);
+let years: string[] = $state([]);
+let selectedYear: string = $state("");
+let capitalGains: CapitalGain[] = $state([]);
+let isLoading = $state(true);
 
-  let hasYears = $derived(years.length > 0);
+let hasYears = $derived(years.length > 0);
 
-  // Active gains for the selected year
-  let activeFyGains = $derived.by((): FYCapitalGain[] => {
-    if (!selectedYear) return [];
-    if (selectedYear === "all") {
-      return capitalGains.flatMap((cg) => Object.values(cg.fy));
-    }
-    return capitalGains.flatMap((cg) => cg.fy[selectedYear] ? [cg.fy[selectedYear]] : []);
-  });
+// Active gains for the selected year
+let activeFyGains = $derived.by((): FYCapitalGain[] => {
+  if (!selectedYear) return [];
+  if (selectedYear === "all") {
+    return capitalGains.flatMap((cg) => Object.values(cg.fy));
+  }
+  return capitalGains.flatMap((cg) =>
+    cg.fy[selectedYear] ? [cg.fy[selectedYear]] : []
+  );
+});
 
-  // KPIs for the selected view
-  let metrics = $derived.by(() => {
-    const withdrawn = sumBy(activeFyGains, (fy) => fy.sell_price);
-    const purchase = sumBy(activeFyGains, (fy) => fy.purchase_price);
-    const gain = sumBy(activeFyGains, (fy) => fy.tax.gain);
-    const taxableGain = sumBy(activeFyGains, (fy) => fy.tax.taxable);
-    const shortTermTax = sumBy(activeFyGains, (fy) => fy.tax.short_term);
-    const longTermTax = sumBy(activeFyGains, (fy) => fy.tax.long_term);
-    const slabTax = sumBy(activeFyGains, (fy) => fy.tax.slab);
-    const totalTax = shortTermTax + longTermTax + slabTax;
+// KPIs for the selected view
+let metrics = $derived.by(() => {
+  const withdrawn = sumBy(activeFyGains, (fy) => fy.sell_price);
+  const purchase = sumBy(activeFyGains, (fy) => fy.purchase_price);
+  const gain = sumBy(activeFyGains, (fy) => fy.tax.gain);
+  const taxableGain = sumBy(activeFyGains, (fy) => fy.tax.taxable);
+  const shortTermTax = sumBy(activeFyGains, (fy) => fy.tax.short_term);
+  const longTermTax = sumBy(activeFyGains, (fy) => fy.tax.long_term);
+  const slabTax = sumBy(activeFyGains, (fy) => fy.tax.slab);
+  const totalTax = shortTermTax + longTermTax + slabTax;
 
+  return {
+    withdrawn,
+    purchase,
+    gain,
+    taxableGain,
+    shortTermTax,
+    longTermTax,
+    slabTax,
+    totalTax,
+  };
+});
+
+// Yearly summary rows for the "All Years" comparison table
+let yearlySummaries = $derived.by(() => {
+  return years.map((yr) => {
+    const yrGains = capitalGains.flatMap((cg) => cg.fy[yr] ? [cg.fy[yr]] : []);
+    const sold = sumBy(yrGains, (fy) => fy.sell_price);
+    const gain = sumBy(yrGains, (fy) => fy.tax.gain);
+    const taxable = sumBy(yrGains, (fy) => fy.tax.taxable);
+    const stcg = sumBy(yrGains, (fy) => fy.tax.short_term);
+    const ltcg = sumBy(yrGains, (fy) => fy.tax.long_term);
+    const slab = sumBy(yrGains, (fy) => fy.tax.slab);
     return {
-      withdrawn,
-      purchase,
+      year: yr,
+      assetCount: yrGains.length,
+      sold,
       gain,
-      taxableGain,
-      shortTermTax,
-      longTermTax,
-      slabTax,
-      totalTax,
+      taxable,
+      stcg,
+      ltcg,
+      slab,
+      totalTax: stcg + ltcg + slab,
     };
   });
+});
 
-  // Yearly summary rows for the "All Years" comparison table
-  let yearlySummaries = $derived.by(() => {
-    return years.map((yr) => {
-      const yrGains = capitalGains.flatMap((cg) => cg.fy[yr] ? [cg.fy[yr]] : []);
-      const sold = sumBy(yrGains, (fy) => fy.sell_price);
-      const gain = sumBy(yrGains, (fy) => fy.tax.gain);
-      const taxable = sumBy(yrGains, (fy) => fy.tax.taxable);
-      const stcg = sumBy(yrGains, (fy) => fy.tax.short_term);
-      const ltcg = sumBy(yrGains, (fy) => fy.tax.long_term);
-      const slab = sumBy(yrGains, (fy) => fy.tax.slab);
-      return {
-        year: yr,
-        assetCount: yrGains.length,
-        sold,
-        gain,
-        taxable,
-        stcg,
-        ltcg,
-        slab,
-        totalTax: stcg + ltcg + slab,
-      };
-    });
-  });
+function gainStatus(value: number): "positive" | "negative" | "neutral" {
+  if (value > 0) return "positive";
+  if (value < 0) return "negative";
+  return "neutral";
+}
 
-  function gainStatus(value: number): "positive" | "negative" | "neutral" {
-    if (value > 0) return "positive";
-    if (value < 0) return "negative";
-    return "neutral";
-  }
+function gainClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
 
-  function gainClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
-  }
-
-  onMount(async () => {
-    try {
-      const { capital_gains } = await api.capitalGains.getCapitalGains() as unknown as {
+onMount(async () => {
+  try {
+    const { capital_gains } = await api.capitalGains
+      .getCapitalGains() as unknown as {
         capital_gains: Record<string, CapitalGain>;
       };
 
-      years = uniq(
-        Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),
-      )
-        .sort()
-        .reverse();
+    years = uniq(
+      Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),
+    )
+      .sort()
+      .reverse();
 
-      capitalGains = values(capital_gains);
-      if (years.length > 0) {
-        selectedYear = years[0];
-      }
-    } finally {
-      isLoading = false;
+    capitalGains = values(capital_gains);
+    if (years.length > 0) {
+      selectedYear = years[0];
     }
-  });
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

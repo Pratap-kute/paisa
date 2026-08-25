@@ -1,52 +1,57 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+import { api } from "$lib/api";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 import { formatFloat } from "$lib/shared/formatters/currency";
 import type { Interest } from "$lib/domain/liabilities";
-import { buildInterestOverviewComparison, buildInterestTimelineSeries, interestSummary, } from "$lib/features/liabilities/interest_data";
-    import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+import {
+  buildInterestOverviewComparison,
+  buildInterestTimelineSeries,
+  interestSummary,
+} from "$lib/features/liabilities/interest_data";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
 
-  let isEmpty = $state(false);
-  let isLoading = $state(true);
-  let interests: Interest[] = $state([]);
-  let overviewData = $derived(buildInterestOverviewComparison(interests));
+let isEmpty = $state(false);
+let isLoading = $state(true);
+let interests: Interest[] = $state([]);
+let overviewData = $derived(buildInterestOverviewComparison(interests));
 
-  function hasLiabilityActivity(interests: Interest[]) {
-    return some(interests, (interest) =>
+function hasLiabilityActivity(interests: Interest[]) {
+  return some(
+    interests,
+    (interest) =>
       !isEmptyValue(interest.overview_timeline) &&
       some(interest.overview_timeline, (point) =>
         point.drawn_amount !== 0 ||
         point.interest_amount !== 0 ||
-        point.repaid_amount !== 0
-      )
-    );
-  }
+        point.repaid_amount !== 0),
+  );
+}
 
-  onMount(async () => {
-    try {
-      const { interest_timeline_breakdown: loadedInterests } = await api.liabilities.getLiabilitiesInterest() as unknown as {
+onMount(async () => {
+  try {
+    const { interest_timeline_breakdown: loadedInterests } = await api
+      .liabilities.getLiabilitiesInterest() as unknown as {
         interest_timeline_breakdown: Interest[];
       };
 
-      if (!hasLiabilityActivity(loadedInterests)) {
-        isEmpty = true;
-        return;
-      }
-
-      interests = loadedInterests;
-      isLoading = false;
-    } finally {
-      isLoading = false;
+    if (!hasLiabilityActivity(loadedInterests)) {
+      isEmpty = true;
+      return;
     }
-  });
 
+    interests = loadedInterests;
+    isLoading = false;
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>
@@ -66,7 +71,9 @@ import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
       empty={!isLoading && isEmpty}
       emptyMessage="No liability activity in this period"
     >
-      <ComparisonBarChart data={overviewData} ariaLabel="Liability interest overview" testId="interest-overview-echart" />
+      <ComparisonBarChart data={overviewData}
+        ariaLabel="Liability interest overview"
+        testId="interest-overview-echart" />
     </ChartFrame>
   </Section>
 

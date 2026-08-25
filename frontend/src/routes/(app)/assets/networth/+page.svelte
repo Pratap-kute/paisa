@@ -1,66 +1,69 @@
 <script lang="ts">
-  import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
 import type { Legend } from "$lib/shared/charts/types";
 import type { Networth } from "$lib/domain/assets";
 import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { api } from "$lib/api";
-  import { last } from "es-toolkit";
-  import { onMount } from "svelte";
-  import {
-    dateMin,
-    dateMax,
-    dateRange,
-    dateRangeOption,
-    setAllowedDateRange,
-  } from "../../../../store";
-  import DateRange from "$lib/shared/ui/DateRange.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
-  import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
+import { api } from "$lib/api";
+import { last } from "es-toolkit";
+import { onMount } from "svelte";
+import {
+  dateMax,
+  dateMin,
+  dateRange,
+  dateRangeOption,
+  setAllowedDateRange,
+} from "../../../../store";
+import DateRange from "$lib/shared/ui/DateRange.svelte";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
+import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
 import { filter, map } from "$lib/shared/utils/collection";
 
-  let networth = $state(0);
-  let investment = $state(0);
-  let gain = $state(0);
-  let xirr = $state(0);
-  let isLoading = $state(true);
-  let points: Networth[] = $state([]);
-  let legends: Legend[] = $state([]);
+let networth = $state(0);
+let investment = $state(0);
+let gain = $state(0);
+let xirr = $state(0);
+let isLoading = $state(true);
+let points: Networth[] = $state([]);
+let legends: Legend[] = $state([]);
 
-  let filteredPoints = $derived(
-    filter(
-      points,
-      (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from),
-    ),
-  );
+let filteredPoints = $derived(
+  filter(
+    points,
+    (p) =>
+      p.date.isSameOrBefore($dateRange.to) &&
+      p.date.isSameOrAfter($dateRange.from),
+  ),
+);
 
-  $effect(() => {
-    legends = buildNetworthSeries(filteredPoints).legends ?? [];
-  });
+$effect(() => {
+  legends = buildNetworthSeries(filteredPoints).legends ?? [];
+});
 
-  onMount(async () => {
-    try {
-      const result = await api.networth.getNetworth();
-      points = (result.networthTimeline as unknown as Networth[]) || [];
-      setAllowedDateRange(map(points, (p) => p.date));
+onMount(async () => {
+  try {
+    const result = await api.networth.getNetworth();
+    points = (result.networthTimeline as unknown as Networth[]) || [];
+    setAllowedDateRange(map(points, (p) => p.date));
 
-      const current = last(points);
-      if (current) {
-        networth = current.investmentAmount + current.gainAmount - current.withdrawalAmount;
-        investment = current.investmentAmount - current.withdrawalAmount;
-        gain = current.gainAmount;
-      }
-      xirr = result.xirr || 0;
-    } finally {
-      isLoading = false;
+    const current = last(points);
+    if (current) {
+      networth = current.investmentAmount + current.gainAmount -
+        current.withdrawalAmount;
+      investment = current.investmentAmount - current.withdrawalAmount;
+      gain = current.gainAmount;
     }
-  });
+    xirr = result.xirr || 0;
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

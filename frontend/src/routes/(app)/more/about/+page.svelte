@@ -1,70 +1,70 @@
 <script lang="ts">
-  import Logo from "$lib/shared/layout/Logo.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+import Logo from "$lib/shared/layout/Logo.svelte";
+import Card from "$lib/shared/ui/Card.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
 
-  const resources = [
-    {
-      name: "Documentation",
-      desc: "Guides, tutorials, and ledger configuration reference",
-      href: "https://paisa.fyi",
-      icon: "fa-solid fa-book",
-      badge: "Docs",
-    },
-    {
-      name: "Source Code",
-      desc: "GitHub repository (Fork maintained by Pratap Kute)",
-      href: "https://github.com/Pratap-kute/paisa",
-      icon: "fa-brands fa-github",
-      badge: "GitHub",
-    },
-    {
-      name: "Releases & Changelog",
-      desc: "Latest release downloads, updates, and release notes",
-      href: "https://github.com/Pratap-kute/paisa/releases",
-      icon: "fa-solid fa-download",
-      badge: "v0.9.0",
-    },
-    {
-      name: "Live Demo",
-      desc: "Interactive demo environment with sample ledger data",
-      href: "https://demo.paisa.fyi",
-      icon: "fa-solid fa-desktop",
-      badge: "Demo",
-    },
-    {
-      name: "Community Discussions",
-      desc: "Ask questions, share workflows, and request features",
-      href: "https://github.com/Pratap-kute/paisa/discussions",
-      icon: "fa-regular fa-comments",
-      badge: "Community",
-    },
-    {
-      name: "Issue Tracker",
-      desc: "Report bugs or submit feature suggestions",
-      href: "https://github.com/Pratap-kute/paisa/issues",
-      icon: "fas fa-bug",
-      badge: "Support",
-    },
-    {
-      name: "Matrix Chat",
-      desc: "Real-time discussion with community contributors",
-      href: "https://matrix.to/#/#paisa:matrix.org",
-      icon: "fa-solid fa-comments",
-      badge: "Chat",
-    },
-  ];
+const resources = [
+  {
+    name: "Documentation",
+    desc: "Guides, tutorials, and ledger configuration reference",
+    href: "https://paisa.fyi",
+    icon: "fa-solid fa-book",
+    badge: "Docs",
+  },
+  {
+    name: "Source Code",
+    desc: "GitHub repository (Fork maintained by Pratap Kute)",
+    href: "https://github.com/Pratap-kute/paisa",
+    icon: "fa-brands fa-github",
+    badge: "GitHub",
+  },
+  {
+    name: "Releases & Changelog",
+    desc: "Latest release downloads, updates, and release notes",
+    href: "https://github.com/Pratap-kute/paisa/releases",
+    icon: "fa-solid fa-download",
+    badge: "v0.9.0",
+  },
+  {
+    name: "Live Demo",
+    desc: "Interactive demo environment with sample ledger data",
+    href: "https://demo.paisa.fyi",
+    icon: "fa-solid fa-desktop",
+    badge: "Demo",
+  },
+  {
+    name: "Community Discussions",
+    desc: "Ask questions, share workflows, and request features",
+    href: "https://github.com/Pratap-kute/paisa/discussions",
+    icon: "fa-regular fa-comments",
+    badge: "Community",
+  },
+  {
+    name: "Issue Tracker",
+    desc: "Report bugs or submit feature suggestions",
+    href: "https://github.com/Pratap-kute/paisa/issues",
+    icon: "fas fa-bug",
+    badge: "Support",
+  },
+  {
+    name: "Matrix Chat",
+    desc: "Real-time discussion with community contributors",
+    href: "https://matrix.to/#/#paisa:matrix.org",
+    icon: "fa-solid fa-comments",
+    badge: "Chat",
+  },
+];
 
-  function externalLink(url: string) {
-    if (typeof window !== "undefined" && window.runtime?.BrowserOpenURL) {
-      window.runtime.BrowserOpenURL(url);
-    } else {
-      window.open(url, "_blank");
-    }
+function externalLink(url: string) {
+  if (typeof window !== "undefined" && window.runtime?.BrowserOpenURL) {
+    window.runtime.BrowserOpenURL(url);
+  } else {
+    window.open(url, "_blank");
   }
+}
 </script>
 
 <svelte:head>
@@ -81,14 +81,19 @@
     <div class="flex flex-col gap-6">
       <!-- Hero Branding Card -->
       <Card padding="lg" class="w-full overflow-hidden">
-        <div class="flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
-          <div class="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
-            <div class="shrink-0 transition-transform duration-300 hover:scale-105">
+        <div
+          class="flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
+          <div
+            class="flex flex-col items-center gap-4 text-center md:flex-row md:text-left">
+            <div
+              class="shrink-0 transition-transform duration-300 hover:scale-105">
               <Logo size={96} />
             </div>
             <div>
-              <div class="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-                <h1 class="text-2xl font-bold tracking-tight text-[var(--paisa-text-primary)]">
+              <div
+                class="flex flex-wrap items-center justify-center gap-2 md:justify-start">
+                <h1
+                  class="text-2xl font-bold tracking-tight text-[var(--paisa-text-primary)]">
                   Paisa
                 </h1>
                 <Badge variant="primary" size="sm" rounded>v0.9.0</Badge>
@@ -97,7 +102,8 @@
               <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">
                 Local-first, privacy-focused financial analytics & plain text accounting for personal ledgers.
               </p>
-              <div class="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs md:justify-start">
+              <div
+                class="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs md:justify-start">
                 <span class="font-medium text-[var(--paisa-text-primary)]">
                   Maintained by <strong class="text-[var(--paisa-brand-primary)]">Pratap Kute</strong>
                 </span>
@@ -106,7 +112,8 @@
                   Originally created by <strong class="text-[var(--paisa-text-primary)]">Ananthakumaran</strong>
                 </span>
               </div>
-              <div class="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--paisa-text-secondary)] md:justify-start">
+              <div
+                class="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs text-[var(--paisa-text-secondary)] md:justify-start">
                 <span class="inline-flex items-center gap-1">
                   <i class="fas fa-shield-halved text-[var(--paisa-positive)]"></i>
                   100% Offline & Private
@@ -134,14 +141,16 @@
               <i class="fa-brands fa-github"></i>
               <span>Star on GitHub</span>
             </button>
-            <span class="text-[0.6875rem] text-[var(--paisa-text-muted)]">Licensed under GNU AGPL-3.0</span>
+            <span
+              class="text-[0.6875rem] text-[var(--paisa-text-muted)]">Licensed under GNU AGPL-3.0</span>
           </div>
         </div>
       </Card>
 
       <!-- Key Resources & Links Grid -->
       <div>
-        <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+        <h2
+          class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
           Resources & Community
         </h2>
 
@@ -182,32 +191,39 @@
       <!-- System & Environment Highlights -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card padding="md" class="w-full">
-          <div class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
+          <div
+            class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
             <i class="fas fa-keyboard text-[var(--paisa-brand-primary)]"></i>
             <span>Keyboard Shortcuts</span>
           </div>
-          <div class="mt-2.5 flex flex-col gap-2 text-xs text-[var(--paisa-text-secondary)]">
+          <div
+            class="mt-2.5 flex flex-col gap-2 text-xs text-[var(--paisa-text-secondary)]">
             <div class="flex items-center justify-between">
               <span>Command Palette</span>
-              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + K / ⌘K</kbd>
+              <kbd
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + K / ⌘K</kbd>
             </div>
             <div class="flex items-center justify-between">
               <span>Save File in Editor</span>
-              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + S / ⌘S</kbd>
+              <kbd
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + S / ⌘S</kbd>
             </div>
             <div class="flex items-center justify-between">
               <span>Format Journal</span>
-              <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + Shift + I</kbd>
+              <kbd
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + Shift + I</kbd>
             </div>
           </div>
         </Card>
 
         <Card padding="md" class="w-full">
-          <div class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
+          <div
+            class="flex items-center gap-2 text-sm font-semibold text-[var(--paisa-text-primary)]">
             <i class="fas fa-cube text-[var(--paisa-brand-primary)]"></i>
             <span>Architecture & Privacy</span>
           </div>
-          <div class="mt-2.5 flex flex-col gap-1.5 text-xs text-[var(--paisa-muted-foreground)]">
+          <div
+            class="mt-2.5 flex flex-col gap-1.5 text-xs text-[var(--paisa-muted-foreground)]">
             <p>• Plain text ledger engine supporting standard double-entry bookkeeping format.</p>
             <p>• Data never leaves your machine. Zero tracking, zero telemetry, 100% offline.</p>
             <p>• Built with modern web technologies: Svelte 5, TypeScript, and ECharts.</p>

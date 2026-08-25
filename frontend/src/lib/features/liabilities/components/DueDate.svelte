@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { dueDateIcon } from "$lib/shared/ui/due_date";
-  import dayjs from "dayjs";
+import { dueDateIcon } from "$lib/shared/ui/due_date";
+import dayjs from "dayjs";
 
-  interface Props {
-    dueDate: dayjs.Dayjs;
-    paidDate: dayjs.Dayjs;
-    amountDue?: number;
-  }
+interface Props {
+  dueDate: dayjs.Dayjs;
+  paidDate: dayjs.Dayjs;
+  amountDue?: number;
+}
 
-  let { dueDate, paidDate, amountDue = undefined }: Props = $props();
+let { dueDate, paidDate, amountDue = undefined }: Props = $props();
 
-  let icon = $derived(dueDateIcon(dueDate, paidDate, amountDue));
+let icon = $derived(dueDateIcon(dueDate, paidDate, amountDue));
 </script>
 
 <span title="due on {dueDate.format('DD MMM YYYY')}">

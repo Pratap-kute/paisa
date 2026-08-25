@@ -1,42 +1,48 @@
 <script lang="ts">
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import type { InvestmentYearlyCard as InvestmentYearlyCardType } from "$lib/domain/assets";
-  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+import Card from "$lib/shared/ui/Card.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import type { InvestmentYearlyCard as InvestmentYearlyCardType } from "$lib/domain/assets";
+import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
 
-  interface Props {
-    card: InvestmentYearlyCardType;
-  }
+interface Props {
+  card: InvestmentYearlyCardType;
+}
 
-  let { card }: Props = $props();
+let { card }: Props = $props();
 
-  let financialYear = $derived(
-    `${card.start_date.format("YYYY")} - ${card.end_date.format("YY")}`,
-  );
+let financialYear = $derived(
+  `${card.start_date.format("YYYY")} - ${card.end_date.format("YY")}`,
+);
 
-  let savingsVariant = $derived<"success" | "primary" | "warning" | "danger">(
-    card.savings_rate >= 50
-      ? "success"
-      : card.savings_rate >= 20
-        ? "primary"
-        : card.savings_rate > 0
-          ? "warning"
-          : "danger",
-  );
+let savingsVariant = $derived<"success" | "primary" | "warning" | "danger">(
+  card.savings_rate >= 50
+    ? "success"
+    : card.savings_rate >= 20
+    ? "primary"
+    : card.savings_rate > 0
+    ? "warning"
+    : "danger",
+);
 
-  const rows = $derived([
-    { label: "Gross Salary Income", value: formatCurrency(card.gross_salary_income) },
-    { label: "Gross Other Income", value: formatCurrency(card.gross_other_income) },
-    { label: "Tax", value: formatCurrency(card.net_tax) },
-    { label: "Net Income", value: formatCurrency(card.net_income) },
-    { label: "Net Expense", value: formatCurrency(card.net_expense) },
-    {
-      label: "Investment",
-      value: formatCurrency(card.net_investment),
-      highlight: true,
-    },
-    { label: "Savings Rate", value: `${formatFloat(card.savings_rate)}%` },
-  ]);
+const rows = $derived([
+  {
+    label: "Gross Salary Income",
+    value: formatCurrency(card.gross_salary_income),
+  },
+  {
+    label: "Gross Other Income",
+    value: formatCurrency(card.gross_other_income),
+  },
+  { label: "Tax", value: formatCurrency(card.net_tax) },
+  { label: "Net Income", value: formatCurrency(card.net_income) },
+  { label: "Net Expense", value: formatCurrency(card.net_expense) },
+  {
+    label: "Investment",
+    value: formatCurrency(card.net_investment),
+    highlight: true,
+  },
+  { label: "Savings Rate", value: `${formatFloat(card.savings_rate)}%` },
+]);
 </script>
 
 <Card padding="sm">

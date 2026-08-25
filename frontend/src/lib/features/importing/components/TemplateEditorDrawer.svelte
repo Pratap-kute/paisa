@@ -1,117 +1,126 @@
 <script lang="ts">
-  import { Dialog as BitsDialog } from "bits-ui";
-  import type { EditorView } from "@codemirror/view";
-  import {
-    createEditor, editorState as templateEditorState, updateContent, } from "$lib/features/editor/template_editor";
-  import type { ImportTemplate } from "$lib/features/importing/types";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import IconButton from "$lib/shared/ui/IconButton.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import FormField from "$lib/shared/layout/FormField.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
+import { Dialog as BitsDialog } from "bits-ui";
+import type { EditorView } from "@codemirror/view";
+import {
+  createEditor,
+  editorState as templateEditorState,
+  updateContent,
+} from "$lib/features/editor/template_editor";
+import type { ImportTemplate } from "$lib/features/importing/types";
+import Button from "$lib/shared/ui/Button.svelte";
+import IconButton from "$lib/shared/ui/IconButton.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
+import FormField from "$lib/shared/layout/FormField.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
 
-  interface Props {
-    open?: boolean;
-    selectedTemplate?: ImportTemplate;
-    templates?: ImportTemplate[];
-    columns?: string[];
-    onsave?: (name: string, content: string) => Promise<void>;
-    ondelete?: (template: ImportTemplate) => Promise<void>;
-  }
+interface Props {
+  open?: boolean;
+  selectedTemplate?: ImportTemplate;
+  templates?: ImportTemplate[];
+  columns?: string[];
+  onsave?: (name: string, content: string) => Promise<void>;
+  ondelete?: (template: ImportTemplate) => Promise<void>;
+}
 
-  let {
-    open = $bindable(false),
-    selectedTemplate,
-    templates = [],
-    columns = [],
-    onsave,
-    ondelete,
-  }: Props = $props();
+let {
+  open = $bindable(false),
+  selectedTemplate,
+  templates = [],
+  columns = [],
+  onsave,
+  ondelete,
+}: Props = $props();
 
-  let editorView = $state<EditorView | null>(null);
-  let showCheatsheet = $state(false);
-  let showSaveAsModal = $state(false);
-  let saveAsName = $state("");
+let editorView = $state<EditorView | null>(null);
+let showCheatsheet = $state(false);
+let showSaveAsModal = $state(false);
+let saveAsName = $state("");
 
-  const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
-  const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
-  const saveAsNameDuplicate = $derived(
-    templates.some((t) => t.name === saveAsName && t.template_type === "custom"),
+const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
+const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
+const saveAsNameDuplicate = $derived(
+  templates.some((t) => t.name === saveAsName && t.template_type === "custom"),
+);
+
+function initCodeMirror(node: HTMLElement, template?: ImportTemplate) {
+  const editor = createEditor(
+    template?.content || selectedTemplate?.content || "",
+    node,
   );
+  editorView = editor;
 
-  function initCodeMirror(node: HTMLElement, template?: ImportTemplate) {
-    const editor = createEditor(template?.content || selectedTemplate?.content || "", node);
-    editorView = editor;
-
-    return {
-      update(newTemplate?: ImportTemplate) {
-        if (editor && newTemplate) {
-          const currentDoc = editor.state.doc.toString();
-          if (currentDoc !== newTemplate.content && !hasUnsavedChanges) {
-            updateContent(editor, newTemplate.content);
-          }
+  return {
+    update(newTemplate?: ImportTemplate) {
+      if (editor && newTemplate) {
+        const currentDoc = editor.state.doc.toString();
+        if (currentDoc !== newTemplate.content && !hasUnsavedChanges) {
+          updateContent(editor, newTemplate.content);
         }
-      },
-      destroy() {
-        editor?.destroy?.();
-        editorView = null;
-      },
-    };
-  }
-
-  function getEditorContent(): string {
-    return editorView ? editorView.state.doc.toString() : (selectedTemplate?.content || "");
-  }
-
-  async function handleDirectSave() {
-    if (!selectedTemplate) return;
-    if (isBuiltin) {
-      saveAsName = `${selectedTemplate.name} (Custom)`;
-      showSaveAsModal = true;
-      return;
-    }
-    const content = getEditorContent();
-    await onsave?.(selectedTemplate.name, content);
-  }
-
-  function handleOpenSaveAs() {
-    saveAsName = selectedTemplate ? `${selectedTemplate.name} Copy` : "";
-    showSaveAsModal = true;
-  }
-
-  async function handleConfirmSaveAs() {
-    if (!saveAsName || saveAsNameDuplicate) return;
-    const content = getEditorContent();
-    showSaveAsModal = false;
-    await onsave?.(saveAsName, content);
-  }
-
-  function copySnippet(snippet: string) {
-    if (editorView) {
-      const selection = editorView.state.selection.main;
-      editorView.dispatch({
-        changes: { from: selection.from, to: selection.to, insert: snippet },
-        selection: { anchor: selection.from + snippet.length },
-      });
-      editorView.focus();
-    }
-  }
-
-  $effect(() => {
-    if (open && editorView && selectedTemplate) {
-      const currentDoc = editorView.state.doc.toString();
-      if (currentDoc !== selectedTemplate.content && !hasUnsavedChanges) {
-        updateContent(editorView, selectedTemplate.content);
       }
-      setTimeout(() => editorView?.focus?.(), 100);
+    },
+    destroy() {
+      editor?.destroy?.();
+      editorView = null;
+    },
+  };
+}
+
+function getEditorContent(): string {
+  return editorView
+    ? editorView.state.doc.toString()
+    : (selectedTemplate?.content || "");
+}
+
+async function handleDirectSave() {
+  if (!selectedTemplate) return;
+  if (isBuiltin) {
+    saveAsName = `${selectedTemplate.name} (Custom)`;
+    showSaveAsModal = true;
+    return;
+  }
+  const content = getEditorContent();
+  await onsave?.(selectedTemplate.name, content);
+}
+
+function handleOpenSaveAs() {
+  saveAsName = selectedTemplate ? `${selectedTemplate.name} Copy` : "";
+  showSaveAsModal = true;
+}
+
+async function handleConfirmSaveAs() {
+  if (!saveAsName || saveAsNameDuplicate) return;
+  const content = getEditorContent();
+  showSaveAsModal = false;
+  await onsave?.(saveAsName, content);
+}
+
+function copySnippet(snippet: string) {
+  if (editorView) {
+    const selection = editorView.state.selection.main;
+    editorView.dispatch({
+      changes: { from: selection.from, to: selection.to, insert: snippet },
+      selection: { anchor: selection.from + snippet.length },
+    });
+    editorView.focus();
+  }
+}
+
+$effect(() => {
+  if (open && editorView && selectedTemplate) {
+    const currentDoc = editorView.state.doc.toString();
+    if (currentDoc !== selectedTemplate.content && !hasUnsavedChanges) {
+      updateContent(editorView, selectedTemplate.content);
     }
-  });
+    setTimeout(() => editorView?.focus?.(), 100);
+  }
+});
 </script>
 
 <BitsDialog.Root bind:open>
   <BitsDialog.Portal>
-    <BitsDialog.Overlay class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200" />
+    <BitsDialog.Overlay
+      class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200" />
     <BitsDialog.Content
       class="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-transform duration-200 max-sm:max-w-full"
       aria-label="Template Editor"
@@ -185,9 +194,9 @@
               {:else}
                 <p class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
                   Load a CSV/PDF/XLSX file on the import page to view live column names, or use default columns:
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ROW.A}}'}</span>,
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ROW.B}}'}</span>,
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ROW.C}}'}</span>.
+                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.A }}'}</span>,
+                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.B }}'}</span>,
+                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.C }}'}</span>.
                 </p>
               {/if}
             </div>

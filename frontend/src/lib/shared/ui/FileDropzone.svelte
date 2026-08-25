@@ -1,31 +1,43 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import type { Snippet } from "svelte";
+import { createEventDispatcher } from "svelte";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    accept?: string;
-    multiple?: boolean;
-    children?: Snippet;
-  }
+interface Props {
+  accept?: string;
+  multiple?: boolean;
+  children?: Snippet;
+}
 
-  let { accept = "", multiple = false, children }: Props = $props();
-  let input: HTMLInputElement = $state();
-  let dragging = $state(false);
-  const dispatch = createEventDispatcher<{ drop: { acceptedFiles: File[]; rejectedFiles: File[] } }>();
+let { accept = "", multiple = false, children }: Props = $props();
+let input: HTMLInputElement = $state();
+let dragging = $state(false);
+const dispatch = createEventDispatcher<
+  { drop: { acceptedFiles: File[]; rejectedFiles: File[] } }
+>();
 
-  function accepted(file: File) {
-    const rules = accept.split(",").map((rule) => rule.trim().toLowerCase()).filter(Boolean);
-    return rules.length === 0 || rules.some((rule) =>
-      rule.startsWith(".") ? file.name.toLowerCase().endsWith(rule) : file.type === rule
+function accepted(file: File) {
+  const rules = accept.split(",").map((rule) => rule.trim().toLowerCase())
+    .filter(Boolean);
+  return rules.length === 0 ||
+    rules.some((rule) =>
+      rule.startsWith(".")
+        ? file.name.toLowerCase().endsWith(rule)
+        : file.type === rule
     );
-  }
+}
 
-  function select(files: FileList | null) {
-    const selected = [...(files || [])];
-    const acceptedFiles = selected.filter(accepted).slice(0, multiple ? undefined : 1);
-    dispatch("drop", { acceptedFiles, rejectedFiles: selected.filter((file) => !accepted(file)) });
-    if (input) input.value = "";
-  }
+function select(files: FileList | null) {
+  const selected = [...(files || [])];
+  const acceptedFiles = selected.filter(accepted).slice(
+    0,
+    multiple ? undefined : 1,
+  );
+  dispatch("drop", {
+    acceptedFiles,
+    rejectedFiles: selected.filter((file) => !accepted(file)),
+  });
+  if (input) input.value = "";
+}
 </script>
 
 <button
@@ -63,15 +75,15 @@
 />
 
 <style>
-  .paisa-file-dropzone-input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+.paisa-file-dropzone-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 </style>

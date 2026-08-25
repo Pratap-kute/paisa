@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+import type { Snippet } from "svelte";
 
-  interface Props {
-    left?: Snippet;
-    right?: Snippet;
-    children?: Snippet;
-  }
+interface Props {
+  left?: Snippet;
+  right?: Snippet;
+  children?: Snippet;
+}
 
-  let { left, right, children }: Props = $props();
+let { left, right, children }: Props = $props();
 </script>
 
 <footer class="paisa4-status-bar">

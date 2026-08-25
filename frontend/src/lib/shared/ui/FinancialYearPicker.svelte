@@ -1,16 +1,17 @@
 <script lang="ts">
-  import type dayjs from "dayjs";
-  import { financialYear } from "$lib/domain/time";
+import type dayjs from "dayjs";
+import { financialYear } from "$lib/domain/time";
 import { forEachFinancialYear } from "$lib/shared/formatters/date";
 
-  interface Props {
-    value: string;
-    dateMin: dayjs.Dayjs;
-    dateMax: dayjs.Dayjs;
-    class?: string;
-  }
+interface Props {
+  value: string;
+  dateMin: dayjs.Dayjs;
+  dateMax: dayjs.Dayjs;
+  class?: string;
+}
 
-  let { value = $bindable(), dateMin, dateMax, class: className = "" }: Props = $props();
+let { value = $bindable(), dateMin, dateMax, class: className = "" }: Props =
+  $props();
 </script>
 
 <select
