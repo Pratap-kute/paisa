@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any -- The sheet language intentionally evaluates heterogeneous user-defined values.
 import type { SyntaxNode } from "@lezer/common";
-import * as Terms from "./parser.terms.js";
+import * as Terms from "$lib/generated/sheet/parser.terms.js";
 import type { EditorState } from "@codemirror/state";
 import { BigNumber } from "bignumber.js";
 import {
@@ -8,12 +8,12 @@ import {
   formatCurrency,
   type Posting,
   type SheetLineResult,
-} from "../core/utils";
+} from "$lib/core/utils";
 import {
   buildAST as buildSearchAST,
   QueryAST,
   type TransactionPredicate,
-} from "../editors/search_query_editor";
+} from "$lib/features/editor/search_query_editor";
 import { type Diagnostic } from "@codemirror/lint";
 
 const STACK_LIMIT = 1000;
@@ -62,7 +62,7 @@ export class Query {
       this.result = env.postings
         .map(asTransaction)
         .filter(this.predicate)
-        .map((t) => t.postings[0]);
+        .map((t: any) => t.postings[0]);
     }
     return this.result;
   }

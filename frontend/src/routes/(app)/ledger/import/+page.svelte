@@ -1,7 +1,7 @@
 <script lang="ts">
   import Select from "svelte-select";
   import Handlebars from "handlebars";
-  import { editorState as templateEditorState } from "$lib/editors/template_editor";
+  import { editorState as templateEditorState } from "$lib/features/editor/template_editor";
   import {
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent

@@ -22,15 +22,15 @@ import {
   lintKeymap,
 } from "@codemirror/lint";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
-import { initialSheetEditorState, sheetEditorState } from "../../store";
+import { initialSheetEditorState, sheetEditorState } from "$lib/state/store";
 import { fullEditorExtensions } from "$lib/shared/editor/base";
-import { sheetExtension, sheetLanguage } from "../sheet/language";
-import { schedulePlugin } from "../domain/transaction_tag";
-export { sheetEditorState } from "../../store";
-import { functions } from "../sheet/functions";
+import { sheetExtension, sheetLanguage } from "$lib/features/sheets/language";
+import { schedulePlugin } from "$lib/domain/transaction_tag";
+export { sheetEditorState } from "$lib/state/store";
+import { functions } from "$lib/features/sheets/functions";
 
-import { buildAST, Environment } from "../sheet/interpreter";
-import type { Posting } from "../core/utils";
+import { buildAST, Environment } from "$lib/features/sheets/interpreter";
+import type { Posting } from "$lib/core/utils";
 import { assign, map } from "$lib/shared/utils/collection";
 
 let latestIdentifiers: string[] = [];

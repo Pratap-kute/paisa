@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEditor } from "$lib/editors/search_query_editor";
+  import { createEditor } from "$lib/features/editor/search_query_editor";
 
   let editorDom: HTMLElement = $state();
   interface Props {

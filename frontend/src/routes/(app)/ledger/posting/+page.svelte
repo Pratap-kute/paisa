@@ -5,7 +5,7 @@
   import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
   import { iconText } from "$lib/shared/ui/icon";
   import { change } from "$lib/domain/posting";
-  import { editorState } from "$lib/editors/search_query_editor";
+  import { editorState } from "$lib/features/editor/search_query_editor";
   import {
     ajax,
     postingUrl,

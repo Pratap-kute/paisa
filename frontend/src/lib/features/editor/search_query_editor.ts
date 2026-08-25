@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any -- CodeMirror syntax-tree nodes expose dynamically shaped parser metadata.
-import type { Transaction } from "../core/utils";
+import type { Posting, Transaction } from "$lib/core/utils";
 import {
   autocompletion,
   closeBrackets,
@@ -19,8 +19,8 @@ import type { SyntaxNode } from "@lezer/common";
 import dayjs from "dayjs";
 import { sumBy } from "es-toolkit";
 import { writable } from "svelte/store";
-import * as Terms from "../search/parser/parser.terms.js";
-import { queryExtension } from "../search/parser/query";
+import * as Terms from "$lib/generated/search/parser.terms.js";
+import { queryExtension } from "$lib/generated/search/query";
 import { baseEditorExtensions } from "$lib/shared/editor/base";
 import { assign, every, includes, map, some } from "$lib/shared/utils/collection";
 
@@ -570,7 +570,7 @@ function getProperty(
       return [
         sumBy(
           transaction.postings,
-          (posting) => (posting.amount > 0 ? posting.amount : 0),
+          (posting: Posting) => (posting.amount > 0 ? posting.amount : 0),
         ),
       ];
     case Terms.Filename:

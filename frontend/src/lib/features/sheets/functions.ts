@@ -1,4 +1,4 @@
-import type { Posting } from "../core/utils";
+import type { Posting } from "$lib/core/utils";
 import { groupBy } from "es-toolkit";
 import { assertType, type Environment, type Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";

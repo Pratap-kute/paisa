@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEditor, sheetEditorState } from "$lib/editors/sheet_editor";
+  import { createEditor, sheetEditorState } from "$lib/features/editor/sheet_editor";
   import { focus, moveToLine, updateContent } from "$lib/shared/editor/editor";
   import {
     ajax,

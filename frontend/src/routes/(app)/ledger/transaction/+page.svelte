@@ -11,7 +11,7 @@
   import * as toast from "$lib/shared/ui/toast";
   import DiffViewModal from "$lib/features/ledger/components/DiffViewModal.svelte";
   import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
-  import { editorState } from "$lib/editors/search_query_editor";
+  import { editorState } from "$lib/features/editor/search_query_editor";
   import { get } from "svelte/store";
   import { download } from "$lib/features/importing/export";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";

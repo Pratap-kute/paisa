@@ -1,5 +1,5 @@
 import { api } from "$lib/api";
-import { ledger } from "$lib/editors/ledger_parser";
+import { ledger } from "$lib/features/editor/ledger_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import { EditorState as State } from "@codemirror/state";

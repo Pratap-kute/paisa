@@ -5,7 +5,7 @@
     createEditor,
     editorState as templateEditorState,
     updateContent,
-  } from "$lib/editors/template_editor";
+  } from "$lib/features/editor/template_editor";
   import type { ImportTemplate } from "$lib/core/utils";
   import Button from "$lib/shared/ui/Button.svelte";
   import IconButton from "$lib/shared/ui/IconButton.svelte";

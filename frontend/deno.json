@@ -13,8 +13,8 @@
     "lint": "deno lint",
     "typecheck": "deno run -A scripts/check.ts",
 
-    "parser-build": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar -o src/lib/search/parser/parser",
-    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar --names -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar --names -o src/lib/search/parser/parser",
+    "parser-build": "deno run -A npm:@lezer/generator src/lib/generated/sheet/language.grammar -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/generated/search/query.grammar -o src/lib/generated/search/parser",
+    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/generated/sheet/language.grammar --names -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/generated/search/query.grammar --names -o src/lib/generated/search/parser",
 
     "api:generate": "deno run -A scripts/generate_api.ts",
     "api:check": "deno run -A scripts/generate_api.ts --check",
@@ -111,8 +111,8 @@
       "../backend/web/static/",
       "graphify-out/",
       "src/lib/api/generated/",
-      "src/lib/search/parser/parser.js",
-      "src/lib/sheet/parser.js",
+      "src/lib/generated/search/parser.js",
+      "src/lib/generated/sheet/parser.js",
       "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
@@ -126,8 +126,8 @@
       "../backend/web/static/",
       "graphify-out/",
       "src/lib/api/generated/",
-      "src/lib/search/parser/parser.js",
-      "src/lib/sheet/parser.js",
+      "src/lib/generated/search/parser.js",
+      "src/lib/generated/sheet/parser.js",
       "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
