@@ -502,7 +502,7 @@ func GetLedgerHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Returns balanced from/to posting pairs
 // @Tags Transactions
 // @Produce json
-// @Success 200 {array} dto.BalancedPostingResponse
+// @Success 200 {object} dto.BalancedPostingsResponse
 // @Security PaisaAuth
 // @Router /transaction/balanced [get]
 func GetBalancedPostingsHandler(db *gorm.DB) gin.HandlerFunc {
@@ -676,7 +676,7 @@ func GetTfIdfHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Returns prediction history records
 // @Tags Predictions
 // @Produce json
-// @Success 200 {array} dto.PredictionHistoryEntryResponse
+// @Success 200 {object} dto.PredictionHistoryResponse
 // @Security PaisaAuth
 // @Router /prediction/history [get]
 func GetPredictionHistoryHandler(db *gorm.DB) gin.HandlerFunc {

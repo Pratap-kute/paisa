@@ -82,6 +82,10 @@ export interface DtoBalancedPostingResponse {
   to?: DtoPostingResponse;
 }
 
+export interface DtoBalancedPostingsResponse {
+  balancedPostings?: DtoBalancedPostingResponse[];
+}
+
 export interface DtoBudgetResponse {
   accounts?: DtoAccountBudgetResponse[];
   availableThisMonth?: number;
@@ -495,6 +499,10 @@ export interface DtoPredictionHistoryEntryResponse {
   payee?: string;
   sourceAccount?: string;
   transactionId?: string;
+}
+
+export interface DtoPredictionHistoryResponse {
+  history?: DtoPredictionHistoryEntryResponse[];
 }
 
 export interface DtoPriceItemResponse {
@@ -1622,7 +1630,7 @@ export class Api<SecurityDataType extends unknown> {
      * @secure
      */
     getPredictionHistory: (params: RequestParams = {}) =>
-      this.http.request<DtoPredictionHistoryEntryResponse[], any>({
+      this.http.request<DtoPredictionHistoryResponse, any>({
         path: `/prediction/history`,
         method: "GET",
         secure: true,
@@ -1967,7 +1975,7 @@ export class Api<SecurityDataType extends unknown> {
      * @secure
      */
     getBalancedPostings: (params: RequestParams = {}) =>
-      this.http.request<DtoBalancedPostingResponse[], any>({
+      this.http.request<DtoBalancedPostingsResponse, any>({
         path: `/transaction/balanced`,
         method: "GET",
         secure: true,

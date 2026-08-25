@@ -160,7 +160,7 @@ onMount(async () => {
   ]);
   accountTfIdf.set(tfidf as unknown as AccountTfIdf);
   predictionSession.loadHistory(
-    historyResponse as unknown as PredictionHistoryEntry[],
+    (historyResponse.history ?? []) as unknown as PredictionHistoryEntry[],
   );
   ({ templates } = await loadTemplates());
   if (templates.length > 0) {

@@ -21,3 +21,7 @@ type PredictionHistoryEntryResponse struct {
 	Direction       *string `json:"direction,omitempty"`
 	Commodity       string  `json:"commodity"`
 }
+
+type PredictionHistoryResponse struct {
+	History []PredictionHistoryEntryResponse `json:"history"`
+}

@@ -85,8 +85,8 @@ async function loadTransactions() {
 }
 
 async function downloadTransactions() {
-  const balancedPostings = await api.transaction.getBalancedPostings();
-  download(balancedPostings as unknown as any);
+  const response = await api.transaction.getBalancedPostings();
+  download(response.balancedPostings as unknown as any);
 }
 
 function showPreview(detail: any) {

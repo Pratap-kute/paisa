@@ -19,7 +19,7 @@ export function createBalancedPostingsState() {
   return createAsyncState<void, DtoBalancedPostingResponse[]>(
     async (_args, signal) => {
       const response = await api.transaction.getBalancedPostings({ signal });
-      return response || [];
+      return response.balancedPostings || [];
     },
     [],
   );

@@ -4,6 +4,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/utils"
@@ -16,17 +17,7 @@ const (
 	DirectionCredit = "CREDIT"
 )
 
-type HistoryEntry struct {
-	TransactionID   string  `json:"transactionId"`
-	Date            string  `json:"date"`
-	Payee           string  `json:"payee"`
-	SourceAccount   *string `json:"sourceAccount,omitempty"`
-	CategoryAccount string  `json:"categoryAccount"`
-	Amount          float64 `json:"amount"`
-	AbsoluteAmount  float64 `json:"absoluteAmount"`
-	Direction       *string `json:"direction,omitempty"`
-	Commodity       string  `json:"commodity"`
-}
+type HistoryEntry = dto.PredictionHistoryEntryResponse
 
 func isUnknownAccount(account string) bool {
 	return account == "Unknown" || strings.HasSuffix(account, ":Unknown")
@@ -152,6 +143,6 @@ func HistoryFromPostings(db *gorm.DB) []HistoryEntry {
 	return entries
 }
 
-func GetHistory(db *gorm.DB) map[string]any {
-	return map[string]any{"history": HistoryFromPostings(db)}
+func GetHistory(db *gorm.DB) dto.PredictionHistoryResponse {
+	return dto.PredictionHistoryResponse{History: HistoryFromPostings(db)}
 }

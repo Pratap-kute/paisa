@@ -131,6 +131,13 @@ definitions:
       to:
         $ref: '#/definitions/dto.PostingResponse'
     type: object
+  dto.BalancedPostingsResponse:
+    properties:
+      balancedPostings:
+        items:
+          $ref: '#/definitions/dto.BalancedPostingResponse'
+        type: array
+    type: object
   dto.BudgetResponse:
     properties:
       accounts:
@@ -937,6 +944,13 @@ definitions:
         type: string
       transactionId:
         type: string
+    type: object
+  dto.PredictionHistoryResponse:
+    properties:
+      history:
+        items:
+          $ref: '#/definitions/dto.PredictionHistoryEntryResponse'
+        type: array
     type: object
   dto.PriceItemResponse:
     properties:
@@ -1939,9 +1953,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.PredictionHistoryEntryResponse'
-            type: array
+            $ref: '#/definitions/dto.PredictionHistoryResponse'
       security:
       - PaisaAuth: []
       summary: Get prediction history
@@ -2356,9 +2368,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.BalancedPostingResponse'
-            type: array
+            $ref: '#/definitions/dto.BalancedPostingsResponse'
       security:
       - PaisaAuth: []
       summary: Get balanced posting pairs

@@ -1115,10 +1115,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.PredictionHistoryEntryResponse"
-                            }
+                            "$ref": "#/definitions/dto.PredictionHistoryResponse"
                         }
                     }
                 }
@@ -1769,10 +1766,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.BalancedPostingResponse"
-                            }
+                            "$ref": "#/definitions/dto.BalancedPostingsResponse"
                         }
                     }
                 }
@@ -1979,6 +1973,17 @@ const docTemplate = `{
                 },
                 "to": {
                     "$ref": "#/definitions/dto.PostingResponse"
+                }
+            }
+        },
+        "dto.BalancedPostingsResponse": {
+            "type": "object",
+            "properties": {
+                "balancedPostings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BalancedPostingResponse"
+                    }
                 }
             }
         },
@@ -3216,6 +3221,17 @@ const docTemplate = `{
                 },
                 "transactionId": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.PredictionHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PredictionHistoryEntryResponse"
+                    }
                 }
             }
         },
