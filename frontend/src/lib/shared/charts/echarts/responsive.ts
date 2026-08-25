@@ -3,7 +3,7 @@ export function responsiveChartOption(
   compact: Record<string, unknown>,
 ) {
   return {
-    baseOption: desktop,
+    ...desktop,
     media: [{ query: { maxWidth: 639 }, option: compact }],
   };
 }
