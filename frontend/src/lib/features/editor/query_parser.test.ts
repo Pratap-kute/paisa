@@ -8,7 +8,7 @@ const caseDir = dirname(fromFileUrl(import.meta.url));
 for (const { name: file } of Deno.readDirSync(caseDir)) {
   if (!/\.txt$/.test(file)) continue;
 
-  const name = /^[^.]*/.exec(file)[0];
+  const name = file.split(".", 1)[0];
   describe(name, () => {
     for (
       const { name, run } of fileTests(

@@ -37,6 +37,8 @@ export function applyChanges(
           result = renameAccount(oldLines.join("\n"), transaction, args);
           newLines.push(result.content);
           break;
+        default:
+          throw new Error(`Unsupported bulk-edit operation: ${operation}`);
       }
       if (result.updated) {
         updatedTransactionsCount++;

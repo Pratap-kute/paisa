@@ -51,7 +51,6 @@ export default defineConfig({
   },
   build: {
     target: "es2021",
-    chunkSizeWarningLimit: 700,
   },
   plugins: [
     tailwindcss(),

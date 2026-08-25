@@ -4,6 +4,7 @@ import { parseDate } from "./search_query_editor";
 
 function assertRange(text: string, start: string, end: string) {
   const result = parseDate(text, reference);
+  if (!result) throw new Error(`Expected a valid date range for ${text}`);
   expect(result.start.format("YYYY-MM-DDTHH:mm:ss")).toEqual(start);
   expect(result.end.format("YYYY-MM-DDTHH:mm:ss")).toEqual(end);
 }

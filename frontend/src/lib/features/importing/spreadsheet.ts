@@ -172,10 +172,10 @@ function parseCSV(file: File): Promise<Result> {
   return new Promise((resolve, reject) => {
     Papa.parse<string[]>(file, {
       skipEmptyLines: true,
-      complete: function (results) {
+      complete: function (results: Papa.ParseResult<string[]>) {
         resolve(results);
       },
-      error: function (error) {
+      error: function (error: Error) {
         reject(error);
       },
       delimitersToGuess: [
@@ -206,7 +206,7 @@ async function parseXLSX(file: File): Promise<Result> {
     );
     return { data: json };
   } catch (e) {
-    if (/password-protected/.test(e.message)) {
+    if (e instanceof Error && /password-protected/.test(e.message)) {
       const password = prompt(
         "Please enter the password to open this XLSX file. Press cancel to exit.",
       );
@@ -255,8 +255,8 @@ async function parsePDF(file: File): Promise<Result> {
 function readFile(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (event) => {
-      resolve(event.target.result as ArrayBuffer);
+    reader.onload = () => {
+      resolve(reader.result as ArrayBuffer);
     };
     reader.onerror = (event) => {
       reject(event);

@@ -39,11 +39,15 @@ Deno.test("persisted serializes values and follows storage events", () => {
       storageArea: storage,
       key: "theme",
       newValue: '"system"',
-    } as StorageEvent,
+    } as unknown as StorageEvent,
   );
   expect(get(store)).toBe("system");
   listener?.(
-    { storageArea: storage, key: "theme", newValue: null } as StorageEvent,
+    {
+      storageArea: storage,
+      key: "theme",
+      newValue: null,
+    } as unknown as StorageEvent,
   );
   expect(get(store)).toBe("light");
 });

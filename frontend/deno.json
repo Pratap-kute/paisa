@@ -29,8 +29,8 @@
     "test:desktop": "deno run --allow-env --allow-read --allow-run --allow-write scripts/desktop_smoke.ts",
     "test:e2e": "deno run -A scripts/run_browser_tests.ts --grep-invert @visual",
     "test:frontend": "deno task test:unit && deno task test:e2e && deno task test:visual && deno task test:coverage",
-    "test:integration": "deno test --no-check --allow-all --ignore=tests/core tests/",
-    "test:unit": "deno test --no-check --allow-read --allow-env --allow-import --ignore=src/**/*.component.test.ts src/",
+    "test:integration": "deno test --allow-all --ignore=tests/core tests/",
+    "test:unit": "deno test --allow-read --allow-env --allow-import --ignore=src/**/*.component.test.ts src/",
     "test:visual": "deno run -A scripts/run_browser_tests.ts --grep @visual",
     "test:visual:update": "deno run -A scripts/run_browser_tests.ts --grep @visual --update-snapshots",
 
@@ -104,7 +104,8 @@
   "compilerOptions": {
     "checkJs": false,
     "skipLibCheck": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "types": ["./src/app.d.ts"]
   },
   "fmt": {
     "exclude": [

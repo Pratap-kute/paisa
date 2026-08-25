@@ -50,8 +50,9 @@ class StringAST extends AST {
   readonly value: string;
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
-    this.quoted = node.firstChild.type.is(Terms.Quoted);
-    if (node.firstChild.type.is(Terms.Quoted)) {
+    const child = requiredFirstChild(node);
+    this.quoted = child.type.is(Terms.Quoted);
+    if (child.type.is(Terms.Quoted)) {
       this.value = state.sliceDoc(node.from + 1, node.to - 1);
     } else {
       this.value = state.sliceDoc(node.from, node.to);
@@ -89,6 +90,7 @@ class RegExpAST extends AST {
     super(node);
     const all = state.sliceDoc(node.from, node.to);
     const result = all.match(/\/(.*)\/(.*)/);
+    if (!result) throw new Error(`Invalid regular expression: ${all}`);
     this.value = new RegExp(result[1], result[2]);
   }
 
@@ -107,7 +109,7 @@ type DateRange = {
 };
 
 class DateValueAST extends AST {
-  readonly value: DateRange;
+  readonly value: DateRange | null;
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
     const value = state.sliceDoc(node.from + 1, node.to - 1);
@@ -129,6 +131,7 @@ class DateValueAST extends AST {
   }
 
   evaluate(): TransactionPredicate {
+    if (!this.value) throw new Error("Cannot evaluate an invalid date");
     return conditionFilter(Terms.Date, "=", this.value);
   }
 }
@@ -138,7 +141,7 @@ class PropertyAST extends AST {
   readonly childId: number;
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
-    const child = node.firstChild;
+    const child = requiredFirstChild(node);
     this.childId = child.type.id;
     this.value = state.sliceDoc(node.from, node.to);
   }
@@ -201,10 +204,12 @@ class ConditionAST extends AST {
   }
 
   evaluate(): TransactionPredicate {
+    const value = this.value.value.value;
+    if (value === null) throw new Error("Cannot evaluate an invalid value");
     return conditionFilter(
       this.property.childId,
       this.operator.value,
-      this.value.value.value,
+      value,
     );
   }
 }
@@ -214,7 +219,7 @@ class ValueAST extends AST {
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
 
-    const child = node.firstChild;
+    const child = requiredFirstChild(node);
     switch (child.type.id) {
       case Terms.String:
         this.value = new StringAST(child, state);
@@ -228,6 +233,8 @@ class ValueAST extends AST {
       case Terms.DateValue:
         this.value = new DateValueAST(child, state);
         break;
+      default:
+        throw new Error(`Unsupported value node: ${child.type.name}`);
     }
   }
 
@@ -300,7 +307,9 @@ class BooleanConditionAST extends AST {
 
     if (cs.length === 2) {
       this.value = new BooleanUnaryAST(node, state);
+      return;
     }
+    throw new Error(`Invalid boolean condition with ${cs.length} children`);
   }
 
   validate(): Diagnostic[] {
@@ -317,7 +326,7 @@ class ClauseAST extends AST {
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
 
-    const child = node.firstChild;
+    const child = requiredFirstChild(node);
     switch (child.type.id) {
       case Terms.Expression:
         this.value = new ExpressionAST(child, state);
@@ -331,6 +340,8 @@ class ClauseAST extends AST {
       case Terms.Value:
         this.value = new ValueAST(child, state);
         break;
+      default:
+        throw new Error(`Unsupported clause node: ${child.type.name}`);
     }
   }
 
@@ -585,6 +596,8 @@ function getProperty(
       return [transaction.note].concat(
         transaction.postings.map((posting) => posting.note),
       );
+    default:
+      throw new Error(`Unsupported property: ${property}`);
   }
 }
 
@@ -697,6 +710,13 @@ function childrens(node: SyntaxNode): SyntaxNode[] {
     result.push(cur.node);
   } while (cur.nextSibling());
   return result;
+}
+
+function requiredFirstChild(node: SyntaxNode): SyntaxNode {
+  if (!node.firstChild) {
+    throw new Error(`Expected ${node.type.name} to have a child node`);
+  }
+  return node.firstChild;
 }
 
 export function createEditor(

@@ -42,7 +42,7 @@ function formatLine(line: string, state: State) {
   const fullMatch = line.match(
     /^[ \t]+(?<account>(?:[*!]\s+)?[^; \t\n](?:(?!\s{2})[^;\t\n])+)[ \t]+(?<prefix>[^;]*?)(?<amount>[+-]?[.,0-9]+)(?<suffix>.*)$/,
   );
-  if (fullMatch) {
+  if (fullMatch?.groups) {
     const { account, prefix, amount, suffix } = fullMatch.groups;
     if (
       account.length + prefix.length + amount.length <=
@@ -65,7 +65,7 @@ function formatLine(line: string, state: State) {
   const partialMatch = line.match(
     /^[ \t]+(?<account>(?:[*!]\s+)?[^; \t\n](?:(?!\s{2})[^;\t\n])+)$/,
   );
-  if (partialMatch) {
+  if (partialMatch?.groups) {
     const { account } = partialMatch.groups;
     return space(4) + account;
   }

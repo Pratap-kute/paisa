@@ -36,7 +36,7 @@ func setupIntegrityTestEnv(t *testing.T) (*gorm.DB, string, string) {
 
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	require.NoError(t, err)
-	model.AutoMigrate(db)
+	require.NoError(t, model.AutoMigrate(db))
 
 	syncRes := Sync(db, SyncRequest{Journal: true})
 	require.True(t, syncRes.Success, "Initial sync should succeed: %s", syncRes.Message)

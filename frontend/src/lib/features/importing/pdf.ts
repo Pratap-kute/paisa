@@ -1,4 +1,3 @@
-import * as pdfjs from "pdfjs-dist";
 import type { TextItem } from "pdfjs-dist/types/src/display/api";
 
 export type TextItemWithPosition = TextItem & {
@@ -35,7 +34,7 @@ const WORD_SPACE_TOLERANCE = 0.5;
 
 function makeRow(cells: TextItemWithPosition[]): string[] {
   const row = [];
-  let lastCell: TextItemWithPosition;
+  let lastCell: TextItemWithPosition | undefined;
   for (const cell of cells) {
     if (
       lastCell !== undefined &&
@@ -57,6 +56,7 @@ function makeRow(cells: TextItemWithPosition[]): string[] {
  * @param data
  */
 export async function pdf2array(data: ArrayBuffer): Promise<string[][]> {
+  const pdfjs = await import("pdfjs-dist");
   const loader = pdfjs.getDocument(data);
   loader.onPassword = (cb: (password: string) => void) => {
     const password = prompt(
@@ -70,7 +70,7 @@ export async function pdf2array(data: ArrayBuffer): Promise<string[][]> {
   const doc = await loader.promise;
 
   const rows: Row[] = [];
-  let currentRow: Row = undefined;
+  let currentRow: Row | undefined;
 
   for (let i = 0; i < doc.numPages; ++i) {
     const page = await doc.getPage(i + 1);

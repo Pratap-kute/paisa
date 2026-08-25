@@ -26,7 +26,9 @@ func explainQueryPlan(t *testing.T, db *gorm.DB, query string, args ...any) []st
 
 	rows, err := sqlDB.Query("EXPLAIN QUERY PLAN "+query, args...)
 	require.NoError(t, err)
-	defer rows.Close()
+	defer func() {
+		require.NoError(t, rows.Close())
+	}()
 
 	var details []string
 	for rows.Next() {

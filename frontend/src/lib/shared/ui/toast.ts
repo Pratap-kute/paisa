@@ -25,11 +25,11 @@ let defaults: ToastOptions = {
   position: "top-right",
 };
 export const toasts = writable<ToastMessage[]>([]);
-export const toastPosition = writable(defaults.position);
+export const toastPosition = writable(defaults.position ?? "top-right");
 
 export function setDefaults(options: Omit<ToastOptions, "message">) {
   defaults = { ...defaults, ...options };
-  toastPosition.set(defaults.position);
+  toastPosition.set(defaults.position ?? "top-right");
 }
 
 export function dismissToast(id: number) {

@@ -37,13 +37,21 @@ func TestHelperProcess(t *testing.T) {
 	case "echo":
 		for i, a := range args[1:] {
 			if i > 0 {
-				os.Stdout.WriteString(" ")
+				if _, err := os.Stdout.WriteString(" "); err != nil {
+					os.Exit(3)
+				}
 			}
-			os.Stdout.WriteString(a)
+			if _, err := os.Stdout.WriteString(a); err != nil {
+				os.Exit(3)
+			}
 		}
-		os.Stdout.WriteString("\n")
+		if _, err := os.Stdout.WriteString("\n"); err != nil {
+			os.Exit(3)
+		}
 	case "exit-non-zero":
-		os.Stderr.WriteString("something went wrong\n")
+		if _, err := os.Stderr.WriteString("something went wrong\n"); err != nil {
+			os.Exit(3)
+		}
 		os.Exit(2)
 	}
 }

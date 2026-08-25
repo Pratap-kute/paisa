@@ -157,28 +157,36 @@ func TestSwagger_UIRouteAndNoSPAFallthrough(t *testing.T) {
 	// 1. GET /swagger/index.html returns Swagger UI HTML
 	respUI, err := client.Get(ts.URL + "/swagger/index.html")
 	require.NoError(t, err)
-	defer respUI.Body.Close()
+	defer func() {
+		require.NoError(t, respUI.Body.Close())
+	}()
 	assert.Equal(t, http.StatusOK, respUI.StatusCode)
 	assert.Contains(t, respUI.Header.Get("Content-Type"), "text/html")
 
 	// 2. GET /swagger/doc.json returns Swagger JSON document
 	respDoc, err := client.Get(ts.URL + "/swagger/doc.json")
 	require.NoError(t, err)
-	defer respDoc.Body.Close()
+	defer func() {
+		require.NoError(t, respDoc.Body.Close())
+	}()
 	assert.Equal(t, http.StatusOK, respDoc.StatusCode)
 	assert.Contains(t, respDoc.Header.Get("Content-Type"), "application/json")
 
 	// 3. GET /api/unknown_route returns JSON 404
 	respAPI404, err := client.Get(ts.URL + "/api/unknown_route")
 	require.NoError(t, err)
-	defer respAPI404.Body.Close()
+	defer func() {
+		require.NoError(t, respAPI404.Body.Close())
+	}()
 	assert.Equal(t, http.StatusNotFound, respAPI404.StatusCode)
 	assert.Contains(t, respAPI404.Header.Get("Content-Type"), "application/json")
 
 	// 4. GET /some_spa_route returns SPA HTML fallback
 	respSPA, err := client.Get(ts.URL + "/dashboard")
 	require.NoError(t, err)
-	defer respSPA.Body.Close()
+	defer func() {
+		require.NoError(t, respSPA.Body.Close())
+	}()
 	assert.Equal(t, http.StatusOK, respSPA.StatusCode)
 	assert.Contains(t, respSPA.Header.Get("Content-Type"), "text/html")
 }
@@ -200,13 +208,13 @@ func TestSwagger_AuthIntegration(t *testing.T) {
 	// 1. Swagger UI itself is publicly readable
 	respUI, err := client.Get(ts.URL + "/swagger/index.html")
 	require.NoError(t, err)
-	respUI.Body.Close()
+	require.NoError(t, respUI.Body.Close())
 	assert.Equal(t, http.StatusOK, respUI.StatusCode)
 
 	// 2. Unauthenticated call to /api/ping fails with 401 Unauthorized
 	respNoAuth, err := client.Get(ts.URL + "/api/ping")
 	require.NoError(t, err)
-	respNoAuth.Body.Close()
+	require.NoError(t, respNoAuth.Body.Close())
 	assert.Equal(t, http.StatusUnauthorized, respNoAuth.StatusCode)
 
 	// 3. Authenticated call with X-Auth header succeeds
@@ -215,7 +223,7 @@ func TestSwagger_AuthIntegration(t *testing.T) {
 	req.Header.Set("X-Auth", "admin:secret")
 	respAuth, err := client.Do(req)
 	require.NoError(t, err)
-	respAuth.Body.Close()
+	require.NoError(t, respAuth.Body.Close())
 	assert.Equal(t, http.StatusOK, respAuth.StatusCode)
 }
 
