@@ -17,7 +17,13 @@ import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";
 import { iconGlyph } from "$lib/shared/ui/icon";
-import { each, first, isEmpty, max, sortBy } from "$lib/shared/utils/collection";
+import {
+  each,
+  first,
+  isEmpty,
+  max,
+  sortBy,
+} from "$lib/shared/utils/collection";
 
 export interface AutoCompleteItem {
   label: string;

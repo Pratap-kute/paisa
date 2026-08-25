@@ -22,7 +22,10 @@ import {
   lintKeymap,
 } from "@codemirror/lint";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
-import { initialSheetEditorState, sheetEditorState } from "$lib/shared/state/store";
+import {
+  initialSheetEditorState,
+  sheetEditorState,
+} from "$lib/shared/state/store";
 import { fullEditorExtensions } from "$lib/shared/editor/base";
 import { sheetExtension, sheetLanguage } from "$lib/features/sheets/language";
 import { schedulePlugin } from "$lib/domain/transaction_tag";

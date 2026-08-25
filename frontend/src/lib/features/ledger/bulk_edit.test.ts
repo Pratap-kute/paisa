@@ -1,4 +1,5 @@
-import { describe, expect, test } from "vitest";
+import { describe, it as test } from "@std/testing/bdd";
+import { expect } from "@std/expect";
 
 import { applyChanges } from "./bulk_edit";
 import type { LedgerFile } from "$lib/core/utils";

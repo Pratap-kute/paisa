@@ -22,7 +22,13 @@ import { writable } from "svelte/store";
 import * as Terms from "$lib/generated/search/parser.terms.js";
 import { queryExtension } from "$lib/generated/search/query";
 import { baseEditorExtensions } from "$lib/shared/editor/base";
-import { assign, every, includes, map, some } from "$lib/shared/utils/collection";
+import {
+  assign,
+  every,
+  includes,
+  map,
+  some,
+} from "$lib/shared/utils/collection";
 
 abstract class AST {
   readonly id: number;

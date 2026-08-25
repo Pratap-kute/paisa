@@ -7,7 +7,9 @@ import fa6brands from "../../../../fonts/fa6-brands-info.json" with {
 import fa6regular from "../../../../fonts/fa6-regular-info.json" with {
   type: "json",
 };
-import fa6solid from "../../../../fonts/fa6-solid-info.json" with { type: "json" };
+import fa6solid from "../../../../fonts/fa6-solid-info.json" with {
+  type: "json",
+};
 import fluentemoji from "../../../../fonts/fluent-emoji-high-contrast-info.json" with {
   type: "json",
 };
