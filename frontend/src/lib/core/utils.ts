@@ -12,7 +12,7 @@ import {
   take,
   trim,
 } from "es-toolkit";
-import { loading } from "$lib/state/store";
+import { loading } from "$lib/shared/state/store";
 import type { JSONSchema7 } from "json-schema";
 import { error } from "@sveltejs/kit";
 import { goto } from "$app/navigation";

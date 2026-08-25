@@ -22,11 +22,11 @@ import {
   lintKeymap,
 } from "@codemirror/lint";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
-import { initialSheetEditorState, sheetEditorState } from "$lib/state/store";
+import { initialSheetEditorState, sheetEditorState } from "$lib/shared/state/store";
 import { fullEditorExtensions } from "$lib/shared/editor/base";
 import { sheetExtension, sheetLanguage } from "$lib/features/sheets/language";
 import { schedulePlugin } from "$lib/domain/transaction_tag";
-export { sheetEditorState } from "$lib/state/store";
+export { sheetEditorState } from "$lib/shared/state/store";
 import { functions } from "$lib/features/sheets/functions";
 
 import { buildAST, Environment } from "$lib/features/sheets/interpreter";

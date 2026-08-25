@@ -1,4 +1,4 @@
-import { obscure } from "$lib/state/persisted";
+import { obscure } from "$lib/shared/state/persisted";
 import { get } from "svelte/store";
 
 export function unicodeMinus(s: string): string {

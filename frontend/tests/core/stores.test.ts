@@ -12,7 +12,7 @@ import {
   delayedLoading,
   delayedUnLoading,
   loading,
-} from "$lib/state/store";
+} from "$lib/shared/state/store";
 
 describe("persisted stores", () => {
   test("reads, writes, updates, and recovers from invalid values", () => {

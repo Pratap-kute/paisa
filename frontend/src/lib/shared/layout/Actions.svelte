@@ -1,8 +1,8 @@
 <script lang="ts">
   import { sync } from "$lib/api/sync";
   import { isLoggedIn, isMobile, logout } from "$lib/core/utils";
-  import { refresh } from "$lib/state/store";
-  import { obscure } from "$lib/state/persisted";
+  import { refresh } from "$lib/shared/state/store";
+  import { obscure } from "$lib/shared/state/persisted";
   import { goto } from "$app/navigation";
 
   let open = $state(false);

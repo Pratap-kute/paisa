@@ -3,7 +3,7 @@
   import { buildIncomeStatementWaterfallOption } from "$lib/shared/charts/echarts/waterfall";
   import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/state/store";
+  import { theme } from "$lib/shared/state/store";
 
   interface Props { data: IncomeStatementWaterfallData; ariaLabel: string; testId: string }
   let { data, ariaLabel, testId }: Props = $props();

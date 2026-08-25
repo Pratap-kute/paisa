@@ -16,7 +16,7 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import { editorState, initialEditorState } from "$lib/state/store";
+import { editorState, initialEditorState } from "$lib/shared/state/store";
 import {
   autocompletion,
   completeFromList,
@@ -29,7 +29,7 @@ import { schedulePlugin } from "$lib/domain/transaction_tag";
 import dayjs from "dayjs";
 import { assign, map } from "$lib/shared/utils/collection";
 
-export { editorState } from "$lib/state/store";
+export { editorState } from "$lib/shared/state/store";
 
 async function lint(editor: EditorView): Promise<Diagnostic[]> {
   const doc = editor.state.doc;

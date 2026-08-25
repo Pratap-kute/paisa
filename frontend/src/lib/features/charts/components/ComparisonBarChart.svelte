@@ -6,7 +6,7 @@
   import type { PaisaChartEventHandler } from "$lib/shared/charts/echarts/surface_lifecycle";
   import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/state/store";
+  import { theme } from "$lib/shared/state/store";
 
   interface Props {
     data: ComparisonBarChartData;

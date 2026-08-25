@@ -3,7 +3,7 @@
   import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
   import type { Graph } from "$lib/core/utils";
   import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/state/store";
+  import { theme } from "$lib/shared/state/store";
 
   interface Props {
     graph: Graph;

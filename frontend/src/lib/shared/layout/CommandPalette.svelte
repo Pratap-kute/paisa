@@ -6,7 +6,7 @@
     getColorPreference,
     setColorPreference,
   } from "$lib/core/utils";
-  import { accountTfIdf, theme as themeStore } from "$lib/state/store";
+  import { accountTfIdf, theme as themeStore } from "$lib/shared/state/store";
   import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {
