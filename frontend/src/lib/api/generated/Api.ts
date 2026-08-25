@@ -481,6 +481,10 @@ export interface DtoPostingResponse {
   transaction_note?: string;
 }
 
+export interface DtoPostingsResponse {
+  postings?: DtoPostingResponse[];
+}
+
 export interface DtoPredictionHistoryEntryResponse {
   absoluteAmount?: number;
   amount?: number;
@@ -655,6 +659,10 @@ export interface ServerAutoCompleteRequest {
   field?: string;
   filters?: Record<string, string>;
   provider?: string;
+}
+
+export interface ServerLogsResponse {
+  logs?: any[];
 }
 
 export interface ServerSyncRequest {
@@ -1466,7 +1474,7 @@ export class Api<SecurityDataType extends unknown> {
      * @secure
      */
     getLedger: (params: RequestParams = {}) =>
-      this.http.request<DtoPostingResponse[], any>({
+      this.http.request<DtoPostingsResponse, any>({
         path: `/ledger`,
         method: "GET",
         secure: true,
@@ -1540,7 +1548,7 @@ export class Api<SecurityDataType extends unknown> {
      * @secure
      */
     getLogs: (params: RequestParams = {}) =>
-      this.http.request<string[], any>({
+      this.http.request<ServerLogsResponse, any>({
         path: `/logs`,
         method: "GET",
         secure: true,

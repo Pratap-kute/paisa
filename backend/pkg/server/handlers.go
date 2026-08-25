@@ -486,7 +486,7 @@ func GetPortfolioAllocationHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Returns flat array of all journal postings with computed balances and market values
 // @Tags Ledger
 // @Produce json
-// @Success 200 {array} dto.PostingResponse
+// @Success 200 {object} dto.PostingsResponse
 // @Security PaisaAuth
 // @Router /ledger [get]
 func GetLedgerHandler(db *gorm.DB) gin.HandlerFunc {
@@ -646,7 +646,7 @@ func GetLiabilitiesRepaymentHandler(db *gorm.DB) gin.HandlerFunc {
 // @Description Returns recent application log lines
 // @Tags Logs
 // @Produce json
-// @Success 200 {array} string
+// @Success 200 {object} LogsResponse
 // @Security PaisaAuth
 // @Router /logs [get]
 func GetLogsHandler(c *gin.Context) {

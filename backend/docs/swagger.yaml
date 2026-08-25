@@ -910,6 +910,13 @@ definitions:
       transaction_note:
         type: string
     type: object
+  dto.PostingsResponse:
+    properties:
+      postings:
+        items:
+          $ref: '#/definitions/dto.PostingResponse'
+        type: array
+    type: object
   dto.PredictionHistoryEntryResponse:
     properties:
       absoluteAmount:
@@ -1213,6 +1220,12 @@ definitions:
         type: object
       provider:
         type: string
+    type: object
+  server.LogsResponse:
+    properties:
+      logs:
+        items: {}
+        type: array
     type: object
   server.SyncRequest:
     properties:
@@ -1800,9 +1813,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.PostingResponse'
-            type: array
+            $ref: '#/definitions/dto.PostingsResponse'
       security:
       - PaisaAuth: []
       summary: Get all ledger postings with market valuation
@@ -1866,9 +1877,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              type: string
-            type: array
+            $ref: '#/definitions/server.LogsResponse'
       security:
       - PaisaAuth: []
       summary: Get application log entries

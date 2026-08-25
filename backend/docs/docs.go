@@ -912,10 +912,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.PostingResponse"
-                            }
+                            "$ref": "#/definitions/dto.PostingsResponse"
                         }
                     }
                 }
@@ -1019,10 +1016,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/server.LogsResponse"
                         }
                     }
                 }
@@ -3182,6 +3176,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PostingsResponse": {
+            "type": "object",
+            "properties": {
+                "postings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PostingResponse"
+                    }
+                }
+            }
+        },
         "dto.PredictionHistoryEntryResponse": {
             "type": "object",
             "properties": {
@@ -3648,6 +3653,15 @@ const docTemplate = `{
                 },
                 "provider": {
                     "type": "string"
+                }
+            }
+        },
+        "server.LogsResponse": {
+            "type": "object",
+            "properties": {
+                "logs": {
+                    "type": "array",
+                    "items": {}
                 }
             }
         },

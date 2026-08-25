@@ -28,7 +28,8 @@ function updateDimensions() {
 async function fetchLogs() {
   isLoading = true;
   try {
-    logs = await api.logs.getLogs() as unknown as Log[];
+    const response = await api.logs.getLogs();
+    logs = response.logs ?? [];
   } finally {
     isLoading = false;
   }

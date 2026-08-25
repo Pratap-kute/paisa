@@ -60,7 +60,8 @@ async function loadPostings() {
       accounts: string[];
       commodities: string[];
     });
-  const loadedPostings = await api.ledger.getLedger() as unknown as Posting[];
+  const response = await api.ledger.getLedger();
+  const loadedPostings = (response.postings ?? []) as unknown as Posting[];
   postings = loadedPostings;
   rows = map(loadedPostings, (p) => ({
     posting: p,
@@ -140,16 +141,18 @@ function unlessZero(value: number, text: string) {
             </div>
 
             {#if filteredPostings.length > 0}
-              <VirtualList
-                width="100%"
-                height={listHeight}
-                itemCount={filteredPostings.length}
-                itemSize={27}
-              >
-                <svelte:fragment slot="item" let:index let:style>
-                  {@const p = filteredPostings[index]}
-                  {@const c = change(p)}
-                  <div
+              {#key filteredPostings}
+                <VirtualList
+                  width="100%"
+                  height={listHeight}
+                  itemCount={filteredPostings.length}
+                  itemSize={27}
+                >
+                  <svelte:fragment slot="item" let:index let:style>
+                    {@const p = filteredPostings[index]}
+                    {#if p}
+                      {@const c = change(p)}
+                      <div
                     class="posting-row items-baseline gap-1 px-3 pt-1 transition-colors hover:bg-[var(--paisa-surface-hover)]"
                     {style}
                   >
@@ -184,9 +187,11 @@ function unlessZero(value: number, text: string) {
                     <div class="text-right text-[0.8125rem] tabular-nums {c.class}">
                       {unlessZero(c.percentage, formatFloat(c.percentage))}
                     </div>
-                  </div>
-                </svelte:fragment>
-              </VirtualList>
+                      </div>
+                    {/if}
+                  </svelte:fragment>
+                </VirtualList>
+              {/key}
             {:else}
               <ZeroState item={[]}>
                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
