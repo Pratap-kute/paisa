@@ -26,7 +26,7 @@ const resources = [
     desc: "Latest release downloads, updates, and release notes",
     href: "https://github.com/Pratap-kute/paisa/releases",
     icon: "fa-solid fa-download",
-    badge: "v0.9.0",
+    badge: "v0.9.1",
   },
   {
     name: "Live Demo",
@@ -96,7 +96,7 @@ function externalLink(url: string) {
                   class="text-2xl font-bold tracking-tight text-[var(--paisa-text-primary)]">
                   Paisa
                 </h1>
-                <Badge variant="primary" size="sm" rounded>v0.9.0</Badge>
+                <Badge variant="primary" size="sm" rounded>v0.9.1</Badge>
                 <Badge variant="neutral" size="sm" rounded>AGPL-3.0</Badge>
               </div>
               <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">

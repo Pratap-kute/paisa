@@ -1,5 +1,79 @@
 # CHANGELOG
 
+### 0.9.1 (2026-08-27)
+
+#### Security
+
+- **Safer file operations:** Added path-traversal protection to ledger editor
+  and sheet endpoints so requests cannot escape their configured directories.
+- **Modern password storage:** Added Argon2id password hashing for user
+  accounts, including transparent migration of existing legacy SHA-256
+  password hashes after a successful login.
+- **HTTP hardening:** Added request-size limits, server timeouts, panic recovery,
+  safer SPA routing, and graceful shutdown behavior.
+- **Bounded external data:** Added response-size limits and context-aware
+  cancellation to HTTP requests and external command execution.
+
+#### Reliability and data integrity
+
+- **Atomic configuration writes:** Configuration updates now use atomic file
+  replacement and return actionable errors instead of terminating the process.
+- **Graceful backend errors:** Removed fatal exits from persistence and domain
+  packages so failures propagate through the service and API layers correctly.
+- **Concurrency safety:** Protected shared accounting, configuration,
+  transaction, prediction, and cache state with synchronization, backed by new
+  concurrency regression tests.
+- **Deterministic accounting:** Stabilized equivalent postings and balances
+  across ledger implementations while avoiding unnecessary large value copies.
+- **Resilient synchronization:** Improved model synchronization and save flows
+  so partial failures do not silently leave inconsistent state.
+
+#### Performance
+
+- **Faster database writes:** Added indexes for postings and prices and replaced
+  row-by-row persistence with batch inserts where appropriate.
+- **Lean lookup paths:** Replaced the B-tree-backed lookup path with sorted
+  slices and binary search, and simplified cache hashing and invalidation.
+- **Runtime safeguards:** Added large-journal, database benchmark, scraper
+  safety, and runtime resilience coverage to prevent regressions.
+
+#### API and backend architecture
+
+- **Typed service boundary:** Introduced service, DTO, and mapper layers so HTTP
+  handlers no longer expose persistence models directly.
+- **Documented API:** Added generated Swagger/OpenAPI documentation, stable
+  operation IDs, handler contract tests, and generated frontend API types.
+- **Native Fetch client:** Replaced Axios calls with a centralized typed Fetch
+  client, including consistent error responses and automatic ISO date parsing.
+- **Clear dependency rules:** Added architecture tests that enforce package
+  boundaries and prevent fatal logging from returning to reusable packages.
+
+#### Frontend architecture and experience
+
+- **Feature-oriented modules:** Reorganized the frontend into `domain`,
+  `features`, `shared`, and `generated` subsystems with automated dependency
+  checks and updated parser-generation paths.
+- **Centralized state and APIs:** Consolidated global state under
+  `shared/state`, moved financial logic into domain modules, and routed feature
+  API calls through the generated client.
+- **Accessible UI primitives:** Improved Dialog, Dropdown, Tabs, Tooltip,
+  Command Palette, and related component behavior with expanded accessibility
+  and component tests.
+- **Authentication flow:** Improved token lifecycle handling, login errors, and
+  account-save feedback.
+- **Correct rendering and calculations:** Fixed font asset paths, optional
+  posting notes, responsive chart options, overview running totals, commodity
+  repricing, and JSON-schema default item handling.
+
+#### Testing and CI
+
+- Expanded backend security, API contract, financial, concurrency, and
+  persistence regression suites.
+- Expanded frontend core and component coverage for charts, authentication,
+  imports, navigation, state, and accessible UI behavior.
+- Fixed Go lint findings in posting stabilization and stabilized Vitest thread
+  teardown under Deno-based CI.
+
 ### 0.9.0 (2026-08-24)
 
 - **UI & Design Modernization**: Complete migration to a pure Tailwind CSS design system with curated HSL color tokens, rich glassmorphic styling, enhanced card ergonomics, and zero legacy Bulma/SCSS footprint.

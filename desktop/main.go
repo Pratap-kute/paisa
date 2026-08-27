@@ -62,7 +62,7 @@ func main() {
 		Mac: &mac.Options{
 			About: &mac.AboutInfo{
 				Title:   "Paisa",
-				Message: "Version 0.9.0 \nCopyright © 2022 - 2025 Anantha Kumaran\nCopyright © 2026 Pratap Kute",
+				Message: "Version 0.9.1 \nCopyright © 2022 - 2025 Anantha Kumaran\nCopyright © 2026 Pratap Kute",
 				Icon:    icon,
 			},
 		},
