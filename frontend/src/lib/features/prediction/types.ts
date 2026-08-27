@@ -35,8 +35,9 @@ export type ReasonCode =
   | "UNKNOWN";
 
 export interface MerchantRule {
-  merchant: string;
   account: string;
+  merchant?: string;
+  merchants?: string[];
 }
 
 export interface HistoryPosting {

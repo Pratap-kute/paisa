@@ -565,18 +565,41 @@
             "description": "Explicit merchant to account mappings. Prefix filters from the import template still apply.",
             "items": {
               "additionalProperties": false,
+              "oneOf": [
+                {
+                  "required": [
+                    "merchant"
+                  ]
+                },
+                {
+                  "required": [
+                    "merchants"
+                  ]
+                }
+              ],
               "properties": {
                 "account": {
                   "description": "Ledger account to use when the merchant matches",
+                  "minLength": 1,
                   "type": "string"
                 },
                 "merchant": {
                   "description": "Merchant text to match after normalization, for example swiggy instamart",
+                  "minLength": 1,
                   "type": "string"
+                },
+                "merchants": {
+                  "description": "List of merchant texts to match after normalization",
+                  "items": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
                 }
               },
               "required": [
-                "merchant",
                 "account"
               ],
               "type": "object"

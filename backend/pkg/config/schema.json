@@ -1154,14 +1154,40 @@
             "properties": {
               "merchant": {
                 "type": "string",
+                "minLength": 1,
                 "description": "Merchant text to match after normalization, for example swiggy instamart"
+              },
+              "merchants": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": "List of merchant texts to match after normalization"
               },
               "account": {
                 "type": "string",
+                "minLength": 1,
                 "description": "Ledger account to use when the merchant matches"
               }
             },
-            "required": ["merchant", "account"],
+            "required": [
+              "account"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "merchant"
+                ]
+              },
+              {
+                "required": [
+                  "merchants"
+                ]
+              }
+            ],
             "additionalProperties": false
           },
           "default": []

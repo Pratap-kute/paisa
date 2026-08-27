@@ -20,11 +20,11 @@ Deno.test("sends the stored authentication token on generated API requests", asy
       return Promise.resolve(Response.json({ success: true }));
     },
   });
-  setAuthToken("amol:password-token");
+  setAuthToken("testuser:password-token");
 
   await client.ping.getPing();
 
-  expect(request?.headers.get("X-Auth")).toBe("amol:password-token");
+  expect(request?.headers.get("X-Auth")).toBe("testuser:password-token");
   clearAuthToken();
   Reflect.deleteProperty(globalThis, "localStorage");
 });

@@ -127,8 +127,19 @@ type CreditCard struct {
 }
 
 type MerchantRule struct {
-	Merchant string `json:"merchant" yaml:"merchant"`
-	Account  string `json:"account" yaml:"account"`
+	Account   string   `json:"account" yaml:"account"`
+	Merchant  string   `json:"merchant,omitempty" yaml:"merchant,omitempty"`
+	Merchants []string `json:"merchants,omitempty" yaml:"merchants,omitempty"`
+}
+
+func (r MerchantRule) MerchantNames() []string {
+	if len(r.Merchants) > 0 {
+		return r.Merchants
+	}
+	if r.Merchant != "" {
+		return []string{r.Merchant}
+	}
+	return nil
 }
 
 type PredictionConfig struct {

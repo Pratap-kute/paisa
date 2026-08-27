@@ -116,3 +116,163 @@ sheets_directory: relative/sheets
 	assert.Equal(t, filepath.Join(tempDir, "relative/paisa.db"), GetDBPath())
 	assert.Equal(t, filepath.Join(tempDir, "relative/sheets"), GetSheetDir())
 }
+
+func TestMerchantRulesParsingAndValidation(t *testing.T) {
+	t.Run("valid singular merchant rule", func(t *testing.T) {
+		yamlContent := `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - merchant: "blinkit"
+      account: "Expenses:Groceries"
+`
+		err := LoadConfig([]byte(yamlContent), "")
+		require.NoError(t, err)
+		rules := GetConfig().Prediction.MerchantRules
+		require.Len(t, rules, 1)
+		assert.Equal(t, "blinkit", rules[0].Merchant)
+		assert.Equal(t, "Expenses:Groceries", rules[0].Account)
+		assert.Equal(t, []string{"blinkit"}, rules[0].MerchantNames())
+	})
+
+	t.Run("valid grouped merchants rule", func(t *testing.T) {
+		yamlContent := `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - account: "Expenses:Groceries"
+      merchants:
+        - "supermarket central"
+        - "fresh mart"
+        - "corner grocery"
+        - "quick commerce"
+`
+		err := LoadConfig([]byte(yamlContent), "")
+		require.NoError(t, err)
+		rules := GetConfig().Prediction.MerchantRules
+		require.Len(t, rules, 1)
+		assert.Equal(t, "Expenses:Groceries", rules[0].Account)
+		assert.Equal(t, []string{"supermarket central", "fresh mart", "corner grocery", "quick commerce"}, rules[0].Merchants)
+		assert.Equal(t, []string{"supermarket central", "fresh mart", "corner grocery", "quick commerce"}, rules[0].MerchantNames())
+	})
+
+	t.Run("valid mixed singular and grouped rules", func(t *testing.T) {
+		yamlContent := `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - merchant: "uber"
+      account: "Expenses:Transport"
+    - account: "Expenses:Groceries"
+      merchants:
+        - "blinkit"
+        - "kanha dairy"
+`
+		err := LoadConfig([]byte(yamlContent), "")
+		require.NoError(t, err)
+		rules := GetConfig().Prediction.MerchantRules
+		require.Len(t, rules, 2)
+		assert.Equal(t, []string{"uber"}, rules[0].MerchantNames())
+		assert.Equal(t, "Expenses:Transport", rules[0].Account)
+		assert.Equal(t, []string{"blinkit", "kanha dairy"}, rules[1].MerchantNames())
+		assert.Equal(t, "Expenses:Groceries", rules[1].Account)
+	})
+
+	invalidCases := []struct {
+		name string
+		yaml string
+	}{
+		{
+			name: "empty grouped list",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - account: "Expenses:Groceries"
+      merchants: []
+`,
+		},
+		{
+			name: "empty string in merchants array",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - account: "Expenses:Groceries"
+      merchants:
+        - ""
+`,
+		},
+		{
+			name: "empty string singular merchant",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - merchant: ""
+      account: "Expenses:Groceries"
+`,
+		},
+		{
+			name: "both merchant and merchants in one rule",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - merchant: "blinkit"
+      merchants:
+        - "kanha dairy"
+      account: "Expenses:Groceries"
+`,
+		},
+		{
+			name: "missing account",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - merchants:
+        - "blinkit"
+`,
+		},
+		{
+			name: "missing both merchant and merchants",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - account: "Expenses:Groceries"
+`,
+		},
+		{
+			name: "duplicate merchant in grouped array",
+			yaml: `
+journal_path: main.ledger
+db_path: paisa.db
+prediction:
+  merchant_rules:
+    - account: "Expenses:Groceries"
+      merchants:
+        - "blinkit"
+        - "blinkit"
+`,
+		},
+	}
+
+	for _, tc := range invalidCases {
+		t.Run("invalid - "+tc.name, func(t *testing.T) {
+			err := LoadConfig([]byte(tc.yaml), "")
+			assert.Error(t, err, "expected error for case: %s", tc.name)
+		})
+	}
+}
+

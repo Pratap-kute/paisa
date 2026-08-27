@@ -4,19 +4,19 @@ import { authTokenAfterAccountSave } from "./auth";
 Deno.test("account save replaces the token when the current password changes", () => {
   expect(
     authTokenAfterAccountSave(
-      "amol:old-token",
-      [{ username: "amol", password: "" }],
-      [{ username: "amol", password: "new-token" }],
+      "testuser:old-token",
+      [{ username: "testuser", password: "" }],
+      [{ username: "testuser", password: "new-token" }],
     ),
-  ).toBe("amol:new-token");
+  ).toBe("testuser:new-token");
 });
 
 Deno.test("account save preserves a token for an unchanged account", () => {
   expect(
     authTokenAfterAccountSave(
-      "amol:current-token",
-      [{ username: "amol", password: "" }],
-      [{ username: "amol", password: "" }],
+      "testuser:current-token",
+      [{ username: "testuser", password: "" }],
+      [{ username: "testuser", password: "" }],
     ),
   ).toBeUndefined();
 });
@@ -24,16 +24,16 @@ Deno.test("account save preserves a token for an unchanged account", () => {
 Deno.test("account save authenticates the first newly configured account", () => {
   expect(
     authTokenAfterAccountSave(null, [], [
-      { username: "amol", password: "new-token" },
+      { username: "testuser", password: "new-token" },
     ]),
-  ).toBe("amol:new-token");
+  ).toBe("testuser:new-token");
 });
 
 Deno.test("account save clears a session whose account was removed", () => {
   expect(
     authTokenAfterAccountSave(
-      "amol:current-token",
-      [{ username: "amol", password: "" }],
+      "testuser:current-token",
+      [{ username: "testuser", password: "" }],
       [{ username: "other", password: "" }],
     ),
   ).toBeNull();

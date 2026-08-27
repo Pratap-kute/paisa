@@ -64,12 +64,22 @@ export function applyMerchantRule(
 ): { account: string; score: number } | null {
   if (!rules || rules.length === 0) return null;
   const normalized = normalizeDescription(input.description);
+  if (!normalized.merchantKey) return null;
+
   for (const rule of rules) {
-    const ruleNorm = normalizeDescription(rule.merchant);
-    if (!ruleNorm.merchantKey || !rule.account) continue;
+    if (!rule.account) continue;
     if (!accountMatchesPrefix(rule.account, input.prefix)) continue;
-    if (normalized.merchantKey === ruleNorm.merchantKey) {
-      return { account: rule.account, score: IDENTITY.RULE };
+    const merchantNames = rule.merchants && rule.merchants.length > 0
+      ? rule.merchants
+      : rule.merchant
+      ? [rule.merchant]
+      : [];
+    for (const merchant of merchantNames) {
+      const ruleNorm = normalizeDescription(merchant);
+      if (!ruleNorm.merchantKey) continue;
+      if (normalized.merchantKey === ruleNorm.merchantKey) {
+        return { account: rule.account, score: IDENTITY.RULE };
+      }
     }
   }
   return null;

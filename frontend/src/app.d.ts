@@ -46,7 +46,11 @@ interface UserConfig {
     icon: string;
   }[];
   prediction?: {
-    merchant_rules?: { merchant: string; account: string }[];
+    merchant_rules?: {
+      account: string;
+      merchant?: string;
+      merchants?: string[];
+    }[];
   };
 }
 

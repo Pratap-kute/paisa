@@ -267,8 +267,24 @@ import_templates:
 # OPTIONAL, DEFAULT: empty merchant_rules
 prediction:
   merchant_rules:
+    # Grouped merchant list shorthand:
+    - account: "Expenses:Groceries"
+      merchants:
+        - "supermarket central"
+        - "fresh mart"
+        - "corner grocery"
+        - "quick commerce"
+
+    - account: "Expenses:Groceries:Vegetables"
+      merchants:
+        - "green farm market"
+        - "city produce"
+        - "fresh vegetables"
+
+    # Singular merchant rule (also supported for backward compatibility):
     - merchant: "swiggy instamart"
       account: "Expenses:Groceries"
+
     # Merchant text is matched after normalization. The import template prefix
     # still hard-filters the account, so an Expenses rule is ignored for
     # prefix="Income".

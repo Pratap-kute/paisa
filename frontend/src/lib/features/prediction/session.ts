@@ -9,6 +9,7 @@ import type {
   Confidence,
   CurrentImportContext,
   HistoryPosting,
+  MerchantRule,
   PredictionIndex,
   PredictionInput,
   PredictionOptions,
@@ -23,6 +24,15 @@ export type ConfidenceFilter =
   | "UNKNOWN"
   | "TRANSFER"
   | null;
+
+export interface PredictionFilterCounts {
+  all: number;
+  high: number;
+  medium: number;
+  needsReview: number;
+  unknown: number;
+  transfer: number;
+}
 
 function predictionKey(
   rowIndex: number | undefined,
@@ -43,7 +53,7 @@ function merchantRulesFromConfig(): PredictionOptions["merchantRules"] {
     const config = (globalThis as {
       USER_CONFIG?: {
         prediction?: {
-          merchant_rules?: { merchant: string; account: string }[];
+          merchant_rules?: MerchantRule[];
         };
       };
     }).USER_CONFIG;

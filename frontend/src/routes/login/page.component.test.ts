@@ -14,13 +14,13 @@ test("submits the values visible in password-manager-populated inputs", async ()
   await fireEvent.input(username, { target: { value: "stale-user" } });
   await fireEvent.input(password, { target: { value: "stale-password" } });
 
-  username.value = "amol";
-  password.value = "amol@123";
+  username.value = "testuser";
+  password.value = "testuser@123";
   await fireEvent.submit(container.querySelector("form")!);
 
   await waitFor(async () => {
     expect(localStorage.getItem(tokenKey)).toBe(
-      `amol:${await sha256Hex("amol@123")}`,
+      `testuser:${await sha256Hex("testuser@123")}`,
     );
   });
 
