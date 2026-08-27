@@ -1,15 +1,15 @@
 package model
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 type QueryPlanRow struct {
@@ -41,11 +41,8 @@ func explainQueryPlan(t *testing.T, db *gorm.DB, query string, args ...any) []st
 
 func TestExplainQueryPlans(t *testing.T) {
 	dir := t.TempDir()
-	db, err := gorm.Open(sqlite.Open(filepath.Join(dir, "explain.db")), &gorm.Config{
-		Logger: logger.Discard,
-	})
+	db, err := database.InitializePath(context.Background(), filepath.Join(dir, "explain.db"))
 	require.NoError(t, err)
-	require.NoError(t, AutoMigrate(db))
 
 	postings := GenerateSyntheticPostings(1000)
 	require.NoError(t, posting.UpsertAll(db, postings))

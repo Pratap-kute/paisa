@@ -9,11 +9,8 @@ import (
 
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/ledger"
-	"github.com/ananthakumaran/paisa/pkg/model/cache"
 	"github.com/ananthakumaran/paisa/pkg/model/cii"
 	"github.com/ananthakumaran/paisa/pkg/model/commodity"
-	mutualfundModel "github.com/ananthakumaran/paisa/pkg/model/mutualfund/scheme"
-	npsModel "github.com/ananthakumaran/paisa/pkg/model/nps/scheme"
 	"github.com/ananthakumaran/paisa/pkg/model/portfolio"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
@@ -24,22 +21,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func AutoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(
-		&npsModel.Scheme{},
-		&mutualfundModel.Scheme{},
-		&posting.Posting{},
-		&price.Price{},
-		&portfolio.Portfolio{},
-		&cii.CII{},
-		&cache.Cache{},
-	)
-}
-
 func SyncJournal(db *gorm.DB) (string, error) {
-	if err := AutoMigrate(db); err != nil {
-		return err.Error(), err
-	}
 	log.Info("Syncing transactions from journal")
 
 	errors, _, err := ledger.Cli().ValidateFile(config.GetJournalPath())
@@ -81,9 +63,6 @@ func SyncJournal(db *gorm.DB) (string, error) {
 }
 
 func SyncCommodities(db *gorm.DB) error {
-	if err := AutoMigrate(db); err != nil {
-		return err
-	}
 	log.Info("Fetching commodities price history")
 	commodities := slices.Clone(commodity.All())
 	for i := len(commodities) - 1; i > 0; i-- {
@@ -128,9 +107,6 @@ func SyncCommodities(db *gorm.DB) error {
 }
 
 func SyncCII(db *gorm.DB) error {
-	if err := AutoMigrate(db); err != nil {
-		return err
-	}
 	log.Info("Fetching taxation related info")
 	ciis, err := india.GetCostInflationIndex()
 	if err != nil {
@@ -141,9 +117,6 @@ func SyncCII(db *gorm.DB) error {
 }
 
 func SyncPortfolios(db *gorm.DB) error {
-	if err := db.AutoMigrate(&portfolio.Portfolio{}); err != nil {
-		return err
-	}
 	log.Info("Fetching commodities portfolio")
 	commodities := commodity.FindByType(config.MutualFund)
 	for _, commodity := range commodities {

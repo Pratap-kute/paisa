@@ -3,10 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/ananthakumaran/paisa/pkg/model"
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/ananthakumaran/paisa/pkg/server"
-	"github.com/ananthakumaran/paisa/pkg/utils"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,19 +16,17 @@ var (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "serve the WEB UI",
-	Run: func(cmd *cobra.Command, args []string) {
-		db, err := utils.OpenDB()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		db, err := database.Initialize()
 		if err != nil {
-			log.Fatal(err)
-		}
-		if err := model.AutoMigrate(db); err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if os.Getenv("PAISA_DEBUG") == "true" {
 			db = db.Debug()
 		}
 		server.Listen(db, host, port)
+		return nil
 	},
 }
 

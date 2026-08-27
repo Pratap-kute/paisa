@@ -44,8 +44,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "paisa",
-	Short: "Personal finance manager",
+	Use:           "paisa",
+	Short:         "Personal finance manager",
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
 func Execute() {

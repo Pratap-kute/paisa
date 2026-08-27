@@ -17,8 +17,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 // FindLatestLessOrEqual returns the element with the maximum key <= target.
@@ -280,11 +278,6 @@ func UnQuote(str string) string {
 		return str[1 : len(str)-1]
 	}
 	return str
-}
-
-func OpenDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(config.GetDBPath()), &gorm.Config{Logger: NewGormLogger()})
-	return db, err
 }
 
 func Dos2Unix(str string) string {

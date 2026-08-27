@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,14 +11,12 @@ import (
 	"testing"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/ananthakumaran/paisa/pkg/model"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func TestLargeJournal_SyncAndQueryIntegrity(t *testing.T) {
@@ -41,9 +40,7 @@ func TestLargeJournal_SyncAndQueryIntegrity(t *testing.T) {
 		_ = config.LoadConfig([]byte(fmt.Sprintf("journal_path: %s\n", defaultJournal)), "")
 	})
 
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		Logger: logger.Discard,
-	})
+	db, err := database.InitializePath(context.Background(), dbPath)
 	require.NoError(t, err)
 
 	// 2. Direct Sync via model.SyncJournal

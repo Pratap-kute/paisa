@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,12 +9,11 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/ananthakumaran/paisa/pkg/model"
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -34,9 +34,8 @@ func setupIntegrityTestEnv(t *testing.T) (*gorm.DB, string, string) {
 	require.NoError(t, os.WriteFile(configPath, []byte(cfgContent), 0o600))
 	require.NoError(t, config.LoadConfig([]byte(cfgContent), configPath))
 
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	db, err := database.InitializePath(context.Background(), dbPath)
 	require.NoError(t, err)
-	require.NoError(t, model.AutoMigrate(db))
 
 	syncRes := Sync(db, SyncRequest{Journal: true})
 	require.True(t, syncRes.Success, "Initial sync should succeed: %s", syncRes.Message)

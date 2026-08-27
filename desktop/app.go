@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"gorm.io/gorm"
 
 	"github.com/ananthakumaran/paisa/cmd"
-	"github.com/ananthakumaran/paisa/pkg/model"
-	"github.com/ananthakumaran/paisa/pkg/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,12 +29,18 @@ func (a *App) startup(ctx context.Context) {
 	cmd.InitConfig()
 	runtime.WindowMaximise(ctx)
 
-	db, err := utils.OpenDB()
+	db, err := database.Initialize()
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		_, _ = runtime.MessageDialog(ctx, runtime.MessageDialogOptions{
+			Type:          runtime.ErrorDialog,
+			Title:         "Database Initialization Failed",
+			Message:       err.Error(),
+			DefaultButton: "Close",
+		})
+		runtime.Quit(ctx)
+		return
 	}
-
-	model.AutoMigrate(db)
 
 	a.db = *db
 }

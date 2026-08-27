@@ -134,23 +134,30 @@ Go to [http://localhost:7500](http://localhost:7500). Read the
 ## Docker
 
 Paisa CLI is available on
-[dockerhub](https://hub.docker.com/r/ananthakumaran/paisa). The default image
+[dockerhub](https://hub.docker.com/r/pratapkute/paisa). The default image
 only supports ledger. `paisa:<version>-hledger`, `paisa:<version>-beancount` or
 `paisa:<version>-all` image variants can be used if you want to use paisa with
 others.
+
+Paisa upgrades its SQLite database automatically when it starts; no migration
+command is required. Back up the mounted directory before upgrading. The
+database file and its containing directory must be writable because Paisa
+updates financial data and SQLite may create journal files beside the database.
+After an upgrade, an older Paisa version may refuse to open a database whose
+schema is newer than it supports.
 
 === "Linux"
 
     ```console
     # mkdir -p /home/john/Documents/paisa/
-    # docker run -p 7500:7500 -v /home/john/Documents/paisa/:/root/Documents/paisa/ ananthakumaran/paisa:latest
+    # docker run -p 7500:7500 -v /home/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest
     ```
 
 === "Mac"
 
     ```console
     # mkdir -p /Users/john/Documents/paisa/
-    # docker run -p 7500:7500 -v /Users/john/Documents/paisa/:/root/Documents/paisa/ ananthakumaran/paisa:latest
+    # docker run -p 7500:7500 -v /Users/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest
     ```
 
 ## Nix Flake

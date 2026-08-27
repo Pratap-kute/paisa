@@ -16,6 +16,11 @@
 
 #### Reliability and data integrity
 
+- **Automatic database upgrades:** Replaced runtime `AutoMigrate` calls with
+  serialized, checksummed SQLite migrations. Existing v0.9.0 and v0.9.1
+  databases are adopted without rebuilding or changing financial data, while
+  incompatible newer schemas and read-only storage now produce actionable
+  startup errors.
 - **Atomic configuration writes:** Configuration updates now use atomic file
   replacement and return actionable errors instead of terminating the process.
 - **Graceful backend errors:** Removed fatal exits from persistence and domain

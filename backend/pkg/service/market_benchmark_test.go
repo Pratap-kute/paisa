@@ -1,23 +1,21 @@
 package service
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
+	"github.com/ananthakumaran/paisa/pkg/database"
 	"github.com/ananthakumaran/paisa/pkg/model"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func BenchmarkMarket_GetTrees_10k(b *testing.B) {
 	dir := b.TempDir()
-	db, err := gorm.Open(sqlite.Open(filepath.Join(dir, "bench.db")), &gorm.Config{Logger: logger.Discard})
+	db, err := database.InitializePath(context.Background(), filepath.Join(dir, "bench.db"))
 	require.NoError(b, err)
-	require.NoError(b, model.AutoMigrate(db))
 
 	postings := model.GenerateSyntheticPostings(10000)
 	require.NoError(b, posting.UpsertAll(db, postings))
@@ -33,9 +31,8 @@ func BenchmarkMarket_GetTrees_10k(b *testing.B) {
 
 func BenchmarkMarket_GetTrees_50k(b *testing.B) {
 	dir := b.TempDir()
-	db, err := gorm.Open(sqlite.Open(filepath.Join(dir, "bench.db")), &gorm.Config{Logger: logger.Discard})
+	db, err := database.InitializePath(context.Background(), filepath.Join(dir, "bench.db"))
 	require.NoError(b, err)
-	require.NoError(b, model.AutoMigrate(db))
 
 	postings := model.GenerateSyntheticPostings(50000)
 	require.NoError(b, posting.UpsertAll(db, postings))
