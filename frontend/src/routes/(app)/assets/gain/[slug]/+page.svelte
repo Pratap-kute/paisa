@@ -1,93 +1,116 @@
 <script lang="ts">
-  import COLORS from "$lib/core/colors";
-  import { buildLegends } from "$lib/charts/gain";
-  import {
-    buildPortfolioComparison,
-    filterCommodityBreakdowns,
-  } from "$lib/charts/hierarchy_data";
-  import {
-    ajax,
-    type Posting,
-    formatCurrency,
-    formatFloat,
-    type AccountGain,
-    type Networth,
-    type PortfolioAggregate,
-    type AssetBreakdown,
-    formatPercentage,
-    formatFloatUptoPrecision,
-    firstName,
-    restName,
-    postingUrl,
-  } from "$lib/core/utils";
-  import { last } from "es-toolkit";
-  import { onMount } from "svelte";
-  import type { PageData } from "./$types";
+import COLORS from "$lib/shared/theme/colors";
+import type { Networth } from "$lib/domain/assets";
+import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+import { firstName, restName } from "$lib/domain/account";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import type { AccountGain, PortfolioAggregate } from "$lib/domain/assets";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import { buildLegends } from "$lib/features/assets/gain";
+import {
+  buildPortfolioComparison,
+  filterCommodityBreakdowns,
+} from "$lib/features/assets/hierarchy_data";
+import type { Posting } from "$lib/domain/ledger";
+import { api } from "$lib/api";
+import { last, sortBy } from "es-toolkit";
+import { onMount } from "svelte";
+import type { PageData } from "./$types";
 
-  import { iconify } from "$lib/core/icon";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import GainAccountTimelineChart from "$lib/components/charts/GainAccountTimelineChart.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-import { sortBy } from "$lib/core/collection";
+import { iconify } from "$lib/shared/ui/icon";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 
-  let commodities: string[] = [];
-  let selectedCommodities: string[] = $state([]);
-  let security_type: PortfolioAggregate[] = $state([]);
-  let name_and_security_type: PortfolioAggregate[] = $state([]);
-  let rating: PortfolioAggregate[] = $state([]);
-  let industry: PortfolioAggregate[] = $state([]);
-  let securityTypeData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(security_type, selectedCommodities)));
-  let ratingData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(rating, selectedCommodities)));
-  let industryData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(industry, selectedCommodities)));
-  let portfolioData = $derived(buildPortfolioComparison(filterCommodityBreakdowns(name_and_security_type, selectedCommodities)));
+let commodities: string[] = [];
+let selectedCommodities: string[] = $state([]);
+let security_type: PortfolioAggregate[] = $state([]);
+let name_and_security_type: PortfolioAggregate[] = $state([]);
+let rating: PortfolioAggregate[] = $state([]);
+let industry: PortfolioAggregate[] = $state([]);
+let securityTypeData = $derived(
+  buildPortfolioComparison(
+    filterCommodityBreakdowns(security_type, selectedCommodities),
+  ),
+);
+let ratingData = $derived(
+  buildPortfolioComparison(
+    filterCommodityBreakdowns(rating, selectedCommodities),
+  ),
+);
+let industryData = $derived(
+  buildPortfolioComparison(
+    filterCommodityBreakdowns(industry, selectedCommodities),
+  ),
+);
+let portfolioData = $derived(
+  buildPortfolioComparison(
+    filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+  ),
+);
 
-  let securityTypeEmpty: boolean = $state(false);
-  let nameAndSecurityTypeEmpty: boolean = $state(false);
-  let ratingEmpty: boolean = $state(false);
-  let industryEmpty: boolean = $state(false);
+let securityTypeEmpty: boolean = $state(false);
+let nameAndSecurityTypeEmpty: boolean = $state(false);
+let ratingEmpty: boolean = $state(false);
+let industryEmpty: boolean = $state(false);
 
-  interface Props {
-    data: PageData;
-  }
+interface Props {
+  data: PageData;
+}
 
-  let { data }: Props = $props();
-  let gain: AccountGain = $state();
-  let overview: Networth = $state();
-  let assetBreakdown: AssetBreakdown = $state();
-  let legends = buildLegends();
+let { data }: Props = $props();
+let gain: AccountGain | undefined = $state();
+let overview: Networth | undefined = $state();
+let assetBreakdown: AssetBreakdown | undefined = $state();
+let legends = buildLegends();
 
-  let postings: Posting[] = $state([]);
+let postings: Posting[] = $state([]);
 
-  onMount(async () => {
-    ({
-      gain_timeline_breakdown: gain,
-      asset_breakdown: assetBreakdown,
-      portfolio_allocation: {
-        name_and_security_type,
-        security_type,
-        rating,
-        industry,
-        commodities,
-      },
-    } = await ajax("/api/gain/:name", null, data));
+onMount(async () => {
+  const res = await api.gain.getAccountGain(data.name);
+  gain = res.gain_timeline_breakdown as unknown as AccountGain;
+  assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
+  name_and_security_type = (res.portfolio_allocation
+    ?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
+  security_type = (res.portfolio_allocation
+    ?.security_type as unknown as PortfolioAggregate[]) || [];
+  rating =
+    (res.portfolio_allocation?.rating as unknown as PortfolioAggregate[]) || [];
+  industry =
+    (res.portfolio_allocation?.industry as unknown as PortfolioAggregate[]) ||
+    [];
+  commodities = (res.portfolio_allocation?.commodities as unknown as any) || [];
 
-    overview = last(gain.networthTimeline);
-    postings = sortBy(gain.postings, (p) => p.date)
-      .reverse()
-      .slice(0, 100);
-    selectedCommodities = [...commodities];
-    securityTypeEmpty = security_type.length === 0;
-    nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
-    ratingEmpty = rating.length === 0;
-    industryEmpty = industry.length === 0;
-  });
-
+  overview = last(gain.networthTimeline as any);
+  postings = [...(gain.postings || [])]
+    .sort((a, b) => {
+      const da = a.date
+        ? (typeof a.date === "string"
+          ? new Date(a.date).getTime()
+          : (a.date as any).valueOf())
+        : 0;
+      const db = b.date
+        ? (typeof b.date === "string"
+          ? new Date(b.date).getTime()
+          : (b.date as any).valueOf())
+        : 0;
+      return db - da;
+    })
+    .slice(0, 100) as unknown as Posting[];
+  selectedCommodities = [...commodities];
+  securityTypeEmpty = security_type.length === 0;
+  nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
+  ratingEmpty = rating.length === 0;
+  industryEmpty = industry.length === 0;
+});
 </script>
 
 <svelte:head>
@@ -124,7 +147,7 @@ import { sortBy } from "$lib/core/collection";
       />
       <Metric
         label="XIRR"
-        value={formatFloat(gain?.xirr)}
+        value={formatFloat(gain?.xirr ?? 0)}
         secondary={assetBreakdown
           ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
           : undefined}

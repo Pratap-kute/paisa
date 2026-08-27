@@ -1,28 +1,33 @@
 <script lang="ts">
-  import { scheduleALTotal } from "$lib/charts/schedule_al_data";
-    import { ajax, formatCurrency, type ScheduleAL } from "$lib/core/utils";
-  import { onMount } from "svelte";
-  import { dateMin, year } from "../../../../../store";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-import { minBy } from "$lib/core/collection";
+import { api } from "$lib/api";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import type { ScheduleAL } from "$lib/domain/tax";
+import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
+import { onMount } from "svelte";
+import { dateMin, year } from "../../../../../store";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { minBy } from "$lib/shared/utils/collection";
 
-  let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
-  let selectedScheduleAl: ScheduleAL | null = $derived(
-    scheduleAls ? scheduleAls[$year] ?? null : null
-  );
-  let hasEntries = $derived((selectedScheduleAl?.entries?.length ?? 0) > 0);
-  let total = $derived(scheduleALTotal(selectedScheduleAl?.entries ?? []));
+let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
+let selectedScheduleAl: ScheduleAL | null = $derived(
+  scheduleAls ? scheduleAls[$year] ?? null : null,
+);
+let hasEntries = $derived((selectedScheduleAl?.entries?.length ?? 0) > 0);
+let total = $derived(scheduleALTotal(selectedScheduleAl?.entries ?? []));
 
-  onMount(async () => {
-    ({ schedule_als: scheduleAls } = await ajax("/api/schedule_al"));
+onMount(async () => {
+  ({ schedule_als: scheduleAls } = await api.scheduleAl
+    .getScheduleAl() as unknown as {
+      schedule_als: Record<string, ScheduleAL>;
+    });
 
-    const firstScheduleAl = minBy(Object.values(scheduleAls), (e) => e.date);
-    if (firstScheduleAl) {
-      dateMin.set(firstScheduleAl.date);
-    }
-  });
+  const firstScheduleAl = minBy(Object.values(scheduleAls), (e) => e.date);
+  if (firstScheduleAl) {
+    dateMin.set(firstScheduleAl.date);
+  }
+});
 </script>
 
 <svelte:head>
@@ -36,7 +41,7 @@ import { minBy } from "$lib/core/collection";
       description="Statement of Assets and Liabilities for Income Tax filing"
     />
 
-  <div class="flex w-full min-w-0 flex-col gap-4">
+    <div class="flex w-full min-w-0 flex-col gap-4">
     {#if scheduleAls}
       {#if selectedScheduleAl}
         <p class="m-0 text-sm text-[var(--paisa-muted-foreground)]">
@@ -97,5 +102,5 @@ import { minBy } from "$lib/core/collection";
       </div>
     {/if}
   </div>
-</div>
+  </div>
 </Page>

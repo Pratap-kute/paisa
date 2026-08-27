@@ -1,46 +1,105 @@
-import { loading } from "../../store";
-import { error } from "@sveltejs/kit";
-import { goto } from "$app/navigation";
+import dayjs from "dayjs";
+import { isString } from "es-toolkit";
+import { Api, HttpClient } from "./generated/Api";
 
-export interface RequestOptions extends RequestInit {
-  background?: boolean;
+export const tokenKey = "token";
+
+export function getAuthToken(): string | null {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(tokenKey);
 }
 
-export async function apiClient<T = unknown>(
-  url: string,
-  options?: RequestOptions,
-): Promise<T> {
-  const isBackground = options?.background ?? false;
-  if (!isBackground) {
-    loading.set(true);
+export function setAuthToken(token: string): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem(tokenKey, token);
   }
+}
 
-  try {
-    const res = await fetch(url, options);
+export function clearAuthToken(): void {
+  if (typeof localStorage !== "undefined") {
+    localStorage.removeItem(tokenKey);
+  }
+}
 
-    if (res.status === 401) {
-      goto("/login");
-      return {} as T;
+export function parseJsonWithDates(text: string): unknown {
+  return JSON.parse(text, (key, value) => {
+    if (
+      isString(value) &&
+      /Date|date|time|now/.test(key) &&
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/
+        .test(
+          value,
+        )
+    ) {
+      return dayjs(value.substring(0, 19));
     }
+    return value;
+  });
+}
 
-    if (res.status >= 400) {
-      let bodyText: string;
-      try {
-        bodyText = await res.text();
-      } catch {
-        bodyText = res.statusText;
+function wrapResponse(response: Response): Response {
+  return new Proxy(response, {
+    get(target, prop) {
+      if (prop === "json") {
+        return async () => {
+          const text = await target.text();
+          return parseJsonWithDates(text);
+        };
       }
-      throw error(res.status, bodyText);
-    }
-
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      return (await res.json()) as T;
-    }
-    return (await res.text()) as unknown as T;
-  } finally {
-    if (!isBackground) {
-      loading.set(false);
-    }
-  }
+      if (prop === "clone") {
+        return () => wrapResponse(target.clone());
+      }
+      const val = (target as unknown as Record<string | symbol, unknown>)[prop];
+      return typeof val === "function"
+        ? (val as (...args: unknown[]) => unknown).bind(target)
+        : val;
+    },
+  });
 }
+
+export interface ClientOptions {
+  baseUrl?: string;
+  customFetch?: typeof fetch;
+}
+
+export function createApiClient(options: ClientOptions = {}): Api<unknown> {
+  const baseFetch = options.customFetch ??
+    (typeof fetch !== "undefined" ? fetch : undefined);
+
+  const customFetch = baseFetch
+    ? async (
+      input: RequestInfo | URL,
+      init?: RequestInit,
+    ): Promise<Response> => {
+      const res = await baseFetch(input, init);
+      return wrapResponse(res);
+    }
+    : undefined;
+
+  const httpClient = new HttpClient({
+    baseUrl: options.baseUrl ?? "/api",
+    customFetch,
+    baseApiParams: {
+      secure: true,
+      credentials: "same-origin",
+      headers: {},
+      redirect: "follow",
+      referrerPolicy: "no-referrer",
+    },
+    securityWorker: () => {
+      const token = getAuthToken();
+      if (token && token.trim() !== "") {
+        return {
+          headers: {
+            "X-Auth": token,
+          },
+        };
+      }
+      return {};
+    },
+  });
+
+  return new Api(httpClient);
+}
+
+export const api = createApiClient();

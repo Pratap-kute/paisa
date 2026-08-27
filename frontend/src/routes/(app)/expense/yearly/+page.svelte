@@ -1,145 +1,162 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { sumBy, uniq } from "es-toolkit";
-  import { ajax, financialYear, formatCurrency, formatPercentage, type Legend, type Posting } from "$lib/core/utils";
-  import { buildYearlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
-  import { buildYearlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import { expenseGroup } from "$lib/charts/expense";
-  import { dateMin, dateMax, year } from "../../../../store";
-  import { writable } from "svelte/store";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/components/ui/FinancialYearPicker.svelte";
-  import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import YearlyExpenseCalendar from "$lib/components/charts/YearlyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { isEmpty, map, maxBy, minBy } from "$lib/core/collection";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import type { Legend } from "$lib/shared/charts/types";
+import type { Posting } from "$lib/domain/ledger";
+import { onMount } from "svelte";
+import { sumBy, uniq } from "es-toolkit";
+import { financialYear } from "$lib/domain/time";
+import { api } from "$lib/api";
+import { buildYearlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+import {
+  categoryColor,
+  categoryColorResolver,
+  categoryLegends,
+} from "$lib/shared/charts/category";
+import { buildYearlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
+import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
+import { expenseGroup } from "$lib/features/expense/expense";
+import { dateMax, dateMin, year } from "../../../../store";
+import { writable } from "svelte/store";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
+import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import YearlyExpenseCalendar from "$lib/features/expense/components/YearlyExpenseCalendar.svelte";
+import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+import { isEmpty, map, maxBy, minBy } from "$lib/shared/utils/collection";
 
-  let groups = writable<string[]>([]);
-  let expenses: Posting[] = $state([]),
-    grouped_expenses: Record<string, Posting[]> = $state({}),
-    grouped_incomes: Record<string, Posting[]> = $state({}),
-    grouped_investments: Record<string, Posting[]> = $state({}),
-    grouped_taxes: Record<string, Posting[]> = $state({});
+let groups = writable<string[]>([]);
+let expenses: Posting[] = $state([]),
+  grouped_expenses: Record<string, Posting[]> = $state({}),
+  grouped_incomes: Record<string, Posting[]> = $state({}),
+  grouped_investments: Record<string, Posting[]> = $state({}),
+  grouped_taxes: Record<string, Posting[]> = $state({});
 
-  let legends: Legend[] = $state([]);
-  let expenseColor = $state(categoryColor);
-  let isLoading = $state(true);
+let legends: Legend[] = $state([]);
+let expenseColor = $state(categoryColor);
+let isLoading = $state(true);
 
-  let income = $state(""),
-    netIncome = $state(""),
-    taxRate = $state(""),
-    tax = $state(""),
-    expenseRate = $state(""),
-    expenseRateValue = $state(""),
-    expense = $state(""),
-    investment = $state(""),
-    savingRate = $state("");
+let income = $state(""),
+  netIncome = $state(""),
+  taxRate = $state(""),
+  tax = $state(""),
+  expenseRate = $state(""),
+  expenseRateValue = $state(""),
+  expense = $state(""),
+  investment = $state(""),
+  savingRate = $state("");
 
-  onMount(async () => {
-    try {
-      ({
-        expenses: expenses,
-        year_wise: {
-          expenses: grouped_expenses,
-          incomes: grouped_incomes,
-          investments: grouped_investments,
-          taxes: grouped_taxes,
-        },
-      } = await ajax("/api/expense"));
+onMount(async () => {
+  try {
+    const res = await api.expense.getExpense();
+    expenses = (res.expenses as unknown as Posting[]) || [];
+    grouped_expenses =
+      (res.year_wise?.expenses as unknown as Record<string, Posting[]>) || {};
+    grouped_incomes =
+      (res.year_wise?.incomes as unknown as Record<string, Posting[]>) || {};
+    grouped_investments =
+      (res.year_wise?.investments as unknown as Record<string, Posting[]>) ||
+      {};
+    grouped_taxes =
+      (res.year_wise?.taxes as unknown as Record<string, Posting[]>) || {};
 
-      const dates = map(expenses, (e) => e.date);
-      if (dates.length > 0) {
-        const minimum = minBy(dates, (d) => d.valueOf())!;
-        const maximum = maxBy(dates, (d) => d.valueOf())!;
-        dateMin.set(minimum);
-        dateMax.set(maximum);
-        if (!$year) year.set(financialYear(maximum));
-      }
-
-      const allGroups = uniq(expenses.map(expenseGroup)).sort();
-      groups.set(allGroups);
-      expenseColor = categoryColorResolver(allGroups);
-      legends = categoryLegends(allGroups, (group) => {
-        groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
-      });
-    } finally {
-      isLoading = false;
+    const dates = map(expenses, (e) => e.date);
+    if (dates.length > 0) {
+      const minimum = minBy(dates, (d) => d.valueOf())!;
+      const maximum = maxBy(dates, (d) => d.valueOf())!;
+      dateMin.set(minimum);
+      dateMax.set(maximum);
+      if (!$year) year.set(financialYear(maximum));
     }
-  });
 
-  function sum(postings: Posting[], sign = 1) {
-    return sign * sumBy(postings, (p) => p.amount);
+    const allGroups = uniq(expenses.map(expenseGroup)).sort();
+    groups.set(allGroups);
+    expenseColor = categoryColorResolver(allGroups);
+    legends = categoryLegends(allGroups, (group) => {
+      groups.update((selected) =>
+        selected.length === 1 && selected[0] === group ? allGroups : [group]
+      );
+    });
+  } finally {
+    isLoading = false;
   }
+});
 
-  function sumCurrency(postings: Posting[], sign = 1) {
-    return formatCurrency(sign * sumBy(postings, (p) => p.amount));
-  }
+function sum(postings: Posting[], sign = 1) {
+  return sign * sumBy(postings, (p) => p.amount);
+}
 
-  let currentYearExpenses: Posting[] = $derived(
-    grouped_expenses[$year] || [],
-  );
-  let currentYearHeatmapData = $derived(
-    buildYearlyExpenseHeatmapData($year, currentYearExpenses, $groups),
-  );
-  let currentYearBreakdownData = $derived(
-    buildExpenseBreakdownComparison(currentYearExpenses),
-  );
-  let expenseTimelineData = $derived(buildYearlyExpenseTimelineSeries(expenses, $groups));
-  let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
-  let hasExpenses = $derived(expenses.length > 0);
-  let postingCountSubtitle = $derived(
-    hasCurrentYearExpenses
-      ? `${currentYearExpenses.length} postings in ${$year}`
-      : "No expenses recorded",
-  );
+function sumCurrency(postings: Posting[], sign = 1) {
+  return formatCurrency(sign * sumBy(postings, (p) => p.amount));
+}
 
-  $effect(() => {
-    if (grouped_expenses) {
-      const yearExpenses = grouped_expenses[$year] || [];
-      const incomes = grouped_incomes[$year] || [];
-      const taxes = grouped_taxes[$year] || [];
-      const investments = grouped_investments[$year] || [];
+let currentYearExpenses: Posting[] = $derived(
+  grouped_expenses[$year] || [],
+);
+let currentYearHeatmapData = $derived(
+  buildYearlyExpenseHeatmapData($year, currentYearExpenses, $groups),
+);
+let currentYearBreakdownData = $derived(
+  buildExpenseBreakdownComparison(currentYearExpenses),
+);
+let expenseTimelineData = $derived(
+  buildYearlyExpenseTimelineSeries(expenses, $groups),
+);
+let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
+let hasExpenses = $derived(expenses.length > 0);
+let postingCountSubtitle = $derived(
+  hasCurrentYearExpenses
+    ? `${currentYearExpenses.length} postings in ${$year}`
+    : "No expenses recorded",
+);
 
-      income = sumCurrency(incomes, -1);
-      tax = sumCurrency(taxes);
-      expense = sumCurrency(yearExpenses);
-      investment = sumCurrency(investments);
+$effect(() => {
+  if (grouped_expenses) {
+    const yearExpenses = grouped_expenses[$year] || [];
+    const incomes = grouped_incomes[$year] || [];
+    const taxes = grouped_taxes[$year] || [];
+    const investments = grouped_investments[$year] || [];
 
-      if (isEmpty(incomes)) {
-        expenseRate = "";
-        expenseRateValue = "";
-        taxRate = "";
-        savingRate = "";
-        netIncome = "";
-      } else {
-        const grossIncome = sum(incomes, -1);
-        const netIncomeAmount = grossIncome - sum(taxes);
-        netIncome = formatCurrency(netIncomeAmount) + " net income";
-        taxRate = grossIncome === 0
-          ? ""
-          : formatPercentage(sum(taxes) / grossIncome) + " on income";
-        expenseRateValue = netIncomeAmount === 0
-          ? ""
-          : formatPercentage(sum(yearExpenses) / netIncomeAmount);
-        expenseRate = netIncomeAmount === 0
-          ? ""
-          : expenseRateValue + " of net income";
-        savingRate = netIncomeAmount === 0
-          ? ""
-          : formatPercentage(sum(investments) / netIncomeAmount) + " of net income";
-      }
+    income = sumCurrency(incomes, -1);
+    tax = sumCurrency(taxes);
+    expense = sumCurrency(yearExpenses);
+    investment = sumCurrency(investments);
+
+    if (isEmpty(incomes)) {
+      expenseRate = "";
+      expenseRateValue = "";
+      taxRate = "";
+      savingRate = "";
+      netIncome = "";
+    } else {
+      const grossIncome = sum(incomes, -1);
+      const netIncomeAmount = grossIncome - sum(taxes);
+      netIncome = formatCurrency(netIncomeAmount) + " net income";
+      taxRate = grossIncome === 0
+        ? ""
+        : formatPercentage(sum(taxes) / grossIncome) + " on income";
+      expenseRateValue = netIncomeAmount === 0
+        ? ""
+        : formatPercentage(sum(yearExpenses) / netIncomeAmount);
+      expenseRate = netIncomeAmount === 0
+        ? ""
+        : expenseRateValue + " of net income";
+      savingRate = netIncomeAmount === 0
+        ? ""
+        : formatPercentage(sum(investments) / netIncomeAmount) +
+          " of net income";
     }
-  });
+  }
+});
 </script>
 
 <svelte:head>

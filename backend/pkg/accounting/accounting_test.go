@@ -98,6 +98,33 @@ func TestPopulateBalanceKeepsAccountsIndependent(t *testing.T) {
 	assert.Equal(t, []string{"10", "7", "8"}, []string{got[0].Balance.String(), got[1].Balance.String(), got[2].Balance.String()})
 }
 
+func TestPopulateBalanceStabilizesEquivalentSameDayPostings(t *testing.T) {
+	earlierLine := accountingPosting(1, "Assets:A", "INR", "-4", "-4")
+	earlierLine.TransactionBeginLine = 26
+	laterLine := accountingPosting(1, "Assets:A", "INR", "-4", "-4")
+	laterLine.TransactionBeginLine = 38
+
+	got := PopulateBalance([]posting.Posting{earlierLine, laterLine})
+
+	balances := map[uint64]string{}
+	for _, p := range got {
+		balances[p.TransactionBeginLine] = p.Balance.String()
+	}
+	assert.Equal(t, "-8", balances[26])
+	assert.Equal(t, "-4", balances[38])
+}
+
+func TestSortDescStabilizesEquivalentSameDayPostings(t *testing.T) {
+	earlierLine := accountingPosting(1, "Assets:A", "INR", "-4", "-4")
+	earlierLine.TransactionBeginLine = 26
+	laterLine := accountingPosting(1, "Assets:A", "INR", "-4", "-4")
+	laterLine.TransactionBeginLine = 38
+
+	descending := SortDesc([]posting.Posting{laterLine, earlierLine})
+
+	assert.Equal(t, []uint64{26, 38}, []uint64{descending[0].TransactionBeginLine, descending[1].TransactionBeginLine})
+}
+
 func TestGroupByMonthlyBillingCycle(t *testing.T) {
 	posts := []posting.Posting{
 		accountingPosting(10, "Expenses:A", "INR", "1", "1"),

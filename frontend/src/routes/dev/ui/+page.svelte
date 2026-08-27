@@ -1,41 +1,53 @@
 <script lang="ts">
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Checkbox from "$lib/components/ui/Checkbox.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import Drawer from "$lib/components/ui/Drawer.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import Popover from "$lib/components/ui/Popover.svelte";
-  import Select from "$lib/components/ui/Select.svelte";
-  import Skeleton from "$lib/components/ui/Skeleton.svelte";
-  import Tabs from "$lib/components/ui/Tabs.svelte";
-  import Textarea from "$lib/components/ui/Textarea.svelte";
-  import DataToolbar from "$lib/components/layout/DataToolbar.svelte";
-  import FilterBar from "$lib/components/layout/FilterBar.svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
-  import FormSection from "$lib/components/layout/FormSection.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import StatusBar from "$lib/components/layout/StatusBar.svelte";
-  import WorkspacePane from "$lib/components/layout/WorkspacePane.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Checkbox from "$lib/shared/ui/Checkbox.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
+import Drawer from "$lib/shared/ui/Drawer.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
+import Popover from "$lib/shared/ui/Popover.svelte";
+import Select from "$lib/shared/ui/Select.svelte";
+import Skeleton from "$lib/shared/ui/Skeleton.svelte";
+import Tabs from "$lib/shared/ui/Tabs.svelte";
+import Textarea from "$lib/shared/ui/Textarea.svelte";
+import DataToolbar from "$lib/shared/layout/DataToolbar.svelte";
+import FilterBar from "$lib/shared/layout/FilterBar.svelte";
+import FormField from "$lib/shared/layout/FormField.svelte";
+import FormSection from "$lib/shared/layout/FormSection.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import StatusBar from "$lib/shared/layout/StatusBar.svelte";
+import WorkspacePane from "$lib/shared/layout/WorkspacePane.svelte";
 
-  let tab = $state("overview");
-  let checked = $state(true);
-  let selectValue = $state("monthly");
-  let name = $state("Amazon India Marketplace Services Private Limited - Home Improvement Order");
-  let notes = $state("Statement row has missing secondary metadata.");
-  let darkPreview = $state(false);
+let tab = $state("overview");
+let checked = $state(true);
+let selectValue = $state("monthly");
+let name = $state(
+  "Amazon India Marketplace Services Private Limited - Home Improvement Order",
+);
+let notes = $state("Statement row has missing secondary metadata.");
+let darkPreview = $state(false);
 
-  const longAccount = "Expenses:Housing:HomeImprovement:InteriorDecoration:LivingRoom";
-  const amounts = ["₹0.00", "₹1,249.00", "-₹1,249.00", "₹82,40,500.00", "₹1,85,42,000.00", "11.8%", "-4.2%"];
+const longAccount =
+  "Expenses:Housing:HomeImprovement:InteriorDecoration:LivingRoom";
+const amounts = [
+  "₹0.00",
+  "₹1,249.00",
+  "-₹1,249.00",
+  "₹82,40,500.00",
+  "₹1,85,42,000.00",
+  "11.8%",
+  "-4.2%",
+];
 </script>
 
 <svelte:head>
   <title>Paisa UI Lab</title>
 </svelte:head>
 
-<main class="min-h-screen overflow-x-hidden bg-canvas p-4 font-sans text-foreground md:p-8">
+<main
+  class="min-h-screen overflow-x-hidden bg-canvas p-4 font-sans text-foreground md:p-8">
   <div class="mx-auto flex max-w-[1440px] flex-col gap-8">
     <header class="flex flex-wrap items-start justify-between gap-4">
       <div>
@@ -51,7 +63,8 @@
       </label>
     </header>
 
-    <section class="grid gap-4 rounded-lg border border-border bg-surface p-4" data-theme={darkPreview ? "dark" : undefined}>
+    <section class="grid gap-4 rounded-lg border border-border bg-surface p-4"
+      data-theme={darkPreview ? "dark" : undefined}>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 class="paisa-type-section-heading m-0">Foundation</h2>
         <div class="flex flex-wrap gap-2">
@@ -63,9 +76,12 @@
       </div>
       <div class="grid gap-3 md:grid-cols-4">
         <div class="rounded-md border border-border bg-canvas p-3">Canvas</div>
-        <div class="rounded-md border border-border bg-surface p-3">Surface</div>
-        <div class="rounded-md border border-border bg-surface-raised p-3">Raised</div>
-        <div class="rounded-md border border-border bg-surface-hover p-3">Hover</div>
+        <div
+          class="rounded-md border border-border bg-surface p-3">Surface</div>
+        <div
+          class="rounded-md border border-border bg-surface-raised p-3">Raised</div>
+        <div
+          class="rounded-md border border-border bg-surface-hover p-3">Hover</div>
       </div>
       <div class="grid gap-2">
         {#each amounts as amount}
@@ -76,7 +92,8 @@
 
     <section class="grid gap-4">
       <h2 class="paisa-type-section-heading m-0">Controls</h2>
-      <div class="grid gap-4 rounded-lg border border-border bg-surface p-4 lg:grid-cols-2">
+      <div
+        class="grid gap-4 rounded-lg border border-border bg-surface p-4 lg:grid-cols-2">
         <div class="flex flex-wrap gap-2">
           <Button variant="primary">Primary</Button>
           <Button>Secondary</Button>
@@ -100,10 +117,14 @@
       <h2 class="paisa-type-section-heading m-0">Financial Display</h2>
       <div class="rounded-lg border border-border bg-surface p-4">
         <MetricStrip cols={4}>
-          <Metric label="Net worth" value="₹1,85,42,000.00" secondary="All accounts" status="neutral" />
-          <Metric label="Gain" value="₹82,40,500.00" trend="11.8%" status="positive" />
-          <Metric label="Drawdown" value="-₹1,249.00" trend="-4.2%" status="negative" />
-          <Metric label="Sync" value="Partial" secondary="2 stale prices" status="warning" />
+          <Metric label="Net worth" value="₹1,85,42,000.00"
+            secondary="All accounts" status="neutral" />
+          <Metric label="Gain" value="₹82,40,500.00" trend="11.8%"
+            status="positive" />
+          <Metric label="Drawdown" value="-₹1,249.00" trend="-4.2%"
+            status="negative" />
+          <Metric label="Sync" value="Partial" secondary="2 stale prices"
+            status="warning" />
         </MetricStrip>
       </div>
     </section>
@@ -113,15 +134,20 @@
       <div class="grid gap-4 md:grid-cols-3">
         <div class="rounded-lg border border-border bg-surface p-4">
           <Skeleton height="2rem" />
-          <div class="mt-3 grid gap-2"><Skeleton /><Skeleton width="72%" /></div>
+          <div class="mt-3 grid gap-2">
+            <Skeleton />
+            <Skeleton width="72%" />
+          </div>
         </div>
         <div class="rounded-lg border border-border bg-surface p-4">
           <p class="m-0 font-semibold">Empty</p>
-          <p class="m-0 mt-1 text-sm text-muted-foreground">No transactions match this filter.</p>
+          <p
+            class="m-0 mt-1 text-sm text-muted-foreground">No transactions match this filter.</p>
         </div>
         <div class="rounded-lg border border-border bg-surface p-4">
           <p class="m-0 font-semibold text-negative">Error</p>
-          <p class="m-0 mt-1 text-sm text-muted-foreground">Price sync failed; ledger data is still available.</p>
+          <p
+            class="m-0 mt-1 text-sm text-muted-foreground">Price sync failed; ledger data is still available.</p>
         </div>
       </div>
     </section>
@@ -129,7 +155,8 @@
     <section class="grid gap-4">
       <h2 class="paisa-type-section-heading m-0">Overlays</h2>
       <div class="flex flex-wrap gap-2">
-        <Dialog title="Reconcile transaction" description="Focus is trapped and Escape closes the dialog.">
+        <Dialog title="Reconcile transaction"
+          description="Focus is trapped and Escape closes the dialog.">
           {#snippet trigger()}<span class="paisa4-button paisa4-button-primary">Open dialog</span>{/snippet}
           {#snippet children({ close })}
             <p class="m-0 text-sm">Merchant: {name}</p>
@@ -158,7 +185,13 @@
         { label: "Overview", value: "overview" },
         { label: "Details", value: "details" },
         { label: "Disabled", value: "disabled", disabled: true },
-      ]} />
+      ]}>
+        {#snippet panel(option)}
+          <div class="mt-3 rounded-md border border-border p-3 text-sm">
+            {option.label} panel
+          </div>
+        {/snippet}
+      </Tabs>
     </section>
 
     <section class="grid gap-4">
@@ -173,25 +206,31 @@
           <div class="grid gap-1 rounded-md border border-border p-3">
             <div class="flex min-w-0 justify-between gap-3">
               <span class="truncate">{name}</span>
-              <span class="paisa-financial-number text-negative">-₹1,249.00</span>
+              <span
+                class="paisa-financial-number text-negative">-₹1,249.00</span>
             </div>
-            <span class="break-words text-sm text-muted-foreground">{longAccount}</span>
+            <span
+              class="break-words text-sm text-muted-foreground">{longAccount}</span>
           </div>
           <ChartFrame title="ChartFrame placeholder" height="compact">
-            <div class="flex h-48 items-center justify-center rounded-md border border-border-subtle text-sm text-muted-foreground">
+            <div
+              class="flex h-48 items-center justify-center rounded-md border border-border-subtle text-sm text-muted-foreground">
               Stable chart geometry
             </div>
           </ChartFrame>
         </div>
       </WorkspacePane>
-      <FormSection title="Form foundation" description="Field labels, descriptions, and errors are associated.">
-        <FormField id="merchant" label="Merchant" description="Shown on transaction rows" required>
+      <FormSection title="Form foundation"
+        description="Field labels, descriptions, and errors are associated.">
+        <FormField id="merchant" label="Merchant"
+          description="Shown on transaction rows" required>
           {#snippet children({ describedby, invalid, disabled })}
             <Input id="merchant" bind:value={name} {disabled} />
             <span class="sr-only">{describedby}{invalid}</span>
           {/snippet}
         </FormField>
-        <FormField id="account" label="Account" error="Choose a posting account before saving.">
+        <FormField id="account" label="Account"
+          error="Choose a posting account before saving.">
           {#snippet children({ describedby, invalid })}
             <Textarea id="account" value={longAccount} {describedby} {invalid} />
           {/snippet}

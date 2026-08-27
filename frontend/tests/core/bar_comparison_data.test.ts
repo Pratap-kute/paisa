@@ -1,14 +1,18 @@
 import dayjs from "dayjs";
+import type { Gain } from "$lib/domain/assets";
+import type { Posting } from "$lib/domain/ledger";
 import { describe, expect, it } from "vitest";
 import {
-  buildAllocationTargetComparison,
-  buildCreditCardYearlySpendsComparison,
   buildExpenseBreakdownComparison,
+} from "$lib/features/expense/chart_comparison_data";
+import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
+import {
+  buildAllocationTargetComparison,
   buildGainOverviewComparison,
-} from "$lib/charts/bar_comparison_data";
-import { buildComparisonBarOption } from "$lib/charts/echarts/bar_comparison";
-import type { PaisaChartTheme } from "$lib/charts/echarts/theme";
-import type { AllocationTarget, Gain, Posting } from "$lib/core/utils";
+} from "$lib/features/assets/chart_comparison_data";
+import { buildComparisonBarOption } from "$lib/shared/charts/echarts/bar_comparison";
+import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
+import type { AllocationTarget } from "$lib/domain/assets";
 
 function posting(
   account: string,
@@ -55,16 +59,14 @@ describe("bar/comparison ECharts adapters", () => {
       seriesColors: ["series-1", "series-2", "series-3", "series-4"],
     } as PaisaChartTheme;
     const option = buildComparisonBarOption(data, { theme }) as {
-      baseOption: {
-        series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
-      };
+      series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
     };
 
-    expect(option.baseOption.series[0].data[0].itemStyle.color).toBe(
+    expect(option.series[0].data[0].itemStyle.color).toBe(
       "semantic-override",
     );
     expect(theme.seriesColors).toContain(
-      option.baseOption.series[0].data[1].itemStyle.color,
+      option.series[0].data[1].itemStyle.color,
     );
   });
 

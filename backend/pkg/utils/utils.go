@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cmp"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -9,37 +10,34 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/google/btree"
-	gorm_logrus "github.com/onrik/gorm-logrus"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/exp/constraints"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func BTreeDescendFirstLessOrEqual[I btree.Item](tree *btree.BTree, item I) I {
-	var hit I
-	tree.DescendLessOrEqual(item, func(item btree.Item) bool {
-		hit = item.(I)
-		return false
+// FindLatestLessOrEqual returns the element with the maximum key <= target.
+// items must be sorted in ascending order by key.
+func FindLatestLessOrEqual[T any, K cmp.Ordered](items []T, target K, keyFn func(T) K) (T, bool) {
+	var zero T
+	if len(items) == 0 {
+		return zero, false
+	}
+	idx, found := slices.BinarySearchFunc(items, target, func(item T, t K) int {
+		return cmp.Compare(keyFn(item), t)
 	})
-
-	return hit
-}
-
-func BTreeToSlice[I btree.Item](tree *btree.BTree) []I {
-	items := make([]I, 0)
-	tree.Descend(func(item btree.Item) bool {
-		items = append(items, item.(I))
-		return true
-	})
-
-	return items
+	if found {
+		return items[idx], true
+	}
+	if idx > 0 {
+		return items[idx-1], true
+	}
+	return zero, false
 }
 
 func FY(date time.Time) string {
@@ -116,18 +114,26 @@ func EndOfDay(date time.Time) time.Time {
 	return toDate(date).AddDate(0, 0, 1).Add(-time.Nanosecond)
 }
 
-var now time.Time
+var (
+	nowMu sync.RWMutex
+	now   time.Time
+)
 
 func SetNow(date string) {
 	t, err := time.ParseInLocation("2006-01-02", date, config.TimeZone())
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("Invalid date passed to SetNow: %v", err)
+		return
 	}
 	log.Infof("Setting now to %s", t)
+	nowMu.Lock()
 	now = t
+	nowMu.Unlock()
 }
 
 func Now() time.Time {
+	nowMu.RLock()
+	defer nowMu.RUnlock()
 	if !now.Equal(time.Time{}) {
 		return now
 	}
@@ -135,6 +141,8 @@ func Now() time.Time {
 }
 
 func IsNowDefined() bool {
+	nowMu.RLock()
+	defer nowMu.RUnlock()
 	return !now.Equal(time.Time{})
 }
 
@@ -252,7 +260,7 @@ func SumBy[C any](collection []C, iteratee func(item C) decimal.Decimal) decimal
 	}, decimal.Zero)
 }
 
-func SortedKeys[K constraints.Ordered, V any](m map[K]V) []K {
+func SortedKeys[K cmp.Ordered, V any](m map[K]V) []K {
 	keys := lo.Keys(m)
 	slices.Sort(keys)
 	return keys
@@ -275,7 +283,7 @@ func UnQuote(str string) string {
 }
 
 func OpenDB() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(config.GetDBPath()), &gorm.Config{Logger: gorm_logrus.New()})
+	db, err := gorm.Open(sqlite.Open(config.GetDBPath()), &gorm.Config{Logger: NewGormLogger()})
 	return db, err
 }
 
@@ -297,7 +305,13 @@ func Sha256(str string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
+var ErrInvalidPath = errors.New("not allowed to refer path outside the base directory")
+
 func BuildSubPath(baseDirectory string, path string) (string, error) {
+	if filepath.IsAbs(path) {
+		return "", ErrInvalidPath
+	}
+
 	baseDirectory = filepath.Clean(baseDirectory)
 	fullpath := filepath.Clean(filepath.Join(baseDirectory, filepath.Clean(path)))
 
@@ -307,8 +321,80 @@ func BuildSubPath(baseDirectory string, path string) (string, error) {
 	}
 
 	if relpath == ".." || strings.HasPrefix(relpath, ".."+string(filepath.Separator)) {
-		return "", errors.New("not allowed to refer path outside the base directory")
+		return "", ErrInvalidPath
+	}
+
+	evalBase, err := filepath.EvalSymlinks(baseDirectory)
+	if err == nil {
+		target := fullpath
+		for {
+			evalTarget, err := filepath.EvalSymlinks(target)
+			if err == nil {
+				evalRel, err := filepath.Rel(evalBase, evalTarget)
+				if err != nil {
+					return "", err
+				}
+				if evalRel == ".." || strings.HasPrefix(evalRel, ".."+string(filepath.Separator)) {
+					return "", ErrInvalidPath
+				}
+				break
+			}
+			if !os.IsNotExist(err) {
+				return "", err
+			}
+			if target == baseDirectory {
+				break
+			}
+			parent := filepath.Dir(target)
+			if parent == target {
+				break
+			}
+			target = parent
+		}
 	}
 
 	return fullpath, nil
+}
+
+func AtomicWriteFile(filename string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+
+	tmpFile, err := os.CreateTemp(dir, ".paisa-tmp-*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmpFile.Name()
+	cleanedUp := false
+	defer func() {
+		if !cleanedUp {
+			_ = tmpFile.Close()
+			_ = os.Remove(tmpName)
+		}
+	}()
+
+	if _, err := tmpFile.Write(data); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Chmod(perm); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Sync(); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Close(); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tmpName, filename); err != nil {
+		return err
+	}
+
+	cleanedUp = true
+	return nil
 }

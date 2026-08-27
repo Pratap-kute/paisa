@@ -1,12 +1,12 @@
 {
   "accounts": [
-    "Income:Salary:Acme",
     "Assets:Checking",
-    "Assets:Equity:AAPL"
+    "Assets:Equity:AAPL",
+    "Income:Salary:Acme"
   ],
   "commodities": [
-    "EUR",
-    "AAPL"
+    "AAPL",
+    "EUR"
   ],
   "files": [
     {

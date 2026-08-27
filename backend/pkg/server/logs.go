@@ -5,29 +5,32 @@ import (
 	"os"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
-	"github.com/gin-gonic/gin"
 	"github.com/icza/backscanner"
 	log "github.com/sirupsen/logrus"
 )
 
-func GetLogs() gin.H {
+type LogsResponse struct {
+	Logs []any `json:"logs"`
+}
+
+func GetLogs() LogsResponse {
 	logs := make([]any, 0)
 	path, err := config.EnsureLogFilePath()
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"logs": logs}
+		return LogsResponse{Logs: logs}
 	}
 
 	//nolint:gosec // log file path from user cache directory
 	file, err := os.Open(path)
 	if err != nil {
-		return gin.H{"logs": logs}
+		return LogsResponse{Logs: logs}
 	}
 	defer func() { _ = file.Close() }()
 
 	stat, err := file.Stat()
 	if err != nil {
-		return gin.H{"logs": logs}
+		return LogsResponse{Logs: logs}
 	}
 
 	scanner := backscanner.New(file, int(stat.Size()))
@@ -49,5 +52,5 @@ func GetLogs() gin.H {
 
 	}
 
-	return gin.H{"logs": logs}
+	return LogsResponse{Logs: logs}
 }

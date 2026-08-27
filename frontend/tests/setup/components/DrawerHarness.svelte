@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Drawer from "$lib/components/ui/Drawer.svelte";
+import Drawer from "$lib/shared/ui/Drawer.svelte";
 </script>
 
 <Drawer title="Harness drawer" description="Drawer test body">

@@ -1,1 +1,1 @@
-export * from "./lib/state/persisted";
+export * from "./lib/shared/state/persisted";

@@ -7,17 +7,21 @@
     "build:watch": "deno run -A npm:vite build --watch",
 
     "audit": "deno audit --level=moderate",
-    "check": "deno task typecheck",
+    "check": "deno task architecture && deno task typecheck",
+    "architecture": "deno test --allow-read scripts/check_architecture_test.ts && deno run --allow-read scripts/check_architecture.ts",
     "check:tooling": "deno run -A scripts/check.ts --tooling",
-    "format": "deno fmt",
+    "format": "deno fmt --unstable-component",
     "lint": "deno lint",
     "typecheck": "deno run -A scripts/check.ts",
 
-    "parser-build": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar -o src/lib/search/parser/parser",
-    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/sheet/language.grammar --names -o src/lib/sheet/parser && deno run -A npm:@lezer/generator src/lib/search/parser/query.grammar --names -o src/lib/search/parser/parser",
+    "parser-build": "deno run -A npm:@lezer/generator src/lib/features/sheets/language.grammar -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/features/editor/query.grammar -o src/lib/generated/search/parser",
+    "parser-build-debug": "deno run -A npm:@lezer/generator src/lib/features/sheets/language.grammar --names -o src/lib/generated/sheet/parser && deno run -A npm:@lezer/generator src/lib/features/editor/query.grammar --names -o src/lib/generated/search/parser",
+
+    "api:generate": "deno run -A scripts/generate_api.ts",
+    "api:check": "deno run -A scripts/generate_api.ts --check",
 
     "test": "deno task test:unit && deno task test:core && deno task test:component",
-    "test:core": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=core --maxWorkers=1",
+    "test:core": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=core --pool=threads --maxWorkers=1 --no-isolate",
     "test:component": "deno run -A npm:vitest@^4 run --config vitest.config.ts --project=component --maxWorkers=1",
     "test:deno": "deno task test:unit && deno task test:integration",
     "test:coverage": "deno run -A scripts/coverage.ts",
@@ -25,8 +29,8 @@
     "test:desktop": "deno run --allow-env --allow-read --allow-run --allow-write scripts/desktop_smoke.ts",
     "test:e2e": "deno run -A scripts/run_browser_tests.ts --grep-invert @visual",
     "test:frontend": "deno task test:unit && deno task test:e2e && deno task test:visual && deno task test:coverage",
-    "test:integration": "deno test --no-check --allow-all --ignore=tests/core tests/",
-    "test:unit": "deno test --no-check --allow-read --allow-env --allow-import --ignore=src/lib/components src/",
+    "test:integration": "deno test --allow-all --ignore=tests/core tests/",
+    "test:unit": "deno test --allow-read --allow-env --allow-import --ignore=src/**/*.component.test.ts src/",
     "test:visual": "deno run -A scripts/run_browser_tests.ts --grep @visual",
     "test:visual:update": "deno run -A scripts/run_browser_tests.ts --grep @visual --update-snapshots",
 
@@ -85,30 +89,34 @@
     "svelte-check": "npm:svelte-check@^4.1.0",
     "svelte-dnd-action": "npm:svelte-dnd-action@^0.9.37",
     "svelte-select": "npm:svelte-select@^5.8.0",
+    "swagger-typescript-api": "npm:swagger-typescript-api@13.12.6",
     "svelte-tiny-virtual-list": "npm:svelte-tiny-virtual-list@^2.0.5",
     "tabulator-tables": "npm:tabulator-tables@^6.3.1",
     "tailwindcss": "npm:tailwindcss@^4.3.3",
-    "tippy.js": "npm:tippy.js@^6.3.7",
     "typescript": "npm:typescript@^5.0.0",
     "vite": "npm:vite@^8.2.1",
     "vitest": "npm:vitest@^4",
     "vitest/config": "npm:vitest@^4/config",
-    "xlsx": "./src/lib/vendor/xlsx.mjs",
+    "xlsx": "./src/lib/shared/vendor/xlsx.mjs",
     "xlsx-populate": "npm:xlsx-populate@^1.21.0"
   },
   "compilerOptions": {
     "checkJs": false,
     "skipLibCheck": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "types": ["./src/app.d.ts"]
   },
   "fmt": {
     "exclude": [
       ".svelte-kit/",
       "../backend/web/static/",
       "graphify-out/",
-      "src/lib/search/parser/parser.js",
-      "src/lib/sheet/parser.js",
-      "src/lib/vendor/",
+      "src/lib/api/generated/",
+      "src/lib/generated/search/parser.js",
+      "src/lib/generated/search/parser.terms.js",
+      "src/lib/generated/sheet/parser.js",
+      "src/lib/generated/sheet/parser.terms.js",
+      "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
   },
@@ -120,9 +128,12 @@
       ".svelte-kit/",
       "../backend/web/static/",
       "graphify-out/",
-      "src/lib/search/parser/parser.js",
-      "src/lib/sheet/parser.js",
-      "src/lib/vendor/",
+      "src/lib/api/generated/",
+      "src/lib/generated/search/parser.js",
+      "src/lib/generated/search/parser.terms.js",
+      "src/lib/generated/sheet/parser.js",
+      "src/lib/generated/sheet/parser.terms.js",
+      "src/lib/shared/vendor/",
       "tests/fixture/"
     ]
   },

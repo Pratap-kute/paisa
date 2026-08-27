@@ -36,9 +36,8 @@ test("monthly expenses preserves calendar details and category icons", async ({ 
   await expect(calendar).toBeVisible();
 
   const activeDay = calendar.locator(".paisa-expense-calendar-active").first();
-  await expect(activeDay).toHaveAttribute("data-tippy-content", /Total/);
   await activeDay.hover();
-  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
+  await expect(page.getByRole("tooltip")).toContainText("Total");
 
   const recentIcon = page.locator("section", { hasText: "Recent Expenses" })
     .locator(".custom-icon").first();
@@ -61,11 +60,10 @@ test("yearly expenses preserves monthly composition and hover breakdown", async 
 
   const activeMonth = calendar.locator(".paisa-yearly-expense-month-active")
     .first();
-  await expect(activeMonth).toHaveAttribute("data-tippy-content", /Total/);
   await expect(activeMonth.locator(".paisa-yearly-expense-ring"))
     .toHaveCSS("background-image", /conic-gradient/);
   await activeMonth.hover();
-  await expect(page.locator("[data-tippy-root]")).toContainText("Total");
+  await expect(page.getByRole("tooltip")).toContainText("Total");
 });
 
 test("major pages are routable", async ({ page }) => {
@@ -217,7 +215,9 @@ test("theme toggle switches document theme between light and dark", async ({ pag
 test("doctor diagnostics page reports system status", async ({ page }) => {
   await page.goto("/more/doctor");
   await expect(
-    page.getByText(/(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i),
+    page.getByText(
+      /(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i,
+    ),
   ).toBeVisible();
   await assertNavigationVisible(page);
 });
@@ -255,7 +255,7 @@ test("config page loads configuration sections", async ({ page }) => {
     page.goto("/more/config"),
   ]);
   await expect(
-    page.getByRole("navigation", { name: "Configuration sections" }),
+    page.getByRole("tablist", { name: "Configuration sections" }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: /save/i })).toBeDisabled();
 });

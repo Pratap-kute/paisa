@@ -33,7 +33,8 @@ func (p *PriceProvider) AutoComplete(db *gorm.DB, field string, filter map[strin
 	if count == 0 {
 		schemes, err := GetSchemes()
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			return []price.AutoCompleteItem{}
 		}
 		scheme.UpsertAll(db, schemes)
 	} else {

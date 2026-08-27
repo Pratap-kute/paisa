@@ -3,14 +3,14 @@ import { EditorState } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { BigNumber } from "bignumber.js";
 import dayjs from "dayjs";
-import { sheetLanguage } from "../../src/lib/sheet/language";
+import { sheetLanguage } from "$lib/features/sheets/language";
 import {
   assertType,
   buildAST,
   Environment,
   Query,
-} from "../../src/lib/sheet/interpreter";
-import { functions } from "../../src/lib/sheet/functions";
+} from "$lib/features/sheets/interpreter";
+import { functions } from "$lib/features/sheets/functions";
 
 function evaluate(source: string, scope: Record<string, unknown> = {}) {
   const state = EditorState.create({

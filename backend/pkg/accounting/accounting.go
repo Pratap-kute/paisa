@@ -3,16 +3,15 @@ package accounting
 import (
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
-	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type Balance struct {
@@ -29,17 +28,21 @@ func Register(postings []posting.Posting) []Balance {
 		sameDay := p.Date.Equal(current.Date)
 		current = Balance{Date: p.Date, Quantity: p.Quantity.Add(current.Quantity), Commodity: p.Commodity}
 		if sameDay {
-			balances = balances[:len(balances)-1]
+			balances[len(balances)-1] = current
+		} else {
+			balances = append(balances, current)
 		}
-		balances = append(balances, current)
-
 	}
 	return balances
 }
 
 func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posting {
+	if len(accounts) == 0 {
+		return postings
+	}
+
 	negatePresent := lo.SomeBy(accounts, func(accountGlob string) bool {
-		return accountGlob[0] == '!'
+		return accountGlob != "" && accountGlob[0] == '!'
 	})
 	var combine func(collection []string, predicate func(item string) bool) bool
 	if negatePresent {
@@ -58,12 +61,13 @@ func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posti
 			}
 
 			account := p.Account
-			if service.IsCapitalGains(p) {
-				account = service.CapitalGainsSourceAccount(p.Account)
+			if utils.IsParent(p.Account, "Income:CapitalGains") {
+				account = strings.Replace(p.Account, "Income:CapitalGains", "Assets", 1)
 			}
 			match, err := filepath.Match(accountGlob, account)
 			if err != nil {
-				log.Fatal("Invalid account glob used for filtering", accountGlob, err)
+				log.Warn("Invalid account glob used for filtering ", accountGlob, ": ", err)
+				return false
 			}
 
 			if negative {
@@ -133,58 +137,10 @@ func CurrentBalance(postings []posting.Posting) decimal.Decimal {
 	})
 }
 
-func CurrentBalanceOn(db *gorm.DB, postings []posting.Posting, date time.Time) decimal.Decimal {
-	return utils.SumBy(postings, func(p posting.Posting) decimal.Decimal {
-		return service.GetMarketPrice(db, p, date)
-	})
-}
-
 func CostSum(postings []posting.Posting) decimal.Decimal {
 	return utils.SumBy(postings, func(p posting.Posting) decimal.Decimal {
 		return p.Amount
 	})
-}
-
-type Point struct {
-	Date  time.Time       `json:"date"`
-	Value decimal.Decimal `json:"value"`
-}
-
-func RunningBalance(db *gorm.DB, postings []posting.Posting) []Point {
-	SortAsc(postings)
-	var series []Point
-
-	if len(postings) == 0 {
-		return series
-	}
-
-	var p posting.Posting
-	accumulator := make(map[string]decimal.Decimal)
-
-	end := utils.EndOfToday()
-	for start := postings[0].Date; start.Before(end); start = start.AddDate(0, 0, 1) {
-		for len(postings) > 0 && (postings[0].Date.Before(start) || postings[0].Date.Equal(start)) {
-			p, postings = postings[0], postings[1:]
-			accumulator[p.Commodity] = accumulator[p.Commodity].Add(p.Quantity)
-		}
-
-		balance := decimal.Zero
-
-		for commodity, quantity := range accumulator {
-			if utils.IsCurrency(commodity) {
-				balance = balance.Add(quantity)
-			} else {
-				price := service.GetUnitPrice(db, commodity, start)
-				if !price.Value.Equal(decimal.Zero) {
-					balance = balance.Add(quantity.Mul(price.Value))
-				} else {
-					balance = balance.Add(quantity)
-				}
-			}
-		}
-		series = append(series, Point{Date: start, Value: balance})
-	}
-	return series
 }
 
 func SortTransactionAsc(transactions []transaction.Transaction) []transaction.Transaction {
@@ -199,7 +155,88 @@ func SortAsc(postings []posting.Posting) []posting.Posting {
 
 func SortDesc(postings []posting.Posting) []posting.Posting {
 	sort.Slice(postings, func(i, j int) bool { return postings[i].Date.After(postings[j].Date) })
+	stabilizeEquivalentPostings(postings)
 	return postings
+}
+
+type equivalentPostingKey struct {
+	date      int64
+	account   string
+	commodity string
+	quantity  string
+	amount    string
+}
+
+func equivalentKey(p posting.Posting) equivalentPostingKey {
+	return equivalentPostingKey{
+		date: p.Date.Unix(), account: p.Account, commodity: p.Commodity,
+		quantity: p.Quantity.String(), amount: p.Amount.String(),
+	}
+}
+
+func postingSourceLess(a, b posting.Posting) bool {
+	if a.FileName != b.FileName {
+		return a.FileName < b.FileName
+	}
+	if a.TransactionBeginLine != b.TransactionBeginLine {
+		return a.TransactionBeginLine < b.TransactionBeginLine
+	}
+	if a.Payee != b.Payee {
+		return a.Payee < b.Payee
+	}
+	return a.Note < b.Note
+}
+
+// stabilizeEquivalentPostings makes otherwise indistinguishable accounting
+// entries deterministic without changing the established order of other
+// same-day postings. This matters when two transactions have the same date,
+// account, commodity and amount, as their database insertion order can vary
+// between ledger CLIs.
+func stabilizeEquivalentPostings(postings []posting.Posting) {
+	groups := make(map[equivalentPostingKey][]int)
+	for i := range postings {
+		key := equivalentKey(postings[i])
+		groups[key] = append(groups[key], i)
+	}
+	for _, indices := range groups {
+		if len(indices) < 2 {
+			continue
+		}
+		values := make([]posting.Posting, len(indices))
+		for i, index := range indices {
+			values[i] = postings[index]
+		}
+		sort.Slice(values, func(i, j int) bool {
+			return postingSourceLess(values[i], values[j])
+		})
+		for i, index := range indices {
+			postings[index] = values[i]
+		}
+	}
+}
+
+func stabilizeEquivalentBalances(postings []posting.Posting) {
+	groups := make(map[equivalentPostingKey][]int)
+	for i := range postings {
+		key := equivalentKey(postings[i])
+		groups[key] = append(groups[key], i)
+	}
+	for _, indices := range groups {
+		if len(indices) < 2 {
+			continue
+		}
+		balances := make([]decimal.Decimal, len(indices))
+		sort.Slice(indices, func(i, j int) bool {
+			return postingSourceLess(postings[indices[i]], postings[indices[j]])
+		})
+		for i, index := range indices {
+			balances[i] = postings[index].Balance
+		}
+		sort.Slice(balances, func(i, j int) bool { return balances[i].LessThan(balances[j]) })
+		for i, index := range indices {
+			postings[index].Balance = balances[i]
+		}
+	}
 }
 
 func PopulateBalance(postings []posting.Posting) []posting.Posting {
@@ -210,6 +247,7 @@ func PopulateBalance(postings []posting.Posting) []posting.Posting {
 		accumulator[postings[i].Account] = accumulator[postings[i].Account].Add(postings[i].Quantity)
 		postings[i].Balance = accumulator[postings[i].Account]
 	}
+	stabilizeEquivalentBalances(postings)
 	return postings
 }
 

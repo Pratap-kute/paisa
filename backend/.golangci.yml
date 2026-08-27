@@ -66,30 +66,28 @@ linters:
   exclusions:
     generated: lax
     rules:
-      # Tests favor readability and intentionally exercise error paths.
+      # Test fixtures intentionally duplicate setup and use controlled paths,
+      # subprocesses, credentials, and permissions to exercise edge cases.
       - path: _test\.go
         linters:
           - dupl
-          - errcheck
           - goconst
           - gocritic
           - gocyclo
           - gosec
           - revive
           - unparam
-      # Closing HTTP response bodies is handled explicitly by the callers.
-      - text: G104
+      # These backup paths are derived through the validated safe-path helpers.
+      - path: pkg/server/(editor|sheet)\.go
+        text: G703
         linters:
           - gosec
-      - text: G307
+      # This utility intentionally executes the caller-supplied command.
+      - path: pkg/utils/unix\.go
+        text: G204
         linters:
           - gosec
-      - text: G204
-        linters:
-          - gosec
-      - text: G703
-        linters:
-          - gosec
+      # Repeated JSON response keys are clearer inline than as constants.
       - path: pkg/server/
         linters:
           - goconst

@@ -170,12 +170,18 @@ docs-build publish: ## Build static documentation site with MkDocs
 
 ##@ Code Generation & Tooling
 
-.PHONY: parsers parser generate-fonts regen regen-fixtures normalize-fixtures
+.PHONY: parsers parser generate-fonts regen regen-fixtures normalize-fixtures swagger
 parsers parser: ## Rebuild Lezer sheet and search query grammars
 	$(MAKE) -C frontend parsers
 
-generate-fonts: ## Download SVGs and generate custom icon font
-	$(MAKE) -C frontend generate-fonts
+swagger: ## Generate Swagger API documentation specification and Go package
+	$(MAKE) -C backend swagger
+
+api: swagger ## Generate Swagger specification and frontend TypeScript API client
+	$(MAKE) -C frontend api
+
+generate: swagger api ## Run full backend and frontend code generation pipeline
+
 
 regen regen-fixtures: build ## Re-generate integration test JSON fixtures
 	unset PAISA_CONFIG && REGENERATE=true TZ=UTC $(MAKE) -C frontend test-integration

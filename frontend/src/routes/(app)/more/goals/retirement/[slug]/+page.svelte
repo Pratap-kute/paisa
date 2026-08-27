@@ -1,103 +1,103 @@
 <script lang="ts">
-  import COLORS from "$lib/core/colors";
-  import {
-    ajax,
-    formatCurrency,
-    formatFloat,
-    type AssetBreakdown,
-    type Forecast,
-    type Point,
-    type Posting,
-    firstName,
-    restName,
-    postingUrl,
-  } from "$lib/core/utils";
-  import { onMount } from "svelte";
-  import ARIMAPromise from "arima/async";
-  import {
-    forecast,
-    findBreakPoints,
-  } from "$lib/domain/goals";
-  import type { PageData } from "./$types";
-  import { iconGlyph } from "$lib/core/icon";
-    import PostingGroup from "$lib/components/transactions/PostingGroup.svelte";
-  import { iconify } from "$lib/core/icon";
-  import ProgressWithBreakpoints from "$lib/components/ui/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import GoalProgressChart from "$lib/components/charts/GoalProgressChart.svelte";
-  import GoalInvestmentChart from "$lib/components/charts/GoalInvestmentChart.svelte";
-import { sortBy } from "$lib/core/collection";
+import { api } from "$lib/api";
+import COLORS from "$lib/shared/theme/colors";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { firstName, restName } from "$lib/domain/account";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import type {
+  Forecast,
+  Point,
+  RetirementGoalProgress,
+} from "$lib/domain/goals_models";
+import type { Posting } from "$lib/domain/ledger";
+import { onMount } from "svelte";
+import ARIMAPromise from "arima/async";
+import { findBreakPoints, forecast } from "$lib/domain/goals";
+import type { PageData } from "./$types";
+import { iconGlyph } from "$lib/shared/ui/icon";
+import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
+import { iconify } from "$lib/shared/ui/icon";
+import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
+import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
+import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
+import { sortBy } from "$lib/shared/utils/collection";
 
-  interface Props {
-    data: PageData;
+interface Props {
+  data: PageData;
+}
+
+let { data }: Props = $props();
+
+let savingsTotal = $state(0),
+  investmentTotal = $state(0),
+  gainTotal = $state(0),
+  icon = $state(""),
+  name = $state(""),
+  targetSavings = $state(0),
+  swr = $state(0),
+  xirr = $state(0),
+  yearlyExpense = $state(0),
+  progressPercent = $state(0),
+  savingsX = $state(0),
+  targetX = $state(0),
+  breakPoints: Point[] = $state([]),
+  savingsTimeline: Point[] = $state([]),
+  postings: Posting[] = $state([]),
+  latestPostings: Posting[] = $state([]),
+  balances: Record<string, AssetBreakdown> = $state({}),
+  predictionsTimeline: Forecast[] = $state([]);
+
+onMount(async () => {
+  ({
+    savingsTotal,
+    investmentTotal,
+    gainTotal,
+    savingsTimeline,
+    yearlyExpense,
+    swr,
+    xirr,
+    icon,
+    name,
+    postings,
+    balances,
+  } = await api.goals.getGoalDetails(
+    "retirement",
+    data.name,
+  ) as unknown as RetirementGoalProgress);
+  targetSavings = yearlyExpense * (100 / swr);
+
+  latestPostings = sortBy(postings, (p: Posting) => p.date)
+    .reverse()
+    .slice(0, 100);
+
+  if (yearlyExpense > 0) {
+    progressPercent = (savingsTotal / targetSavings) * 100;
+    savingsX = savingsTotal / yearlyExpense;
+    targetX = targetSavings / yearlyExpense;
   }
 
-  let { data }: Props = $props();
+  if (targetX <= 0 || savingsX <= 0 || yearlyExpense <= 0) {
+    return;
+  }
 
-  let savingsTotal = $state(0),
-    investmentTotal = $state(0),
-    gainTotal = $state(0),
-    icon = $state(""),
-    name = $state(""),
-    targetSavings = $state(0),
-    swr = $state(0),
-    xirr = $state(0),
-    yearlyExpense = $state(0),
-    progressPercent = $state(0),
-    savingsX = $state(0),
-    targetX = $state(0),
-    breakPoints: Point[] = $state([]),
-    savingsTimeline: Point[] = $state([]),
-    postings: Posting[] = $state([]),
-    latestPostings: Posting[] = $state([]),
-    balances: Record<string, AssetBreakdown> = $state({}),
-    predictionsTimeline: Forecast[] = $state([]);
-
-  onMount(async () => {
-    ({
-      savingsTotal,
-      investmentTotal,
-      gainTotal,
-      savingsTimeline,
-      yearlyExpense,
-      swr,
-      xirr,
-      icon,
-      name,
-      postings,
-      balances,
-    } = await ajax("/api/goals/retirement/:name", null as any, data as Record<string, string>));
-    targetSavings = yearlyExpense * (100 / swr);
-
-    latestPostings = sortBy(postings, (p: Posting) => p.date)
-      .reverse()
-      .slice(0, 100);
-
-    if (yearlyExpense > 0) {
-      progressPercent = (savingsTotal / targetSavings) * 100;
-      savingsX = savingsTotal / yearlyExpense;
-      targetX = targetSavings / yearlyExpense;
-    }
-
-    if (targetX <= 0 || savingsX <= 0 || yearlyExpense <= 0) {
-      return;
-    }
-
-    const ARIMA = await ARIMAPromise;
-    const nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
-    const nextBreakPoints = findBreakPoints(
-      savingsTimeline.concat(nextPredictions),
-      targetSavings,
-    );
-    predictionsTimeline = nextPredictions;
-    breakPoints = nextBreakPoints;
-  });
+  const ARIMA = await ARIMAPromise;
+  const nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
+  const nextBreakPoints = findBreakPoints(
+    savingsTimeline.concat(nextPredictions),
+    targetSavings,
+  );
+  predictionsTimeline = nextPredictions;
+  breakPoints = nextBreakPoints;
+});
 </script>
 
 <svelte:head>

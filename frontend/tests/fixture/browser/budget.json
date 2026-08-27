@@ -1,5 +1,4 @@
 {
-  "availableForBudgeting": -100902.4374871296,
   "budgetsByMonth": {
     "2022-01": {
       "date": "2022-01-01T00:00:00Z",
@@ -22,7 +21,7 @@
               "status": "unmarked",
               "tag_recurring": "",
               "tag_period": "",
-              "transaction_begin_line": 20,
+              "transaction_begin_line": 25,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",
@@ -50,7 +49,7 @@
               "status": "unmarked",
               "tag_recurring": "Rent",
               "tag_period": "1 * ?",
-              "transaction_begin_line": 14,
+              "transaction_begin_line": 19,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",
@@ -71,7 +70,7 @@
         }
       ],
       "availableThisMonth": 7000,
-      "endOfMonthBalance": -33902.4374871296,
+      "endOfMonthBalance": 16097.5625128704,
       "forecast": 31000
     },
     "2022-02": {
@@ -104,7 +103,7 @@
               "status": "unmarked",
               "tag_recurring": "Rent",
               "tag_period": "1 * ?",
-              "transaction_begin_line": 67,
+              "transaction_begin_line": 72,
               "file_name": "main.ledger",
               "forecast": false,
               "note": "",
@@ -125,7 +124,7 @@
         }
       ],
       "availableThisMonth": 18000,
-      "endOfMonthBalance": -51902.4374871296,
+      "endOfMonthBalance": -1902.4374871296,
       "forecast": 31000
     },
     "2022-03": {
@@ -160,9 +159,10 @@
         }
       ],
       "availableThisMonth": 49000,
-      "endOfMonthBalance": -100902.4374871296,
+      "endOfMonthBalance": -50902.4374871296,
       "forecast": 31000
     }
   },
-  "checkingBalance": -26902.4374871296
+  "checkingBalance": 23097.5625128704,
+  "availableForBudgeting": -50902.4374871296
 }

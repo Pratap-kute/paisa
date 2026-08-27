@@ -1,33 +1,18 @@
 package liabilities
 
 import (
-	"time"
-
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
 
-type Overview struct {
-	Date           time.Time       `json:"date"`
-	DrawnAmount    decimal.Decimal `json:"drawn_amount"`
-	RepaidAmount   decimal.Decimal `json:"repaid_amount"`
-	InterestAmount decimal.Decimal `json:"interest_amount"`
-}
-
-type Interest struct {
-	Account          string          `json:"account"`
-	OverviewTimeline []Overview      `json:"overview_timeline"`
-	APR              decimal.Decimal `json:"apr"`
-}
-
-func GetInterest(db *gorm.DB) gin.H {
+func GetInterest(db *gorm.DB) dto.LiabilitiesInterestResponse {
 	postings := query.Init(db).Like("Liabilities:%").All()
 	expenses := query.Init(db).Like("Expenses:Interest:%").All()
 	postings = service.PopulateMarketPrice(db, postings)
@@ -44,23 +29,34 @@ func GetInterest(db *gorm.DB) gin.H {
 	}
 
 	//nolint:prealloc // nil slice required for null JSON serialization when empty
-	var interests []Interest
+	var interests []dto.LiabilityInterestResponse
 	for _, account := range accounts {
 		ps := byAccount[account]
 		es := lo.Filter(expenses, func(e posting.Posting, _ int) bool { return e.RestName(1) == "Interest:"+account })
 		ps = append(ps, es...)
-		interests = append(interests, Interest{Account: "Liabilities:" + account, APR: service.APR(db, ps), OverviewTimeline: computeOverviewTimeline(db, ps)})
+		interests = append(interests, dto.LiabilityInterestResponse{
+			Account:          "Liabilities:" + account,
+			APR:              service.APR(db, ps),
+			OverviewTimeline: computeOverviewTimeline(db, ps),
+		})
 	}
 
-	return gin.H{"interest_timeline_breakdown": interests}
+	return dto.LiabilitiesInterestResponse{InterestTimelineBreakdown: interests}
 }
 
-func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []Overview {
+func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []dto.LiabilityOverviewResponse {
 	accounting.SortAsc(postings)
-	netliabilities := []Overview{}
+	netliabilities := []dto.LiabilityOverviewResponse{}
 
 	var p posting.Posting
-	var pastPostings []posting.Posting
+	drawn := decimal.Zero
+	repaid := decimal.Zero
+	currencyBalance := decimal.Zero
+	type commodityPosition struct {
+		quantity       decimal.Decimal
+		fallbackAmount decimal.Decimal
+	}
+	commodityPositions := make(map[string]commodityPosition)
 
 	if len(postings) == 0 {
 		return netliabilities
@@ -70,35 +66,37 @@ func computeOverviewTimeline(db *gorm.DB, postings []posting.Posting) []Overview
 	for start := postings[0].Date; start.Before(end) || start.Equal(end); start = start.AddDate(0, 0, 1) {
 		for len(postings) > 0 && (postings[0].Date.Before(start) || postings[0].Date.Equal(start)) {
 			p, postings = postings[0], postings[1:]
-			pastPostings = append(pastPostings, p)
+			isInterestExpense := utils.IsExpenseInterestAccount(p.Account)
+			if p.Amount.IsNegative() && !isInterestExpense {
+				drawn = drawn.Sub(p.Amount)
+			} else if !p.Amount.IsNegative() {
+				repaid = repaid.Add(p.Amount)
+			}
+			if isInterestExpense {
+				continue
+			}
+
+			if utils.IsCurrency(p.Commodity) {
+				currencyBalance = currencyBalance.Sub(p.Amount)
+			} else {
+				position := commodityPositions[p.Commodity]
+				position.quantity = position.quantity.Add(p.Quantity)
+				position.fallbackAmount = position.fallbackAmount.Add(p.Amount)
+				commodityPositions[p.Commodity] = position
+			}
 		}
 
-		drawn := lo.Reduce(pastPostings, func(agg decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
-			if p.Amount.GreaterThan(decimal.Zero) || utils.IsExpenseInterestAccount(p.Account) {
-				return agg
-			} else {
-				return p.Amount.Neg().Add(agg)
+		balance := currencyBalance
+		for commodity, position := range commodityPositions {
+			marketAmount := position.fallbackAmount
+			if unitPrice := service.GetUnitPrice(db, commodity, start); !unitPrice.Value.IsZero() {
+				marketAmount = position.quantity.Mul(unitPrice.Value)
 			}
-		}, decimal.Zero)
-
-		repaid := lo.Reduce(pastPostings, func(agg decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
-			if p.Amount.LessThan(decimal.Zero) {
-				return agg
-			} else {
-				return p.Amount.Add(agg)
-			}
-		}, decimal.Zero)
-
-		balance := lo.Reduce(pastPostings, func(agg decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
-			if utils.IsExpenseInterestAccount(p.Account) {
-				return agg
-			} else {
-				return service.GetMarketPrice(db, p, start).Neg().Add(agg)
-			}
-		}, decimal.Zero)
+			balance = balance.Sub(marketAmount)
+		}
 
 		interest := balance.Add(repaid).Sub(drawn)
-		netliabilities = append(netliabilities, Overview{Date: start, DrawnAmount: drawn, RepaidAmount: repaid, InterestAmount: interest})
+		netliabilities = append(netliabilities, dto.LiabilityOverviewResponse{Date: start, DrawnAmount: drawn, RepaidAmount: repaid, InterestAmount: interest})
 
 		if len(postings) == 0 && balance.Abs().LessThan(decimal.NewFromFloat(0.01)) {
 			break

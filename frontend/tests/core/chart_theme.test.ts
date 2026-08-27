@@ -1,18 +1,19 @@
+import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import {} from "$lib/shared/formatters/currency";
+import {} from "$lib/shared/formatters/currency";
+import {} from "$lib/shared/formatters/currency";
 import { describe, expect, it } from "vitest";
-import { chartFormatters } from "$lib/charts/echarts/formatters";
+import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,
   categorySeriesColor,
   categorySeriesIndex,
   normalizeCategoryKey,
   readPaisaChartTheme,
-} from "$lib/charts/echarts/theme";
-import {
-  formatCurrency,
-  formatCurrencyCrude,
-  formatFloat,
-  formatPercentage,
-} from "$lib/core/utils";
+} from "$lib/shared/charts/echarts/theme";
+import { formatCurrency } from "$lib/shared/formatters/currency";
 
 describe("chart theme and formatter helpers", () => {
   it("maps Paisa semantic CSS tokens into a chart theme", () => {

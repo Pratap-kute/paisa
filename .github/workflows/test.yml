@@ -19,9 +19,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  VITE_CONFIG_NATIVE_IGNORE_WARNING: true
-
 jobs:
   nix-warmup:
     name: Nix & Deno Warmup

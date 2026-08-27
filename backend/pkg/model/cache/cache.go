@@ -1,18 +1,21 @@
 package cache
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/kelindar/binary"
-	"github.com/mitchellh/hashstructure/v2"
 	"gorm.io/gorm"
 )
 
 type Cache struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	ExpiresAt time.Time `json:"expires_at"`
-	HashKey   string    `json:"hash_key"`
+	HashKey   string    `gorm:"index:idx_caches_hash_key" json:"hash_key"`
 	Value     []byte    `gorm:"type:BLOB" json:"item"`
 }
 
@@ -24,31 +27,46 @@ func DeleteExpired(db *gorm.DB) error {
 	return nil
 }
 
-var lastGarbageCollectedAt *time.Time
+var (
+	gcMu                   sync.Mutex
+	lastGarbageCollectedAt *time.Time
+)
+
+func maybeGarbageCollect(db *gorm.DB) {
+	gcMu.Lock()
+	defer gcMu.Unlock()
+	if lastGarbageCollectedAt == nil || time.Since(*lastGarbageCollectedAt) > 24*time.Hour {
+		_ = DeleteExpired(db)
+		now := time.Now()
+		lastGarbageCollectedAt = &now
+	}
+}
+
+func computeHashKey(key any) string {
+	b, err := json.Marshal(key)
+	if err != nil {
+		b = []byte(fmt.Sprintf("%#v", key))
+	}
+	h := sha256.Sum256(b)
+	return hex.EncodeToString(h[:])
+}
 
 func Lookup[I any, K any](db *gorm.DB, key K, fallback func() I) I {
 	var item I
 	var cache Cache
 
-	if lastGarbageCollectedAt == nil || time.Since(*lastGarbageCollectedAt) > 24*time.Hour {
-		_ = DeleteExpired(db)
-		lastGarbageCollectedAt = new(time.Time)
-		*lastGarbageCollectedAt = time.Now()
-	}
+	maybeGarbageCollect(db)
 
-	hash, err := hashstructure.Hash(key, hashstructure.FormatV2, nil)
-	hashKey := fmt.Sprintf("%d", hash)
+	hashKey := computeHashKey(key)
+	err := db.Where("hash_key = ?", hashKey).First(&cache).Error
 	if err == nil {
-		err := db.Where("hash_key = ?", hashKey).First(&cache).Error
-		if err == nil {
-			if time.Now().Before(cache.ExpiresAt) {
-				err := binary.Unmarshal(cache.Value, &item)
-				if err == nil {
-					return item
-				}
-			} else {
-				_ = DeleteExpired(db)
+		if time.Now().Before(cache.ExpiresAt) {
+			err := binary.Unmarshal(cache.Value, &item)
+			if err == nil {
+				return item
 			}
+		} else {
+			_ = DeleteExpired(db)
 		}
 	}
 

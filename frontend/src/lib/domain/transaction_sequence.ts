@@ -1,17 +1,15 @@
 import { groupBy, partition } from "es-toolkit";
-import {
-  dueDateIcon,
-  now,
-  prefixMinutesSeconds,
-  type Transaction,
-  type TransactionSchedule,
-  type TransactionSequence,
-  transactionTotal,
-} from "../core/utils";
+import type { Transaction } from "$lib/domain/ledger";
+import type {
+  TransactionSchedule,
+  TransactionSequence,
+} from "$lib/domain/recurring";
+import { now, prefixMinutesSeconds } from "$lib/domain/time";
+import { transactionTotal } from "$lib/domain/transactions";
 import dayjs from "dayjs";
 import { type CronExprs, parse } from "@datasert/cronjs-parser";
 import { getFutureMatches } from "@datasert/cronjs-matcher";
-import { sortBy } from "$lib/core/collection";
+import { sortBy } from "$lib/shared/utils/collection";
 
 const end = now().add(36, "month");
 
@@ -161,10 +159,6 @@ export function nextUnpaidSchedule(ts: TransactionSequence) {
     return last;
   }
   return ts.futureSchedules?.find((s) => !s.actual);
-}
-
-export function scheduleIcon(schedule: TransactionSchedule) {
-  return dueDateIcon(schedule.scheduled, schedule.actual);
 }
 
 export function intervalText(ts: TransactionSequence) {

@@ -2,7 +2,9 @@
   "terminal.integrated.profiles.linux": {
     "nix-shell": {
       "path": "nix",
-      "args": ["develop"]
+      "args": [
+        "develop"
+      ]
     }
   },
   "go.alternateTools": {
@@ -18,5 +20,9 @@
     "frontend/vitest.config.ts",
     "frontend/vitest.shared.ts",
     "frontend/tests/browser"
-  ]
+  ],
+  "editor.formatOnSave": true,
+  "[svelte]": {
+    "editor.defaultFormatter": "svelte.svelte-vscode"
+  }
 }

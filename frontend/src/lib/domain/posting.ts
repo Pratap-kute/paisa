@@ -1,4 +1,5 @@
-import { now, type Posting } from "../core/utils";
+import type { Posting } from "$lib/domain/ledger";
+import { now } from "$lib/domain/time";
 
 export interface Change {
   class: string;

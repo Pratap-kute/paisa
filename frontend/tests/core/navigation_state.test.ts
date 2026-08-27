@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import {
   type NavGroup,
   NavigationState,
-} from "../../src/lib/state/navigation.svelte";
+} from "$lib/shared/state/navigation.svelte";
 
 describe("NavigationState", () => {
   let nav: NavigationState;

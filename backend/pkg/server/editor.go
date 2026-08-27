@@ -8,31 +8,28 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/ledger"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gin-gonic/gin"
-	"github.com/samber/lo"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-type LedgerFile struct {
-	Name      string   `json:"name"`
-	Content   string   `json:"content"`
-	Versions  []string `json:"versions"`
-	Operation string   `json:"operation"`
-}
+type LedgerFile = dto.LedgerFileResponse
 
-func GetFiles(db *gorm.DB) gin.H {
+func GetFiles(db *gorm.DB) dto.EditorFilesResponse {
 	var accounts []string
 	var payees []string
 	var commodities []string
 	db.Model(&posting.Posting{}).Distinct().Pluck("Account", &accounts)
 	db.Model(&posting.Posting{}).Distinct().Pluck("Payee", &payees)
 	db.Model(&posting.Posting{}).Distinct().Pluck("Commodity", &commodities)
+	sort.Strings(accounts)
+	sort.Strings(commodities)
 
 	path := config.GetJournalPath()
 	if err := ensureJournalFile(path, config.GetConfig().Readonly); err != nil {
@@ -44,10 +41,15 @@ func GetFiles(db *gorm.DB) gin.H {
 	files := make([]*LedgerFile, 0, len(paths))
 
 	for _, path = range paths {
-		files = append(files, readLedgerFileWithVersions(dir, path))
+		lf, err := readLedgerFileWithVersions(dir, path)
+		if err == nil {
+			files = append(files, lf)
+		} else {
+			log.Warn("Failed to read ledger file: ", path, err)
+		}
 	}
 
-	return gin.H{"files": files, "accounts": accounts, "payees": payees, "commodities": commodities}
+	return dto.EditorFilesResponse{Files: files, Accounts: accounts, Payees: payees, Commodities: commodities}
 }
 
 func ensureJournalFile(path string, readonly bool) error {
@@ -77,27 +79,43 @@ func ensureJournalFile(path string, readonly bool) error {
 	return file.Close()
 }
 
-func GetFile(file LedgerFile) gin.H {
+func GetFile(file LedgerFile) (gin.H, error) {
 	path := config.GetJournalPath()
 	dir := filepath.Dir(path)
-	return gin.H{"file": readLedgerFile(dir, filepath.Join(dir, file.Name))}
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
+	lf, err := readLedgerFile(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": lf}, nil
 }
 
-func DeleteBackups(file LedgerFile) gin.H {
+func DeleteBackups(file LedgerFile) (gin.H, error) {
 	path := config.GetJournalPath()
 	dir := filepath.Dir(path)
+	filePath, err := utils.BuildSubPath(dir, file.Name)
+	if err != nil {
+		return nil, err
+	}
 
 	if !config.GetConfig().Readonly {
-		versions, _ := filepath.Glob(filepath.Join(dir, file.Name+".backup.*"))
+		versions, _ := filepath.Glob(filepath.Join(filepath.Dir(filePath), filepath.Base(filePath)+".backup.*"))
 		for _, version := range versions {
 			err := os.Remove(version)
 			if err != nil {
-				log.Fatal(err)
+				return nil, err
 			}
 		}
 	}
 
-	return gin.H{"file": readLedgerFileWithVersions(dir, filepath.Join(dir, file.Name))}
+	lf, err := readLedgerFileWithVersions(dir, filePath)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"file": lf}, nil
 }
 
 func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
@@ -107,7 +125,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		if len(errors) > 0 && errors[0].Message != "" {
 			msg = fmt.Sprintf("Validation failed at Line %d: %s", errors[0].LineFrom, strings.TrimSpace(errors[0].Message))
 		}
-		return gin.H{"errors": errors, "saved": false, "message": msg}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": msg}
 	}
 
 	path := config.GetJournalPath()
@@ -116,7 +134,7 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 	filePath, err := utils.BuildSubPath(dir, file.Name)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Invalid file name"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Invalid file name"}
 	}
 
 	backupPath := filePath + ".backup." + time.Now().Format("2006-01-02-15-04-05.000")
@@ -124,19 +142,19 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 	err = os.MkdirAll(filepath.Dir(filePath), 0o700)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Failed to create directory"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to create directory"}
 	}
 
 	fileStat, err := os.Stat(filePath)
 	if err != nil && file.Operation != "overwrite" && file.Operation != "create" {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "File does not exist"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "File does not exist"}
 	}
 
 	var perm os.FileMode = 0o644
 	if err == nil {
 		if file.Operation == "create" {
-			return gin.H{"errors": errors, "saved": false, "message": "File already exists"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "File already exists"}
 		}
 
 		perm = fileStat.Mode().Perm()
@@ -144,25 +162,36 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 		existingContent, err := os.ReadFile(filePath)
 		if err != nil {
 			log.Warn(err)
-			return gin.H{"errors": errors, "saved": false, "message": "Failed to read file"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to read file"}
 		}
 
 		err = os.WriteFile(backupPath, existingContent, perm)
 		if err != nil {
 			log.Warn(err)
-			return gin.H{"errors": errors, "saved": false, "message": "Failed to create backup"}
+			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to create backup"}
 		}
 	}
 
-	err = os.WriteFile(filePath, []byte(file.Content), perm)
+	err = utils.AtomicWriteFile(filePath, []byte(file.Content), perm)
 	if err != nil {
 		log.Warn(err)
-		return gin.H{"errors": errors, "saved": false, "message": "Failed to write file"}
+		return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to write file"}
 	}
 
-	Sync(db, SyncRequest{Journal: true})
+	syncResult := Sync(db, SyncRequest{Journal: true})
 
-	return gin.H{"errors": errors, "saved": true, "file": readLedgerFileWithVersions(dir, filePath)}
+	lf, _ := readLedgerFileWithVersions(dir, filePath)
+	if !syncResult.Success {
+		return gin.H{
+			"errors":  errors,
+			"saved":   true,
+			"synced":  false,
+			"file":    lf,
+			"message": fmt.Sprintf("Journal saved, but sync failed: %s", syncResult.Message),
+		}
+	}
+
+	return gin.H{"errors": errors, "saved": true, "synced": true, "file": lf}
 }
 
 func ValidateFile(file LedgerFile) gin.H {
@@ -191,47 +220,50 @@ func validateFile(file LedgerFile) ([]ledger.LedgerFileError, string, error) {
 	return ledger.Cli().ValidateFile(tmpfile.Name())
 }
 
-func readLedgerFile(dir string, path string) *LedgerFile {
+func readLedgerFile(dir string, path string) (*LedgerFile, error) {
 	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	name, _ := filepath.Rel(dir, path)
+	name, err := filepath.Rel(dir, path)
+	if err != nil {
+		return nil, err
+	}
 
 	return &LedgerFile{
 		Name:    name,
 		Content: string(content),
-	}
+	}, nil
 }
 
-func readLedgerFileWithVersions(dir string, path string) *LedgerFile {
+func readLedgerFileWithVersions(dir string, path string) (*LedgerFile, error) {
 	//nolint:gosec // user requested ledger file read
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	versions, _ := filepath.Glob(filepath.Join(filepath.Dir(path), filepath.Base(path)+".backup.*"))
-	versionPaths := lo.Map(versions, func(path string, _ int) string {
-		name, err := filepath.Rel(dir, path)
+	versionPaths := make([]string, 0, len(versions))
+	for _, version := range versions {
+		name, err := filepath.Rel(dir, version)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
-
-		return name
-	})
+		versionPaths = append(versionPaths, name)
+	}
 	sort.Sort(sort.Reverse(sort.StringSlice(versionPaths)))
 
 	name, err := filepath.Rel(dir, path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return &LedgerFile{
 		Name:     name,
 		Content:  string(content),
 		Versions: versionPaths,
-	}
+	}, nil
 }

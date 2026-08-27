@@ -1,28 +1,31 @@
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
-import { change } from "../../src/lib/domain/posting";
+import { change } from "$lib/domain/posting";
 import {
   findBreakPoints,
   forecast,
   project,
   solvePMTOrNper,
-} from "../../src/lib/domain/goals";
+} from "$lib/domain/goals";
 import {
   intervalText,
   nextUnpaidSchedule,
-  scheduleIcon,
   sortTrantionSequence,
   totalRecurring,
-} from "../../src/lib/domain/transaction_sequence";
-import { setNow } from "../../src/lib/core/utils";
+} from "$lib/domain/transaction_sequence";
+import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
+import { setNow } from "$lib/domain/time";
 
 beforeAll(() => {
   dayjs.extend(isSameOrBefore);
   dayjs.extend(utc);
   dayjs.extend(timezone);
+});
+
+beforeEach(() => {
   setNow(dayjs("2024-01-15"));
 });
 

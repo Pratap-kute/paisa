@@ -1,491 +1,534 @@
 <script lang="ts">
-  import Select from "svelte-select";
-  import Handlebars from "handlebars";
-  import { editorState as templateEditorState } from "$lib/editors/template_editor";
-  import {
-    createEditor as createPreviewEditor,
-    updateContent as updatePreviewContent
-  } from "$lib/editors/editor";
-  import TemplateEditorDrawer from "$lib/components/import/TemplateEditorDrawer.svelte";
-  import FileDropzone from "$lib/components/ui/FileDropzone.svelte";
-  import {
-    parse,
-    asRows,
-    renderWithMetadata,
-    type RenderMetadata
-  } from "$lib/importing/spreadsheet";
-  import {
-    commitParseOutcome,
-    displayCell,
-    emptyRenderMetadata,
-  } from "$lib/importing/import_commit";
-  import { range } from "es-toolkit";
-  import { EditorView } from "@codemirror/view";
-  import { onMount } from "svelte";
-  import { ajax, type ImportTemplate } from "$lib/core/utils";
-  import { accountTfIdf } from "../../../../store";
-  import * as toast from "$lib/core/toast";
-  import { ensureFileExtension } from "$lib/ledger/file";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
-  import Dialog from "$lib/components/ui/Dialog.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import Drawer from "$lib/components/ui/Drawer.svelte";
-  import Switch from "$lib/components/ui/Switch.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import FormField from "$lib/components/layout/FormField.svelte";
-  import Input from "$lib/components/ui/Input.svelte";
-  import IconButton from "$lib/components/ui/IconButton.svelte";
-  import PredictionReviewBar from "$lib/components/prediction/PredictionReviewBar.svelte";
-  import PredictionRowBadge from "$lib/components/prediction/PredictionRowBadge.svelte";
-  import PredictionDetail from "$lib/components/prediction/PredictionDetail.svelte";
-  import SourceReviewList from "$lib/components/import/SourceReviewList.svelte";
-  import {
-    predictionSession,
-    rowMatchesFilter,
-    type ConfidenceFilter,
-  } from "$lib/prediction/session";
-  import type { Confidence, PredictionResult } from "$lib/prediction/types";
-import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
+import { api } from "$lib/api";
+import Select from "svelte-select";
+import Handlebars from "handlebars";
+import type { ImportTemplate } from "$lib/features/importing/types";
+import type { PredictionHistoryEntry } from "$lib/features/prediction/types_api";
+import type { AccountTfIdf } from "$lib/shared/state/models";
+import { editorState as templateEditorState } from "$lib/features/editor/template_editor";
+import {
+  createEditor as createPreviewEditor,
+  updateContent as updatePreviewContent,
+} from "$lib/features/editor/runtime";
+import TemplateEditorDrawer from "$lib/features/importing/components/TemplateEditorDrawer.svelte";
+import FileDropzone from "$lib/shared/ui/FileDropzone.svelte";
+import {
+  asRows,
+  parse,
+  type RenderMetadata,
+  renderWithMetadata,
+} from "$lib/features/importing/spreadsheet";
+import {
+  commitParseOutcome,
+  displayCell,
+  emptyRenderMetadata,
+} from "$lib/features/importing/import_commit";
+import { range } from "es-toolkit";
+import { EditorView } from "@codemirror/view";
+import { onMount } from "svelte";
+import { accountTfIdf } from "../../../../store";
+import * as toast from "$lib/shared/ui/toast";
+import { ensureFileExtension } from "$lib/features/ledger/file";
+import FileModal from "$lib/features/ledger/components/FileModal.svelte";
+import Dialog from "$lib/shared/ui/Dialog.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import Drawer from "$lib/shared/ui/Drawer.svelte";
+import Switch from "$lib/shared/ui/Switch.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import FormField from "$lib/shared/layout/FormField.svelte";
+import Input from "$lib/shared/ui/Input.svelte";
+import IconButton from "$lib/shared/ui/IconButton.svelte";
+import PredictionReviewBar from "$lib/features/prediction/components/PredictionReviewBar.svelte";
+import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
+import PredictionDetail from "$lib/features/prediction/components/PredictionDetail.svelte";
+import SourceReviewList from "$lib/features/importing/components/SourceReviewList.svelte";
+import {
+  type ConfidenceFilter,
+  predictionSession,
+  rowMatchesFilter,
+} from "$lib/features/prediction/session";
+import type {
+  Confidence,
+  PredictionResult,
+} from "$lib/features/prediction/types";
+import {
+  assign,
+  each,
+  find,
+  isEmpty,
+  maxBy,
+} from "$lib/shared/utils/collection";
 
-  let templates: ImportTemplate[] = $state([]);
-  let selectedTemplate: ImportTemplate = $state();
-  let saveAsName: string = $state();
-  let preview = $state("");
-  let parseErrorMessage: string = $state(null);
-  let columnCount: number = $state(0);
-  let data: any[][] = $state([]);
-  let rows: Array<Record<string, any>> = $state([]);
-  let options: { reverse: boolean; trim: boolean } = $state({ reverse: false, trim: true });
-  let loading = $state(false);
-  let activeFileName = $state("");
-  let templateDrawerOpen = $state(false);
-  let selectedSourceRowIndex: number | null = $state(null);
-  let predictionTick = $state(0);
-  let predictionFilter: ConfidenceFilter = $state(null);
-  let sourceViewMode: "review" | "raw" = $state("review");
-  let mobileActiveTab: "source" | "preview" = $state("source");
-  let advancedOptionsOpen = $state(false);
-  let mobileInspectorOpen = $state(false);
-  let predictionCounts = $state({
-    high: 0,
-    medium: 0,
-    review: 0,
-    unknown: 0,
-    transfer: 0,
+let templates: ImportTemplate[] = $state([]);
+let selectedTemplate: ImportTemplate | undefined = $state();
+let saveAsName = $state("");
+let preview = $state("");
+let parseErrorMessage: string | null = $state(null);
+let columnCount: number = $state(0);
+let data: any[][] = $state([]);
+let rows: Array<Record<string, any>> = $state([]);
+let options: { reverse: boolean; trim: boolean } = $state({
+  reverse: false,
+  trim: true,
+});
+let loading = $state(false);
+let activeFileName = $state("");
+let templateDrawerOpen = $state(false);
+let selectedSourceRowIndex: number | null = $state(null);
+let predictionTick = $state(0);
+let predictionFilter: ConfidenceFilter = $state(null);
+let sourceViewMode: "review" | "raw" = $state("review");
+let mobileActiveTab: "source" | "preview" = $state("source");
+let advancedOptionsOpen = $state(false);
+let mobileInspectorOpen = $state(false);
+let predictionCounts = $state({
+  high: 0,
+  medium: 0,
+  review: 0,
+  unknown: 0,
+  transfer: 0,
+});
+
+async function loadTemplates() {
+  return await api.templates.getTemplates() as unknown as {
+    templates: ImportTemplate[];
+  };
+}
+let predictionReviewFailed = $state(false);
+let predictionRows = $state<
+  Array<{
+    rowIndex: number;
+    confidence: Confidence;
+    possibleTransfer: boolean;
+    results: PredictionResult[];
+  }>
+>([]);
+
+let templateItems = $derived(
+  templates.map((t) => ({
+    value: t,
+    label: t.name,
+    template_type: t.template_type,
+  })),
+);
+
+let selectedTemplateOption = $derived(
+  selectedTemplate
+    ? {
+      value: selectedTemplate,
+      label: selectedTemplate.name,
+      template_type: selectedTemplate.template_type,
+    }
+    : null,
+);
+
+function refreshPredictionReview() {
+  try {
+    predictionSession.finalizeCurrentImport();
+    predictionCounts = predictionSession.counts();
+    predictionRows = predictionSession.rowSummaries();
+    predictionReviewFailed = false;
+  } catch (error) {
+    console.error(error);
+    predictionReviewFailed = true;
+  }
+}
+let renderMetadata: RenderMetadata = $state({
+  content: "",
+  rows: [],
+  generatedCount: 0,
+  errors: [],
+});
+
+let previewEditorDom: Element | undefined = $state();
+let previewEditor: EditorView | undefined = $state();
+let showSaveAsModal = $state(false);
+let showFileModal = $state(false);
+
+let fileColumns = $derived.by(() => {
+  if (rows && rows.length > 0) {
+    return Object.keys(rows[0]).filter((k) => k !== "index");
+  }
+  return [];
+});
+
+onMount(async () => {
+  const [tfidf, historyResponse] = await Promise.all([
+    api.account.getTfIdf(),
+    api.prediction.getPredictionHistory(),
+  ]);
+  accountTfIdf.set(tfidf as unknown as AccountTfIdf);
+  predictionSession.loadHistory(
+    (historyResponse.history ?? []) as unknown as PredictionHistoryEntry[],
+  );
+  ({ templates } = await loadTemplates());
+  if (templates.length > 0) {
+    onSelectTemplate(templates[0]);
+  }
+});
+
+function initPreviewEditor(node: HTMLElement) {
+  previewEditorDom = node;
+  previewEditor = createPreviewEditor(preview, node, { readonly: true });
+  if (preview) {
+    updatePreviewContent(previewEditor, preview);
+  }
+  return {
+    destroy() {
+      previewEditor?.destroy?.();
+    },
+  };
+}
+
+let saveAsNameDuplicate = $derived(
+  !!find(templates, { name: saveAsName, template_type: "custom" }),
+);
+let selectedTemplateIsBuiltin = $derived(
+  selectedTemplate?.template_type == "builtin",
+);
+
+async function handleSaveTemplate(name: string, content: string) {
+  const { template, saved, message } = await api.templates.upsertTemplate({
+    name,
+    content,
+  }) as unknown as {
+    template: ImportTemplate;
+    saved: boolean;
+    message?: string;
+  };
+  if (!saved) {
+    toast.toast({
+      message: `Failed to save template ${name}. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
+    });
+    return;
+  }
+  toast.toast({
+    message: `Saved ${name}`,
+    type: "is-success",
   });
-  let predictionReviewFailed = $state(false);
-  let predictionRows = $state<
-    Array<{
-      rowIndex: number;
-      confidence: Confidence;
-      possibleTransfer: boolean;
-      results: PredictionResult[];
-    }>
-  >([]);
+  $templateEditorState = assign({}, $templateEditorState, {
+    hasUnsavedChanges: false,
+  });
+  ({ templates } = await loadTemplates());
+  selectedTemplate = template;
+}
 
-  let templateItems = $derived(
-    templates.map((t) => ({
-      value: t,
-      label: t.name,
-      template_type: t.template_type,
-    }))
+function builtinNotAllowed(action: string, template: ImportTemplate) {
+  if (template?.template_type == "builtin") {
+    return `Builtin template can't be ${action}`;
+  }
+  return "";
+}
+
+async function handleDeleteTemplate(templateToDelete: ImportTemplate) {
+  const oldName = templateToDelete.name;
+  const confirmed = confirm(
+    `Are you sure you want to delete ${oldName} template?`,
   );
+  if (!confirmed) {
+    return;
+  }
+  const { success, message } = await api.templates.deleteTemplate({
+    name: templateToDelete.name,
+  });
+  if (!success) {
+    toast.toast({
+      message: `Failed to remove ${oldName}. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
+    });
+    return;
+  }
 
-  let selectedTemplateOption = $derived(
-    selectedTemplate
-      ? {
-          value: selectedTemplate,
-          label: selectedTemplate.name,
-          template_type: selectedTemplate.template_type,
-        }
-      : null
-  );
+  ({ templates } = await loadTemplates());
+  if (templates.length > 0) {
+    onSelectTemplate(templates[0]);
+  }
+  toast.toast({
+    message: `Removed ${oldName}`,
+    type: "is-success",
+  });
 
-  function refreshPredictionReview() {
+  $templateEditorState = assign({}, $templateEditorState, {
+    hasUnsavedChanges: false,
+  });
+}
+
+$effect(() => {
+  const currentTemplate = $templateEditorState.template;
+  const currentRows = rows;
+  const currentReverse = options.reverse;
+  const currentTrim = options.trim;
+  const _tick = predictionTick;
+
+  if (!isEmpty(currentRows) && currentTemplate) {
     try {
-      predictionSession.finalizeCurrentImport();
-      predictionCounts = predictionSession.counts();
-      predictionRows = predictionSession.rowSummaries();
-      predictionReviewFailed = false;
+      predictionSession.beginRender();
     } catch (error) {
       console.error(error);
-      predictionReviewFailed = true;
     }
-  }
-  let renderMetadata: RenderMetadata = $state({
-    content: "",
-    rows: [],
-    generatedCount: 0,
-    errors: []
-  });
-
-  let previewEditorDom: Element = $state();
-  let previewEditor: EditorView = $state();
-  let showSaveAsModal = $state(false);
-  let showFileModal = $state(false);
-
-  let fileColumns = $derived.by(() => {
-    if (rows && rows.length > 0) {
-      return Object.keys(rows[0]).filter((k) => k !== "index");
-    }
-    return [];
-  });
-
-  onMount(async () => {
-    const [tfidf, historyResponse] = await Promise.all([
-      ajax("/api/account/tf_idf"),
-      ajax("/api/prediction/history"),
-    ]);
-    accountTfIdf.set(tfidf);
-    predictionSession.loadHistory(historyResponse.history || []);
-    ({ templates } = await ajax("/api/templates"));
-    if (templates.length > 0) {
-      onSelectTemplate(templates[0]);
-    }
-  });
-
-  function initPreviewEditor(node: HTMLElement) {
-    previewEditorDom = node;
-    previewEditor = createPreviewEditor(preview, node, { readonly: true });
-    if (preview) {
-      updatePreviewContent(previewEditor, preview);
-    }
-    return {
-      destroy() {
-        previewEditor?.destroy?.();
-      }
-    };
-  }
-
-  let saveAsNameDuplicate = $derived(!!find(templates, { name: saveAsName, template_type: "custom" }));
-  let selectedTemplateIsBuiltin = $derived(selectedTemplate?.template_type == "builtin");
-
-  async function handleSaveTemplate(name: string, content: string) {
-    const { template, saved, message } = await ajax("/api/templates/upsert", {
-      method: "POST",
-      body: JSON.stringify({
-        name,
-        content
-      }),
-      background: true
-    });
-    if (!saved) {
-      toast.toast({
-        message: `Failed to save template ${name}. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000
+    try {
+      const generated = renderWithMetadata(currentRows, currentTemplate, {
+        reverse: currentReverse,
+        trim: currentTrim,
       });
-      return;
-    }
-    toast.toast({
-      message: `Saved ${name}`,
-      type: "is-success"
-    });
-    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
-    ({ templates } = await ajax("/api/templates", { background: true }));
-    selectedTemplate = template;
-  }
-
-  function builtinNotAllowed(action: string, template: ImportTemplate) {
-    if (template?.template_type == "builtin") {
-      return `Builtin template can't be ${action}`;
-    }
-    return "";
-  }
-
-  async function handleDeleteTemplate(templateToDelete: ImportTemplate) {
-    const oldName = templateToDelete.name;
-    const confirmed = confirm(`Are you sure you want to delete ${oldName} template?`);
-    if (!confirmed) {
-      return;
-    }
-    const { success, message } = await ajax("/api/templates/delete", {
-      method: "POST",
-      body: JSON.stringify({
-        name: templateToDelete.name
-      }),
-      background: true
-    });
-    if (!success) {
-      toast.toast({
-        message: `Failed to remove ${oldName}. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000
-      });
-      return;
-    }
-
-    ({ templates } = await ajax("/api/templates", { background: true }));
-    if (templates.length > 0) {
-      onSelectTemplate(templates[0]);
-    }
-    toast.toast({
-      message: `Removed ${oldName}`,
-      type: "is-success"
-    });
-
-    $templateEditorState = assign({}, $templateEditorState, { hasUnsavedChanges: false });
-  }
-
-  $effect(() => {
-    const currentTemplate = $templateEditorState.template;
-    const currentRows = rows;
-    const currentReverse = options.reverse;
-    const currentTrim = options.trim;
-    const _tick = predictionTick;
-
-    if (!isEmpty(currentRows) && currentTemplate) {
-      try {
-        predictionSession.beginRender();
-      } catch (error) {
-        console.error(error);
+      renderMetadata = generated;
+      preview = generated.content;
+      if (previewEditor) {
+        updatePreviewContent(previewEditor, generated.content);
       }
-      try {
-        const generated = renderWithMetadata(currentRows, currentTemplate, {
-          reverse: currentReverse,
-          trim: currentTrim
-        });
-        renderMetadata = generated;
-        preview = generated.content;
-        if (previewEditor) {
-          updatePreviewContent(previewEditor, generated.content);
-        }
-      } catch (e) {
-        console.error(e);
-        renderMetadata = emptyRenderMetadata;
-        preview = "";
-        if (previewEditor) {
-          updatePreviewContent(previewEditor, "");
-        }
-      }
-      refreshPredictionReview();
-    } else if (isEmpty(currentRows)) {
-      renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
+    } catch (e) {
+      console.error(e);
+      renderMetadata = emptyRenderMetadata;
       preview = "";
       if (previewEditor) {
         updatePreviewContent(previewEditor, "");
       }
-      predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
-      predictionRows = [];
-      predictionReviewFailed = false;
     }
-  });
-
-  async function handleFilesSelect(e: { detail: { acceptedFiles: File[] } }) {
-    const { acceptedFiles } = e.detail;
-    if (!acceptedFiles || acceptedFiles.length === 0) return;
-
-    loading = true;
-    const fileName = acceptedFiles[0].name;
-    try {
-      const results = await parse(acceptedFiles[0]);
-      const outcome = commitParseOutcome(fileName, results);
-      if (outcome.ok === false) {
-        clearLoadedFile();
-        activeFileName = outcome.fileName;
-        parseErrorMessage = outcome.error;
-      } else {
-        parseErrorMessage = null;
-        activeFileName = outcome.fileName;
-        data = outcome.data;
-        rows = asRows(results);
-        selectedSourceRowIndex = null;
-        predictionSession.clearPreview();
-        predictionFilter = null;
-        predictionTick += 1;
-
-        // Auto-select template if statement filename matches a known template
-        const match = templates.find((t) => fileName.toLowerCase().includes(t.name.toLowerCase()));
-        if (match) {
-          onSelectTemplate(match);
-        }
-
-        columnCount = maxBy(data, (row) => row.length)?.length || 0;
-        each(data, (row) => {
-          row.length = columnCount;
-        });
-      }
-    } catch (err: any) {
-      const outcome = commitParseOutcome(
-        fileName,
-        null,
-        err?.message || "Error parsing file",
-      );
-      clearLoadedFile();
-      activeFileName = outcome.fileName;
-      parseErrorMessage = outcome.ok === false ? outcome.error : null;
-    } finally {
-      loading = false;
-    }
-  }
-
-  function clearLoadedFile() {
-    data = [];
-    rows = [];
-    activeFileName = "";
-    selectedSourceRowIndex = null;
-    predictionSession.clearPreview();
-    predictionFilter = null;
-    predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
-    predictionRows = [];
-    predictionReviewFailed = false;
+    refreshPredictionReview();
+  } else if (isEmpty(currentRows)) {
     renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
     preview = "";
     if (previewEditor) {
       updatePreviewContent(previewEditor, "");
     }
+    predictionCounts = {
+      high: 0,
+      medium: 0,
+      review: 0,
+      unknown: 0,
+      transfer: 0,
+    };
+    predictionRows = [];
+    predictionReviewFailed = false;
   }
+});
 
-  function selectSourceRow(rowIndex: number) {
-    selectedSourceRowIndex = rowIndex;
-    if (typeof window !== "undefined" && window.innerWidth <= 860) {
-      mobileInspectorOpen = true;
+async function handleFilesSelect(e: { detail: { acceptedFiles: File[] } }) {
+  const { acceptedFiles } = e.detail;
+  if (!acceptedFiles || acceptedFiles.length === 0) return;
+
+  loading = true;
+  const fileName = acceptedFiles[0].name;
+  try {
+    const results = await parse(acceptedFiles[0]);
+    const outcome = commitParseOutcome(fileName, results);
+    if (outcome.ok === false) {
+      clearLoadedFile();
+      activeFileName = outcome.fileName;
+      parseErrorMessage = outcome.error;
+    } else {
+      parseErrorMessage = null;
+      activeFileName = outcome.fileName;
+      data = outcome.data;
+      rows = asRows(results);
+      selectedSourceRowIndex = null;
+      predictionSession.clearPreview();
+      predictionFilter = null;
+      predictionTick += 1;
+
+      // Auto-select template if statement filename matches a known template
+      const match = templates.find((t) =>
+        fileName.toLowerCase().includes(t.name.toLowerCase())
+      );
+      if (match) {
+        onSelectTemplate(match);
+      }
+
+      columnCount = maxBy(data, (row) => row.length)?.length || 0;
+      each(data, (row) => {
+        row.length = columnCount;
+      });
     }
-    const renderedRow = find(renderMetadata.rows, { sourceRowIndex: rowIndex });
-    if (!renderedRow?.lineRange || !previewEditor) {
-      return;
-    }
+  } catch (err: any) {
+    const outcome = commitParseOutcome(
+      fileName,
+      null,
+      err?.message || "Error parsing file",
+    );
+    clearLoadedFile();
+    activeFileName = outcome.fileName;
+    parseErrorMessage = outcome.ok === false ? outcome.error : null;
+  } finally {
+    loading = false;
+  }
+}
 
-    const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
-    previewEditor.dispatch({
-      effects: EditorView.scrollIntoView(line.from, { y: "center" })
-    });
+function clearLoadedFile() {
+  data = [];
+  rows = [];
+  activeFileName = "";
+  selectedSourceRowIndex = null;
+  predictionSession.clearPreview();
+  predictionFilter = null;
+  predictionCounts = { high: 0, medium: 0, review: 0, unknown: 0, transfer: 0 };
+  predictionRows = [];
+  predictionReviewFailed = false;
+  renderMetadata = { content: "", rows: [], generatedCount: 0, errors: [] };
+  preview = "";
+  if (previewEditor) {
+    updatePreviewContent(previewEditor, "");
+  }
+}
+
+function selectSourceRow(rowIndex: number) {
+  selectedSourceRowIndex = rowIndex;
+  if (typeof window !== "undefined" && window.innerWidth <= 860) {
+    mobileInspectorOpen = true;
+  }
+  const renderedRow = find(renderMetadata.rows, { sourceRowIndex: rowIndex });
+  if (!renderedRow?.lineRange || !previewEditor) {
+    return;
   }
 
-  function summaryForRow(rowIndex: number) {
-    try {
-      return find(predictionRows, { rowIndex });
-    } catch (_error) {
-      return undefined;
-    }
-  }
+  const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
+  previewEditor.dispatch({
+    effects: EditorView.scrollIntoView(line.from, { y: "center" }),
+  });
+}
 
-  function rowIsVisible(rowIndex: number) {
-    const summary = summaryForRow(rowIndex);
-    return rowMatchesFilter(summary, predictionFilter);
+function summaryForRow(rowIndex: number) {
+  try {
+    return find(predictionRows, { rowIndex });
+  } catch (_error) {
+    return undefined;
   }
+}
 
-  let selectedPrediction = $derived(
-    selectedSourceRowIndex == null
-      ? null
-      : (summaryForRow(selectedSourceRowIndex)?.results[0] || null)
+function rowIsVisible(rowIndex: number) {
+  const summary = summaryForRow(rowIndex);
+  return rowMatchesFilter(summary, predictionFilter);
+}
+
+let selectedPrediction = $derived(
+  selectedSourceRowIndex == null
+    ? null
+    : (summaryForRow(selectedSourceRowIndex)?.results[0] || null),
+);
+
+function overrideSelected(account: string) {
+  if (selectedSourceRowIndex == null || !selectedPrediction) return;
+  predictionSession.setOverride(
+    selectedSourceRowIndex,
+    selectedPrediction.prefix,
+    account,
+    selectedPrediction.helperInvocationIndex,
   );
+  predictionTick += 1;
+}
 
-  function overrideSelected(account: string) {
-    if (selectedSourceRowIndex == null || !selectedPrediction) return;
-    predictionSession.setOverride(
-      selectedSourceRowIndex,
-      selectedPrediction.prefix,
-      account,
-      selectedPrediction.helperInvocationIndex,
-    );
-    predictionTick += 1;
-  }
+function applySimilar(account: string) {
+  if (selectedSourceRowIndex == null || !selectedPrediction) return;
+  predictionSession.applyToSimilar(
+    selectedSourceRowIndex,
+    selectedPrediction.prefix,
+    account,
+    selectedPrediction.helperInvocationIndex,
+  );
+  predictionTick += 1;
+  toast.toast({
+    message: `Applied account to similar transactions`,
+    type: "is-info",
+    duration: 3000,
+  });
+}
 
-  function applySimilar(account: string) {
-    if (selectedSourceRowIndex == null || !selectedPrediction) return;
-    predictionSession.applyToSimilar(
-      selectedSourceRowIndex,
-      selectedPrediction.prefix,
-      account,
-      selectedPrediction.helperInvocationIndex,
-    );
-    predictionTick += 1;
+function alwaysUseMerchant(account: string) {
+  if (!selectedPrediction) return;
+  const key = selectedPrediction.merchantKey || "";
+  predictionSession.alwaysUseMerchant(key, selectedPrediction.prefix, account);
+  predictionTick += 1;
+  toast.toast({
+    message: `Saved rule: ${key} -> ${account}`,
+    type: "is-success",
+    duration: 4000,
+  });
+}
+
+function confirmNextReview() {
+  const reviewQueue = predictionRows.filter((r) =>
+    r.confidence === "NEEDS_REVIEW" || r.confidence === "UNKNOWN"
+  );
+  if (reviewQueue.length === 0) {
+    selectedSourceRowIndex = null;
+    mobileInspectorOpen = false;
     toast.toast({
-      message: `Applied account to similar transactions`,
-      type: "is-info",
-      duration: 3000
-    });
-  }
-
-  function alwaysUseMerchant(account: string) {
-    if (!selectedPrediction) return;
-    const key = selectedPrediction.merchantKey || "";
-    predictionSession.alwaysUseMerchant(key, selectedPrediction.prefix, account);
-    predictionTick += 1;
-    toast.toast({
-      message: `Saved rule: ${key} -> ${account}`,
+      message: "All low-confidence rows reviewed!",
       type: "is-success",
-      duration: 4000
+    });
+    return;
+  }
+  const currentPos = reviewQueue.findIndex((r) =>
+    r.rowIndex === selectedSourceRowIndex
+  );
+  const nextRow = reviewQueue[currentPos + 1] || reviewQueue[0];
+  if (nextRow) {
+    selectSourceRow(nextRow.rowIndex);
+  } else {
+    selectedSourceRowIndex = null;
+    mobileInspectorOpen = false;
+  }
+}
+
+function onSelectTemplate(template: ImportTemplate) {
+  selectedTemplate = template;
+  saveAsName = template.name;
+  let compiled: any = null;
+  try {
+    compiled = Handlebars.compile(template.content, { noEscape: true });
+  } catch (e) {
+    console.warn("Handlebars compile error on select:", e);
+  }
+  $templateEditorState = assign({}, $templateEditorState, {
+    template: compiled,
+    content: template.content,
+    hasUnsavedChanges: false,
+  });
+}
+
+function openSaveModal() {
+  if (!isEmpty(preview)) {
+    showFileModal = true;
+  }
+}
+
+async function saveToFile(destinationFile: string) {
+  const finalName = ensureFileExtension(destinationFile, ".ledger");
+  const { saved, message } = await api.editor.saveEditorFile({
+    name: finalName,
+    content: preview,
+    operation: "overwrite",
+  });
+
+  if (saved) {
+    toast.toast({
+      message: `Saved <b><a href="/ledger/editor/${
+        encodeURIComponent(finalName)
+      }">${finalName}</a></b>`,
+      type: "is-success",
+    });
+  } else {
+    toast.toast({
+      message: `Failed to save ${finalName}. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
     });
   }
+}
 
-  function confirmNextReview() {
-    const reviewQueue = predictionRows.filter((r) => r.confidence === "NEEDS_REVIEW" || r.confidence === "UNKNOWN");
-    if (reviewQueue.length === 0) {
-      selectedSourceRowIndex = null;
-      mobileInspectorOpen = false;
-      toast.toast({
-        message: "All low-confidence rows reviewed!",
-        type: "is-success"
-      });
-      return;
-    }
-    const currentPos = reviewQueue.findIndex((r) => r.rowIndex === selectedSourceRowIndex);
-    const nextRow = reviewQueue[currentPos + 1] || reviewQueue[0];
-    if (nextRow) {
-      selectSourceRow(nextRow.rowIndex);
-    } else {
-      selectedSourceRowIndex = null;
-      mobileInspectorOpen = false;
-    }
-  }
-
-  function onSelectTemplate(template: ImportTemplate) {
-    selectedTemplate = template;
-    saveAsName = template.name;
-    let compiled: any = null;
-    try {
-      compiled = Handlebars.compile(template.content, { noEscape: true });
-    } catch (e) {
-      console.warn("Handlebars compile error on select:", e);
-    }
-    $templateEditorState = assign({}, $templateEditorState, {
-      template: compiled,
-      content: template.content,
-      hasUnsavedChanges: false
+function copyToClipboard() {
+  if (!preview) return;
+  navigator.clipboard.writeText(preview).then(() => {
+    toast.toast({
+      message: "Generated ledger copied to clipboard",
+      type: "is-success",
+      duration: 3000,
     });
-  }
-
-  function openSaveModal() {
-    if (!isEmpty(preview)) {
-      showFileModal = true;
-    }
-  }
-
-  async function saveToFile(destinationFile: string) {
-    const finalName = ensureFileExtension(destinationFile, ".ledger");
-    const { saved, message } = await ajax("/api/editor/save", {
-      method: "POST",
-      body: JSON.stringify({ name: finalName, content: preview, operation: "overwrite" }),
-      background: true
-    });
-
-    if (saved) {
-      toast.toast({
-        message: `Saved <b><a href="/ledger/editor/${encodeURIComponent(finalName)}">${finalName}</a></b>`,
-        type: "is-success",
-      });
-    } else {
-      toast.toast({
-        message: `Failed to save ${finalName}. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000,
-      });
-    }
-  }
-
-  function copyToClipboard() {
-    if (!preview) return;
-    navigator.clipboard.writeText(preview).then(() => {
-      toast.toast({
-        message: "Generated ledger copied to clipboard",
-        type: "is-success",
-        duration: 3000
-      });
-    });
-  }
+  });
+}
 </script>
 
 <svelte:head>
@@ -496,7 +539,8 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
   width="fluid"
   class="box-border h-[calc(100vh-3.5rem)] max-h-[calc(100vh-3.5rem)] overflow-hidden !pb-[var(--paisa-space-4)] [&_.paisa-page-content]:h-full [&_.paisa-page-content]:min-h-0 max-[860px]:!p-[var(--paisa-space-2)]"
 >
-  <div class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
+  <div
+    class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
     <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
       <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)]">
         <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
@@ -878,7 +922,8 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
 </Page>
 
 <!-- MOBILE INSPECTOR DRAWER -->
-<Drawer title="Selected Row Review" bind:open={mobileInspectorOpen} side="right">
+<Drawer title="Selected Row Review" bind:open={mobileInspectorOpen}
+  side="right">
   {#snippet children()}
     {#if selectedPrediction}
       <PredictionDetail
@@ -942,16 +987,12 @@ import { assign, each, find, isEmpty, maxBy } from "$lib/core/collection";
         disabled={!saveAsName || saveAsNameDuplicate}
         onclick={async () => {
           close();
-          const { template, saved, message } = await ajax("/api/templates/upsert", {
-            method: "POST",
-            body: JSON.stringify({
-              name: saveAsName,
-              content: selectedTemplate?.content || ""
-            }),
-            background: true
-          });
+          const { template, saved, message } = await api.templates.upsertTemplate({
+            name: saveAsName,
+            content: selectedTemplate?.content || "",
+          }) as unknown as { template: ImportTemplate; saved: boolean; message?: string };
           if (saved) {
-            ({ templates } = await ajax("/api/templates", { background: true }));
+            ({ templates } = await loadTemplates());
             onSelectTemplate(template);
             toast.toast({
               message: `Created template ${saveAsName}`,

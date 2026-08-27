@@ -1,25 +1,25 @@
 {
   "accounts": [
-    "Income:Salary:Acme",
     "Assets:Checking",
-    "Expenses:Rent",
-    "Assets:Equity:NIFTY",
-    "Assets:Equity:ABNB",
-    "Assets:Equity:AAPL",
-    "Income:CapitalGains:Equity:AAPL",
-    "Expenses:Charges",
-    "Assets:Dollar",
     "Assets:Coinbase:BTC",
+    "Assets:Dollar",
+    "Assets:Equity:AAPL",
+    "Assets:Equity:ABNB",
+    "Assets:Equity:NIFTY",
     "Equity:OpeningBalances",
-    "Income:Interest:Checking"
+    "Expenses:Charges",
+    "Expenses:Rent",
+    "Income:CapitalGains:Equity:AAPL",
+    "Income:Interest:Checking",
+    "Income:Salary:Acme"
   ],
   "commodities": [
+    "AAPL",
+    "ABNB",
+    "BTC",
     "INR",
     "NIFTY",
-    "ABNB",
-    "USD",
-    "AAPL",
-    "BTC"
+    "USD"
   ],
   "files": [
     {

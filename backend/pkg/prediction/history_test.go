@@ -72,12 +72,10 @@ func TestGetHistoryShape(t *testing.T) {
 		predictionPosting("Income:Salary", "Acme", 1000),
 	}).Error)
 	result := GetHistory(db)
-	history, ok := result["history"].([]HistoryEntry)
-	require.True(t, ok)
-	require.Len(t, history, 1)
-	assert.Equal(t, "Acme", history[0].Payee)
-	assert.Equal(t, "Income:Salary", history[0].CategoryAccount)
-	assert.NotEmpty(t, history[0].TransactionID)
+	require.Len(t, result.History, 1)
+	assert.Equal(t, "Acme", result.History[0].Payee)
+	assert.Equal(t, "Income:Salary", result.History[0].CategoryAccount)
+	assert.NotEmpty(t, result.History[0].TransactionID)
 }
 
 func TestHistoryExposesSourceAndDirectionWhenDeterminable(t *testing.T) {

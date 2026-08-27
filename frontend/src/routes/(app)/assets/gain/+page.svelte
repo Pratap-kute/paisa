@@ -1,53 +1,58 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import { buildLegends } from "$lib/charts/gain";
-  import { buildGainOverviewComparison } from "$lib/charts/bar_comparison_data";
-  import { ajax, formatCurrency, type Gain, type Legend } from "$lib/core/utils";
-  import { sumBy } from "es-toolkit";
-  import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
+import type { Gain } from "$lib/domain/assets";
+import type { Legend } from "$lib/shared/charts/types";
+import { goto } from "$app/navigation";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import { buildLegends } from "$lib/features/assets/gain";
+import { buildGainOverviewComparison } from "$lib/features/assets/chart_comparison_data";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { api } from "$lib/api";
+import { sumBy } from "es-toolkit";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 
-  let legends: Legend[] = $state([]);
-  let gains: Gain[] = $state([]);
-  let isLoading = $state(true);
-  let totalGain = $state(0);
-  let totalInvestment = $state(0);
+let legends: Legend[] = $state([]);
+let gains: Gain[] = $state([]);
+let isLoading = $state(true);
+let totalGain = $state(0);
+let totalInvestment = $state(0);
 
-  let hasGains = $derived(gains.length > 0);
-  let overviewData = $derived(buildGainOverviewComparison(gains));
-  let chartEvents = $derived([
-    {
-      event: "click" as const,
-      handler: (event: { dataIndex?: number }) => {
-        if (typeof event.dataIndex !== "number") return;
-        const account = overviewData.points[event.dataIndex]?.key;
-        if (account) goto(`/assets/gain/${account}`);
-      },
+let hasGains = $derived(gains.length > 0);
+let overviewData = $derived(buildGainOverviewComparison(gains));
+let chartEvents = $derived([
+  {
+    target: "series.bar" as const,
+    event: "click" as const,
+    handler: (event: { dataIndex?: number }) => {
+      if (typeof event.dataIndex !== "number") return;
+      const account = overviewData.points[event.dataIndex]?.key;
+      if (account) goto(`/assets/gain/${account}`);
     },
-  ]);
+  },
+]);
 
-  onMount(async () => {
-    try {
-      ({ gain_breakdown: gains } = await ajax("/api/gain"));
-      totalGain = sumBy(gains, (g) => g.networth.gainAmount);
-      totalInvestment = sumBy(
-        gains,
-        (g) => g.networth.investmentAmount - g.networth.withdrawalAmount,
-      );
-      legends = buildLegends();
-      isLoading = false;
-    } catch {
-      isLoading = false;
-    }
-  });
+onMount(async () => {
+  try {
+    const res = await api.gain.getGain();
+    gains = (res.gain_breakdown as unknown as Gain[]) || [];
+    totalGain = sumBy(gains, (g) => g.networth.gainAmount);
+    totalInvestment = sumBy(
+      gains,
+      (g) => g.networth.investmentAmount - g.networth.withdrawalAmount,
+    );
+    legends = buildLegends();
+    isLoading = false;
+  } catch {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

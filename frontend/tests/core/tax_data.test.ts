@@ -1,12 +1,13 @@
+import type { ScheduleALEntry } from "$lib/domain/tax";
 import { describe, expect, it } from "vitest";
 import {
   filterHarvestables,
   harvestablePercentage,
   unitsRequiredFromAmount,
   unitsRequiredFromGain,
-} from "$lib/charts/harvest_data";
-import { scheduleALTotal } from "$lib/charts/schedule_al_data";
-import type { Harvestable, ScheduleALEntry } from "$lib/core/utils";
+} from "$lib/features/tax/harvest_data";
+import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
+import type { Harvestable } from "$lib/domain/tax";
 
 function harvestable(overrides: Partial<Harvestable> = {}): Harvestable {
   return {

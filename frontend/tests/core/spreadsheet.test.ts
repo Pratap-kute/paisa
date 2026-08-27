@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import Handlebars from "handlebars";
 import * as XLSX from "xlsx";
-import { asRows, parse, render } from "../../src/lib/importing/spreadsheet";
+import { asRows, parse, render } from "$lib/features/importing/spreadsheet";
 
 describe("spreadsheet importing", () => {
   test("parses CSV and maps columns to spreadsheet letters", async () => {

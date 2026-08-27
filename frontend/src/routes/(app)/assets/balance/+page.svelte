@@ -1,24 +1,27 @@
 <script lang="ts">
-  import AssetsBalance from "$lib/components/finance/AssetsBalance.svelte";
-  import { ajax, type AssetBreakdown } from "$lib/core/utils";
-  import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
+import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
+import type { AssetBreakdown } from "$lib/domain/assets";
+import { api } from "$lib/api";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 
-  let breakdowns: Record<string, AssetBreakdown> = $state({});
-  let isLoading = $state(true);
+let breakdowns: Record<string, AssetBreakdown> = $state({});
+let isLoading = $state(true);
 
-  let hasBreakdowns = $derived(Object.keys(breakdowns).length > 0);
+let hasBreakdowns = $derived(Object.keys(breakdowns).length > 0);
 
-  onMount(async () => {
-    try {
-      ({ asset_breakdowns: breakdowns } = await ajax("/api/assets/balance"));
-    } finally {
-      isLoading = false;
-    }
-  });
+onMount(async () => {
+  try {
+    const res = await api.assets.getAssetsBalance();
+    breakdowns =
+      (res.asset_breakdowns as unknown as Record<string, AssetBreakdown>) || {};
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

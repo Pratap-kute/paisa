@@ -2,24 +2,37 @@ package india
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/model/cii"
 	log "github.com/sirupsen/logrus"
 )
 
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
+}
+
 func GetCostInflationIndex() ([]*cii.CII, error) {
 	log.Info("Fetching Cost Inflation Index from Purified Bytes")
-	resp, err := http.Get("https://india.finbodhi.com/api/cii/v2.json")
+	resp, err := httpClient.Get("https://india.finbodhi.com/api/cii/v2.json")
 	if err != nil {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	respBytes, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+	}
+
+	respBytes, err := io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024+1))
 	if err != nil {
 		return nil, err
+	}
+	if len(respBytes) > 10*1024*1024 {
+		return nil, fmt.Errorf("response exceeded maximum allowed size of 10MB")
 	}
 
 	type CII struct {

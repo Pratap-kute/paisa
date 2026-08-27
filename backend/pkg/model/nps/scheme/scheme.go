@@ -30,17 +30,13 @@ func UpsertAll(db *gorm.DB, schemes []*Scheme) {
 		if err != nil {
 			return err
 		}
-		for _, scheme := range schemes {
-			err := tx.Create(scheme).Error
-			if err != nil {
-				return err
-			}
+		if len(schemes) == 0 {
+			return nil
 		}
-
-		return nil
+		return tx.CreateInBatches(schemes, 500).Error
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Error("Failed to upsert nps schemes: ", err)
 	}
 }
 

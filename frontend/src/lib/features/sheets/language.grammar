@@ -1,0 +1,90 @@
+@dialects { comment skip_comment }
+
+@top Sheet { newline* lines? }
+
+@precedence {
+  call,
+  unary @right,
+  exp @left,
+  factor @left,
+  term @left,
+  comparison @left,
+  equality @left,
+  and @left,
+  or @left
+}
+
+lines { Line (newline+ Line)* newline* }
+
+Line { Expression | Assignment | FunctionDefinition | Header }
+
+Expression { Literal | UnaryExpression | BinaryExpression | Grouping | Identifier | FunctionCall | Postings }
+
+Literal { Number | Percent }
+Grouping { "(" Expression ")" }
+UnaryExpression { !unary UnaryOperator ~unary Expression }
+BinaryExpression {
+  Expression !exp BinaryOperator<"^"> Expression |
+  Expression !factor BinaryOperator<"*" | "/"> Expression |
+  Expression !term BinaryOperator<"+" | "-"> ~unary Expression |
+  Expression !comparison BinaryOperator<"<" | "<=" | ">" | ">="> Expression |
+  Expression !equality BinaryOperator<"==" | "!="> Expression |
+  Expression !and  BinaryOperator<@specialize[@name='AND']<Identifier, "AND">> Expression |
+  Expression !or BinaryOperator<@specialize[@name='OR']<Identifier, "OR">> Expression
+}
+Assignment { Identifier AssignmentOperator Expression }
+FunctionCall { Identifier !call "(" Arguments? ")" }
+Arguments { Expression ~call ("," Expression)* }
+
+Postings { SearchQueryString }
+
+FunctionDefinition { Identifier !call "(" Parameters? ")" "=" Expression }
+Parameters { Identifier ~call ("," Identifier)* }
+
+UnaryOperator { "+" | "-" | "!" }
+AssignmentOperator { "=" }
+BinaryOperator<expr> { expr }
+
+@tokens {
+  Number { int frac? exp?  }
+  int  { '0' | $[1-9] commadigit* }
+  frac { '.' commadigit+ }
+  exp  { $[eE] $[+\-]? $[0-9]+ }
+  commadigit { ','? $[0-9]+ }
+
+  Percent { int frac? exp? '%' }
+
+  Identifier { $[a-zA-Z_] $[0-9a-zA-Z_]* }
+
+  whitespace { $[ \t] }
+
+  newline { $[\n\r] }
+
+  Header { "#" ![\n]* }
+
+  Comment[@dialect=comment] { ";" ![\n]* | "//" ![\n]* }
+
+  comment[@dialect=skip_comment] { ";" ![\n]* | "//" ![\n]* }
+
+  @precedence { comment, Comment, "/", Percent, Number }
+}
+
+@local tokens {
+  stringEnd[@name='}'] { '}' }
+  stringEscape { "\\" _ }
+  @else stringContent
+}
+
+@skip {} {
+  stringStart[@name='{'] { '{' }
+  SearchQueryString { stringStart SearchQuery stringEnd }
+  SearchQuery { (stringContent | stringEscape)* }
+}
+
+@skip {
+  whitespace | Comment | comment
+}
+
+@external propSource sheetHighlighting from "../../shared/editor/sheet_highlight.js"
+
+@detectDelim

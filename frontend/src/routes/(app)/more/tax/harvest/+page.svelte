@@ -1,86 +1,88 @@
 <script lang="ts">
-  import {
-    filterHarvestables,
-    harvestablePercentage,
-  } from "$lib/charts/harvest_data";
-  import {
-    ajax,
-    formatCurrency,
-    formatFloat,
-    formatPercentage,
-    restName,
-    type Harvestable,
-  } from "$lib/core/utils";
-  import { sumBy } from "es-toolkit";
-  import { onMount } from "svelte";
-  import Card from "$lib/components/ui/Card.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import HarvestCard from "$lib/components/tax/HarvestCard.svelte";
+import { api } from "$lib/api";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatFloat } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { restName } from "$lib/domain/account";
+import type { Harvestable } from "$lib/domain/tax";
+import {
+  filterHarvestables,
+  harvestablePercentage,
+} from "$lib/features/tax/harvest_data";
+import { sumBy } from "es-toolkit";
+import { onMount } from "svelte";
+import Card from "$lib/shared/ui/Card.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import HarvestCard from "$lib/features/tax/components/HarvestCard.svelte";
 
-  let isLoading = $state(true);
-  let harvestables: Harvestable[] = $state([]);
-  let selectedAccount: string = $state("");
-  const isEmpty = $derived(!isLoading && harvestables.length === 0);
+let isLoading = $state(true);
+let harvestables: Harvestable[] = $state([]);
+let selectedAccount: string = $state("");
+const isEmpty = $derived(!isLoading && harvestables.length === 0);
 
-  let selectedHarvestable = $derived(
-    harvestables.find((h) => h.account === selectedAccount) || harvestables[0],
+let selectedHarvestable = $derived(
+  harvestables.find((h) => h.account === selectedAccount) || harvestables[0],
+);
+
+// High-level portfolio metrics across all harvestable holdings
+let portfolioMetrics = $derived.by(() => {
+  const totalHarvestableValue = sumBy(
+    harvestables,
+    (h) => h.harvestable_units * h.current_unit_price,
   );
+  const totalUnrealizedGain = sumBy(
+    harvestables,
+    (h) => h.unrealized_gain,
+  );
+  const totalTaxableGain = sumBy(
+    harvestables,
+    (h) => h.taxable_unrealized_gain,
+  );
+  const totalUnits = sumBy(harvestables, (h) => h.total_units);
+  const totalHarvestableUnits = sumBy(harvestables, (h) => h.harvestable_units);
+  const overallRatio = totalUnits > 0
+    ? (totalHarvestableUnits / totalUnits) * 100
+    : 0;
 
-  // High-level portfolio metrics across all harvestable holdings
-  let portfolioMetrics = $derived.by(() => {
-    const totalHarvestableValue = sumBy(
-      harvestables,
-      (h) => h.harvestable_units * h.current_unit_price,
-    );
-    const totalUnrealizedGain = sumBy(
-      harvestables,
-      (h) => h.unrealized_gain,
-    );
-    const totalTaxableGain = sumBy(
-      harvestables,
-      (h) => h.taxable_unrealized_gain,
-    );
-    const totalUnits = sumBy(harvestables, (h) => h.total_units);
-    const totalHarvestableUnits = sumBy(harvestables, (h) => h.harvestable_units);
-    const overallRatio = totalUnits > 0 ? (totalHarvestableUnits / totalUnits) * 100 : 0;
+  return {
+    totalHarvestableValue,
+    totalUnrealizedGain,
+    totalTaxableGain,
+    eligibleHoldingsCount: harvestables.length,
+    overallRatio,
+  };
+});
 
-    return {
-      totalHarvestableValue,
-      totalUnrealizedGain,
-      totalTaxableGain,
-      eligibleHoldingsCount: harvestables.length,
-      overallRatio,
+function gainStatus(value: number): "positive" | "negative" | "neutral" {
+  if (value > 0) return "positive";
+  if (value < 0) return "negative";
+  return "neutral";
+}
+
+function gainClass(value: number) {
+  if (value > 0) return "text-[var(--paisa-positive)]";
+  if (value < 0) return "text-[var(--paisa-negative)]";
+  return "text-[var(--paisa-muted-foreground)]";
+}
+
+onMount(async () => {
+  try {
+    const response = await api.harvest.getHarvest() as unknown as {
+      harvestables: Record<string, Harvestable>;
     };
-  });
-
-  function gainStatus(value: number): "positive" | "negative" | "neutral" {
-    if (value > 0) return "positive";
-    if (value < 0) return "negative";
-    return "neutral";
-  }
-
-  function gainClass(value: number) {
-    if (value > 0) return "text-[var(--paisa-positive)]";
-    if (value < 0) return "text-[var(--paisa-negative)]";
-    return "text-[var(--paisa-muted-foreground)]";
-  }
-
-  onMount(async () => {
-    try {
-      const response = await ajax("/api/harvest");
-      harvestables = filterHarvestables(Object.values(response.harvestables));
-      if (harvestables.length > 0) {
-        selectedAccount = harvestables[0].account;
-      }
-    } finally {
-      isLoading = false;
+    harvestables = filterHarvestables(Object.values(response.harvestables));
+    if (harvestables.length > 0) {
+      selectedAccount = harvestables[0].account;
     }
-  });
+  } finally {
+    isLoading = false;
+  }
+});
 </script>
 
 <svelte:head>

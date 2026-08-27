@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	_ "embed"
@@ -13,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"dario.cat/mergo"
+	"github.com/ananthakumaran/paisa/pkg/auth"
 	"github.com/santhosh-tekuri/jsonschema/v5"
 
 	"gopkg.in/yaml.v3"
@@ -170,6 +172,7 @@ type Config struct {
 }
 
 var (
+	configMu   sync.RWMutex
 	config     Config
 	configPath string
 	location   *time.Location
@@ -272,22 +275,180 @@ func SaveConfigObject(config Config) error {
 	return SaveConfig(content)
 }
 
+func atomicWriteFile(filename string, data []byte, perm os.FileMode) error {
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+
+	tmpFile, err := os.CreateTemp(dir, ".paisa-tmp-*")
+	if err != nil {
+		return err
+	}
+	tmpName := tmpFile.Name()
+	cleanedUp := false
+	defer func() {
+		if !cleanedUp {
+			_ = tmpFile.Close()
+			_ = os.Remove(tmpName)
+		}
+	}()
+
+	if _, err := tmpFile.Write(data); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Chmod(perm); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Sync(); err != nil {
+		return err
+	}
+
+	if err := tmpFile.Close(); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tmpName, filename); err != nil {
+		return err
+	}
+
+	cleanedUp = true
+	return nil
+}
+
 func SaveConfig(content []byte) error {
-	err := LoadConfig(content, "")
+	var configJSON any
+	err := yaml.Unmarshal(content, &configJSON)
 	if err != nil {
 		return err
 	}
 
-	yamlContent, err := yaml.Marshal(config)
+	err = schema.Validate(configJSON)
+	if err != nil {
+		return fmt.Errorf("invalid configuration\n%w", err)
+	}
+
+	newConfig := Config{}
+	err = yaml.Unmarshal(content, &newConfig)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(configPath, yamlContent, 0o600)
+	err = mergo.Merge(&newConfig, defaultConfig, mergo.WithOverrideEmptySlice)
 	if err != nil {
 		return err
 	}
 
+	var newLocation *time.Location
+	if newConfig.TimeZone == "" {
+		newLocation = time.Local
+	} else {
+		newLocation, err = time.LoadLocation(newConfig.TimeZone)
+		if err != nil {
+			return fmt.Errorf("invalid time zone: %s\n%w", newConfig.TimeZone, err)
+		}
+	}
+
+	configMu.RLock()
+	existingAccounts := make(map[string]string)
+	for _, acc := range config.UserAccounts {
+		existingAccounts[acc.Username] = acc.Password
+	}
+	cp := configPath
+	configMu.RUnlock()
+
+	for i := range newConfig.UserAccounts {
+		acc := &newConfig.UserAccounts[i]
+		switch {
+		case acc.Password == "":
+			if existingPw, ok := existingAccounts[acc.Username]; ok {
+				acc.Password = existingPw
+			}
+		case strings.HasPrefix(acc.Password, "sha256:") || strings.HasPrefix(acc.Password, "$argon2id$"):
+			// Already a valid verifier format, keep as is
+		default:
+			hashed, hashErr := auth.HashPassword(acc.Password)
+			if hashErr != nil {
+				return hashErr
+			}
+			acc.Password = hashed
+		}
+	}
+
+	yamlContent, err := yaml.Marshal(newConfig)
+	if err != nil {
+		return err
+	}
+
+	err = atomicWriteFile(cp, yamlContent, 0o600)
+	if err != nil {
+		return err
+	}
+
+	configMu.Lock()
+	config = newConfig
+	location = newLocation
+	configMu.Unlock()
+
+	return nil
+}
+
+func GetPublicConfig() Config {
+	configMu.RLock()
+	defer configMu.RUnlock()
+	publicCfg := config
+	if len(publicCfg.UserAccounts) > 0 {
+		publicCfg.UserAccounts = make([]UserAccount, len(config.UserAccounts))
+		for i, acc := range config.UserAccounts {
+			publicCfg.UserAccounts[i] = UserAccount{
+				Username: acc.Username,
+				Password: "", // Redact verifier
+			}
+		}
+	}
+	return publicCfg
+}
+
+func UpgradeUserPassword(username string, passwordToken string) error {
+	configMu.Lock()
+	defer configMu.Unlock()
+
+	accountIdx := -1
+	for i, acc := range config.UserAccounts {
+		if acc.Username == username {
+			accountIdx = i
+			break
+		}
+	}
+	if accountIdx == -1 {
+		return fmt.Errorf("user %s not found in configuration", username)
+	}
+
+	newHash, err := auth.HashPassword(passwordToken)
+	if err != nil {
+		return err
+	}
+
+	newConfig := config
+	newAccounts := make([]UserAccount, len(config.UserAccounts))
+	copy(newAccounts, config.UserAccounts)
+	newAccounts[accountIdx].Password = newHash
+	newConfig.UserAccounts = newAccounts
+
+	yamlContent, err := yaml.Marshal(newConfig)
+	if err != nil {
+		return err
+	}
+
+	if err := atomicWriteFile(configPath, yamlContent, 0o600); err != nil {
+		log.Warnf("Failed to persist upgraded credential for %s: %v", username, err)
+		return err
+	}
+
+	config = newConfig
+	log.Infof("Successfully upgraded credential to Argon2id for user %s", username)
 	return nil
 }
 
@@ -324,54 +485,71 @@ func LoadConfig(content []byte, cp string) error {
 		return fmt.Errorf("invalid configuration\n%w", err)
 	}
 
-	config = Config{}
-	err = yaml.Unmarshal(content, &config)
+	newConfig := Config{}
+	err = yaml.Unmarshal(content, &newConfig)
 	if err != nil {
 		return err
 	}
 
-	err = mergo.Merge(&config, defaultConfig, mergo.WithOverrideEmptySlice)
+	err = mergo.Merge(&newConfig, defaultConfig, mergo.WithOverrideEmptySlice)
 	if err != nil {
 		return err
 	}
 
+	var newLocation *time.Location
+	if newConfig.TimeZone == "" {
+		newLocation = time.Local
+	} else {
+		newLocation, err = time.LoadLocation(newConfig.TimeZone)
+		if err != nil {
+			return fmt.Errorf("invalid time zone: %s\n%w", newConfig.TimeZone, err)
+		}
+	}
+
+	configMu.Lock()
+	config = newConfig
 	if cp != "" {
 		configPath = cp
 	}
-
-	if config.TimeZone == "" {
-		location = time.Local
-	} else {
-		location, err = time.LoadLocation(config.TimeZone)
-		if err != nil {
-			location = time.Local
-			return fmt.Errorf("invalid time zone: %s\n%w", config.TimeZone, err)
-		}
-	}
+	location = newLocation
+	configMu.Unlock()
 
 	return nil
 }
 
 func GetConfig() Config {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return config
 }
 
 func GetJournalPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if !filepath.IsAbs(config.JournalPath) {
-		return filepath.Join(GetConfigDir(), config.JournalPath)
+		return filepath.Join(filepath.Dir(configPath), config.JournalPath)
 	}
 
 	return config.JournalPath
 }
 
 func GetSheetDir() string {
-	if config.SheetsDirectory == "" {
-		return filepath.Dir(GetJournalPath())
+	configMu.RLock()
+	sheetsDir := config.SheetsDirectory
+	journalPath := config.JournalPath
+	cfgDir := filepath.Dir(configPath)
+	configMu.RUnlock()
+
+	if sheetsDir == "" {
+		if !filepath.IsAbs(journalPath) {
+			return filepath.Dir(filepath.Join(cfgDir, journalPath))
+		}
+		return filepath.Dir(journalPath)
 	}
 
-	dir := config.SheetsDirectory
-	if !filepath.IsAbs(config.SheetsDirectory) {
-		dir = filepath.Join(GetConfigDir(), config.SheetsDirectory)
+	dir := sheetsDir
+	if !filepath.IsAbs(sheetsDir) {
+		dir = filepath.Join(cfgDir, sheetsDir)
 	}
 
 	err := os.MkdirAll(dir, 0o750)
@@ -383,18 +561,24 @@ func GetSheetDir() string {
 }
 
 func GetDBPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if !filepath.IsAbs(config.DBPath) {
-		return filepath.Join(GetConfigDir(), config.DBPath)
+		return filepath.Join(filepath.Dir(configPath), config.DBPath)
 	}
 
 	return config.DBPath
 }
 
 func GetConfigDir() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return filepath.Dir(configPath)
 }
 
 func GetConfigPath() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return configPath
 }
 
@@ -435,10 +619,14 @@ func EnsureLogFilePath() (string, error) {
 }
 
 func DefaultCurrency() string {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	return config.DefaultCurrency
 }
 
 func TimeZone() *time.Location {
+	configMu.RLock()
+	defer configMu.RUnlock()
 	if location != nil {
 		return location
 	}

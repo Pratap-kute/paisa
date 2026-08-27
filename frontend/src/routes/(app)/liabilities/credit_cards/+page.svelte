@@ -1,22 +1,26 @@
 <script lang="ts">
-  import CreditCardCard from "$lib/components/finance/CreditCardCard.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import { ajax, helpUrl, type CreditCardSummary } from "$lib/core/utils";
-    import { onMount } from "svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-import { isEmpty as isEmptyValue } from "$lib/core/collection";
+import { api } from "$lib/api";
+import CreditCardCard from "$lib/features/liabilities/components/CreditCardCard.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { helpUrl } from "$lib/shared/browser/navigation";
+import type { CreditCardSummary } from "$lib/domain/liabilities";
+import { onMount } from "svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
-  let isEmpty = $state(false);
-  let creditCards: CreditCardSummary[] = $state([]);
+let isEmpty = $state(false);
+let creditCards: CreditCardSummary[] = $state([]);
 
-  onMount(async () => {
-    ({ creditCards } = await ajax("/api/credit_cards"));
-    if (isEmptyValue(creditCards)) {
-      isEmpty = true;
-    }
+onMount(async () => {
+  ({ creditCards } = await api.creditCards.getCreditCards() as unknown as {
+    creditCards: CreditCardSummary[];
   });
+  if (isEmptyValue(creditCards)) {
+    isEmpty = true;
+  }
+});
 </script>
 
 <svelte:head>

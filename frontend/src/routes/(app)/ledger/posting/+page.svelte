@@ -1,93 +1,97 @@
 <script lang="ts">
-  import { accountColorStyle } from "$lib/core/colors";
-  import PostingNote from "$lib/components/transactions/PostingNote.svelte";
-  import PostingStatus from "$lib/components/transactions/PostingStatus.svelte";
-  import SearchQuery from "$lib/components/ledger/SearchQuery.svelte";
-  import { iconText } from "$lib/core/icon";
-  import { change } from "$lib/domain/posting";
-  import { editorState } from "$lib/editors/search_query_editor";
-  import {
-    ajax,
-    postingUrl,
-    type Posting,
-    formatCurrency,
-    formatFloat,
-    firstName,
-    type LedgerFile,
-    type Transaction,
-    asTransaction
-  } from "$lib/core/utils";
-  import { debounce } from "es-toolkit";
-  import { get } from "svelte/store";
-  import { onDestroy, onMount } from "svelte";
-  import VirtualList from "svelte-tiny-virtual-list";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-import { map } from "$lib/core/collection";
+import { api } from "$lib/api";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+import { firstName } from "$lib/domain/account";
+import { asTransaction } from "$lib/domain/transactions";
+import type { LedgerFile, Posting } from "$lib/domain/ledger";
+import type { Transaction } from "$lib/domain/ledger";
+import { accountColorStyle } from "$lib/shared/theme/colors";
+import PostingNote from "$lib/features/transactions/components/PostingNote.svelte";
+import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
+import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
+import { iconText } from "$lib/shared/ui/icon";
+import { change } from "$lib/domain/posting";
+import { editorState } from "$lib/features/editor/search_query_editor";
+import { debounce } from "es-toolkit";
+import { get } from "svelte/store";
+import { onDestroy, onMount } from "svelte";
+import VirtualList from "svelte-tiny-virtual-list";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import { map } from "$lib/shared/utils/collection";
 
-  let files: LedgerFile[] = $state([]);
-  let accounts: string[] = $state([]);
-  let commodities: string[] = $state([]);
-  let postings: Posting[] | null = $state(null);
+let files: LedgerFile[] = $state([]);
+let accounts: string[] = $state([]);
+let commodities: string[] = $state([]);
+let postings: Posting[] | null = $state(null);
 
-  let filteredPostings: Posting[] = $state([]);
-  let rows: { posting: Posting; transaction: Transaction }[] = [];
-  let listHeight = $state(600);
+let filteredPostings: Posting[] = $state([]);
+let rows: { posting: Posting; transaction: Transaction }[] = [];
+let listHeight = $state(600);
 
-  function handleInputRaw(predicate: (t: Transaction) => boolean) {
-    if (!postings) return;
-    filteredPostings = rows.filter((r) => predicate(r.transaction)).map((r) => r.posting);
+function handleInputRaw(predicate: (t: Transaction) => boolean) {
+  if (!postings) return;
+  filteredPostings = rows.filter((r) => predicate(r.transaction)).map((r) =>
+    r.posting
+  );
+}
+
+const handleInput = debounce(handleInputRaw, 100);
+
+const unsubscribe = editorState.subscribe((state) => {
+  handleInput(state.predicate);
+});
+
+onDestroy(() => {
+  unsubscribe();
+});
+
+function updateDimensions() {
+  if (typeof window !== "undefined") {
+    listHeight = Math.max(320, window.innerHeight - 220);
   }
+}
 
-  const handleInput = debounce(handleInputRaw, 100);
+async function loadPostings() {
+  ({ files, accounts, commodities } = await api.editor
+    .getEditorFiles() as unknown as {
+      files: LedgerFile[];
+      accounts: string[];
+      commodities: string[];
+    });
+  const response = await api.ledger.getLedger();
+  const loadedPostings = (response.postings ?? []) as unknown as Posting[];
+  postings = loadedPostings;
+  rows = map(loadedPostings, (p) => ({
+    posting: p,
+    transaction: asTransaction(p),
+  }));
+  handleInputRaw(get(editorState).predicate);
+}
 
-  const unsubscribe = editorState.subscribe((state) => {
-    handleInput(state.predicate);
-  });
+onMount(() => {
+  updateDimensions();
+  window.addEventListener("resize", updateDimensions);
+  loadPostings();
+  return () => {
+    window.removeEventListener("resize", updateDimensions);
+  };
+});
 
-  onDestroy(() => {
-    unsubscribe();
-  });
-
-  function updateDimensions() {
-    if (typeof window !== "undefined") {
-      listHeight = Math.max(320, window.innerHeight - 220);
-    }
+function unlessDefault(p: Posting, text: string) {
+  if (p.commodity !== USER_CONFIG.default_currency) {
+    return text;
   }
+  return "";
+}
 
-  async function loadPostings() {
-    ({ files, accounts, commodities } = await ajax("/api/editor/files"));
-    const { postings: loadedPostings } = await ajax("/api/ledger");
-    postings = loadedPostings;
-    rows = map(loadedPostings, (p) => ({
-      posting: p,
-      transaction: asTransaction(p)
-    }));
-    handleInputRaw(get(editorState).predicate);
+function unlessZero(value: number, text: string) {
+  if (value > 0) {
+    return text;
   }
-
-  onMount(() => {
-    updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    loadPostings();
-    return () => {
-      window.removeEventListener("resize", updateDimensions);
-    };
-  });
-
-  function unlessDefault(p: Posting, text: string) {
-    if (p.commodity !== USER_CONFIG.default_currency) {
-      return text;
-    }
-    return "";
-  }
-
-  function unlessZero(value: number, text: string) {
-    if (value > 0) {
-      return text;
-    }
-    return "";
-  }
+  return "";
+}
 </script>
 
 <svelte:head>
@@ -137,16 +141,18 @@ import { map } from "$lib/core/collection";
             </div>
 
             {#if filteredPostings.length > 0}
-              <VirtualList
-                width="100%"
-                height={listHeight}
-                itemCount={filteredPostings.length}
-                itemSize={27}
-              >
-                <svelte:fragment slot="item" let:index let:style>
-                  {@const p = filteredPostings[index]}
-                  {@const c = change(p)}
-                  <div
+              {#key filteredPostings}
+                <VirtualList
+                  width="100%"
+                  height={listHeight}
+                  itemCount={filteredPostings.length}
+                  itemSize={27}
+                >
+                  <svelte:fragment slot="item" let:index let:style>
+                    {@const p = filteredPostings[index]}
+                    {#if p}
+                      {@const c = change(p)}
+                      <div
                     class="posting-row items-baseline gap-1 px-3 pt-1 transition-colors hover:bg-[var(--paisa-surface-hover)]"
                     {style}
                   >
@@ -181,9 +187,11 @@ import { map } from "$lib/core/collection";
                     <div class="text-right text-[0.8125rem] tabular-nums {c.class}">
                       {unlessZero(c.percentage, formatFloat(c.percentage))}
                     </div>
-                  </div>
-                </svelte:fragment>
-              </VirtualList>
+                      </div>
+                    {/if}
+                  </svelte:fragment>
+                </VirtualList>
+              {/key}
             {:else}
               <ZeroState item={[]}>
                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
@@ -210,22 +218,22 @@ import { map } from "$lib/core/collection";
 </div>
 
 <style>
-  .paisa-posting-table {
-    width: 100%;
-    min-width: 1480px;
-  }
+.paisa-posting-table {
+  width: 100%;
+  min-width: 1480px;
+}
 
-  .posting-row {
-    box-sizing: border-box;
-    display: grid;
-    grid-template-columns:
-      110px minmax(160px, 1.25fr) minmax(200px, 1.5fr)
-      repeat(7, minmax(92px, 0.75fr));
-    width: 100%;
-    overflow: hidden;
-  }
+.posting-row {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns:
+    110px minmax(160px, 1.25fr) minmax(200px, 1.5fr)
+    repeat(7, minmax(92px, 0.75fr));
+  width: 100%;
+  overflow: hidden;
+}
 
-  .posting-row > div {
-    min-width: 0;
-  }
+.posting-row > div {
+  min-width: 0;
+}
 </style>

@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/ananthakumaran/paisa/pkg/cache"
 	"github.com/ananthakumaran/paisa/pkg/model"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -13,33 +12,38 @@ type SyncRequest struct {
 	Portfolios bool `json:"portfolios"`
 }
 
-func Sync(db *gorm.DB, request SyncRequest) gin.H {
-	cache.Clear()
+type SyncResult struct {
+	Success bool   `json:"success"`
+	Message string `json:"message,omitempty"`
+}
 
+func Sync(db *gorm.DB, request SyncRequest) SyncResult {
 	if request.Journal {
 		message, err := model.SyncJournal(db)
 		if err != nil {
-			return gin.H{"success": false, "message": message}
+			return SyncResult{Success: false, Message: message}
 		}
 	}
 
 	if request.Prices {
 		err := model.SyncCommodities(db)
 		if err != nil {
-			return gin.H{"success": false, "message": err.Error()}
+			return SyncResult{Success: false, Message: err.Error()}
 		}
 		err = model.SyncCII(db)
 		if err != nil {
-			return gin.H{"success": false, "message": err.Error()}
+			return SyncResult{Success: false, Message: err.Error()}
 		}
 	}
 
 	if request.Portfolios {
 		err := model.SyncPortfolios(db)
 		if err != nil {
-			return gin.H{"success": false, "message": err.Error()}
+			return SyncResult{Success: false, Message: err.Error()}
 		}
 	}
 
-	return gin.H{"success": true}
+	cache.Clear()
+
+	return SyncResult{Success: true}
 }

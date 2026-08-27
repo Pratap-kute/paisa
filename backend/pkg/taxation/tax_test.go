@@ -143,7 +143,7 @@ func TestCalculateDebt(t *testing.T) {
 		{FinancialYear: "2018-19", CostInflationIndex: 280},
 		{FinancialYear: "2022-23", CostInflationIndex: 331},
 	}
-	cii.UpsertAll(db, ciis)
+	require.NoError(t, cii.UpsertAll(db, ciis))
 
 	commodity := config.Commodity{
 		Name:        "DebtFund",

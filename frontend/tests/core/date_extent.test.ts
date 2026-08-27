@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { describe, expect, it } from "vitest";
-import { dayjsExtent } from "$lib/formatters/date";
+import { dayjsExtent } from "$lib/shared/formatters/date";
 
 describe("Dayjs extent", () => {
   it("returns undefined bounds for an empty input", () => {

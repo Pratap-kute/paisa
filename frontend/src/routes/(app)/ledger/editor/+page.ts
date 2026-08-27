@@ -1,10 +1,11 @@
 import { redirect } from "@sveltejs/kit";
-import { ajax } from "$lib/core/utils";
+import { createApiClient } from "$lib/api";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ fetch }) => {
-  const { files } = await ajax("/api/editor/files", { customFetch: fetch });
-  if (files.length > 0) {
+  const client = createApiClient({ customFetch: fetch });
+  const { files } = await client.editor.getEditorFiles();
+  if (files && files.length > 0) {
     redirect(307, `/ledger/editor/${files[0].name}`);
   }
 

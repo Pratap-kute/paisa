@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
 	"github.com/ananthakumaran/paisa/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -94,16 +94,19 @@ func init() {
 	}
 }
 
-func GetDiagnosis(db *gorm.DB) gin.H {
-	issues := make([]Issue, 0, len(rules))
+func GetDiagnosis(db *gorm.DB) dto.DiagnosisResponse {
+	issues := make([]dto.IssueResponse, 0, len(rules))
 	for _, rule := range rules {
-		for _, error := range rule.Predicate(db) {
-			issue := rule.Issue
-			issue.Details = error.Error()
-			issues = append(issues, issue)
+		for _, err := range rule.Predicate(db) {
+			issues = append(issues, dto.IssueResponse{
+				Level:       string(rule.Issue.Level),
+				Summary:     rule.Issue.Summary,
+				Description: rule.Issue.Description,
+				Details:     err.Error(),
+			})
 		}
 	}
-	return gin.H{"issues": issues}
+	return dto.DiagnosisResponse{Issues: issues}
 }
 
 func ruleAssetRegisterNonNegative(db *gorm.DB) []error {

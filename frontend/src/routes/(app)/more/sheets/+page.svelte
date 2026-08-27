@@ -1,44 +1,45 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import FileModal from "$lib/components/ledger/FileModal.svelte";
-  import { ajax } from "$lib/core/utils";
-  import * as toast from "$lib/core/toast";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import Button from "$lib/components/ui/Button.svelte";
+import { api } from "$lib/api";
+import { goto } from "$app/navigation";
+import FileModal from "$lib/features/ledger/components/FileModal.svelte";
+import * as toast from "$lib/shared/ui/toast";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
 
-  let modalOpen = $state(false);
-  function openCreateModal() {
-    modalOpen = true;
-  }
+let modalOpen = $state(false);
+function openCreateModal() {
+  modalOpen = true;
+}
 
-  async function createFile(destinationFile: string) {
-    destinationFile = destinationFile.trim() + ".paisa";
-    const { saved, message } = await ajax("/api/sheets/save", {
-      method: "POST",
-      body: JSON.stringify({ name: destinationFile, content: "", operation: "create" }),
-      background: true
+async function createFile(destinationFile: string) {
+  destinationFile = destinationFile.trim() + ".paisa";
+  const { saved, message } = await api.sheets.saveSheetFile({
+    name: destinationFile,
+    content: "",
+  });
+
+  if (saved) {
+    toast.toast({
+      message: `Created <b><a href="/more/sheets/${
+        encodeURIComponent(
+          destinationFile,
+        )
+      }">${destinationFile}</a></b>`,
+      type: "is-success",
+      duration: 5000,
     });
 
-    if (saved) {
-      toast.toast({
-        message: `Created <b><a href="/more/sheets/${encodeURIComponent(
-          destinationFile
-        )}">${destinationFile}</a></b>`,
-        type: "is-success",
-        duration: 5000
-      });
-
-      await goto(`/more/sheets/${encodeURIComponent(destinationFile)}`);
-    } else {
-      toast.toast({
-        message: `Failed to create ${destinationFile}. reason: ${message}`,
-        type: "is-danger",
-        duration: 10000
-      });
-    }
+    await goto(`/more/sheets/${encodeURIComponent(destinationFile)}`);
+  } else {
+    toast.toast({
+      message: `Failed to create ${destinationFile}. reason: ${message}`,
+      type: "is-danger",
+      duration: 10000,
+    });
   }
+}
 </script>
 
 <FileModal
@@ -63,7 +64,8 @@
         {/snippet}
         Create
       </Button>
-      <p class="text-sm font-medium text-[var(--paisa-muted-foreground)]">Create your first sheet</p>
+      <p
+        class="text-sm font-medium text-[var(--paisa-muted-foreground)]">Create your first sheet</p>
     </div>
   </Section>
 </Page>

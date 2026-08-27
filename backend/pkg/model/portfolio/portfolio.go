@@ -19,8 +19,8 @@ type Portfolio struct {
 	Percentage        decimal.Decimal      `json:"percentage"`
 }
 
-func UpsertAll(db *gorm.DB, commodityType config.CommodityType, parentCommodityID string, portfolios []*Portfolio) {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func UpsertAll(db *gorm.DB, commodityType config.CommodityType, parentCommodityID string, portfolios []*Portfolio) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Delete(&Portfolio{}, "commodity_type = ? and parent_commodity_id = ?", commodityType, parentCommodityID).Error
 		if err != nil {
 			return err
@@ -34,9 +34,6 @@ func UpsertAll(db *gorm.DB, commodityType config.CommodityType, parentCommodityI
 
 		return nil
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func GetPortfolios(db *gorm.DB, parentCommodityID string) []Portfolio {
@@ -44,7 +41,8 @@ func GetPortfolios(db *gorm.DB, parentCommodityID string) []Portfolio {
 	result := db.Model(&Portfolio{}).Where("parent_commodity_id = ?", parentCommodityID).Find(&portfolios)
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return nil
 	}
 	return portfolios
 }
@@ -54,7 +52,8 @@ func GetAllParentCommodityIDs(db *gorm.DB) []string {
 	result := db.Model(&Portfolio{}).Distinct().Pluck("parent_commodity_id", &parentCommodityIDs)
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return nil
 	}
 	return parentCommodityIDs
 }

@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
+	"github.com/ananthakumaran/paisa/pkg/api/mapper"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
@@ -17,41 +19,19 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreditCardSummary struct {
-	Account        string                                `json:"account"`
-	Network        string                                `json:"network"`
-	Number         string                                `json:"number"`
-	Balance        decimal.Decimal                       `json:"balance"`
-	Bills          []CreditCardBill                      `json:"bills"`
-	CreditLimit    decimal.Decimal                       `json:"creditLimit"`
-	YearlySpends   map[string]map[string]decimal.Decimal `json:"yearlySpends"`
-	ExpirationDate time.Time                             `json:"expirationDate"`
-}
+type CreditCardSummary = mapper.DomainCreditCardSummary
+type CreditCardBill = mapper.DomainCreditCardBill
 
-type CreditCardBill struct {
-	StatementStartDate   time.Time       `json:"statementStartDate"`
-	StatementEndDate     time.Time       `json:"statementEndDate"`
-	DueDate              time.Time       `json:"dueDate"`
-	PaidDate             *time.Time      `json:"paidDate"`
-	Credits              decimal.Decimal `json:"credits"`
-	Debits               decimal.Decimal `json:"debits"`
-	DebitsRunningBalance decimal.Decimal
-	OpeningBalance       decimal.Decimal           `json:"openingBalance"`
-	ClosingBalance       decimal.Decimal           `json:"closingBalance"`
-	Postings             []posting.Posting         `json:"postings"`
-	Transactions         []transaction.Transaction `json:"transactions"`
-}
-
-func GetCreditCards(db *gorm.DB) gin.H {
+func GetCreditCards(db *gorm.DB) dto.CreditCardsResponse {
 	ccs := config.GetConfig().CreditCards
-	creditCards := make([]CreditCardSummary, 0, len(ccs))
+	creditCards := make([]mapper.DomainCreditCardSummary, 0, len(ccs))
 
 	for _, creditCardConfig := range ccs {
 		ps := query.Init(db).Where("account = ?", creditCardConfig.Account).All()
 		creditCards = append(creditCards, buildCreditCard(db, creditCardConfig, ps, false))
 	}
 
-	return gin.H{"creditCards": creditCards}
+	return dto.CreditCardsResponse{CreditCards: mapper.CreditCardSummariesToDTO(creditCards)}
 }
 
 func GetCreditCard(db *gorm.DB, account string) gin.H {
@@ -59,7 +39,7 @@ func GetCreditCard(db *gorm.DB, account string) gin.H {
 		if creditCardConfig.Account == account {
 			ps := query.Init(db).Where("account = ?", creditCardConfig.Account).All()
 			creditCard := buildCreditCard(db, creditCardConfig, ps, true)
-			return gin.H{"creditCard": creditCard, "found": true}
+			return gin.H{"creditCard": mapper.CreditCardSummaryToDTO(creditCard), "found": true}
 		}
 	}
 
@@ -88,9 +68,13 @@ func buildCreditCard(db *gorm.DB, creditCardConfig config.CreditCard, ps []posti
 		balance = bills[len(bills)-1].ClosingBalance
 	}
 
-	expirationDate, err := time.ParseInLocation("2006-01-02", creditCardConfig.ExpirationDate, config.TimeZone())
-	if err != nil {
-		log.Fatal(err)
+	var expirationDate time.Time
+	if creditCardConfig.ExpirationDate != "" {
+		var err error
+		expirationDate, err = time.ParseInLocation("2006-01-02", creditCardConfig.ExpirationDate, config.TimeZone())
+		if err != nil {
+			log.Warnf("Invalid expiration date for credit card %s: %v", creditCardConfig.Account, err)
+		}
 	}
 
 	ys := make(map[string]map[string]decimal.Decimal)
@@ -121,7 +105,8 @@ func computeBills(db *gorm.DB, creditCardConfig config.CreditCard, ps []posting.
 	for _, month := range utils.SortedKeys(grouped) {
 		statementEndDate, err := time.ParseInLocation("2006-01", month, config.TimeZone())
 		if err != nil {
-			log.Fatal(err)
+			log.Warnf("Invalid statement month %s: %v", month, err)
+			continue
 		}
 
 		statementEndDate = statementEndDate.AddDate(0, 0, creditCardConfig.StatementEndDay-1)

@@ -89,3 +89,7 @@ generate-fonts: ## Download SVGs and generate custom icon font
 
 normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
 	deno run -A scripts/normalize_fixture_json.ts
+
+api: ## Generate TypeScript API client and data contracts from Swagger specification
+	deno task api:generate
+

@@ -13,8 +13,8 @@ type CII struct {
 	CostInflationIndex uint   `json:"cost_inflation_index"`
 }
 
-func UpsertAll(db *gorm.DB, ciis []*CII) {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func UpsertAll(db *gorm.DB, ciis []*CII) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		err := tx.Exec("DELETE FROM ciis").Error
 		if err != nil {
 			return err
@@ -28,9 +28,6 @@ func UpsertAll(db *gorm.DB, ciis []*CII) {
 
 		return nil
 	})
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func GetIndex(db *gorm.DB, financialYear string) uint {
@@ -42,7 +39,8 @@ func GetIndex(db *gorm.DB, financialYear string) uint {
 	}
 
 	if result.Error != nil {
-		log.Fatal(result.Error)
+		log.Error(result.Error)
+		return 100
 	}
 	return cii.CostInflationIndex
 }

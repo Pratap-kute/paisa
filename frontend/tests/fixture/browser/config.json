@@ -1,22 +1,23 @@
 {
   "accounts": [
-    "Income:Salary:Acme",
     "Assets:Checking",
-    "Assets:House",
-    "Liabilities:HomeLoan",
-    "Expenses:Rent",
-    "Expenses:Food",
-    "Liabilities:CreditCard:Freedom",
-    "Assets:Equity:NIFTY",
-    "Assets:Equity:ABNB",
-    "Assets:Equity:AAPL",
-    "Income:CapitalGains:Equity:AAPL",
-    "Expenses:Charges",
     "Assets:Dollar",
-    "Income:Interest:Checking",
+    "Assets:Equity:AAPL",
+    "Assets:Equity:ABNB",
+    "Assets:Equity:NIFTY",
+    "Assets:House",
+    "Equity:OpeningBalances",
+    "Expenses:Charges",
+    "Expenses:Food",
     "Expenses:Interest:HomeLoan",
+    "Expenses:Rent",
     "Expenses:Shopping",
-    "Expenses:Utilities"
+    "Expenses:Utilities",
+    "Income:CapitalGains:Equity:AAPL",
+    "Income:Interest:Checking",
+    "Income:Salary:Acme",
+    "Liabilities:CreditCard:Freedom",
+    "Liabilities:HomeLoan"
   ],
   "config": {
     "journal_path": "main.ledger",
@@ -1385,7 +1386,6 @@
           "properties": {
             "password": {
               "description": "Password for the account",
-              "pattern": "^sha256:[A-Fa-f0-9]{64}$",
               "type": "string",
               "ui:order": 2,
               "ui:widget": "password"
@@ -1399,8 +1399,7 @@
             }
           },
           "required": [
-            "username",
-            "password"
+            "username"
           ],
           "type": "object",
           "ui:header": "username"

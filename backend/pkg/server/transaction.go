@@ -4,37 +4,37 @@ import (
 	"sort"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
+	"github.com/ananthakumaran/paisa/pkg/api/mapper"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
 	"github.com/ananthakumaran/paisa/pkg/query"
-	"github.com/gin-gonic/gin"
-
 	"gorm.io/gorm"
 )
 
-func GetTransactions(db *gorm.DB) gin.H {
+func GetTransactions(db *gorm.DB) dto.TransactionsResponse {
 	postings := query.Init(db).Desc().All()
 	transactions := transaction.Build(postings)
 
 	sort.Slice(transactions, func(i, j int) bool { return transactions[i].ID > transactions[j].ID })
 	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Date.After(transactions[j].Date) })
 
-	return gin.H{"transactions": transactions}
+	return dto.TransactionsResponse{Transactions: mapper.TransactionsToDTO(transactions)}
 }
 
-func GetBalancedPostings(db *gorm.DB) gin.H {
+func GetBalancedPostings(db *gorm.DB) dto.BalancedPostingsResponse {
 	postings := query.Init(db).Desc().All()
 	transactions := transaction.Build(postings)
 	balancePostings := accounting.BuildBalancedPostings(transactions)
 
-	return gin.H{"balancedPostings": balancePostings}
+	return dto.BalancedPostingsResponse{BalancedPostings: mapper.BalancedPostingsToDTO(balancePostings)}
 }
 
-func GetLatestTransactions(db *gorm.DB) []transaction.Transaction {
+func GetLatestTransactions(db *gorm.DB) []dto.TransactionResponse {
 	postings := query.Init(db).Desc().Limit(200).All()
 	transactions := transaction.Build(postings)
 
 	sort.Slice(transactions, func(i, j int) bool { return transactions[i].ID > transactions[j].ID })
 	sort.SliceStable(transactions, func(i, j int) bool { return transactions[i].Date.After(transactions[j].Date) })
 
-	return transactions
+	return mapper.TransactionsToDTO(transactions)
 }

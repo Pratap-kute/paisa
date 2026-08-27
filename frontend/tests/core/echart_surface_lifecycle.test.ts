@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createEChartSurfaceController } from "$lib/charts/echarts/surface_lifecycle";
+import { createEChartSurfaceController } from "$lib/shared/charts/echarts/surface_lifecycle";
 
 function createFrameScheduler() {
   let nextId = 0;

@@ -1,185 +1,205 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { sumBy, uniq } from "es-toolkit";
-  import dayjs from "dayjs";
-  import {
-    ajax,
-    firstName,
-    type Posting,
-    formatCurrency,
-    formatPercentage,
-    type Legend,
-    postingUrl,
-    restName,
-  } from "$lib/core/utils";
-  import { buildMonthlyExpenseTimelineSeries, categoryColor, categoryColorResolver, categoryLegends } from "$lib/charts/mixed_period_data";
-  import { buildMonthlyExpenseHeatmapData } from "$lib/charts/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/charts/bar_comparison_data";
-  import { expenseGroup } from "$lib/charts/expense";
-  import { iconify } from "$lib/core/icon";
-  import { dateRange, month, dateMin, dateMax, setAllowedDateRange } from "../../../../store";
-  import { writable } from "svelte/store";
-  import LegendCard from "$lib/components/ui/LegendCard.svelte";
-  import Page from "$lib/components/layout/Page.svelte";
-  import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import Section from "$lib/components/layout/Section.svelte";
-  import MetricStrip from "$lib/components/layout/MetricStrip.svelte";
-  import Metric from "$lib/components/layout/Metric.svelte";
-  import ResponsiveGrid from "$lib/components/layout/ResponsiveGrid.svelte";
-  import ChartFrame from "$lib/components/ui/ChartFrame.svelte";
-  import MonthPicker from "$lib/components/ui/MonthPicker.svelte";
-  import IncomeContextStrip from "$lib/components/layout/IncomeContextStrip.svelte";
-  import Badge from "$lib/components/ui/Badge.svelte";
-  import ZeroState from "$lib/components/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/components/charts/ComparisonBarChart.svelte";
-  import DailyExpenseCalendar from "$lib/components/charts/DailyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/components/charts/TimeSeriesChart.svelte";
-import { isEmpty, map, sortBy } from "$lib/core/collection";
+import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatPercentage } from "$lib/shared/formatters/currency";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { restName } from "$lib/domain/account";
+import type { Posting } from "$lib/domain/ledger";
+import type { Legend } from "$lib/shared/charts/types";
+import { onMount } from "svelte";
+import { sumBy, uniq } from "es-toolkit";
+import dayjs from "dayjs";
+import { firstName } from "$lib/domain/account";
+import { api } from "$lib/api";
+import { buildMonthlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+import {
+  categoryColor,
+  categoryColorResolver,
+  categoryLegends,
+} from "$lib/shared/charts/category";
+import { buildMonthlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
+import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
+import { expenseGroup } from "$lib/features/expense/expense";
+import { iconify } from "$lib/shared/ui/icon";
+import {
+  dateMax,
+  dateMin,
+  dateRange,
+  month,
+  setAllowedDateRange,
+} from "../../../../store";
+import { writable } from "svelte/store";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import Section from "$lib/shared/layout/Section.svelte";
+import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+import Metric from "$lib/shared/layout/Metric.svelte";
+import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
+import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
+import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
 
-  let groups = writable<string[]>([]);
-  let expenses: Posting[] | undefined = $state(),
-    grouped_expenses: Record<string, Posting[]> | undefined = $state(),
-    grouped_incomes: Record<string, Posting[]> | undefined = $state(),
-    grouped_investments: Record<string, Posting[]> | undefined = $state(),
-    grouped_taxes: Record<string, Posting[]> | undefined = $state();
+let groups = writable<string[]>([]);
+let expenses: Posting[] | undefined = $state(),
+  grouped_expenses: Record<string, Posting[]> | undefined = $state(),
+  grouped_incomes: Record<string, Posting[]> | undefined = $state(),
+  grouped_investments: Record<string, Posting[]> | undefined = $state(),
+  grouped_taxes: Record<string, Posting[]> | undefined = $state();
 
-  let legends: Legend[] = $state([]);
-  let expenseColor = $state(categoryColor);
-  let isLoading = $state(true);
+let legends: Legend[] = $state([]);
+let expenseColor = $state(categoryColor);
+let isLoading = $state(true);
 
-  let taxRate = $state(""),
-    netIncome = $state(""),
-    tax = $state(""),
-    expenseRate = $state(""),
-    expenseRateValue = $state(""),
-    expense = $state(""),
-    saving = $state(""),
-    savingRate = $state(""),
-    income = $state("");
+let taxRate = $state(""),
+  netIncome = $state(""),
+  tax = $state(""),
+  expenseRate = $state(""),
+  expenseRateValue = $state(""),
+  expense = $state(""),
+  saving = $state(""),
+  savingRate = $state(""),
+  income = $state("");
 
-  onMount(async () => {
-    try {
-      ({
-        expenses: expenses,
-        month_wise: {
-          expenses: grouped_expenses,
-          incomes: grouped_incomes,
-          investments: grouped_investments,
-          taxes: grouped_taxes,
-        },
-      } = await ajax("/api/expense"));
+onMount(async () => {
+  try {
+    const res = await api.expense.getExpense();
+    expenses = res.expenses as unknown as Posting[];
+    grouped_expenses = res.month_wise?.expenses as unknown as Record<
+      string,
+      Posting[]
+    >;
+    grouped_incomes = res.month_wise?.incomes as unknown as Record<
+      string,
+      Posting[]
+    >;
+    grouped_investments = res.month_wise?.investments as unknown as Record<
+      string,
+      Posting[]
+    >;
+    grouped_taxes = res.month_wise?.taxes as unknown as Record<
+      string,
+      Posting[]
+    >;
 
-      setAllowedDateRange(map(expenses, (e: Posting) => e.date));
-      const allGroups = uniq(expenses.map(expenseGroup)).sort();
-      expenseColor = categoryColorResolver(allGroups);
-      groups.set(allGroups);
-      legends = categoryLegends(allGroups, (group) => {
-        groups.update((selected) => selected.length === 1 && selected[0] === group ? allGroups : [group]);
-      });
-    } finally {
-      isLoading = false;
-    }
-  });
-
-  function sum(postings: Posting[], sign = 1) {
-    return sign * sumBy(postings, (p: Posting) => p.amount);
+    setAllowedDateRange(map(expenses, (e: Posting) => e.date));
+    const allGroups = uniq(expenses.map(expenseGroup)).sort();
+    expenseColor = categoryColorResolver(allGroups);
+    groups.set(allGroups);
+    legends = categoryLegends(allGroups, (group) => {
+      groups.update((selected) =>
+        selected.length === 1 && selected[0] === group ? allGroups : [group]
+      );
+    });
+  } finally {
+    isLoading = false;
   }
+});
 
-  function sumCurrency(postings: Posting[], sign = 1) {
-    return formatCurrency(sign * sumBy(postings, (p: Posting) => p.amount));
-  }
+function sum(postings: Posting[], sign = 1) {
+  return sign * sumBy(postings, (p: Posting) => p.amount);
+}
 
-  let current_month_expenses: Posting[] = $derived(
-    sortBy(
-      ((grouped_expenses && grouped_expenses[$month]) || []).filter(
-        (e: Posting) => isEmpty($groups) || $groups.includes(expenseGroup(e)),
-      ),
-      (e: Posting) => e.date,
-    ).reverse(),
-  );
-  let selectedMonthExpenses: Posting[] = $derived(
-    grouped_expenses?.[$month] || [],
-  );
-  let selectedMonthHeatmapData = $derived(
-    buildMonthlyExpenseHeatmapData($month, selectedMonthExpenses, $groups),
-  );
-  let selectedMonthBreakdownData = $derived(
-    buildExpenseBreakdownComparison(selectedMonthExpenses),
-  );
-  let expenseTimelineData = $derived(buildMonthlyExpenseTimelineSeries(expenses ?? [], $groups, $dateRange));
-  let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
-  let hasExpenses = $derived((expenses?.length ?? 0) > 0);
-  let hasTrendInRange = $derived(
-    (expenses ?? []).some(
-      (e) =>
-        e.date.isSameOrAfter($dateRange.from) &&
-        e.date.isSameOrBefore($dateRange.to),
+function sumCurrency(postings: Posting[], sign = 1) {
+  return formatCurrency(sign * sumBy(postings, (p: Posting) => p.amount));
+}
+
+let current_month_expenses: Posting[] = $derived(
+  sortBy(
+    ((grouped_expenses && grouped_expenses[$month]) || []).filter(
+      (e: Posting) => isEmpty($groups) || $groups.includes(expenseGroup(e)),
     ),
-  );
-  let formattedCurrentMonth = $derived(dayjs($month, "YYYY-MM").format("MMMM YYYY"));
-  let postingCountSubtitle = $derived(
-    hasSelectedMonthExpenses
-      ? `${selectedMonthExpenses.length} postings in ${formattedCurrentMonth}`
-      : "No expenses recorded",
-  );
-  let recentExpensesSubtitle = $derived.by(() => {
-    if (!hasSelectedMonthExpenses) return undefined;
-    if (
-      current_month_expenses.length !== selectedMonthExpenses.length &&
-      $groups.length > 0
-    ) {
-      return `${current_month_expenses.length} of ${selectedMonthExpenses.length} postings for ${formattedCurrentMonth}`;
+    (e: Posting) => e.date,
+  ).reverse(),
+);
+let selectedMonthExpenses: Posting[] = $derived(
+  grouped_expenses?.[$month] || [],
+);
+let selectedMonthHeatmapData = $derived(
+  buildMonthlyExpenseHeatmapData($month, selectedMonthExpenses, $groups),
+);
+let selectedMonthBreakdownData = $derived(
+  buildExpenseBreakdownComparison(selectedMonthExpenses),
+);
+let expenseTimelineData = $derived(
+  buildMonthlyExpenseTimelineSeries(expenses ?? [], $groups, $dateRange),
+);
+let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
+let hasExpenses = $derived((expenses?.length ?? 0) > 0);
+let hasTrendInRange = $derived(
+  (expenses ?? []).some(
+    (e) =>
+      e.date.isSameOrAfter($dateRange.from) &&
+      e.date.isSameOrBefore($dateRange.to),
+  ),
+);
+let formattedCurrentMonth = $derived(
+  dayjs($month, "YYYY-MM").format("MMMM YYYY"),
+);
+let postingCountSubtitle = $derived(
+  hasSelectedMonthExpenses
+    ? `${selectedMonthExpenses.length} postings in ${formattedCurrentMonth}`
+    : "No expenses recorded",
+);
+let recentExpensesSubtitle = $derived.by(() => {
+  if (!hasSelectedMonthExpenses) return undefined;
+  if (
+    current_month_expenses.length !== selectedMonthExpenses.length &&
+    $groups.length > 0
+  ) {
+    return `${current_month_expenses.length} of ${selectedMonthExpenses.length} postings for ${formattedCurrentMonth}`;
+  }
+  return `${current_month_expenses.length} postings for ${formattedCurrentMonth}`;
+});
+let recentExpensesEmptyMessage = $derived(
+  hasSelectedMonthExpenses && $groups.length > 0
+    ? `No postings in the selected categories for ${formattedCurrentMonth}.`
+    : `No expenses recorded for ${formattedCurrentMonth}.`,
+);
+
+$effect(() => {
+  if (grouped_expenses) {
+    const expenses = grouped_expenses[$month] || [];
+    const incomes = grouped_incomes?.[$month] || [];
+    const taxes = grouped_taxes?.[$month] || [];
+    const investments = grouped_investments?.[$month] || [];
+
+    income = sumCurrency(incomes, -1);
+    tax = sumCurrency(taxes);
+    expense = sumCurrency(expenses);
+    saving = sumCurrency(investments);
+
+    if (isEmpty(incomes)) {
+      taxRate = "";
+      expenseRate = "";
+      expenseRateValue = "";
+      savingRate = "";
+      netIncome = "";
+    } else {
+      const grossIncome = sum(incomes, -1);
+      const netIncomeAmount = grossIncome - sum(taxes);
+      netIncome = formatCurrency(netIncomeAmount) + " net income";
+      taxRate = grossIncome === 0
+        ? ""
+        : formatPercentage(sum(taxes) / grossIncome) + " on income";
+      expenseRateValue = netIncomeAmount === 0
+        ? ""
+        : formatPercentage(sum(expenses) / netIncomeAmount);
+      expenseRate = netIncomeAmount === 0
+        ? ""
+        : expenseRateValue + " of net income";
+      savingRate = netIncomeAmount === 0
+        ? ""
+        : formatPercentage(sum(investments) / netIncomeAmount) +
+          " of net income";
     }
-    return `${current_month_expenses.length} postings for ${formattedCurrentMonth}`;
-  });
-  let recentExpensesEmptyMessage = $derived(
-    hasSelectedMonthExpenses && $groups.length > 0
-      ? `No postings in the selected categories for ${formattedCurrentMonth}.`
-      : `No expenses recorded for ${formattedCurrentMonth}.`,
-  );
-
-  $effect(() => {
-    if (grouped_expenses) {
-      const expenses = grouped_expenses[$month] || [];
-      const incomes = grouped_incomes?.[$month] || [];
-      const taxes = grouped_taxes?.[$month] || [];
-      const investments = grouped_investments?.[$month] || [];
-
-      income = sumCurrency(incomes, -1);
-      tax = sumCurrency(taxes);
-      expense = sumCurrency(expenses);
-      saving = sumCurrency(investments);
-
-      if (isEmpty(incomes)) {
-        taxRate = "";
-        expenseRate = "";
-        expenseRateValue = "";
-        savingRate = "";
-        netIncome = "";
-      } else {
-        const grossIncome = sum(incomes, -1);
-        const netIncomeAmount = grossIncome - sum(taxes);
-        netIncome = formatCurrency(netIncomeAmount) + " net income";
-        taxRate =
-          grossIncome === 0
-            ? ""
-            : formatPercentage(sum(taxes) / grossIncome) + " on income";
-        expenseRateValue =
-          netIncomeAmount === 0
-            ? ""
-            : formatPercentage(sum(expenses) / netIncomeAmount);
-        expenseRate =
-          netIncomeAmount === 0
-            ? ""
-            : expenseRateValue + " of net income";
-        savingRate =
-          netIncomeAmount === 0
-            ? ""
-            : formatPercentage(sum(investments) / netIncomeAmount) +
-              " of net income";
-      }
-    }
-  });
+  }
+});
 </script>
 
 <svelte:head>

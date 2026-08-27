@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   buildCashFlowHierarchy,
   buildCashFlowHierarchyData,
-} from "$lib/charts/cash_flow_hierarchy";
-import type { Graph } from "$lib/core/utils";
+} from "$lib/features/cash_flow/cash_flow_hierarchy";
+import type { Graph } from "$lib/shared/charts/types";
 import browserExpense from "../fixture/browser/expense.json" with {
   type: "json",
 };

@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import { describe, expect, it } from "vitest";
-import { buildIncomeStatementWaterfall } from "$lib/charts/income_statement_data";
+import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
 import {
   buildIncomeStatementWaterfallOption,
   incomeStatementAxisRange,
-} from "$lib/charts/echarts/waterfall";
-import type { IncomeStatement } from "$lib/core/utils";
+} from "$lib/shared/charts/echarts/waterfall";
+import type { IncomeStatement } from "$lib/domain/cash_flow";
 
 describe("income statement waterfall adapter", () => {
   it("preserves ordered start, delta, end, and breakdown values", () => {
@@ -82,13 +82,13 @@ describe("income statement waterfall adapter", () => {
     expect(range.max).toBeGreaterThanOrEqual(
       Math.max(...data.steps.map((step) => step.end)),
     );
-    expect(option.baseOption.yAxis).toMatchObject({
+    expect(option.yAxis).toMatchObject({
       min: range.min,
       max: range.max,
       scale: true,
     });
-    expect(option.baseOption.series[1].data[1].value).toBe(1_748_750);
-    expect(option.baseOption.series[1].data[2].value).toBe(524_625);
+    expect(option.series[1].data[1].value).toBe(1_748_750);
+    expect(option.series[1].data[2].value).toBe(524_625);
   });
 
   it("provides a finite axis for empty chart data", () => {

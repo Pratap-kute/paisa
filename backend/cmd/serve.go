@@ -20,14 +20,15 @@ var serveCmd = &cobra.Command{
 	Short: "serve the WEB UI",
 	Run: func(cmd *cobra.Command, args []string) {
 		db, err := utils.OpenDB()
-		model.AutoMigrate(db)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if err := model.AutoMigrate(db); err != nil {
+			log.Fatal(err)
+		}
 
 		if os.Getenv("PAISA_DEBUG") == "true" {
 			db = db.Debug()
-		}
-
-		if err != nil {
-			log.Fatal(err)
 		}
 		server.Listen(db, host, port)
 	},

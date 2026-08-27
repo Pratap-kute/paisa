@@ -63,7 +63,7 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 		"type":            "retirement",
 		"name":            conf.Name,
 		"icon":            conf.Icon,
-		"savingsTimeline": accounting.RunningBalance(db, savings),
+		"savingsTimeline": service.RunningBalance(db, savings),
 		"savingsTotal":    savingsTotal,
 		"investmentTotal": investmentTotal,
 		"gainTotal":       gainsTotal,

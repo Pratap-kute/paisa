@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { commitParseOutcome, displayCell } from "$lib/importing/import_commit";
+import {
+  commitParseOutcome,
+  displayCell,
+} from "$lib/features/importing/import_commit";
 
 describe("displayCell", () => {
   it("keeps zero and empty string instead of collapsing them", () => {

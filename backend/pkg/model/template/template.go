@@ -31,7 +31,8 @@ type Template struct {
 func All() []Template {
 	dirEntries, err := BuiltinTemplates.ReadDir("templates")
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return nil
 	}
 
 	importTemplates := config.GetConfig().ImportTemplates
@@ -45,7 +46,8 @@ func All() []Template {
 		name := f.Name()
 		content, err := BuiltinTemplates.ReadFile(fmt.Sprintf("templates/%s", name))
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			continue
 		}
 
 		name = strings.TrimSuffix(name, filepath.Ext(name))
@@ -56,25 +58,25 @@ func All() []Template {
 	return templates
 }
 
-func Upsert(name string, content string) Template {
+func Upsert(name string, content string) (Template, error) {
 	template := Template{ID: buildID(name, Custom), Name: name, Content: content, TemplateType: Custom}
 
 	if config.GetConfig().Readonly {
-		return template
+		return template, nil
 	}
 
-	Delete(name)
+	_ = Delete(name)
 	cfg := config.GetConfig()
 	cfg.ImportTemplates = append(cfg.ImportTemplates, config.ImportTemplate{Name: name, Content: content})
 	err := config.SaveConfigObject(cfg)
 	if err != nil {
-		log.Fatal(err)
+		return template, err
 	}
 
-	return template
+	return template, nil
 }
 
-func Delete(name string) {
+func Delete(name string) error {
 	cfg := config.GetConfig()
 	cfg.ImportTemplates = lo.Filter(cfg.ImportTemplates, func(t config.ImportTemplate, _ int) bool {
 		return t.Name != name
@@ -82,8 +84,9 @@ func Delete(name string) {
 
 	err := config.SaveConfigObject(cfg)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
 func buildID(name string, templateType TemplateType) string {
