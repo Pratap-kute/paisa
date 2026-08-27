@@ -319,14 +319,27 @@ describe("self-reinforcement and overrides", () => {
       },
     ];
 
-    for (const merchant of ["supermarket central", "FRESH MART", "Corner Grocery", "quick commerce"]) {
+    for (
+      const merchant of [
+        "supermarket central",
+        "FRESH MART",
+        "Corner Grocery",
+        "quick commerce",
+      ]
+    ) {
       const res = predict(input(merchant), { merchantRules: rules }, index);
       expect(res.account).toBe("Expenses:Groceries");
       expect(res.source).toBe("RULE");
       expect(res.confidence).toBe("HIGH");
     }
 
-    for (const merchant of ["green farm market", "City Produce", "Fresh Vegetables"]) {
+    for (
+      const merchant of [
+        "green farm market",
+        "City Produce",
+        "Fresh Vegetables",
+      ]
+    ) {
       const res = predict(input(merchant), { merchantRules: rules }, index);
       expect(res.account).toBe("Expenses:Groceries:Vegetable");
       expect(res.source).toBe("RULE");
@@ -347,21 +360,34 @@ describe("self-reinforcement and overrides", () => {
       },
     ];
 
-    const uberRes = predict(input("UPI/TRANSIT EXPRESS/123456"), { merchantRules: rules }, index);
+    const uberRes = predict(input("UPI/TRANSIT EXPRESS/123456"), {
+      merchantRules: rules,
+    }, index);
     expect(uberRes.account).toBe("Expenses:Transport");
     expect(uberRes.source).toBe("RULE");
 
-    const blinkitRes = predict(input("Supermarket Central"), { merchantRules: rules }, index);
+    const blinkitRes = predict(input("Supermarket Central"), {
+      merchantRules: rules,
+    }, index);
     expect(blinkitRes.account).toBe("Expenses:Groceries");
     expect(blinkitRes.source).toBe("RULE");
 
-    const kanhaRes = predict(input("Corner Grocery"), { merchantRules: rules }, index);
+    const kanhaRes = predict(
+      input("Corner Grocery"),
+      { merchantRules: rules },
+      index,
+    );
     expect(kanhaRes.account).toBe("Expenses:Groceries");
     expect(kanhaRes.source).toBe("RULE");
   });
 
   it("is behaviorally equivalent between 1 grouped rule and N singular rules", () => {
-    const merchants = ["supermarket central", "fresh mart", "corner grocery", "quick commerce"];
+    const merchants = [
+      "supermarket central",
+      "fresh mart",
+      "corner grocery",
+      "quick commerce",
+    ];
     const groupedRules = [
       {
         account: "Expenses:Groceries",
@@ -375,8 +401,16 @@ describe("self-reinforcement and overrides", () => {
 
     const index = buildIndex([]);
     for (const m of merchants) {
-      const groupedResult = predict(input(m), { merchantRules: groupedRules }, index);
-      const singularResult = predict(input(m), { merchantRules: singularRules }, index);
+      const groupedResult = predict(
+        input(m),
+        { merchantRules: groupedRules },
+        index,
+      );
+      const singularResult = predict(
+        input(m),
+        { merchantRules: singularRules },
+        index,
+      );
 
       expect(groupedResult.account).toBe(singularResult.account);
       expect(groupedResult.score).toBe(singularResult.score);
@@ -388,10 +422,12 @@ describe("self-reinforcement and overrides", () => {
 
   it("falls back to history / prediction index when merchant does not match any rule", () => {
     const index = buildIndex(
-      Array.from({ length: 6 }, (_, i) =>
-        hist("Coffee Roasters", "Expenses:Dining", {
-          date: `2024-01-0${i + 1}`,
-        }),
+      Array.from(
+        { length: 6 },
+        (_, i) =>
+          hist("Coffee Roasters", "Expenses:Dining", {
+            date: `2024-01-0${i + 1}`,
+          }),
       ),
     );
     const rules = [
@@ -401,9 +437,12 @@ describe("self-reinforcement and overrides", () => {
       },
     ];
 
-    const res = predict(input("COFFEE ROASTERS"), { merchantRules: rules }, index);
+    const res = predict(
+      input("COFFEE ROASTERS"),
+      { merchantRules: rules },
+      index,
+    );
     expect(res.account).toBe("Expenses:Dining");
     expect(res.source).toBe("HISTORY");
   });
 });
-
