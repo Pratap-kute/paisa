@@ -194,8 +194,9 @@ func postingSourceLess(a, b posting.Posting) bool {
 // between ledger CLIs.
 func stabilizeEquivalentPostings(postings []posting.Posting) {
 	groups := make(map[equivalentPostingKey][]int)
-	for i, p := range postings {
-		groups[equivalentKey(p)] = append(groups[equivalentKey(p)], i)
+	for i := range postings {
+		key := equivalentKey(postings[i])
+		groups[key] = append(groups[key], i)
 	}
 	for _, indices := range groups {
 		if len(indices) < 2 {
@@ -216,8 +217,9 @@ func stabilizeEquivalentPostings(postings []posting.Posting) {
 
 func stabilizeEquivalentBalances(postings []posting.Posting) {
 	groups := make(map[equivalentPostingKey][]int)
-	for i, p := range postings {
-		groups[equivalentKey(p)] = append(groups[equivalentKey(p)], i)
+	for i := range postings {
+		key := equivalentKey(postings[i])
+		groups[key] = append(groups[key], i)
 	}
 	for _, indices := range groups {
 		if len(indices) < 2 {
