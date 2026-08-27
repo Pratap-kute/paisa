@@ -3011,6 +3011,11 @@
 </ul>
 <h4 id="reliability-and-data-integrity">Reliability and data integrity<a class="headerlink" href="#reliability-and-data-integrity" title="Permanent link">&para;</a></h4>
 <ul>
+<li><strong>Automatic database upgrades:</strong> Replaced runtime <code>AutoMigrate</code> calls with
+  serialized, checksummed SQLite migrations. Existing v0.9.0 and v0.9.1
+  databases are adopted without rebuilding or changing financial data, while
+  incompatible newer schemas and read-only storage now produce actionable
+  startup errors.</li>
 <li><strong>Atomic configuration writes:</strong> Configuration updates now use atomic file
   replacement and return actionable errors instead of terminating the process.</li>
 <li><strong>Graceful backend errors:</strong> Removed fatal exits from persistence and domain
