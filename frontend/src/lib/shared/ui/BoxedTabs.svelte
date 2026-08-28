@@ -2,9 +2,10 @@
 interface Props {
   options: { label: string; value: any }[];
   value: any;
+  mobileGrid?: boolean;
 }
 
-let { options, value = $bindable() }: Props = $props();
+let { options, value = $bindable(), mobileGrid = false }: Props = $props();
 
 $effect(() => {
   if (
@@ -16,7 +17,10 @@ $effect(() => {
 });
 </script>
 
-<div class="paisa-boxed-tabs" role="group">
+<div
+  class="paisa-boxed-tabs {mobileGrid ? 'paisa-boxed-tabs-mobile-grid' : ''}"
+  role="group"
+>
   {#each options as option}
     <button
       type="button"
@@ -32,6 +36,7 @@ $effect(() => {
 <style>
 .paisa-boxed-tabs {
   display: inline-flex;
+  min-width: max-content;
   padding: 0.25rem;
   border-radius: var(--paisa-radius-sm, 4px);
   background-color: var(--paisa-surface-hover);
@@ -39,6 +44,7 @@ $effect(() => {
 
 .paisa-boxed-tab {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   height: 1.5rem;
@@ -53,6 +59,7 @@ $effect(() => {
   cursor: pointer;
   font-family: inherit;
   line-height: normal;
+  white-space: nowrap;
   transition:
     background-color 150ms ease,
     color 150ms ease,
@@ -68,5 +75,20 @@ $effect(() => {
   background-color: var(--paisa-surface);
   color: var(--paisa-foreground);
   box-shadow: var(--paisa-shadow-sm);
+}
+
+@media (max-width: 639px) {
+  .paisa-boxed-tabs-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+    gap: 0.125rem;
+  }
+
+  .paisa-boxed-tabs-mobile-grid .paisa-boxed-tab {
+    min-width: 0;
+    padding: 0 0.375rem;
+  }
 }
 </style>

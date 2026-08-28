@@ -44,6 +44,7 @@ import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
 import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
+import { get } from "svelte/store";
 import { page } from "$app/state";
 import { validPeriod } from "$lib/shared/browser/period";
 
@@ -68,9 +69,16 @@ let taxRate = $state(""),
   savingRate = $state(""),
   income = $state("");
 
+let requestedPeriod = $derived(
+  validPeriod(page.url.searchParams.get("period")),
+);
+const fallbackMonth = get(month);
+
+$effect(() => {
+  month.set(requestedPeriod ?? fallbackMonth);
+});
+
 onMount(async () => {
-  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
-  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.expense.getExpense();
     expenses = res.expenses as unknown as Posting[];

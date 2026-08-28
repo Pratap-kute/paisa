@@ -18,12 +18,15 @@ import Metric from "$lib/shared/layout/Metric.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 import { page } from "$app/state";
 import { isHistoricalPeriod, validPeriod } from "$lib/shared/browser/period";
+import { get } from "svelte/store";
 
 const monthStart = now().startOf("month");
-const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
-const historicalPeriod = isHistoricalPeriod(
-  requestedPeriod,
-  now().format("YYYY-MM"),
+const fallbackMonth = get(month);
+let requestedPeriod = $derived(
+  validPeriod(page.url.searchParams.get("period")),
+);
+let historicalPeriod = $derived(
+  isHistoricalPeriod(requestedPeriod, now().format("YYYY-MM")),
 );
 let budgetsByMonth: Record<string, Budget> = $state({});
 let checkingBalance = $state(0),
@@ -65,7 +68,6 @@ function budgetProgress(accountBudget: AccountBudget): number {
 }
 
 onMount(async () => {
-  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.budget.getBudget();
     budgetsByMonth =
@@ -84,6 +86,10 @@ onMount(async () => {
   } finally {
     isLoading = false;
   }
+});
+
+$effect(() => {
+  month.set(requestedPeriod ?? fallbackMonth);
 });
 </script>
 

@@ -11,6 +11,10 @@ test("investment drilldown focuses the requested historical month", async ({ pag
       "[data-testid='investment-monthly-echart'][data-chart-ready='true']",
     ),
   ).toBeVisible();
+
+  await page.goto("/assets/investment");
+  await expect(page.getByText("Latest FY Investment", { exact: true }))
+    .toBeVisible();
 });
 
 test("historical budget drilldown hides live-only metrics", async ({ page }) => {
@@ -37,4 +41,18 @@ test("insights month picker preserves URL state and browser history", async ({ p
   await expect(page).toHaveURL(/\/insights\?period=2022-01$/);
   await expect(page.getByRole("button", { name: "Select month and year" }))
     .toContainText("Jan 2022");
+});
+
+test("insights exposes its month picker on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/insights?period=2022-01");
+  await expect(page.getByRole("button", { name: "Select month and year" }))
+    .toBeVisible();
+});
+
+test("net-worth period reacts to query-only navigation", async ({ page }) => {
+  await page.goto("/assets/networth?period=2022-01");
+  await expect(page.getByText("Showing January 2022")).toBeVisible();
+  await page.goto("/assets/networth?period=2022-02");
+  await expect(page.getByText("Showing February 2022")).toBeVisible();
 });

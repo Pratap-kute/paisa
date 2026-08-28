@@ -1,7 +1,6 @@
 <script lang="ts">
 import LegendCard from "$lib/shared/ui/LegendCard.svelte";
 import type { InvestmentYearlyCard as InvestmentYearlyCardType } from "$lib/domain/assets";
-import type { Legend } from "$lib/shared/charts/types";
 import type { Posting } from "$lib/domain/ledger";
 import {
   buildMonthlyInvestmentSeries,
@@ -27,16 +26,14 @@ import { page } from "$app/state";
 import { isInPeriod, validPeriod } from "$lib/shared/browser/period";
 import dayjs from "dayjs";
 
-let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
-let yearlyInvestmentTimelineLegends: Legend[] = $state([]);
 let yearlyCards: InvestmentYearlyCardType[] = $state([]);
 let postings: Posting[] = $state([]);
 let isLoading = $state(true);
-let hasData = $state(false);
-let totalInvested = $state(0);
 let latestFyInvestment = $state("");
 let latestFyLabel = $state("");
-const selectedPeriod = validPeriod(page.url.searchParams.get("period"));
+let selectedPeriod = $derived(
+  validPeriod(page.url.searchParams.get("period")),
+);
 
 let displayedPostings = $derived(
   selectedPeriod
@@ -47,6 +44,22 @@ let displayedPostings = $derived(
 let sortedYearlyCards = $derived(
   orderBy(yearlyCards, [(c) => c.start_date.valueOf()], ["desc"]),
 );
+let totalInvested = $derived(
+  selectedPeriod
+    ? sumBy(displayedPostings, (posting) => posting.amount)
+    : sumBy(yearlyCards, (card) => card.net_investment),
+);
+let hasData = $derived(
+  selectedPeriod
+    ? !isEmpty(displayedPostings)
+    : !isEmpty(postings) || !isEmpty(yearlyCards),
+);
+let monthlyInvestmentTimelineLegends = $derived(
+  buildMonthlyInvestmentSeries(displayedPostings).legends ?? [],
+);
+let yearlyInvestmentTimelineLegends = $derived(
+  buildYearlyInvestmentSeries(yearlyCards).legends ?? [],
+);
 
 onMount(async () => {
   try {
@@ -55,9 +68,6 @@ onMount(async () => {
       [];
     postings = (res.assets as unknown as Posting[]) || [];
 
-    totalInvested = selectedPeriod
-      ? sumBy(displayedPostings, (posting) => posting.amount)
-      : sumBy(yearlyCards, (c) => c.net_investment);
     const latest = sortedYearlyCards[0];
     if (latest) {
       latestFyInvestment = formatCurrency(latest.net_investment);
@@ -65,14 +75,6 @@ onMount(async () => {
         latest.end_date.format("YY")
       }`;
     }
-
-    hasData = selectedPeriod
-      ? !isEmpty(displayedPostings)
-      : !isEmpty(postings) || !isEmpty(yearlyCards);
-    monthlyInvestmentTimelineLegends =
-      buildMonthlyInvestmentSeries(displayedPostings).legends ?? [];
-    yearlyInvestmentTimelineLegends =
-      buildYearlyInvestmentSeries(yearlyCards).legends ?? [];
 
     isLoading = false;
   } catch {

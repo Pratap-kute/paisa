@@ -22,6 +22,7 @@ import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
 import Section from "$lib/shared/layout/Section.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
+import { get } from "svelte/store";
 import { page } from "$app/state";
 import { validPeriod } from "$lib/shared/browser/period";
 
@@ -29,6 +30,14 @@ let transactionSequences: TransactionSequence[] = $state([]);
 let transactionSequencesDelayed: TransactionSequence[] = $state([]);
 let isEmpty = $state(false);
 let isLoading = $state(true);
+let requestedPeriod = $derived(
+  validPeriod(page.url.searchParams.get("period")),
+);
+const fallbackMonth = get(month);
+
+$effect(() => {
+  month.set(requestedPeriod ?? fallbackMonth);
+});
 
 let days: Dayjs[] = $derived(monthDays($month).days);
 let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
@@ -41,8 +50,6 @@ let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
 );
 
 onMount(async () => {
-  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
-  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.recurring.getRecurringTransactions();
     transactionSequences =

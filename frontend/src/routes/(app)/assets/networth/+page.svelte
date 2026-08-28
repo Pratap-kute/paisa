@@ -28,14 +28,30 @@ import { page } from "$app/state";
 import { validPeriod } from "$lib/shared/browser/period";
 import dayjs from "dayjs";
 
-let networth = $state(0);
-let investment = $state(0);
-let gain = $state(0);
 let xirr = $state(0);
 let isLoading = $state(true);
 let points: Networth[] = $state([]);
 let legends: Legend[] = $state([]);
-const selectedPeriod = validPeriod(page.url.searchParams.get("period"));
+let selectedPeriod = $derived(
+  validPeriod(page.url.searchParams.get("period")),
+);
+let currentPoint = $derived.by(() => {
+  if (!selectedPeriod) return last(points);
+  const periodEnd = dayjs(`${selectedPeriod}-01`).endOf("month");
+  return last(points.filter((p) => p.date.isSameOrBefore(periodEnd)));
+});
+let networth = $derived(
+  currentPoint
+    ? currentPoint.investmentAmount + currentPoint.gainAmount -
+      currentPoint.withdrawalAmount
+    : 0,
+);
+let investment = $derived(
+  currentPoint
+    ? currentPoint.investmentAmount - currentPoint.withdrawalAmount
+    : 0,
+);
+let gain = $derived(currentPoint?.gainAmount ?? 0);
 
 let filteredPoints = $derived.by(() => {
   if (!selectedPeriod) {
@@ -62,18 +78,6 @@ onMount(async () => {
     points = (result.networthTimeline as unknown as Networth[]) || [];
     setAllowedDateRange(map(points, (p) => p.date));
 
-    const periodEnd = selectedPeriod
-      ? dayjs(`${selectedPeriod}-01`).endOf("month")
-      : undefined;
-    const current = periodEnd
-      ? last(points.filter((p) => p.date.isSameOrBefore(periodEnd)))
-      : last(points);
-    if (current) {
-      networth = current.investmentAmount + current.gainAmount -
-        current.withdrawalAmount;
-      investment = current.investmentAmount - current.withdrawalAmount;
-      gain = current.gainAmount;
-    }
     xirr = result.xirr || 0;
   } finally {
     isLoading = false;
