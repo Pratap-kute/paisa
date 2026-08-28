@@ -328,6 +328,33 @@ export interface DtoIndexResponse {
   tokens?: Record<string, Record<string, number>>;
 }
 
+export interface DtoInsightResponse {
+  account?: string;
+  category?: string;
+  change?: number;
+  changePercent?: number;
+  comparisonPeriod?: string;
+  gainContribution?: number;
+  href?: string;
+  id?: string;
+  investmentContribution?: number;
+  period?: string;
+  previousValue?: number;
+  relatedAccounts?: string[];
+  score?: number;
+  severity?: string;
+  type?: string;
+  value?: number;
+}
+
+export interface DtoInsightsResponse {
+  asOf?: string;
+  comparisonPeriod?: string;
+  insights?: DtoInsightResponse[];
+  isPartial?: boolean;
+  period?: string;
+}
+
 export interface DtoInvestmentResponse {
   assets?: DtoPostingResponse[];
   yearly_cards?: DtoInvestmentYearlyCardResponse[];
@@ -1447,6 +1474,32 @@ export class Api<SecurityDataType extends unknown> {
       this.http.request<DtoSuccessResponse, DtoErrorResponse>({
         path: `/init`,
         method: "POST",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
+  insights = {
+    /**
+     * @description Returns deterministic financial observations and risks derived from ledger history
+     *
+     * @tags Insights
+     * @name GetInsights
+     * @summary Get deterministic financial health insights
+     * @request GET:/insights
+     * @secure
+     */
+    getInsights: (
+      query?: {
+        /** Month period in YYYY-MM format (defaults to current month) */
+        period?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.http.request<DtoInsightsResponse, DtoErrorResponse>({
+        path: `/insights`,
+        method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,

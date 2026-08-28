@@ -97,6 +97,79 @@ func ComputeNetworth(db *gorm.DB, postings []posting.Posting) Networth {
 	return networth
 }
 
+func ComputeNetworthOn(db *gorm.DB, postings []posting.Posting, onDate time.Time) Networth {
+	var networth Networth
+	if len(postings) == 0 {
+		return networth
+	}
+
+	type RunningSum struct {
+		investment   decimal.Decimal
+		withdrawal   decimal.Decimal
+		balance      decimal.Decimal
+		balanceUnits decimal.Decimal
+	}
+
+	accumulator := make(map[string]RunningSum)
+	for i := range postings {
+		p := &postings[i]
+		if p.Date.After(onDate) {
+			continue
+		}
+
+		rs := accumulator[p.Commodity]
+		isInterest := IsInterest(db, *p)
+		isCapitalGains := IsCapitalGains(*p)
+
+		if p.Amount.GreaterThan(decimal.Zero) && !isInterest {
+			rs.investment = rs.investment.Add(p.Amount)
+		}
+
+		if p.Amount.LessThan(decimal.Zero) && !isInterest {
+			rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
+		}
+
+		if !isCapitalGains {
+			rs.balance = rs.balance.Add(GetMarketPrice(db, *p, onDate))
+			rs.balanceUnits = rs.balanceUnits.Add(p.Quantity)
+		}
+
+		accumulator[p.Commodity] = rs
+	}
+
+	investment := decimal.Zero
+	withdrawal := decimal.Zero
+	balance := decimal.Zero
+
+	for commodity, rs := range accumulator {
+		investment = investment.Add(rs.investment)
+		withdrawal = withdrawal.Add(rs.withdrawal)
+
+		if utils.IsCurrency(commodity) {
+			balance = balance.Add(rs.balance)
+		} else {
+			price := GetUnitPrice(db, commodity, onDate)
+			if !price.Value.Equal(decimal.Zero) {
+				balance = balance.Add(rs.balanceUnits.Mul(price.Value))
+			} else {
+				balance = balance.Add(rs.balance)
+			}
+		}
+	}
+
+	gain := balance.Add(withdrawal).Sub(investment)
+	netInvestment := investment.Sub(withdrawal)
+
+	return Networth{
+		Date:                onDate,
+		InvestmentAmount:    investment,
+		WithdrawalAmount:    withdrawal,
+		GainAmount:          gain,
+		BalanceAmount:       balance,
+		NetInvestmentAmount: netInvestment,
+	}
+}
+
 func ComputeNetworthTimeline(db *gorm.DB, postings []posting.Posting, computeBalanceUnits bool) []Networth {
 	var networths []Networth
 	var p posting.Posting

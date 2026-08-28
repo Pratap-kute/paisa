@@ -77,6 +77,12 @@ const navSections: NavSection[] = [
         href: "/",
         icon: "fa-solid fa-gauge-high",
       },
+      {
+        kind: "link",
+        label: "Insights",
+        href: "/insights",
+        icon: "fa-solid fa-lightbulb",
+      },
     ],
   },
   {

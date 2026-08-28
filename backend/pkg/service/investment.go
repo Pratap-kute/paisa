@@ -13,6 +13,18 @@ import (
 	"gorm.io/gorm"
 )
 
+type SavingsSummary struct {
+	StartDate         time.Time
+	EndDate           time.Time
+	GrossSalaryIncome decimal.Decimal
+	GrossOtherIncome  decimal.Decimal
+	NetTax            decimal.Decimal
+	NetIncome         decimal.Decimal
+	NetInvestment     decimal.Decimal
+	NetExpense        decimal.Decimal
+	SavingsRate       decimal.Decimal
+}
+
 type InvestmentYearlyCard struct {
 	StartDate         time.Time
 	EndDate           time.Time
@@ -50,6 +62,69 @@ func GetInvestment(db *gorm.DB) InvestmentResult {
 	return InvestmentResult{
 		Assets:      assets,
 		YearlyCards: ComputeInvestmentYearlyCard(p.Date, assets, expenses, incomes),
+	}
+}
+
+func ComputeSavingsSummary(assets, expenses, incomes []posting.Posting, start, end time.Time) SavingsSummary {
+	currentPostings := make([]posting.Posting, 0)
+	for i := range assets {
+		if utils.IsWithDate(assets[i].Date, start, end) {
+			currentPostings = append(currentPostings, assets[i])
+		}
+	}
+
+	currentTaxes := make([]posting.Posting, 0)
+	currentExpenses := make([]posting.Posting, 0)
+	for i := range expenses {
+		if utils.IsWithDate(expenses[i].Date, start, end) {
+			if utils.IsSameOrParent(expenses[i].Account, "Expenses:Tax") {
+				currentTaxes = append(currentTaxes, expenses[i])
+			} else {
+				currentExpenses = append(currentExpenses, expenses[i])
+			}
+		}
+	}
+
+	currentIncomes := make([]posting.Posting, 0)
+	for i := range incomes {
+		if utils.IsWithDate(incomes[i].Date, start, end) {
+			currentIncomes = append(currentIncomes, incomes[i])
+		}
+	}
+
+	netTax := accounting.CostSum(currentTaxes)
+	netExpense := accounting.CostSum(currentExpenses)
+
+	grossSalaryIncome := utils.SumBy(currentIncomes, func(p posting.Posting) decimal.Decimal {
+		if strings.HasPrefix(p.Account, "Income:Salary") {
+			return p.Amount.Neg()
+		}
+		return decimal.Zero
+	})
+	grossOtherIncome := utils.SumBy(currentIncomes, func(p posting.Posting) decimal.Decimal {
+		if !strings.HasPrefix(p.Account, "Income:Salary") {
+			return p.Amount.Neg()
+		}
+		return decimal.Zero
+	})
+
+	netInvestment := accounting.CostSum(currentPostings)
+	netIncome := grossSalaryIncome.Add(grossOtherIncome).Sub(netTax)
+	savingsRate := decimal.Zero
+	if !netIncome.Equal(decimal.Zero) {
+		savingsRate = netInvestment.Div(netIncome).Mul(decimal.NewFromInt(100))
+	}
+
+	return SavingsSummary{
+		StartDate:         start,
+		EndDate:           end,
+		GrossSalaryIncome: grossSalaryIncome,
+		GrossOtherIncome:  grossOtherIncome,
+		NetTax:            netTax,
+		NetIncome:         netIncome,
+		NetInvestment:     netInvestment,
+		NetExpense:        netExpense,
+		SavingsRate:       savingsRate,
 	}
 }
 

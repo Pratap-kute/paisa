@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
@@ -396,4 +398,33 @@ func TestContract_ScenarioJ_CheckingAccountBehavior(t *testing.T) {
 	require.NotEmpty(t, cf)
 	assert.Equal(t, "25000", cf[0].Checking.String())
 	assert.Equal(t, "25000", cf[0].Balance.String())
+}
+
+// Scenario K: Insights API Contract
+func TestContract_ScenarioK_InsightsEndpoint(t *testing.T) {
+	utils.SetNow("2024-02-15")
+	db := setupContractTestDB(t, "")
+	router := Build(db, false)
+
+	// 1. Empty data GET /api/insights
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/api/insights", nil)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	assert.Contains(t, w.Body.String(), `"period":"2024-02"`)
+	assert.Contains(t, w.Body.String(), `"insights":[]`)
+
+	// 2. Specific period GET /api/insights?period=2024-01
+	w2 := httptest.NewRecorder()
+	req2, _ := http.NewRequest(http.MethodGet, "/api/insights?period=2024-01", nil)
+	router.ServeHTTP(w2, req2)
+	assert.Equal(t, 200, w2.Code)
+	assert.Contains(t, w2.Body.String(), `"period":"2024-01"`)
+
+	// 3. Invalid period GET /api/insights?period=not-a-date
+	w3 := httptest.NewRecorder()
+	req3, _ := http.NewRequest(http.MethodGet, "/api/insights?period=not-a-date", nil)
+	router.ServeHTTP(w3, req3)
+	assert.Equal(t, 400, w3.Code)
+	assert.Contains(t, w3.Body.String(), "invalid period format")
 }

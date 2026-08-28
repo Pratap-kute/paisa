@@ -53,6 +53,15 @@ const staticCommands: CommandItem[] = [
     keywords: ["home", "overview", "summary", "stats"],
     action: () => navigate("/"),
   },
+  {
+    id: "nav-insights",
+    title: "Financial Insights",
+    description: "Important changes, anomalies, and risks",
+    icon: "fa-solid fa-lightbulb",
+    category: "Navigation",
+    keywords: ["insights", "health", "risks", "trends", "observations"],
+    action: () => navigate("/insights"),
+  },
   // Cash Flow
   {
     id: "nav-cashflow-monthly",

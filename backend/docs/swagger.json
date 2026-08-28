@@ -859,6 +859,46 @@
                 }
             }
         },
+        "/insights": {
+            "get": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "description": "Returns deterministic financial observations and risks derived from ledger history",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Insights"
+                ],
+                "summary": "Get deterministic financial health insights",
+                "operationId": "getInsights",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Month period in YYYY-MM format (defaults to current month)",
+                        "name": "period",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.InsightsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/investment": {
             "get": {
                 "security": [
@@ -2715,6 +2755,85 @@
                             "format": "int64"
                         }
                     }
+                }
+            }
+        },
+        "dto.InsightResponse": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "change": {
+                    "type": "number"
+                },
+                "changePercent": {
+                    "type": "number"
+                },
+                "comparisonPeriod": {
+                    "type": "string"
+                },
+                "gainContribution": {
+                    "type": "number"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "investmentContribution": {
+                    "type": "number"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "previousValue": {
+                    "type": "number"
+                },
+                "relatedAccounts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.InsightsResponse": {
+            "type": "object",
+            "properties": {
+                "asOf": {
+                    "type": "string"
+                },
+                "comparisonPeriod": {
+                    "type": "string"
+                },
+                "insights": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.InsightResponse"
+                    }
+                },
+                "isPartial": {
+                    "type": "boolean"
+                },
+                "period": {
+                    "type": "string"
                 }
             }
         },

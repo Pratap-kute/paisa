@@ -34,6 +34,8 @@ import {
   sortTrantionSequence,
   totalRecurring,
 } from "$lib/domain/transaction_sequence";
+import InsightsPanel from "$lib/features/insights/components/InsightsPanel.svelte";
+import type { InsightsResult } from "$lib/domain/insights";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { sumBy, take } from "es-toolkit";
 import dayjs from "dayjs";
@@ -57,6 +59,8 @@ let transactions: Transaction[] = $state([]);
 let budgetsByMonth: Record<string, Budget> = $state({});
 let isEmpty = $state(false);
 let isLoading = $state(true);
+let insightsLoading = $state(true);
+let insightsResponse: InsightsResult | null = $state(null);
 let checkingBalances: Record<string, AssetBreakdown> = $state({});
 
 function hasCashFlowActivity(flows: CashFlow[]) {
@@ -89,7 +93,11 @@ async function initDemo() {
 
 onMount(async () => {
   try {
-    const res = await api.dashboard.getDashboard();
+    const [res, insRes] = await Promise.all([
+      api.dashboard.getDashboard(),
+      api.insights.getInsights().catch(() => null),
+    ]);
+    insightsResponse = insRes as unknown as InsightsResult | null;
     expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
     cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
     goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
@@ -121,6 +129,7 @@ onMount(async () => {
     );
   } finally {
     isLoading = false;
+    insightsLoading = false;
   }
 });
 </script>
@@ -233,6 +242,17 @@ onMount(async () => {
       </div>
     {/if}
 
+    <!-- Row 1C: Financial Insights Panel -->
+    {#if (insightsResponse && insightsResponse.insights && insightsResponse.insights.length > 0) || insightsLoading}
+      <InsightsPanel
+        insights={insightsResponse?.insights || []}
+        isPartial={insightsResponse?.isPartial}
+        comparisonPeriod={insightsResponse?.comparisonPeriod}
+        loading={insightsLoading}
+        maxItems={5}
+      />
+    {/if}
+
     <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
     <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0">
       <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
@@ -293,7 +313,7 @@ onMount(async () => {
         <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
           <div class="flex items-center justify-between mb-3">
             <a href="/expense/budget" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-              Needs Attention
+              Budget
             </a>
           </div>
           <div class="space-y-3">

@@ -3,6 +3,7 @@ package query
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
@@ -39,6 +40,21 @@ func (q *Query) Limit(n int) *Query {
 
 func (q *Query) Clone() *Query {
 	return &Query{context: q.context.Session(&gorm.Session{}), order: q.order, includeForecast: q.includeForecast}
+}
+
+func (q *Query) Between(start, end time.Time) *Query {
+	q.context = q.context.Where("date >= ? and date < ?", start, end)
+	return q
+}
+
+func (q *Query) From(start time.Time) *Query {
+	q.context = q.context.Where("date >= ?", start)
+	return q
+}
+
+func (q *Query) Before(end time.Time) *Query {
+	q.context = q.context.Where("date < ?", end)
+	return q
 }
 
 func (q *Query) BeforeNMonths(n int) *Query {

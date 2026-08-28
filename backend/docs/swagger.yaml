@@ -620,6 +620,58 @@ definitions:
           type: object
         type: object
     type: object
+  dto.InsightResponse:
+    properties:
+      account:
+        type: string
+      category:
+        type: string
+      change:
+        type: number
+      changePercent:
+        type: number
+      comparisonPeriod:
+        type: string
+      gainContribution:
+        type: number
+      href:
+        type: string
+      id:
+        type: string
+      investmentContribution:
+        type: number
+      period:
+        type: string
+      previousValue:
+        type: number
+      relatedAccounts:
+        items:
+          type: string
+        type: array
+      score:
+        type: integer
+      severity:
+        type: string
+      type:
+        type: string
+      value:
+        type: number
+    type: object
+  dto.InsightsResponse:
+    properties:
+      asOf:
+        type: string
+      comparisonPeriod:
+        type: string
+      insights:
+        items:
+          $ref: '#/definitions/dto.InsightResponse'
+        type: array
+      isPartial:
+        type: boolean
+      period:
+        type: string
+    type: object
   dto.InvestmentResponse:
     properties:
       assets:
@@ -1800,6 +1852,32 @@ paths:
       summary: Initialize demo data
       tags:
       - Initialization
+  /insights:
+    get:
+      description: Returns deterministic financial observations and risks derived
+        from ledger history
+      operationId: getInsights
+      parameters:
+      - description: Month period in YYYY-MM format (defaults to current month)
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.InsightsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Get deterministic financial health insights
+      tags:
+      - Insights
   /investment:
     get:
       description: Returns yearly investment cards and savings rate metrics
