@@ -22,7 +22,7 @@ test("application starts without fatal browser errors", async ({ page }) => {
 
 test("dashboard renders synchronized fixture data", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("Net worth", { exact: true }).first())
+  await expect(page.getByText("Net Worth", { exact: true }).first())
     .toBeVisible();
   await expect(page.getByRole("link", { name: "Transactions" }).first())
     .toBeVisible();

@@ -101,7 +101,7 @@ test.describe("layout invariants", () => {
     });
   }
 
-  test("surviving dashboard section spans the row when Budget is absent", async ({ page }) => {
+  test("dashboard shows a not-configured Budget state when Budget is absent", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/dashboard", async (route) => {
       const response = await route.fetch();
@@ -118,7 +118,9 @@ test.describe("layout invariants", () => {
       has: page.getByRole("link", { name: "Recent Activity" }),
     });
     await expect(row).toBeVisible();
-    await expect(row.locator(":scope > *")).toHaveCount(1);
+    await expect(row.locator(":scope > *")).toHaveCount(2);
+    await expect(row.getByText("Not configured", { exact: true }))
+      .toBeVisible();
   });
 
   test("surviving dashboard section spans the row when Goals are absent", async ({ page }) => {

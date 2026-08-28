@@ -212,6 +212,34 @@ for (const route of visualRoutes) {
             "[data-testid='dashboard-expense-breakdown-echart'][data-chart-ready='true']",
           ),
         ).toBeVisible();
+        await expect(
+          page.locator("[data-testid='dashboard-kpis'] .paisa4-metric-label"),
+        ).toHaveText(["Net Worth", "Cash Balance", "Expenses", "Budget"]);
+        await expect(page.getByText("Net Investment", { exact: true }))
+          .toHaveCount(0);
+        await expect(page.getByText("Gain / Loss", { exact: true }))
+          .toHaveCount(0);
+        await expect(page.getByText("XIRR", { exact: true })).toHaveCount(0);
+        expect(
+          await page.locator("[data-testid='dashboard-insight-preview']")
+            .count(),
+        ).toBeLessThanOrEqual(1);
+        expect(
+          await page.locator("[data-testid='dashboard-budget-item']").count(),
+        ).toBeLessThanOrEqual(3);
+        expect(
+          await page.locator("[data-testid='dashboard-cash-account']").count(),
+        ).toBeLessThanOrEqual(3);
+        expect(
+          await page.locator("[data-testid='dashboard-recent-item']").count(),
+        ).toBeLessThanOrEqual(5);
+        expect(
+          await page.locator("[data-testid='dashboard-goal-item']").count(),
+        ).toBeLessThanOrEqual(3);
+        expect(
+          await page.locator("[data-testid='dashboard-recurring-item']")
+            .count(),
+        ).toBeLessThanOrEqual(5);
       }
       if (route.name === "savings-goal" || route.name === "retirement-goal") {
         const prefix = route.name === "savings-goal" ? "savings" : "retirement";

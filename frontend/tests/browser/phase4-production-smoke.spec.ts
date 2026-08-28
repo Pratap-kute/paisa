@@ -1,7 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 const routes = [
-  { name: "dashboard", path: "/", readyText: "Net worth" },
+  { name: "dashboard", path: "/", readyText: "Net Worth" },
   { name: "expense-monthly", path: "/expense/monthly" },
   {
     name: "transactions",
