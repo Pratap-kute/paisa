@@ -145,20 +145,11 @@ func ComputeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 			currentYearPostings = append(currentYearPostings, p)
 		}
 
-		currentYearTaxes := make([]posting.Posting, 0)
 		currentYearExpenses := make([]posting.Posting, 0)
-
 		for len(expenses) > 0 && utils.IsWithDate(expenses[0].Date, start, yearEnd) {
 			p, expenses = expenses[0], expenses[1:]
-			if utils.IsSameOrParent(p.Account, "Expenses:Tax") {
-				currentYearTaxes = append(currentYearTaxes, p)
-			} else {
-				currentYearExpenses = append(currentYearExpenses, p)
-			}
+			currentYearExpenses = append(currentYearExpenses, p)
 		}
-
-		netTax := accounting.CostSum(currentYearTaxes)
-		netExpense := accounting.CostSum(currentYearExpenses)
 
 		currentYearIncomes := make([]posting.Posting, 0)
 		for len(incomes) > 0 && utils.IsWithDate(incomes[0].Date, start, yearEnd) {
@@ -166,40 +157,19 @@ func ComputeInvestmentYearlyCard(start time.Time, assets []posting.Posting, expe
 			currentYearIncomes = append(currentYearIncomes, p)
 		}
 
-		grossSalaryIncome := utils.SumBy(currentYearIncomes, func(p posting.Posting) decimal.Decimal {
-			if strings.HasPrefix(p.Account, "Income:Salary") {
-				return p.Amount.Neg()
-			} else {
-				return decimal.Zero
-			}
-		})
-		grossOtherIncome := utils.SumBy(currentYearIncomes, func(p posting.Posting) decimal.Decimal {
-			if !strings.HasPrefix(p.Account, "Income:Salary") {
-				return p.Amount.Neg()
-			} else {
-				return decimal.Zero
-			}
-		})
-
-		netInvestment := accounting.CostSum(currentYearPostings)
-
-		netIncome := grossSalaryIncome.Add(grossOtherIncome).Sub(netTax)
-		savingsRate := decimal.Zero
-		if !netIncome.Equal(decimal.Zero) {
-			savingsRate = netInvestment.Div(netIncome).Mul(decimal.NewFromInt(100))
-		}
+		savingsSummary := ComputeSavingsSummary(currentYearPostings, currentYearExpenses, currentYearIncomes, start, yearEnd)
 
 		yearlyCards = append(yearlyCards, InvestmentYearlyCard{
 			StartDate:         start,
 			EndDate:           yearEnd,
 			Postings:          currentYearPostings,
-			NetTax:            netTax,
-			GrossSalaryIncome: grossSalaryIncome,
-			GrossOtherIncome:  grossOtherIncome,
-			NetIncome:         netIncome,
-			NetInvestment:     netInvestment,
-			NetExpense:        netExpense,
-			SavingsRate:       savingsRate,
+			NetTax:            savingsSummary.NetTax,
+			GrossSalaryIncome: savingsSummary.GrossSalaryIncome,
+			GrossOtherIncome:  savingsSummary.GrossOtherIncome,
+			NetIncome:         savingsSummary.NetIncome,
+			NetInvestment:     savingsSummary.NetInvestment,
+			NetExpense:        savingsSummary.NetExpense,
+			SavingsRate:       savingsSummary.SavingsRate,
 		})
 	}
 	return yearlyCards

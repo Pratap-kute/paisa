@@ -35,6 +35,7 @@ import {
   totalRecurring,
 } from "$lib/domain/transaction_sequence";
 import InsightsPanel from "$lib/features/insights/components/InsightsPanel.svelte";
+import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
 import type { InsightsResult } from "$lib/domain/insights";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { sumBy, take } from "es-toolkit";
@@ -97,7 +98,7 @@ onMount(async () => {
       api.dashboard.getDashboard(),
       api.insights.getInsights().catch(() => null),
     ]);
-    insightsResponse = insRes as unknown as InsightsResult | null;
+    insightsResponse = insRes ? mapInsightsResponseToDomain(insRes) : null;
     expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
     cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
     goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];

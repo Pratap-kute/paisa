@@ -221,7 +221,10 @@ func buildPeriodSummary(db *gorm.DB, start, end, asOf time.Time, isPartial bool)
 	allNetworthPostings := query.Init(db).Like("Assets:%", "Income:CapitalGains:%", "Liabilities:%").Before(endInclusive).All()
 	allNetworthPostings = PopulateMarketPrice(db, allNetworthPostings)
 
-	networthStart := ComputeNetworthOn(db, allNetworthPostings, start)
+	// Baseline is the previous month-end snapshot (start minus 1 nanosecond)
+	// so that any transaction on the 1st of the current month is counted in the month's net worth change.
+	networthBaselineDate := start.Add(-time.Nanosecond)
+	networthStart := ComputeNetworthOn(db, allNetworthPostings, networthBaselineDate)
 	networthEnd := ComputeNetworthOn(db, allNetworthPostings, end)
 
 	return PeriodSummary{
@@ -263,8 +266,12 @@ func DetectAndRankInsights(ctx InsightContext) []Insight {
 
 	candidates = append(candidates, detectBudgetRisk(ctx)...)
 	candidates = append(candidates, detectRecurringIncrease(ctx)...)
-	candidates = append(candidates, detectAllocationConcentration(ctx)...)
-	candidates = append(candidates, detectCashWarnings(ctx)...)
+
+	// Only evaluate today-dependent balance/allocation detectors for the active/current period
+	if ctx.IsPartial {
+		candidates = append(candidates, detectAllocationConcentration(ctx)...)
+		candidates = append(candidates, detectCashWarnings(ctx)...)
+	}
 
 	return rankAndDeduplicate(candidates)
 }
@@ -355,18 +362,19 @@ func detectCategorySpikes(ctx InsightContext) []Insight {
 
 		if prevCat.IsPositive() {
 			percent := diff.Div(prevCat).Mul(decimal.NewFromInt(100))
-			// Relative materiality: category diff must be >= 5% of total monthly spend OR absolute change >= 2,000
+			// Relative materiality: category diff must be >= 2% of total monthly spend
 			isRelativeMaterial := false
+			var share decimal.Decimal
 			if ctx.Current.Expenses.IsPositive() {
-				share := diff.Div(ctx.Current.Expenses)
-				if share.GreaterThanOrEqual(decimal.NewFromFloat(0.05)) || diff.GreaterThanOrEqual(decimal.NewFromInt(2000)) {
+				share = diff.Div(ctx.Current.Expenses)
+				if share.GreaterThanOrEqual(decimal.NewFromFloat(0.02)) {
 					isRelativeMaterial = true
 				}
 			}
 
-			if percent.GreaterThanOrEqual(decimal.NewFromInt(25)) && isRelativeMaterial {
+			if percent.GreaterThanOrEqual(decimal.NewFromInt(20)) && isRelativeMaterial {
 				severity := InsightSeverityInfo
-				if percent.GreaterThanOrEqual(decimal.NewFromInt(40)) && diff.GreaterThanOrEqual(decimal.NewFromInt(1500)) {
+				if percent.GreaterThanOrEqual(decimal.NewFromInt(40)) && share.GreaterThanOrEqual(decimal.NewFromFloat(0.05)) {
 					severity = InsightSeverityWarning
 				}
 				score := 55 + int(percent.IntPart()/2)
@@ -426,7 +434,7 @@ func detectSavingsRateChange(ctx InsightContext) *Insight {
 	currRate := ctx.Current.SavingsRate
 	prevRate := ctx.Comparison.SavingsRate
 
-	if ctx.Current.Income.IsZero() && ctx.Comparison.Income.IsZero() {
+	if ctx.Current.Income.LessThanOrEqual(decimal.Zero) || ctx.Comparison.Income.LessThanOrEqual(decimal.Zero) {
 		return nil
 	}
 
@@ -567,9 +575,16 @@ func detectBudgetRisk(ctx InsightContext) []Insight {
 
 	for i := range budget.Accounts {
 		acc := &budget.Accounts[i]
-		if acc.Available.IsNegative() {
-			// Real overrun: spent > forecast
-			overAmount := acc.Available.Abs()
+		isOverspent := acc.Available.IsNegative() || (acc.Forecast.IsPositive() && acc.Actual.GreaterThan(acc.Forecast))
+
+		if isOverspent {
+			overAmount := acc.Actual.Sub(acc.Forecast)
+			if acc.Available.IsNegative() && acc.Available.Abs().GreaterThan(overAmount) {
+				overAmount = acc.Available.Abs()
+			}
+			if overAmount.LessThanOrEqual(decimal.Zero) {
+				continue
+			}
 			actual := acc.Actual
 			forecast := acc.Forecast
 			insights = append(insights, Insight{
@@ -591,7 +606,7 @@ func detectBudgetRisk(ctx InsightContext) []Insight {
 			if usagePercent.GreaterThanOrEqual(decimal.NewFromInt(85)) && acc.Actual.LessThan(acc.Forecast) {
 				actual := acc.Actual
 				forecast := acc.Forecast
-				remaining := acc.Available
+				remaining := acc.Forecast.Sub(acc.Actual)
 				insights = append(insights, Insight{
 					ID:            fmt.Sprintf("budget_risk:%s:%s", ctx.Period, acc.Account),
 					Type:          InsightTypeBudgetRisk,
@@ -621,8 +636,26 @@ func detectRecurringIncrease(ctx InsightContext) []Insight {
 			continue
 		}
 
-		latestExpense := expenseOutflow(seq.Transactions[0])
-		prevExpense := expenseOutflow(seq.Transactions[1])
+		// Find transaction occurring in ctx.Period and compare against its immediate predecessor
+		var currentTx *transaction.Transaction
+		var prevTx *transaction.Transaction
+		for i := range seq.Transactions {
+			tx := &seq.Transactions[i]
+			txPeriod := tx.Date.Format("2006-01")
+			if currentTx == nil && txPeriod == ctx.Period {
+				currentTx = tx
+			} else if currentTx != nil {
+				prevTx = tx
+				break
+			}
+		}
+
+		if currentTx == nil || prevTx == nil {
+			continue
+		}
+
+		latestExpense := expenseOutflow(*currentTx)
+		prevExpense := expenseOutflow(*prevTx)
 
 		if latestExpense.GreaterThan(prevExpense) && prevExpense.IsPositive() {
 			diff := latestExpense.Sub(prevExpense)
@@ -630,7 +663,7 @@ func detectRecurringIncrease(ctx InsightContext) []Insight {
 
 			if percent.GreaterThanOrEqual(decimal.NewFromInt(5)) {
 				insights = append(insights, Insight{
-					ID:            fmt.Sprintf("recurring_increase:%s", seq.Key),
+					ID:            fmt.Sprintf("recurring_increase:%s:%s", ctx.Period, seq.Key),
 					Type:          InsightTypeRecurringIncrease,
 					Category:      InsightCategoryRecurring,
 					Severity:      InsightSeverityWarning,

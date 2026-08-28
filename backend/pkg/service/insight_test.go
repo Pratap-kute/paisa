@@ -247,10 +247,106 @@ func TestInsight_RecurringExpenseIncrease(t *testing.T) {
 	}
 
 	require.NotNil(t, recurringInsight)
-	assert.Equal(t, "recurring_increase:Netflix", recurringInsight.ID)
+	assert.Equal(t, "recurring_increase:2026-08:Netflix", recurringInsight.ID)
 	assert.True(t, decimal.NewFromInt(649).Equal(*recurringInsight.Value))
 	assert.True(t, decimal.NewFromInt(499).Equal(*recurringInsight.PreviousValue))
 	assert.True(t, decimal.NewFromInt(150).Equal(*recurringInsight.Change))
+}
+
+func TestInsight_NetworthFirstOfMonthInvestment(t *testing.T) {
+	db := setupInsightTestDB(t, "")
+
+	// Investment made on the 1st of August
+	postings := []posting.Posting{
+		{TransactionID: "inv1", Date: parseDate("2026-07-15"), Account: "Assets:MF", Commodity: "INR", Amount: decimal.NewFromInt(100000)},
+		{TransactionID: "inv2", Date: parseDate("2026-08-01"), Account: "Assets:MF", Commodity: "INR", Amount: decimal.NewFromInt(25000)},
+	}
+	require.NoError(t, db.Create(&postings).Error)
+
+	res, err := GetInsights(db, "2026-08")
+	require.NoError(t, err)
+
+	var nwInsight *Insight
+	for i := range res.Insights {
+		if res.Insights[i].Type == InsightTypeNetworthChange {
+			nwInsight = &res.Insights[i]
+			break
+		}
+	}
+
+	require.NotNil(t, nwInsight, "August 1st investment must produce net worth change insight")
+	// The change should be +25,000 (125,000 vs 100,000 baseline at July 31)
+	assert.True(t, decimal.NewFromInt(25000).Equal(*nwInsight.Change), "Change should be 25,000, got: %s", nwInsight.Change)
+	assert.True(t, decimal.NewFromInt(125000).Equal(*nwInsight.Value))
+	assert.True(t, decimal.NewFromInt(100000).Equal(*nwInsight.PreviousValue))
+}
+
+func TestInsight_HistoricalBudgetOverspendWithoutRollover(t *testing.T) {
+	db := setupInsightTestDB(t, "")
+
+	// Historical month 2026-06 (where Available is zeroed in budget service when rollover=false)
+	postings := []posting.Posting{
+		{TransactionID: "b1", Date: parseDate("2026-06-01"), Account: "Expenses:Shopping", Amount: decimal.NewFromInt(10000), Forecast: true},
+		{TransactionID: "b2", Date: parseDate("2026-06-15"), Account: "Expenses:Shopping", Amount: decimal.NewFromInt(16000)},
+	}
+	require.NoError(t, db.Create(&postings).Error)
+
+	res, err := GetInsights(db, "2026-06")
+	require.NoError(t, err)
+
+	var overspent *Insight
+	for i := range res.Insights {
+		if res.Insights[i].Type == InsightTypeBudgetOverspent && res.Insights[i].Account == "Expenses:Shopping" {
+			overspent = &res.Insights[i]
+			break
+		}
+	}
+
+	require.NotNil(t, overspent, "Historical budget overspending must be detected even without rollover")
+	assert.Equal(t, InsightSeverityCritical, overspent.Severity)
+	assert.True(t, decimal.NewFromInt(16000).Equal(*overspent.Value))
+	assert.True(t, decimal.NewFromInt(10000).Equal(*overspent.PreviousValue))
+	assert.True(t, decimal.NewFromInt(6000).Equal(*overspent.Change))
+}
+
+func TestInsight_ZeroIncomeSuppressesSavingsRateAlert(t *testing.T) {
+	db := setupInsightTestDB(t, "")
+
+	// July had income & 40% savings rate; August has NO income yet
+	postings := []posting.Posting{
+		{TransactionID: "j1", Date: parseDate("2026-07-01"), Account: "Income:Salary", Amount: decimal.NewFromInt(-100000)},
+		{TransactionID: "j2", Date: parseDate("2026-07-02"), Account: "Assets:MF", Amount: decimal.NewFromInt(40000), Commodity: "INR"},
+		// August has an expense but no income
+		{TransactionID: "a1", Date: parseDate("2026-08-01"), Account: "Expenses:Food", Amount: decimal.NewFromInt(5000)},
+	}
+	require.NoError(t, db.Create(&postings).Error)
+
+	res, err := GetInsights(db, "2026-08")
+	require.NoError(t, err)
+
+	for i := range res.Insights {
+		assert.NotEqual(t, InsightTypeSavingsRateChange, res.Insights[i].Type, "Should not emit savings_rate_change when current income is 0")
+	}
+}
+
+func TestInsight_HistoricalPeriodSkipsTodayOnlyDetectors(t *testing.T) {
+	db := setupInsightTestDB(t, "")
+
+	// Today has negative checking balance
+	postings := []posting.Posting{
+		{TransactionID: "c1", Date: parseDate("2026-08-01"), Account: "Assets:Checking", Amount: decimal.NewFromInt(-10000), Commodity: "INR"},
+		{TransactionID: "e1", Date: parseDate("2026-05-10"), Account: "Expenses:Food", Amount: decimal.NewFromInt(5000)},
+	}
+	require.NoError(t, db.Create(&postings).Error)
+
+	// Querying historical month 2026-05 must NOT emit today's cash warning
+	res, err := GetInsights(db, "2026-05")
+	require.NoError(t, err)
+
+	for i := range res.Insights {
+		assert.NotEqual(t, InsightTypeCashWarning, res.Insights[i].Type, "Historical months should not emit cash warnings based on today's balance")
+		assert.NotEqual(t, InsightTypeAllocationConcentration, res.Insights[i].Type, "Historical months should not emit allocation warnings based on today's prices")
+	}
 }
 
 func TestInsight_AllocationConcentration(t *testing.T) {

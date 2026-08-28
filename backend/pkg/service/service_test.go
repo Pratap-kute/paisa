@@ -164,3 +164,66 @@ func TestInterestMatching(t *testing.T) {
 		})
 	}
 }
+
+func TestComputeNetworthOnParity(t *testing.T) {
+	db := serviceTestDB(t)
+	date := serviceDate(10)
+
+	// Create diverse postings:
+	// 1. Stock split (AAPL +10 / -10)
+	// 2. Regular investment in MutualFunds (50,000)
+	// 3. Regular withdrawal from Checking (-10,000)
+	// 4. Interest income in Checking (500)
+	// 5. Capital gains offset (-2,000)
+	postings := []posting.Posting{
+		{TransactionID: "split", Date: date, Account: "Assets:Broker", Commodity: "AAPL", Quantity: decimal.NewFromInt(10), Amount: decimal.NewFromInt(0)},
+		{TransactionID: "split", Date: date, Account: "Assets:Broker", Commodity: "AAPL", Quantity: decimal.NewFromInt(-10), Amount: decimal.NewFromInt(0)},
+		{TransactionID: "inv", Date: date, Account: "Assets:MutualFunds", Commodity: "INR", Amount: decimal.NewFromInt(50000)},
+		{TransactionID: "wdr", Date: date, Account: "Assets:Checking", Commodity: "INR", Amount: decimal.NewFromInt(-10000)},
+		{TransactionID: "int-src", Date: date, Payee: "Bank", Account: "Income:Interest:Savings", Commodity: "INR", Amount: decimal.NewFromInt(-500)},
+		{TransactionID: "int-dest", Date: date, Payee: "Bank", Account: "Assets:Checking", Commodity: "INR", Amount: decimal.NewFromInt(500)},
+		{TransactionID: "cg", Date: date, Account: "Income:CapitalGains:Broker", Commodity: "INR", Amount: decimal.NewFromInt(-2000)},
+	}
+	require.NoError(t, db.Create(&postings).Error)
+	transaction.ClearCache()
+	ClearInterestCache()
+
+	nwAll := ComputeNetworth(db, postings)
+	nwOn := ComputeNetworthOn(db, postings, date)
+
+	assert.True(t, nwAll.InvestmentAmount.Equal(nwOn.InvestmentAmount), "InvestmentAmount must match: all=%s on=%s", nwAll.InvestmentAmount, nwOn.InvestmentAmount)
+	assert.True(t, nwAll.WithdrawalAmount.Equal(nwOn.WithdrawalAmount), "WithdrawalAmount must match: all=%s on=%s", nwAll.WithdrawalAmount, nwOn.WithdrawalAmount)
+	assert.True(t, nwAll.GainAmount.Equal(nwOn.GainAmount), "GainAmount must match: all=%s on=%s", nwAll.GainAmount, nwOn.GainAmount)
+	assert.True(t, nwAll.BalanceAmount.Equal(nwOn.BalanceAmount), "BalanceAmount must match: all=%s on=%s", nwAll.BalanceAmount, nwOn.BalanceAmount)
+	assert.True(t, nwAll.NetInvestmentAmount.Equal(nwOn.NetInvestmentAmount), "NetInvestmentAmount must match: all=%s on=%s", nwAll.NetInvestmentAmount, nwOn.NetInvestmentAmount)
+}
+
+func TestSavingsSummaryParity(t *testing.T) {
+	start := time.Date(2024, time.April, 1, 0, 0, 0, 0, time.Local)
+	end := time.Date(2025, time.March, 31, 23, 59, 59, 0, time.Local)
+
+	assets := []posting.Posting{
+		{Date: time.Date(2024, time.June, 1, 0, 0, 0, 0, time.Local), Account: "Assets:MF", Amount: decimal.NewFromInt(30000)},
+	}
+	expenses := []posting.Posting{
+		{Date: time.Date(2024, time.June, 1, 0, 0, 0, 0, time.Local), Account: "Expenses:Tax", Amount: decimal.NewFromInt(10000)},
+		{Date: time.Date(2024, time.June, 1, 0, 0, 0, 0, time.Local), Account: "Expenses:Food", Amount: decimal.NewFromInt(20000)},
+	}
+	incomes := []posting.Posting{
+		{Date: time.Date(2024, time.June, 1, 0, 0, 0, 0, time.Local), Account: "Income:Salary", Amount: decimal.NewFromInt(-100000)},
+	}
+
+	summary := ComputeSavingsSummary(assets, expenses, incomes, start, end)
+	yearlyCards := ComputeInvestmentYearlyCard(start, assets, expenses, incomes)
+
+	require.NotEmpty(t, yearlyCards)
+	card := yearlyCards[0]
+
+	assert.True(t, summary.GrossSalaryIncome.Equal(card.GrossSalaryIncome))
+	assert.True(t, summary.GrossOtherIncome.Equal(card.GrossOtherIncome))
+	assert.True(t, summary.NetTax.Equal(card.NetTax))
+	assert.True(t, summary.NetIncome.Equal(card.NetIncome))
+	assert.True(t, summary.NetInvestment.Equal(card.NetInvestment))
+	assert.True(t, summary.NetExpense.Equal(card.NetExpense))
+	assert.True(t, summary.SavingsRate.Equal(card.SavingsRate))
+}

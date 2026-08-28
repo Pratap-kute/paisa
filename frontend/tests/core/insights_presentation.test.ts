@@ -121,9 +121,29 @@ describe("presentInsight", () => {
     };
 
     const pContrib = presentInsight(contrib);
-    expect(pContrib.title).toBe("Net worth growth composition");
+    expect(pContrib.title).toBe("Net worth change composition");
     expect(pContrib.description).toContain("investments");
-    expect(pContrib.description).toContain("market valuation change");
+    expect(pContrib.description).toContain("gain / valuation effect");
+  });
+
+  test("presents abnormal savings rate normalization with factual copy", () => {
+    const insight: _Insight = {
+      id: "savings_rate_change:2026-08",
+      type: "savings_rate_change",
+      category: "savings",
+      severity: "info",
+      score: 45,
+      value: 35,
+      previousValue: 140,
+      change: -105,
+      period: "2026-08",
+      comparisonPeriod: "2026-07",
+    };
+
+    const p = presentInsight(insight);
+    expect(p.title).toContain("Savings rate fell to 35%");
+    expect(p.description).toContain("unusually high savings rate");
+    expect(p.tone).toBe("info");
   });
 
   test("presents budget overspent and budget risk", () => {

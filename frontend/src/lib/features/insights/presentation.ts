@@ -1,4 +1,5 @@
-import type { Insight } from "$lib/domain/insights";
+import type { Insight, InsightsResult } from "$lib/domain/insights";
+import type { DtoInsightResponse, DtoInsightsResponse } from "$lib/api";
 import { restName } from "$lib/domain/account";
 import {
   formatCurrency,
@@ -6,6 +7,39 @@ import {
   formatPercentage,
 } from "$lib/shared/formatters/currency";
 import dayjs from "dayjs";
+
+export function mapInsightDtoToDomain(dto: DtoInsightResponse): Insight {
+  return {
+    id: dto.id ?? "",
+    type: dto.type ?? "",
+    category: dto.category ?? "",
+    severity: dto.severity ?? "info",
+    score: dto.score ?? 0,
+    value: dto.value,
+    previousValue: dto.previousValue,
+    change: dto.change,
+    changePercent: dto.changePercent,
+    investmentContribution: dto.investmentContribution,
+    gainContribution: dto.gainContribution,
+    period: dto.period,
+    comparisonPeriod: dto.comparisonPeriod,
+    account: dto.account,
+    relatedAccounts: dto.relatedAccounts,
+    href: dto.href,
+  };
+}
+
+export function mapInsightsResponseToDomain(
+  dto?: DtoInsightsResponse | null,
+): InsightsResult {
+  return {
+    period: dto?.period ?? "",
+    comparisonPeriod: dto?.comparisonPeriod,
+    asOf: dayjs(dto?.asOf),
+    isPartial: dto?.isPartial,
+    insights: (dto?.insights ?? []).map(mapInsightDtoToDomain),
+  };
+}
 
 export type InsightTone =
   | "positive"
@@ -200,7 +234,7 @@ export function presentInsight(
         const description = isLumpSumNormalization
           ? `Normalized from ${
             formatFloat(prev, 0)
-          }% in ${compSuffix} (lump-sum/bonus)`
+          }% in ${compSuffix} (previous period had an unusually high savings rate)`
           : `Down from ${formatFloat(prev, 0)}% in ${compSuffix}`;
 
         return {
@@ -302,10 +336,10 @@ export function presentInsight(
         categoryLabel,
         severity: insight.severity,
         score: insight.score,
-        title: "Net worth growth composition",
+        title: "Net worth change composition",
         description: `${formatCurrency(inv)} from new investments, ${
           formatCurrency(gain)
-        } from market valuation change`,
+        } from gain / valuation effect`,
         icon: "fa-solid fa-coins",
         tone: chg >= 0 ? "positive" : "info",
         badgeText: "Decomposition",
@@ -321,7 +355,7 @@ export function presentInsight(
             tone: gain >= 0 ? "positive" : "warning",
           },
         ],
-        actionText: "View Growth Details",
+        actionText: "View Net Worth Details",
         href: insight.href || "/assets/networth",
       };
     }

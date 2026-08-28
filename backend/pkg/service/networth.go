@@ -119,17 +119,24 @@ func ComputeNetworthOn(db *gorm.DB, postings []posting.Posting, onDate time.Time
 
 		rs := accumulator[p.Commodity]
 		isInterest := IsInterest(db, *p)
+		isInterestRepayment := IsInterestRepayment(db, *p)
+		isStockSplit := IsStockSplit(db, *p)
 		isCapitalGains := IsCapitalGains(*p)
 
-		if p.Amount.GreaterThan(decimal.Zero) && !isInterest {
-			rs.investment = rs.investment.Add(p.Amount)
-		}
-
-		if p.Amount.LessThan(decimal.Zero) && !isInterest {
+		switch {
+		case isInterest || isInterestRepayment:
+			rs.balance = rs.balance.Add(p.Amount)
+		case isCapitalGains:
 			rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-		}
+		default:
+			if p.Amount.GreaterThan(decimal.Zero) && !isStockSplit {
+				rs.investment = rs.investment.Add(p.Amount)
+			}
 
-		if !isCapitalGains {
+			if p.Amount.LessThan(decimal.Zero) && !isStockSplit {
+				rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
+			}
+
 			rs.balance = rs.balance.Add(GetMarketPrice(db, *p, onDate))
 			rs.balanceUnits = rs.balanceUnits.Add(p.Quantity)
 		}
@@ -194,17 +201,24 @@ func ComputeNetworthTimeline(db *gorm.DB, postings []posting.Posting, computeBal
 			rs := accumulator[p.Commodity]
 
 			isInterest := IsInterest(db, p)
+			isInterestRepayment := IsInterestRepayment(db, p)
+			isStockSplit := IsStockSplit(db, p)
 			isCapitalGains := IsCapitalGains(p)
 
-			if p.Amount.GreaterThan(decimal.Zero) && !isInterest {
-				rs.investment = rs.investment.Add(p.Amount)
-			}
-
-			if p.Amount.LessThan(decimal.Zero) && !isInterest {
+			switch {
+			case isInterest || isInterestRepayment:
+				rs.balance = rs.balance.Add(p.Amount)
+			case isCapitalGains:
 				rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-			}
+			default:
+				if p.Amount.GreaterThan(decimal.Zero) && !isStockSplit {
+					rs.investment = rs.investment.Add(p.Amount)
+				}
 
-			if !isCapitalGains {
+				if p.Amount.LessThan(decimal.Zero) && !isStockSplit {
+					rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
+				}
+
 				rs.balance = rs.balance.Add(GetMarketPrice(db, p, start))
 				rs.balanceUnits = rs.balanceUnits.Add(p.Quantity)
 			}

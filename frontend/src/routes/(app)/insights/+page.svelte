@@ -8,6 +8,7 @@ import BoxedTabs from "$lib/shared/ui/BoxedTabs.svelte";
 import InsightCard from "$lib/features/insights/components/InsightCard.svelte";
 import InsightItem from "$lib/features/insights/components/InsightItem.svelte";
 import InsightsSummaryBar from "$lib/features/insights/components/InsightsSummaryBar.svelte";
+import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
 import {
   type Insight,
   INSIGHT_CATEGORIES,
@@ -27,7 +28,7 @@ async function loadInsights(period: string) {
   isLoading = true;
   try {
     const res = await api.insights.getInsights({ period });
-    response = res as unknown as InsightsResult;
+    response = mapInsightsResponseToDomain(res);
   } catch (err) {
     console.error("Failed to fetch insights:", err);
     response = null;
