@@ -73,6 +73,15 @@ func computeLegacyStoredHash(rawPassword string) string {
 	return "sha256:" + utils.Sha256(inner)
 }
 
+func requireCredentialMigration(t *testing.T) {
+	t.Helper()
+	require.Eventually(t, func() bool {
+		cfg := config.GetConfig()
+		return len(cfg.UserAccounts) == 1 &&
+			strings.HasPrefix(cfg.UserAccounts[0].Password, "$argon2id$")
+	}, 2*time.Second, 10*time.Millisecond)
+}
+
 // TEST 1 — Existing SHA credential still works
 func TestAuth_LegacySHACredentialSuccess(t *testing.T) {
 	rawPassword := "legacy_secret_123"
@@ -90,6 +99,7 @@ func TestAuth_LegacySHACredentialSuccess(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
+	requireCredentialMigration(t)
 }
 
 // TEST 2 — Wrong password against SHA credential
@@ -129,10 +139,8 @@ func TestAuth_LegacyCredentialOpportunisticMigration(t *testing.T) {
 	router.ServeHTTP(w1, req1)
 	assert.Equal(t, http.StatusOK, w1.Code)
 
-	// Give background migration a moment to write
-	time.Sleep(50 * time.Millisecond)
-
 	// 2. Check stored configuration has been upgraded to Argon2id
+	requireCredentialMigration(t)
 	cfg := config.GetConfig()
 	require.Len(t, cfg.UserAccounts, 1)
 	assert.True(t, strings.HasPrefix(cfg.UserAccounts[0].Password, "$argon2id$"))
