@@ -56,22 +56,15 @@ let attentionInsights = $derived(
     i.severity === "critical" || i.severity === "warning"
   ),
 );
-let wealthInsights = $derived(
-  allInsights.filter(
-    (i) =>
-      (i.category === "networth" || i.category === "savings" ||
-        i.category === "investment") &&
-      i.severity !== "critical" &&
-      i.severity !== "warning",
-  ),
+let positiveInsights = $derived(
+  allInsights.filter((i) => i.severity === "positive"),
 );
-let spendingAndRecurringInsights = $derived(
+let observationInsights = $derived(
   allInsights.filter(
     (i) =>
-      (i.category === "spending" || i.category === "recurring" ||
-        i.category === "budget" || i.category === "cash") &&
       i.severity !== "critical" &&
-      i.severity !== "warning",
+      i.severity !== "warning" &&
+      i.severity !== "positive",
   ),
 );
 
@@ -206,17 +199,17 @@ const tabOptions = $derived.by(() => {
           </div>
         {/if}
 
-        <!-- Section 2: Wealth & Trajectory -->
-        {#if wealthInsights.length > 0}
+        <!-- Section 2: Positive Trends -->
+        {#if positiveInsights.length > 0}
           <div class="space-y-2.5">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-vault text-xs text-[var(--paisa-primary)]"></i>
+              <i class="fa-solid fa-circle-check text-xs text-[var(--paisa-positive)]"></i>
               <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--paisa-foreground)]">
-                Wealth & Trajectory ({wealthInsights.length})
+                Positive Trends ({positiveInsights.length})
               </h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {#each wealthInsights as insight (insight.id)}
+              {#each positiveInsights as insight (insight.id)}
                 <InsightCard
                   {insight}
                   isPartial={response?.isPartial}
@@ -227,17 +220,17 @@ const tabOptions = $derived.by(() => {
           </div>
         {/if}
 
-        <!-- Section 3: Spending & Recurring Trends -->
-        {#if spendingAndRecurringInsights.length > 0}
+        <!-- Section 3: Observations & Trends -->
+        {#if observationInsights.length > 0}
           <div class="space-y-2.5">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-chart-line text-xs text-[var(--paisa-muted-foreground)]"></i>
               <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--paisa-foreground)]">
-                Spending & Recurring Shifts ({spendingAndRecurringInsights.length})
+                Observations & Shifts ({observationInsights.length})
               </h3>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {#each spendingAndRecurringInsights as insight (insight.id)}
+              {#each observationInsights as insight (insight.id)}
                 <InsightCard
                   {insight}
                   isPartial={response?.isPartial}

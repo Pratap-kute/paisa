@@ -16,6 +16,10 @@ type InsightResponse struct {
 	PreviousValue          *decimal.Decimal `json:"previousValue,omitempty"`
 	Change                 *decimal.Decimal `json:"change,omitempty"`
 	ChangePercent          *decimal.Decimal `json:"changePercent,omitempty"`
+	BaselineQuality        string           `json:"baselineQuality,omitempty"`
+	BaselineMethod         string           `json:"baselineMethod,omitempty"`
+	BaselineValue          *decimal.Decimal `json:"baselineValue,omitempty"`
+	BaselineSampleCount    int              `json:"baselineSampleCount,omitempty"`
 	InvestmentContribution *decimal.Decimal `json:"investmentContribution,omitempty"`
 	GainContribution       *decimal.Decimal `json:"gainContribution,omitempty"`
 	Period                 string           `json:"period"`

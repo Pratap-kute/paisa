@@ -2771,6 +2771,18 @@ const docTemplate = `{
                 "account": {
                     "type": "string"
                 },
+                "baselineMethod": {
+                    "type": "string"
+                },
+                "baselineQuality": {
+                    "type": "string"
+                },
+                "baselineSampleCount": {
+                    "type": "integer"
+                },
+                "baselineValue": {
+                    "type": "number"
+                },
                 "category": {
                     "type": "string"
                 },

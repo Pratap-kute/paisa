@@ -19,6 +19,17 @@ export function mapInsightDtoToDomain(dto: DtoInsightResponse): Insight {
     previousValue: dto.previousValue,
     change: dto.change,
     changePercent: dto.changePercent,
+    baselineQuality: dto.baselineQuality as
+      | "normal"
+      | "low_baseline"
+      | "no_baseline"
+      | undefined,
+    baselineMethod: dto.baselineMethod as
+      | "previous_period"
+      | "rolling_median"
+      | undefined,
+    baselineValue: dto.baselineValue,
+    baselineSampleCount: dto.baselineSampleCount,
     investmentContribution: dto.investmentContribution,
     gainContribution: dto.gainContribution,
     period: dto.period,
@@ -175,11 +186,13 @@ export function presentInsight(
     case "category_spike": {
       const val = Number(insight.value ?? 0);
       const prev = Number(insight.previousValue ?? 0);
+      const chg = Number(insight.change ?? 0);
       const pct = Number(insight.changePercent ?? 0);
       const name = restName(insight.account || "") || insight.account ||
         "Category";
+      const isLowBaseline = insight.baselineQuality === "low_baseline";
 
-      if (prev === 0) {
+      if (prev === 0 || insight.baselineQuality === "no_baseline") {
         return {
           id: insight.id,
           type: insight.type,
@@ -195,6 +208,26 @@ export function presentInsight(
           heroMetric: formatCurrency(val),
           heroLabel: "first month",
           actionText: "Analyze Category",
+          href: insight.href || "/expense/monthly",
+        };
+      }
+
+      if (isLowBaseline) {
+        return {
+          id: insight.id,
+          type: insight.type,
+          category: insight.category,
+          categoryLabel,
+          severity: insight.severity,
+          score: insight.score,
+          title: `${name} spending increased by ${formatCurrency(chg)}`,
+          description: `${formatCurrency(val)} this month vs a very small amount previously`,
+          icon: "fa-solid fa-arrow-trend-up",
+          tone: "info",
+          badgeText: `+${formatCurrency(chg)}`,
+          heroMetric: `+${formatCurrency(chg)}`,
+          heroLabel: `${formatCurrency(val)} this month`,
+          actionText: "Analyze Spending",
           href: insight.href || "/expense/monthly",
         };
       }
@@ -329,6 +362,13 @@ export function presentInsight(
       const gain = Number(insight.gainContribution ?? 0);
       const chg = Number(insight.change ?? 0);
 
+      const invLabel = inv >= 0
+        ? `${formatCurrency(inv)} net capital added`
+        : `${formatCurrency(Math.abs(inv))} net capital withdrawn`;
+      const gainLabel = gain >= 0
+        ? `${formatCurrency(gain)} gain / valuation effect`
+        : `${formatCurrency(Math.abs(gain))} loss / valuation effect`;
+
       return {
         id: insight.id,
         type: insight.type,
@@ -337,9 +377,7 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: "Net worth change composition",
-        description: `${formatCurrency(inv)} from new investments, ${
-          formatCurrency(gain)
-        } from gain / valuation effect`,
+        description: `${invLabel}, ${gainLabel}`,
         icon: "fa-solid fa-coins",
         tone: chg >= 0 ? "positive" : "info",
         badgeText: "Decomposition",
@@ -347,11 +385,11 @@ export function presentInsight(
         heroLabel: "net movement",
         tags: [
           {
-            label: `${inv >= 0 ? "+" : ""}${formatCurrency(inv)} Capital`,
-            tone: "info",
+            label: `${inv >= 0 ? "+" : "-"}${formatCurrency(Math.abs(inv))} Capital`,
+            tone: inv >= 0 ? "info" : "warning",
           },
           {
-            label: `${gain >= 0 ? "+" : ""}${formatCurrency(gain)} Valuation`,
+            label: `${gain >= 0 ? "+" : "-"}${formatCurrency(Math.abs(gain))} Valuation`,
             tone: gain >= 0 ? "positive" : "warning",
           },
         ],
@@ -430,6 +468,16 @@ export function presentInsight(
       const chg = Number(insight.change ?? 0);
       const pct = Number(insight.changePercent ?? 0);
       const name = insight.account || "Recurring";
+      const isRollingMedian = insight.baselineMethod === "rolling_median" &&
+        (insight.baselineSampleCount ?? 0) >= 3;
+      const baselineVal = Number(insight.baselineValue ?? prev);
+
+      const title = isRollingMedian
+        ? `${name} bill is unusually high`
+        : `${name} recurring cost increased to ${formatCurrency(val)}`;
+      const description = isRollingMedian
+        ? `${formatCurrency(val)} this month (typical recent bill: ~${formatCurrency(baselineVal)})`
+        : `Up by ${formatCurrency(chg)} (+${formatFloat(pct, 1)}%) from ${formatCurrency(prev)}`;
 
       return {
         id: insight.id,
@@ -438,15 +486,15 @@ export function presentInsight(
         categoryLabel,
         severity: insight.severity,
         score: insight.score,
-        title: `${name} recurring cost increased to ${formatCurrency(val)}`,
-        description: `Up by ${formatCurrency(chg)} (+${
-          formatFloat(pct, 1)
-        }%) from ${formatCurrency(prev)}`,
+        title,
+        description,
         icon: "fa-solid fa-repeat",
-        tone: "warning",
-        badgeText: `+${formatFloat(pct, 1)}%`,
-        heroMetric: `+${formatFloat(pct, 1)}%`,
-        heroLabel: `+${formatCurrency(chg)} (now ${formatCurrency(val)})`,
+        tone: insight.severity === "warning" ? "warning" : "info",
+        badgeText: `+${formatCurrency(chg)}`,
+        heroMetric: `+${formatCurrency(chg)}`,
+        heroLabel: isRollingMedian
+          ? `${formatCurrency(val)} vs ~${formatCurrency(baselineVal)}`
+          : `${formatCurrency(val)} vs ${formatCurrency(prev)}`,
         actionText: "View Recurring Schedule",
         href: insight.href || "/cash_flow/recurring",
       };

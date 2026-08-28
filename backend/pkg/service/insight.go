@@ -57,6 +57,30 @@ const (
 	InsightSeverityCritical InsightSeverity = "critical"
 )
 
+type BaselineQuality string
+
+const (
+	BaselineQualityNormal      BaselineQuality = "normal"
+	BaselineQualityLowBaseline BaselineQuality = "low_baseline"
+	BaselineQualityNoBaseline  BaselineQuality = "no_baseline"
+)
+
+type BaselineMethod string
+
+const (
+	BaselineMethodPreviousPeriod BaselineMethod = "previous_period"
+	BaselineMethodRollingMedian  BaselineMethod = "rolling_median"
+)
+
+var (
+	CategoryMinIncreasePercent  = decimal.NewFromInt(20)
+	CategoryMinCurrentShare     = decimal.NewFromFloat(0.05) // 5% of current monthly expenses
+	CategoryMinImpactShare      = decimal.NewFromFloat(0.02) // 2% of current monthly expenses
+	CategoryLowBaselineShare    = decimal.NewFromFloat(0.01) // 1% of monthly expenses
+	RecurringMinIncreasePercent = decimal.NewFromInt(10)
+	RecurringMinImpactShare     = decimal.NewFromFloat(0.01) // 1% of current monthly expenses
+)
+
 type Insight struct {
 	ID                     string           `json:"id"`
 	Type                   InsightType      `json:"type"`
@@ -67,6 +91,10 @@ type Insight struct {
 	PreviousValue          *decimal.Decimal `json:"previousValue,omitempty"`
 	Change                 *decimal.Decimal `json:"change,omitempty"`
 	ChangePercent          *decimal.Decimal `json:"changePercent,omitempty"`
+	BaselineQuality        BaselineQuality  `json:"baselineQuality,omitempty"`
+	BaselineMethod         BaselineMethod   `json:"baselineMethod,omitempty"`
+	BaselineValue          *decimal.Decimal `json:"baselineValue,omitempty"`
+	BaselineSampleCount    int              `json:"baselineSampleCount,omitempty"`
 	InvestmentContribution *decimal.Decimal `json:"investmentContribution,omitempty"`
 	GainContribution       *decimal.Decimal `json:"gainContribution,omitempty"`
 	Period                 string           `json:"period"`
@@ -91,17 +119,24 @@ type PeriodSummary struct {
 	NetworthEnd       Networth
 }
 
+type HistoricalExpensePeriod struct {
+	Period            string
+	TotalExpenses     decimal.Decimal
+	ExpenseByCategory map[string]decimal.Decimal
+}
+
 type InsightContext struct {
-	Period           string
-	ComparisonPeriod string
-	AsOf             time.Time
-	IsPartial        bool
-	Current          PeriodSummary
-	Comparison       PeriodSummary
-	Budget           BudgetResult
-	Recurring        []TransactionSequence
-	Allocation       AllocationSummary
-	CheckingBalance  decimal.Decimal
+	Period                   string
+	ComparisonPeriod         string
+	AsOf                     time.Time
+	IsPartial                bool
+	Current                  PeriodSummary
+	Comparison               PeriodSummary
+	HistoricalExpensePeriods []HistoricalExpensePeriod
+	Budget                   BudgetResult
+	Recurring                []TransactionSequence
+	Allocation               AllocationSummary
+	CheckingBalance          decimal.Decimal
 }
 
 type InsightsResult struct {
@@ -110,6 +145,25 @@ type InsightsResult struct {
 	AsOf             time.Time `json:"asOf"`
 	IsPartial        bool      `json:"isPartial"`
 	Insights         []Insight `json:"insights"`
+}
+
+func Median(values []decimal.Decimal) decimal.Decimal {
+	if len(values) == 0 {
+		return decimal.Zero
+	}
+	sorted := make([]decimal.Decimal, len(values))
+	copy(sorted, values)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].LessThan(sorted[j])
+	})
+
+	n := len(sorted)
+	if n%2 != 0 {
+		return sorted[n/2]
+	}
+	mid1 := sorted[n/2-1]
+	mid2 := sorted[n/2]
+	return mid1.Add(mid2).Div(decimal.NewFromInt(2))
 }
 
 func GetInsights(db *gorm.DB, periodStr string) (InsightsResult, error) {
@@ -174,22 +228,88 @@ func BuildInsightContext(db *gorm.DB, periodStr string) (InsightContext, error) 
 	currentSummary := buildPeriodSummary(db, currentStart, currentEnd, asOf, isPartial)
 	compSummary := buildPeriodSummary(db, compStart, compEnd, compEnd, isPartial)
 
+	// Load up to 6 historical months prior to targetMonth (batch query)
+	histStartOverall := utils.BeginningOfMonth(targetMonth.AddDate(0, -6, 0))
+	histEndOverall := targetMonth
+	histPostings := query.Init(db).Like("Expenses:%").NotAccountPrefix("Expenses:Tax").Between(histStartOverall, histEndOverall).All()
+
+	type mtdWindow struct {
+		period string
+		start  time.Time
+		end    time.Time
+	}
+	windows := make([]mtdWindow, 0, 6)
+	for k := 1; k <= 6; k++ {
+		hMonth := targetMonth.AddDate(0, -k, 0)
+		hStr := hMonth.Format("2006-01")
+		hStart := utils.BeginningOfMonth(hMonth)
+		var hEnd time.Time
+		if isPartial {
+			dayOfMonth := now.Day()
+			daysInMonth := utils.EndOfMonth(hMonth).Day()
+			if dayOfMonth > daysInMonth {
+				dayOfMonth = daysInMonth
+			}
+			hEnd = time.Date(hMonth.Year(), hMonth.Month(), dayOfMonth, 23, 59, 59, 999999999, config.TimeZone())
+		} else {
+			hEnd = utils.EndOfMonth(hMonth)
+		}
+		windows = append(windows, mtdWindow{period: hStr, start: hStart, end: hEnd})
+	}
+
+	histMap := make(map[string]map[string]decimal.Decimal)
+	histTotals := make(map[string]decimal.Decimal)
+	for i := range windows {
+		histMap[windows[i].period] = make(map[string]decimal.Decimal)
+		histTotals[windows[i].period] = decimal.Zero
+	}
+
+	for i := range histPostings {
+		p := &histPostings[i]
+		for wIdx := range windows {
+			w := &windows[wIdx]
+			if (p.Date.Equal(w.start) || p.Date.After(w.start)) && (p.Date.Equal(w.end) || p.Date.Before(w.end)) {
+				parts := strings.Split(p.Account, ":")
+				var topCategory string
+				if len(parts) >= 2 {
+					topCategory = parts[0] + ":" + parts[1]
+				} else {
+					topCategory = p.Account
+				}
+				histMap[w.period][topCategory] = histMap[w.period][topCategory].Add(p.Amount)
+				histTotals[w.period] = histTotals[w.period].Add(p.Amount)
+				break
+			}
+		}
+	}
+
+	historicalExpensePeriods := make([]HistoricalExpensePeriod, 0, 6)
+	for i := range windows {
+		pStr := windows[i].period
+		historicalExpensePeriods = append(historicalExpensePeriods, HistoricalExpensePeriod{
+			Period:            pStr,
+			TotalExpenses:     histTotals[pStr],
+			ExpenseByCategory: histMap[pStr],
+		})
+	}
+
 	budgetRes := GetBudget(db)
 	recurring := GetRecurringTransactions(db)
 	allocation := GetAllocationSummary(db)
 	checkingBalance := accounting.CostSum(query.Init(db).AccountPrefix("Assets:Checking").All())
 
 	return InsightContext{
-		Period:           periodStr,
-		ComparisonPeriod: comparisonPeriodStr,
-		AsOf:             asOf,
-		IsPartial:        isPartial,
-		Current:          currentSummary,
-		Comparison:       compSummary,
-		Budget:           budgetRes,
-		Recurring:        recurring,
-		Allocation:       allocation,
-		CheckingBalance:  checkingBalance,
+		Period:                   periodStr,
+		ComparisonPeriod:         comparisonPeriodStr,
+		AsOf:                     asOf,
+		IsPartial:                isPartial,
+		Current:                  currentSummary,
+		Comparison:               compSummary,
+		HistoricalExpensePeriods: historicalExpensePeriods,
+		Budget:                   budgetRes,
+		Recurring:                recurring,
+		Allocation:               allocation,
+		CheckingBalance:          checkingBalance,
 	}, nil
 }
 
@@ -280,6 +400,11 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 	curr := ctx.Current.Expenses
 	prev := ctx.Comparison.Expenses
 
+	// If ongoing partial month has zero expenses, do not emit false -100% drop
+	if ctx.IsPartial && curr.IsZero() {
+		return nil
+	}
+
 	if curr.IsZero() && prev.IsZero() {
 		return nil
 	}
@@ -346,8 +471,81 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 	return nil
 }
 
+type CategoryBaselineResult struct {
+	BaselineValue       decimal.Decimal
+	BaselineQuality     BaselineQuality
+	BaselineMethod      BaselineMethod
+	BaselineSampleCount int
+}
+
+func RecentCategoryBaseline(ctx InsightContext, account string) CategoryBaselineResult {
+	historicalValues := make([]decimal.Decimal, 0, len(ctx.HistoricalExpensePeriods))
+	historicalTotals := make([]decimal.Decimal, 0, len(ctx.HistoricalExpensePeriods))
+	for i := range ctx.HistoricalExpensePeriods {
+		hp := &ctx.HistoricalExpensePeriods[i]
+		if val, ok := hp.ExpenseByCategory[account]; ok && val.IsPositive() {
+			historicalValues = append(historicalValues, val)
+			historicalTotals = append(historicalTotals, hp.TotalExpenses)
+		} else if hp.TotalExpenses.IsPositive() {
+			// Month had expenses but 0 in this category
+			historicalValues = append(historicalValues, decimal.Zero)
+			historicalTotals = append(historicalTotals, hp.TotalExpenses)
+		}
+	}
+
+	if len(historicalValues) >= 3 {
+		baseline := Median(historicalValues)
+		histTotalMedian := Median(historicalTotals)
+
+		if baseline.IsZero() {
+			return CategoryBaselineResult{
+				BaselineValue:       baseline,
+				BaselineQuality:     BaselineQualityNoBaseline,
+				BaselineMethod:      BaselineMethodRollingMedian,
+				BaselineSampleCount: len(historicalValues),
+			}
+		}
+
+		quality := BaselineQualityNormal
+		if histTotalMedian.IsPositive() && baseline.Div(histTotalMedian).LessThan(CategoryLowBaselineShare) {
+			quality = BaselineQualityLowBaseline
+		}
+
+		return CategoryBaselineResult{
+			BaselineValue:       baseline,
+			BaselineQuality:     quality,
+			BaselineMethod:      BaselineMethodRollingMedian,
+			BaselineSampleCount: len(historicalValues),
+		}
+	}
+
+	if prevVal, ok := ctx.Comparison.ExpenseByCategory[account]; ok && prevVal.IsPositive() {
+		quality := BaselineQualityNormal
+		if ctx.Comparison.Expenses.IsPositive() && prevVal.Div(ctx.Comparison.Expenses).LessThan(CategoryLowBaselineShare) {
+			quality = BaselineQualityLowBaseline
+		}
+		return CategoryBaselineResult{
+			BaselineValue:       prevVal,
+			BaselineQuality:     quality,
+			BaselineMethod:      BaselineMethodPreviousPeriod,
+			BaselineSampleCount: 1,
+		}
+	}
+
+	return CategoryBaselineResult{
+		BaselineValue:       decimal.Zero,
+		BaselineQuality:     BaselineQualityNoBaseline,
+		BaselineMethod:      BaselineMethodPreviousPeriod,
+		BaselineSampleCount: 0,
+	}
+}
+
 func detectCategorySpikes(ctx InsightContext) []Insight {
 	spikes := make([]Insight, 0)
+	currTotal := ctx.Current.Expenses
+	if currTotal.IsZero() {
+		return spikes
+	}
 
 	for cat, currCat := range ctx.Current.ExpenseByCategory {
 		if strings.HasPrefix(cat, "Expenses:Tax") {
@@ -357,61 +555,80 @@ func detectCategorySpikes(ctx InsightContext) []Insight {
 			continue
 		}
 
-		prevCat := ctx.Comparison.ExpenseByCategory[cat]
-		diff := currCat.Sub(prevCat)
+		currShare := currCat.Div(currTotal)
+		// Requirement: current category spend must be at least 5% of monthly expenses
+		if currShare.LessThan(CategoryMinCurrentShare) {
+			continue
+		}
 
-		if prevCat.IsPositive() {
-			percent := diff.Div(prevCat).Mul(decimal.NewFromInt(100))
-			// Relative materiality: category diff must be >= 2% of total monthly spend
-			isRelativeMaterial := false
-			var share decimal.Decimal
-			if ctx.Current.Expenses.IsPositive() {
-				share = diff.Div(ctx.Current.Expenses)
-				if share.GreaterThanOrEqual(decimal.NewFromFloat(0.02)) {
-					isRelativeMaterial = true
-				}
-			}
+		baselineRes := RecentCategoryBaseline(ctx, cat)
+		diff := currCat.Sub(baselineRes.BaselineValue)
 
-			if percent.GreaterThanOrEqual(decimal.NewFromInt(20)) && isRelativeMaterial {
+		if baselineRes.BaselineValue.IsPositive() {
+			percent := diff.Div(baselineRes.BaselineValue).Mul(decimal.NewFromInt(100))
+			impactShare := diff.Div(currTotal)
+
+			// Requirements:
+			// 1. Percentage increase >= 20%
+			// 2. Absolute impact >= 2% of monthly expenses
+			if percent.GreaterThanOrEqual(CategoryMinIncreasePercent) && impactShare.GreaterThanOrEqual(CategoryMinImpactShare) {
 				severity := InsightSeverityInfo
-				if percent.GreaterThanOrEqual(decimal.NewFromInt(40)) && share.GreaterThanOrEqual(decimal.NewFromFloat(0.05)) {
+				if percent.GreaterThanOrEqual(decimal.NewFromInt(40)) && impactShare.GreaterThanOrEqual(decimal.NewFromFloat(0.05)) {
 					severity = InsightSeverityWarning
 				}
-				score := 55 + int(percent.IntPart()/2)
-				if score > 75 {
-					score = 75
+
+				// Financial impact share dominates scoring with strict bounding (30 to 80)
+				score := 45 + int(currShare.Mul(decimal.NewFromInt(80)).IntPart()) + int(impactShare.Mul(decimal.NewFromInt(120)).IntPart())
+				if baselineRes.BaselineQuality == BaselineQualityLowBaseline {
+					score -= 15
+				}
+				if score > 80 {
+					score = 80
+				}
+				if score < 30 {
+					score = 30
 				}
 
+				baselineVal := baselineRes.BaselineValue
 				spikes = append(spikes, Insight{
-					ID:               fmt.Sprintf("category_spike:%s:%s", ctx.Period, cat),
-					Type:             InsightTypeCategorySpike,
-					Category:         InsightCategorySpending,
-					Severity:         severity,
-					Score:            score,
-					Value:            &currCat,
-					PreviousValue:    &prevCat,
-					Change:           &diff,
-					ChangePercent:    &percent,
-					Account:          cat,
-					Period:           ctx.Period,
-					ComparisonPeriod: ctx.ComparisonPeriod,
-					Href:             hrefExpenseMonthly,
+					ID:                  fmt.Sprintf("category_spike:%s:%s", ctx.Period, cat),
+					Type:                InsightTypeCategorySpike,
+					Category:            InsightCategorySpending,
+					Severity:            severity,
+					Score:               score,
+					Value:               &currCat,
+					PreviousValue:       &baselineVal,
+					Change:              &diff,
+					ChangePercent:       &percent,
+					BaselineQuality:     baselineRes.BaselineQuality,
+					BaselineMethod:      baselineRes.BaselineMethod,
+					BaselineValue:       &baselineVal,
+					BaselineSampleCount: baselineRes.BaselineSampleCount,
+					Account:             cat,
+					Period:              ctx.Period,
+					ComparisonPeriod:    ctx.ComparisonPeriod,
+					Href:                hrefExpenseMonthly,
 				})
 			}
-		} else if prevCat.IsZero() && ctx.Current.Expenses.IsPositive() {
-			if currCat.Div(ctx.Current.Expenses).GreaterThanOrEqual(decimal.NewFromFloat(0.05)) {
+		} else if baselineRes.BaselineQuality == BaselineQualityNoBaseline || baselineRes.BaselineQuality == BaselineQualityLowBaseline {
+			// No baseline or tiny baseline: must be financially significant (>= 5% of monthly spend)
+			impactShare := currCat.Div(currTotal)
+			if impactShare.GreaterThanOrEqual(CategoryMinCurrentShare) {
 				spikes = append(spikes, Insight{
-					ID:               fmt.Sprintf("category_spike:%s:%s", ctx.Period, cat),
-					Type:             InsightTypeCategorySpike,
-					Category:         InsightCategorySpending,
-					Severity:         InsightSeverityInfo,
-					Score:            50,
-					Value:            &currCat,
-					Change:           &diff,
-					Account:          cat,
-					Period:           ctx.Period,
-					ComparisonPeriod: ctx.ComparisonPeriod,
-					Href:             hrefExpenseMonthly,
+					ID:                  fmt.Sprintf("category_spike:%s:%s", ctx.Period, cat),
+					Type:                InsightTypeCategorySpike,
+					Category:            InsightCategorySpending,
+					Severity:            InsightSeverityInfo,
+					Score:               45,
+					Value:               &currCat,
+					Change:              &diff,
+					BaselineQuality:     baselineRes.BaselineQuality,
+					BaselineMethod:      baselineRes.BaselineMethod,
+					BaselineSampleCount: baselineRes.BaselineSampleCount,
+					Account:             cat,
+					Period:              ctx.Period,
+					ComparisonPeriod:    ctx.ComparisonPeriod,
+					Href:                hrefExpenseMonthly,
 				})
 			}
 		}
@@ -628,53 +845,128 @@ func detectBudgetRisk(ctx InsightContext) []Insight {
 	return insights
 }
 
+type RecurringBaselineResult struct {
+	BaselineValue       decimal.Decimal
+	BaselineMethod      BaselineMethod
+	BaselineSampleCount int
+}
+
+func RecentRecurringBaseline(seq TransactionSequence, currentPeriodStart time.Time) RecurringBaselineResult {
+	pastAmounts := make([]decimal.Decimal, 0, len(seq.Transactions))
+	for i := range seq.Transactions {
+		tx := &seq.Transactions[i]
+		if tx.Date.Before(currentPeriodStart) {
+			outflow := expenseOutflow(*tx)
+			if outflow.IsPositive() {
+				pastAmounts = append(pastAmounts, outflow)
+			}
+		}
+	}
+
+	if len(pastAmounts) >= 3 {
+		window := pastAmounts
+		if len(window) > 6 {
+			window = window[:6]
+		}
+		return RecurringBaselineResult{
+			BaselineValue:       Median(window),
+			BaselineMethod:      BaselineMethodRollingMedian,
+			BaselineSampleCount: len(window),
+		}
+	} else if len(pastAmounts) >= 1 {
+		return RecurringBaselineResult{
+			BaselineValue:       pastAmounts[0],
+			BaselineMethod:      BaselineMethodPreviousPeriod,
+			BaselineSampleCount: len(pastAmounts),
+		}
+	}
+	return RecurringBaselineResult{
+		BaselineValue:       decimal.Zero,
+		BaselineMethod:      BaselineMethodPreviousPeriod,
+		BaselineSampleCount: 0,
+	}
+}
+
 func detectRecurringIncrease(ctx InsightContext) []Insight {
 	insights := make([]Insight, 0)
+	currentPeriodStart := ctx.Current.Start
+
+	// If current monthly expenses is zero or negative, do not emit warnings based on percentage
+	if ctx.Current.Expenses.LessThanOrEqual(decimal.Zero) {
+		return insights
+	}
 
 	for _, seq := range ctx.Recurring {
 		if len(seq.Transactions) < 2 {
 			continue
 		}
 
-		// Find transaction occurring in ctx.Period and compare against its immediate predecessor
+		// Find transaction occurring in ctx.Period
 		var currentTx *transaction.Transaction
-		var prevTx *transaction.Transaction
 		for i := range seq.Transactions {
 			tx := &seq.Transactions[i]
-			txPeriod := tx.Date.Format("2006-01")
-			if currentTx == nil && txPeriod == ctx.Period {
+			if tx.Date.Format("2006-01") == ctx.Period {
 				currentTx = tx
-			} else if currentTx != nil {
-				prevTx = tx
 				break
 			}
 		}
 
-		if currentTx == nil || prevTx == nil {
+		if currentTx == nil {
 			continue
 		}
 
 		latestExpense := expenseOutflow(*currentTx)
-		prevExpense := expenseOutflow(*prevTx)
+		if latestExpense.LessThanOrEqual(decimal.Zero) {
+			continue
+		}
 
-		if latestExpense.GreaterThan(prevExpense) && prevExpense.IsPositive() {
-			diff := latestExpense.Sub(prevExpense)
-			percent := diff.Div(prevExpense).Mul(decimal.NewFromInt(100))
+		baselineRes := RecentRecurringBaseline(seq, currentPeriodStart)
+		if baselineRes.BaselineValue.IsZero() {
+			continue
+		}
 
-			if percent.GreaterThanOrEqual(decimal.NewFromInt(5)) {
+		if latestExpense.GreaterThan(baselineRes.BaselineValue) {
+			diff := latestExpense.Sub(baselineRes.BaselineValue)
+			percent := diff.Div(baselineRes.BaselineValue).Mul(decimal.NewFromInt(100))
+			impactShare := diff.Div(ctx.Current.Expenses)
+
+			// Materiality checks:
+			// 1. Percentage increase >= 10%
+			// 2. Absolute increase >= 1% of current monthly expenses
+			if percent.GreaterThanOrEqual(RecurringMinIncreasePercent) && impactShare.GreaterThanOrEqual(RecurringMinImpactShare) {
+				severity := InsightSeverityInfo
+				if impactShare.GreaterThanOrEqual(decimal.NewFromFloat(0.03)) {
+					severity = InsightSeverityWarning
+				}
+
+				score := 45 + int(percent.IntPart()/3)
+				if score > 75 {
+					score = 75
+				}
+
+				baselineVal := baselineRes.BaselineValue
+				var baselinePtr *decimal.Decimal
+				if baselineRes.BaselineSampleCount >= 3 {
+					baselinePtr = &baselineVal
+				}
+
 				insights = append(insights, Insight{
-					ID:            fmt.Sprintf("recurring_increase:%s:%s", ctx.Period, seq.Key),
-					Type:          InsightTypeRecurringIncrease,
-					Category:      InsightCategoryRecurring,
-					Severity:      InsightSeverityWarning,
-					Score:         60,
-					Value:         &latestExpense,
-					PreviousValue: &prevExpense,
-					Change:        &diff,
-					ChangePercent: &percent,
-					Account:       seq.Key,
-					Period:        ctx.Period,
-					Href:          "/cash_flow/recurring",
+					ID:                  fmt.Sprintf("recurring_increase:%s:%s", ctx.Period, seq.Key),
+					Type:                InsightTypeRecurringIncrease,
+					Category:            InsightCategoryRecurring,
+					Severity:            severity,
+					Score:               score,
+					Value:               &latestExpense,
+					PreviousValue:       &baselineVal,
+					Change:              &diff,
+					ChangePercent:       &percent,
+					BaselineMethod:      baselineRes.BaselineMethod,
+					BaselineValue:       baselinePtr,
+					BaselineSampleCount: baselineRes.BaselineSampleCount,
+					Account:             seq.Key,
+					Period:              ctx.Period,
+					ComparisonPeriod:    ctx.ComparisonPeriod,
+					Href:                "/cash_flow/recurring",
 				})
 			}
 		}

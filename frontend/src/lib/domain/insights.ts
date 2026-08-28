@@ -10,6 +10,10 @@ export interface Insight {
   previousValue?: number;
   change?: number;
   changePercent?: number;
+  baselineQuality?: "normal" | "low_baseline" | "no_baseline";
+  baselineMethod?: "previous_period" | "rolling_median";
+  baselineValue?: number;
+  baselineSampleCount?: number;
   investmentContribution?: number;
   gainContribution?: number;
   period?: string;

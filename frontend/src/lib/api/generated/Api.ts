@@ -330,6 +330,10 @@ export interface DtoIndexResponse {
 
 export interface DtoInsightResponse {
   account?: string;
+  baselineMethod?: string;
+  baselineQuality?: string;
+  baselineSampleCount?: number;
+  baselineValue?: number;
   category?: string;
   change?: number;
   changePercent?: number;

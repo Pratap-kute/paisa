@@ -122,8 +122,117 @@ describe("presentInsight", () => {
 
     const pContrib = presentInsight(contrib);
     expect(pContrib.title).toBe("Net worth change composition");
-    expect(pContrib.description).toContain("investments");
+    expect(pContrib.description).toContain("net capital added");
     expect(pContrib.description).toContain("gain / valuation effect");
+  });
+
+  test("presents net worth contribution with capital withdrawal and valuation loss", () => {
+    const contrib: _Insight = {
+      id: "networth_contribution:2026-08",
+      type: "networth_contribution",
+      category: "investment",
+      severity: "info",
+      score: 40,
+      value: 1200000,
+      change: -14951,
+      investmentContribution: -20577,
+      gainContribution: 5626,
+      period: "2026-08",
+    };
+
+    const p = presentInsight(contrib);
+    expect(p.description).toContain("20,577.00 net capital withdrawn");
+    expect(p.description).toContain("5,626.00 gain / valuation effect");
+    expect(p.description).not.toContain("from new investments");
+
+    const contribLoss: _Insight = {
+      id: "networth_contribution:2026-08",
+      type: "networth_contribution",
+      category: "investment",
+      severity: "info",
+      score: 40,
+      value: 1200000,
+      change: -25000,
+      investmentContribution: -20000,
+      gainContribution: -5000,
+      period: "2026-08",
+    };
+
+    const pLoss = presentInsight(contribLoss);
+    expect(pLoss.description).toContain("20,000.00 net capital withdrawn");
+    expect(pLoss.description).toContain("5,000.00 loss / valuation effect");
+  });
+
+  test("presents category spike with low baseline as absolute increase", () => {
+    const insight: _Insight = {
+      id: "category_spike:2026-08:Expenses:Transport",
+      type: "category_spike",
+      category: "spending",
+      severity: "info",
+      score: 45,
+      value: 1030,
+      previousValue: 30,
+      change: 1000,
+      changePercent: 3333.3,
+      baselineQuality: "low_baseline",
+      account: "Expenses:Transport",
+      period: "2026-08",
+      comparisonPeriod: "2026-07",
+    };
+
+    const p = presentInsight(insight);
+    expect(p.title).toContain("Transport spending increased by");
+    expect(p.description).toContain("very small amount previously");
+    expect(p.badgeText).toContain("1,000");
+  });
+
+  test("presents recurring increase with historical median baseline", () => {
+    const insight: _Insight = {
+      id: "recurring_increase:2026-08:Electricity",
+      type: "recurring_increase",
+      category: "recurring",
+      severity: "warning",
+      score: 65,
+      value: 5660,
+      previousValue: 2370,
+      baselineMethod: "rolling_median",
+      baselineValue: 2370,
+      baselineSampleCount: 4,
+      change: 3290,
+      changePercent: 138.8,
+      account: "Electricity",
+      period: "2026-08",
+      comparisonPeriod: "2026-07",
+    };
+
+    const p = presentInsight(insight);
+    expect(p.title).toBe("Electricity bill is unusually high");
+    expect(p.description).toContain("typical recent bill: ~");
+    expect(p.heroLabel).toContain("vs ~");
+  });
+
+  test("presents recurring increase with 1 sample previous period fallback", () => {
+    const insight: _Insight = {
+      id: "recurring_increase:2026-08:Electricity",
+      type: "recurring_increase",
+      category: "recurring",
+      severity: "warning",
+      score: 65,
+      value: 5660,
+      previousValue: 2340,
+      baselineMethod: "previous_period",
+      baselineSampleCount: 1,
+      change: 3320,
+      changePercent: 141.9,
+      account: "Electricity",
+      period: "2026-08",
+      comparisonPeriod: "2026-07",
+    };
+
+    const p = presentInsight(insight);
+    expect(p.title).toContain("Electricity recurring cost increased to");
+    expect(p.description).toContain("from 2,340.00");
+    expect(p.heroLabel).toContain("vs 2,340.00");
   });
 
   test("presents abnormal savings rate normalization with factual copy", () => {
