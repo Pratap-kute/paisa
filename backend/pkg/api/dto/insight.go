@@ -22,6 +22,9 @@ type InsightResponse struct {
 	BaselineSampleCount    int              `json:"baselineSampleCount,omitempty"`
 	InvestmentContribution *decimal.Decimal `json:"investmentContribution,omitempty"`
 	GainContribution       *decimal.Decimal `json:"gainContribution,omitempty"`
+	DriverAccount          *string          `json:"driverAccount,omitempty"`
+	DriverChange           *decimal.Decimal `json:"driverChange,omitempty"`
+	DriverShare            *decimal.Decimal `json:"driverShare,omitempty"`
 	Period                 string           `json:"period"`
 	ComparisonPeriod       string           `json:"comparisonPeriod,omitempty"`
 	Account                string           `json:"account,omitempty"`

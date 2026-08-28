@@ -24,6 +24,9 @@ import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
 import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
 import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
 import { filter, map } from "$lib/shared/utils/collection";
+import { page } from "$app/state";
+import { validPeriod } from "$lib/shared/browser/period";
+import dayjs from "dayjs";
 
 let networth = $state(0);
 let investment = $state(0);
@@ -32,15 +35,16 @@ let xirr = $state(0);
 let isLoading = $state(true);
 let points: Networth[] = $state([]);
 let legends: Legend[] = $state([]);
+const selectedPeriod = validPeriod(page.url.searchParams.get("period"));
 
-let filteredPoints = $derived(
-  filter(
-    points,
-    (p) =>
-      p.date.isSameOrBefore($dateRange.to) &&
-      p.date.isSameOrAfter($dateRange.from),
-  ),
-);
+let filteredPoints = $derived.by(() => {
+  if (!selectedPeriod) return filter(points, (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from));
+  const start = dayjs(`${selectedPeriod}-01`).startOf("month");
+  const end = start.endOf("month");
+  const inPeriod = points.filter((p) => p.date.isSameOrAfter(start) && p.date.isSameOrBefore(end));
+  const before = points.filter((p) => p.date.isBefore(start)).at(-1);
+  return before ? [before, ...inPeriod] : inPeriod;
+});
 
 $effect(() => {
   legends = buildNetworthSeries(filteredPoints).legends ?? [];
@@ -52,7 +56,8 @@ onMount(async () => {
     points = (result.networthTimeline as unknown as Networth[]) || [];
     setAllowedDateRange(map(points, (p) => p.date));
 
-    const current = last(points);
+    const periodEnd = selectedPeriod ? dayjs(`${selectedPeriod}-01`).endOf("month") : undefined;
+    const current = periodEnd ? last(points.filter((p) => p.date.isSameOrBefore(periodEnd))) : last(points);
     if (current) {
       networth = current.investmentAmount + current.gainAmount -
         current.withdrawalAmount;
@@ -82,7 +87,13 @@ onMount(async () => {
     {/snippet}
   </PageHeader>
 
-  <MetricStrip cols={4}>
+  {#if selectedPeriod}
+    <div class="mb-3 text-sm text-[var(--paisa-muted-foreground)]">
+      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-[var(--paisa-primary)]">Clear period filter</a>
+    </div>
+  {/if}
+
+  <MetricStrip cols={selectedPeriod ? 3 : 4}>
     <Metric
       label="Net Worth"
       value={formatCurrency(networth)}
@@ -99,11 +110,9 @@ onMount(async () => {
       status={gain >= 0 ? "positive" : "negative"}
       loading={isLoading}
     />
-    <Metric
-      label="XIRR"
-      value={formatFloat(xirr)}
-      loading={isLoading}
-    />
+    {#if !selectedPeriod}
+      <Metric label="XIRR" value={formatFloat(xirr)} loading={isLoading} />
+    {/if}
   </MetricStrip>
 
   <Section

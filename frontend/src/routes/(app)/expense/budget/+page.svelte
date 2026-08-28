@@ -16,6 +16,8 @@ import Section from "$lib/shared/layout/Section.svelte";
 import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
+import { page } from "$app/state";
+import { validPeriod } from "$lib/shared/browser/period";
 
 const monthStart = now().startOf("month");
 let budgetsByMonth: Record<string, Budget> = $state({});
@@ -58,6 +60,8 @@ function budgetProgress(accountBudget: AccountBudget): number {
 }
 
 onMount(async () => {
+  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
+  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.budget.getBudget();
     budgetsByMonth =
@@ -142,6 +146,7 @@ onMount(async () => {
           {@const isOverspent = accountBudget.available < 0}
           {@const percent = budgetProgress(accountBudget)}
           <div
+            id={accountBudget.account === page.url.searchParams.get("account") ? "insight-account" : undefined}
             class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3"
           >
             <div class="mb-1.5 flex items-center justify-between gap-2">
@@ -191,7 +196,9 @@ onMount(async () => {
 
     <div class="flex flex-col gap-3">
       {#each currentMonthAccountBudgets as accountBudget (accountBudget.account)}
-        <BudgetCard {accountBudget} />
+        <div id={accountBudget.account === page.url.searchParams.get("account") ? "insight-account" : undefined}>
+          <BudgetCard {accountBudget} />
+        </div>
       {/each}
     </div>
   </Section>

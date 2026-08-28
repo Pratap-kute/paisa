@@ -7,9 +7,10 @@ import {
   formatPercentage,
 } from "$lib/shared/formatters/currency";
 import dayjs from "dayjs";
+import { buildInsightActionHref } from "./navigation";
 
 export function mapInsightDtoToDomain(dto: DtoInsightResponse): Insight {
-  return {
+  const insight: Insight = {
     id: dto.id ?? "",
     type: dto.type ?? "",
     category: dto.category ?? "",
@@ -32,12 +33,17 @@ export function mapInsightDtoToDomain(dto: DtoInsightResponse): Insight {
     baselineSampleCount: dto.baselineSampleCount,
     investmentContribution: dto.investmentContribution,
     gainContribution: dto.gainContribution,
+    driverAccount: dto.driverAccount,
+    driverChange: dto.driverChange,
+    driverShare: dto.driverShare,
     period: dto.period,
     comparisonPeriod: dto.comparisonPeriod,
     account: dto.account,
     relatedAccounts: dto.relatedAccounts,
     href: dto.href,
   };
+  insight.href = buildInsightActionHref(insight);
+  return insight;
 }
 
 export function mapInsightsResponseToDomain(
@@ -101,6 +107,14 @@ const categoryLabels: Record<string, string> = {
   cash: "Cash & Liquidity",
 };
 
+export const EXTREME_PERCENT_THRESHOLD = 500;
+
+function ratioLabel(value: number, baseline: number): string {
+  return baseline > 0
+    ? `~${formatFloat(value / baseline, 0)}× the comparison level`
+    : "";
+}
+
 export function presentInsight(
   insight: Insight,
   isPartial?: boolean,
@@ -141,6 +155,12 @@ export function presentInsight(
 
       if (chg > 0) {
         const tone: InsightTone = pct >= 20 ? "warning" : "info";
+        const extreme = pct >= EXTREME_PERCENT_THRESHOLD;
+        const driver = insight.driverAccount && insight.driverChange
+          ? ` Driven primarily by ${restName(insight.driverAccount)} (+${
+            formatCurrency(insight.driverChange)
+          }).`
+          : "";
         return {
           id: insight.id,
           type: insight.type,
@@ -148,14 +168,20 @@ export function presentInsight(
           categoryLabel,
           severity: insight.severity,
           score: insight.score,
-          title: `Expenses increased ${formatPercentage(pct / 100, 0)}`,
+          title: extreme
+            ? `Expenses increased by ${formatCurrency(chg)}`
+            : `Expenses increased ${formatPercentage(pct / 100, 0)}`,
           description: `${formatCurrency(val)} vs ${
             formatCurrency(prev)
-          } in ${compSuffix}`,
+          } in ${compSuffix}${
+            extreme ? `. ${ratioLabel(val, prev)}` : ""
+          }.${driver}`,
           icon: "fa-solid fa-arrow-trend-up",
           tone,
           badgeText: `+${formatFloat(pct, 1)}%`,
-          heroMetric: `+${formatFloat(pct, 1)}%`,
+          heroMetric: extreme
+            ? `+${formatCurrency(chg)}`
+            : `+${formatFloat(pct, 1)}%`,
           heroLabel: `vs ${compName}`,
           actionText: "View Monthly Expenses",
           href: insight.href || "/expense/monthly",
@@ -221,7 +247,9 @@ export function presentInsight(
           severity: insight.severity,
           score: insight.score,
           title: `${name} spending increased by ${formatCurrency(chg)}`,
-          description: `${formatCurrency(val)} this month vs a very small amount previously`,
+          description: `${
+            formatCurrency(val)
+          } this month vs a very small amount previously`,
           icon: "fa-solid fa-arrow-trend-up",
           tone: "info",
           badgeText: `+${formatCurrency(chg)}`,
@@ -233,6 +261,8 @@ export function presentInsight(
       }
 
       const tone: InsightTone = pct >= 35 ? "warning" : "info";
+      const extreme = pct >= EXTREME_PERCENT_THRESHOLD;
+      const rolling = insight.baselineMethod === "rolling_median";
       return {
         id: insight.id,
         type: insight.type,
@@ -240,14 +270,22 @@ export function presentInsight(
         categoryLabel,
         severity: insight.severity,
         score: insight.score,
-        title: `${name} spending increased ${formatPercentage(pct / 100, 0)}`,
-        description: `${formatCurrency(val)} vs ${
-          formatCurrency(prev)
-        } in ${compSuffix}`,
+        title: extreme
+          ? `${name} spending increased by ${formatCurrency(chg)}`
+          : `${name} spending increased ${formatPercentage(pct / 100, 0)}`,
+        description: rolling
+          ? `${formatCurrency(val)} this month. Typical recent spend: ~${
+            formatCurrency(prev)
+          }${extreme ? `. ${ratioLabel(val, prev)}` : ""}`
+          : `${formatCurrency(val)} vs ${
+            formatCurrency(prev)
+          } in ${compSuffix}${extreme ? `. ${ratioLabel(val, prev)}` : ""}`,
         icon: "fa-solid fa-arrow-trend-up",
         tone,
         badgeText: `+${formatFloat(pct, 1)}%`,
-        heroMetric: `+${formatFloat(pct, 1)}%`,
+        heroMetric: extreme
+          ? `+${formatCurrency(chg)}`
+          : `+${formatFloat(pct, 1)}%`,
         heroLabel: `${formatCurrency(val)} vs ${formatCurrency(prev)}`,
         actionText: "Analyze Spending",
         href: insight.href || "/expense/monthly",
@@ -284,7 +322,7 @@ export function presentInsight(
           badgeText: `${formatFloat(chg, 1)} pp`,
           heroMetric: `${formatFloat(val, 0)}%`,
           heroLabel: `${formatFloat(chg, 1)} pp vs ${compName}`,
-          actionText: "View Savings Rate",
+          actionText: "View Investment Activity",
           href: insight.href || "/assets/investment",
         };
       }
@@ -303,7 +341,7 @@ export function presentInsight(
         badgeText: `+${formatFloat(chg, 1)} pp`,
         heroMetric: `${formatFloat(val, 0)}%`,
         heroLabel: `+${formatFloat(chg, 1)} pp vs ${compName}`,
-        actionText: "View Savings Rate",
+        actionText: "View Investment Activity",
         href: insight.href || "/assets/investment",
       };
     }
@@ -379,17 +417,21 @@ export function presentInsight(
         title: "Net worth change composition",
         description: `${invLabel}, ${gainLabel}`,
         icon: "fa-solid fa-coins",
-        tone: chg >= 0 ? "positive" : "info",
+        tone: "info",
         badgeText: "Decomposition",
         heroMetric: `${chg >= 0 ? "+" : ""}${formatCurrency(chg)}`,
         heroLabel: "net movement",
         tags: [
           {
-            label: `${inv >= 0 ? "+" : "-"}${formatCurrency(Math.abs(inv))} Capital`,
+            label: `${inv >= 0 ? "+" : "-"}${
+              formatCurrency(Math.abs(inv))
+            } Capital`,
             tone: inv >= 0 ? "info" : "warning",
           },
           {
-            label: `${gain >= 0 ? "+" : "-"}${formatCurrency(Math.abs(gain))} Valuation`,
+            label: `${gain >= 0 ? "+" : "-"}${
+              formatCurrency(Math.abs(gain))
+            } Valuation`,
             tone: gain >= 0 ? "positive" : "warning",
           },
         ],
@@ -405,6 +447,7 @@ export function presentInsight(
       const name = restName(insight.account || "") || insight.account ||
         "Budget";
       const pct = prev > 0 ? Math.round((val / prev) * 100) : 100;
+      const extreme = pct >= EXTREME_PERCENT_THRESHOLD;
 
       return {
         id: insight.id,
@@ -414,14 +457,16 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `${name} budget exceeded by ${formatCurrency(chg)}`,
-        description: `Spent ${formatCurrency(val)} of ${
+        description: `${formatCurrency(val)} spent vs ${
           formatCurrency(prev)
-        } budgeted`,
+        } budget${extreme ? `. ~${formatFloat(val / prev, 0)}× budget` : "ed"}`,
         icon: "fa-solid fa-circle-exclamation",
         tone: "critical",
         badgeText: "Over budget",
-        heroMetric: `${pct}%`,
-        heroLabel: `spent (exceeded by ${formatCurrency(chg)})`,
+        heroMetric: extreme ? `${formatCurrency(chg)} over` : `${pct}%`,
+        heroLabel: extreme
+          ? "budget"
+          : `spent (exceeded by ${formatCurrency(chg)})`,
         progressPercent: Math.min(100, pct),
         progressTone: "critical",
         actionText: "Review Budget",
@@ -476,8 +521,12 @@ export function presentInsight(
         ? `${name} bill is unusually high`
         : `${name} recurring cost increased to ${formatCurrency(val)}`;
       const description = isRollingMedian
-        ? `${formatCurrency(val)} this month (typical recent bill: ~${formatCurrency(baselineVal)})`
-        : `Up by ${formatCurrency(chg)} (+${formatFloat(pct, 1)}%) from ${formatCurrency(prev)}`;
+        ? `${formatCurrency(val)} this month (typical recent bill: ~${
+          formatCurrency(baselineVal)
+        })`
+        : `Up by ${formatCurrency(chg)} (+${formatFloat(pct, 1)}%) from ${
+          formatCurrency(prev)
+        }`;
 
       return {
         id: insight.id,

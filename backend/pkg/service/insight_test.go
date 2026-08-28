@@ -24,6 +24,63 @@ func setupInsightTestDB(t *testing.T, cfg string) *gorm.DB {
 	return db
 }
 
+func TestIsComparableSavingsRate(t *testing.T) {
+	tests := []struct {
+		name              string
+		income, tax, rate int64
+		want              bool
+	}{
+		{"38 percent", 100, 0, 38, true},
+		{"31 percent", 100, 0, 31, true},
+		{"negative", 100, 0, -999, false},
+		{"large negative", 100, 0, -4267, false},
+		{"over 100", 100, 0, 122, false},
+		{"no net income", 0, 0, 20, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := PeriodSummary{Income: decimal.NewFromInt(tt.income), Tax: decimal.NewFromInt(tt.tax), SavingsRate: decimal.NewFromInt(tt.rate)}
+			assert.Equal(t, tt.want, IsComparableSavingsRate(s))
+		})
+	}
+}
+
+func TestSavingsRateComparabilitySuppressesPathologicalTrends(t *testing.T) {
+	tests := []struct {
+		previous, current int64
+		emitted           bool
+	}{
+		{38, 31, true}, {20, 35, true}, {-999, 19, false}, {19, -190, false}, {-190, -4267, false}, {122, 9, false},
+	}
+	for _, tt := range tests {
+		ctx := InsightContext{Period: "2026-05", ComparisonPeriod: "2026-04",
+			Current:    PeriodSummary{Income: decimal.NewFromInt(100), SavingsRate: decimal.NewFromInt(tt.current)},
+			Comparison: PeriodSummary{Income: decimal.NewFromInt(100), SavingsRate: decimal.NewFromInt(tt.previous)}}
+		assert.Equal(t, tt.emitted, detectSavingsRateChange(ctx) != nil, "%d -> %d", tt.previous, tt.current)
+	}
+}
+
+func TestInsightConsolidationAndDominantExpenseDriver(t *testing.T) {
+	health := "Expenses:Health"
+	ctx := InsightContext{Period: "2026-05", ComparisonPeriod: "2026-04",
+		Current:    PeriodSummary{Expenses: decimal.NewFromInt(719302), ExpenseByCategory: map[string]decimal.Decimal{health: decimal.NewFromInt(676374), "Expenses:Food": decimal.NewFromInt(42928)}},
+		Comparison: PeriodSummary{Expenses: decimal.NewFromInt(63766), ExpenseByCategory: map[string]decimal.Decimal{health: decimal.NewFromInt(10005), "Expenses:Food": decimal.NewFromInt(53761)}}}
+	overall := detectExpenseChange(ctx)
+	require.NotNil(t, overall)
+	require.NotNil(t, overall.DriverAccount)
+	assert.Equal(t, health, *overall.DriverAccount)
+	assert.True(t, overall.DriverShare.GreaterThanOrEqual(decimal.NewFromFloat(.70)))
+
+	result := rankAndDeduplicate([]Insight{
+		{ID: "spike", Type: InsightTypeCategorySpike, Account: health},
+		{ID: "budget", Type: InsightTypeBudgetOverspent, Account: health},
+		{ID: "recurring", Type: InsightTypeRecurringIncrease, Account: "OpenAI"},
+	})
+	assert.Len(t, result, 2)
+	assert.NotContains(t, []string{result[0].ID, result[1].ID}, "spike")
+	assert.Contains(t, []string{result[0].ID, result[1].ID}, "recurring")
+}
+
 func parseDate(s string) time.Time {
 	t, _ := time.ParseInLocation("2006-01-02", s, config.TimeZone())
 	return t
@@ -577,13 +634,13 @@ func TestInsight_RecurringIncrease_TinyIncreaseSuppressed(t *testing.T) {
 	db := setupInsightTestDB(t, "")
 
 	// Monthly spend = 43,500
-	// Airtel: 49 -> 199 (+306%, diff = 150).
+	// PhoneBill: 49 -> 199 (+306%, diff = 150).
 	// 150 / 43,500 = 0.34% < 1% impact share -> must be SUPPRESSED!
 	postings := []posting.Posting{
-		{TransactionID: "j1", Date: parseDate("2026-07-15"), Account: "Expenses:Entertainment", Amount: decimal.NewFromInt(49), TagRecurring: "Airtel"},
+		{TransactionID: "j1", Date: parseDate("2026-07-15"), Account: "Expenses:Utilities", Amount: decimal.NewFromInt(49), TagRecurring: "PhoneBill"},
 		{TransactionID: "j2", Date: parseDate("2026-07-15"), Account: "Expenses:Rent", Amount: decimal.NewFromInt(43451)},
 
-		{TransactionID: "a1", Date: parseDate("2026-08-15"), Account: "Expenses:Entertainment", Amount: decimal.NewFromInt(199), TagRecurring: "Airtel"},
+		{TransactionID: "a1", Date: parseDate("2026-08-15"), Account: "Expenses:Utilities", Amount: decimal.NewFromInt(199), TagRecurring: "PhoneBill"},
 		{TransactionID: "a2", Date: parseDate("2026-08-15"), Account: "Expenses:Rent", Amount: decimal.NewFromInt(43301)},
 	}
 	require.NoError(t, db.Create(&postings).Error)
@@ -592,8 +649,8 @@ func TestInsight_RecurringIncrease_TinyIncreaseSuppressed(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, ins := range res.Insights {
-		if ins.Type == InsightTypeRecurringIncrease && ins.Account == "Airtel" {
-			t.Fatalf("Airtel ₹150 recurring increase on ₹43.5k spend must be suppressed, but got: %+v", ins)
+		if ins.Type == InsightTypeRecurringIncrease && ins.Account == "PhoneBill" {
+			t.Fatalf("PhoneBill 150 recurring increase on 43.5k spend must be suppressed, but got: %+v", ins)
 		}
 	}
 }

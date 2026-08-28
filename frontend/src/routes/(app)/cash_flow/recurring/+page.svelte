@@ -22,6 +22,8 @@ import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
 import Section from "$lib/shared/layout/Section.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
+import { page } from "$app/state";
+import { validPeriod } from "$lib/shared/browser/period";
 
 let transactionSequences: TransactionSequence[] = $state([]);
 let transactionSequencesDelayed: TransactionSequence[] = $state([]);
@@ -39,6 +41,8 @@ let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
 );
 
 onMount(async () => {
+  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
+  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.recurring.getRecurringTransactions();
     transactionSequences =
@@ -117,7 +121,9 @@ onMount(async () => {
     {:else}
       <div class="flex flex-col gap-3">
         {#each transactionSequencesDelayed as ts (ts.key)}
-          <RecurringCard {ts} schedule={nextUnpaidSchedule(ts)} />
+          <div id={ts.key === page.url.searchParams.get("key") ? "insight-recurring" : undefined}>
+            <RecurringCard {ts} schedule={nextUnpaidSchedule(ts)} />
+          </div>
         {/each}
       </div>
     {/if}

@@ -97,6 +97,9 @@ type Insight struct {
 	BaselineSampleCount    int              `json:"baselineSampleCount,omitempty"`
 	InvestmentContribution *decimal.Decimal `json:"investmentContribution,omitempty"`
 	GainContribution       *decimal.Decimal `json:"gainContribution,omitempty"`
+	DriverAccount          *string          `json:"driverAccount,omitempty"`
+	DriverChange           *decimal.Decimal `json:"driverChange,omitempty"`
+	DriverShare            *decimal.Decimal `json:"driverShare,omitempty"`
 	Period                 string           `json:"period"`
 	ComparisonPeriod       string           `json:"comparisonPeriod,omitempty"`
 	Account                string           `json:"account,omitempty"`
@@ -411,7 +414,7 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 
 	if prev.IsZero() && curr.IsPositive() {
 		diff := curr
-		return &Insight{
+		insight := &Insight{
 			ID:               fmt.Sprintf("expense_change:%s", ctx.Period),
 			Type:             InsightTypeExpenseChange,
 			Category:         InsightCategorySpending,
@@ -423,6 +426,8 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 			ComparisonPeriod: ctx.ComparisonPeriod,
 			Href:             hrefExpenseMonthly,
 		}
+		setDominantExpenseDriver(insight, ctx)
+		return insight
 	}
 
 	if prev.IsPositive() {
@@ -451,7 +456,7 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 				}
 			}
 
-			return &Insight{
+			insight := &Insight{
 				ID:               fmt.Sprintf("expense_change:%s", ctx.Period),
 				Type:             InsightTypeExpenseChange,
 				Category:         InsightCategorySpending,
@@ -465,10 +470,37 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 				ComparisonPeriod: ctx.ComparisonPeriod,
 				Href:             hrefExpenseMonthly,
 			}
+			if diff.IsPositive() {
+				setDominantExpenseDriver(insight, ctx)
+			}
+			return insight
 		}
 	}
 
 	return nil
+}
+
+func setDominantExpenseDriver(insight *Insight, ctx InsightContext) {
+	var largestAccount string
+	largest, total := decimal.Zero, decimal.Zero
+	for account, current := range ctx.Current.ExpenseByCategory {
+		delta := current.Sub(ctx.Comparison.ExpenseByCategory[account])
+		if !delta.IsPositive() {
+			continue
+		}
+		total = total.Add(delta)
+		if delta.GreaterThan(largest) {
+			largest, largestAccount = delta, account
+		}
+	}
+	if total.IsZero() || largestAccount == "" {
+		return
+	}
+	share := largest.Div(total)
+	if share.LessThan(decimal.NewFromFloat(0.70)) {
+		return
+	}
+	insight.DriverAccount, insight.DriverChange, insight.DriverShare = &largestAccount, &largest, &share
 }
 
 type CategoryBaselineResult struct {
@@ -651,7 +683,7 @@ func detectSavingsRateChange(ctx InsightContext) *Insight {
 	currRate := ctx.Current.SavingsRate
 	prevRate := ctx.Comparison.SavingsRate
 
-	if ctx.Current.Income.LessThanOrEqual(decimal.Zero) || ctx.Comparison.Income.LessThanOrEqual(decimal.Zero) {
+	if !IsComparableSavingsRate(ctx.Current) || !IsComparableSavingsRate(ctx.Comparison) {
 		return nil
 	}
 
@@ -700,6 +732,10 @@ func detectSavingsRateChange(ctx InsightContext) *Insight {
 	}
 
 	return nil
+}
+
+func IsComparableSavingsRate(summary PeriodSummary) bool {
+	return summary.Income.IsPositive() && summary.SavingsRate.GreaterThanOrEqual(decimal.Zero) && summary.SavingsRate.LessThanOrEqual(decimal.NewFromInt(100))
 }
 
 func detectNetworthChange(ctx InsightContext) (*Insight, *Insight) {
@@ -760,15 +796,11 @@ func detectNetworthChange(ctx InsightContext) (*Insight, *Insight) {
 
 	var contribInsight *Insight
 	if !invContrib.IsZero() || !gainContrib.IsZero() {
-		contribSeverity := InsightSeverityInfo
-		if change.IsPositive() {
-			contribSeverity = InsightSeverityPositive
-		}
 		contribInsight = &Insight{
 			ID:                     fmt.Sprintf("networth_contribution:%s", ctx.Period),
 			Type:                   InsightTypeNetworthContribution,
 			Category:               InsightCategoryInvestment,
-			Severity:               contribSeverity,
+			Severity:               InsightSeverityInfo,
 			Score:                  40,
 			Value:                  &currBalance,
 			Change:                 &change,
@@ -1071,13 +1103,20 @@ func detectCashWarnings(ctx InsightContext) []Insight {
 
 func rankAndDeduplicate(insights []Insight) []Insight {
 	seenAccounts := make(map[string]bool)
+	budgetAccounts := make(map[string]bool)
 	filtered := make([]Insight, 0, len(insights))
 
 	for i := range insights {
 		ins := &insights[i]
 		if ins.Type == InsightTypeBudgetOverspent {
 			seenAccounts[ins.Account] = true
+			budgetAccounts[ins.Account] = true
 			filtered = append(filtered, *ins)
+		}
+	}
+	for i := range insights {
+		if insights[i].Type == InsightTypeBudgetRisk {
+			budgetAccounts[insights[i].Account] = true
 		}
 	}
 
@@ -1088,6 +1127,9 @@ func rankAndDeduplicate(insights []Insight) []Insight {
 				continue
 			}
 			filtered = append(filtered, *ins)
+			budgetAccounts[ins.Account] = true
+		} else if ins.Type == InsightTypeCategorySpike && budgetAccounts[ins.Account] {
+			continue
 		} else if ins.Type != InsightTypeBudgetOverspent {
 			filtered = append(filtered, *ins)
 		}

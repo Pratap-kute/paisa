@@ -2795,6 +2795,15 @@ const docTemplate = `{
                 "comparisonPeriod": {
                     "type": "string"
                 },
+                "driverAccount": {
+                    "type": "string"
+                },
+                "driverChange": {
+                    "type": "number"
+                },
+                "driverShare": {
+                    "type": "number"
+                },
                 "gainContribution": {
                     "type": "number"
                 },

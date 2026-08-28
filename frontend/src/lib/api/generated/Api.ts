@@ -338,6 +338,9 @@ export interface DtoInsightResponse {
   change?: number;
   changePercent?: number;
   comparisonPeriod?: string;
+  driverAccount?: string;
+  driverChange?: number;
+  driverShare?: number;
   gainContribution?: number;
   href?: string;
   id?: string;

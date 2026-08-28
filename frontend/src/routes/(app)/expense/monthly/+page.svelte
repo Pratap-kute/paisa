@@ -44,6 +44,8 @@ import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
 import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
+import { page } from "$app/state";
+import { validPeriod } from "$lib/shared/browser/period";
 
 let groups = writable<string[]>([]);
 let expenses: Posting[] | undefined = $state(),
@@ -67,6 +69,8 @@ let taxRate = $state(""),
   income = $state("");
 
 onMount(async () => {
+  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
+  if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.expense.getExpense();
     expenses = res.expenses as unknown as Posting[];
@@ -91,6 +95,11 @@ onMount(async () => {
     const allGroups = uniq(expenses.map(expenseGroup)).sort();
     expenseColor = categoryColorResolver(allGroups);
     groups.set(allGroups);
+    const requestedAccount = page.url.searchParams.get("account");
+    if (requestedAccount) {
+      const requestedGroup = restName(requestedAccount);
+      if (allGroups.includes(requestedGroup)) groups.set([requestedGroup]);
+    }
     legends = categoryLegends(allGroups, (group) => {
       groups.update((selected) =>
         selected.length === 1 && selected[0] === group ? allGroups : [group]

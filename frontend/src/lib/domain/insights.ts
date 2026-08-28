@@ -16,6 +16,9 @@ export interface Insight {
   baselineSampleCount?: number;
   investmentContribution?: number;
   gainContribution?: number;
+  driverAccount?: string;
+  driverChange?: number;
+  driverShare?: number;
   period?: string;
   comparisonPeriod?: string;
   account?: string;
