@@ -9,11 +9,16 @@ Object.defineProperty(globalThis, "localStorage", {
 globalThis.USER_CONFIG = {
   accounts: [],
   default_currency: "INR",
+  readonly: false,
   display_precision: 2,
   locale: "en-IN",
+  journal_path: "",
+  db_path: "",
   financial_year_starting_month: 4,
+  amount_alignment_column: 0,
   week_starting_day: 1,
-} as typeof USER_CONFIG;
+  goals: {},
+};
 const { presentInsight } = await import("./presentation.ts");
 
 const base: Insight = {

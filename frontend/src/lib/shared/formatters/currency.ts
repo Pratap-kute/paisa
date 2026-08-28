@@ -22,18 +22,15 @@ export function normalize(value: number): number {
 
 export function formatCurrency(
   value: number,
-  precision: number = null,
+  precision?: number,
 ): string {
   value = normalize(value);
-
-  if (precision == null) {
-    precision = USER_CONFIG.display_precision;
-  }
+  const resolvedPrecision = precision ?? USER_CONFIG.display_precision;
 
   return unicodeMinus(
     value.toLocaleString(USER_CONFIG.locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
+      minimumFractionDigits: resolvedPrecision,
+      maximumFractionDigits: resolvedPrecision,
     }),
   );
 }
