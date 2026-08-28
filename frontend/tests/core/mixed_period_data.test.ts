@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildMonthlyExpenseTimelineSeries,
   buildYearlyExpenseTimelineSeries,
+  expenseGroupsByContribution,
 } from "$lib/features/expense/chart_timeline_data";
 import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
 import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
@@ -65,9 +66,18 @@ describe("mixed-period chart adapters", () => {
       "yearlyAverage",
     ]);
     expect(data.points[0].tooltipRows).toContainEqual([
-      "Yearly monthly average",
+      "Calendar-year monthly average",
       75,
     ]);
+    expect(data.series.at(-1)?.label).toBe("Monthly Average");
+  });
+
+  it("orders expense categories by contribution with stable ties", () => {
+    expect(expenseGroupsByContribution([
+      posting("2024-01-05", "Expenses:Food", 100),
+      posting("2024-01-06", "Expenses:Rent", 250),
+      posting("2024-01-07", "Expenses:Books", 100),
+    ])).toEqual(["Rent", "Books", "Food"]);
   });
 
   it("keeps financial-year ordering and category totals", () => {
