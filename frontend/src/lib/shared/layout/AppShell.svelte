@@ -1,7 +1,7 @@
 <script lang="ts">
 import { forEachFinancialYear } from "$lib/shared/formatters/date";
 import { page } from "$app/stores";
-import { afterNavigate } from "$app/navigation";
+import { afterNavigate, goto } from "$app/navigation";
 import { onMount, type Snippet } from "svelte";
 import Logo from "./Logo.svelte";
 import ThemeSwitcher from "./ThemeSwitcher.svelte";
@@ -20,6 +20,7 @@ import {
 import DateRange from "$lib/shared/ui/DateRange.svelte";
 import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
 import InputRange from "$lib/shared/ui/InputRange.svelte";
+import { validPeriod } from "$lib/shared/browser/period";
 
 import {
   type NavGroup,
@@ -274,8 +275,22 @@ let showDateRange = $derived(
 let showMonthPicker = $derived(
   pathname === "/cash_flow/recurring" ||
     pathname === "/expense/monthly" ||
-    pathname === "/expense/budget",
+    pathname === "/expense/budget" ||
+    pathname === "/insights",
 );
+let insightsMonth = $derived(
+  validPeriod($page.url.searchParams.get("period")) ?? $month,
+);
+
+async function selectInsightsMonth(period: string) {
+  if ($page.url.searchParams.get("period") === period) return;
+  const url = new URL($page.url);
+  url.searchParams.set("period", period);
+  await goto(`${url.pathname}${url.search}`, {
+    keepFocus: true,
+    noScroll: true,
+  });
+}
 let showFinancialYearPicker = $derived(
   pathname === "/cash_flow/income_statement" ||
     pathname === "/cash_flow/yearly" ||
@@ -553,7 +568,16 @@ const navSubLinkActiveClass =
 
           {#if showMonthPicker}
             <div>
-              <MonthPicker bind:value={$month} max={$dateMax} min={$dateMin} />
+              {#if pathname === "/insights"}
+                <MonthPicker
+                  value={insightsMonth}
+                  max={$dateMax}
+                  min={$dateMin}
+                  onchange={selectInsightsMonth}
+                />
+              {:else}
+                <MonthPicker bind:value={$month} max={$dateMax} min={$dateMin} />
+              {/if}
             </div>
           {/if}
 

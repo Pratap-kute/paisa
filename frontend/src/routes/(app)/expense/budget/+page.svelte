@@ -17,9 +17,14 @@ import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 import { page } from "$app/state";
-import { validPeriod } from "$lib/shared/browser/period";
+import { isHistoricalPeriod, validPeriod } from "$lib/shared/browser/period";
 
 const monthStart = now().startOf("month");
+const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
+const historicalPeriod = isHistoricalPeriod(
+  requestedPeriod,
+  now().format("YYYY-MM"),
+);
 let budgetsByMonth: Record<string, Budget> = $state({});
 let checkingBalance = $state(0),
   availableForBudgeting = $state(0);
@@ -60,7 +65,6 @@ function budgetProgress(accountBudget: AccountBudget): number {
 }
 
 onMount(async () => {
-  const requestedPeriod = validPeriod(page.url.searchParams.get("period"));
   if (requestedPeriod) month.set(requestedPeriod);
   try {
     const res = await api.budget.getBudget();
@@ -93,7 +97,16 @@ onMount(async () => {
     description="Monthly envelope budgeting and spending tracking"
   />
 
-  {#if currentMonthBudget || isLoading}
+  {#if historicalPeriod && requestedPeriod}
+    <div class="mb-3 text-sm text-[var(--paisa-muted-foreground)]">
+      Showing {currentMonthBudget?.date.format("MMMM YYYY") || requestedPeriod} ·
+      <a href="/expense/budget" class="text-[var(--paisa-primary)]">
+        Clear period filter
+      </a>
+    </div>
+  {/if}
+
+  {#if !historicalPeriod && (currentMonthBudget || isLoading)}
     <div class="mb-[var(--paisa-space-5)]">
       <MetricStrip cols={showCurrentMonthMetrics ? 3 : 2}>
         <Metric

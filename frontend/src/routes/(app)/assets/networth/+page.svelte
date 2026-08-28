@@ -38,10 +38,16 @@ let legends: Legend[] = $state([]);
 const selectedPeriod = validPeriod(page.url.searchParams.get("period"));
 
 let filteredPoints = $derived.by(() => {
-  if (!selectedPeriod) return filter(points, (p) => p.date.isSameOrBefore($dateRange.to) && p.date.isSameOrAfter($dateRange.from));
+  if (!selectedPeriod) {
+    return filter(points, (p) =>
+      p.date.isSameOrBefore($dateRange.to) &&
+      p.date.isSameOrAfter($dateRange.from));
+  }
   const start = dayjs(`${selectedPeriod}-01`).startOf("month");
   const end = start.endOf("month");
-  const inPeriod = points.filter((p) => p.date.isSameOrAfter(start) && p.date.isSameOrBefore(end));
+  const inPeriod = points.filter((p) =>
+    p.date.isSameOrAfter(start) && p.date.isSameOrBefore(end)
+  );
   const before = points.filter((p) => p.date.isBefore(start)).at(-1);
   return before ? [before, ...inPeriod] : inPeriod;
 });
@@ -56,8 +62,12 @@ onMount(async () => {
     points = (result.networthTimeline as unknown as Networth[]) || [];
     setAllowedDateRange(map(points, (p) => p.date));
 
-    const periodEnd = selectedPeriod ? dayjs(`${selectedPeriod}-01`).endOf("month") : undefined;
-    const current = periodEnd ? last(points.filter((p) => p.date.isSameOrBefore(periodEnd))) : last(points);
+    const periodEnd = selectedPeriod
+      ? dayjs(`${selectedPeriod}-01`).endOf("month")
+      : undefined;
+    const current = periodEnd
+      ? last(points.filter((p) => p.date.isSameOrBefore(periodEnd)))
+      : last(points);
     if (current) {
       networth = current.investmentAmount + current.gainAmount -
         current.withdrawalAmount;

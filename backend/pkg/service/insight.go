@@ -1122,15 +1122,21 @@ func rankAndDeduplicate(insights []Insight) []Insight {
 
 	for i := range insights {
 		ins := &insights[i]
-		if ins.Type == InsightTypeBudgetRisk {
+		switch ins.Type {
+		case InsightTypeBudgetRisk:
 			if seenAccounts[ins.Account] {
 				continue
 			}
 			filtered = append(filtered, *ins)
 			budgetAccounts[ins.Account] = true
-		} else if ins.Type == InsightTypeCategorySpike && budgetAccounts[ins.Account] {
-			continue
-		} else if ins.Type != InsightTypeBudgetOverspent {
+		case InsightTypeCategorySpike:
+			if budgetAccounts[ins.Account] {
+				continue
+			}
+			filtered = append(filtered, *ins)
+		case InsightTypeBudgetOverspent:
+			// Already appended in the first pass.
+		default:
 			filtered = append(filtered, *ins)
 		}
 	}

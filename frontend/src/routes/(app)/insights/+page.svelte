@@ -1,7 +1,6 @@
 <script lang="ts">
 import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
 import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 import Spinner from "$lib/shared/ui/Spinner.svelte";
 import BoxedTabs from "$lib/shared/ui/BoxedTabs.svelte";
@@ -17,12 +16,52 @@ import {
 } from "$lib/domain/insights";
 import { now } from "$lib/domain/time";
 import { api } from "$lib/api";
+import { page } from "$app/state";
+import { goto } from "$app/navigation";
+import { onMount } from "svelte";
+import dayjs from "dayjs";
+import { validPeriod } from "$lib/shared/browser/period";
+import { month, setAllowedDateRange } from "../../../store";
 
-let selectedMonth = $state(now().format("YYYY-MM"));
+const initialUrlPeriod = validPeriod(page.url.searchParams.get("period"));
+const initialMonth = initialUrlPeriod ?? now().format("YYYY-MM");
+setAllowedDateRange([dayjs(`${initialMonth}-01`)]);
+month.set(initialMonth);
+let selectedMonth = $derived(
+  validPeriod(page.url.searchParams.get("period")) ?? initialMonth,
+);
 let selectedCategory: InsightCategoryFilter = $state("all");
 let viewMode: "grid" | "list" = $state("grid");
 let isLoading = $state(true);
 let response: InsightsResult | null = $state(null);
+
+onMount(async () => {
+  if (!initialUrlPeriod) {
+    const url = new URL(page.url);
+    url.searchParams.set("period", selectedMonth);
+    await goto(`${url.pathname}${url.search}`, {
+      replaceState: true,
+      keepFocus: true,
+      noScroll: true,
+    });
+  }
+
+  try {
+    const result = await api.transaction.getTransactions();
+    const dates = (result.transactions ?? [])
+      .map((transaction) => dayjs(transaction.date))
+      .filter((date) => date.isValid());
+    if (dates.length > 0) {
+      setAllowedDateRange(dates);
+    }
+  } catch (err) {
+    console.error("Failed to load ledger date range:", err);
+  }
+});
+
+$effect(() => {
+  month.set(selectedMonth);
+});
 
 async function loadInsights(period: string) {
   isLoading = true;
@@ -83,13 +122,12 @@ const tabOptions = $derived.by(() => {
 
 <Page width="analysis">
   <div class="w-full flex flex-col space-y-6">
-    <!-- Header with Month Switcher -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <PageHeader
-        title="Financial Insights"
-        description="Deterministic observations, risks, and milestones derived from your ledger"
-      />
-      <div class="flex items-center gap-3 self-start sm:self-auto flex-wrap">
+    <PageHeader
+      title="Financial Insights"
+      description="Deterministic observations, risks, and milestones derived from your ledger"
+    >
+      {#snippet actions()}
+        <div class="flex items-center gap-2 flex-wrap">
         <!-- View Mode Switcher -->
         <div class="inline-flex rounded-lg bg-[var(--paisa-surface-raised)] p-1 border border-[var(--paisa-border-subtle)]">
           <button
@@ -111,10 +149,9 @@ const tabOptions = $derived.by(() => {
             <span class="hidden sm:inline">List</span>
           </button>
         </div>
-
-        <LastNMonths n={6} bind:value={selectedMonth} />
-      </div>
-    </div>
+        </div>
+      {/snippet}
+    </PageHeader>
 
     <!-- Top Executive Health Summary Bar -->
     {#if !isLoading && allInsights.length > 0}

@@ -6,9 +6,10 @@ interface Props {
   min: dayjs.Dayjs;
   max: dayjs.Dayjs;
   value: string;
+  onchange?: (value: string) => void;
 }
 
-let { min, max, value = $bindable() }: Props = $props();
+let { min, max, value = $bindable(), onchange }: Props = $props();
 
 let open = $state(false);
 let valueDate = $derived(dayjs(value, "YYYY-MM"));
@@ -47,6 +48,7 @@ function isAllowed(
 
 function select(date: dayjs.Dayjs) {
   value = date.format("YYYY-MM");
+  onchange?.(value);
   selectedYear = date.year();
   open = false;
 }
