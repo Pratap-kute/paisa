@@ -5,10 +5,7 @@ import type { GoalSummary } from "$lib/domain/goals_models";
 import type { Posting } from "$lib/domain/ledger";
 import type { TransactionSequence } from "$lib/domain/recurring";
 import { now } from "$lib/domain/time";
-import {
-  nextUnpaidSchedule,
-  totalRecurring,
-} from "$lib/domain/transaction_sequence";
+import { totalRecurring } from "$lib/domain/transaction_sequence";
 import {
   type InsightTone,
   presentInsight,
@@ -179,20 +176,29 @@ export function summarizeUpcomingRecurring(
   const end = start.add(horizonDays, "day").endOf("day");
   for (const sequence of sequences ?? []) {
     if (!isOutgoingRecurring(sequence)) continue;
-    const schedule = nextUnpaidSchedule(sequence);
-    const due = schedule?.scheduled;
-    const amount = totalRecurring(sequence);
-    if (!due?.isValid() || !Number.isFinite(amount) || amount <= 0) continue;
-    if (due.isBefore(start, "day")) {
-      summary.pastDueCount++;
-      summary.pastDueAmount += amount;
-      continue;
-    }
-    if (due.isAfter(end, "day")) continue;
-    summary.upcomingCount++;
-    summary.upcomingAmount += amount;
-    if (!summary.earliestDueDate || due.isBefore(summary.earliestDueDate)) {
-      summary.earliestDueDate = due;
+    const schedules = sequence.schedules ?? [
+      ...(sequence.pastSchedules ?? []),
+      ...(sequence.futureSchedules ?? []),
+    ];
+    const defaultAmount = totalRecurring(sequence);
+    for (const schedule of schedules) {
+      if (schedule.actual) continue;
+      const due = schedule.scheduled;
+      const amount = Number.isFinite(schedule.amount) && schedule.amount > 0
+        ? schedule.amount
+        : defaultAmount;
+      if (!due?.isValid() || !Number.isFinite(amount) || amount <= 0) continue;
+      if (due.isBefore(start, "day")) {
+        summary.pastDueCount++;
+        summary.pastDueAmount += amount;
+        continue;
+      }
+      if (due.isAfter(end, "day")) continue;
+      summary.upcomingCount++;
+      summary.upcomingAmount += amount;
+      if (!summary.earliestDueDate || due.isBefore(summary.earliestDueDate)) {
+        summary.earliestDueDate = due;
+      }
     }
   }
   if (Number.isFinite(cashBalance)) {
@@ -320,18 +326,7 @@ export function buildDashboardAttention(
       priority: 200,
     });
   }
-  addInsights(
-    allInsights.filter((insight) =>
-      insight.severity !== "critical" && insight.severity !== "warning" &&
-      presentInsight(insight, input.isPartial, input.comparisonPeriod).tone ===
-        "info"
-    ),
-    100,
-  );
-
-  return result.sort((left, right) =>
-    right.priority - left.priority || left.id.localeCompare(right.id)
-  ).slice(0, Math.max(0, limit));
+  return result.slice(0, Math.max(0, limit));
 }
 
 export function periodUrl(path: string, period: string): string {

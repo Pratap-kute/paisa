@@ -4,7 +4,10 @@ import type { AssetBreakdown } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
 import type { GoalSummary } from "$lib/domain/goals_models";
-import type { TransactionSequence } from "$lib/domain/recurring";
+import type {
+  TransactionSchedule,
+  TransactionSequence,
+} from "$lib/domain/recurring";
 import dayjs from "dayjs";
 
 Object.defineProperty(globalThis, "localStorage", {
@@ -90,7 +93,7 @@ function budget(accounts: AccountBudget[]): Budget {
 
 function recurring(
   key: string,
-  scheduled: string,
+  scheduled: string | string[],
   amount: number,
   account = "Expenses:Bills",
 ): TransactionSequence {
@@ -109,22 +112,27 @@ function recurring(
       } as never,
     ],
   };
-  const schedule = {
+  const schedules: TransactionSchedule[] = (
+    Array.isArray(scheduled) ? scheduled : [scheduled]
+  ).map((date) => ({
     key,
     amount,
-    scheduled: dayjs(scheduled),
+    scheduled: dayjs(date),
     actual: null,
     transaction: null,
-  } as never;
-  const isPast = dayjs(scheduled).isBefore(dayjs("2026-08-10"), "day");
+  }));
   return {
     key,
     period: "",
     interval: 30,
     transactions: [transaction],
-    schedules: [schedule],
-    pastSchedules: isPast ? [schedule] : [],
-    futureSchedules: isPast ? [] : [schedule],
+    schedules,
+    pastSchedules: schedules.filter((schedule) =>
+      schedule.scheduled.isBefore(dayjs("2026-08-10"), "day")
+    ),
+    futureSchedules: schedules.filter((schedule) =>
+      !schedule.scheduled.isBefore(dayjs("2026-08-10"), "day")
+    ),
     schedulesByMonth: {},
   } as TransactionSequence;
 }
@@ -306,6 +314,29 @@ describe("dashboard summaries", () => {
       .toMatchObject({ upcomingCount: 0, pastDueCount: 0 });
   });
 
+  test("counts every weekly occurrence inside the recurring horizon", () => {
+    const result = summarizeUpcomingRecurring([
+      recurring("weekly", ["2026-08-12", "2026-08-19"], 1_000),
+    ], dayjs("2026-08-10"));
+    expect(result).toMatchObject({
+      upcomingCount: 2,
+      upcomingAmount: 2_000,
+      pastDueCount: 0,
+    });
+  });
+
+  test("counts past-due and future occurrences from the same sequence", () => {
+    const result = summarizeUpcomingRecurring([
+      recurring("weekly", ["2026-08-01", "2026-08-08", "2026-08-15"], 750),
+    ], dayjs("2026-08-10"));
+    expect(result).toMatchObject({
+      pastDueCount: 2,
+      pastDueAmount: 1_500,
+      upcomingCount: 1,
+      upcomingAmount: 750,
+    });
+  });
+
   test("orders, deduplicates, and caps cross-domain attention", () => {
     const recurringSummary = summarizeUpcomingRecurring(
       [recurring("rent", "2026-08-09", 8_000)],
@@ -350,6 +381,29 @@ describe("dashboard summaries", () => {
     });
     expect(duplicateBudget).toHaveLength(1);
     expect(duplicateBudget[0].id).toBe("insight:overspent");
+  });
+
+  test("preserves descending insight score order within a severity", () => {
+    const items = buildDashboardAttention({
+      insights: [
+        insight({ id: "a-low", severity: "warning", score: 10 }),
+        insight({ id: "z-high", severity: "warning", score: 90 }),
+      ],
+      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+      asOf: dayjs("2026-08-10"),
+    });
+    expect(items.map((item) => item.id)).toEqual([
+      "insight:z-high",
+      "insight:a-low",
+    ]);
+  });
+
+  test("does not use informational insights to fill attention slots", () => {
+    expect(buildDashboardAttention({
+      insights: [insight({ id: "context", severity: "info", score: 100 })],
+      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+      asOf: dayjs("2026-08-10"),
+    })).toEqual([]);
   });
 
   test("adds only overdue incomplete goals and inspects every supplied goal", () => {
