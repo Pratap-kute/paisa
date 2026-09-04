@@ -65,12 +65,34 @@ export const DYNAMIC_TOKEN_PREFIX_ALLOWLIST = [
   "--paisa-ledger-depth",
 ];
 
+export const APPROVED_TOKEN_DEFINITION_FILES = [
+  "src/lib/shared/styles/foundation.css",
+  "src/lib/shared/theme/tokens.css",
+];
+
+export const DEPRECATED_APP_TOKENS = new Set([
+  "--paisa-success",
+  "--paisa-success-light",
+  "--paisa-danger",
+  "--paisa-danger-light",
+  "--paisa-info",
+  "--paisa-info-light",
+]);
+
+export const ALLOWED_DEPRECATED_TOKEN_FILES = new Set([
+  "src/lib/shared/theme/tokens.css",
+  "src/lib/shared/styles/legacy-compat.css",
+]);
+
 export const ALLOWED_IMPORTANT_FILES = new Set([
   "src/lib/shared/styles/legacy-compat.css",
   "src/lib/shared/styles/integrations/codemirror.css",
   "src/lib/shared/styles/integrations/select.css",
   "src/lib/shared/styles/integrations/tabulator.css",
 ]);
+
+const BITS_UI_IMPORT_REGEX =
+  /(?:(?:import|export)\s+[\s\S]*?from\s+|import\(\s*)["'](bits-ui(?:\/[^"']*)?)["']/g;
 
 export function findRawPaletteViolations(
   filePath: string,
@@ -96,9 +118,7 @@ export function findBitsUiViolations(
   const violations: SpecViolation[] = [];
   if (filePath.startsWith("src/lib/shared/ui/")) return violations;
 
-  const importRegex =
-    /(?:import|export)\s+.*from\s+["'](bits-ui(?:\/[^"']*)?)["']/g;
-  for (const match of content.matchAll(importRegex)) {
+  for (const match of content.matchAll(BITS_UI_IMPORT_REGEX)) {
     violations.push({
       file: filePath,
       rule: "bits-ui-wrapper-only",
@@ -146,16 +166,41 @@ export function findImportantViolations(
   return violations;
 }
 
+export function findDeprecatedTokenViolations(
+  filePath: string,
+  content: string,
+): SpecViolation[] {
+  if (ALLOWED_DEPRECATED_TOKEN_FILES.has(filePath)) return [];
+  const violations: SpecViolation[] = [];
+
+  for (const match of content.matchAll(/--paisa-[a-z0-9-]+/g)) {
+    const token = match[0];
+    if (DEPRECATED_APP_TOKENS.has(token)) {
+      violations.push({
+        file: filePath,
+        rule: "no-deprecated-paisa-tokens",
+        detail:
+          `Found deprecated token '${token}'. Use canonical financial semantics (--paisa-positive, --paisa-negative, --paisa-warning, --paisa-primary) instead.`,
+      });
+    }
+  }
+  return violations;
+}
+
 export async function extractDefinedCssVariables(
   frontendRoot: string,
 ): Promise<Set<string>> {
   const defined = new Set<string>();
-  const srcDir = join(frontendRoot, "src");
 
-  for await (const entry of walk(srcDir, { exts: [".css"] })) {
-    const content = await Deno.readTextFile(entry.path);
-    for (const match of content.matchAll(/(--paisa-[a-z0-9-]+)\s*:/g)) {
-      defined.add(match[1]);
+  for (const relPath of APPROVED_TOKEN_DEFINITION_FILES) {
+    const fullPath = join(frontendRoot, relPath);
+    try {
+      const content = await Deno.readTextFile(fullPath);
+      for (const match of content.matchAll(/(--paisa-[a-z0-9-]+)\s*:/g)) {
+        defined.add(match[1]);
+      }
+    } catch {
+      // File not found or unreadable; checker will report missing definitions
     }
   }
 
@@ -188,7 +233,7 @@ export function findUndefinedTokenViolations(
         file: filePath,
         rule: "no-undefined-paisa-tokens",
         detail:
-          `Undefined CSS variable '${token}'. Define in tokens.css or foundation.css, or use a canonical token.`,
+          `Undefined CSS variable '${token}'. Tokens must be registered in tokens.css or foundation.css.`,
       });
     }
   }
@@ -244,7 +289,10 @@ export async function checkUiSpec(
       // 5. !important check
       violations.push(...findImportantViolations(relPath, content));
 
-      // 6. Undefined tokens check
+      // 6. Deprecated tokens check
+      violations.push(...findDeprecatedTokenViolations(relPath, content));
+
+      // 7. Undefined tokens check
       violations.push(
         ...findUndefinedTokenViolations(relPath, content, definedTokens),
       );

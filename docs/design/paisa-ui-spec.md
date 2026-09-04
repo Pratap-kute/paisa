@@ -46,9 +46,9 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 - **CSS Engine:** Tailwind CSS v4 + native CSS custom properties.
 - **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/styles/foundation.css` (primary Tailwind integration point and canonical tokens) and `$lib/shared/theme/tokens.css` (extended token superset and integration mappings).
 - **Three Token Tiers:**
-  1. **Canonical Tokens:** Permitted for all new application components and views (`--paisa-canvas`, `--paisa-surface`, `--paisa-surface-raised`, `--paisa-surface-hover`, `--paisa-foreground`, `--paisa-muted-foreground`, `--paisa-border`, `--paisa-primary`, `--paisa-positive`, `--paisa-negative`, `--paisa-warning`, `--paisa-neutral`, `--paisa-prediction-*`).
-  2. **Compatibility Tokens:** Retained for third-party vendor integrations (CodeMirror, Tabulator, svelte-select), chart SVG rendering, and legacy DOM compatibility bridges (`--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-text-primary`, `--paisa-text-secondary`, `--paisa-text-muted`, `--paisa-surface-bg`, `--paisa-canvas-bg`).
-  3. **Deprecated Tokens:** Prohibited in new application code and slated for incremental migration (`--paisa-success`, `--paisa-success-light`, `--paisa-danger`, `--paisa-danger-light`, `--paisa-info`, `--paisa-info-light`, `--paisa-brand-primary`). Application code representing financial statuses must use canonical financial semantics (`positive`, `negative`, `warning`, `primary`).
+  1. **Canonical Tokens:** Permitted for all application components and views (`--paisa-canvas`, `--paisa-surface`, `--paisa-surface-raised`, `--paisa-surface-hover`, `--paisa-foreground`, `--paisa-muted-foreground`, `--paisa-border`, `--paisa-border-subtle`, `--paisa-border-strong`, `--paisa-primary`, `--paisa-primary-subtle`, `--paisa-positive`, `--paisa-positive-subtle`, `--paisa-negative`, `--paisa-negative-subtle`, `--paisa-warning`, `--paisa-warning-subtle`, `--paisa-neutral`, `--paisa-prediction-*`).
+  2. **Legacy Compatibility Tokens:** Existing application and integration code may continue using them while incremental migration proceeds (`--paisa-brand-primary`, `--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-text-primary`, `--paisa-text-secondary`, `--paisa-text-muted`, `--paisa-surface-bg`, `--paisa-surface-card`, `--paisa-canvas-bg`). New application code must not introduce new dependencies on them.
+  3. **Deprecated Tokens:** Prohibited in application code and enforced by automated spec guards (`--paisa-success`, `--paisa-success-light`, `--paisa-danger`, `--paisa-danger-light`, `--paisa-info`, `--paisa-info-light`). Application code representing financial statuses must use canonical financial semantics (`positive`, `negative`, `warning`, `primary`).
 - **CSS Layer Architecture:** Styles are organized via `@layer theme, base, components, utilities;` for controlled specificity.
 - **Migration Status (Complete):**
   $$\text{Bulma} = 0 \quad\big|\quad \text{Sass/SCSS} = 0 \quad\big|\quad \text{!important} \approx 0$$
@@ -72,7 +72,7 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 
 To ensure long-term maintainability and visual harmony across light and dark modes, all styling relies on a compact, stable set of semantic tokens. Unnecessary aliases that resolve to the same semantic role are avoided.
 
-New application code must strictly use **Canonical Tokens** via Tailwind semantic utility classes (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`) rather than direct CSS variable lookups or deprecated status aliases.
+Application code SHOULD prefer Tailwind semantic utilities (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`, etc.). Direct canonical token references (`var(--paisa-...)`) are permitted where Tailwind utilities are unsuitable, particularly component CSS, dynamic styles, vendor integration boundaries, SVG/chart rendering, and complex state-dependent classes. Deprecated tokens and raw palette colors remain strictly prohibited.
 
 ### 3.1 Token Definitions
 
@@ -218,7 +218,7 @@ New application code must strictly use **Canonical Tokens** via Tailwind semanti
 
 ### 3.3 Semantic Utility Classes Rule
 
-Components and views must use semantic utility classes (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`). Direct use of raw color utilities (such as `text-red-500`, `bg-blue-600`, `bg-gray-100`) in application code is strictly forbidden.
+Components and views SHOULD prefer semantic utility classes (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`, etc.). Direct canonical token references (`var(--paisa-...)`) are permitted where Tailwind utilities are unsuitable, particularly component CSS, dynamic styles, vendor integration boundaries, SVG/chart rendering, and complex state-dependent classes. Direct use of raw color utilities (such as `text-red-500`, `bg-blue-600`, `bg-gray-100`) and deprecated tokens in application code is strictly forbidden.
 
 ---
 

@@ -1,7 +1,9 @@
 import { expect } from "@std/expect";
 import {
+  extractDefinedCssVariables,
   findBitsUiViolations,
   findBulmaViolations,
+  findDeprecatedTokenViolations,
   findImportantViolations,
   findRawPaletteViolations,
   findUndefinedTokenViolations,
@@ -40,21 +42,29 @@ Deno.test("findRawPaletteViolations ignores semantic color classes", () => {
   expect(violations.length).toBe(0);
 });
 
-Deno.test("findBitsUiViolations forbids direct imports outside src/lib/shared/ui", () => {
-  const sample = `import { Dialog } from "bits-ui";`;
-  const violations = findBitsUiViolations(
-    "src/lib/features/importing/Modal.svelte",
-    sample,
-  );
-  expect(violations.length).toBe(1);
-  expect(violations[0].rule).toBe("bits-ui-wrapper-only");
+Deno.test("findBitsUiViolations forbids direct imports outside src/lib/shared/ui (including multiline)", () => {
+  const singleLine = `import { Dialog } from "bits-ui";`;
+  const multiLine = `import {
+    Dialog,
+    Tabs,
+  } from "bits-ui";`;
+  const dynamicImport = `const modal = import("bits-ui/dialog");`;
 
-  // Allowed in src/lib/shared/ui/
-  const allowedViolations = findBitsUiViolations(
-    "src/lib/shared/ui/Dialog.svelte",
-    sample,
-  );
-  expect(allowedViolations.length).toBe(0);
+  for (const sample of [singleLine, multiLine, dynamicImport]) {
+    const violations = findBitsUiViolations(
+      "src/lib/features/importing/Modal.svelte",
+      sample,
+    );
+    expect(violations.length).toBe(1);
+    expect(violations[0].rule).toBe("bits-ui-wrapper-only");
+
+    // Allowed in src/lib/shared/ui/
+    const allowedViolations = findBitsUiViolations(
+      "src/lib/shared/ui/Dialog.svelte",
+      sample,
+    );
+    expect(allowedViolations.length).toBe(0);
+  }
 });
 
 Deno.test("findBulmaViolations catches old Bulma imports", () => {
@@ -77,6 +87,29 @@ Deno.test("findImportantViolations enforces integration allowlist", () => {
   expect(allowed.length).toBe(0);
 });
 
+Deno.test("findDeprecatedTokenViolations catches deprecated tokens in app code", () => {
+  const sample = `
+    <span class="text-[var(--paisa-danger)] bg-[var(--paisa-danger-light)]">Error</span>
+    <span class="text-[var(--paisa-success)] bg-[var(--paisa-success-light)]">OK</span>
+    <span class="text-[var(--paisa-info)] bg-[var(--paisa-info-light)]">Info</span>
+  `;
+  const violations = findDeprecatedTokenViolations(
+    "src/routes/(app)/sample/+page.svelte",
+    sample,
+  );
+  expect(violations.length).toBe(6);
+  expect(violations.every((v) => v.rule === "no-deprecated-paisa-tokens")).toBe(
+    true,
+  );
+
+  // Allowed in legacy compatibility files
+  const allowed = findDeprecatedTokenViolations(
+    "src/lib/shared/styles/legacy-compat.css",
+    sample,
+  );
+  expect(allowed.length).toBe(0);
+});
+
 Deno.test("findUndefinedTokenViolations flags undefined tokens but allows dynamic allowlist", () => {
   const defined = new Set(["--paisa-primary", "--paisa-surface"]);
   const sample = `
@@ -92,4 +125,14 @@ Deno.test("findUndefinedTokenViolations flags undefined tokens but allows dynami
   );
   expect(violations.length).toBe(1);
   expect(violations[0].detail).toContain("--paisa-bogus-token");
+});
+
+Deno.test("extractDefinedCssVariables extracts tokens strictly from approved files", async () => {
+  const tokens = await extractDefinedCssVariables(Deno.cwd());
+  expect(tokens.has("--paisa-canvas")).toBe(true);
+  expect(tokens.has("--paisa-surface")).toBe(true);
+  expect(tokens.has("--paisa-primary")).toBe(true);
+  expect(tokens.has("--paisa-positive")).toBe(true);
+  expect(tokens.has("--paisa-negative")).toBe(true);
+  expect(tokens.has("--paisa-prediction-high")).toBe(true);
 });
