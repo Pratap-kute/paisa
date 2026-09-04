@@ -37,7 +37,7 @@ async function tryLogin(form: HTMLFormElement) {
 
 <main
   class="grid min-h-screen place-items-center p-6"
-  style="background: var(--paisa-canvas-bg);"
+  style="background: var(--paisa-canvas);"
 >
   <div
     class="w-full max-w-[26rem] rounded-[var(--paisa-radius-lg)] border p-6 shadow-[var(--paisa-shadow-md)]"
@@ -47,7 +47,7 @@ async function tryLogin(form: HTMLFormElement) {
       <Logo size={32} />
       <a
         href="https://paisa.fyi"
-        class="text-3xl font-semibold text-[var(--paisa-primary)] no-underline hover:underline"
+        class="text-3xl font-semibold text-primary no-underline hover:underline"
       >
         Paisa
       </a>

@@ -17,23 +17,23 @@ let {
 }: Props = $props();
 
 const statusClass: Record<MetricStatus, string> = {
-  neutral: "text-[var(--paisa-muted-foreground)]",
-  positive: "text-[var(--paisa-positive)]",
-  negative: "text-[var(--paisa-negative)]",
-  warning: "text-[var(--paisa-warning)]",
-  primary: "text-[var(--paisa-primary)]",
+  neutral: "text-muted-foreground",
+  positive: "text-positive",
+  negative: "text-negative",
+  warning: "text-warning",
+  primary: "text-primary",
 };
 </script>
 
 <section
-  class="rounded-xl p-3.5 sm:p-4 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs min-w-0"
+  class="rounded-xl p-3.5 sm:p-4 bg-surface border border-border-subtle shadow-xs min-w-0"
   data-testid="dashboard-insights">
   <div class="flex items-center justify-between gap-3">
     <div class="flex items-center gap-2 min-w-0">
-      <i class="fa-solid fa-lightbulb text-xs text-[var(--paisa-primary)]"></i>
-      <span class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Financial Insights</span>
+      <i class="fa-solid fa-lightbulb text-xs text-primary"></i>
+      <span class="text-xs font-semibold uppercase tracking-wider text-foreground">Financial Insights</span>
     </div>
-    <a href={`/insights?period=${period}`} class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline whitespace-nowrap">
+    <a href={`/insights?period=${period}`} class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline whitespace-nowrap">
       View Insights <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
     </a>
   </div>
@@ -41,10 +41,10 @@ const statusClass: Record<MetricStatus, string> = {
   {#if loading}
     <div class="py-3"><Spinner /></div>
   {:else if failed}
-    <p class="mt-2 text-sm text-[var(--paisa-muted-foreground)]">Insights unavailable</p>
+    <p class="mt-2 text-sm text-muted-foreground">Insights unavailable</p>
   {:else if items.length > 0}
     <div class="mt-2 min-w-0">
-      <p class="text-sm font-semibold text-[var(--paisa-foreground)]">
+      <p class="text-sm font-semibold text-foreground">
         {items.length} {items.length === 1 ? "item needs" : "items need"} attention
       </p>
       <div class="mt-1 divide-y divide-[var(--paisa-border-subtle)]">
@@ -60,14 +60,14 @@ const statusClass: Record<MetricStatus, string> = {
               <i class={`${item.icon} ${statusClass[item.status]} mt-0.5 w-4 shrink-0 text-xs text-center`} aria-hidden="true"></i>
             {/if}
             <span class="min-w-0 flex-1">
-              <span class="block text-sm font-medium leading-snug text-[var(--paisa-foreground)] group-hover:text-[var(--paisa-primary)] break-words">{item.title}</span>
-              {#if item.detail}<span class="mt-0.5 block text-xs leading-snug text-[var(--paisa-muted-foreground)] line-clamp-2 break-words">{item.detail}</span>{/if}
+              <span class="block text-sm font-medium leading-snug text-foreground group-hover:text-primary break-words">{item.title}</span>
+              {#if item.detail}<span class="mt-0.5 block text-xs leading-snug text-muted-foreground line-clamp-2 break-words">{item.detail}</span>{/if}
             </span>
           </a>
         {/each}
       </div>
     </div>
   {:else}
-    <p class="mt-2 text-sm text-[var(--paisa-muted-foreground)]">No material issues detected this month</p>
+    <p class="mt-2 text-sm text-muted-foreground">No material issues detected this month</p>
   {/if}
 </section>

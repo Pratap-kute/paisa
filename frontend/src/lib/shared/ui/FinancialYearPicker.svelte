@@ -16,7 +16,7 @@ let { value = $bindable(), dateMin, dateMax, class: className = "" }: Props =
 
 <select
   bind:value
-  class="px-2 py-1 text-xs rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] {className}"
+  class="px-2 py-1 text-xs rounded border border-border-subtle bg-surface text-foreground {className}"
 >
   {#each forEachFinancialYear(dateMin, dateMax).reverse() as fy}
     <option>{financialYear(fy)}</option>

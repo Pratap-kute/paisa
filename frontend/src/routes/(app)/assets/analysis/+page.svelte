@@ -195,7 +195,7 @@ onMount(async () => {
           {#each commodities as commodity}
             {@const name = `switch-${commodity}`}
             <label
-              class="inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-[var(--paisa-border-subtle)] px-2 py-0.5 text-xs text-[var(--paisa-muted-foreground)] has-[:checked]:border-[var(--commodity-color,var(--paisa-primary))] has-[:checked]:bg-[var(--paisa-surface-hover)] has-[:checked]:text-[var(--paisa-foreground)]"
+              class="inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border border-border-subtle px-2 py-0.5 text-xs text-muted-foreground has-[:checked]:border-[var(--commodity-color,var(--paisa-primary))] has-[:checked]:bg-surface-hover has-[:checked]:text-foreground"
             >
               <input
                 id={name}
@@ -218,14 +218,14 @@ onMount(async () => {
     </Section>
   {:else if isEmpty}
     <ZeroState item={[]}>
-      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+      <p class="text-sm text-muted-foreground">
         Mutual fund portfolio data is not available. Use
         <strong>Update Mutual Fund Portfolios</strong> from the actions menu to refresh holdings.
       </p>
     </ZeroState>
   {:else if !hasFilteredData}
     <ZeroState item={[]}>
-      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+      <p class="text-sm text-muted-foreground">
         Select at least one commodity to view portfolio breakdown.
       </p>
     </ZeroState>
@@ -266,7 +266,7 @@ onMount(async () => {
           />
         </div>
       {/snippet}
-      <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+      <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle">
         <Table data={filteredHoldingRows} columns={holdingColumns} options={{ layout: "fitDataFill" }} />
       </div>
     </Section>

@@ -29,7 +29,7 @@ function onClick(legend: Legend, index: number) {
     {#if legend.onClick}
       <button
         type="button"
-        class="legend-box inline-flex items-center gap-2 px-2 py-1 rounded-[var(--paisa-radius-sm)] border-0 bg-transparent m-0 font-inherit text-inherit text-left cursor-pointer hover:bg-[var(--paisa-surface-hover)]"
+        class="legend-box inline-flex items-center gap-2 px-2 py-1 rounded-[var(--paisa-radius-sm)] border-0 bg-transparent m-0 font-inherit text-inherit text-left cursor-pointer hover:bg-surface-hover"
         onclick={() => onClick(legend, index)}
         aria-pressed={selectedLegendIndex === index}
         class:selected={selectedLegendIndex === index}
@@ -50,7 +50,7 @@ function onClick(legend: Legend, index: number) {
         {/if}
         <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
-          {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
+          {#if legend.value}<span class="ml-1 text-foreground">{legend.value}</span>{/if}
         </div>
       </button>
     {:else}
@@ -74,7 +74,7 @@ function onClick(legend: Legend, index: number) {
         {/if}
         <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
-          {#if legend.value}<span class="ml-1 text-[var(--paisa-foreground)]">{legend.value}</span>{/if}
+          {#if legend.value}<span class="ml-1 text-foreground">{legend.value}</span>{/if}
         </div>
       </div>
     {/if}
@@ -101,8 +101,8 @@ function onClick(legend: Legend, index: number) {
 }
 
 .legend-box.selected {
-  background-color: var(--paisa-surface-active);
-  box-shadow: inset 0 0 0 1px var(--paisa-brand-primary);
+  background-color: var(--paisa-surface-hover);
+  box-shadow: inset 0 0 0 1px var(--paisa-primary);
 }
 
 .legend-pattern-diagonal {

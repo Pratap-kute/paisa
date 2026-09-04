@@ -165,14 +165,14 @@ onMount(() => {
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5 max-md:w-full max-md:flex-col max-md:items-stretch max-md:gap-2">
-        <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2.5 py-1.5 text-[0.8125rem] text-[var(--paisa-muted-foreground)] max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
-          <p class="m-0 inline"><b class="text-[var(--paisa-foreground)]">{filtered.length}</b> transaction(s)</p>
+        <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised px-2.5 py-1.5 text-[0.8125rem] text-muted-foreground max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
+          <p class="m-0 inline"><b class="text-foreground">{filtered.length}</b> transaction(s)</p>
         </div>
 
         <div class="inline-flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-2">
           <button
             type="button"
-            class="inline-flex h-9 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[var(--paisa-radius-md)] border px-3 text-[0.8125rem] font-medium transition-[background-color,border-color,color] duration-[var(--paisa-transition-fast)] max-md:min-h-11 max-md:w-full max-md:justify-center {bulkEditOpen ? 'border-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'border-[var(--paisa-border)] bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] hover:border-[var(--paisa-border-strong)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex h-9 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-[var(--paisa-radius-md)] border px-3 text-[0.8125rem] font-medium transition-[background-color,border-color,color] duration-[var(--paisa-transition-fast)] max-md:min-h-11 max-md:w-full max-md:justify-center {bulkEditOpen ? 'border-[var(--paisa-primary)] bg-primary-subtle font-semibold text-primary' : 'border-border bg-surface text-foreground hover:border-border-strong hover:bg-surface-hover'}"
             onclick={() => {
               bulkEditOpen = !bulkEditOpen;
               setTimeout(updateDimensions, 200);
@@ -206,8 +206,8 @@ onMount(() => {
     {/if}
 
     {#if transactions}
-      <div class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
-        <div class="hidden grid-cols-[200px_1fr_1fr] gap-4 border-b border-[var(--paisa-border)] bg-[var(--paisa-surface-raised)] px-3 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)] md:grid">
+      <div class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
+        <div class="hidden grid-cols-[200px_1fr_1fr] gap-4 border-b border-border bg-surface-raised px-3 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground md:grid">
           <div class="truncate">Date & Payee</div>
           <div class="truncate">Debits</div>
           <div class="truncate">Credits</div>
@@ -231,19 +231,19 @@ onMount(() => {
           </div>
         {:else}
           <div class="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl text-muted-foreground">
               <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <div class="mb-1 text-[0.9375rem] font-semibold text-[var(--paisa-foreground)]">No transactions match your search</div>
-            <div class="max-w-[360px] text-[0.8125rem] text-[var(--paisa-muted-foreground)]">
+            <div class="mb-1 text-[0.9375rem] font-semibold text-foreground">No transactions match your search</div>
+            <div class="max-w-[360px] text-[0.8125rem] text-muted-foreground">
               Try adjusting your query terms, account filters, or date range.
             </div>
           </div>
         {/if}
       </div>
     {:else}
-      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] px-6 py-16 text-sm text-[var(--paisa-muted-foreground)]">
-        <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paisa-border-strong)] border-t-[var(--paisa-primary)]"></div>
+      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"></div>
         <span>Loading transactions...</span>
       </div>
     {/if}

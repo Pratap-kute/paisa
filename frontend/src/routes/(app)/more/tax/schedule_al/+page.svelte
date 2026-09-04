@@ -44,28 +44,28 @@ onMount(async () => {
     <div class="flex w-full min-w-0 flex-col gap-4">
     {#if scheduleAls}
       {#if selectedScheduleAl}
-        <p class="m-0 text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="m-0 text-sm text-muted-foreground">
           Schedule AL as on
-          <span class="font-semibold text-[var(--paisa-foreground)]">
+          <span class="font-semibold text-foreground">
             {selectedScheduleAl.date.format("DD MMM YYYY")}
           </span>
         </p>
       {/if}
 
       {#if hasEntries}
-        <div class="w-full min-w-0 overflow-x-auto rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
+        <div class="w-full min-w-0 overflow-x-auto rounded-[var(--paisa-radius-lg)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
           <table class="mb-0 w-full min-w-[640px] border-collapse text-[0.8125rem]">
             <thead>
-              <tr class="border-b border-[var(--paisa-border)] bg-[var(--paisa-surface-raised)] text-[0.6875rem] font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)]">
+              <tr class="border-b border-border bg-surface-raised text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                 <th class="px-3 py-2.5 text-left">Code</th>
                 <th class="px-3 py-2.5 text-left">Section</th>
                 <th class="px-3 py-2.5 text-left">Details</th>
                 <th class="px-3 py-2.5 text-right">Amount</th>
               </tr>
             </thead>
-            <tbody class="text-[var(--paisa-foreground)]">
+            <tbody class="text-foreground">
               {#each selectedScheduleAl?.entries ?? [] as entry (`${entry.section.code}-${entry.section.section}-${entry.section.details}`)}
-                <tr class="border-b border-[var(--paisa-border-subtle)]">
+                <tr class="border-b border-border-subtle">
                   <td class="px-3 py-2.5">{entry.section.code}</td>
                   <td class="px-3 py-2.5">{entry.section.section}</td>
                   <td class="px-3 py-2.5">{entry.section.details}</td>
@@ -74,7 +74,7 @@ onMount(async () => {
               {/each}
             </tbody>
             <tfoot>
-              <tr class="bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-foreground)]">
+              <tr class="bg-surface-raised font-semibold text-foreground">
                 <td class="px-3 py-2.5" colspan="2"></td>
                 <th class="px-3 py-2.5 text-left" scope="row">Total</th>
                 <td class="px-3 py-2.5 text-right tabular-nums" data-testid="schedule-al-total">{formatCurrency(total)}</td>
@@ -84,20 +84,20 @@ onMount(async () => {
         </div>
       {:else}
         <ZeroState item={[]}>
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl text-muted-foreground">
             <i class="fa-solid fa-file-invoice"></i>
           </div>
-          <div class="mb-1 text-[0.9375rem] font-semibold text-[var(--paisa-foreground)]">
+          <div class="mb-1 text-[0.9375rem] font-semibold text-foreground">
             No Schedule AL data for the selected financial year
           </div>
-          <div class="max-w-[360px] text-[0.8125rem] text-[var(--paisa-muted-foreground)]">
+          <div class="max-w-[360px] text-[0.8125rem] text-muted-foreground">
             Configure Schedule AL entries in settings or select a different financial year.
           </div>
         </ZeroState>
       {/if}
     {:else}
-      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] px-6 py-16 text-sm text-[var(--paisa-muted-foreground)]">
-        <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paisa-border-strong)] border-t-[var(--paisa-primary)]"></div>
+      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"></div>
         <span>Loading Schedule AL...</span>
       </div>
     {/if}

@@ -266,7 +266,7 @@ async function createFile(destinationFile: string) {
     {#snippet leading()}
       <a
         href="/more/sheets"
-        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+        class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
         <span>Sheets</span>
@@ -284,11 +284,11 @@ async function createFile(destinationFile: string) {
         {#if $sheetEditorState.errors.length > 0}
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-negative-subtle)] px-2.5 py-0.5 text-xs font-semibold text-[var(--paisa-negative)] transition-colors hover:bg-[var(--paisa-negative)] hover:text-[var(--paisa-text-inverse)]"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-negative-subtle px-2.5 py-0.5 text-xs font-semibold text-negative transition-colors hover:bg-negative hover:text-inverse-foreground"
             onclick={() => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
             title="Click to jump to error"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-negative)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-negative"></span>
             <span>{$sheetEditorState.errors.length} error(s)</span>
           </button>
         {/if}
@@ -302,11 +302,11 @@ async function createFile(destinationFile: string) {
       class="grid h-[calc(100vh-13.5rem)] min-h-[520px] w-full grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
       <!-- File Tree Sidebar -->
       <aside
-        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden">
+        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden">
         <div
-          class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2">
+          class="flex min-h-[38px] items-center gap-2 border-b border-border bg-surface-raised px-3 py-2">
           <span
-            class="text-[0.725rem] font-bold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            class="text-[0.725rem] font-bold uppercase tracking-wider text-muted-foreground">
             <i class="fa-regular fa-folder-open mr-1"></i>
             SHEETS
           </span>
@@ -314,7 +314,7 @@ async function createFile(destinationFile: string) {
             rounded>{values(filesMap).length}</Badge>
           <button
             type="button"
-            class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
+            class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
             title="Create new sheet"
             onclick={() => openCreateModal()}
           >
@@ -334,17 +334,17 @@ async function createFile(destinationFile: string) {
 
       <!-- Main Editor & Live Results Pane -->
       <main
-        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]">
+        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
         <!-- Integrated Toolbar Header -->
         <div
-          class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-bg)] px-3 py-1.5">
+          class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-border bg-surface px-3 py-1.5">
           <div class="flex items-center gap-2">
             <div
-              class="flex items-center gap-1.5 font-mono text-xs font-semibold text-[var(--paisa-text-primary)]">
-              <i class="fa-regular fa-file-lines text-[var(--paisa-brand-primary)]"></i>
+              class="flex items-center gap-1.5 font-mono text-xs font-semibold text-foreground">
+              <i class="fa-regular fa-file-lines text-primary"></i>
               <span class="max-w-[240px] truncate">{selectedFile?.name || "Sheet"}</span>
               {#if $sheetEditorState.hasUnsavedChanges}
-                <span class="text-[0.75rem] leading-none text-[var(--paisa-warning)]" title="Unsaved changes">●</span>
+                <span class="text-[0.75rem] leading-none text-warning" title="Unsaved changes">●</span>
               {/if}
             </div>
           </div>
@@ -401,8 +401,8 @@ async function createFile(destinationFile: string) {
             </Button>
 
             {#if !isEmpty(selectedFile?.versions)}
-              <div class="ml-1 flex items-center gap-1 border-l border-[var(--paisa-border-default)] pl-2">
-                <i class="fas fa-clock-rotate-left text-[0.75rem] text-[var(--paisa-text-muted)]" title="Backup versions"></i>
+              <div class="ml-1 flex items-center gap-1 border-l border-border pl-2">
+                <i class="fas fa-clock-rotate-left text-[0.75rem] text-muted-foreground" title="Backup versions"></i>
                 <Select bind:value={selectedVersion} size="sm" class="max-w-[150px] font-mono text-xs">
                   <option value="" disabled>Select backup...</option>
                   {#each selectedFile?.versions ?? [] as version}
@@ -438,7 +438,7 @@ async function createFile(destinationFile: string) {
 
         <!-- Split Editor & Results Workspace -->
         <div
-          class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--paisa-surface)]">
+          class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-surface">
           <!-- CodeMirror Editor Pane -->
           <div
             class="relative flex-1 min-w-0 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.sheet-editor]:h-full"
@@ -448,20 +448,20 @@ async function createFile(destinationFile: string) {
 
           <!-- Live Calculated Evaluation Results Pane -->
           <div
-            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
+            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-border bg-surface-raised overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
           >
             {#each $sheetEditorState.results as result, i}
               <div
                 class="px-3 leading-[1.4] {i + 1 === $sheetEditorState.currentLine
-                  ? 'bg-[var(--paisa-surface-hover)] font-bold text-[var(--paisa-text-primary)]'
-                  : 'text-[var(--paisa-text-secondary)]'}"
+                  ? 'bg-surface-hover font-bold text-foreground'
+                  : 'text-muted-foreground'}"
               >
                 <div
                   title={result.result}
-                  class="paisa-truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
-                    ? 'font-bold text-[var(--paisa-negative)]'
+                  class="truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
+                    ? 'font-bold text-negative'
                     : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
-                    ? 'font-bold text-[var(--paisa-text-primary)]'
+                    ? 'font-bold text-foreground'
                     : ''} {result.underline ? 'underline' : ''}"
                 >
                   &nbsp;{result.result}

@@ -50,14 +50,14 @@ onMount(async () => {
   <Section title="Monthly Repayments">
     {#if isLoading}
       <div
-        class="flex min-h-[200px] items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]"
+        class="flex min-h-[200px] items-center justify-center rounded-[var(--paisa-radius-md)] border border-border-subtle"
         aria-hidden="true"
       >
-        <div class="h-8 w-8 animate-pulse rounded-full bg-[var(--paisa-surface-hover)]"></div>
+        <div class="h-8 w-8 animate-pulse rounded-full bg-surface-hover"></div>
       </div>
     {:else if isEmpty}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           You haven't repaid any liabilities.
         </p>
       </ZeroState>

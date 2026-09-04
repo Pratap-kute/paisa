@@ -153,7 +153,7 @@ const isResolved = $derived(
           {/if}
           {#if input.sourceAccount}
             <span class="paisa-source-account" title="Source Account">
-              <i class="fas fa-wallet text-[10px] mr-1 text-[var(--paisa-text-muted)]"></i>
+              <i class="fas fa-wallet text-[10px] mr-1 text-muted-foreground"></i>
               {input.sourceAccount}
             </span>
           {/if}
@@ -282,8 +282,8 @@ const isResolved = $derived(
   flex-direction: column;
   gap: var(--paisa-space-2, 0.5rem);
   padding: var(--paisa-space-3, 0.75rem);
-  border-top: 1px solid var(--paisa-border-default, #e2e8f0);
-  background-color: var(--paisa-surface-card, #ffffff);
+  border-top: 1px solid var(--paisa-border, #e2e8f0);
+  background-color: var(--paisa-surface, #ffffff);
 }
 
 .paisa-prediction-detail-head {
@@ -299,7 +299,7 @@ const isResolved = $derived(
   gap: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--paisa-text-primary, #0f172a);
+  color: var(--paisa-foreground, #0f172a);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -307,8 +307,8 @@ const isResolved = $derived(
 .paisa-queue-badge {
   display: inline-flex;
   align-items: center;
-  background-color: var(--paisa-brand-primary-light, rgba(59, 130, 246, 0.1));
-  color: var(--paisa-brand-primary, #3b82f6);
+  background-color: var(--paisa-primary-subtle, rgba(59, 130, 246, 0.1));
+  color: var(--paisa-primary, #3b82f6);
   border: 1px solid rgba(59, 130, 246, 0.25);
   font-size: 0.6875rem;
   font-weight: 700;
@@ -318,7 +318,7 @@ const isResolved = $derived(
 }
 
 .paisa-detail-merchant {
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
   text-transform: none;
   font-weight: normal;
 }
@@ -332,7 +332,7 @@ const isResolved = $derived(
 .paisa-confidence-pct {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
 }
 
 .paisa-inspector-close-btn {
@@ -344,14 +344,14 @@ const isResolved = $derived(
   border: none;
   border-radius: var(--paisa-radius-sm, 0.25rem);
   background: transparent;
-  color: var(--paisa-text-muted, #94a3b8);
+  color: var(--paisa-muted-foreground, #94a3b8);
   cursor: pointer;
   font-size: 0.75rem;
   transition: all 0.12s ease;
 
   &:hover {
-    background-color: var(--paisa-surface-muted, #f1f5f9);
-    color: var(--paisa-text-primary, #0f172a);
+    background-color: var(--paisa-surface-raised, #f1f5f9);
+    color: var(--paisa-foreground, #0f172a);
   }
 }
 
@@ -361,7 +361,7 @@ const isResolved = $derived(
   gap: 0.25rem;
   padding: 0.25rem;
   border-radius: var(--paisa-radius-sm, 0.25rem);
-  background-color: var(--paisa-surface-muted, #f8fafc);
+  background-color: var(--paisa-surface-raised, #f8fafc);
   border: 1px solid var(--paisa-border-subtle, #e2e8f0);
 }
 
@@ -375,32 +375,32 @@ const isResolved = $derived(
   border: none;
   border-radius: var(--paisa-radius-sm, 0.25rem);
   background: transparent;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
   cursor: pointer;
   transition: all 0.12s ease;
 
   &:hover {
-    color: var(--paisa-text-primary, #0f172a);
+    color: var(--paisa-foreground, #0f172a);
     background-color: rgba(0, 0, 0, 0.04);
   }
 
   &.is-active {
-    background-color: var(--paisa-surface-card, #ffffff);
-    color: var(--paisa-brand-primary, #3b82f6);
+    background-color: var(--paisa-surface, #ffffff);
+    color: var(--paisa-primary, #3b82f6);
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
 }
 
 .paisa-switcher-tab-account {
-  color: var(--paisa-text-muted, #94a3b8);
+  color: var(--paisa-muted-foreground, #94a3b8);
   font-weight: normal;
 }
 
 .paisa-source-card {
   padding: 0.4rem 0.55rem;
   border-radius: var(--paisa-radius-sm, 0.25rem);
-  background-color: var(--paisa-surface-muted, #f8fafc);
+  background-color: var(--paisa-surface-raised, #f8fafc);
   border: 1px solid var(--paisa-border-subtle, #e2e8f0);
   display: flex;
   flex-direction: column;
@@ -413,17 +413,17 @@ const isResolved = $derived(
   flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.6875rem;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
 }
 
 .paisa-source-date {
   font-weight: 600;
-  color: var(--paisa-text-primary, #0f172a);
+  color: var(--paisa-foreground, #0f172a);
 }
 
 .paisa-source-account,
 .paisa-source-prefix {
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
 }
 
 .paisa-source-amount {
@@ -438,7 +438,7 @@ const isResolved = $derived(
 
 .paisa-source-desc {
   font-size: 0.75rem;
-  color: var(--paisa-text-primary, #0f172a);
+  color: var(--paisa-foreground, #0f172a);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -453,7 +453,7 @@ const isResolved = $derived(
 .paisa-detail-label {
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -462,8 +462,8 @@ const isResolved = $derived(
   width: 100%;
 
   :global(.svelte-select) {
-    border: 1px solid var(--paisa-border-default, #cbd5e1);
-    background-color: var(--paisa-canvas-bg, #f8fafc);
+    border: 1px solid var(--paisa-border, #cbd5e1);
+    background-color: var(--paisa-canvas, #f8fafc);
     border-radius: var(--paisa-radius-sm, 0.375rem);
     font-size: 0.8125rem;
     min-height: 36px;
@@ -474,7 +474,7 @@ const isResolved = $derived(
   margin: 0;
   padding-left: 1.1rem;
   font-size: 0.75rem;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
   line-height: 1.4;
 }
 
@@ -487,7 +487,7 @@ const isResolved = $derived(
 .paisa-detail-sublabel {
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--paisa-text-muted, #94a3b8);
+  color: var(--paisa-muted-foreground, #94a3b8);
 }
 
 .paisa-alt-buttons {
@@ -501,14 +501,14 @@ const isResolved = $derived(
   padding: 0.1875rem 0.5rem;
   border-radius: var(--paisa-radius-sm, 0.25rem);
   border: 1px solid var(--paisa-border-subtle, #e2e8f0);
-  background-color: var(--paisa-surface-muted, #f1f5f9);
-  color: var(--paisa-text-secondary, #475569);
+  background-color: var(--paisa-surface-raised, #f1f5f9);
+  color: var(--paisa-muted-foreground, #475569);
   cursor: pointer;
   transition: all 0.15s ease;
 
   &:hover {
     background-color: var(--paisa-surface-hover, #e2e8f0);
-    color: var(--paisa-text-primary, #0f172a);
+    color: var(--paisa-foreground, #0f172a);
   }
 }
 
@@ -519,7 +519,7 @@ const isResolved = $derived(
   margin-top: auto;
   position: sticky;
   bottom: 0;
-  background-color: var(--paisa-surface-card, #ffffff);
+  background-color: var(--paisa-surface, #ffffff);
   padding-top: 0.5rem;
   border-top: 1px solid var(--paisa-border-subtle, #f1f5f9);
   z-index: 20;
@@ -540,9 +540,9 @@ const isResolved = $derived(
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: var(--paisa-radius-sm, 0.25rem);
-  border: 1px solid var(--paisa-border-default, #cbd5e1);
-  background-color: var(--paisa-surface-card, #ffffff);
-  color: var(--paisa-text-primary, #0f172a);
+  border: 1px solid var(--paisa-border, #cbd5e1);
+  background-color: var(--paisa-surface, #ffffff);
+  color: var(--paisa-foreground, #0f172a);
   cursor: pointer;
   transition: all 0.15s ease;
 
@@ -561,19 +561,19 @@ const isResolved = $derived(
 .paisa-action-btn-subtle {
   border: none;
   background: transparent;
-  color: var(--paisa-text-secondary, #64748b);
+  color: var(--paisa-muted-foreground, #64748b);
   justify-content: flex-start;
   padding: 0.25rem 0;
 }
 
 .paisa-action-btn-subtle:hover {
   background: transparent;
-  color: var(--paisa-text-primary, #0f172a);
+  color: var(--paisa-foreground, #0f172a);
 }
 
 .paisa-action-btn-primary {
-  background-color: var(--paisa-brand-primary, #3b82f6);
-  border-color: var(--paisa-brand-primary, #3b82f6);
+  background-color: var(--paisa-primary, #3b82f6);
+  border-color: var(--paisa-primary, #3b82f6);
   color: #ffffff;
   font-weight: 600;
 }

@@ -25,7 +25,7 @@ const dispatch = createEventDispatcher();
 <div class="paisa-bulk-edit-card">
   <div class="paisa-bulk-edit-header">
     <div class="paisa-bulk-edit-title">
-      <i class="fa-solid fa-pen-to-square text-[var(--paisa-primary)] mr-2"></i>
+      <i class="fa-solid fa-pen-to-square text-primary mr-2"></i>
       <span>Bulk Operations</span>
     </div>
     <div class="paisa-bulk-edit-hint">
@@ -39,7 +39,7 @@ const dispatch = createEventDispatcher();
       <span class="paisa-control-label">Operation</span>
       <div class="paisa-op-badge">
         <i
-          class="fa-solid fa-arrows-rotate text-[var(--paisa-primary)] mr-1.5 text-xs"
+          class="fa-solid fa-arrows-rotate text-primary mr-1.5 text-xs"
         ></i>
         <span>Rename Account</span>
       </div>

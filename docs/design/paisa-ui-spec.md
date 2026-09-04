@@ -47,12 +47,12 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 - **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/styles/foundation.css` (primary Tailwind integration point and canonical tokens) and `$lib/shared/theme/tokens.css` (extended token superset and integration mappings).
 - **Three Token Tiers:**
   1. **Canonical Tokens:** Permitted for all application components and views (`--paisa-canvas`, `--paisa-surface`, `--paisa-surface-raised`, `--paisa-surface-hover`, `--paisa-foreground`, `--paisa-muted-foreground`, `--paisa-border`, `--paisa-border-subtle`, `--paisa-border-strong`, `--paisa-primary`, `--paisa-primary-subtle`, `--paisa-positive`, `--paisa-positive-subtle`, `--paisa-negative`, `--paisa-negative-subtle`, `--paisa-warning`, `--paisa-warning-subtle`, `--paisa-neutral`, `--paisa-prediction-*`).
-  2. **Legacy Compatibility Tokens:** Existing application and integration code may continue using them while incremental migration proceeds (`--paisa-brand-primary`, `--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-text-primary`, `--paisa-text-secondary`, `--paisa-text-muted`, `--paisa-surface-bg`, `--paisa-surface-card`, `--paisa-canvas-bg`). New application code must not introduce new dependencies on them.
-  3. **Deprecated Tokens:** Prohibited in application code and enforced by automated spec guards (`--paisa-success`, `--paisa-success-light`, `--paisa-danger`, `--paisa-danger-light`, `--paisa-info`, `--paisa-info-light`). Application code representing financial statuses must use canonical financial semantics (`positive`, `negative`, `warning`, `primary`).
+  2. **Specialized Tokens:** Stable integration and component semantics (`--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-tooltip-*`, `--paisa-login-*`) remain valid and should alias the canonical foundation where the semantics match.
+  3. **Removed Tokens:** Deprecated status tokens and legacy generic aliases are prohibited everywhere and enforced by automated spec guards. Application code representing financial statuses must use canonical financial semantics (`positive`, `negative`, `warning`, `primary`).
 - **CSS Layer Architecture:** Styles are organized via `@layer theme, base, components, utilities;` for controlled specificity.
 - **Migration Status (Complete):**
   $$\text{Bulma} = 0 \quad\big|\quad \text{Sass/SCSS} = 0 \quad\big|\quad \text{!important} \approx 0$$
-  Bulma and SCSS have been fully removed. Tailwind CSS v4 Preflight is **enabled** (`@import "tailwindcss/preflight.css" layer(base)`). A thin `legacy-compat.css` bridge provides class aliases (e.g., `.has-text-success`, `.table.is-hoverable`) consumed by Tabulator and legacy DOM output. No new Bulma-style classes may be added.
+  Bulma and SCSS have been fully removed. Tailwind CSS v4 Preflight is **enabled** (`@import "tailwindcss/preflight.css" layer(base)`). The former Bulma compatibility selectors had no runtime consumers and were removed; automated checks prevent their reintroduction in application markup.
 
 ### 2.3 UI Primitives & Accessibility Layer
 
@@ -887,7 +887,7 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 │    ├── charts/: EChartSurface, TimeSeriesChart,             │
 │    │   ComparisonBarChart, FinancialHierarchyChart           │
 │    ├── editor/: CodeMirror foundations                      │
-│    ├── styles/: foundation.css, legacy-compat.css           │
+│    ├── styles/: foundation.css, base.css, utilities.css     │
 │    └── theme/: tokens.css, chartPalette.ts, color.ts        │
 ├─────────────────────────────────────────────────────────────┤
 │ 4. Domain ($lib/domain/)                                    │

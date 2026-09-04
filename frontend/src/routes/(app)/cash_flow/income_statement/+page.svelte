@@ -63,9 +63,9 @@ function formatUnlessZero(value: number) {
 }
 
 function changeClass(value: number) {
-  if (value > 0) return "text-[var(--paisa-positive)]";
-  if (value < 0) return "text-[var(--paisa-negative)]";
-  return "text-[var(--paisa-muted-foreground)]";
+  if (value > 0) return "text-positive";
+  if (value < 0) return "text-negative";
+  return "text-muted-foreground";
 }
 
 const sum = (object: Record<string, number>) =>
@@ -222,7 +222,7 @@ onMount(async () => {
   >
     {#if !isLoading && isEmpty}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           No transactions recorded for the selected year.
         </p>
       </ZeroState>
@@ -241,22 +241,22 @@ onMount(async () => {
     title="Detailed Statement"
     subtitle="Multi-year account comparison"
   >
-    <div class="max-h-[min(650px,calc(100vh-280px))] min-h-[300px] max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-sm">
+    <div class="max-h-[min(650px,calc(100vh-280px))] min-h-[300px] max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface shadow-sm">
       {#if isLoading}
         <div class="flex flex-col gap-[var(--paisa-space-2)] p-[var(--paisa-space-4)]" aria-hidden="true">
           {#each Array(8) as _}
-            <div class="h-5 animate-pulse rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-hover)]"></div>
+            <div class="h-5 animate-pulse rounded-[var(--paisa-radius-sm)] bg-surface-hover"></div>
           {/each}
         </div>
       {:else}
-        <table class="mb-0 w-full min-w-max border-separate border-spacing-0 text-sm text-[var(--paisa-text-primary)]">
+        <table class="mb-0 w-full min-w-max border-separate border-spacing-0 text-sm text-foreground">
           <thead>
             <tr>
-              <th class="sticky left-0 top-0 z-20 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-table-header-bg)] px-4 py-3 text-left font-semibold text-[var(--paisa-table-header-text)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
+              <th class="sticky left-0 top-0 z-20 min-w-[220px] max-w-[280px] border-b border-r border-border bg-[var(--paisa-table-header-bg)] px-4 py-3 text-left font-semibold text-[var(--paisa-table-header-text)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
                 Account
               </th>
               {#each years as y}
-                <th class="sticky top-0 z-10 min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-table-header-bg)] px-3.5 py-3 text-right font-semibold tabular-nums text-[var(--paisa-table-header-text)]">
+                <th class="sticky top-0 z-10 min-w-[120px] border-b border-border bg-[var(--paisa-table-header-bg)] px-3.5 py-3 text-right font-semibold tabular-nums text-[var(--paisa-table-header-text)]">
                   {y}
                 </th>
               {/each}
@@ -264,12 +264,12 @@ onMount(async () => {
           </thead>
           <tbody>
             {#each accountGroups as group}
-              <tr class="bg-[var(--paisa-surface-hover)]">
-                <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-4 py-2.5 text-left font-bold text-[var(--paisa-brand-primary)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
+              <tr class="bg-surface-hover">
+                <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-t border-border bg-surface-hover px-4 py-2.5 text-left font-bold text-primary shadow-[2px_0_4px_rgba(0,0,0,0.06)]">
                   {group.label}
                 </th>
                 {#each years as y}
-                  <td class="min-w-[120px] border-b border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-hover)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-brand-primary)]">
+                  <td class="min-w-[120px] border-b border-t border-border bg-surface-hover px-3.5 py-2.5 text-right font-bold tabular-nums text-primary">
                     {#if yearly[y]?.[group.key]}
                       {formatUnlessZero(sum(yearly[y][group.key]) * group.multiplier)}
                     {/if}
@@ -277,14 +277,14 @@ onMount(async () => {
                 {/each}
               </tr>
               {#each group.accounts as account}
-                <tr class="group transition-colors hover:bg-[var(--paisa-surface-hover)]/40">
-                  <th class="custom-icon sticky left-0 z-[1] min-w-[220px] max-w-[280px] truncate whitespace-nowrap border-b border-r border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-4 py-2 text-left text-xs font-normal text-[var(--paisa-text-secondary)] shadow-[2px_0_4px_rgba(0,0,0,0.06)] transition-colors group-hover:bg-[var(--paisa-surface-hover)]/70">
+                <tr class="group transition-colors hover:bg-surface-hover/40">
+                  <th class="custom-icon sticky left-0 z-[1] min-w-[220px] max-w-[280px] truncate whitespace-nowrap border-b border-r border-border-subtle bg-surface px-4 py-2 text-left text-xs font-normal text-muted-foreground shadow-[2px_0_4px_rgba(0,0,0,0.06)] transition-colors group-hover:bg-surface-hover/70">
                     <span class="pl-3">
                       {iconify(restName(account), { group: firstName(account) })}
                     </span>
                   </th>
                   {#each years as y}
-                    <td class="min-w-[120px] whitespace-nowrap border-b border-[var(--paisa-border-subtle)] px-3.5 py-2 text-right text-xs tabular-nums text-[var(--paisa-text-secondary)] transition-colors group-hover:bg-[var(--paisa-surface-hover)]/40">
+                    <td class="min-w-[120px] whitespace-nowrap border-b border-border-subtle px-3.5 py-2 text-right text-xs tabular-nums text-muted-foreground transition-colors group-hover:bg-surface-hover/40">
                       {#if yearly[y]?.[group.key]?.[account]}
                         {formatUnlessZero(yearly[y][group.key][account] * group.multiplier)}
                       {/if}
@@ -294,35 +294,35 @@ onMount(async () => {
               {/each}
             {/each}
           </tbody>
-          <tfoot class="border-t-2 border-[var(--paisa-border-strong)]">
-            <tr class="bg-[var(--paisa-surface)]">
-              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Change</th>
+          <tfoot class="border-t-2 border-border-strong">
+            <tr class="bg-surface">
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-border bg-surface-raised px-4 py-2.5 text-left font-bold text-foreground shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Change</th>
               {#each years as y}
                 {#if yearly[y]}
                   {@const yearDiff = yearly[y].endingBalance - yearly[y].startingBalance}
-                  <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums {changeClass(yearDiff)}">
+                  <td class="min-w-[120px] border-b border-border bg-surface-raised px-3.5 py-2.5 text-right font-bold tabular-nums {changeClass(yearDiff)}">
                     <div>{formatCurrency(yearDiff)}</div>
                     <div class="text-xs font-normal opacity-85">{formatPercentage(yearDiff / yearly[y].startingBalance)}</div>
                   </td>
                 {:else}
-                  <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5"></td>
+                  <td class="min-w-[120px] border-b border-border bg-surface-raised px-3.5 py-2.5"></td>
                 {/if}
               {/each}
             </tr>
-            <tr class="bg-[var(--paisa-surface)]">
-              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">End Balance</th>
+            <tr class="bg-surface">
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-border bg-surface-raised px-4 py-2.5 text-left font-bold text-foreground shadow-[2px_0_4px_rgba(0,0,0,0.06)]">End Balance</th>
               {#each years as y}
-                <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">
+                <td class="min-w-[120px] border-b border-border bg-surface-raised px-3.5 py-2.5 text-right font-bold tabular-nums text-foreground">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].endingBalance)}
                   {/if}
                 </td>
               {/each}
             </tr>
-            <tr class="bg-[var(--paisa-surface)]">
-              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Start Balance</th>
+            <tr class="bg-surface">
+              <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-r border-border bg-surface-raised px-4 py-2.5 text-left font-bold text-foreground shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Start Balance</th>
               {#each years as y}
-                <td class="min-w-[120px] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">
+                <td class="min-w-[120px] bg-surface-raised px-3.5 py-2.5 text-right font-bold tabular-nums text-foreground">
                   {#if yearly[y]}
                     {formatCurrency(yearly[y].startingBalance)}
                   {/if}

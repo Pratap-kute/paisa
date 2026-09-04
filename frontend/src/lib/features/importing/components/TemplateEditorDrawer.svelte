@@ -123,18 +123,18 @@ $effect(() => {
   showHeader={false}
   unstyled
   overlayClass="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] transition-opacity duration-200"
-  contentClass="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-transform duration-200 max-sm:max-w-full"
+  contentClass="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-border-subtle bg-surface shadow-2xl transition-transform duration-200 max-sm:max-w-full"
 >
   {#snippet children()}
       <!-- HEADER -->
-      <div class="flex shrink-0 items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
+      <div class="flex shrink-0 items-center justify-between border-b border-border-subtle bg-surface-raised px-4 py-3">
         <div class="flex min-w-0 items-center gap-2.5">
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--paisa-primary)]/10 text-[var(--paisa-primary)]">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <i class="fas fa-code text-sm"></i>
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <h2 class="truncate text-sm font-bold text-[var(--paisa-foreground)]">
+              <h2 class="truncate text-sm font-bold text-foreground">
                 {selectedTemplate?.name || "Template Editor"}
               </h2>
               <Badge variant={isBuiltin ? "info" : "primary"} size="sm">
@@ -144,7 +144,7 @@ $effect(() => {
                 <Badge variant="warning" size="sm" dot>Unsaved</Badge>
               {/if}
             </div>
-            <p class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
+            <p class="text-[0.6875rem] text-muted-foreground">
               Handlebars-based ledger transaction mapping template
             </p>
           </div>
@@ -153,7 +153,7 @@ $effect(() => {
         <div class="flex items-center gap-1.5">
           <button
             type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2.5 text-xs font-medium text-[var(--paisa-muted-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)]"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
             onclick={() => (showCheatsheet = !showCheatsheet)}
             title="Toggle Variables & Helpers Reference"
           >
@@ -173,19 +173,19 @@ $effect(() => {
 
       <!-- CHEATSHEET / HELPER PANEL -->
       {#if showCheatsheet}
-        <div class="shrink-0 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3 text-xs">
+        <div class="shrink-0 border-b border-border-subtle bg-surface-raised p-3 text-xs">
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <!-- Available Columns -->
-            <div class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-2.5">
-              <span class="mb-1.5 block font-semibold text-[var(--paisa-foreground)]">
-                <i class="fas fa-table-columns mr-1 text-[var(--paisa-primary)]"></i> Available Columns (Click to insert)
+            <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
+              <span class="mb-1.5 block font-semibold text-foreground">
+                <i class="fas fa-table-columns mr-1 text-primary"></i> Available Columns (Click to insert)
               </span>
               {#if columns && columns.length > 0}
                 <div class="flex flex-wrap gap-1">
                   {#each columns as col}
                     <button
                       type="button"
-                      class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                      class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                       onclick={() => copySnippet(`{{ROW.${col}}}`)}
                     >
                       {`{{ROW.${col}}}`}
@@ -193,24 +193,24 @@ $effect(() => {
                   {/each}
                 </div>
               {:else}
-                <p class="text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
+                <p class="text-[0.6875rem] text-muted-foreground">
                   Load a CSV/PDF/XLSX file on the import page to view live column names, or use default columns:
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.A }}'}</span>,
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.B }}'}</span>,
-                  <span class="font-mono text-[var(--paisa-primary)]">{'{{ ROW.C }}'}</span>.
+                  <span class="font-mono text-primary">{'{{ ROW.A }}'}</span>,
+                  <span class="font-mono text-primary">{'{{ ROW.B }}'}</span>,
+                  <span class="font-mono text-primary">{'{{ ROW.C }}'}</span>.
                 </p>
               {/if}
             </div>
 
             <!-- Common Helpers -->
-            <div class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-2.5">
-              <span class="mb-1.5 block font-semibold text-[var(--paisa-foreground)]">
-                <i class="fas fa-wand-magic-sparkles mr-1 text-[var(--paisa-primary)]"></i> Template Functions
+            <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
+              <span class="mb-1.5 block font-semibold text-foreground">
+                <i class="fas fa-wand-magic-sparkles mr-1 text-primary"></i> Template Functions
               </span>
               <div class="flex flex-wrap gap-1">
                 <button
                   type="button"
-                  class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                   title="Format date as YYYY/MM/DD"
                   onclick={() => copySnippet('{{date ROW.A "DD/MM/YYYY"}}')}
                 >
@@ -218,7 +218,7 @@ $effect(() => {
                 </button>
                 <button
                   type="button"
-                  class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                   title="Scrub & parse amount"
                   onclick={() => copySnippet('{{amount ROW.B}}')}
                 >
@@ -226,7 +226,7 @@ $effect(() => {
                 </button>
                 <button
                   type="button"
-                  class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                   title="AI / TF-IDF account predictor"
                   onclick={() => copySnippet('{{predictAccount ROW.Description prefix="Expenses"}}')}
                 >
@@ -234,7 +234,7 @@ $effect(() => {
                 </button>
                 <button
                   type="button"
-                  class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                   title="Regex matcher"
                   onclick={() => copySnippet('{{regexpMatch ROW.A "UPI/(\\w+)" group=1}}')}
                 >
@@ -242,7 +242,7 @@ $effect(() => {
                 </button>
                 <button
                   type="button"
-                  class="rounded bg-[var(--paisa-surface-hover)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-foreground)] hover:bg-[var(--paisa-primary)] hover:text-white"
+                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
                   title="Clean multiple whitespace"
                   onclick={() => copySnippet('{{oneline ROW.A}}')}
                 >
@@ -255,7 +255,7 @@ $effect(() => {
       {/if}
 
       <!-- CODEMIRROR EDITOR BODY -->
-      <div class="relative min-h-0 flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
+      <div class="relative min-h-0 flex-1 overflow-hidden bg-canvas">
         <div
           class="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:w-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-xs [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
           use:initCodeMirror={selectedTemplate}
@@ -263,7 +263,7 @@ $effect(() => {
       </div>
 
       <!-- FOOTER ACTIONS -->
-      <div class="flex shrink-0 items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
+      <div class="flex shrink-0 items-center justify-between border-t border-border-subtle bg-surface-raised px-4 py-3">
         <div class="flex items-center gap-2">
           {#if !isBuiltin && selectedTemplate}
             <Button

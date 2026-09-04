@@ -125,7 +125,7 @@ onMount(async () => {
     {#snippet leading()}
       <a
         href="/assets/gain"
-        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+        class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
         <span>Gain</span>
@@ -163,7 +163,7 @@ onMount(async () => {
         >
           {#each postings as posting}
             <a
-              class="paisa-posting-row flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)]"
+              class="paisa-posting-row flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-border bg-surface px-3 py-2 text-muted-foreground no-underline transition-colors hover:border-border-strong hover:text-foreground"
               href={postingUrl(posting)}
               style="border-left: 2px solid {posting.amount >= 0
                 ? posting.account.startsWith('Income:CapitalGains')
@@ -175,24 +175,24 @@ onMount(async () => {
             >
               <span class="flex min-w-0 items-center justify-between gap-2">
                 <span
-                  class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-secondary)]"
+                  class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground"
                   >{posting.payee}</span
                 >
                 <span
-                  class="shrink-0 text-xs text-[var(--paisa-text-muted)]"
+                  class="shrink-0 text-xs text-muted-foreground"
                   >{posting.date.format("DD MMM YYYY")}</span
                 >
               </span>
               <span class="flex min-w-0 items-center justify-between gap-2">
                 <span
-                  class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-muted)]"
+                  class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground"
                 >
                   {iconify(restName(posting.account), {
                     group: firstName(posting.account),
                   })}
                 </span>
                 <span
-                  class="shrink-0 font-semibold tabular-nums text-[var(--paisa-text-primary)]"
+                  class="shrink-0 font-semibold tabular-nums text-foreground"
                   >{formatCurrency(posting.amount)}</span
                 >
               </span>
@@ -206,31 +206,31 @@ onMount(async () => {
       {#if overview}
         <Section>
           <div
-            class="flex flex-wrap items-center gap-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-4 py-3"
+            class="flex flex-wrap items-center gap-4 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-4 py-3"
           >
             <span class="custom-icon text-xl">{iconify(data.name)}</span>
             <div class="flex items-baseline gap-2">
-              <span class="text-xs text-[var(--paisa-text-muted)]"
+              <span class="text-xs text-muted-foreground"
                 >Investment</span
               >
-              <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
+              <span class="font-semibold tabular-nums text-foreground"
                 >{formatCurrency(overview.investmentAmount)}</span
               >
             </div>
             <div class="flex items-baseline gap-2">
-              <span class="text-xs text-[var(--paisa-text-muted)]"
+              <span class="text-xs text-muted-foreground"
                 >Withdrawal</span
               >
-              <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
+              <span class="font-semibold tabular-nums text-foreground"
                 >{formatCurrency(overview.withdrawalAmount)}</span
               >
             </div>
             {#if overview.balanceUnits > 0}
               <div class="flex items-baseline gap-2">
-                <span class="text-xs text-[var(--paisa-text-muted)]"
+                <span class="text-xs text-muted-foreground"
                   >Balance Units</span
                 >
-                <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
+                <span class="font-semibold tabular-nums text-foreground"
                   >{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span
                 >
               </div>

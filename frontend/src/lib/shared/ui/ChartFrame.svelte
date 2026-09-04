@@ -114,7 +114,7 @@ const rowClass = $derived(rows === undefined ? "" : "paisa-chart-row-aware");
 .paisa-chart-frame-title {
   font-size: var(--paisa-font-size-sm);
   font-weight: var(--paisa-font-weight-semibold);
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   margin: 0;
 }
 

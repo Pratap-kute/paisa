@@ -29,9 +29,9 @@ function availableStatus(
 }
 
 const statusClasses = {
-  positive: "bg-[var(--paisa-positive-subtle)] text-[var(--paisa-positive)]",
-  negative: "bg-[var(--paisa-negative-subtle)] text-[var(--paisa-negative)]",
-  neutral: "bg-[var(--paisa-primary-subtle)] text-[var(--paisa-primary)]",
+  positive: "bg-positive-subtle text-positive",
+  negative: "bg-negative-subtle text-negative",
+  neutral: "bg-primary-subtle text-primary",
 } as const;
 
 let tooltipContent = $derived(
@@ -39,7 +39,7 @@ let tooltipContent = $derived(
     accountBudget.expenses.map((e) => {
       return [
         e.date.format("DD MMM YYYY"),
-        [e.payee, "paisa-truncate"],
+        [e.payee, "truncate"],
         [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
       ];
     }),
@@ -87,7 +87,7 @@ let widthPercent = $derived((amount: number) =>
 <Card {...tooltipProps} padding="sm" variant="flat" class="m-0">
   <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
     <div
-      class="min-w-0 truncate pl-2 text-sm font-semibold text-[var(--paisa-muted-foreground)] custom-icon"
+      class="min-w-0 truncate pl-2 text-sm font-semibold text-muted-foreground custom-icon"
       title={accountBudget.account}
     >
       {iconify(restName(accountBudget.account), { group: firstName(accountBudget.account) })}
@@ -96,30 +96,30 @@ let widthPercent = $derived((amount: number) =>
     <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 pr-2">
       {#if !compact}
         <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
-          <span class="text-[var(--paisa-muted-foreground)]">Budget</span>
-          <span class="font-semibold text-[var(--paisa-foreground)]">
+          <span class="text-muted-foreground">Budget</span>
+          <span class="font-semibold text-foreground">
             {formatCurrency(accountBudget.forecast)}
           </span>
         </div>
         <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
-          <span class="text-[var(--paisa-muted-foreground)]">Spent</span>
-          <span class="font-semibold text-[var(--paisa-foreground)]">
+          <span class="text-muted-foreground">Spent</span>
+          <span class="font-semibold text-foreground">
             {formatCurrency(accountBudget.actual)}
           </span>
         </div>
       {/if}
       {#if !compact && accountBudget.rollover !== 0}
         <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
-          <span class="text-[var(--paisa-muted-foreground)]">Rollover</span>
+          <span class="text-muted-foreground">Rollover</span>
           <span
-            class="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-[var(--paisa-warning-light)] text-[var(--paisa-warning)]"
+            class="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-warning-subtle text-warning"
           >
             {formatCurrency(accountBudget.rollover)}
           </span>
         </div>
       {/if}
       <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
-        <span class="text-[var(--paisa-muted-foreground)]">
+        <span class="text-muted-foreground">
           {accountBudget.available >= 0 ? "Available" : "Overspent"}
         </span>
         <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClasses[availableTone]}">
@@ -132,15 +132,15 @@ let widthPercent = $derived((amount: number) =>
   {#if canShow(accountBudget)}
     <div class="relative mt-3 h-2 overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-negative)]"
+        class="absolute inset-y-0 left-0 rounded-full bg-negative"
         style="width: {widthPercent(withinBudget + rolloverUsed + overspent)}"
       ></div>
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-warning)]"
+        class="absolute inset-y-0 left-0 rounded-full bg-warning"
         style="width: {widthPercent(withinBudget + rolloverUsed)}"
       ></div>
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-positive)]"
+        class="absolute inset-y-0 left-0 rounded-full bg-positive"
         style="width: {widthPercent(withinBudget)}"
       ></div>
       <div

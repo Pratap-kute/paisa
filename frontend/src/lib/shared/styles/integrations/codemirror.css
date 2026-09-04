@@ -3,8 +3,8 @@
  */
 
 .cm-editor .cm-gutters {
-  background-color: var(--paisa-surface-muted);
-  color: var(--paisa-text-muted);
+  background-color: var(--paisa-surface-raised);
+  color: var(--paisa-muted-foreground);
   border: none;
   border-top-left-radius: var(--paisa-radius-xs);
   border-bottom-left-radius: var(--paisa-radius-xs);
@@ -12,7 +12,7 @@
 
 .cm-editor .cm-activeLineGutter {
   background-color: var(--paisa-surface-hover) !important;
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   font-weight: var(--paisa-font-weight-bold);
 }
 
@@ -21,12 +21,12 @@
 }
 
 .cm-editor .cm-selectionBackground {
-  background-color: var(--paisa-surface-active) !important;
+  background-color: var(--paisa-surface-hover) !important;
 }
 
 .cm-editor .cm-line .tok-heading {
   font-weight: var(--paisa-font-weight-bold);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
 }
 
 .cm-editor .cm-line .tok-link {
@@ -48,7 +48,7 @@
 }
 
 .cm-editor .cm-line .tok-comment {
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
 }
 
 .cm-editor .cm-line .tok-strong {
@@ -72,16 +72,16 @@
 }
 
 .cm-editor .cm-line .ͼd {
-  color: var(--paisa-brand-primary);
+  color: var(--paisa-primary);
   font-weight: var(--paisa-font-weight-bold);
 }
 
 .cm-editor .cm-line .ͼg {
-  color: var(--paisa-brand-primary);
+  color: var(--paisa-primary);
 }
 
 .cm-editor .cm-line .ͼm {
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
 }
 
 .cm-editor .cm-line .ͼ9 {
@@ -90,20 +90,20 @@
 
 .cm-editor .cm-cursor,
 .cm-editor .cm-dropCursor {
-  border-left-color: var(--paisa-text-primary);
+  border-left-color: var(--paisa-foreground);
   border-width: 2px;
 }
 
 .cm-editor .cm-tooltip {
-  border: 1px solid var(--paisa-border-default);
+  border: 1px solid var(--paisa-border);
   box-shadow: var(--paisa-shadow-md);
-  background-color: var(--paisa-surface-bg);
-  color: var(--paisa-text-primary);
+  background-color: var(--paisa-surface);
+  color: var(--paisa-foreground);
 }
 
 .cm-editor .cm-tooltip-autocomplete > ul > li[aria-selected] {
-  background-color: var(--paisa-brand-primary-light);
-  color: var(--paisa-brand-primary);
+  background-color: var(--paisa-primary-subtle);
+  color: var(--paisa-primary);
 }
 
 .cm-editor .cm-completionMatchedText {
@@ -111,8 +111,8 @@
 }
 
 .cm-editor .cm-tooltip-autocomplete > ul > li {
-  background-color: var(--paisa-surface-bg);
-  color: var(--paisa-text-primary);
+  background-color: var(--paisa-surface);
+  color: var(--paisa-foreground);
 }
 
 .cm-editor .cm-panels-bottom {
@@ -124,17 +124,17 @@
 }
 
 .cm-editor .cm-diagnostic {
-  background: var(--paisa-surface-bg) !important;
-  color: var(--paisa-text-primary);
+  background: var(--paisa-surface) !important;
+  color: var(--paisa-foreground);
   font-size: var(--paisa-font-size-sm);
   box-shadow: var(--paisa-shadow-md);
-  border: 1px solid var(--paisa-border-default);
+  border: 1px solid var(--paisa-border);
 }
 
 .cm-editor .cm-panel.cm-search {
-  background: var(--paisa-surface-bg);
-  color: var(--paisa-text-primary);
-  border-top: 1px solid var(--paisa-border-default);
+  background: var(--paisa-surface);
+  color: var(--paisa-foreground);
+  border-top: 1px solid var(--paisa-border);
 }
 
 .cm-editor .cm-panel.cm-search .cm-button,
@@ -145,9 +145,9 @@
   border-radius: var(--paisa-radius-sm);
   padding: calc(0.5em - 1px) calc(0.75em - 1px);
   line-height: 1.5;
-  background: var(--paisa-surface-bg);
+  background: var(--paisa-surface);
   border: 1px solid var(--paisa-input-border);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   font-size: var(--paisa-font-size-sm);
 }
 
@@ -172,7 +172,7 @@
 
 .cm-editor .cm-panel.cm-search [name="close"] {
   font-size: var(--paisa-font-size-base);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
 }
 
 .cm-editor .cm-searchMatch {
@@ -184,8 +184,8 @@
 }
 
 .cm-editor .cm-collapsedLines {
-  color: var(--paisa-text-secondary);
-  background: var(--paisa-surface-muted);
+  color: var(--paisa-muted-foreground);
+  background: var(--paisa-surface-raised);
 }
 
 .cm-editor.cm-merge-a .cm-changedLine {
@@ -215,7 +215,7 @@
 
 .cm-editor .cm-changedText ins span,
 .cm-editor .cm-changedText del span {
-  color: var(--paisa-text-primary) !important;
+  color: var(--paisa-foreground) !important;
 }
 
 .template-editor .cm-editor {

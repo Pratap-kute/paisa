@@ -87,7 +87,7 @@ onMount(async () => {
 
   {#if !isLoading && !hasIncomeData}
     <ZeroState item={[]}>
-      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+      <p class="text-sm text-muted-foreground">
         No income postings found.
       </p>
     </ZeroState>

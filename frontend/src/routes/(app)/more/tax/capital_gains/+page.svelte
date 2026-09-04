@@ -87,9 +87,9 @@ function gainStatus(value: number): "positive" | "negative" | "neutral" {
 }
 
 function gainClass(value: number) {
-  if (value > 0) return "text-[var(--paisa-positive)]";
-  if (value < 0) return "text-[var(--paisa-negative)]";
-  return "text-[var(--paisa-muted-foreground)]";
+  if (value > 0) return "text-positive";
+  if (value < 0) return "text-negative";
+  return "text-muted-foreground";
 }
 
 onMount(async () => {
@@ -127,13 +127,13 @@ onMount(async () => {
     {#snippet actions()}
       {#if hasYears}
         <div class="flex items-center gap-2">
-          <label for="fy-select" class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+          <label for="fy-select" class="text-xs font-medium text-muted-foreground">
             Period:
           </label>
           <select
             id="fy-select"
             bind:value={selectedYear}
-            class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-text-primary)] shadow-sm transition-colors focus:border-[var(--paisa-brand-primary)] focus:outline-none"
+            class="rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm transition-colors focus:border-[var(--paisa-primary)] focus:outline-none"
           >
             {#each years as yr}
               <option value={yr}>{yr}</option>
@@ -153,14 +153,14 @@ onMount(async () => {
       >
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {#each Array(4) as _}
-            <div class="h-20 animate-pulse rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-hover)]"></div>
+            <div class="h-20 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"></div>
           {/each}
         </div>
-        <div class="h-64 animate-pulse rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-hover)]"></div>
+        <div class="h-64 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"></div>
       </div>
     {:else if !hasYears}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           No capital gains recorded.
         </p>
       </ZeroState>
@@ -201,10 +201,10 @@ onMount(async () => {
           <Card padding="none" class="w-full overflow-hidden">
             {#snippet header()}
               <div class="flex items-center justify-between">
-                <span class="text-base font-semibold text-[var(--paisa-foreground)]">
+                <span class="text-base font-semibold text-foreground">
                   Historical Financial Years Summary
                 </span>
-                <span class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                <span class="text-xs font-medium text-muted-foreground">
                   {years.length} financial years
                 </span>
               </div>
@@ -213,7 +213,7 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                  <tr class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground">
                     <th class="px-3 py-2.5">Financial Year</th>
                     <th class="px-3 py-2.5 text-right">Sold Amount</th>
                     <th class="px-3 py-2.5 text-right">Realized Gain</th>
@@ -226,16 +226,16 @@ onMount(async () => {
                 <tbody class="divide-y divide-[var(--paisa-border-subtle)]">
                   {#each yearlySummaries as summary (summary.year)}
                     <tr
-                      class="cursor-pointer transition-colors hover:bg-[var(--paisa-surface-hover)]"
+                      class="cursor-pointer transition-colors hover:bg-surface-hover"
                       onclick={() => (selectedYear = summary.year)}
                     >
-                      <td class="whitespace-nowrap px-3 py-2.5 font-semibold text-[var(--paisa-brand-primary)]">
+                      <td class="whitespace-nowrap px-3 py-2.5 font-semibold text-primary">
                         {summary.year}
-                        <span class="ml-1 text-xs font-normal text-[var(--paisa-text-muted)]">
+                        <span class="ml-1 text-xs font-normal text-muted-foreground">
                           ({summary.assetCount} {summary.assetCount === 1 ? "asset" : "assets"})
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-[var(--paisa-text-primary)]">
+                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
                         {formatCurrency(summary.sold)}
                       </td>
                       <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(summary.gain)}">
@@ -244,13 +244,13 @@ onMount(async () => {
                       <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(summary.taxable)}">
                         {formatCurrency(summary.taxable)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-[var(--paisa-text-secondary)]">
+                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
                         {formatCurrency(summary.stcg)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-[var(--paisa-text-secondary)]">
+                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
                         {formatCurrency(summary.ltcg)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-[var(--paisa-text-primary)]">
+                      <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
                         {formatCurrency(summary.totalTax)}
                       </td>
                     </tr>
@@ -261,7 +261,7 @@ onMount(async () => {
           </Card>
 
           <div class="flex flex-col gap-[var(--paisa-space-4)]">
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               All Financial Year Realizations
             </h3>
             {#each years as yr}

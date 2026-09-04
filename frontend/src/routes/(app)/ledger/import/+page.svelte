@@ -720,27 +720,27 @@ function copyToClipboard() {
   <div
     class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
     <!-- PAISA CLEAN TOP BAR -->
-    <header class="flex shrink-0 flex-col rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-2.5 px-3.5 shadow-[var(--paisa-shadow-sm)]">
+    <header class="flex shrink-0 flex-col rounded-[var(--paisa-radius-md)] border border-border bg-surface p-2.5 px-3.5 shadow-[var(--paisa-shadow-sm)]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <!-- LEFT: Page Title & Statement File Pill -->
         <div class="flex min-w-0 items-center gap-3">
-          <h1 class="m-0 text-base font-bold tracking-tight text-[var(--paisa-text-primary)]">Ledger Import</h1>
+          <h1 class="m-0 text-base font-bold tracking-tight text-foreground">Ledger Import</h1>
 
           {#if activeFileName}
             <span class="text-[var(--paisa-border-strong)] select-none font-light">/</span>
 
             <!-- Sleek File Pill -->
-            <div class="inline-flex items-center gap-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1 text-xs">
+            <div class="inline-flex items-center gap-2 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2.5 py-1 text-xs">
               <i class="{activeFileMeta.icon} {activeFileMeta.color} text-xs"></i>
-              <span class="max-w-[200px] truncate font-semibold text-[var(--paisa-text-primary)]" title={activeFileName}>
+              <span class="max-w-[200px] truncate font-semibold text-foreground" title={activeFileName}>
                 {activeFileName}
               </span>
-              <span class="rounded bg-[var(--paisa-brand-primary-light)] px-1.5 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-brand-primary)] tabular-nums">
+              <span class="rounded bg-primary-subtle px-1.5 py-0.5 text-[0.6875rem] font-semibold text-primary tabular-nums">
                 {data.length} rows
               </span>
               <button
                 type="button"
-                class="cursor-pointer text-[var(--paisa-text-muted)] transition-colors hover:text-[var(--paisa-text-primary)] p-0.5 border-0 bg-transparent"
+                class="cursor-pointer text-muted-foreground transition-colors hover:text-foreground p-0.5 border-0 bg-transparent"
                 onclick={clearLoadedFile}
                 title="Replace statement with another file"
                 aria-label="Replace File"
@@ -771,27 +771,27 @@ function copyToClipboard() {
               }}
             >
               <!-- Selected item inside input -->
-              <div slot="selection" let:selection class="flex items-center gap-2 overflow-hidden text-xs font-semibold text-[var(--paisa-text-primary)]">
-                <i class="fas fa-file-code text-[var(--paisa-brand-primary)] text-xs shrink-0"></i>
+              <div slot="selection" let:selection class="flex items-center gap-2 overflow-hidden text-xs font-semibold text-foreground">
+                <i class="fas fa-file-code text-primary text-xs shrink-0"></i>
                 <span class="truncate" title={selection.label}>{selection.label}</span>
               </div>
 
               <!-- Dropdown items -->
               <div slot="item" let:item class="flex w-full items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                  <i class="fas {item.template_type === 'builtin' ? 'fa-box-archive text-[var(--paisa-text-muted)]' : 'fa-file-code text-[var(--paisa-brand-primary)]'} text-xs shrink-0"></i>
-                  <span class="truncate font-medium text-xs text-[var(--paisa-text-primary)]" title={item.label}>
+                  <i class="fas {item.template_type === 'builtin' ? 'fa-box-archive text-muted-foreground' : 'fa-file-code text-primary'} text-xs shrink-0"></i>
+                  <span class="truncate font-medium text-xs text-foreground" title={item.label}>
                     {item.label}
                   </span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                   {#if item.template_type === 'builtin'}
-                    <span class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium bg-[var(--paisa-surface-muted)] text-[var(--paisa-text-muted)] border border-[var(--paisa-border-subtle)]">
+                    <span class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium bg-surface-raised text-muted-foreground border border-border-subtle">
                       Built-in
                     </span>
                   {/if}
                   {#if selectedTemplate?.name === item.label}
-                    <i class="fas fa-check text-[var(--paisa-brand-primary)] text-xs"></i>
+                    <i class="fas fa-check text-primary text-xs"></i>
                   {/if}
                 </div>
               </div>
@@ -811,7 +811,7 @@ function copyToClipboard() {
             {/snippet}
             <span>Edit Template</span>
             {#if $templateEditorState.hasUnsavedChanges}
-              <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-warning)]"></span>
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-warning"></span>
             {/if}
           </Button>
 
@@ -842,20 +842,20 @@ function copyToClipboard() {
             {/snippet}
             <span>Options</span>
             {#if options.reverse || options.trim}
-              <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-brand-primary)]"></span>
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
             {/if}
-            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px] ml-0.5 text-[var(--paisa-text-muted)]"></i>
+            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px] ml-0.5 text-muted-foreground"></i>
           </Button>
         </div>
       </div>
 
       {#if advancedOptionsOpen}
-        <div class="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--paisa-border-subtle)] pt-2.5">
+        <div class="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-2.5">
           <div class="flex items-center gap-5">
             <Switch id="import-reverse" bind:checked={options.reverse} size="sm" label="Reverse Row Order" />
             <Switch id="trim-reverse" bind:checked={options.trim} size="sm" label="Trim Whitespace" />
           </div>
-          <span class="text-[0.6875rem] text-[var(--paisa-text-muted)] flex items-center gap-1">
+          <span class="text-[0.6875rem] text-muted-foreground flex items-center gap-1">
             <i class="fas fa-circle-info text-[10px]"></i>
             Adjust row sequence or clean generated ledger spacing
           </span>
@@ -864,26 +864,26 @@ function copyToClipboard() {
     </header>
 
     {#if isEmpty(data) && !loading}
-      <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
-        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-[var(--paisa-border-default)] [&_.paisa-file-dropzone]:bg-[var(--paisa-canvas-bg)] [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-brand-primary)] hover:[&_.paisa-file-dropzone]:bg-[var(--paisa-brand-primary-light)]">
+      <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-border bg-surface p-[var(--paisa-space-6)]">
+        <div class="w-full max-w-[540px] [&_.paisa-file-dropzone]:w-full [&_.paisa-file-dropzone]:cursor-pointer [&_.paisa-file-dropzone]:rounded-[var(--paisa-radius-md)] [&_.paisa-file-dropzone]:border-2 [&_.paisa-file-dropzone]:border-dashed [&_.paisa-file-dropzone]:border-border [&_.paisa-file-dropzone]:bg-canvas [&_.paisa-file-dropzone]:transition-all [&_.paisa-file-dropzone]:duration-[var(--paisa-transition-fast)] hover:[&_.paisa-file-dropzone]:border-[var(--paisa-primary)] hover:[&_.paisa-file-dropzone]:bg-primary-subtle">
           <FileDropzone
             multiple={false}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
             on:drop={handleFilesSelect}
           >
             <div class="flex flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center">
-              <div class="mb-[var(--paisa-space-3)] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--paisa-brand-primary-light)] text-[var(--paisa-brand-primary)]">
+              <div class="mb-[var(--paisa-space-3)] flex h-14 w-14 items-center justify-center rounded-full bg-primary-subtle text-primary">
                 <i class="fas fa-cloud-arrow-up fa-2x"></i>
               </div>
-              <h2 class="mb-2 text-xl font-semibold text-[var(--paisa-text-primary)]">Drop your bank or card statement here</h2>
-              <p class="mb-4 text-base text-[var(--paisa-text-secondary)]">Turn your financial statements into clean, verified ledger transactions</p>
+              <h2 class="mb-2 text-xl font-semibold text-foreground">Drop your bank or card statement here</h2>
+              <p class="mb-4 text-base text-muted-foreground">Turn your financial statements into clean, verified ledger transactions</p>
               <div class="mb-4 flex flex-wrap items-center justify-center gap-1.5">
-                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">CSV</span>
-                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">TXT</span>
-                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">XLS / XLSX</span>
-                <span class="rounded-[var(--paisa-radius-full)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-text-secondary)]">PDF</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-[0.6875rem] font-semibold text-muted-foreground">CSV</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-[0.6875rem] font-semibold text-muted-foreground">TXT</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-[0.6875rem] font-semibold text-muted-foreground">XLS / XLSX</span>
+                <span class="rounded-[var(--paisa-radius-full)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-[0.6875rem] font-semibold text-muted-foreground">PDF</span>
               </div>
-              <div class="inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-[filter] hover:brightness-110">
+              <div class="inline-flex min-h-8 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-primary)] bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-[filter] hover:brightness-110">
                 <i class="fas fa-folder-open text-xs"></i>
                 <span>Choose File</span>
               </div>
@@ -892,25 +892,25 @@ function copyToClipboard() {
         </div>
 
         {#if parseErrorMessage}
-          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-[var(--paisa-negative-subtle)] p-3">
+          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-negative-subtle p-3">
             <div class="flex items-center gap-2">
-              <i class="fas fa-triangle-exclamation text-[var(--paisa-negative)]"></i>
+              <i class="fas fa-triangle-exclamation text-negative"></i>
               <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
             </div>
           </div>
         {/if}
       </div>
     {:else if loading}
-      <div class="flex flex-1 flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-[var(--paisa-text-primary)]">
-        <i class="fas fa-spinner fa-pulse fa-2x text-[var(--paisa-brand-primary)]"></i>
+      <div class="flex flex-1 flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-foreground">
+        <i class="fas fa-spinner fa-pulse fa-2x text-primary"></i>
         <p class="mt-2 text-base font-semibold">Parsing Spreadsheet Data…</p>
-        <p class="text-xs text-[var(--paisa-text-secondary)]">Extracting tabular rows and columns</p>
+        <p class="text-xs text-muted-foreground">Extracting tabular rows and columns</p>
       </div>
     {:else}
       <div class="hidden shrink-0 grid-cols-2 gap-2 max-[860px]:grid">
         <button
           type="button"
-          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'source' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'source' ? 'border-[var(--paisa-primary)] bg-primary text-white' : 'border-border bg-surface text-muted-foreground'}"
           onclick={() => (mobileActiveTab = "source")}
         >
           <i class="fas fa-table-cells text-xs"></i>
@@ -918,7 +918,7 @@ function copyToClipboard() {
         </button>
         <button
           type="button"
-          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'preview' ? 'border-[var(--paisa-brand-primary)] bg-[var(--paisa-brand-primary)] text-white' : 'border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] text-[var(--paisa-text-secondary)]'}"
+          class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border px-3 py-2 text-[0.8125rem] font-semibold transition-colors {mobileActiveTab === 'preview' ? 'border-[var(--paisa-primary)] bg-primary text-white' : 'border-border bg-surface text-muted-foreground'}"
           onclick={() => (mobileActiveTab = "preview")}
         >
           <i class="fas fa-file-invoice-dollar text-xs"></i>
@@ -930,12 +930,12 @@ function copyToClipboard() {
       </div>
 
       <div class="grid min-h-0 flex-1 grid-cols-[minmax(430px,44%)_1fr] gap-[var(--paisa-space-2)] overflow-hidden max-[860px]:grid-cols-1">
-        <div class="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'preview' ? 'max-[860px]:hidden' : ''}">
-          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-3 py-1.5">
-            <div class="inline-flex shrink-0 gap-0.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-0.5">
+        <div class="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'preview' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-border-subtle bg-surface-raised px-3 py-1.5">
+            <div class="inline-flex shrink-0 gap-0.5 rounded-[var(--paisa-radius-sm)] border border-border bg-surface p-0.5">
               <button
                 type="button"
-                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-primary font-semibold text-white' : 'bg-transparent text-muted-foreground hover:text-foreground'}"
                 onclick={() => (sourceViewMode = "review")}
               >
                 <i class="fas fa-list-check text-xs"></i>
@@ -943,7 +943,7 @@ function copyToClipboard() {
               </button>
               <button
                 type="button"
-                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-primary font-semibold text-white' : 'bg-transparent text-muted-foreground hover:text-foreground'}"
                 onclick={() => (sourceViewMode = "raw")}
               >
                 <i class="fas fa-table text-xs"></i>
@@ -952,18 +952,18 @@ function copyToClipboard() {
             </div>
 
             {#if sourceViewMode === "raw"}
-              <div class="flex items-center gap-2 text-xs text-[var(--paisa-text-secondary)]">
+              <div class="flex items-center gap-2 text-xs text-muted-foreground">
                 <span class="font-medium">{data.length} rows</span>
                 {#if columnCount > 0}
                   <span class="text-[var(--paisa-border-strong)]">·</span>
-                  <span class="font-mono text-[0.6875rem] text-[var(--paisa-text-muted)]">{columnCount} cols (A–{String.fromCharCode(64 + Math.min(columnCount, 26))})</span>
+                  <span class="font-mono text-[0.6875rem] text-muted-foreground">{columnCount} cols (A–{String.fromCharCode(64 + Math.min(columnCount, 26))})</span>
                 {/if}
               </div>
             {/if}
           </div>
 
           {#if sourceViewMode === "review" && !predictionReviewFailed && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
-            <div class="shrink-0 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-3 py-2">
+            <div class="shrink-0 border-b border-border-subtle bg-surface px-3 py-2">
               <PredictionReviewBar
                 counts={predictionCounts}
                 filter={predictionFilter}
@@ -975,9 +975,9 @@ function copyToClipboard() {
           {/if}
 
           {#if parseErrorMessage}
-            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-[var(--paisa-negative-subtle)] p-3">
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-negative-subtle p-3">
               <div class="flex items-center gap-2">
-                <i class="fas fa-triangle-exclamation text-[var(--paisa-negative)]"></i>
+                <i class="fas fa-triangle-exclamation text-negative"></i>
                 <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
               </div>
             </div>
@@ -1008,7 +1008,7 @@ function copyToClipboard() {
                             <span class="text-xs font-bold text-[var(--paisa-table-header-text)] tracking-wide">
                               {String.fromCharCode(65 + ci)}
                             </span>
-                            <span class="rounded bg-[var(--paisa-table-bg)] px-1.5 py-0.5 font-mono text-[0.625rem] font-semibold text-[var(--paisa-brand-primary)] border border-[var(--paisa-table-border)]" title="Template variable: row.{String.fromCharCode(65 + ci)}">
+                            <span class="rounded bg-[var(--paisa-table-bg)] px-1.5 py-0.5 font-mono text-[0.625rem] font-semibold text-primary border border-[var(--paisa-table-border)]" title="Template variable: row.{String.fromCharCode(65 + ci)}">
                               row.{String.fromCharCode(65 + ci)}
                             </span>
                           </div>
@@ -1022,9 +1022,9 @@ function copyToClipboard() {
                         class="group cursor-pointer transition-colors duration-75 {!rowIsVisible(ri) ? 'hidden' : ''} {selectedSourceRowIndex === ri ? '[&>th]:!bg-[var(--paisa-table-row-selected)] [&>td]:!bg-[var(--paisa-table-row-selected)]' : 'hover:[&>th]:bg-[var(--paisa-table-row-hover)] hover:[&>td]:bg-[var(--paisa-table-row-hover)]'}"
                         onclick={() => selectSourceRow(ri)}
                       >
-                        <th class="paisa-sheet-row-header sticky left-0 z-[5] min-w-[110px] w-[110px] border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-2.5 py-1.5 font-normal text-left select-none transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)] border-l-2 border-l-[var(--paisa-brand-primary)]' : ''}">
+                        <th class="paisa-sheet-row-header sticky left-0 z-[5] min-w-[110px] w-[110px] border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-2.5 py-1.5 font-normal text-left select-none transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)] border-l-2 border-l-[var(--paisa-primary)]' : ''}">
                           <div class="flex items-center justify-between gap-2">
-                            <span class="font-mono text-xs font-semibold tabular-nums text-[var(--paisa-text-muted)] group-hover:text-[var(--paisa-text-primary)]">
+                            <span class="font-mono text-xs font-semibold tabular-nums text-muted-foreground group-hover:text-foreground">
                               {ri}
                             </span>
                             <div class="shrink-0">
@@ -1037,11 +1037,11 @@ function copyToClipboard() {
                           </div>
                         </th>
                         {#each row as cell}
-                          <td class="paisa-sheet-data-cell max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-3 py-1.5 font-mono text-[0.75rem] text-[var(--paisa-text-primary)] transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)]' : ''}" title={displayCell(cell)}>
+                          <td class="paisa-sheet-data-cell max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-3 py-1.5 font-mono text-[0.75rem] text-foreground transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)]' : ''}" title={displayCell(cell)}>
                             {#if displayCell(cell)}
                               {displayCell(cell)}
                             {:else}
-                              <span class="text-[var(--paisa-text-muted)]/30 select-none font-sans italic">—</span>
+                              <span class="text-muted-foreground/30 select-none font-sans italic">—</span>
                             {/if}
                           </td>
                         {/each}
@@ -1054,7 +1054,7 @@ function copyToClipboard() {
           </div>
 
           {#if !predictionReviewFailed && selectedPrediction}
-            <div class="max-h-[360px] min-h-[220px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
+            <div class="max-h-[360px] min-h-[220px] shrink-0 overflow-y-auto border-t border-border bg-surface max-[860px]:hidden">
               <PredictionDetail
                 result={selectedPrediction}
                 input={selectedInput}
@@ -1075,10 +1075,10 @@ function copyToClipboard() {
           {/if}
         </div>
 
-        <div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'source' ? 'max-[860px]:hidden' : ''}">
-          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
-            <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
-              <i class="fas fa-file-invoice-dollar text-xs text-[var(--paisa-positive)]"></i>
+        <div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'source' ? 'max-[860px]:hidden' : ''}">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-border-subtle bg-surface-raised px-2.5 py-1">
+            <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-foreground">
+              <i class="fas fa-file-invoice-dollar text-xs text-positive"></i>
               <span>Ledger Preview</span>
               {#if renderMetadata.generatedCount > 0}
                 <Badge variant="success" size="sm">{renderMetadata.generatedCount} generated</Badge>
@@ -1120,16 +1120,16 @@ function copyToClipboard() {
           </div>
 
           {#if renderMetadata.errors.length > 0}
-            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-warning)]/20 bg-[var(--paisa-warning-light)] p-3">
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-warning)]/20 bg-warning-subtle p-3">
               <div class="text-xs"><strong>Template Errors:</strong> {renderMetadata.errors.length} rows encountered template rendering issues. Check Handlebars syntax or column mappings.</div>
             </div>
           {/if}
 
-          <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-[var(--paisa-canvas-bg)]">
+          <div class="relative min-h-0 h-full flex-1 overflow-hidden bg-canvas">
             <div class="preview-editor h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-[0.8125rem] [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto" use:initPreviewEditor></div>
             {#if isEmpty(preview) && isEmpty(data)}
-              <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-[var(--paisa-text-muted)]">
-                <i class="fas fa-arrow-left fa-2x mb-2 text-[var(--paisa-text-muted)]"></i>
+              <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center p-[var(--paisa-space-4)] text-center text-xs text-muted-foreground">
+                <i class="fas fa-arrow-left fa-2x mb-2 text-muted-foreground"></i>
                 <p>Upload a statement to inspect generated journal transactions.</p>
               </div>
             {/if}
@@ -1137,29 +1137,29 @@ function copyToClipboard() {
         </div>
       </div>
 
-      <div class="flex shrink-0 items-center justify-between gap-[var(--paisa-space-3)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1 text-xs shadow-[var(--paisa-shadow-sm)]">
+      <div class="flex shrink-0 items-center justify-between gap-[var(--paisa-space-3)] rounded-[var(--paisa-radius-md)] border border-border bg-surface px-3 py-1 text-xs shadow-[var(--paisa-shadow-sm)]">
         <div class="flex min-w-0 items-center gap-[var(--paisa-space-3)] overflow-x-auto">
           {#if parseErrorMessage}
-            <span class="text-[var(--paisa-negative)]"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+            <span class="text-negative"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
           {:else if loading}
-            <span class="text-[var(--paisa-brand-primary)]"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
+            <span class="text-primary"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
           {:else if renderMetadata.generatedCount > 0}
-            <span class="text-[var(--paisa-positive)]"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
+            <span class="text-positive"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
             {#if renderMetadata.errors.length > 0}
-              <span class="text-[var(--paisa-negative)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
+              <span class="text-negative"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
             {/if}
             {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
               <span class="flex items-center gap-2.5 text-[0.6875rem]">
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="High confidence: {predictionCounts.high}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high} High</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Medium confidence: {predictionCounts.medium}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium} Med</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Needs review: {predictionCounts.review}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review} Review</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Unknown: {predictionCounts.unknown}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown} Unknown</span>
+                <span class="inline-flex items-center gap-1 text-muted-foreground" title="High confidence: {predictionCounts.high}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high} High</span>
+                <span class="inline-flex items-center gap-1 text-muted-foreground" title="Medium confidence: {predictionCounts.medium}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium} Med</span>
+                <span class="inline-flex items-center gap-1 text-muted-foreground" title="Needs review: {predictionCounts.review}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review} Review</span>
+                <span class="inline-flex items-center gap-1 text-muted-foreground" title="Unknown: {predictionCounts.unknown}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown} Unknown</span>
               </span>
             {/if}
           {:else if activeFileName}
-            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
+            <span class="text-muted-foreground"><i class="fas fa-circle-info mr-1"></i> No transactions generated</span>
           {:else}
-            <span class="text-[var(--paisa-text-secondary)]"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
+            <span class="text-muted-foreground"><i class="fas fa-circle-info mr-1"></i> Import a file to begin</span>
           {/if}
         </div>
 
@@ -1218,15 +1218,15 @@ function copyToClipboard() {
   onclose={() => (showReviewWarningModal = false)}
 >
   {#snippet children()}
-    <div class="space-y-3 py-2 text-sm text-[var(--paisa-text-secondary)]">
+    <div class="space-y-3 py-2 text-sm text-muted-foreground">
       <p>
         There {reviewProgress.remaining === 1 ? "is" : "are"}
-        <strong class="font-semibold text-[var(--paisa-text-primary)]">
+        <strong class="font-semibold text-foreground">
           {reviewProgress.remaining} {reviewProgress.remaining === 1 ? "transaction" : "transactions"}
         </strong>
         that still require review (unresolved low-confidence or transfer predictions).
       </p>
-      <p class="text-xs text-[var(--paisa-text-muted)]">
+      <p class="text-xs text-muted-foreground">
         You can return to review and categorize them, or proceed to save the ledger preview anyway.
       </p>
     </div>

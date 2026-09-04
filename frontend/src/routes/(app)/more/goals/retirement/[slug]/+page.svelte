@@ -108,7 +108,7 @@ onMount(async () => {
     {#snippet leading()}
       <a
         href="/more/goals"
-        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+        class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
         <span>Goals</span>
@@ -174,7 +174,7 @@ onMount(async () => {
       </Section>
 
       <Section title="Current Balance">
-        <div class="text-[var(--paisa-muted-foreground)]">
+        <div class="text-muted-foreground">
           <AssetsBalance breakdowns={balances} indent={false} />
         </div>
       </Section>

@@ -463,19 +463,19 @@ onMount(() => {
   showHeader={false}
   unstyled
   overlayClass="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-150"
-  contentClass="fixed left-1/2 top-[12%] z-50 w-full max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-2xl transition-all duration-150 max-sm:top-4 max-sm:w-[94%]"
+  contentClass="fixed left-1/2 top-[12%] z-50 w-full max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border border-border-subtle bg-surface shadow-2xl transition-all duration-150 max-sm:top-4 max-sm:w-[94%]"
 >
   {#snippet children()}
       <!-- SEARCH INPUT HEADER -->
       <div
-        class="flex items-center gap-3 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
-        <i class="fa-solid fa-magnifying-glass text-sm text-[var(--paisa-muted-foreground)]"></i>
+        class="flex items-center gap-3 border-b border-border-subtle bg-surface-raised px-4 py-3">
+        <i class="fa-solid fa-magnifying-glass text-sm text-muted-foreground"></i>
         <input
           id="paisa-command-palette-input"
           type="text"
           bind:value={query}
           placeholder="Search pages, accounts, or type a command..."
-          class="flex-1 border-0 bg-transparent text-sm text-[var(--paisa-foreground)] placeholder-[var(--paisa-muted-foreground)] outline-none"
+          class="flex-1 border-0 bg-transparent text-sm text-foreground placeholder-[var(--paisa-muted-foreground)] outline-none"
           autocomplete="off"
           autocorrect="off"
           spellcheck="false"
@@ -483,14 +483,14 @@ onMount(() => {
         {#if query}
           <button
             type="button"
-            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs text-[var(--paisa-muted-foreground)] hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)]"
+            class="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-surface-hover hover:text-foreground"
             onclick={() => (query = "")}
             aria-label="Clear search"
           >
             <i class="fa-solid fa-xmark"></i>
           </button>
         {/if}
-        <kbd class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1.5 py-0.5 font-mono text-[0.625rem] text-[var(--paisa-muted-foreground)]">
+        <kbd class="rounded border border-border-subtle bg-surface px-1.5 py-0.5 font-mono text-[0.625rem] text-muted-foreground">
           ESC
         </kbd>
       </div>
@@ -499,16 +499,16 @@ onMount(() => {
       <div class="max-h-[60vh] overflow-y-auto p-2">
         {#if filteredCommands.length === 0}
           <div class="flex flex-col items-center justify-center py-10 text-center">
-            <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--paisa-surface-hover)] text-[var(--paisa-muted-foreground)]">
+            <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-surface-hover text-muted-foreground">
               <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <p class="text-sm font-medium text-[var(--paisa-foreground)]">No results found</p>
-            <p class="text-xs text-[var(--paisa-muted-foreground)]">No commands or pages matching "{query}"</p>
+            <p class="text-sm font-medium text-foreground">No results found</p>
+            <p class="text-xs text-muted-foreground">No commands or pages matching "{query}"</p>
           </div>
         {:else}
           {#each groupedCommands as group}
             <div class="mb-2">
-              <span class="px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-wider text-[var(--paisa-muted-foreground)]">
+              <span class="px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-wider text-muted-foreground">
                 {group.category}
               </span>
               <div class="mt-1 flex flex-col gap-0.5">
@@ -518,18 +518,18 @@ onMount(() => {
                   <button
                     type="button"
                     data-command-active={active}
-                    class="group flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 text-left transition-colors {active ? 'bg-[var(--paisa-primary)] text-white' : 'text-[var(--paisa-foreground)] hover:bg-[var(--paisa-surface-hover)]'}"
+                    class="group flex w-full cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 text-left transition-colors {active ? 'bg-primary text-white' : 'text-foreground hover:bg-surface-hover'}"
                     onclick={() => item.action()}
                     onmouseenter={() => (selectedIndex = index)}
                   >
                     <div class="flex min-w-0 items-center gap-3">
-                      <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md {active ? 'bg-white/20 text-white' : 'bg-[var(--paisa-surface-raised)] text-[var(--paisa-primary)]'}">
+                      <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md {active ? 'bg-white/20 text-white' : 'bg-surface-raised text-primary'}">
                         <i class="{item.icon} text-xs"></i>
                       </div>
                       <div class="min-w-0">
                         <div class="truncate text-xs font-semibold">{item.title}</div>
                         {#if item.description}
-                          <div class="truncate text-[0.6875rem] {active ? 'text-white/80' : 'text-[var(--paisa-muted-foreground)]'}">
+                          <div class="truncate text-[0.6875rem] {active ? 'text-white/80' : 'text-muted-foreground'}">
                             {item.description}
                           </div>
                         {/if}
@@ -550,30 +550,30 @@ onMount(() => {
 
       <!-- FOOTER -->
       <div
-        class="flex items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-2 text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
+        class="flex items-center justify-between border-t border-border-subtle bg-surface-raised px-4 py-2 text-[0.6875rem] text-muted-foreground">
         <div class="flex items-center gap-3">
           <span class="flex items-center gap-1">
             <kbd
-              class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">↑</kbd>
+              class="rounded border border-border-subtle bg-surface px-1 font-mono">↑</kbd>
             <kbd
-              class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">↓</kbd>
+              class="rounded border border-border-subtle bg-surface px-1 font-mono">↓</kbd>
             <span>Navigate</span>
           </span>
           <span class="flex items-center gap-1">
             <kbd
-              class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">↵</kbd>
+              class="rounded border border-border-subtle bg-surface px-1 font-mono">↵</kbd>
             <span>Select</span>
           </span>
         </div>
         <div class="flex items-center gap-1">
           <span>Shortcuts:</span>
           <kbd
-            class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">
+            class="rounded border border-border-subtle bg-surface px-1 font-mono">
             {isMac ? "⌘K" : "Ctrl K"}
           </kbd>
           <span>or</span>
           <kbd
-            class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-1 font-mono">/</kbd>
+            class="rounded border border-border-subtle bg-surface px-1 font-mono">/</kbd>
         </div>
       </div>
   {/snippet}

@@ -35,8 +35,8 @@ let remainder = $derived(computed.remainder);
   <div>
     {#if !small && showPercent}
       <div class="mb-1.5 flex items-center justify-between gap-3">
-        <span class="text-xs font-medium uppercase tracking-wide text-[var(--paisa-muted-foreground)]">Progress</span>
-        <span class="rounded-full bg-[var(--paisa-positive-subtle)] px-2 py-0.5 text-xs font-semibold tabular-nums text-[var(--paisa-positive)]">
+        <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Progress</span>
+        <span class="rounded-full bg-positive-subtle px-2 py-0.5 text-xs font-semibold tabular-nums text-positive">
           {formatPercentage(progressPercent / 100, 2)}
         </span>
       </div>
@@ -47,7 +47,7 @@ let remainder = $derived(computed.remainder);
       max="100"
     ></progress>
     {#if small && showPercent}
-      <span class="text-sm font-semibold text-[var(--paisa-foreground)]"
+      <span class="text-sm font-semibold text-foreground"
         >{formatPercentage(progressPercent / 100, 2)}</span
       >
     {/if}

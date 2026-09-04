@@ -70,22 +70,59 @@ export const APPROVED_TOKEN_DEFINITION_FILES = [
   "src/lib/shared/theme/tokens.css",
 ];
 
-export const DEPRECATED_APP_TOKENS = new Set([
+export const FORBIDDEN_PAISA_TOKENS = new Set([
+  "--paisa-canvas-bg",
+  "--paisa-surface-bg",
+  "--paisa-surface-card",
+  "--paisa-surface-active",
+  "--paisa-surface-muted",
+  "--paisa-text-primary",
+  "--paisa-text-secondary",
+  "--paisa-text-muted",
+  "--paisa-text-inverse",
+  "--paisa-brand-primary",
+  "--paisa-brand-primary-hover",
+  "--paisa-brand-primary-light",
+  "--paisa-brand-accent",
+  "--paisa-border-default",
   "--paisa-success",
   "--paisa-success-light",
   "--paisa-danger",
   "--paisa-danger-light",
   "--paisa-info",
   "--paisa-info-light",
+  "--paisa-warning-light",
 ]);
 
-export const ALLOWED_DEPRECATED_TOKEN_FILES = new Set([
-  "src/lib/shared/theme/tokens.css",
-  "src/lib/shared/styles/legacy-compat.css",
+export const FORBIDDEN_BULMA_CLASSES = new Set([
+  "is-clipped",
+  "is-size-6",
+  "is-size-7",
+  "has-text-weight-bold",
+  "has-text-weight-medium",
+  "has-text-right",
+  "has-text-centered",
+  "has-text-success",
+  "has-text-danger",
+  "has-text-warning",
+  "has-text-warning-dark",
+  "has-text-info",
+  "has-text-primary",
+  "has-text-link",
+  "has-text-grey",
+  "has-text-grey-light",
+  "has-text-grey-lighter",
+  "has-text-grey-dark",
 ]);
+
+export const FORBIDDEN_BULMA_CLASS_COMBINATIONS = [
+  ["icon", "is-small"],
+  ["table", "is-narrow"],
+  ["table", "is-fullwidth"],
+  ["table", "is-hoverable"],
+] as const;
 
 export const ALLOWED_IMPORTANT_FILES = new Set([
-  "src/lib/shared/styles/legacy-compat.css",
   "src/lib/shared/styles/integrations/codemirror.css",
   "src/lib/shared/styles/integrations/select.css",
   "src/lib/shared/styles/integrations/tabulator.css",
@@ -149,6 +186,98 @@ export function findBulmaViolations(
   return violations;
 }
 
+export function findBulmaClassViolations(
+  filePath: string,
+  content: string,
+): SpecViolation[] {
+  const violations: SpecViolation[] = [];
+  const reported = new Set<string>();
+  const report = (className: string) => {
+    if (!FORBIDDEN_BULMA_CLASSES.has(className) || reported.has(className)) {
+      return;
+    }
+    reported.add(className);
+    violations.push({
+      file: filePath,
+      rule: "no-bulma-compat-classes",
+      detail:
+        `Found removed Bulma compatibility class '${className}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
+    });
+  };
+  const reportCombination = (classes: ReadonlySet<string>) => {
+    for (const combination of FORBIDDEN_BULMA_CLASS_COMBINATIONS) {
+      if (!combination.every((className) => classes.has(className))) continue;
+      const label = combination.join(" + ");
+      if (reported.has(label)) continue;
+      reported.add(label);
+      violations.push({
+        file: filePath,
+        rule: "no-bulma-compat-classes",
+        detail:
+          `Found removed Bulma compatibility class combination '${label}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
+      });
+    }
+  };
+
+  if (extname(filePath).toLowerCase() === ".css") {
+    const withoutComments = content.replaceAll(/\/\*[\s\S]*?\*\//g, "");
+    for (const selectorBlock of withoutComments.matchAll(/([^{}]+)\{/g)) {
+      for (const selector of selectorBlock[1].split(",")) {
+        const classes = new Set(
+          [...selector.matchAll(/\.([a-z][a-z0-9-]*)/g)].map((match) =>
+            match[1]
+          ),
+        );
+        for (const className of classes) report(className);
+        reportCombination(classes);
+      }
+    }
+    return violations.map((violation) => ({
+      ...violation,
+      rule: "no-bulma-compat-selectors",
+      detail: violation.detail.replace(
+        "in application markup",
+        "in a CSS selector",
+      ),
+    }));
+  }
+
+  // Restrict matching to quoted class attributes. This covers static classes and
+  // quoted branches inside Svelte class expressions without matching prose,
+  // selectors, object properties, or unrelated strings.
+  const classAttributeRegex =
+    /(?:^|[\s<{])class(?:Name)?\s*=\s*(["'`])([\s\S]*?)\1/g;
+  for (const attribute of content.matchAll(classAttributeRegex)) {
+    const classes = new Set(
+      [...attribute[2].matchAll(/[a-z][a-z0-9-]*/g)].map((token) => token[0]),
+    );
+    for (const className of classes) report(className);
+    reportCombination(classes);
+  }
+
+  // Also inspect string literals inside class={...} expressions. Identifiers are
+  // deliberately ignored because their runtime values cannot be inferred here.
+  const expressionAttributeRegex =
+    /(?:^|[\s<{])class(?:Name)?\s*=\s*\{([\s\S]*?)\}/g;
+  for (const attribute of content.matchAll(expressionAttributeRegex)) {
+    const classes = new Set<string>();
+    for (const literal of attribute[1].matchAll(/(["'`])([\s\S]*?)\1/g)) {
+      for (const token of literal[2].matchAll(/[a-z][a-z0-9-]*/g)) {
+        report(token[0]);
+        classes.add(token[0]);
+      }
+    }
+    reportCombination(classes);
+  }
+
+  // Svelte's class:name={condition} directive does not use a class attribute.
+  for (const directive of content.matchAll(/\bclass:([a-z][a-z0-9-]*)\b/g)) {
+    report(directive[1]);
+  }
+
+  return violations;
+}
+
 export function findImportantViolations(
   filePath: string,
   content: string,
@@ -166,21 +295,20 @@ export function findImportantViolations(
   return violations;
 }
 
-export function findDeprecatedTokenViolations(
+export function findForbiddenTokenViolations(
   filePath: string,
   content: string,
 ): SpecViolation[] {
-  if (ALLOWED_DEPRECATED_TOKEN_FILES.has(filePath)) return [];
   const violations: SpecViolation[] = [];
 
   for (const match of content.matchAll(/--paisa-[a-z0-9-]+/g)) {
     const token = match[0];
-    if (DEPRECATED_APP_TOKENS.has(token)) {
+    if (FORBIDDEN_PAISA_TOKENS.has(token)) {
       violations.push({
         file: filePath,
-        rule: "no-deprecated-paisa-tokens",
+        rule: "no-forbidden-paisa-tokens",
         detail:
-          `Found deprecated token '${token}'. Use canonical financial semantics (--paisa-positive, --paisa-negative, --paisa-warning, --paisa-primary) instead.`,
+          `Found removed token '${token}'. Use canonical Paisa semantic tokens instead.`,
       });
     }
   }
@@ -213,11 +341,7 @@ export function findUndefinedTokenViolations(
   definedTokens: Set<string>,
 ): SpecViolation[] {
   const violations: SpecViolation[] = [];
-  if (
-    filePath.includes("tokens.css") ||
-    filePath.includes("legacy-compat.css") ||
-    filePath.includes("src/lib/shared/vendor/")
-  ) {
+  if (filePath.startsWith("src/lib/shared/vendor/")) {
     return violations;
   }
 
@@ -286,13 +410,16 @@ export async function checkUiSpec(
       // 4. Bulma import check
       violations.push(...findBulmaViolations(relPath, content));
 
-      // 5. !important check
+      // 5. Removed Bulma compatibility class check
+      violations.push(...findBulmaClassViolations(relPath, content));
+
+      // 6. !important check
       violations.push(...findImportantViolations(relPath, content));
 
-      // 6. Deprecated tokens check
-      violations.push(...findDeprecatedTokenViolations(relPath, content));
+      // 7. Removed legacy/deprecated tokens check
+      violations.push(...findForbiddenTokenViolations(relPath, content));
 
-      // 7. Undefined tokens check
+      // 8. Undefined tokens check
       violations.push(
         ...findUndefinedTokenViolations(relPath, content, definedTokens),
       );

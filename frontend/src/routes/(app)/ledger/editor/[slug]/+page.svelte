@@ -321,7 +321,7 @@ let gridColsClass = $derived.by(() => {
 <Page width="fluid">
   <Section class="!pb-0">
     <div
-      class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-2 px-3 shadow-[var(--paisa-shadow-sm)]"
+      class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-[var(--paisa-radius-md)] border border-border bg-surface p-2 px-3 shadow-[var(--paisa-shadow-sm)]"
     >
       <div class="flex items-center gap-2">
         <Button
@@ -337,11 +337,11 @@ let gridColsClass = $derived.by(() => {
         </Button>
 
         <div
-          class="flex items-center gap-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-1"
+          class="flex items-center gap-2 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2 py-1"
         >
-          <i class="fa-regular fa-file-code text-[var(--paisa-brand-primary)]"></i>
+          <i class="fa-regular fa-file-code text-primary"></i>
           <span
-            class="max-w-[240px] truncate font-mono text-xs font-medium text-[var(--paisa-text-primary)]"
+            class="max-w-[240px] truncate font-mono text-xs font-medium text-foreground"
             title={selectedFile?.name}
           >
             {selectedFile?.name || "No file selected"}
@@ -354,7 +354,7 @@ let gridColsClass = $derived.by(() => {
 
       <div class="flex flex-wrap items-center gap-2">
         <div
-          class="flex items-center gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] p-0.5"
+          class="flex items-center gap-1 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised p-0.5"
         >
           <Button
             variant={$editorState.hasUnsavedChanges ? "primary" : "secondary"}
@@ -423,9 +423,9 @@ let gridColsClass = $derived.by(() => {
 
         {#if !isEmpty(selectedFile?.versions)}
           <div
-            class="flex items-center gap-1 border-l border-[var(--paisa-border-default)] pl-2"
+            class="flex items-center gap-1 border-l border-border pl-2"
           >
-            <i class="fas fa-clock-rotate-left text-[0.8rem] text-[var(--paisa-text-muted)]" title="File version history"></i>
+            <i class="fas fa-clock-rotate-left text-[0.8rem] text-muted-foreground" title="File version history"></i>
             <Select
               bind:value={selectedVersion}
               size="sm"
@@ -466,23 +466,23 @@ let gridColsClass = $derived.by(() => {
         {#if $editorState.errors.length > 0}
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-negative-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-negative)] transition-colors hover:bg-[var(--paisa-negative)] hover:text-[var(--paisa-text-inverse)]"
+            class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-negative-subtle px-2.5 py-1 text-xs font-semibold text-negative transition-colors hover:bg-negative hover:text-inverse-foreground"
             onclick={() => {
               if (editor) moveToLine(editor, $editorState.errors[0].line_from, true);
             }}
             title="Click to jump to error line"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-negative)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-negative"></span>
             <span
               >{$editorState.errors.length} error{$editorState.errors.length > 1 ? "s" : ""}</span
             >
           </button>
         {:else}
           <div
-            class="inline-flex items-center gap-2 rounded-full border border-[rgba(34,197,94,0.2)] bg-[var(--paisa-positive-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-positive)]"
+            class="inline-flex items-center gap-2 rounded-full border border-[rgba(34,197,94,0.2)] bg-positive-subtle px-2.5 py-1 text-xs font-semibold text-positive"
             title="Ledger syntax is valid"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-positive)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-positive"></span>
             <span>Valid</span>
           </div>
         {/if}
@@ -506,19 +506,19 @@ let gridColsClass = $derived.by(() => {
     <div class="grid h-full min-h-0 w-full flex-1 gap-3 {gridColsClass}">
       {#if sidebarOpen}
         <aside
-          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden"
+          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >
           <div
-            class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2"
+            class="flex min-h-[38px] items-center gap-2 border-b border-border bg-surface-raised px-3 py-2"
           >
-            <span class="text-[0.725rem] font-bold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            <span class="text-[0.725rem] font-bold uppercase tracking-wider text-muted-foreground">
               <i class="fa-regular fa-folder-open mr-1"></i>
               FILES
             </span>
             <Badge variant="neutral" size="sm" rounded>{values(filesMap).length}</Badge>
             <button
               type="button"
-              class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
+              class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
               title="Create new file"
               onclick={() => openCreateModal()}
             >
@@ -538,20 +538,20 @@ let gridColsClass = $derived.by(() => {
       {/if}
 
       <main
-        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)]"
+        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]"
       >
         <div
-          class="flex min-h-[38px] items-center border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-bg)] px-2"
+          class="flex min-h-[38px] items-center border-b border-border bg-surface px-2"
         >
           <div
-            class="flex h-full items-center gap-2 border-b-2 border-[var(--paisa-brand-primary)] bg-[var(--paisa-surface-card)] px-3 py-2 font-mono text-xs font-medium text-[var(--paisa-text-primary)]"
+            class="flex h-full items-center gap-2 border-b-2 border-[var(--paisa-primary)] bg-surface px-3 py-2 font-mono text-xs font-medium text-foreground"
           >
             <i class="fa-regular fa-file-lines mr-1"></i>
             <span class="max-w-[200px] truncate">
               {selectedFile ? last(selectedFile.name.split("/")) : "editor"}
             </span>
             {#if $editorState.hasUnsavedChanges}
-              <span class="text-[0.75rem] leading-none text-[var(--paisa-warning)]" title="Unsaved changes"
+              <span class="text-[0.75rem] leading-none text-warning" title="Unsaved changes"
                 >●</span
               >
             {/if}
@@ -569,13 +569,13 @@ let gridColsClass = $derived.by(() => {
 
       {#if outputOpen && !isEmpty($editorState.output)}
         <section
-          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] max-md:hidden"
+          class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >
           <div
-            class="flex min-h-[38px] items-center gap-2 border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-muted)] px-3 py-2"
+            class="flex min-h-[38px] items-center gap-2 border-b border-border bg-surface-raised px-3 py-2"
           >
             <span
-              class="text-[0.725rem] font-bold uppercase tracking-wider text-[var(--paisa-text-secondary)]"
+              class="text-[0.725rem] font-bold uppercase tracking-wider text-muted-foreground"
               title="hledger CLI validation balance report"
             >
               <i class="fas fa-scale-balanced mr-1"></i>
@@ -584,7 +584,7 @@ let gridColsClass = $derived.by(() => {
 
             <a
               href="/assets/investment"
-              class="ml-auto inline-flex items-center rounded-full bg-[var(--paisa-brand-primary-light)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--paisa-brand-primary)] no-underline transition-colors hover:bg-[var(--paisa-brand-primary)] hover:text-[var(--paisa-text-inverse)]"
+              class="ml-auto inline-flex items-center rounded-full bg-primary-subtle px-2 py-0.5 text-[0.7rem] font-medium text-primary no-underline transition-colors hover:bg-primary hover:text-inverse-foreground"
               title="Open Portfolio Dashboard with full INR valuations, charts, and gain/loss analytics"
             >
               <i class="fas fa-chart-pie mr-1"></i>
@@ -593,7 +593,7 @@ let gridColsClass = $derived.by(() => {
 
             <button
               type="button"
-              class="inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-[var(--paisa-text-muted)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-text-primary)]"
+              class="inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
               title="Copy raw output to clipboard"
               onclick={copyOutput}
             >

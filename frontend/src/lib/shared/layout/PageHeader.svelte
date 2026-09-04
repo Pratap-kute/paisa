@@ -124,7 +124,7 @@ let {
   margin: 0;
   font-size: var(--paisa-font-size-xl);
   font-weight: var(--paisa-font-weight-bold);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   line-height: var(--paisa-line-height-tight);
   display: inline-flex;
   align-items: center;
@@ -135,17 +135,17 @@ let {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--paisa-text-muted, var(--paisa-muted-foreground));
+  color: var(--paisa-muted-foreground, var(--paisa-muted-foreground));
   transition: color var(--paisa-transition-fast);
 }
 
 .paisa-help-link:hover {
-  color: var(--paisa-brand-primary, var(--paisa-primary));
+  color: var(--paisa-primary, var(--paisa-primary));
 }
 
 .paisa-page-description {
   font-size: var(--paisa-font-size-sm);
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   margin-top: var(--paisa-space-1);
   margin-bottom: 0;
 }

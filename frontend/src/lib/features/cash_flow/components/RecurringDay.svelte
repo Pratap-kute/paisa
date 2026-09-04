@@ -17,15 +17,15 @@ let isCurrentMonth = $derived(day.format("YYYY-MM") === month);
 </script>
 
 <div
-  class="min-h-[4.5rem] rounded-md border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-1 {isCurrentMonth
+  class="min-h-[4.5rem] rounded-md border border-border-subtle bg-surface p-1 {isCurrentMonth
     ? ''
     : 'invisible max-md:hidden'}"
 >
   <div class="mb-1 mt-1 text-center text-sm font-semibold">
     <span
       class="inline-flex min-w-[1.75rem] items-center justify-center px-2 py-1 {isToday
-        ? 'rounded-full border border-[var(--paisa-primary)] text-[var(--paisa-primary)]'
-        : 'text-[var(--paisa-muted-foreground)]'}"
+        ? 'rounded-full border border-[var(--paisa-primary)] text-primary'
+        : 'text-muted-foreground'}"
     >
       {day.format(isMobile() ? "ddd D" : "D")}
     </span>

@@ -26,20 +26,20 @@ let icon = $derived(
 {#if schedule && n}
   <div class="mb-0 text-center">
   <div
-    class="truncate text-xs font-medium text-[var(--paisa-foreground)]">{transactionSequece.key}</div>
+    class="truncate text-xs font-medium text-foreground">{transactionSequece.key}</div>
   <div class="my-1">
     <Badge variant="neutral" size="sm"
       rounded>{intervalText(transactionSequece)}</Badge>
   </div>
-  <div class="text-xs text-[var(--paisa-muted-foreground)]">
-      <span class="text-[var(--paisa-muted-foreground)]">
+  <div class="text-xs text-muted-foreground">
+      <span class="text-muted-foreground">
         <i class="fas fa-calendar text-[10px]" aria-hidden="true"></i>
       </span>
       {schedule.scheduled.format("DD MMM YYYY")}
     </div>
   <div class="paisa-grid justify-center">
     <div
-      class="mx-3 mt-3 radial-progress text-xs paisa-text-muted paisa-opacity-20"
+      class="mx-3 mt-3 radial-progress text-xs paisa-text-muted opacity-20"
       style="--value: 100; --thickness: 3px; --size: 100px; grid-area: 1/1"
     ></div>
     <div
