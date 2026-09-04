@@ -83,6 +83,24 @@ let predictionFilter: ConfidenceFilter = $state(null);
 let sourceViewMode: "review" | "raw" = $state("review");
 let mobileActiveTab: "source" | "preview" = $state("source");
 let advancedOptionsOpen = $state(false);
+
+let activeFileMeta = $derived.by(() => {
+  if (!activeFileName) {
+    return {
+      icon: "fa-solid fa-file-lines",
+      color: "text-[var(--paisa-brand-primary)]",
+    };
+  }
+  const ext = activeFileName.split(".").pop()?.toLowerCase();
+  if (ext === "xlsx" || ext === "xls") {
+    return { icon: "fa-solid fa-file-excel", color: "text-emerald-500" };
+  } else if (ext === "pdf") {
+    return { icon: "fa-solid fa-file-pdf", color: "text-rose-500" };
+  } else if (ext === "csv") {
+    return { icon: "fa-solid fa-file-csv", color: "text-blue-500" };
+  }
+  return { icon: "fa-solid fa-file-lines", color: "text-blue-400" };
+});
 let mobileInspectorOpen = $state(false);
 let predictionCounts = $state({
   high: 0,
@@ -388,10 +406,26 @@ function selectSourceRow(rowIndex: number, invocationIndex = 0) {
     return;
   }
 
-  const line = previewEditor.state.doc.line(renderedRow.lineRange.from);
-  previewEditor.dispatch({
-    effects: EditorView.scrollIntoView(line.from, { y: "center" }),
-  });
+  const totalLines = previewEditor.state.doc.lines;
+  const fromLine = Math.min(
+    Math.max(1, renderedRow.lineRange.from),
+    totalLines,
+  );
+  const toLine = Math.min(
+    Math.max(fromLine, renderedRow.lineRange.to),
+    totalLines,
+  );
+
+  try {
+    const lineStart = previewEditor.state.doc.line(fromLine);
+    const lineEnd = previewEditor.state.doc.line(toLine);
+    previewEditor.dispatch({
+      selection: { anchor: lineStart.from, head: lineEnd.to },
+      effects: EditorView.scrollIntoView(lineStart.from, { y: "center" }),
+    });
+  } catch (err) {
+    console.debug("Failed to scroll preview editor:", err);
+  }
 }
 
 function summaryForRow(rowIndex: number) {
@@ -685,107 +719,149 @@ function copyToClipboard() {
 >
   <div
     class="box-border flex h-full max-h-full min-h-0 w-full flex-col gap-[var(--paisa-space-2)] overflow-hidden">
-    <div class="flex shrink-0 flex-col gap-[var(--paisa-space-2)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-2)] px-[var(--paisa-space-3)] shadow-[var(--paisa-shadow-sm)]">
-      <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)]">
-        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
-          <h1 class="m-0 text-lg font-bold text-[var(--paisa-text-primary)]">Ledger Import</h1>
+    <!-- PAISA CLEAN TOP BAR -->
+    <header class="flex shrink-0 flex-col rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-2.5 px-3.5 shadow-[var(--paisa-shadow-sm)]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- LEFT: Page Title & Statement File Pill -->
+        <div class="flex min-w-0 items-center gap-3">
+          <h1 class="m-0 text-base font-bold tracking-tight text-[var(--paisa-text-primary)]">Ledger Import</h1>
 
           {#if activeFileName}
-            <div class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2 py-0.5">
-              <i class="fas fa-file-csv text-xs text-[var(--paisa-brand-primary)]"></i>
-              <span class="max-w-[180px] truncate text-xs font-semibold text-[var(--paisa-text-primary)]" title={activeFileName}>{activeFileName}</span>
-              <span class="rounded-[var(--paisa-radius-full)] bg-[var(--paisa-brand-primary-light)] px-1.5 py-0.5 text-[0.6875rem] font-medium text-[var(--paisa-brand-primary)]">{data.length} rows</span>
+            <span class="text-[var(--paisa-border-strong)] select-none font-light">/</span>
+
+            <!-- Sleek File Pill -->
+            <div class="inline-flex items-center gap-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1 text-xs">
+              <i class="{activeFileMeta.icon} {activeFileMeta.color} text-xs"></i>
+              <span class="max-w-[200px] truncate font-semibold text-[var(--paisa-text-primary)]" title={activeFileName}>
+                {activeFileName}
+              </span>
+              <span class="rounded bg-[var(--paisa-brand-primary-light)] px-1.5 py-0.5 text-[0.6875rem] font-semibold text-[var(--paisa-brand-primary)] tabular-nums">
+                {data.length} rows
+              </span>
               <button
                 type="button"
-                class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
+                class="cursor-pointer text-[var(--paisa-text-muted)] transition-colors hover:text-[var(--paisa-text-primary)] p-0.5 border-0 bg-transparent"
                 onclick={clearLoadedFile}
-                title="Replace with another file"
+                title="Replace statement with another file"
                 aria-label="Replace File"
               >
-                <i class="fas fa-arrow-rotate-right text-xs"></i>
-                <span class="hidden sm:inline">Replace</span>
+                <i class="fas fa-arrow-rotate-right text-[10px]"></i>
               </button>
             </div>
           {/if}
         </div>
 
-        <div class="flex flex-wrap items-center gap-[var(--paisa-space-2)]">
-          <div class="flex min-w-0 items-center gap-[var(--paisa-space-1)]">
-            <div class="min-w-[180px] max-w-[260px] [&_.svelte-select]:min-h-8 [&_.svelte-select]:rounded-[var(--paisa-radius-sm)] [&_.svelte-select]:text-xs">
-              <Select
-                items={templateItems}
-                value={selectedTemplateOption}
-                placeholder="Select Template…"
-                showChevron={true}
-                searchable={true}
-                clearable={false}
-                on:change={(e) => {
-                  if (e.detail?.value) onSelectTemplate(e.detail.value);
-                }}
-              >
-                <div slot="item" let:item class="flex w-full items-center justify-between gap-[var(--paisa-space-2)] overflow-hidden">
-                  <span class="truncate font-semibold text-[var(--paisa-text-primary)]">{item.label}</span>
-                  <Badge variant={item.template_type === "builtin" ? "info" : "primary"} size="sm">
-                    {item.template_type}
-                  </Badge>
+        <!-- RIGHT: Clean Toolbar Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Template Selector -->
+          <div class="w-[180px] sm:w-[220px] flex items-center">
+            <Select
+              class="paisa-select-sm"
+              items={templateItems}
+              value={selectedTemplateOption}
+              placeholder="Select Template…"
+              showChevron={true}
+              searchable={true}
+              clearable={false}
+              listAutoWidth={false}
+              --list-max-height="300px"
+              --list-z-index="50"
+              on:change={(e) => {
+                if (e.detail?.value) onSelectTemplate(e.detail.value);
+              }}
+            >
+              <!-- Selected item inside input -->
+              <div slot="selection" let:selection class="flex items-center gap-2 overflow-hidden text-xs font-semibold text-[var(--paisa-text-primary)]">
+                <i class="fas fa-file-code text-[var(--paisa-brand-primary)] text-xs shrink-0"></i>
+                <span class="truncate" title={selection.label}>{selection.label}</span>
+              </div>
+
+              <!-- Dropdown items -->
+              <div slot="item" let:item class="flex w-full items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <i class="fas {item.template_type === 'builtin' ? 'fa-box-archive text-[var(--paisa-text-muted)]' : 'fa-file-code text-[var(--paisa-brand-primary)]'} text-xs shrink-0"></i>
+                  <span class="truncate font-medium text-xs text-[var(--paisa-text-primary)]" title={item.label}>
+                    {item.label}
+                  </span>
                 </div>
-              </Select>
-            </div>
-
-            <div class="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                title="Edit active Handlebars template"
-                ariaLabel="Edit Template"
-                onclick={() => (templateDrawerOpen = true)}
-              >
-                {#snippet icon()}
-                  <i class="fas fa-code"></i>
-                {/snippet}
-                <span class="hidden sm:inline">Edit Template</span>
-                {#if $templateEditorState.hasUnsavedChanges}
-                  <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-warning)]"></span>
-                {/if}
-              </Button>
-
-              <IconButton
-                variant="outline"
-                size="sm"
-                ariaLabel="Create Template"
-                title="Create New Template"
-                onclick={() => {
-                  showSaveAsModal = true;
-                  setTimeout(() => document.getElementById("template-name-input")?.focus(), 50);
-                }}
-              >
-                <i class="fas fa-plus"></i>
-              </IconButton>
-            </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  {#if item.template_type === 'builtin'}
+                    <span class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium bg-[var(--paisa-surface-muted)] text-[var(--paisa-text-muted)] border border-[var(--paisa-border-subtle)]">
+                      Built-in
+                    </span>
+                  {/if}
+                  {#if selectedTemplate?.name === item.label}
+                    <i class="fas fa-check text-[var(--paisa-brand-primary)] text-xs"></i>
+                  {/if}
+                </div>
+              </div>
+            </Select>
           </div>
 
-          <button
-            type="button"
-            class="inline-flex min-h-[30px] cursor-pointer items-center justify-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-transparent bg-transparent px-2 py-1 text-xs font-medium text-[var(--paisa-text-secondary)] transition-all hover:bg-[var(--paisa-surface-muted)] hover:text-[var(--paisa-text-primary)]"
-            onclick={() => (advancedOptionsOpen = !advancedOptionsOpen)}
-            aria-expanded={advancedOptionsOpen}
+          <!-- Edit Template Button -->
+          <Button
+            variant="outline"
+            size="sm"
+            title="Edit active Handlebars template"
+            ariaLabel="Edit Template"
+            onclick={() => (templateDrawerOpen = true)}
           >
-            <span>Advanced Options</span>
-            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs"></i>
-          </button>
+            {#snippet icon()}
+              <i class="fas fa-code text-xs"></i>
+            {/snippet}
+            <span>Edit Template</span>
+            {#if $templateEditorState.hasUnsavedChanges}
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-warning)]"></span>
+            {/if}
+          </Button>
+
+          <!-- New Template Button -->
+          <IconButton
+            variant="outline"
+            size="sm"
+            ariaLabel="Create Template"
+            title="Create New Template"
+            onclick={() => {
+              showSaveAsModal = true;
+              setTimeout(() => document.getElementById("template-name-input")?.focus(), 50);
+            }}
+          >
+            <i class="fas fa-plus"></i>
+          </IconButton>
+
+          <!-- Advanced Options Button -->
+          <Button
+            variant={advancedOptionsOpen ? "secondary" : "outline"}
+            size="sm"
+            title="Toggle import sequence and formatting options"
+            ariaLabel="Advanced Options"
+            onclick={() => (advancedOptionsOpen = !advancedOptionsOpen)}
+          >
+            {#snippet icon()}
+              <i class="fas fa-sliders text-xs"></i>
+            {/snippet}
+            <span>Options</span>
+            {#if options.reverse || options.trim}
+              <span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--paisa-brand-primary)]"></span>
+            {/if}
+            <i class="fas {advancedOptionsOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-[10px] ml-0.5 text-[var(--paisa-text-muted)]"></i>
+          </Button>
         </div>
       </div>
 
       {#if advancedOptionsOpen}
-        <div class="flex flex-wrap items-center justify-between gap-[var(--paisa-space-2)] border-t border-dashed border-[var(--paisa-border-subtle)] pt-[var(--paisa-space-2)]">
-          <div class="flex items-center gap-[var(--paisa-space-4)]">
+        <div class="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--paisa-border-subtle)] pt-2.5">
+          <div class="flex items-center gap-5">
             <Switch id="import-reverse" bind:checked={options.reverse} size="sm" label="Reverse Row Order" />
             <Switch id="trim-reverse" bind:checked={options.trim} size="sm" label="Trim Whitespace" />
           </div>
-          <span class="text-xs text-[var(--paisa-text-muted)]">Adjust row sequence or clean generated spacing</span>
+          <span class="text-[0.6875rem] text-[var(--paisa-text-muted)] flex items-center gap-1">
+            <i class="fas fa-circle-info text-[10px]"></i>
+            Adjust row sequence or clean generated ledger spacing
+          </span>
         </div>
       {/if}
-    </div>
+    </header>
 
     {#if isEmpty(data) && !loading}
       <div class="flex min-h-0 flex-1 flex-col items-center justify-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-[var(--paisa-space-6)]">
@@ -853,13 +929,13 @@ function copyToClipboard() {
         </button>
       </div>
 
-      <div class="grid min-h-0 flex-1 grid-cols-[minmax(380px,35%)_1fr] gap-[var(--paisa-space-2)] overflow-hidden max-[860px]:grid-cols-1">
+      <div class="grid min-h-0 flex-1 grid-cols-[minmax(430px,44%)_1fr] gap-[var(--paisa-space-2)] overflow-hidden max-[860px]:grid-cols-1">
         <div class="relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'preview' ? 'max-[860px]:hidden' : ''}">
-          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
+          <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-3 py-1.5">
             <div class="inline-flex shrink-0 gap-0.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] p-0.5">
               <button
                 type="button"
-                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'review' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
                 onclick={() => (sourceViewMode = "review")}
               >
                 <i class="fas fa-list-check text-xs"></i>
@@ -867,7 +943,7 @@ function copyToClipboard() {
               </button>
               <button
                 type="button"
-                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2 py-0.5 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
+                class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-sm)-2px)] border-0 px-2.5 py-1 text-[0.6875rem] font-medium transition-all {sourceViewMode === 'raw' ? 'bg-[var(--paisa-brand-primary)] font-semibold text-white' : 'bg-transparent text-[var(--paisa-text-secondary)] hover:text-[var(--paisa-text-primary)]'}"
                 onclick={() => (sourceViewMode = "raw")}
               >
                 <i class="fas fa-table text-xs"></i>
@@ -875,18 +951,28 @@ function copyToClipboard() {
               </button>
             </div>
 
-            {#if !predictionReviewFailed && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
-              <div class="max-w-full overflow-x-auto">
-                <PredictionReviewBar
-                  counts={predictionCounts}
-                  filter={predictionFilter}
-                  progress={reviewProgress}
-                  onFilter={(next) => (predictionFilter = next)}
-                  onReviewNext={confirmNextReview}
-                />
+            {#if sourceViewMode === "raw"}
+              <div class="flex items-center gap-2 text-xs text-[var(--paisa-text-secondary)]">
+                <span class="font-medium">{data.length} rows</span>
+                {#if columnCount > 0}
+                  <span class="text-[var(--paisa-border-strong)]">·</span>
+                  <span class="font-mono text-[0.6875rem] text-[var(--paisa-text-muted)]">{columnCount} cols (A–{String.fromCharCode(64 + Math.min(columnCount, 26))})</span>
+                {/if}
               </div>
             {/if}
           </div>
+
+          {#if sourceViewMode === "review" && !predictionReviewFailed && (predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown) > 0}
+            <div class="shrink-0 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-3 py-2">
+              <PredictionReviewBar
+                counts={predictionCounts}
+                filter={predictionFilter}
+                progress={reviewProgress}
+                onFilter={(next) => (predictionFilter = next)}
+                onReviewNext={confirmNextReview}
+              />
+            </div>
+          {/if}
 
           {#if parseErrorMessage}
             <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
@@ -906,17 +992,26 @@ function copyToClipboard() {
                 {selectedSourceRowIndex}
                 {predictionFilter}
                 onSelectRow={selectSourceRow}
+                onClearFilter={() => (predictionFilter = null)}
               />
             {:else}
               <div class="h-full min-h-0 flex-1 overflow-auto bg-[var(--paisa-table-bg)]">
                 <table class="m-0 w-full min-w-full border-separate border-spacing-0 text-xs">
                   <thead>
                     <tr>
-                      <th class="sticky left-0 top-0 z-[15] w-10 min-w-10 border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">#</th>
+                      <th class="sticky left-0 top-0 z-[15] min-w-[110px] w-[110px] border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-2.5 py-2 text-left font-mono text-[0.6875rem] font-bold uppercase tracking-wider text-[var(--paisa-table-header-text)] select-none">
+                        # · Status
+                      </th>
                       {#each range(0, columnCount) as ci}
-                        <th class="sticky top-0 z-10 min-w-[110px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center text-[var(--paisa-table-header-text)]">
-                          <span class="block text-sm font-bold">{String.fromCharCode(65 + ci)}</span>
-                          <span class="block font-mono text-[0.68rem] text-[var(--paisa-brand-primary)]">ROW.{String.fromCharCode(65 + ci)}</span>
+                        <th class="sticky top-0 z-10 min-w-[130px] border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-3 py-1.5 text-left select-none">
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-[var(--paisa-table-header-text)] tracking-wide">
+                              {String.fromCharCode(65 + ci)}
+                            </span>
+                            <span class="rounded bg-[var(--paisa-table-bg)] px-1.5 py-0.5 font-mono text-[0.625rem] font-semibold text-[var(--paisa-brand-primary)] border border-[var(--paisa-table-border)]" title="Template variable: row.{String.fromCharCode(65 + ci)}">
+                              row.{String.fromCharCode(65 + ci)}
+                            </span>
+                          </div>
                         </th>
                       {/each}
                     </tr>
@@ -924,19 +1019,31 @@ function copyToClipboard() {
                   <tbody>
                     {#each data as row, ri}
                       <tr
-                        class="cursor-pointer hover:[&_.paisa-sheet-data-cell]:bg-[var(--paisa-table-row-hover)] hover:[&_.paisa-sheet-row-header]:bg-[var(--paisa-surface-hover)] hover:[&_.paisa-sheet-row-header]:text-[var(--paisa-brand-primary)] {selectedSourceRowIndex === ri ? '[&_.paisa-sheet-data-cell]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-data-cell]:text-[var(--paisa-text-primary)] [&_.paisa-sheet-row-header]:bg-[var(--paisa-brand-primary-light)] [&_.paisa-sheet-row-header]:text-[var(--paisa-text-primary)]' : ''} {!rowIsVisible(ri) ? 'hidden' : ''}"
+                        class="group cursor-pointer transition-colors duration-75 {!rowIsVisible(ri) ? 'hidden' : ''} {selectedSourceRowIndex === ri ? '[&>th]:!bg-[var(--paisa-table-row-selected)] [&>td]:!bg-[var(--paisa-table-row-selected)]' : 'hover:[&>th]:bg-[var(--paisa-table-row-hover)] hover:[&>td]:bg-[var(--paisa-table-row-hover)]'}"
                         onclick={() => selectSourceRow(ri)}
                       >
-                        <th class="paisa-sheet-row-header sticky left-0 z-[5] w-[88px] min-w-[88px] border-[var(--paisa-table-border)] bg-[var(--paisa-table-header-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-center align-middle font-semibold text-[var(--paisa-table-header-text)]">
-                          <span>{ri}</span>
-                          <PredictionRowBadge
-                            confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
-                            possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
-                            resolved={predictionReviewFailed ? false : summaryForRow(ri)?.resolved}
-                          />
+                        <th class="paisa-sheet-row-header sticky left-0 z-[5] min-w-[110px] w-[110px] border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-2.5 py-1.5 font-normal text-left select-none transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)] border-l-2 border-l-[var(--paisa-brand-primary)]' : ''}">
+                          <div class="flex items-center justify-between gap-2">
+                            <span class="font-mono text-xs font-semibold tabular-nums text-[var(--paisa-text-muted)] group-hover:text-[var(--paisa-text-primary)]">
+                              {ri}
+                            </span>
+                            <div class="shrink-0">
+                              <PredictionRowBadge
+                                confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
+                                possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
+                                resolved={predictionReviewFailed ? false : summaryForRow(ri)?.resolved}
+                              />
+                            </div>
+                          </div>
                         </th>
                         {#each row as cell}
-                          <td class="paisa-sheet-data-cell max-w-[250px] overflow-hidden text-ellipsis whitespace-nowrap border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-[var(--paisa-space-2)] py-[var(--paisa-space-1)] text-[var(--paisa-text-primary)]" title={displayCell(cell)}>{displayCell(cell)}</td>
+                          <td class="paisa-sheet-data-cell max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap border-b border-r border-[var(--paisa-table-border)] bg-[var(--paisa-table-bg)] px-3 py-1.5 font-mono text-[0.75rem] text-[var(--paisa-text-primary)] transition-colors {selectedSourceRowIndex === ri ? '!bg-[var(--paisa-table-row-selected)]' : ''}" title={displayCell(cell)}>
+                            {#if displayCell(cell)}
+                              {displayCell(cell)}
+                            {:else}
+                              <span class="text-[var(--paisa-text-muted)]/30 select-none font-sans italic">—</span>
+                            {/if}
+                          </td>
                         {/each}
                       </tr>
                     {/each}
@@ -947,7 +1054,7 @@ function copyToClipboard() {
           </div>
 
           {#if !predictionReviewFailed && selectedPrediction}
-            <div class="max-h-[300px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
+            <div class="max-h-[360px] min-h-[220px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
               <PredictionDetail
                 result={selectedPrediction}
                 input={selectedInput}
@@ -1042,11 +1149,11 @@ function copyToClipboard() {
               <span class="text-[var(--paisa-danger)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
             {/if}
             {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
-              <span class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review}</span>
-                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown}</span>
+              <span class="flex items-center gap-2.5 text-[0.6875rem]">
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="High confidence: {predictionCounts.high}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-high)]"></span> {predictionCounts.high} High</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Medium confidence: {predictionCounts.medium}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-medium)]"></span> {predictionCounts.medium} Med</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Needs review: {predictionCounts.review}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-review)]"></span> {predictionCounts.review} Review</span>
+                <span class="inline-flex items-center gap-1 text-[var(--paisa-text-secondary)]" title="Unknown: {predictionCounts.unknown}"><span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-prediction-unknown)]"></span> {predictionCounts.unknown} Unknown</span>
               </span>
             {/if}
           {:else if activeFileName}

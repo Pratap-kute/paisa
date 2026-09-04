@@ -117,20 +117,16 @@ function toggle(next: ConfidenceFilter) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.625rem;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .paisa-chips-group {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  flex-wrap: wrap;
 }
 
 button.paisa-review-chip {

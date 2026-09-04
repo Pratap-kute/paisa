@@ -184,7 +184,9 @@ const isResolved = $derived(
       <label class="paisa-detail-label" for="predict-account-select">Suggested Account</label>
       <div class="paisa-select-container" id="predict-account-select">
         <Select
-          --list-z-index="40"
+          --list-z-index="50"
+          --list-max-height="240px"
+          listAutoWidth={false}
           items={items}
           value={{ value: selectedAccount, label: selectedAccount }}
           showChevron={true}
@@ -514,7 +516,13 @@ const isResolved = $derived(
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
-  margin-top: 0.25rem;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  background-color: var(--paisa-surface-card, #ffffff);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--paisa-border-subtle, #f1f5f9);
+  z-index: 20;
 }
 
 .paisa-action-group-secondary {
