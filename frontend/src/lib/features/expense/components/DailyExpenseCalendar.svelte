@@ -49,7 +49,7 @@ function detailHtml(index: number) {
         iconText(row.detail ?? ""),
         "custom-icon",
       ],
-      [row.label, "paisa-truncate"],
+      [row.label, "truncate"],
       [formatCurrency(row.value), "paisa-text-bold paisa-text-right"],
     ]),
     { header: point.label, total: formatCurrency(point.value) },

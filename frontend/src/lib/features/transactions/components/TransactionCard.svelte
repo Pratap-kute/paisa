@@ -47,7 +47,7 @@ let posting: Posting = $derived(t.postings[0]);
         >
         {restName(posting.account)}
       </div>
-      <div class="text-base font-bold paisa-nowrap tabular-nums">
+      <div class="text-base font-bold whitespace-nowrap tabular-nums">
         {formatCurrency(posting.amount)}
       </div>
     </div>

@@ -10,20 +10,6 @@
   text-decoration: underline;
 }
 
-.paisa-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.paisa-nowrap {
-  white-space: nowrap;
-}
-
-.paisa-opacity-20 {
-  opacity: 0.2;
-}
-
 .paisa-toast-container {
   position: fixed;
   z-index: 99999;

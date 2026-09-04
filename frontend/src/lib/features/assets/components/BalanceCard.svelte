@@ -25,7 +25,7 @@ let { assetBreakdown }: Props = $props();
         href="/assets/gain/{assetBreakdown.group}">
         {restName(restName(assetBreakdown.group))}</a>
     </div>
-    <div class="text-base font-bold paisa-nowrap tabular-nums">
+    <div class="text-base font-bold whitespace-nowrap tabular-nums">
       {formatCurrency(assetBreakdown.marketAmount)}
     </div>
   </div>

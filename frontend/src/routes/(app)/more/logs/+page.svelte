@@ -244,7 +244,7 @@ function formatTime(time: any): string {
 
                 <!-- Message -->
                 <div
-                  class="paisa-truncate w-[420px] shrink-0 text-[0.8125rem] font-medium text-foreground"
+                  class="truncate w-[420px] shrink-0 text-[0.8125rem] font-medium text-foreground"
                   title={log.msg}
                 >
                   {log.msg}
@@ -252,7 +252,7 @@ function formatTime(time: any): string {
 
                 <!-- Structured Context Fields -->
                 <div
-                  class="paisa-truncate min-w-0 flex-1 text-[0.725rem] text-muted-foreground"
+                  class="truncate min-w-0 flex-1 text-[0.725rem] text-muted-foreground"
                 >
                   {#each Object.entries(fields) as [key, value]}
                     <span class="mr-2 inline-flex items-center rounded bg-surface-raised px-1.5 py-0.5 border border-border-subtle">

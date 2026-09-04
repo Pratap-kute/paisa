@@ -458,7 +458,7 @@ async function createFile(destinationFile: string) {
               >
                 <div
                   title={result.result}
-                  class="paisa-truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
+                  class="truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
                     ? 'font-bold text-negative'
                     : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
                     ? 'font-bold text-foreground'

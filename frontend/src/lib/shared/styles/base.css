@@ -24,6 +24,7 @@
 
   a:hover {
     color: var(--paisa-primary);
+    text-decoration: underline;
   }
 
   code,

@@ -8,6 +8,7 @@ import {
   findImportantViolations,
   findRawPaletteViolations,
   findUndefinedTokenViolations,
+  FORBIDDEN_BULMA_CLASS_COMBINATIONS,
   FORBIDDEN_BULMA_CLASSES,
 } from "./check_ui_spec.ts";
 
@@ -89,8 +90,7 @@ Deno.test("findBulmaClassViolations catches removed classes in class attributes 
   expect(violations.map((violation) => violation.detail)).toEqual([
     expect.stringContaining("has-text-success"),
     expect.stringContaining("is-size-7"),
-    expect.stringContaining("table"),
-    expect.stringContaining("is-narrow"),
+    expect.stringContaining("table + is-narrow"),
     expect.stringContaining("has-text-right"),
   ]);
   expect(
@@ -111,6 +111,46 @@ Deno.test("findBulmaClassViolations covers every removed compatibility class", (
   expect(violations.length).toBe(FORBIDDEN_BULMA_CLASSES.size);
 });
 
+Deno.test("findBulmaClassViolations requires context for generic Bulma class names", () => {
+  const legitimate = `
+    <div class="table"></div>
+    <div class="is-small is-narrow is-fullwidth is-hoverable"></div>
+    <div class="{table ? 'grid' : 'block'}"></div>
+  `;
+  expect(
+    findBulmaClassViolations("src/routes/sample.svelte", legitimate),
+  ).toEqual([]);
+
+  const combinations = FORBIDDEN_BULMA_CLASS_COMBINATIONS.map((classes) =>
+    `<div class="${classes.join(" ")}"></div>`
+  ).join("\n");
+  expect(
+    findBulmaClassViolations("src/routes/sample.svelte", combinations).length,
+  ).toBe(FORBIDDEN_BULMA_CLASS_COMBINATIONS.length);
+});
+
+Deno.test("findBulmaClassViolations rejects removed Bulma CSS selectors", () => {
+  const sample = `
+    .has-text-success { color: green; }
+    .icon.is-small { width: 1rem; }
+    .table.is-hoverable tbody tr:hover { background: white; }
+    /* .has-text-danger must not count inside comments. */
+    .table { display: table; }
+    .is-small { font-size: 0.8rem; }
+    .table, .is-narrow { display: block; }
+  `;
+  const violations = findBulmaClassViolations(
+    "src/lib/shared/styles/example.css",
+    sample,
+  );
+  expect(violations.length).toBe(3);
+  expect(
+    violations.every((violation) =>
+      violation.rule === "no-bulma-compat-selectors"
+    ),
+  ).toBe(true);
+});
+
 Deno.test("findBulmaClassViolations avoids prose, selectors, and partial-name false positives", () => {
   const sample = `
     // Do not add has-text-danger to application markup.
@@ -124,8 +164,8 @@ Deno.test("findBulmaClassViolations avoids prose, selectors, and partial-name fa
   ).toEqual([]);
   expect(
     findBulmaClassViolations(
-      "src/lib/shared/styles/legacy/bulma-compat.css",
-      `.has-text-info { color: red; }`,
+      "src/lib/shared/styles/example.css",
+      `.paisa-table { display: table; }`,
     ),
   ).toEqual([]);
 });

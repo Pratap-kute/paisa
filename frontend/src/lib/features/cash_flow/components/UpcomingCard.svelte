@@ -39,7 +39,7 @@ let icon = $derived(
     </div>
   <div class="paisa-grid justify-center">
     <div
-      class="mx-3 mt-3 radial-progress text-xs paisa-text-muted paisa-opacity-20"
+      class="mx-3 mt-3 radial-progress text-xs paisa-text-muted opacity-20"
       style="--value: 100; --thickness: 3px; --size: 100px; grid-area: 1/1"
     ></div>
     <div

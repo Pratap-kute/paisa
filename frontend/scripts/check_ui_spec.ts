@@ -96,7 +96,6 @@ export const FORBIDDEN_PAISA_TOKENS = new Set([
 
 export const FORBIDDEN_BULMA_CLASSES = new Set([
   "is-clipped",
-  "is-small",
   "is-size-6",
   "is-size-7",
   "has-text-weight-bold",
@@ -114,11 +113,14 @@ export const FORBIDDEN_BULMA_CLASSES = new Set([
   "has-text-grey-light",
   "has-text-grey-lighter",
   "has-text-grey-dark",
-  "table",
-  "is-narrow",
-  "is-fullwidth",
-  "is-hoverable",
 ]);
+
+export const FORBIDDEN_BULMA_CLASS_COMBINATIONS = [
+  ["icon", "is-small"],
+  ["table", "is-narrow"],
+  ["table", "is-fullwidth"],
+  ["table", "is-hoverable"],
+] as const;
 
 export const ALLOWED_IMPORTANT_FILES = new Set([
   "src/lib/shared/styles/integrations/codemirror.css",
@@ -188,8 +190,6 @@ export function findBulmaClassViolations(
   filePath: string,
   content: string,
 ): SpecViolation[] {
-  if (extname(filePath).toLowerCase() === ".css") return [];
-
   const violations: SpecViolation[] = [];
   const reported = new Set<string>();
   const report = (className: string) => {
@@ -204,6 +204,43 @@ export function findBulmaClassViolations(
         `Found removed Bulma compatibility class '${className}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
     });
   };
+  const reportCombination = (classes: ReadonlySet<string>) => {
+    for (const combination of FORBIDDEN_BULMA_CLASS_COMBINATIONS) {
+      if (!combination.every((className) => classes.has(className))) continue;
+      const label = combination.join(" + ");
+      if (reported.has(label)) continue;
+      reported.add(label);
+      violations.push({
+        file: filePath,
+        rule: "no-bulma-compat-classes",
+        detail:
+          `Found removed Bulma compatibility class combination '${label}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
+      });
+    }
+  };
+
+  if (extname(filePath).toLowerCase() === ".css") {
+    const withoutComments = content.replaceAll(/\/\*[\s\S]*?\*\//g, "");
+    for (const selectorBlock of withoutComments.matchAll(/([^{}]+)\{/g)) {
+      for (const selector of selectorBlock[1].split(",")) {
+        const classes = new Set(
+          [...selector.matchAll(/\.([a-z][a-z0-9-]*)/g)].map((match) =>
+            match[1]
+          ),
+        );
+        for (const className of classes) report(className);
+        reportCombination(classes);
+      }
+    }
+    return violations.map((violation) => ({
+      ...violation,
+      rule: "no-bulma-compat-selectors",
+      detail: violation.detail.replace(
+        "in application markup",
+        "in a CSS selector",
+      ),
+    }));
+  }
 
   // Restrict matching to quoted class attributes. This covers static classes and
   // quoted branches inside Svelte class expressions without matching prose,
@@ -211,9 +248,11 @@ export function findBulmaClassViolations(
   const classAttributeRegex =
     /(?:^|[\s<{])class(?:Name)?\s*=\s*(["'`])([\s\S]*?)\1/g;
   for (const attribute of content.matchAll(classAttributeRegex)) {
-    for (const token of attribute[2].matchAll(/[a-z][a-z0-9-]*/g)) {
-      report(token[0]);
-    }
+    const classes = new Set(
+      [...attribute[2].matchAll(/[a-z][a-z0-9-]*/g)].map((token) => token[0]),
+    );
+    for (const className of classes) report(className);
+    reportCombination(classes);
   }
 
   // Also inspect string literals inside class={...} expressions. Identifiers are
@@ -221,11 +260,14 @@ export function findBulmaClassViolations(
   const expressionAttributeRegex =
     /(?:^|[\s<{])class(?:Name)?\s*=\s*\{([\s\S]*?)\}/g;
   for (const attribute of content.matchAll(expressionAttributeRegex)) {
+    const classes = new Set<string>();
     for (const literal of attribute[1].matchAll(/(["'`])([\s\S]*?)\1/g)) {
       for (const token of literal[2].matchAll(/[a-z][a-z0-9-]*/g)) {
         report(token[0]);
+        classes.add(token[0]);
       }
     }
+    reportCombination(classes);
   }
 
   // Svelte's class:name={condition} directive does not use a class attribute.

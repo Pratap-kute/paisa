@@ -39,7 +39,7 @@ let tooltipContent = $derived(
     accountBudget.expenses.map((e) => {
       return [
         e.date.format("DD MMM YYYY"),
-        [e.payee, "paisa-truncate"],
+        [e.payee, "truncate"],
         [formatCurrency(e.amount), "paisa-text-bold paisa-text-right"],
       ];
     }),

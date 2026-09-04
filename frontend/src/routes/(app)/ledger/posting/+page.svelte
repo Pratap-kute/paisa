@@ -159,12 +159,12 @@ function unlessZero(value: number, text: string) {
                     <div class="text-[0.8125rem] text-foreground">
                       {p.date.format("DD MMM YYYY")}
                     </div>
-                    <div class="paisa-truncate text-xs text-foreground" title={p.payee}>
+                    <div class="truncate text-xs text-foreground" title={p.payee}>
                       <PostingStatus posting={p} />
                       <PostingNote posting={p} />
                       <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
                     </div>
-                    <div class="custom-icon paisa-truncate text-[0.8125rem] text-foreground" title={p.account}>
+                    <div class="custom-icon truncate text-[0.8125rem] text-foreground" title={p.account}>
                       <div class="flex">
                         <span class="mr-1" style={accountColorStyle(firstName(p.account))}
                           >{iconText(p.account)}</span
