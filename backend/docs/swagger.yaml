@@ -837,6 +837,35 @@ definitions:
       value:
         type: number
     type: object
+  dto.MerchantRuleResponse:
+    properties:
+      account:
+        type: string
+      merchant:
+        type: string
+      merchants:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.MerchantRuleSaveResponse:
+    properties:
+      message:
+        type: string
+      rule:
+        $ref: '#/definitions/dto.MerchantRuleResponse'
+      saved:
+        type: boolean
+    type: object
+  dto.MerchantRuleUpsertRequest:
+    properties:
+      account:
+        type: string
+      merchant:
+        type: string
+      prefix:
+        type: string
+    type: object
   dto.NetworthResponse:
     properties:
       networthTimeline:
@@ -2049,6 +2078,48 @@ paths:
       security:
       - PaisaAuth: []
       summary: Get prediction history
+      tags:
+      - Predictions
+  /prediction/merchant-rule:
+    post:
+      consumes:
+      - application/json
+      description: Upserts a merchant to account rule in paisa.yaml under prediction.merchant_rules.
+        Returns 409 in readonly mode.
+      operationId: upsertMerchantRule
+      parameters:
+      - description: Merchant rule details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MerchantRuleUpsertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MerchantRuleSaveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.MerchantRuleSaveResponse'
+      security:
+      - PaisaAuth: []
+      summary: Add or update a merchant prediction rule
       tags:
       - Predictions
   /price:

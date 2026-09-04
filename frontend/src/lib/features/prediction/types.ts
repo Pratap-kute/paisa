@@ -155,3 +155,26 @@ export interface UserOverride {
   account: string;
   source: "USER";
 }
+
+export type PredictionReviewStatus = "UNREVIEWED" | "ACCEPTED" | "CORRECTED";
+
+export interface PredictionReviewState {
+  status: PredictionReviewStatus;
+  initialAccount: string;
+  currentAccount: string;
+  initialConfidence: Confidence;
+  wasReviewRequired: boolean;
+  inputFingerprint: string;
+  reviewedAt?: number;
+}
+
+export interface PredictionReviewProgress {
+  totalRows: number;
+  reviewRequiredRows: number;
+  reviewedRows: number;
+  unresolvedRows: number;
+  percent: number;
+  total: number;
+  reviewed: number;
+  remaining: number;
+}

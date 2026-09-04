@@ -1154,6 +1154,70 @@
                 }
             }
         },
+        "/prediction/merchant-rule": {
+            "post": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "description": "Upserts a merchant to account rule in paisa.yaml under prediction.merchant_rules. Returns 409 in readonly mode.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Predictions"
+                ],
+                "summary": "Add or update a merchant prediction rule",
+                "operationId": "upsertMerchantRule",
+                "parameters": [
+                    {
+                        "description": "Merchant rule details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.MerchantRuleUpsertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MerchantRuleSaveResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MerchantRuleSaveResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/price": {
             "get": {
                 "security": [
@@ -3088,6 +3152,51 @@
                 },
                 "value": {
                     "type": "number"
+                }
+            }
+        },
+        "dto.MerchantRuleResponse": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "merchant": {
+                    "type": "string"
+                },
+                "merchants": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.MerchantRuleSaveResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "rule": {
+                    "$ref": "#/definitions/dto.MerchantRuleResponse"
+                },
+                "saved": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.MerchantRuleUpsertRequest": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "merchant": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
                 }
             }
         },

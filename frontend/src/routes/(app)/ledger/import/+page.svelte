@@ -76,6 +76,8 @@ let loading = $state(false);
 let activeFileName = $state("");
 let templateDrawerOpen = $state(false);
 let selectedSourceRowIndex: number | null = $state(null);
+let selectedInvocationIndex = $state(0);
+let showReviewWarningModal = $state(false);
 let predictionTick = $state(0);
 let predictionFilter: ConfidenceFilter = $state(null);
 let sourceViewMode: "review" | "raw" = $state("review");
@@ -101,6 +103,7 @@ let predictionRows = $state<
     rowIndex: number;
     confidence: Confidence;
     possibleTransfer: boolean;
+    resolved: boolean;
     results: PredictionResult[];
   }>
 >([]);
@@ -374,8 +377,9 @@ function clearLoadedFile() {
   }
 }
 
-function selectSourceRow(rowIndex: number) {
+function selectSourceRow(rowIndex: number, invocationIndex = 0) {
   selectedSourceRowIndex = rowIndex;
+  selectedInvocationIndex = invocationIndex;
   if (typeof window !== "undefined" && window.innerWidth <= 860) {
     mobileInspectorOpen = true;
   }
@@ -403,11 +407,79 @@ function rowIsVisible(rowIndex: number) {
   return rowMatchesFilter(summary, predictionFilter);
 }
 
-let selectedPrediction = $derived(
-  selectedSourceRowIndex == null
-    ? null
-    : (summaryForRow(selectedSourceRowIndex)?.results[0] || null),
-);
+let selectedRowPredictions = $derived.by(() => {
+  const _tick = predictionTick;
+  if (selectedSourceRowIndex == null) return [];
+  return summaryForRow(selectedSourceRowIndex)?.results || [];
+});
+
+let selectedPrediction = $derived.by(() => {
+  const _tick = predictionTick;
+  if (selectedRowPredictions.length === 0) return null;
+  return (
+    selectedRowPredictions.find(
+      (r) => r.helperInvocationIndex === selectedInvocationIndex,
+    ) ||
+    selectedRowPredictions[0] ||
+    null
+  );
+});
+
+let reviewProgress = $derived.by(() => {
+  const _tick = predictionTick;
+  return predictionSession.reviewProgress();
+});
+
+let unresolvedQueue = $derived.by(() => {
+  const _tick = predictionTick;
+  return predictionSession.unresolvedPredictions();
+});
+
+let queuePosition = $derived.by(() => {
+  const _tick = predictionTick;
+  if (!selectedPrediction) return null;
+  const idx = unresolvedQueue.findIndex(
+    (r) =>
+      r.rowIndex === selectedPrediction?.rowIndex &&
+      r.helperInvocationIndex === selectedPrediction?.helperInvocationIndex &&
+      r.prefix === selectedPrediction?.prefix,
+  );
+  if (idx === -1) return null;
+  return {
+    index: idx + 1,
+    total: unresolvedQueue.length,
+  };
+});
+
+let similarCount = $derived.by(() => {
+  const _tick = predictionTick;
+  if (!selectedPrediction || selectedPrediction.rowIndex == null) return 0;
+  return predictionSession.similarPredictionsCount(
+    selectedPrediction.rowIndex,
+    selectedPrediction.prefix,
+    selectedPrediction.helperInvocationIndex,
+  );
+});
+
+let selectedInput = $derived.by(() => {
+  const _tick = predictionTick;
+  if (!selectedPrediction || selectedPrediction.rowIndex == null) return null;
+  return predictionSession.getInput(
+    selectedPrediction.rowIndex,
+    selectedPrediction.helperInvocationIndex,
+    selectedPrediction.prefix,
+  );
+});
+
+let selectedReviewState = $derived.by(() => {
+  const _tick = predictionTick;
+  if (!selectedPrediction || selectedPrediction.rowIndex == null) return null;
+  return predictionSession.getReviewState(
+    selectedPrediction.rowIndex,
+    selectedPrediction.helperInvocationIndex,
+    selectedPrediction.prefix,
+  );
+});
 
 function overrideSelected(account: string) {
   if (selectedSourceRowIndex == null || !selectedPrediction) return;
@@ -422,7 +494,7 @@ function overrideSelected(account: string) {
 
 function applySimilar(account: string) {
   if (selectedSourceRowIndex == null || !selectedPrediction) return;
-  predictionSession.applyToSimilar(
+  const { appliedCount } = predictionSession.applyToSimilar(
     selectedSourceRowIndex,
     selectedPrediction.prefix,
     account,
@@ -430,46 +502,114 @@ function applySimilar(account: string) {
   );
   predictionTick += 1;
   toast.toast({
-    message: `Applied account to similar transactions`,
+    message: `Applied account to ${appliedCount} similar ${
+      appliedCount === 1 ? "transaction" : "transactions"
+    }`,
     type: "is-info",
     duration: 3000,
   });
-}
 
-function alwaysUseMerchant(account: string) {
-  if (!selectedPrediction) return;
-  const key = selectedPrediction.merchantKey || "";
-  predictionSession.alwaysUseMerchant(key, selectedPrediction.prefix, account);
-  predictionTick += 1;
-  toast.toast({
-    message: `Saved rule: ${key} -> ${account}`,
-    type: "is-success",
-    duration: 4000,
-  });
-}
-
-function confirmNextReview() {
-  const reviewQueue = predictionRows.filter((r) =>
-    r.confidence === "NEEDS_REVIEW" || r.confidence === "UNKNOWN"
-  );
-  if (reviewQueue.length === 0) {
-    selectedSourceRowIndex = null;
-    mobileInspectorOpen = false;
-    toast.toast({
-      message: "All low-confidence rows reviewed!",
-      type: "is-success",
-    });
-    return;
-  }
-  const currentPos = reviewQueue.findIndex((r) =>
-    r.rowIndex === selectedSourceRowIndex
-  );
-  const nextRow = reviewQueue[currentPos + 1] || reviewQueue[0];
-  if (nextRow) {
-    selectSourceRow(nextRow.rowIndex);
+  const next = predictionSession.nextUnresolved();
+  if (next && next.rowIndex != null) {
+    selectSourceRow(next.rowIndex, next.helperInvocationIndex);
   } else {
     selectedSourceRowIndex = null;
     mobileInspectorOpen = false;
+  }
+}
+
+async function alwaysUseMerchant(account: string) {
+  if (!selectedPrediction || selectedSourceRowIndex == null) return;
+  const merchant = selectedPrediction.merchantKey ||
+    selectedInput?.description || "";
+  if (!merchant) return;
+
+  predictionSession.alwaysUseMerchant(
+    merchant,
+    selectedPrediction.prefix,
+    account,
+  );
+  predictionSession.confirmPrediction(
+    selectedSourceRowIndex,
+    selectedPrediction.prefix,
+    account,
+    selectedPrediction.helperInvocationIndex,
+  );
+  predictionTick += 1;
+
+  try {
+    const res = await api.prediction.upsertMerchantRule({
+      merchant,
+      account,
+      prefix: selectedPrediction.prefix,
+    });
+    if (res.saved) {
+      toast.toast({
+        message:
+          `Persistent rule saved: <b>${merchant}</b> &rarr; <b>${account}</b>`,
+        type: "is-success",
+        duration: 4000,
+      });
+    } else if (res.message) {
+      toast.toast({
+        message: `Rule applied (${res.message})`,
+        type: "is-warning",
+        duration: 3000,
+      });
+    }
+  } catch (error) {
+    console.error("Failed to save merchant rule:", error);
+    toast.toast({
+      message: `Failed to save rule: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+      type: "is-danger",
+      duration: 5000,
+    });
+  }
+
+  const next = predictionSession.nextUnresolved();
+  if (next && next.rowIndex != null) {
+    selectSourceRow(next.rowIndex, next.helperInvocationIndex);
+  } else {
+    selectedSourceRowIndex = null;
+    mobileInspectorOpen = false;
+  }
+}
+
+function confirmNextReview() {
+  if (selectedSourceRowIndex == null || !selectedPrediction) {
+    const next = predictionSession.nextUnresolved();
+    if (next && next.rowIndex != null) {
+      selectSourceRow(next.rowIndex, next.helperInvocationIndex);
+    }
+    return;
+  }
+
+  predictionSession.confirmPrediction(
+    selectedSourceRowIndex,
+    selectedPrediction.prefix,
+    selectedPrediction.account,
+    selectedPrediction.helperInvocationIndex,
+  );
+  predictionTick += 1;
+
+  const next = predictionSession.nextUnresolved(
+    selectedSourceRowIndex,
+    selectedPrediction.helperInvocationIndex,
+    selectedPrediction.prefix,
+  );
+
+  if (next && next.rowIndex != null) {
+    selectSourceRow(next.rowIndex, next.helperInvocationIndex);
+  } else {
+    selectedSourceRowIndex = null;
+    mobileInspectorOpen = false;
+    toast.toast({
+      message: "All transactions reviewed!",
+      type: "is-success",
+      duration: 3000,
+    });
   }
 }
 
@@ -490,7 +630,11 @@ function onSelectTemplate(template: ImportTemplate) {
 }
 
 function openSaveModal() {
-  if (!isEmpty(preview)) {
+  if (isEmpty(preview)) return;
+  const unresolvedRows = predictionSession.unresolvedRows();
+  if (unresolvedRows.length > 0) {
+    showReviewWarningModal = true;
+  } else {
     showFileModal = true;
   }
 }
@@ -736,7 +880,9 @@ function copyToClipboard() {
                 <PredictionReviewBar
                   counts={predictionCounts}
                   filter={predictionFilter}
+                  progress={reviewProgress}
                   onFilter={(next) => (predictionFilter = next)}
+                  onReviewNext={confirmNextReview}
                 />
               </div>
             {/if}
@@ -786,6 +932,7 @@ function copyToClipboard() {
                           <PredictionRowBadge
                             confidence={predictionReviewFailed ? null : summaryForRow(ri)?.confidence}
                             possibleTransfer={predictionReviewFailed ? false : summaryForRow(ri)?.possibleTransfer}
+                            resolved={predictionReviewFailed ? false : summaryForRow(ri)?.resolved}
                           />
                         </th>
                         {#each row as cell}
@@ -800,10 +947,17 @@ function copyToClipboard() {
           </div>
 
           {#if !predictionReviewFailed && selectedPrediction}
-            <div class="max-h-[280px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
+            <div class="max-h-[300px] shrink-0 overflow-y-auto border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] max-[860px]:hidden">
               <PredictionDetail
                 result={selectedPrediction}
+                input={selectedInput}
                 accounts={predictionSession.index?.accounts || []}
+                queueIndex={queuePosition?.index}
+                queueTotal={queuePosition?.total}
+                similarCount={similarCount}
+                rowPredictions={selectedRowPredictions}
+                onSelectPrediction={(p) => (selectedInvocationIndex = p.helperInvocationIndex)}
+                reviewStatus={selectedReviewState?.status}
                 onOverride={overrideSelected}
                 onApplySimilar={applySimilar}
                 onAlwaysUse={alwaysUseMerchant}
@@ -928,7 +1082,14 @@ function copyToClipboard() {
     {#if selectedPrediction}
       <PredictionDetail
         result={selectedPrediction}
+        input={selectedInput}
         accounts={predictionSession.index?.accounts || []}
+        queueIndex={queuePosition?.index}
+        queueTotal={queuePosition?.total}
+        similarCount={similarCount}
+        rowPredictions={selectedRowPredictions}
+        onSelectPrediction={(p) => (selectedInvocationIndex = p.helperInvocationIndex)}
+        reviewStatus={selectedReviewState?.status}
         onOverride={overrideSelected}
         onApplySimilar={applySimilar}
         onAlwaysUse={alwaysUseMerchant}
@@ -942,6 +1103,60 @@ function copyToClipboard() {
     {/if}
   {/snippet}
 </Drawer>
+
+<!-- SAFE-SAVE WARNING DIALOG -->
+<Dialog
+  bind:open={showReviewWarningModal}
+  title="Unreviewed Transactions"
+  onclose={() => (showReviewWarningModal = false)}
+>
+  {#snippet children()}
+    <div class="space-y-3 py-2 text-sm text-[var(--paisa-text-secondary)]">
+      <p>
+        There {reviewProgress.remaining === 1 ? "is" : "are"}
+        <strong class="font-semibold text-[var(--paisa-text-primary)]">
+          {reviewProgress.remaining} {reviewProgress.remaining === 1 ? "transaction" : "transactions"}
+        </strong>
+        that still require review (unresolved low-confidence or transfer predictions).
+      </p>
+      <p class="text-xs text-[var(--paisa-text-muted)]">
+        You can return to review and categorize them, or proceed to save the ledger preview anyway.
+      </p>
+    </div>
+  {/snippet}
+  {#snippet footer({ close })}
+    <div class="flex w-full items-center justify-between gap-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        onclick={() => {
+          close();
+          const next = predictionSession.nextUnresolved();
+          if (next && next.rowIndex != null) {
+            selectSourceRow(next.rowIndex, next.helperInvocationIndex);
+            if (typeof window !== "undefined" && window.innerWidth <= 860) {
+              mobileInspectorOpen = true;
+            }
+          }
+        }}
+      >
+        <i class="fas fa-arrow-left mr-1.5 text-xs"></i>
+        Back to Review
+      </Button>
+      <Button
+        variant="primary"
+        size="sm"
+        onclick={() => {
+          close();
+          showFileModal = true;
+        }}
+      >
+        Continue Saving
+        <i class="fas fa-arrow-right ml-1.5 text-xs"></i>
+      </Button>
+    </div>
+  {/snippet}
+</Dialog>
 
 <!-- TEMPLATE EDITOR DRAWER -->
 <TemplateEditorDrawer

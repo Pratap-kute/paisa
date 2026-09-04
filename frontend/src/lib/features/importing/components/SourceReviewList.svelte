@@ -21,6 +21,7 @@ interface Props {
     rowIndex: number;
     confidence: Confidence;
     possibleTransfer: boolean;
+    resolved?: boolean;
     results: PredictionResult[];
   }>;
   selectedSourceRowIndex: number | null;
@@ -51,6 +52,7 @@ interface ParsedReviewItem {
   account: string;
   confidence: Confidence | null;
   possibleTransfer: boolean;
+  resolved: boolean;
   isVisible: boolean;
 }
 
@@ -132,6 +134,7 @@ function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
     account,
     confidence: summary?.confidence || null,
     possibleTransfer: summary?.possibleTransfer || false,
+    resolved: summary?.resolved ?? false,
     isVisible,
   };
 }
@@ -218,6 +221,7 @@ function indicatorClass(
                 <PredictionRowBadge
                   confidence={item.confidence}
                   possibleTransfer={item.possibleTransfer}
+                  resolved={item.resolved}
                 />
               </div>
             </div>

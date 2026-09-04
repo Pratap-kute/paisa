@@ -134,10 +134,17 @@ type MerchantRule struct {
 
 func (r MerchantRule) MerchantNames() []string {
 	if len(r.Merchants) > 0 {
-		return r.Merchants
+		res := make([]string, 0, len(r.Merchants))
+		for _, m := range r.Merchants {
+			trimmed := strings.TrimSpace(m)
+			if trimmed != "" {
+				res = append(res, trimmed)
+			}
+		}
+		return res
 	}
-	if r.Merchant != "" {
-		return []string{r.Merchant}
+	if trimmed := strings.TrimSpace(r.Merchant); trimmed != "" {
+		return []string{trimmed}
 	}
 	return nil
 }
@@ -183,10 +190,11 @@ type Config struct {
 }
 
 var (
-	configMu   sync.RWMutex
-	config     Config
-	configPath string
-	location   *time.Location
+	configMu      sync.RWMutex
+	configWriteMu sync.Mutex
+	config        Config
+	configPath    string
+	location      *time.Location
 )
 
 var defaultConfig = Config{
@@ -278,6 +286,21 @@ func init() {
 	schema = c.MustCompile("schema.json")
 }
 
+func MutateConfig(fn func(cfg *Config) error) error {
+	configWriteMu.Lock()
+	defer configWriteMu.Unlock()
+
+	currentConfig := GetConfig()
+	if err := fn(&currentConfig); err != nil {
+		return err
+	}
+	content, err := yaml.Marshal(currentConfig)
+	if err != nil {
+		return err
+	}
+	return saveConfigLocked(content)
+}
+
 func SaveConfigObject(config Config) error {
 	content, err := yaml.Marshal(config)
 	if err != nil {
@@ -330,6 +353,12 @@ func atomicWriteFile(filename string, data []byte, perm os.FileMode) error {
 }
 
 func SaveConfig(content []byte) error {
+	configWriteMu.Lock()
+	defer configWriteMu.Unlock()
+	return saveConfigLocked(content)
+}
+
+func saveConfigLocked(content []byte) error {
 	var configJSON any
 	err := yaml.Unmarshal(content, &configJSON)
 	if err != nil {
@@ -643,4 +672,98 @@ func TimeZone() *time.Location {
 	}
 
 	return time.Local
+}
+
+func UpsertMerchantRule(merchant, account, prefix string) (*MerchantRule, error) {
+	normMerchant := strings.TrimSpace(merchant)
+	if normMerchant == "" {
+		return nil, fmt.Errorf("merchant cannot be empty")
+	}
+
+	normAccount := strings.TrimSpace(account)
+	if normAccount == "" {
+		return nil, fmt.Errorf("account cannot be empty")
+	}
+
+	normPrefix := strings.TrimSpace(prefix)
+	if normPrefix != "" {
+		cleanPrefix := strings.TrimSuffix(normPrefix, ":")
+		if !strings.HasPrefix(strings.ToLower(normAccount), strings.ToLower(cleanPrefix)+":") && !strings.EqualFold(normAccount, cleanPrefix) {
+			normAccount = cleanPrefix + ":" + strings.TrimPrefix(normAccount, ":")
+		}
+	}
+
+	var res MerchantRule
+	err := MutateConfig(func(cfg *Config) error {
+		rules := make([]MerchantRule, 0, len(cfg.Prediction.MerchantRules))
+		var targetIndex = -1
+
+		for _, rule := range cfg.Prediction.MerchantRules {
+			allMerchants := rule.MerchantNames()
+			if strings.EqualFold(rule.Account, normAccount) {
+				if targetIndex == -1 {
+					rule.Account = normAccount
+					rule.Merchant = ""
+					rule.Merchants = allMerchants
+					rules = append(rules, rule)
+					targetIndex = len(rules) - 1
+				} else {
+					for _, m := range allMerchants {
+						exists := false
+						for _, em := range rules[targetIndex].Merchants {
+							if strings.EqualFold(em, m) {
+								exists = true
+								break
+							}
+						}
+						if !exists {
+							rules[targetIndex].Merchants = append(rules[targetIndex].Merchants, m)
+						}
+					}
+				}
+			} else {
+				filtered := make([]string, 0, len(allMerchants))
+				for _, m := range allMerchants {
+					if !strings.EqualFold(m, normMerchant) {
+						filtered = append(filtered, m)
+					}
+				}
+				if len(filtered) > 0 {
+					rules = append(rules, MerchantRule{
+						Account:   rule.Account,
+						Merchants: filtered,
+					})
+				}
+			}
+		}
+
+		if targetIndex == -1 {
+			newRule := MerchantRule{
+				Account:   normAccount,
+				Merchants: []string{normMerchant},
+			}
+			rules = append(rules, newRule)
+			targetIndex = len(rules) - 1
+		} else {
+			exists := false
+			for _, m := range rules[targetIndex].Merchants {
+				if strings.EqualFold(m, normMerchant) {
+					exists = true
+					break
+				}
+			}
+			if !exists {
+				rules[targetIndex].Merchants = append(rules[targetIndex].Merchants, normMerchant)
+			}
+		}
+
+		cfg.Prediction.MerchantRules = rules
+		res = rules[targetIndex]
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

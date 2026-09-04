@@ -449,6 +449,24 @@ export interface DtoLinkResponse {
   value?: number;
 }
 
+export interface DtoMerchantRuleResponse {
+  account?: string;
+  merchant?: string;
+  merchants?: string[];
+}
+
+export interface DtoMerchantRuleSaveResponse {
+  message?: string;
+  rule?: DtoMerchantRuleResponse;
+  saved?: boolean;
+}
+
+export interface DtoMerchantRuleUpsertRequest {
+  account?: string;
+  merchant?: string;
+  prefix?: string;
+}
+
 export interface DtoNetworthResponse {
   networthTimeline?: DtoNetworthTimelineItemResponse[];
   xirr?: number;
@@ -1694,6 +1712,32 @@ export class Api<SecurityDataType extends unknown> {
         path: `/prediction/history`,
         method: "GET",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Upserts a merchant to account rule in paisa.yaml under prediction.merchant_rules. Returns 409 in readonly mode.
+     *
+     * @tags Predictions
+     * @name UpsertMerchantRule
+     * @summary Add or update a merchant prediction rule
+     * @request POST:/prediction/merchant-rule
+     * @secure
+     */
+    upsertMerchantRule: (
+      request: DtoMerchantRuleUpsertRequest,
+      params: RequestParams = {},
+    ) =>
+      this.http.request<
+        DtoMerchantRuleSaveResponse,
+        DtoErrorResponse | DtoMerchantRuleSaveResponse
+      >({
+        path: `/prediction/merchant-rule`,
+        method: "POST",
+        body: request,
+        secure: true,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
