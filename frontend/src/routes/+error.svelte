@@ -3,11 +3,11 @@ import { page } from "$app/stores";
 </script>
 
 <div
-  class="flex min-h-screen items-center justify-center bg-[var(--paisa-background)] p-6">
+  class="flex min-h-screen items-center justify-center bg-[var(--paisa-canvas)] p-6">
   <div class="w-full max-w-lg">
     {#if $page.status === 404 || $page.error?.status === 404 || $page.error?.message === "Not found"}
-      <div class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)] bg-[var(--paisa-surface)]">
-        <div class="bg-[var(--paisa-danger)] px-4 py-3 text-sm font-semibold text-white">
+      <div class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)] bg-[var(--paisa-surface)]">
+        <div class="bg-[var(--paisa-negative)] px-4 py-3 text-sm font-semibold text-white">
           Page not found
         </div>
         <div class="space-y-3 p-4 text-sm text-[var(--paisa-foreground)]">
@@ -20,8 +20,8 @@ import { page } from "$app/stores";
         </div>
       </div>
     {:else}
-      <div class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)] bg-[var(--paisa-surface)]">
-        <div class="bg-[var(--paisa-danger)] px-4 py-3 text-sm font-semibold text-white">
+      <div class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)] bg-[var(--paisa-surface)]">
+        <div class="bg-[var(--paisa-negative)] px-4 py-3 text-sm font-semibold text-white">
           Something Went Wrong
         </div>
         <div class="space-y-3 p-4 text-sm text-[var(--paisa-foreground)]">

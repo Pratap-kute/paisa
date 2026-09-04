@@ -127,7 +127,7 @@ $effect(() => {
 >
   {#snippet children()}
       <!-- HEADER -->
-      <div class="flex shrink-0 items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-3">
+      <div class="flex shrink-0 items-center justify-between border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
         <div class="flex min-w-0 items-center gap-2.5">
           <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--paisa-primary)]/10 text-[var(--paisa-primary)]">
             <i class="fas fa-code text-sm"></i>
@@ -173,7 +173,7 @@ $effect(() => {
 
       <!-- CHEATSHEET / HELPER PANEL -->
       {#if showCheatsheet}
-        <div class="shrink-0 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] p-3 text-xs">
+        <div class="shrink-0 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3 text-xs">
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <!-- Available Columns -->
             <div class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-2.5">
@@ -263,7 +263,7 @@ $effect(() => {
       </div>
 
       <!-- FOOTER ACTIONS -->
-      <div class="flex shrink-0 items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-3">
+      <div class="flex shrink-0 items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
         <div class="flex items-center gap-2">
           {#if !isBuiltin && selectedTemplate}
             <Button

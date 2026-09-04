@@ -172,7 +172,7 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
                     <th class="px-3.5 py-2.5">Holding Account</th>
                     <th class="px-3.5 py-2.5">Tax Category</th>
                     <th class="px-3.5 py-2.5 text-right">Harvestable Units</th>
@@ -194,7 +194,7 @@ onMount(async () => {
                         {restName(h.account)}
                       </td>
                       <td class="whitespace-nowrap px-3.5 py-2.5">
-                        <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+                        <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
                           {h.tax_category}
                         </span>
                       </td>

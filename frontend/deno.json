@@ -7,8 +7,9 @@
     "build:watch": "deno run -A npm:vite build --watch",
 
     "audit": "deno audit --level=moderate",
-    "check": "deno task architecture && deno task typecheck",
+    "check": "deno task architecture && deno task ui:spec-check && deno task typecheck",
     "architecture": "deno test --allow-read scripts/check_architecture_test.ts && deno run --allow-read scripts/check_architecture.ts",
+    "ui:spec-check": "deno test --allow-read scripts/check_ui_spec_test.ts && deno run --allow-read scripts/check_ui_spec.ts",
     "check:tooling": "deno run -A scripts/check.ts --tooling",
     "format": "deno fmt --unstable-component",
     "lint": "deno lint",

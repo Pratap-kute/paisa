@@ -284,11 +284,11 @@ async function createFile(destinationFile: string) {
         {#if $sheetEditorState.errors.length > 0}
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-danger-light)] px-2.5 py-0.5 text-xs font-semibold text-[var(--paisa-danger)] transition-colors hover:bg-[var(--paisa-danger)] hover:text-[var(--paisa-text-inverse)]"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-negative-subtle)] px-2.5 py-0.5 text-xs font-semibold text-[var(--paisa-negative)] transition-colors hover:bg-[var(--paisa-negative)] hover:text-[var(--paisa-text-inverse)]"
             onclick={() => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
             title="Click to jump to error"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-danger)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-negative)]"></span>
             <span>{$sheetEditorState.errors.length} error(s)</span>
           </button>
         {/if}
@@ -448,7 +448,7 @@ async function createFile(destinationFile: string) {
 
           <!-- Live Calculated Evaluation Results Pane -->
           <div
-            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
+            class="sheet-result w-56 sm:w-64 md:w-72 border-l border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
           >
             {#each $sheetEditorState.results as result, i}
               <div
@@ -459,7 +459,7 @@ async function createFile(destinationFile: string) {
                 <div
                   title={result.result}
                   class="paisa-truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
-                    ? 'font-bold text-[var(--paisa-danger)]'
+                    ? 'font-bold text-[var(--paisa-negative)]'
                     : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
                     ? 'font-bold text-[var(--paisa-text-primary)]'
                     : ''} {result.underline ? 'underline' : ''}"

@@ -83,7 +83,7 @@ onMount(async () => {
         {#each interests as interest (interest.account)}
           {@const summary = interestSummary(interest)}
           <div class="grid grid-cols-1 gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-3 md:grid-cols-[220px_minmax(0,1fr)]">
-            <table class="w-full text-xs">
+            <table class="w-full text-xs tabular-nums">
               <tbody>
                 <tr><th class="py-1 text-left">Account</th><td class="py-1 text-right font-semibold">{summary.label}</td></tr>
                 <tr><th class="py-1 text-left">Loan Drawn</th><td class="py-1 text-right">{formatCurrency(summary.drawn)}</td></tr>

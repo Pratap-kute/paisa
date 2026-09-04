@@ -138,7 +138,7 @@ function formatTime(time: any): string {
         <div class="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'all' ? 'bg-[var(--paisa-brand-primary)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'all' ? 'bg-[var(--paisa-primary)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-raised)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
             onclick={() => (selectedLevel = "all")}
           >
             <span>All</span>
@@ -148,7 +148,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'info' ? 'bg-[var(--paisa-info)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'info' ? 'bg-[var(--paisa-primary)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-raised)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
             onclick={() => (selectedLevel = "info")}
           >
             <span>Info</span>
@@ -158,7 +158,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'warning' ? 'bg-[var(--paisa-warning)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'warning' ? 'bg-[var(--paisa-warning)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-raised)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
             onclick={() => (selectedLevel = "warning")}
           >
             <span>Warning</span>
@@ -168,7 +168,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'error' ? 'bg-[var(--paisa-danger)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'error' ? 'bg-[var(--paisa-negative)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-raised)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
             onclick={() => (selectedLevel = "error")}
           >
             <span>Error</span>
@@ -184,7 +184,7 @@ function formatTime(time: any): string {
             type="text"
             bind:value={searchQuery}
             placeholder="Search logs, routes, IPs..."
-            class="w-full rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] py-1.5 pl-8 pr-3 text-xs text-[var(--paisa-text-primary)] placeholder-[var(--paisa-text-muted)] transition-colors focus:border-[var(--paisa-brand-primary)] focus:bg-[var(--paisa-surface)] focus:outline-none"
+            class="w-full rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] py-1.5 pl-8 pr-3 text-xs text-[var(--paisa-text-primary)] placeholder-[var(--paisa-text-muted)] transition-colors focus:border-[var(--paisa-primary)] focus:bg-[var(--paisa-surface)] focus:outline-none"
           />
           {#if searchQuery}
             <button
@@ -205,7 +205,7 @@ function formatTime(time: any): string {
       class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-sm"
     >
       <!-- Header Row -->
-      <div class="flex min-w-[950px] items-center border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+      <div class="flex min-w-[950px] items-center border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
         <div class="w-[155px] shrink-0">Timestamp</div>
         <div class="w-[75px] shrink-0">Level</div>
         <div class="w-[420px] shrink-0">Message</div>
@@ -255,7 +255,7 @@ function formatTime(time: any): string {
                   class="paisa-truncate min-w-0 flex-1 text-[0.725rem] text-[var(--paisa-muted-foreground)]"
                 >
                   {#each Object.entries(fields) as [key, value]}
-                    <span class="mr-2 inline-flex items-center rounded bg-[var(--paisa-surface-2)] px-1.5 py-0.5 border border-[var(--paisa-border-subtle)]">
+                    <span class="mr-2 inline-flex items-center rounded bg-[var(--paisa-surface-raised)] px-1.5 py-0.5 border border-[var(--paisa-border-subtle)]">
                       <span class="text-[var(--paisa-text-secondary)]">{key}:</span>
                       <span class="ml-1 font-semibold text-[var(--paisa-text-primary)]">{value}</span>
                     </span>

@@ -63,7 +63,7 @@ function gainClass(value: number) {
           <span class="text-base font-semibold text-[var(--paisa-foreground)]">
             {restName(harvestable.account)}
           </span>
-          <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+          <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
             {harvestable.tax_category}
           </span>
         </div>
@@ -78,7 +78,7 @@ function gainClass(value: number) {
     <!-- Simulator & Progress Block -->
     <div class="grid grid-cols-1 gap-4 bg-[var(--paisa-surface-card)] p-4 lg:grid-cols-12">
       <!-- Interactive Redemption Simulator -->
-      <div class="flex flex-col gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-3.5 lg:col-span-7">
+      <div class="flex flex-col gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3.5 lg:col-span-7">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
             Redemption Simulator
@@ -137,7 +137,7 @@ function gainClass(value: number) {
       </div>
 
       <!-- Holding Stats & Progress Bar -->
-      <div class="flex flex-col justify-between gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-3.5 lg:col-span-5">
+      <div class="flex flex-col justify-between gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3.5 lg:col-span-5">
         <div>
           <div class="mb-1.5 flex items-center justify-between text-xs font-semibold">
             <span class="text-[var(--paisa-positive)]">Harvestable ({formatFloat(percentage)}%)</span>
@@ -174,7 +174,7 @@ function gainClass(value: number) {
     <div class="w-full overflow-x-auto">
       <table class="w-full min-w-[900px] border-collapse text-sm">
         <thead>
-          <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+          <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
             <th class="px-3.5 py-2.5">Purchase Date</th>
             <th class="px-3.5 py-2.5 text-right">Units</th>
             <th class="px-3.5 py-2.5 text-right">Purchase Cost</th>

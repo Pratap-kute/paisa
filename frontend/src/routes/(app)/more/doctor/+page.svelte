@@ -177,7 +177,7 @@ function levelVariant(
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {#each diagnosticChecks as check}
             <div class="flex items-start gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] p-3.5 shadow-sm">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-2)] text-[var(--paisa-brand-primary)]">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-brand-primary)]">
                 <i class={check.icon}></i>
               </div>
               <div class="min-w-0 flex-1">
@@ -218,7 +218,7 @@ function levelVariant(
                 <div class="pt-2 text-xs text-[var(--paisa-text-secondary)]">
                   <div class="leading-relaxed">{@html issue.description}</div>
                   {#if issue.details}
-                    <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-2.5 font-mono text-[0.75rem] text-[var(--paisa-text-primary)]">
+                    <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-2.5 font-mono text-[0.75rem] text-[var(--paisa-text-primary)]">
                       {@html issue.details}
                     </div>
                   {/if}

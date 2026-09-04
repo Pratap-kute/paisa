@@ -466,23 +466,23 @@ let gridColsClass = $derived.by(() => {
         {#if $editorState.errors.length > 0}
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-danger-light)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-danger)] transition-colors hover:bg-[var(--paisa-danger)] hover:text-[var(--paisa-text-inverse)]"
+            class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-[var(--paisa-negative-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-negative)] transition-colors hover:bg-[var(--paisa-negative)] hover:text-[var(--paisa-text-inverse)]"
             onclick={() => {
               if (editor) moveToLine(editor, $editorState.errors[0].line_from, true);
             }}
             title="Click to jump to error line"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-danger)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-negative)]"></span>
             <span
               >{$editorState.errors.length} error{$editorState.errors.length > 1 ? "s" : ""}</span
             >
           </button>
         {:else}
           <div
-            class="inline-flex items-center gap-2 rounded-full border border-[rgba(34,197,94,0.2)] bg-[var(--paisa-success-light)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-success)]"
+            class="inline-flex items-center gap-2 rounded-full border border-[rgba(34,197,94,0.2)] bg-[var(--paisa-positive-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-positive)]"
             title="Ledger syntax is valid"
           >
-            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-success)]"></span>
+            <span class="h-1.5 w-1.5 rounded-full bg-[var(--paisa-positive)]"></span>
             <span>Valid</span>
           </div>
         {/if}

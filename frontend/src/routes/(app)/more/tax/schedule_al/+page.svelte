@@ -69,7 +69,7 @@ onMount(async () => {
                   <td class="px-3 py-2.5">{entry.section.code}</td>
                   <td class="px-3 py-2.5">{entry.section.section}</td>
                   <td class="px-3 py-2.5">{entry.section.details}</td>
-                  <td class="px-3 py-2.5 text-right font-semibold">{formatCurrency(entry.amount)}</td>
+                  <td class="px-3 py-2.5 text-right font-semibold tabular-nums">{formatCurrency(entry.amount)}</td>
                 </tr>
               {/each}
             </tbody>
@@ -77,7 +77,7 @@ onMount(async () => {
               <tr class="bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-foreground)]">
                 <td class="px-3 py-2.5" colspan="2"></td>
                 <th class="px-3 py-2.5 text-left" scope="row">Total</th>
-                <td class="px-3 py-2.5 text-right" data-testid="schedule-al-total">{formatCurrency(total)}</td>
+                <td class="px-3 py-2.5 text-right tabular-nums" data-testid="schedule-al-total">{formatCurrency(total)}</td>
               </tr>
             </tfoot>
           </table>

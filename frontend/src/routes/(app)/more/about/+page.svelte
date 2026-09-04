@@ -135,7 +135,7 @@ function externalLink(url: string) {
           <div class="flex shrink-0 flex-col items-center gap-2 md:items-end">
             <button
               type="button"
-              class="inline-flex cursor-pointer items-center gap-2 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-3 py-1.5 text-xs font-semibold text-[var(--paisa-text-primary)] transition-colors hover:border-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)]"
+              class="inline-flex cursor-pointer items-center gap-2 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-3 py-1.5 text-xs font-semibold text-[var(--paisa-text-primary)] transition-colors hover:border-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)]"
               onclick={() => externalLink("https://github.com/Pratap-kute/paisa")}
             >
               <i class="fa-brands fa-github"></i>
@@ -170,7 +170,7 @@ function externalLink(url: string) {
                     <i class="{item.icon} w-4 text-center text-[var(--paisa-text-muted)] group-hover:text-[var(--paisa-brand-primary)]"></i>
                     <span>{item.name}</span>
                   </div>
-                  <span class="inline-flex items-center rounded bg-[var(--paisa-surface-2)] px-1.5 py-0.5 text-[0.6875rem] font-mono text-[var(--paisa-text-secondary)] border border-[var(--paisa-border-subtle)]">
+                  <span class="inline-flex items-center rounded bg-[var(--paisa-surface-raised)] px-1.5 py-0.5 text-[0.6875rem] font-mono text-[var(--paisa-text-secondary)] border border-[var(--paisa-border-subtle)]">
                     {item.badge}
                   </span>
                 </div>
@@ -201,17 +201,17 @@ function externalLink(url: string) {
             <div class="flex items-center justify-between">
               <span>Command Palette</span>
               <kbd
-                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + K / ⌘K</kbd>
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + K / ⌘K</kbd>
             </div>
             <div class="flex items-center justify-between">
               <span>Save File in Editor</span>
               <kbd
-                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + S / ⌘S</kbd>
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + S / ⌘S</kbd>
             </div>
             <div class="flex items-center justify-between">
               <span>Format Journal</span>
               <kbd
-                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + Shift + I</kbd>
+                class="rounded border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-1.5 py-0.5 font-mono text-[0.6875rem] text-[var(--paisa-text-primary)]">Ctrl + Shift + I</kbd>
             </div>
           </div>
         </Card>

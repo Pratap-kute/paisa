@@ -158,7 +158,7 @@ function composition(point: ExpenseHeatmapData["points"][number]) {
 }
 
 .paisa-yearly-expense-month:not(.paisa-yearly-expense-month-active) {
-  background: var(--paisa-surface-subtle);
+  background: var(--paisa-surface-raised);
 }
 
 .paisa-yearly-expense-month-zero {

@@ -192,7 +192,7 @@ onMount(async () => {
                   })}
                 </span>
                 <span
-                  class="shrink-0 font-semibold text-[var(--paisa-text-primary)]"
+                  class="shrink-0 font-semibold tabular-nums text-[var(--paisa-text-primary)]"
                   >{formatCurrency(posting.amount)}</span
                 >
               </span>
@@ -213,7 +213,7 @@ onMount(async () => {
               <span class="text-xs text-[var(--paisa-text-muted)]"
                 >Investment</span
               >
-              <span class="font-semibold text-[var(--paisa-foreground)]"
+              <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
                 >{formatCurrency(overview.investmentAmount)}</span
               >
             </div>
@@ -221,7 +221,7 @@ onMount(async () => {
               <span class="text-xs text-[var(--paisa-text-muted)]"
                 >Withdrawal</span
               >
-              <span class="font-semibold text-[var(--paisa-foreground)]"
+              <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
                 >{formatCurrency(overview.withdrawalAmount)}</span
               >
             </div>
@@ -230,7 +230,7 @@ onMount(async () => {
                 <span class="text-xs text-[var(--paisa-text-muted)]"
                   >Balance Units</span
                 >
-                <span class="font-semibold text-[var(--paisa-foreground)]"
+                <span class="font-semibold tabular-nums text-[var(--paisa-foreground)]"
                   >{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span
                 >
               </div>

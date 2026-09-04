@@ -65,27 +65,27 @@ onDestroy(() => window.clearTimeout(timer));
 }
 
 .paisa-toast.is-danger {
-  background-color: var(--paisa-negative-subtle, var(--paisa-danger-light));
+  background-color: var(--paisa-negative-subtle);
   border-color: var(--paisa-negative);
   color: var(--paisa-negative);
 }
 
 .paisa-toast.is-success {
-  background-color: var(--paisa-positive-subtle, var(--paisa-success-light));
-  border-color: var(--paisa-positive, var(--paisa-success));
-  color: var(--paisa-positive, var(--paisa-success));
+  background-color: var(--paisa-positive-subtle);
+  border-color: var(--paisa-positive);
+  color: var(--paisa-positive);
 }
 
 .paisa-toast.is-warning {
-  background-color: var(--paisa-warning-subtle, var(--paisa-warning-light));
+  background-color: var(--paisa-warning-subtle);
   border-color: var(--paisa-warning);
   color: var(--paisa-warning);
 }
 
 .paisa-toast.is-info {
-  background-color: var(--paisa-primary-subtle, var(--paisa-info-light));
-  border-color: var(--paisa-primary, var(--paisa-info));
-  color: var(--paisa-primary, var(--paisa-info));
+  background-color: var(--paisa-primary-subtle);
+  border-color: var(--paisa-primary);
+  color: var(--paisa-primary);
 }
 
 .paisa-toast-dismiss {

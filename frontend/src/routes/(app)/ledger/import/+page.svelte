@@ -88,18 +88,18 @@ let activeFileMeta = $derived.by(() => {
   if (!activeFileName) {
     return {
       icon: "fa-solid fa-file-lines",
-      color: "text-[var(--paisa-brand-primary)]",
+      color: "text-primary",
     };
   }
   const ext = activeFileName.split(".").pop()?.toLowerCase();
   if (ext === "xlsx" || ext === "xls") {
-    return { icon: "fa-solid fa-file-excel", color: "text-emerald-500" };
+    return { icon: "fa-solid fa-file-excel", color: "text-primary" };
   } else if (ext === "pdf") {
-    return { icon: "fa-solid fa-file-pdf", color: "text-rose-500" };
+    return { icon: "fa-solid fa-file-pdf", color: "text-primary" };
   } else if (ext === "csv") {
-    return { icon: "fa-solid fa-file-csv", color: "text-blue-500" };
+    return { icon: "fa-solid fa-file-csv", color: "text-primary" };
   }
-  return { icon: "fa-solid fa-file-lines", color: "text-blue-400" };
+  return { icon: "fa-solid fa-file-lines", color: "text-muted-foreground" };
 });
 let mobileInspectorOpen = $state(false);
 let predictionCounts = $state({
@@ -892,9 +892,9 @@ function copyToClipboard() {
         </div>
 
         {#if parseErrorMessage}
-          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+          <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-[var(--paisa-negative-subtle)] p-3">
             <div class="flex items-center gap-2">
-              <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+              <i class="fas fa-triangle-exclamation text-[var(--paisa-negative)]"></i>
               <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
             </div>
           </div>
@@ -975,9 +975,9 @@ function copyToClipboard() {
           {/if}
 
           {#if parseErrorMessage}
-            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-danger)]/20 bg-[var(--paisa-danger-light)] p-3">
+            <div class="m-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-[var(--paisa-negative-subtle)] p-3">
               <div class="flex items-center gap-2">
-                <i class="fas fa-triangle-exclamation text-[var(--paisa-danger)]"></i>
+                <i class="fas fa-triangle-exclamation text-[var(--paisa-negative)]"></i>
                 <div class="text-xs"><strong>Failed to parse document:</strong> {parseErrorMessage}</div>
               </div>
             </div>
@@ -1078,7 +1078,7 @@ function copyToClipboard() {
         <div class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-[var(--paisa-shadow-sm)] {mobileActiveTab === 'source' ? 'max-[860px]:hidden' : ''}">
           <div class="flex min-h-10 shrink-0 items-center justify-between gap-[var(--paisa-space-2)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] px-2.5 py-1">
             <div class="flex min-w-0 items-center gap-[var(--paisa-space-2)] text-xs font-semibold uppercase tracking-wide text-[var(--paisa-text-primary)]">
-              <i class="fas fa-file-invoice-dollar text-xs text-[var(--paisa-success)]"></i>
+              <i class="fas fa-file-invoice-dollar text-xs text-[var(--paisa-positive)]"></i>
               <span>Ledger Preview</span>
               {#if renderMetadata.generatedCount > 0}
                 <Badge variant="success" size="sm">{renderMetadata.generatedCount} generated</Badge>
@@ -1140,13 +1140,13 @@ function copyToClipboard() {
       <div class="flex shrink-0 items-center justify-between gap-[var(--paisa-space-3)] rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1 text-xs shadow-[var(--paisa-shadow-sm)]">
         <div class="flex min-w-0 items-center gap-[var(--paisa-space-3)] overflow-x-auto">
           {#if parseErrorMessage}
-            <span class="text-[var(--paisa-danger)]"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
+            <span class="text-[var(--paisa-negative)]"><i class="fas fa-circle-xmark mr-1"></i> Parse failed</span>
           {:else if loading}
             <span class="text-[var(--paisa-brand-primary)]"><i class="fas fa-spinner fa-pulse mr-1"></i> Parsing source data…</span>
           {:else if renderMetadata.generatedCount > 0}
-            <span class="text-[var(--paisa-success)]"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
+            <span class="text-[var(--paisa-positive)]"><i class="fas fa-circle-check mr-1"></i> {renderMetadata.generatedCount} generated</span>
             {#if renderMetadata.errors.length > 0}
-              <span class="text-[var(--paisa-danger)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
+              <span class="text-[var(--paisa-negative)]"><i class="fas fa-triangle-exclamation mr-1"></i> {renderMetadata.errors.length} errors</span>
             {/if}
             {#if predictionCounts.high + predictionCounts.medium + predictionCounts.review + predictionCounts.unknown > 0}
               <span class="flex items-center gap-2.5 text-[0.6875rem]">
@@ -1204,7 +1204,7 @@ function copyToClipboard() {
         onClose={() => (mobileInspectorOpen = false)}
       />
     {:else}
-      <div class="p-4 text-center text-sm text-gray-500">
+      <div class="p-4 text-center text-sm text-muted-foreground">
         Select a row from the Review or Raw Data list to inspect and override.
       </div>
     {/if}

@@ -42,7 +42,7 @@ function gainClass(value: number) {
   <div class="w-full overflow-x-auto">
     <table class="w-full min-w-[980px] border-collapse text-sm">
       <thead>
-        <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+        <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
           <th class="w-10 px-3 py-2.5 text-center"></th>
           <th class="px-3 py-2.5">Asset Account</th>
           <th class="px-3 py-2.5">Tax Category</th>
@@ -79,7 +79,7 @@ function gainClass(value: number) {
                   {cg.account}
                 </td>
                 <td class="px-3 py-2.5">
-                  <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+                  <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
                     {cg.tax_category}
                   </span>
                 </td>

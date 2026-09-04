@@ -189,7 +189,7 @@
 }
 
 .cm-editor.cm-merge-a .cm-changedLine {
-  background-color: var(--paisa-danger-light);
+  background-color: var(--paisa-negative-subtle);
 }
 
 .cm-editor.cm-merge-a .cm-changedText {
@@ -197,7 +197,7 @@
 }
 
 .cm-editor.cm-merge-b .cm-changedLine {
-  background-color: var(--paisa-success-light);
+  background-color: var(--paisa-positive-subtle);
 }
 
 .cm-editor.cm-merge-b .cm-changedText {

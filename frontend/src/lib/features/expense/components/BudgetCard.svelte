@@ -29,9 +29,9 @@ function availableStatus(
 }
 
 const statusClasses = {
-  positive: "bg-[var(--paisa-success-light)] text-[var(--paisa-success)]",
-  negative: "bg-[var(--paisa-danger-light)] text-[var(--paisa-danger)]",
-  neutral: "bg-[var(--paisa-info-light)] text-[var(--paisa-info)]",
+  positive: "bg-[var(--paisa-positive-subtle)] text-[var(--paisa-positive)]",
+  negative: "bg-[var(--paisa-negative-subtle)] text-[var(--paisa-negative)]",
+  neutral: "bg-[var(--paisa-primary-subtle)] text-[var(--paisa-primary)]",
 } as const;
 
 let tooltipContent = $derived(
@@ -132,7 +132,7 @@ let widthPercent = $derived((amount: number) =>
   {#if canShow(accountBudget)}
     <div class="relative mt-3 h-2 overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-danger)]"
+        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-negative)]"
         style="width: {widthPercent(withinBudget + rolloverUsed + overspent)}"
       ></div>
       <div
@@ -140,7 +140,7 @@ let widthPercent = $derived((amount: number) =>
         style="width: {widthPercent(withinBudget + rolloverUsed)}"
       ></div>
       <div
-        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-success)]"
+        class="absolute inset-y-0 left-0 rounded-full bg-[var(--paisa-positive)]"
         style="width: {widthPercent(withinBudget)}"
       ></div>
       <div

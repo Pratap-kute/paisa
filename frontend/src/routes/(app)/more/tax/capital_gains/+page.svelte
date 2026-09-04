@@ -213,7 +213,7 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
                     <th class="px-3 py-2.5">Financial Year</th>
                     <th class="px-3 py-2.5 text-right">Sold Amount</th>
                     <th class="px-3 py-2.5 text-right">Realized Gain</th>

@@ -210,7 +210,7 @@ function indicatorClass(
             <div class="flex min-w-0 items-baseline justify-between gap-2">
               <span class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-[var(--paisa-text-primary)]" title={item.payee}>{item.payee}</span>
               {#if item.amount}
-                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-[var(--paisa-danger)]' : 'text-[var(--paisa-text-primary)]'}">
+                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-[var(--paisa-negative)]' : 'text-[var(--paisa-text-primary)]'}">
                   {item.amount}
                 </span>
               {/if}

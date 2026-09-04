@@ -468,7 +468,7 @@ onMount(() => {
   {#snippet children()}
       <!-- SEARCH INPUT HEADER -->
       <div
-        class="flex items-center gap-3 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-3">
+        class="flex items-center gap-3 border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
         <i class="fa-solid fa-magnifying-glass text-sm text-[var(--paisa-muted-foreground)]"></i>
         <input
           id="paisa-command-palette-input"
@@ -550,7 +550,7 @@ onMount(() => {
 
       <!-- FOOTER -->
       <div
-        class="flex items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated)] px-4 py-2 text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
+        class="flex items-center justify-between border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-2 text-[0.6875rem] text-[var(--paisa-muted-foreground)]">
         <div class="flex items-center gap-3">
           <span class="flex items-center gap-1">
             <kbd

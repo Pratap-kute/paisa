@@ -17,7 +17,7 @@ function gainClass(value: number) {
 </script>
 
 <div
-  class="border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] px-4 py-3">
+  class="border-t border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-4 py-3">
   <div class="mb-2 flex items-center justify-between">
     <span
       class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
@@ -29,7 +29,7 @@ function gainClass(value: number) {
     <table class="w-full min-w-[760px] border-collapse text-xs">
       <thead>
         <tr
-          class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] text-left font-medium text-[var(--paisa-muted-foreground)]">
+          class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left font-medium text-[var(--paisa-muted-foreground)]">
           <th class="px-3 py-2">Purchase Date</th>
           <th class="px-3 py-2 text-right">Purchase Price</th>
           <th class="px-3 py-2">Sell Date</th>

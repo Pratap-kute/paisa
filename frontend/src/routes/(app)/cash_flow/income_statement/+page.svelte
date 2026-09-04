@@ -295,7 +295,7 @@ onMount(async () => {
             {/each}
           </tbody>
           <tfoot class="border-t-2 border-[var(--paisa-border-strong)]">
-            <tr class="bg-[var(--paisa-surface-default)]">
+            <tr class="bg-[var(--paisa-surface)]">
               <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Change</th>
               {#each years as y}
                 {#if yearly[y]}
@@ -309,7 +309,7 @@ onMount(async () => {
                 {/if}
               {/each}
             </tr>
-            <tr class="bg-[var(--paisa-surface-default)]">
+            <tr class="bg-[var(--paisa-surface)]">
               <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-b border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">End Balance</th>
               {#each years as y}
                 <td class="min-w-[120px] border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">
@@ -319,7 +319,7 @@ onMount(async () => {
                 </td>
               {/each}
             </tr>
-            <tr class="bg-[var(--paisa-surface-default)]">
+            <tr class="bg-[var(--paisa-surface)]">
               <th class="sticky left-0 z-10 min-w-[220px] max-w-[280px] border-r border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-2.5 text-left font-bold text-[var(--paisa-foreground)] shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Start Balance</th>
               {#each years as y}
                 <td class="min-w-[120px] bg-[var(--paisa-surface-raised)] px-3.5 py-2.5 text-right font-bold tabular-nums text-[var(--paisa-foreground)]">

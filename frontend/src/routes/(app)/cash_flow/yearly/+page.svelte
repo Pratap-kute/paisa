@@ -122,17 +122,17 @@ onMount(async () => {
   >
     {#snippet actions()}
       <div class="inline-flex flex-wrap items-center gap-[var(--paisa-space-2)] sm:hidden">
-        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5">
+        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-0.5">
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
             onclick={() => ($cashflowViewMode = "treemap")}
           >
             Breakdown
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
             onclick={() => ($cashflowViewMode = "sankey")}
           >
             Flow
@@ -168,10 +168,10 @@ onMount(async () => {
   >
     {#snippet action()}
       <div class="hidden items-center gap-[var(--paisa-space-2)] sm:inline-flex">
-        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] p-0.5" role="group" aria-label="Visualization mode">
+        <div class="inline-flex items-center rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-0.5" role="group" aria-label="Visualization mode">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'treemap' ? 'bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
             onclick={() => ($cashflowViewMode = "treemap")}
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -184,7 +184,7 @@ onMount(async () => {
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-elevated)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode === 'sankey' ? 'bg-[var(--paisa-surface-raised)] font-semibold text-[var(--paisa-text-primary)] shadow-sm' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-text-primary)]'}"
             onclick={() => ($cashflowViewMode = "sankey")}
           >
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

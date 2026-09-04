@@ -357,7 +357,7 @@ onMount(() => {
                   <span class="text-[var(--paisa-negative)]">{recurringSummary.pastDueCount} {recurringSummary.pastDueCount === 1 ? "payment" : "payments"} past due</span>
                   {#if recurringSummary.upcomingCount > 0}<span> · </span>{/if}
                 {/if}
-                {#if recurringSummary.upcomingCount > 0}<span>{formatCurrency(recurringSummary.upcomingAmount)} due in the next {recurringSummary.horizonDays} days</span>{/if}
+                {#if recurringSummary.upcomingCount > 0}<span class="tabular-nums font-semibold text-[var(--paisa-foreground)]">{formatCurrency(recurringSummary.upcomingAmount)}</span><span> due in the next {recurringSummary.horizonDays} days</span>{/if}
               </p>
             {/if}
             <div class="divide-y divide-[var(--paisa-border-subtle)]">

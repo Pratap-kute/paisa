@@ -112,7 +112,7 @@ const MONTHS = [
         onclick={() => (open = false)}
       ></button>
       <div
-        class="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full z-50 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-elevated,var(--paisa-surface))] shadow-[var(--paisa-shadow-lg)]"
+        class="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full z-50 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised,var(--paisa-surface))] shadow-[var(--paisa-shadow-lg)]"
         role="listbox"
       >
         <div class="border-b border-[var(--paisa-border-subtle)] p-2">

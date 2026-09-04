@@ -432,7 +432,7 @@ const isResolved = $derived(
   font-family: var(--paisa-font-mono, monospace);
 
   &.is-debit {
-    color: var(--paisa-danger, #ef4444);
+    color: var(--paisa-negative, #ef4444);
   }
 }
 
@@ -548,7 +548,7 @@ const isResolved = $derived(
 
   &:hover:not(:disabled) {
     background-color: var(--paisa-surface-hover, #f8fafc);
-    border-color: var(--paisa-border-focus, #3b82f6);
+    border-color: var(--paisa-primary, #3b82f6);
   }
 
   &.is-disabled,
