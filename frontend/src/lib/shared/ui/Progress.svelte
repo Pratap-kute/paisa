@@ -32,22 +32,22 @@ let remainder = $derived(computed.remainder);
     </div>
   {/each}
 
-  <div class="relative">
+  <div>
+    {#if !small && showPercent}
+      <div class="mb-1.5 flex items-center justify-between gap-3">
+        <span class="text-xs font-medium uppercase tracking-wide text-[var(--paisa-muted-foreground)]">Progress</span>
+        <span class="rounded-full bg-[var(--paisa-positive-subtle)] px-2 py-0.5 text-xs font-semibold tabular-nums text-[var(--paisa-positive)]">
+          {formatPercentage(progressPercent / 100, 2)}
+        </span>
+      </div>
+    {/if}
     <progress
-      class="paisa-progress mb-1 {small ? 'paisa-progress-sm' : 'paisa-progress-lg'}"
+      class="paisa-progress {small ? 'paisa-progress-sm' : 'paisa-progress-lg'}"
       value={remainder}
       max="100"
     ></progress>
     {#if small && showPercent}
       <span class="text-sm font-semibold text-[var(--paisa-foreground)]"
-        >{formatPercentage(progressPercent / 100, 2)}</span
-      >
-    {/if}
-
-    {#if !small && showPercent}
-      <span
-        class="progress-percent absolute top-1/2 -translate-y-1/2 text-sm font-semibold text-[var(--paisa-foreground)] {remainder < 10 ? 'less-than-10' : ''}"
-        style={remainder > 10 ? `right: ${100 - remainder}%;` : `left: ${remainder}%;`}
         >{formatPercentage(progressPercent / 100, 2)}</span
       >
     {/if}
@@ -91,10 +91,5 @@ let remainder = $derived(computed.remainder);
 .paisa-progress::-moz-progress-bar {
   background-color: var(--paisa-positive);
   border-radius: var(--paisa-radius-full);
-}
-
-.progress-percent.less-than-10 {
-  left: 0.5rem;
-  right: auto;
 }
 </style>

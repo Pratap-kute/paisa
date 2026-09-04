@@ -129,6 +129,12 @@ func SetNow(date string) {
 	nowMu.Unlock()
 }
 
+func ResetNow() {
+	nowMu.Lock()
+	now = time.Time{}
+	nowMu.Unlock()
+}
+
 func Now() time.Time {
 	nowMu.RLock()
 	defer nowMu.RUnlock()

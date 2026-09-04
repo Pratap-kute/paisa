@@ -91,7 +91,7 @@ function enrich(ts: TransactionSequence) {
   const amount = totalRecurring(ts);
   const start = transactions[0]?.date ?? now();
   let periodAvailable = false;
-  let cron: CronExprs;
+  let cron: CronExprs | undefined;
   try {
     if (ts.period != "") {
       cron = parse(prefixMinutesSeconds(ts.period), { hasSeconds: false });
@@ -111,7 +111,7 @@ function enrich(ts: TransactionSequence) {
     periodAvailable = false;
   }
 
-  if (periodAvailable) {
+  if (periodAvailable && cron) {
     const schedules = getFutureMatches(cron, {
       startAt: start.toISOString(),
       endAt: end.toISOString(),

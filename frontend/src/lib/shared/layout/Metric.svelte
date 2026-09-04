@@ -9,6 +9,7 @@ interface Props {
   secondary?: string;
   trend?: string;
   status?: Status;
+  trendStatus?: Status;
   loading?: boolean;
   class?: string;
 }
@@ -19,6 +20,7 @@ let {
   secondary,
   trend,
   status = "neutral",
+  trendStatus,
   loading = false,
   class: className = "",
 }: Props = $props();
@@ -34,7 +36,7 @@ let {
   {#if secondary || trend}
     <div class="paisa4-metric-meta">
       {#if secondary}<span>{secondary}</span>{/if}
-      {#if trend}<span class="paisa4-metric-{status}">{trend}</span>{/if}
+      {#if trend}<span class="paisa4-metric-{trendStatus || status}">{trend}</span>{/if}
     </div>
   {/if}
 </div>

@@ -1,10 +1,7 @@
 <script lang="ts">
 import { api } from "$lib/api";
-import COLORS from "$lib/shared/theme/colors";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { formatFloat } from "$lib/shared/formatters/currency";
-import { firstName, restName } from "$lib/domain/account";
-import { postingUrl } from "$lib/shared/browser/navigation";
 import type { AssetBreakdown } from "$lib/domain/assets";
 import type {
   Forecast,
@@ -16,9 +13,6 @@ import { onMount } from "svelte";
 import ARIMAPromise from "arima/async";
 import { findBreakPoints, forecast } from "$lib/domain/goals";
 import type { PageData } from "./$types";
-import { iconGlyph } from "$lib/shared/ui/icon";
-import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
-import { iconify } from "$lib/shared/ui/icon";
 import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
 import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
 import Page from "$lib/shared/layout/Page.svelte";
@@ -29,6 +23,7 @@ import Metric from "$lib/shared/layout/Metric.svelte";
 import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
 import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
 import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
+import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
 import { sortBy } from "$lib/shared/utils/collection";
 
 interface Props {
@@ -77,7 +72,7 @@ onMount(async () => {
 
   latestPostings = sortBy(postings, (p: Posting) => p.date)
     .reverse()
-    .slice(0, 100);
+    .slice(0, 12);
 
   if (yearlyExpense > 0) {
     progressPercent = (savingsTotal / targetSavings) * 100;
@@ -106,7 +101,8 @@ onMount(async () => {
 
 <Page width="fluid">
   <PageHeader
-    title="{iconGlyph(icon)} {name}"
+    title={name}
+    titleIcon={icon}
     description="Retirement goal tracking, forecast, and portfolio health"
   >
     {#snippet leading()}
@@ -151,10 +147,10 @@ onMount(async () => {
   </Section>
 
   <div
-    class="paisa-goal-detail-layout grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
+    class="paisa-goal-detail-layout grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-cols-[minmax(0,5fr)_minmax(20rem,2fr)]"
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
-      <Section title="{iconGlyph(icon)} {name} Progress">
+      <Section title="{name} Progress" titleIcon={icon}>
         <ChartFrame height="tall">
           <GoalProgressChart
             points={savingsTimeline}
@@ -184,52 +180,9 @@ onMount(async () => {
       </Section>
     </div>
 
-    <div class="paisa-goal-detail-side flex min-w-0 flex-col gap-4">
-      <Section title="Recent Postings">
-        <PostingGroup postings={latestPostings} groupFormat="MMM YYYY">
-          {#snippet children({ groupedPostings })}
-            <div>
-              {#each groupedPostings as posting}
-                <a
-                  class="paisa-posting-row mb-2 flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)]"
-                  href={postingUrl(posting)}
-                  style="border-left: 2px solid {posting.amount >= 0
-                    ? posting.account.startsWith('Income:CapitalGains')
-                      ? COLORS.tertiary
-                      : COLORS.secondary
-                    : posting.account.startsWith('Income:CapitalGains')
-                      ? COLORS.secondary
-                      : COLORS.tertiary}"
-                >
-                  <span class="flex min-w-0 items-center justify-between gap-2">
-                    <span
-                      class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-secondary)]"
-                      >{posting.payee}</span
-                    >
-                    <span
-                      class="shrink-0 text-xs text-[var(--paisa-text-muted)]"
-                      >{posting.date.format("DD MMM YYYY")}</span
-                    >
-                  </span>
-                  <span class="flex min-w-0 items-center justify-between gap-2">
-                    <span
-                      class="custom-icon min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-[var(--paisa-text-muted)]"
-                    >
-                      {iconify(restName(posting.account), {
-                        group: firstName(posting.account),
-                      })}
-                    </span>
-                    <span
-                      class="shrink-0 font-semibold text-[var(--paisa-text-primary)]"
-                      >{formatCurrency(posting.amount)}</span
-                    >
-                  </span>
-                </a>
-              {/each}
-            </div>
-          {/snippet}
-        </PostingGroup>
-      </Section>
+    <div class="paisa-goal-detail-side min-w-0 lg:sticky lg:top-20">
+      <GoalRecentPostings postings={latestPostings}
+        totalCount={postings.length} />
     </div>
   </div>
 </Page>

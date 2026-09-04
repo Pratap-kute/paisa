@@ -4,13 +4,19 @@ import { forEachMonth } from "$lib/shared/formatters/date";
 import { now } from "$lib/domain/time";
 import { forEachFinancialYear } from "$lib/shared/formatters/date";
 import type { Posting } from "$lib/domain/ledger";
-import { groupBy, mapValues, sumBy, uniq } from "es-toolkit";
+import { groupBy, mapValues, sumBy } from "es-toolkit";
 import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
 import { expenseGroup } from "$lib/features/expense/expense";
 import { maxBy, minBy } from "$lib/shared/utils/collection";
 
-function expenseGroups(postings: Posting[]) {
-  return uniq(postings.map(expenseGroup)).sort();
+export function expenseGroupsByContribution(postings: Posting[]) {
+  const totals = mapValues(
+    groupBy(postings, expenseGroup),
+    (items) => sumBy(items, (item) => item.amount),
+  );
+  return Object.keys(totals).sort((left, right) =>
+    (totals[right] ?? 0) - (totals[left] ?? 0) || left.localeCompare(right)
+  );
 }
 
 export function buildMonthlyExpenseTimelineSeries(
@@ -18,7 +24,7 @@ export function buildMonthlyExpenseTimelineSeries(
   allowedGroups: string[],
   range: { from: dayjs.Dayjs; to: dayjs.Dayjs },
 ): PeriodSeriesChartData {
-  const groups = expenseGroups(postings);
+  const groups = expenseGroupsByContribution(postings);
   const selected = allowedGroups.length ? allowedGroups : groups;
   const start = minBy(postings, (posting) => posting.date.valueOf())?.date;
   const end = maxBy(postings, (posting) => posting.date.valueOf())?.date;
@@ -59,7 +65,7 @@ export function buildMonthlyExpenseTimelineSeries(
           ...selected.filter((group) => (values[group] ?? 0) !== 0).map((
             group,
           ) => [group, values[group] ?? 0] as [string, number]),
-          ["Yearly monthly average", average],
+          ["Calendar-year monthly average", average],
         ],
       });
     });
@@ -78,7 +84,7 @@ export function buildMonthlyExpenseTimelineSeries(
       })),
       {
         key: "yearlyAverage",
-        label: "Yearly Average",
+        label: "Monthly Average",
         intent: "line" as const,
         categoryKey: "Average",
         color: "rgb(234, 88, 12)",
@@ -92,7 +98,7 @@ export function buildYearlyExpenseTimelineSeries(
   postings: Posting[],
   allowedGroups: string[],
 ): PeriodSeriesChartData {
-  const groups = expenseGroups(postings);
+  const groups = expenseGroupsByContribution(postings);
   const selected = allowedGroups.length ? allowedGroups : groups;
   const start = minBy(postings, (posting) => posting.date.valueOf())?.date;
   const end = now().startOf("month");

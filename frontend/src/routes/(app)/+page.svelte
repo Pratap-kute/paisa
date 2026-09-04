@@ -1,32 +1,16 @@
 <script lang="ts">
-import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
-import { formatFloat } from "$lib/shared/formatters/currency";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import { now } from "$lib/domain/time";
-import { postingUrl } from "$lib/shared/browser/navigation";
-import { restName } from "$lib/domain/account";
-import type { AssetBreakdown } from "$lib/domain/assets";
-import type { Networth } from "$lib/domain/assets";
+import { onMount } from "svelte";
+import dayjs from "dayjs";
+import { sumBy, take } from "es-toolkit";
+import { api } from "$lib/api";
+import type { AssetBreakdown, Networth } from "$lib/domain/assets";
 import type { Budget, CashFlow } from "$lib/domain/cash_flow";
 import type { GoalSummary } from "$lib/domain/goals_models";
-import type { Legend } from "$lib/shared/charts/types";
+import type { InsightsResult } from "$lib/domain/insights";
 import type { Posting, Transaction } from "$lib/domain/ledger";
 import type { TransactionSequence } from "$lib/domain/recurring";
-import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import Button from "$lib/shared/ui/Button.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
-import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-import { refresh } from "../../store";
+import { restName } from "$lib/domain/account";
+import { now } from "$lib/domain/time";
 import {
   enrichTrantionSequence,
   intervalText,
@@ -34,435 +18,364 @@ import {
   sortTrantionSequence,
   totalRecurring,
 } from "$lib/domain/transaction_sequence";
-import InsightsPanel from "$lib/features/insights/components/InsightsPanel.svelte";
+import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
+import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
 import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
-import type { InsightsResult } from "$lib/domain/insights";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { sumBy, take } from "es-toolkit";
-import dayjs from "dayjs";
-import { onMount } from "svelte";
 import {
-  isEmpty as isEmptyValue,
-  some,
-  sortBy,
-  values,
-} from "$lib/shared/utils/collection";
+  buildDashboardAttention,
+  buildExpensePace,
+  buildExpenseTrend,
+  buildNetWorthTrend,
+  currentExpenses,
+  summarizeBudget,
+  summarizeCash,
+  summarizeUpcomingRecurring,
+} from "$lib/features/dashboard/summary";
+import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
+import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
+import DashboardBudgetHealth from "$lib/features/dashboard/components/DashboardBudgetHealth.svelte";
+import DashboardCashAccounts from "$lib/features/dashboard/components/DashboardCashAccounts.svelte";
+import Page from "$lib/shared/layout/Page.svelte";
+import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
+import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+import Button from "$lib/shared/ui/Button.svelte";
+import Badge from "$lib/shared/ui/Badge.svelte";
+import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+import {
+  formatCurrency,
+  formatCurrencyCrude,
+  formatPercentage,
+} from "$lib/shared/formatters/currency";
+import { postingUrl } from "$lib/shared/browser/navigation";
+import { some, sortBy } from "$lib/shared/utils/collection";
+import { refresh } from "../../store";
 
-let cashflowLegends: Legend[] = $state([]);
-let month = $state(now().format("YYYY-MM"));
-let goalSummaries: GoalSummary[] = $state([]);
-let transactionSequences: TransactionSequence[] = $state([]);
+const period = now().format("YYYY-MM");
+let expenseMonth = $state(period);
+let allGoalSummaries: GoalSummary[] = $state([]);
+let allTransactionSequences: TransactionSequence[] = $state([]);
 let cashFlows: CashFlow[] = $state([]);
-let expenses: { [key: string]: Posting[] } = $state({});
-let xirr = $state(0);
+let expenses: Record<string, Posting[]> = $state({});
 let networth: Networth | undefined = $state();
 let transactions: Transaction[] = $state([]);
 let budgetsByMonth: Record<string, Budget> = $state({});
-let isEmpty = $state(false);
-let isLoading = $state(true);
-let insightsLoading = $state(true);
-let insightsResponse: InsightsResult | null = $state(null);
 let checkingBalances: Record<string, AssetBreakdown> = $state({});
+let isEmpty = $state(false);
+let dashboardLoading = $state(true);
+let dashboardFailed = $state(false);
+let insightsLoading = $state(true);
+let insightsFailed = $state(false);
+let insightsResponse: InsightsResult | null = $state(null);
 
-function hasCashFlowActivity(flows: CashFlow[]) {
-  return some(flows, (c) =>
-    c.income !== 0 ||
-    c.expenses !== 0 ||
-    c.liabilities !== 0 ||
-    c.tax !== 0 ||
-    c.investment !== 0 ||
-    c.checking !== 0 ||
-    c.balance !== 0);
-}
-
-let currentBudget = $derived(budgetsByMonth[month]);
-import { api } from "$lib/api";
-
-let selectedExpenses: Posting[] = $derived(expenses[month] || []);
-let totalExpense = $derived(sumBy(selectedExpenses, (p) => p.amount));
-let selectedExpenseBreakdownData = $derived(
+let currentPeriodExpenses = $derived(currentExpenses(expenses, period));
+let currentPeriodExpenseTotal = $derived(
+  sumBy(currentPeriodExpenses, (posting) => posting.amount),
+);
+let selectedExpenses = $derived(currentExpenses(expenses, expenseMonth));
+let selectedExpenseTotal = $derived(
+  sumBy(selectedExpenses, (posting) => posting.amount),
+);
+let expenseBreakdown = $derived(
   buildExpenseBreakdownComparison(selectedExpenses),
 );
-let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
 let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
-let hasSelectedExpenses = $derived(selectedExpenses.length > 0);
+let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+let cashSummary = $derived(summarizeCash(checkingBalances));
+let insightsAvailable = $derived(
+  !insightsLoading && !insightsFailed && insightsResponse !== null,
+);
+let budgetSummary = $derived(
+  summarizeBudget(
+    budgetsByMonth[period],
+    insightsResponse?.insights,
+    insightsAvailable,
+  ),
+);
+let netWorthTrend = $derived(
+  buildNetWorthTrend(networth, insightsResponse?.insights),
+);
+let expenseTrend = $derived(
+  buildExpenseTrend(
+    insightsResponse?.insights,
+    insightsResponse?.isPartial,
+    insightsResponse?.comparisonPeriod,
+  ),
+);
+let dashboardAsOf = $derived(
+  insightsResponse?.period === period && insightsResponse.asOf.isValid()
+    ? insightsResponse.asOf
+    : now(),
+);
+let visibleGoalSummaries = $derived(
+  take(
+    sortBy(allGoalSummaries, (goal) => -goal.priority),
+    3,
+  ),
+);
+let visibleTransactionSequences = $derived(take(allTransactionSequences, 5));
+let recurringSummary = $derived(
+  summarizeUpcomingRecurring(
+    allTransactionSequences,
+    dashboardAsOf,
+    cashSummary.available ? cashSummary.total : undefined,
+  ),
+);
+let expensePace = $derived(
+  buildExpensePace(
+    currentPeriodExpenseTotal,
+    period,
+    dashboardAsOf,
+    budgetSummary.configured ? budgetSummary.planned : undefined,
+  ),
+);
+let attentionItems = $derived(
+  buildDashboardAttention({
+    insights: insightsResponse?.insights,
+    recurring: recurringSummary,
+    goals: allGoalSummaries,
+    asOf: dashboardAsOf,
+    isPartial: insightsResponse?.isPartial,
+    comparisonPeriod: insightsResponse?.comparisonPeriod,
+  }),
+);
+let periodContext = $derived(
+  insightsResponse?.period === period && insightsResponse.asOf.isValid()
+    ? `${
+      dayjs(`${period}-01`).format("MMM YYYY").toUpperCase()
+    } · MTD · As of ${insightsResponse.asOf.format("D MMM")}`
+    : `${dayjs(`${period}-01`).format("MMM YYYY").toUpperCase()} · MTD`,
+);
 
-async function initDemo() {
-  await api.init.initDemoData();
-  refresh();
+function hasCashFlowActivity(flows: CashFlow[]) {
+  return some(
+    flows,
+    (flow) =>
+      flow.income !== 0 || flow.expenses !== 0 || flow.liabilities !== 0 ||
+      flow.tax !== 0 || flow.investment !== 0 || flow.checking !== 0 ||
+      flow.balance !== 0,
+  );
 }
 
-onMount(async () => {
+async function loadDashboard() {
   try {
-    const [res, insRes] = await Promise.all([
-      api.dashboard.getDashboard(),
-      api.insights.getInsights().catch(() => null),
-    ]);
-    insightsResponse = insRes ? mapInsightsResponseToDomain(insRes) : null;
+    const res = await api.dashboard.getDashboard();
     expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
     cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
-    goalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
+    allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
     budgetsByMonth =
       (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
-    transactionSequences =
-      (res.transactionSequences as unknown as TransactionSequence[]) || [];
-    networth = (res.networth?.networth as unknown as Networth) || null;
-    xirr = res.networth?.xirr || 0;
+    allTransactionSequences = sortTrantionSequence(
+      enrichTrantionSequence(
+        (res.transactionSequences as unknown as TransactionSequence[]) || [],
+      ),
+    );
+    networth = (res.networth?.networth as unknown as Networth) || undefined;
     checkingBalances =
       (res.checkingBalances?.asset_breakdowns as unknown as Record<
         string,
         AssetBreakdown
       >) || {};
     transactions = (res.transactions as unknown as Transaction[]) || [];
-
-    goalSummaries = sortBy(goalSummaries, (g) => -g.priority);
-
-    if (isEmptyValue(transactions)) {
-      isEmpty = true;
-    } else {
-      isEmpty = false;
-    }
-
-    cashflowLegends = cashFlowData.legends ?? [];
-    transactionSequences = take(
-      sortTrantionSequence(enrichTrantionSequence(transactionSequences)),
-      8,
-    );
+    isEmpty = transactions.length === 0;
+  } catch {
+    dashboardFailed = true;
   } finally {
-    isLoading = false;
+    dashboardLoading = false;
+  }
+}
+
+async function loadInsights() {
+  try {
+    insightsResponse = mapInsightsResponseToDomain(
+      await api.insights.getInsights(),
+    );
+  } catch {
+    insightsFailed = true;
+  } finally {
     insightsLoading = false;
   }
+}
+
+async function initDemo() {
+  await api.init.initDemoData();
+  refresh();
+}
+
+onMount(() => {
+  void loadDashboard();
+  void loadInsights();
 });
 </script>
 
 <Page width="analysis">
-  {#if isEmpty}
+  {#if dashboardFailed && !dashboardLoading}
+    <div class="rounded-xl p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs" data-testid="dashboard-unavailable">
+      <h2 class="text-base font-semibold text-[var(--paisa-foreground)]">Dashboard unavailable</h2>
+      <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">Your dashboard data could not be loaded. Please try again.</p>
+    </div>
+  {:else if isEmpty && !dashboardLoading}
     <div class="max-w-3xl mx-auto py-8">
       <div class="p-6 sm:p-8 rounded-xl bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
         <ZeroState item={false}>
           <div class="text-left space-y-4">
-            <p class="text-sm text-[var(--paisa-muted-foreground)]">
-              Looks like you are new here, you can either get started or look at a demo setup
-            </p>
+            <p class="text-sm text-[var(--paisa-muted-foreground)]">Looks like you are new here, you can either get started or look at a demo setup</p>
             <div>
               <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to get started</h2>
               <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2">
-                <li>
-                  Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and set your default currency and locale.
-                </li>
-                <li>
-                  Go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and start adding transactions to your journal.
-                </li>
+                <li>Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> and set your default currency and locale.</li>
+                <li>Go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> and start adding transactions.</li>
               </ol>
             </div>
             <div>
               <h2 class="text-base font-semibold text-[var(--paisa-foreground)] mb-2">I want to view a Demo</h2>
-              <ol class="list-decimal list-inside text-sm text-[var(--paisa-foreground)] space-y-1 ml-2 mb-4">
-                <li>
-                  Click the button below to load a demo setup. This will load a demo journal with relevant config.
-                </li>
-                <li>
-                  Once you are done playing around, you can go to <a href="/ledger/editor" class="text-[var(--paisa-primary)] underline">editor</a> page and select all the content and delete them.
-                </li>
-                <li>
-                  Go to <a href="/more/config" class="text-[var(--paisa-primary)] underline">configuration</a> page and click the reset to defaults button.
-                </li>
-              </ol>
-              <Button variant="primary" size="md" onclick={() => initDemo()}>Setup Demo</Button>
+              <p class="text-sm text-[var(--paisa-foreground)] mb-4">Load a demo journal with relevant configuration.</p>
+              <Button variant="primary" size="md" onclick={initDemo}>Setup Demo</Button>
             </div>
           </div>
         </ZeroState>
       </div>
     </div>
   {:else}
-    <div class="w-full flex flex-col space-y-6">
-      <!-- Header -->
-      <PageHeader
-        title="Dashboard"
-        description="Your financial position at a glance"
+    <div class="w-full flex flex-col space-y-6 min-w-0">
+      <PageHeader title="Dashboard" description="Your financial position at a glance">
+        <p class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)]">{periodContext}</p>
+      </PageHeader>
+
+      <DashboardKpiStrip
+        netWorth={networth?.balanceAmount}
+        {netWorthTrend}
+        cash={cashSummary}
+        expenses={currentPeriodExpenseTotal}
+        {expenseTrend}
+        {expensePace}
+        expenseRecorded={currentPeriodExpenses.length > 0}
+        budget={budgetSummary}
+        {period}
+        loading={dashboardLoading}
       />
 
-    <!-- Row 1: Primary Financial Metric Strip -->
-    {#if networth || isLoading}
-      <div class="py-2 mb-2">
-        <MetricStrip cols={4}>
-          <Metric
-            label="Net worth"
-            value={networth ? formatCurrency(networth.balanceAmount) : "₹0"}
-            loading={isLoading}
-          />
-          <Metric
-            label="Net Investment"
-            value={networth ? formatCurrency(networth.netInvestmentAmount) : "₹0"}
-            loading={isLoading}
-          />
-          <Metric
-            label="Gain / Loss"
-            value={networth ? (networth.gainAmount >= 0 ? `+${formatCurrency(networth.gainAmount)}` : formatCurrency(networth.gainAmount)) : "₹0"}
-            status={networth ? (networth.gainAmount >= 0 ? "positive" : "negative") : "neutral"}
-            loading={isLoading}
-          />
-          <Metric
-            label="XIRR"
-            value={networth ? `${formatFloat(xirr)}%` : "0%"}
-            status={xirr > 0 ? "positive" : (xirr < 0 ? "negative" : "neutral")}
-            loading={isLoading}
-          />
-        </MetricStrip>
-      </div>
-    {/if}
-
-    <!-- Row 1B: Checking / Cash Accounts Summary -->
-    {#if !isEmptyValue(checkingBalances)}
-      <div class="rounded-xl p-4 sm:p-5 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Cash Accounts</span>
-          <a href="/assets/balance" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">
-            View All
-          </a>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {#each values(checkingBalances) as assetBreakdown}
-            {@const name = restName(restName(assetBreakdown.group)) || restName(assetBreakdown.group) || assetBreakdown.group}
-            <a
-              href="/assets/gain/{encodeURIComponent(assetBreakdown.group)}"
-              class="flex items-center justify-between p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] transition-colors"
-            >
-              <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                <i class="fa-solid fa-wallet text-xs text-[var(--paisa-muted-foreground)]"></i>
-                <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate" title={assetBreakdown.group}>
-                  {name}
-                </span>
-              </div>
-              <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
-                {formatCurrency(assetBreakdown.marketAmount)}
-              </span>
-            </a>
-          {/each}
-        </div>
-      </div>
-    {/if}
-
-    <!-- Row 1C: Financial Insights Panel -->
-    {#if (insightsResponse && insightsResponse.insights && insightsResponse.insights.length > 0) || insightsLoading}
-      <InsightsPanel
-        insights={insightsResponse?.insights || []}
-        isPartial={insightsResponse?.isPartial}
-        comparisonPeriod={insightsResponse?.comparisonPeriod}
+      <DashboardInsightGateway
+        items={attentionItems}
+        {period}
         loading={insightsLoading}
-        maxItems={5}
+        failed={insightsFailed}
       />
-    {/if}
 
-    <!-- Row 2: Primary Visualizations (Cash Flow ~60% + Expenses ~40%) -->
-    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0">
-      <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-        <div class="flex items-center justify-between mb-3">
-          <a href="/cash_flow/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-            Cash Flow
-          </a>
-        </div>
-        {#if hasCashFlowData}
-          <LegendCard legends={cashflowLegends} clazz="mb-2 paisa-overflow-x-auto" />
+      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0">
+        <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/cash_flow/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">Cash Flow</a>
+            <span class="text-xs text-[var(--paisa-muted-foreground)]">Last 3 months</span>
+          </div>
+          {#if hasCashFlowData}<LegendCard legends={cashFlowData.legends ?? []} clazz="mb-2 paisa-overflow-x-auto" />{/if}
+          <ChartFrame height="compact" empty={!hasCashFlowData} emptyMessage="No cash-flow activity in this period">
+            <TimeSeriesChart data={cashFlowData} ariaLabel="Current cash flow and checking balance" testId="dashboard-cash-flow-echart" />
+          </ChartFrame>
+        </section>
+
+        <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3 gap-2">
+            <a href={`/expense/monthly?period=${expenseMonth}`} class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">Expenses</a>
+            <LastNMonths n={3} bind:value={expenseMonth} />
+          </div>
+          <div class="mb-3 flex items-baseline gap-2">
+            <span class="text-xs text-[var(--paisa-muted-foreground)]">Total:</span>
+            <span class="text-base font-semibold text-[var(--paisa-foreground)] tabular-nums">{formatCurrency(selectedExpenseTotal)}</span>
+            <span class="text-xs text-[var(--paisa-muted-foreground)]">{expenseMonth === period ? "Month to date" : "Monthly total"}</span>
+          </div>
+          <ChartFrame height="compact" rows={Math.min(8, selectedExpenses.length || 4)} empty={selectedExpenses.length === 0} emptyMessage="No expenses this month">
+            <ComparisonBarChart data={expenseBreakdown} ariaLabel={`Dashboard ${dayjs(`${expenseMonth}-01`).format("MMMM YYYY")} expense breakdown`} testId="dashboard-expense-breakdown-echart" />
+          </ChartFrame>
+        </section>
+      </div>
+
+      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] [&>*]:min-w-0">
+        <DashboardBudgetHealth summary={budgetSummary} {period} isPartial={insightsResponse?.isPartial} comparisonPeriod={insightsResponse?.comparisonPeriod} />
+
+        <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <a href="/ledger/transaction" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">Recent Activity</a>
+            <a href="/ledger/transaction" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">View All</a>
+          </div>
+          {#if transactions.length > 0}
+            <div class="divide-y divide-[var(--paisa-border-subtle)]">
+              {#each take(transactions, 5) as transaction}
+                {@const posting = transaction.postings[0]}
+                <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0" data-testid="dashboard-recent-item">
+                  <div class="min-w-0 flex-1">
+                    <a href={postingUrl(posting)} class="text-sm font-medium text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)] truncate block">{posting.payee || "Unknown"}</a>
+                    <p class="text-xs text-[var(--paisa-muted-foreground)] truncate">{restName(posting.account)} · {posting.date.format("DD MMM YYYY")}</p>
+                  </div>
+                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">{formatCurrency(posting.amount)}</span>
+                </div>
+              {/each}
+            </div>
+          {:else if !dashboardLoading}
+            <p class="text-sm text-[var(--paisa-muted-foreground)]">No recent activity</p>
+          {/if}
+        </section>
+      </div>
+
+      <DashboardCashAccounts accounts={cashSummary.accounts} />
+
+      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:min-w-0">
+        {#if visibleGoalSummaries.length > 0}
+          <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs min-w-0">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Goals</span>
+              <a href="/more/goals" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">View All</a>
+            </div>
+            <div class="space-y-3">
+              {#each visibleGoalSummaries as goal (goal.name)}
+                {@const completed = goal.target > 0 ? goal.current / goal.target : 0}
+                <a href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`} class="block p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] min-w-0" data-testid="dashboard-goal-item">
+                  <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{goal.name}</span><span class="text-xs font-semibold tabular-nums whitespace-nowrap">{formatPercentage(completed, 1)}</span></div>
+                  <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] my-1.5"><div class="h-full rounded-full bg-[var(--paisa-primary)]" style={`width: ${Math.min(100, Math.max(0, completed * 100))}%`}></div></div>
+                  <div class="flex items-center justify-between gap-3 text-xs text-[var(--paisa-muted-foreground)] tabular-nums">
+                    <span class="truncate">{formatCurrency(goal.current)} of {formatCurrency(goal.target)}</span>
+                    {#if goal.targetDate && dayjs(goal.targetDate).isValid()}<span class="whitespace-nowrap">{dayjs(goal.targetDate).fromNow()}</span>{/if}
+                  </div>
+                </a>
+              {/each}
+            </div>
+          </section>
         {/if}
 
-        <ChartFrame
-          height="compact"
-          empty={!hasCashFlowData}
-          emptyMessage="No cash-flow activity in this period"
-        >
-          <TimeSeriesChart
-            data={cashFlowData}
-            ariaLabel="Current cash flow and checking balance"
-            testId="dashboard-cash-flow-echart"
-          />
-        </ChartFrame>
-      </div>
-
-      <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-        <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-          <a href="/expense/monthly" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-            Expenses
-          </a>
-          <LastNMonths n={3} bind:value={month} />
-        </div>
-
-        <div class="mb-3 flex items-baseline gap-2">
-          <span class="text-xs text-[var(--paisa-muted-foreground)]">Total Monthly:</span>
-          <span class="text-base font-semibold text-[var(--paisa-foreground)] tabular-nums">
-            {formatCurrency(totalExpense)}
-          </span>
-        </div>
-        <ChartFrame
-          height="compact"
-          rows={Math.min(8, selectedExpenses.length || 4)}
-          empty={!hasSelectedExpenses}
-          emptyMessage="No expenses this month"
-        >
-          <ComparisonBarChart
-            data={selectedExpenseBreakdownData}
-            ariaLabel="Dashboard monthly expense breakdown"
-            testId="dashboard-expense-breakdown-echart"
-          />
-        </ChartFrame>
+        {#if visibleTransactionSequences.length > 0}
+          <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs min-w-0">
+            <div class="flex items-center justify-between mb-3">
+              <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">Upcoming / Recurring</a>
+              <a href="/cash_flow/recurring" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">View All</a>
+            </div>
+            {#if recurringSummary.pastDueCount > 0 || recurringSummary.upcomingCount > 0}
+              <p class="mb-2 text-xs font-medium text-[var(--paisa-muted-foreground)]" data-testid="dashboard-recurring-summary">
+                {#if recurringSummary.pastDueCount > 0}
+                  <span class="text-[var(--paisa-negative)]">{recurringSummary.pastDueCount} {recurringSummary.pastDueCount === 1 ? "payment" : "payments"} past due</span>
+                  {#if recurringSummary.upcomingCount > 0}<span> · </span>{/if}
+                {/if}
+                {#if recurringSummary.upcomingCount > 0}<span>{formatCurrency(recurringSummary.upcomingAmount)} due in the next {recurringSummary.horizonDays} days</span>{/if}
+              </p>
+            {/if}
+            <div class="divide-y divide-[var(--paisa-border-subtle)]">
+              {#each visibleTransactionSequences as sequence (sequence.key)}
+                {@const schedule = nextUnpaidSchedule(sequence)}
+                {@const pastDue = schedule?.scheduled?.isBefore(now()) ?? false}
+                <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0" data-testid="dashboard-recurring-item">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{sequence.key}</span><Badge variant="neutral" size="sm" rounded>{intervalText(sequence)}</Badge></div>
+                    {#if schedule?.scheduled}<p class={`text-xs mt-0.5 ${pastDue ? "text-[var(--paisa-negative)] font-medium" : "text-[var(--paisa-muted-foreground)]"}`}>{schedule.scheduled.format("DD MMM YYYY")} · {pastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}</p>{/if}
+                  </div>
+                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">{formatCurrencyCrude(totalRecurring(sequence))}</span>
+                </div>
+              {/each}
+            </div>
+          </section>
+        {/if}
       </div>
     </div>
-
-    <!-- Row 3: Operational Data (Budget ~40% + Recent Transactions ~60%) -->
-    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] [&>*]:mb-0 [&>*]:min-w-0 [&>:only-child]:col-span-full">
-      {#if currentBudget && currentBudget.accounts && currentBudget.accounts.length > 0}
-        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-          <div class="flex items-center justify-between mb-3">
-            <a href="/expense/budget" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-              Budget
-            </a>
-          </div>
-          <div class="space-y-3">
-            {#each currentBudget.accounts as accountBudget (accountBudget.account)}
-              {@const isOverspent = accountBudget.available < 0}
-              {@const percent = accountBudget.forecast > 0 ? (accountBudget.actual / accountBudget.forecast) * 100 : 0}
-              <div class="p-3 rounded-lg bg-[var(--paisa-surface-raised)] border border-[var(--paisa-border-subtle)]">
-                <div class="flex items-center justify-between mb-1.5 gap-2">
-                  <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate" title={accountBudget.account}>
-                    {restName(accountBudget.account)}
-                  </span>
-                  <span class="text-xs font-semibold tabular-nums whitespace-nowrap {isOverspent ? 'text-[var(--paisa-negative)]' : 'text-[var(--paisa-positive)]'}">
-                    {isOverspent ? 'Over by ' : 'Available '}{formatCurrency(Math.abs(accountBudget.available))}
-                  </span>
-                </div>
-                <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] mb-1.5">
-                  <div
-                    class="h-full rounded-full transition-all {isOverspent ? 'bg-[var(--paisa-negative)]' : (percent > 85 ? 'bg-[var(--paisa-warning)]' : 'bg-[var(--paisa-positive)]')}"
-                    style="width: {Math.min(100, Math.max(0, percent))}%"
-                  ></div>
-                </div>
-                <div class="flex items-center justify-between text-xs text-[var(--paisa-muted-foreground)] tabular-nums">
-                  <span>Spent {formatCurrency(accountBudget.actual)}</span>
-                  <span>Budget {formatCurrency(accountBudget.forecast)}</span>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-      {/if}
-
-      {#if !isEmptyValue(transactions)}
-        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-          <div class="flex items-center justify-between mb-3">
-            <a href="/ledger/transaction" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-              Recent Activity
-            </a>
-            <a href="/ledger/transaction" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">
-              View All
-            </a>
-          </div>
-          <div class="divide-y divide-[var(--paisa-border-subtle)]">
-            {#each take(transactions, 8) as t}
-              {@const posting = t.postings[0]}
-              <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-[var(--paisa-surface-hover)] -mx-2 px-2 rounded-md transition-colors">
-                <div class="min-w-0 flex-1 pr-3">
-                  <a
-                    href={postingUrl(posting)}
-                    class="text-sm font-medium text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)] truncate block"
-                  >
-                    {posting.payee || "Unknown"}
-                  </a>
-                  <div class="text-xs text-[var(--paisa-muted-foreground)] flex items-center gap-2 mt-0.5">
-                    <span>{restName(posting.account)}</span>
-                    <span>·</span>
-                    <span class="tabular-nums">{posting.date.format("DD MMM YYYY")}</span>
-                  </div>
-                </div>
-                <div class="text-right">
-                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
-                    {formatCurrency(posting.amount)}
-                  </span>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-      {/if}
-    </div>
-
-    <!-- Row 4: Long-Term & Recurring (Goals ~50% + Recurring ~50%) -->
-    <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:mb-0 [&>*]:min-w-0 [&>:only-child]:col-span-full">
-      {#if !isEmptyValue(goalSummaries)}
-        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-          <div class="flex items-center justify-between mb-3">
-            <a href="/more/goals" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-              Goals
-            </a>
-          </div>
-          <div class="space-y-3">
-            {#each goalSummaries as goal (goal.name)}
-              {@const completed = goal.target > 0 ? (goal.current / goal.target) * 100 : 0}
-              <a
-                href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
-                class="block p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] transition-colors"
-              >
-                <div class="flex items-center justify-between mb-1.5 gap-2">
-                  <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{goal.name}</span>
-                  <span class="text-xs font-semibold text-[var(--paisa-foreground)] tabular-nums">
-                    {formatPercentage(completed / 100, 1)}
-                  </span>
-                </div>
-                <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] mb-1.5">
-                  <div
-                    class="h-full rounded-full bg-[var(--paisa-primary)] transition-all"
-                    style="width: {Math.min(100, Math.max(0, completed))}%"
-                  ></div>
-                </div>
-                <div class="flex items-center justify-between text-xs text-[var(--paisa-muted-foreground)] tabular-nums">
-                  <span>{formatCurrency(goal.current)} of {formatCurrency(goal.target)}</span>
-                  {#if goal.targetDate && dayjs(goal.targetDate).isValid()}
-                    <span>{dayjs(goal.targetDate).fromNow()}</span>
-                  {/if}
-                </div>
-              </a>
-            {/each}
-          </div>
-        </div>
-      {/if}
-
-      {#if !isEmptyValue(transactionSequences)}
-        <div class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0">
-          <div class="flex items-center justify-between mb-3">
-            <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">
-              Upcoming / Recurring
-            </a>
-          </div>
-          <div class="divide-y divide-[var(--paisa-border-subtle)]">
-            {#each transactionSequences as ts (ts.key)}
-              {@const schedule = nextUnpaidSchedule(ts)}
-              {@const isPastDue = schedule?.scheduled ? schedule.scheduled.isBefore(now()) : false}
-              <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 hover:bg-[var(--paisa-surface-hover)] -mx-2 px-2 rounded-md transition-colors">
-                <div class="min-w-0 flex-1 pr-3">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{ts.key}</span>
-                    <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
-                  </div>
-                  {#if schedule?.scheduled}
-                    <div class="text-xs text-[var(--paisa-muted-foreground)] flex items-center gap-2 mt-0.5">
-                      <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
-                      <span>·</span>
-                      <span class={isPastDue ? 'text-[var(--paisa-negative)] font-medium' : ''}>
-                        {isPastDue ? 'Past due' : `Due ${schedule.scheduled.fromNow()}`}
-                      </span>
-                    </div>
-                  {/if}
-                </div>
-                <div class="text-right">
-                  <span class="text-sm font-semibold text-[var(--paisa-foreground)] tabular-nums whitespace-nowrap">
-                    {formatCurrencyCrude(totalRecurring(ts))}
-                  </span>
-                </div>
-              </div>
-            {/each}
-          </div>
-        </div>
-      {/if}
-    </div>
-  </div>
-{/if}
+  {/if}
 </Page>

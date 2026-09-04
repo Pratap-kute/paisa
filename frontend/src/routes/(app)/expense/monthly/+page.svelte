@@ -6,11 +6,14 @@ import { restName } from "$lib/domain/account";
 import type { Posting } from "$lib/domain/ledger";
 import type { Legend } from "$lib/shared/charts/types";
 import { onMount } from "svelte";
-import { sumBy, uniq } from "es-toolkit";
+import { sumBy } from "es-toolkit";
 import dayjs from "dayjs";
 import { firstName } from "$lib/domain/account";
 import { api } from "$lib/api";
-import { buildMonthlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+import {
+  buildMonthlyExpenseTimelineSeries,
+  expenseGroupsByContribution,
+} from "$lib/features/expense/chart_timeline_data";
 import {
   categoryColor,
   categoryColorResolver,
@@ -100,7 +103,7 @@ onMount(async () => {
     >;
 
     setAllowedDateRange(map(expenses, (e: Posting) => e.date));
-    const allGroups = uniq(expenses.map(expenseGroup)).sort();
+    const allGroups = expenseGroupsByContribution(expenses);
     expenseColor = categoryColorResolver(allGroups);
     groups.set(allGroups);
     const requestedAccount = page.url.searchParams.get("account");
@@ -271,7 +274,7 @@ $effect(() => {
       <ChartFrame
         height="compact"
         class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
-        rows={Math.min(8, selectedMonthExpenses.length || 4)}
+        rows={Math.max(4, selectedMonthBreakdownData.points.length)}
         empty={!hasSelectedMonthExpenses}
         emptyMessage="No expenses recorded for {formattedCurrentMonth}"
       >
@@ -300,7 +303,7 @@ $effect(() => {
 
   <Section
     title="Expense Trend"
-    subtitle="Historical monthly expenses by category"
+    subtitle="Monthly spending by category with calendar-year average"
   >
     {#if hasTrendInRange}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
@@ -310,7 +313,7 @@ $effect(() => {
       >
         <TimeSeriesChart
           data={expenseTimelineData}
-          ariaLabel="Historical monthly expenses by category and cumulative total"
+          ariaLabel="Monthly expenses by category with calendar-year monthly average"
           testId="monthly-expense-timeline-echart"
         />
       </ChartFrame>

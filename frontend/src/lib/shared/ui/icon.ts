@@ -25,14 +25,37 @@ const icons = {
   mdi: mdi["codepoints"],
 };
 
+const ICON_ALIASES: Record<string, string> = {
+  "mdi:land-plants": "mdi:land-plots",
+};
+
+function resolveIconSymbol(symbol: string): string {
+  return ICON_ALIASES[symbol] ?? symbol;
+}
+
 export function iconGlyph(symbol: string): string {
   if (!symbol) {
     return String.fromCodePoint(65533);
   }
-  const [font, name] = symbol.split(":");
+  const [font, name] = resolveIconSymbol(symbol).split(":");
   const code =
     (icons as Record<string, Record<string, number>>)[font]?.[name] || 65533;
   return String.fromCodePoint(code);
+}
+
+export function hasIcon(symbol: string): boolean {
+  if (!symbol) return false;
+  const [font, name] = resolveIconSymbol(symbol).split(":");
+  return Boolean(
+    (icons as Record<string, Record<string, number>>)[font]?.[name],
+  );
+}
+
+export function iconGlyphOr(
+  symbol: string,
+  fallback = "fa6-solid:bullseye",
+): string {
+  return iconGlyph(hasIcon(symbol) ? symbol : fallback);
 }
 
 export const iconsList = Object.entries(icons).flatMap(([font, glyph]) =>

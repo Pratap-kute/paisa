@@ -8,6 +8,7 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,6 +17,8 @@ import (
 
 func setupInsightTestDB(t *testing.T, cfg string) *gorm.DB {
 	t.Helper()
+	utils.SetNow("2026-08-20")
+	t.Cleanup(utils.ResetNow)
 	db := serviceTestDB(t)
 	if cfg == "" {
 		cfg = "journal_path: main.ledger\ndb_path: paisa.db\ndefault_currency: INR\n"
