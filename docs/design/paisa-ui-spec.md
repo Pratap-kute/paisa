@@ -1,9 +1,8 @@
-# Paisa UI Redesign — Canonical UI/UX Specification (Phase 3)
+# Paisa UI/UX Specification — As-Built Reference
 
-> **Document Status:** Canonical Design Contract  
-> **Target Version:** Paisa Frontend Redesign (Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI)  
+> **Document Status:** As-Built Reference Specification (Post-Migration)  
+> **Current Stack:** Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI + ECharts 6  
 > **Source-of-Truth Priority:** Existing Paisa Business Logic & Functionality > Existing Route/Component Code > Existing Workflows > This Specification > Visual Mockups  
-> **Branch:** `ui/00-design-spec`  
 > **Canonical File:** `docs/design/paisa-ui-spec.md`
 
 ---
@@ -35,7 +34,7 @@ Paisa is a desktop-first, local-first personal finance management system built o
 
 ## 2. Technology & Architecture Direction
 
-The Paisa frontend redesign modernizes styling and component ergonomics while preserving the proven application core.
+The Paisa frontend uses modern styling and component ergonomics while preserving the proven application core.
 
 ### 2.1 Core Framework
 
@@ -45,22 +44,23 @@ The Paisa frontend redesign modernizes styling and component ergonomics while pr
 ### 2.2 Styling Direction
 
 - **CSS Engine:** Tailwind CSS v4 + native CSS custom properties.
-- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`.
-- **Eradication Goal:**
+- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/theme/tokens.css` (extended token set) and `$lib/shared/styles/foundation.css` (core tokens + Tailwind integration).
+- **CSS Layer Architecture:** Styles are organized via `@layer theme, base, components, utilities;` for controlled specificity.
+- **Migration Status (Complete):**
   $$\text{Bulma} = 0 \quad\big|\quad \text{Sass/SCSS} = 0 \quad\big|\quad \text{!important} \approx 0$$
-- **Migration Coexistence:** During the transition, Bulma and Tailwind CSS v4 coexist. Tailwind Preflight is initially disabled to prevent style collisions with Bulma legacy components, and re-enabled only when the last Bulma module is decommissioned. No new SCSS files or `@import "bulma"` rules may be added.
+  Bulma and SCSS have been fully removed. Tailwind CSS v4 Preflight is **enabled** (`@import "tailwindcss/preflight.css" layer(base)`). A thin `legacy-compat.css` bridge provides class aliases (e.g., `.has-text-success`, `.table.is-hoverable`) consumed by Tabulator and legacy DOM output. No new Bulma-style classes may be added.
 
 ### 2.3 UI Primitives & Accessibility Layer
 
-- **Component Ownership:** All application routes import Paisa-owned Svelte UI components located in `$lib/components/ui/` or `$lib/components/layout/`.
-- **Bits UI Boundary:** Bits UI is utilized internally under the hood of Paisa UI primitives (e.g., `$lib/components/ui/Dialog.svelte`, `$lib/components/ui/Tabs.svelte`, `$lib/components/ui/Dropdown.svelte`) to guarantee WAI-ARIA compliance, keyboard navigation, and focus trapping.
+- **Component Ownership:** All application routes import Paisa-owned Svelte UI components located in `$lib/shared/ui/` or `$lib/shared/layout/`.
+- **Bits UI Boundary:** Bits UI is utilized internally under the hood of Paisa UI primitives (e.g., `$lib/shared/ui/Dialog.svelte`, `$lib/shared/ui/Tabs.svelte`, `$lib/shared/ui/Dropdown.svelte`) to guarantee WAI-ARIA compliance, keyboard navigation, and focus trapping.
 - **Encapsulation Guarantee:** Domain components and SvelteKit routes **must never** import Bits UI directly. All interactions go through Paisa's own typed props and slots/snippets.
 
 ### 2.4 Visualization & Specialized Engines
 
-- **D3.js:** Retained for all financial data visualizations (timelines, bar charts, sunbursts, treemaps, calendars, sankey flows). Wrapped cleanly inside `<ChartFrame />` components that handle responsive resizing via `ResizeObserver`.
+- **ECharts 6:** All financial data visualizations (timelines, bar charts, comparison bars, waterfall charts, sankey flows, sunbursts, treemaps, hierarchies). Charts are rendered via `<EChartSurface />` with built-in `ResizeObserver` lifecycle management. Higher-level wrappers include `<TimeSeriesChart />`, `<ComparisonBarChart />`, and `<FinancialHierarchyChart />`. Chart data transforms and option builders live in `$lib/shared/charts/echarts/`. D3.js has been fully removed.
 - **CodeMirror 6:** Retained for ledger journal editing, sheet expression evaluation, and template editing.
-- **Tabulator Tables:** Retained initially behind the `<Table />` wrapper boundary for complex data-dense grids. Replacement with native/virtualized table engines is a decoupled future concern.
+- **Tabulator Tables:** Retained behind the `<Table />` wrapper boundary for complex data-dense grids. Replacement with native/virtualized table engines is a decoupled future concern.
 
 ---
 
@@ -98,6 +98,13 @@ To ensure long-term maintainability and visual harmony across light and dark mod
   --paisa-warning: #d97706;
   --paisa-warning-subtle: #fffbeb;
   --paisa-neutral: #475569;
+
+  /* Prediction Confidence */
+  --paisa-prediction-high: #10b981;
+  --paisa-prediction-medium: #3b82f6;
+  --paisa-prediction-review: #f59e0b;
+  --paisa-prediction-unknown: #f43f5e;
+  --paisa-prediction-transfer: #8b5cf6;
 
   /* Elevation Shadows */
   --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -143,6 +150,13 @@ To ensure long-term maintainability and visual harmony across light and dark mod
   --paisa-warning-subtle: #451a03;
   --paisa-neutral: #94a3b8;
 
+  /* Prediction Confidence */
+  --paisa-prediction-high: #34d399;
+  --paisa-prediction-medium: #60a5fa;
+  --paisa-prediction-review: #fbbf24;
+  --paisa-prediction-unknown: #fb7185;
+  --paisa-prediction-transfer: #a78bfa;
+
   /* Elevation Shadows */
   --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
   --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
@@ -176,11 +190,23 @@ To ensure long-term maintainability and visual harmony across light and dark mod
   --color-warning: var(--paisa-warning);
   --color-warning-subtle: var(--paisa-warning-subtle);
   --color-neutral: var(--paisa-neutral);
+  --color-prediction-high: var(--paisa-prediction-high);
+  --color-prediction-medium: var(--paisa-prediction-medium);
+  --color-prediction-review: var(--paisa-prediction-review);
+  --color-prediction-unknown: var(--paisa-prediction-unknown);
+  --color-prediction-transfer: var(--paisa-prediction-transfer);
+
+  --font-sans: var(--paisa-font-ui);
+  --font-mono: var(--paisa-font-code);
 
   --radius-sm: var(--paisa-radius-sm);
   --radius-md: var(--paisa-radius-md);
   --radius-lg: var(--paisa-radius-lg);
   --radius-full: var(--paisa-radius-full);
+
+  --shadow-sm: var(--paisa-shadow-sm);
+  --shadow-md: var(--paisa-shadow-md);
+  --shadow-lg: var(--paisa-shadow-lg);
 }
 ```
 
@@ -196,8 +222,8 @@ Paisa standardizes on **Inter** for all UI copy, navigation, forms, and financia
 
 ### 4.1 Font Families
 
-- **Primary UI Font:** `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
-- **Monospace Font:** `JetBrains Mono, "Fira Code", monospace` (Used exclusively in: Ledger Editor, CodeMirror Template Editor, Generated Ledger Previews, Raw Transaction IDs, Posting syntax).
+- **Primary UI Font (`--paisa-font-ui` / `--paisa-font-sans`):** `"Inter Variable", Inter, "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` — the font stack includes icon font families for inline icon rendering via CSS class selectors.
+- **Monospace Font (`--paisa-font-code` / `--paisa-font-mono`):** `"JetBrains Mono Variable", "JetBrains Mono", monospace` (Used exclusively in: Ledger Editor, CodeMirror Template Editor, Generated Ledger Previews, Raw Transaction IDs, Posting syntax).
 
 ### 4.2 Typographic Hierarchy Scale
 
@@ -319,7 +345,7 @@ In double-entry personal finance, naive color associations (e.g., "all income is
 | **`var(--paisa-primary)`** | Selection / Focus / Navigation | Active route, primary CTA button, selected table row, active editor tab, focused input ring. | Financial value status (gain/loss). |
 | **`var(--paisa-neutral)`** | Neutral Information / Facts | Standard currency values, asset balance, credit card statement total, ledger posting accounts. | Status alarms or urgent action prompts. |
 | **`var(--paisa-muted-foreground)`** | Supporting / Historical Context | Relative dates ("3 days ago"), transaction notes, file paths, commodity symbols, column headers. | Primary financial numbers. |
-| **Categorical Colors** | Multi-class distinction | D3 category breakdowns, asset allocation pie/sunburst slices, cash flow flowline distinctions. | Text status badges. |
+| **Categorical Colors** | Multi-class distinction | ECharts category breakdowns, asset allocation pie/sunburst slices, cash flow flowline distinctions. | Text status badges. |
 
 ### 7.2 Sign vs. Context Rules
 
@@ -336,6 +362,7 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 ┌─────────────────────────────────────────────────────────────┐
 │ OVERVIEW                                                    │
 │   Dashboard (/)                                             │
+│   Insights (/insights)                                      │
 ├─────────────────────────────────────────────────────────────┤
 │ MONEY (Expandable Group)                                    │
 │   ▾ Cash Flow                                               │
@@ -392,9 +419,9 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 
 In the current repository, `Cash Flow`, `Expenses`, `Assets`, `Liabilities`, and `System` do not have standalone index page routes (`+page.svelte`). They are strictly **non-route expandable navigation groups** whose children are the real routes. When a route within a group is active, the parent group is automatically expanded.
 
-### 8.2 Global Command / Route Search (Future Enhancement)
+### 8.2 Global Command Palette
 
-A global shortcut (`Ctrl+K` / `Cmd+K`) will provide instant fuzzy navigation search across all routes. *(Documented as candidate enhancement; initial scope limited to route jump, with full command palette deferred)*.
+The global shortcut (`Ctrl+K` / `Cmd+K`) opens the **Command Palette** (`$lib/shared/layout/CommandPalette.svelte`), providing instant fuzzy search across four categories: **Navigation** (all routes), **Actions** (sync, theme toggle, price update), **Accounts** (jump to account-specific views), and **Search** (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.
 
 ---
 
@@ -476,7 +503,7 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | Cash Accounts:  HDFC Checking: ₹1,42,000  ·  ICICI Savings: ₹85,400  ·  Cash Wallet: ₹12,000  |
 +-------------------------------------------------------------+---------------------------------+
 | CASH FLOW                                                   | SPENDING (Jul 2026)             |
-| [=================== D3 Monthly Flow Chart ===============] | Total: ₹78,420                  |
+| [=================== ECharts Monthly Flow Chart ===============] | Total: ₹78,420                  |
 |                                                             | Shopping    ████████████  ₹32k  |
 |                                                             | Groceries   ████████      ₹21k  |
 |                                                             | Utilities   ████          ₹11k  |
@@ -506,7 +533,7 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | ICICI Savings                  ₹85,400 |
 +---------------------------------------+
 | CASH FLOW                             |
-| [=== D3 Monthly Flow Chart ==========]|
+| [=== ECharts Monthly Flow Chart ==========]|
 +---------------------------------------+
 | SPENDING THIS MONTH                   |
 | Total: ₹78,420                        |
@@ -561,7 +588,7 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | Utilities       ████                            ₹6,420      | 13  14  15  16  17  18  19      |
 +-------------------------------------------------------------+---------------------------------+
 | EXPENSE TREND                                                                                 |
-| [=========================== D3 Monthly Expense Timeline ===================================] |
+| [=========================== ECharts Monthly Expense Timeline ===================================] |
 +-----------------------------------------------------------------------------------------------+
 | RECENT EXPENSES                                                                               |
 | Amazon India                 Liabilities:CreditCard:Freedom       -₹1,249.00      18 Jul 2026 |
@@ -630,7 +657,7 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | Opening Balance: ₹12,400.00  +  Purchases: ₹48,200.00  -  Credits: ₹18,100.00  =  ₹42,500.00  |
 +-----------------------------------------------------------------------------------------------+
 | SPENDING TREND                                                                                |
-| [=============================== D3 Yearly Spends Chart ====================================] |
+| [=============================== ECharts Yearly Spends Chart ====================================] |
 +-----------------------------------------------------------------------------------------------+
 | TRANSACTIONS IN STATEMENT (18)                                                                |
 | Amazon India                 Expenses:Shopping:Electronics                -₹1,249.00   18 Jul |
@@ -810,24 +837,47 @@ Every data region, table, chart frame, and section in Paisa must explicitly hand
 
 ## 12. Component Architecture & Layering
 
-Paisa enforces a strict 4-tier component layering model:
+Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the full dependency enforcement rules):
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. SvelteKit Routes (frontend/src/routes/(app)/...)         │
+│    Page URLs, loading orchestration, composition            │
 ├─────────────────────────────────────────────────────────────┤
-│ 2. Domain Components ($lib/components/finance, prediction)  │
-│    BudgetCard, CreditCardCard, RecurringCard, etc.          │
+│ 2. Feature Modules ($lib/features/<feature>/)               │
+│    Business-specific UI, data transforms, chart data        │
+│    e.g. features/expense/, features/prediction/,            │
+│         features/importing/, features/insights/             │
 ├─────────────────────────────────────────────────────────────┤
-│ 3. Paisa Application Components ($lib/components/layout)    │
-│    Page, PageHeader, Section, MetricStrip, ChartFrame       │
+│ 3. Shared Presentation ($lib/shared/)                       │
+│    ├── layout/: AppShell, Page, PageHeader, MetricStrip,    │
+│    │   Section, CommandPalette, ResponsiveGrid, Stack       │
+│    ├── ui/: Button, Input, Select, Dialog, Drawer, Badge,   │
+│    │   Table, Tabs, Card, ChartFrame, ZeroState, Tooltip    │
+│    ├── charts/: EChartSurface, TimeSeriesChart,             │
+│    │   ComparisonBarChart, FinancialHierarchyChart           │
+│    ├── editor/: CodeMirror foundations                      │
+│    ├── styles/: foundation.css, legacy-compat.css           │
+│    └── theme/: tokens.css, chartPalette.ts, color.ts        │
 ├─────────────────────────────────────────────────────────────┤
-│ 4. Paisa UI Primitives ($lib/components/ui)                 │
-│    Button, Input, Select, Dialog, Drawer, Badge, Table      │
+│ 4. Domain ($lib/domain/)                                    │
+│    Framework-independent financial concepts & calculations   │
+│    (postings, accounts, assets, cash flow, goals, tax, etc.)│
 ├─────────────────────────────────────────────────────────────┤
-│ 5. Foundation: Tailwind CSS v4 / Bits UI / Native CSS / D3  │
+│ 5. API ($lib/api/)                                          │
+│    Backend transport, generated DTOs, auth, error handling   │
+├─────────────────────────────────────────────────────────────┤
+│ 6. Foundation: Tailwind CSS v4 / Bits UI / ECharts / Native │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+### 12.1 Dependency Rules
+
+- **Domain** cannot depend on Svelte, routes, features, UI, or API transport.
+- **Shared** cannot depend on features or routes.
+- **Features** and **generated** output cannot depend on routes.
+- **API** cannot depend on routes or feature implementations.
+- Enforced by `deno task architecture` boundary checks.
 
 ---
 
@@ -848,12 +898,14 @@ Paisa enforces a strict 4-tier component layering model:
 3. **Progressive Disclosure:** Advanced or destructive settings are grouped in collapsible sections.
 4. **Anti-Pattern:** Never enclose individual form fields in standalone cards.
 
-### 13.3 Chart Rules (D3.js)
+### 13.3 Chart Rules (ECharts 6)
 
-1. **Container Management:** Every D3 chart must reside in a `<ChartFrame />` handling dimension observation, container cleanup, and resize callbacks.
-2. **Color Palette:** Use semantic colors from the centralized palette.
-3. **Collision Avoidance:** Chart axes format dates and numbers to prevent label overlap on narrow screens.
-4. **Tooltips:** Tooltips use semantic styling and are keyboard/touch accessible.
+1. **Container Management:** Every chart is rendered inside `<EChartSurface />` (`$lib/shared/charts/EChartSurface.svelte`), which manages lifecycle (lazy ECharts core import, `ResizeObserver` binding, instance disposal on unmount).
+2. **Higher-Level Wrappers:** Use `<TimeSeriesChart />`, `<ComparisonBarChart />`, or `<FinancialHierarchyChart />` for standard chart patterns. These accept typed data contracts and delegate to `<EChartSurface />`.
+3. **Theme Integration:** Chart themes are read from `$lib/shared/charts/echarts/theme.ts` which derives colors from semantic CSS variables at render time.
+4. **Color Palette:** Use semantic colors from `$lib/shared/theme/chartPalette.ts`.
+5. **Responsive Behavior:** Charts auto-resize via `ResizeObserver`. Option builders in `$lib/shared/charts/echarts/responsive.ts` produce viewport-aware configurations.
+6. **Tooltips:** Tooltips use the Paisa chart tooltip formatter (`$lib/shared/charts/tooltip.ts`) with semantic styling.
 
 ---
 
@@ -890,7 +942,7 @@ The following sensitive routes must pass automated overflow tests without horizo
 
 ## 16. Development UI Design Lab (`/dev/ui`)
 
-Phase 4 will introduce a dedicated development route: `/dev/ui`.
+A dedicated development route at `/dev/ui` provides an interactive component showcase and design lab.
 
 - Matrix toggles: Light mode / Dark mode / Desktop width (1440px) / Mobile width (390px).
 - State previews: Normal, Hover, Focus, Disabled, Loading, Skeleton, Empty, Error, Unsaved Dirty.
@@ -898,9 +950,9 @@ Phase 4 will introduce a dedicated development route: `/dev/ui`.
 
 ---
 
-## 17. Complete 40-Route Inventory & Canonical Design Contracts
+## 17. Complete 41-Route Inventory & Canonical Design Contracts
 
-The table and 40 individual route design contracts below represent the binding UI/UX specifications for the entire Paisa frontend.
+The table and 41 individual route design contracts below represent the binding UI/UX specifications for the entire Paisa frontend.
 
 ### 17.1 Complete Route Inventory Table
 
@@ -945,11 +997,12 @@ The table and 40 individual route design contracts below represent the binding U
 | **37** | `/more/tax/capital_gains` | Capital Gains Tax | Analysis | What is my short-term vs long-term capital gains tax liability? |
 | **38** | `/more/tax/harvest` | Tax Harvesting | Analysis | Which investment lots can be harvested for tax optimization? |
 | **39** | `/more/tax/schedule_al` | Schedule AL | Data Explorer | What is the formal Asset and Liability statement for tax filing? |
-| **40** | `/login` | Login | Tool | How do I authenticate to access the Paisa workspace? |
+| **40** | `/insights` | Insights | Analysis | What changed in my finances this month and why? |
+| **41** | `/login` | Login | Tool | How do I authenticate to access the Paisa workspace? |
 
 ---
 
-### 17.2 Detailed Canonical Contracts for All 40 Routes
+### 17.2 Detailed Canonical Contracts for All 41 Routes
 
 #### 1. `/` — Dashboard
 
@@ -965,7 +1018,7 @@ The table and 40 individual route design contracts below represent the binding U
 - **Loading Behavior:** Geometry-preserving skeletons for metric strip and both chart frames.
 - **Empty Behavior:** Full-page `<ZeroState />` offering "Get Started" guide or "Setup Demo" button (`/api/init`).
 - **Error Behavior:** Section-localized alerts for failing API segments; remaining sections stay visible.
-- **Preserved Functionality:** Interactive D3 cash flow chart with legends, D3 month breakdown, Last N Months selector, direct drill-down links to all sections.
+- **Preserved Functionality:** Interactive ECharts cash flow chart with legends, ECharts month breakdown, Last N Months selector, direct drill-down links to all sections.
 
 #### 2. `/assets/allocation` — Asset Allocation
 
@@ -978,10 +1031,10 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Actions:** Category depth toggle, target adjustment link.
 - **Desktop Composition:** Target treemap (if targets configured) $\rightarrow$ Allocation by category $\rightarrow$ Allocation by value $\rightarrow$ Allocation timeline with legends $\rightarrow$ Allocation data table.
 - **Mobile Transformation:** Stacked sequence of charts followed by responsive allocation table with progress bar column.
-- **Loading Behavior:** ChartFrame skeletons preserving depth-dependent heights.
+- **Loading Behavior:** ECharts chart skeletons preserving depth-dependent heights.
 - **Empty Behavior:** EmptyState with guidance to configure allocation targets in settings.
 - **Error Behavior:** Local error message in chart frame with retry CTA.
-- **Preserved Functionality:** D3 treemap, dynamic depth scaling (`depth * 100px`), D3 timeline resize, Tabulator progress bar column.
+- **Preserved Functionality:** ECharts treemap, dynamic depth scaling (`depth * 100px`), ECharts timeline resize, Tabulator progress bar column.
 
 #### 3. `/assets/analysis` — Asset Analysis
 
@@ -997,7 +1050,7 @@ The table and 40 individual route design contracts below represent the binding U
 - **Loading Behavior:** Skeleton loaders matching chart dimensions.
 - **Empty Behavior:** ZeroState indicating no investment assets found in journal.
 - **Error Behavior:** Localized failure banner.
-- **Preserved Functionality:** D3 portfolio security visualization, alpha-tag indicators.
+- **Preserved Functionality:** ECharts portfolio security visualization, alpha-tag indicators.
 
 #### 4. `/assets/balance` — Asset Balance
 
@@ -1026,10 +1079,10 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Actions:** Period toggle.
 - **Desktop Composition:** Gain overview chart with legend card $\rightarrow$ Per-account gain timeline breakdown.
 - **Mobile Transformation:** Stacked overview chart followed by per-account gain cards.
-- **Loading Behavior:** ChartFrame skeletons.
+- **Loading Behavior:** ECharts chart skeletons.
 - **Empty Behavior:** ZeroState indicating no investment gains recorded.
 - **Error Behavior:** Localized chart error display.
-- **Preserved Functionality:** D3 gain breakdown chart, interactive legends, account drill-down to `/assets/gain/[slug]`.
+- **Preserved Functionality:** ECharts gain breakdown chart, interactive legends, account drill-down to `/assets/gain/[slug]`.
 
 #### 6. `/assets/gain/[slug]` — Asset Gain Detail
 
@@ -1058,10 +1111,10 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Actions:** Financial year selector.
 - **Desktop Composition:** Monthly investment timeline $\rightarrow$ Financial year investment timeline $\rightarrow$ Responsive grid of `InvestmentYearlyCard` components.
 - **Mobile Transformation:** Stacked timeline charts followed by single-column annual cards.
-- **Loading Behavior:** ChartFrame timeline skeletons.
+- **Loading Behavior:** ECharts timeline skeletons.
 - **Empty Behavior:** ZeroState indicating no investment postings in journal.
 - **Error Behavior:** Local chart error with retry CTA.
-- **Preserved Functionality:** D3 monthly & yearly investment charts, `InvestmentYearlyCard` metric rendering.
+- **Preserved Functionality:** ECharts monthly & yearly investment charts, `InvestmentYearlyCard` metric rendering.
 
 #### 8. `/assets/networth` — Net Worth
 
@@ -1070,14 +1123,14 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Question:** How is my total net worth trending over time across currencies?
 - **Page Header:** Title: "Net Worth", Description: "Track assets and investment growth over time"; Subtoolbar: Date range selector.
 - **Primary Information:** MetricStrip (Net worth, Net Investment, Gain/Loss, XIRR).
-- **Secondary Information:** D3 Net worth timeline chart with asset/liability area fills and legends.
+- **Secondary Information:** ECharts net worth timeline chart with asset/liability area fills and legends.
 - **Primary Actions:** Date range picker.
-- **Desktop Composition:** MetricStrip (4 cols) $\rightarrow$ Full-width D3 timeline chart with legend card.
+- **Desktop Composition:** MetricStrip (4 cols) $\rightarrow$ Full-width ECharts timeline chart with legend card.
 - **Mobile Transformation:** MetricStrip (2 cols or stack) $\rightarrow$ Scaled net worth timeline chart.
 - **Loading Behavior:** Skeleton metric strip and chart frame placeholder.
 - **Empty Behavior:** ZeroState for periods with no net worth activity.
 - **Error Behavior:** Localized error box.
-- **Preserved Functionality:** Date range filtering via `$dateRange`, D3 networth timeline with resize observer.
+- **Preserved Functionality:** Date range filtering via `$dateRange`, ECharts networth timeline with resize observer.
 
 #### 9. `/cash_flow/income_statement` — Income Statement
 
@@ -1104,12 +1157,12 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Monthly cash flow chart (Income vs Expenses vs Investment vs Tax).
 - **Secondary Information:** Interactive legends, checking balance line.
 - **Primary Actions:** Date range selector.
-- **Desktop Composition:** Legend card $\rightarrow$ Full-width D3 monthly cash flow chart (`#d3-monthly-cash-flow`).
+- **Desktop Composition:** Legend card $\rightarrow$ Full-width ECharts monthly cash flow chart.
 - **Mobile Transformation:** Legend card $\rightarrow$ Responsive monthly cash flow chart.
-- **Loading Behavior:** ChartFrame skeleton.
+- **Loading Behavior:** ECharts chart skeleton.
 - **Empty Behavior:** EmptyState with message "No cash-flow activity in this period".
 - **Error Behavior:** Local error banner.
-- **Preserved Functionality:** D3 vertical/horizontal rotation option, balance line overlay, `$dateRange` reactivity.
+- **Preserved Functionality:** ECharts vertical/horizontal rotation option, balance line overlay, `$dateRange` reactivity.
 
 #### 11. `/cash_flow/recurring` — Recurring Transactions
 
@@ -1136,9 +1189,9 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Multi-year cash flow bar chart at selected account depth.
 - **Secondary Information:** Account depth distribution breakdown.
 - **Primary Actions:** Account depth slider (`$cashflowExpenseDepth`, `$cashflowIncomeDepth`).
-- **Desktop Composition:** Controls subtoolbar $\rightarrow$ D3 yearly cash flow chart $\rightarrow$ Account breakdown list.
+- **Desktop Composition:** Controls subtoolbar $\rightarrow$ ECharts yearly cash flow chart $\rightarrow$ Account breakdown list.
 - **Mobile Transformation:** Depth controls in popover $\rightarrow$ Responsive yearly cash flow chart $\rightarrow$ Breakdown cards.
-- **Loading Behavior:** ChartFrame skeleton.
+- **Loading Behavior:** ECharts chart skeleton.
 - **Empty Behavior:** ZeroState indicating no annual cash flow data.
 - **Error Behavior:** Local error message.
 - **Preserved Functionality:** Max depth filtering, financial year range calculation.
@@ -1173,7 +1226,7 @@ The table and 40 individual route design contracts below represent the binding U
 - **Loading Behavior:** Skeleton loaders for metric strip, calendar, and breakdown charts.
 - **Empty Behavior:** ZeroState for months without expense postings.
 - **Error Behavior:** Local chart error with retry.
-- **Preserved Functionality:** D3 category breakdown, D3 calendar heatmap, D3 timeline, category color scales.
+- **Preserved Functionality:** ECharts category breakdown, ECharts calendar heatmap, ECharts timeline, category color scales.
 
 #### 15. `/expense/yearly` — Yearly Expenses
 
@@ -1184,12 +1237,12 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Yearly expense timeline chart with legends.
 - **Secondary Information:** Annual category breakdown tables.
 - **Primary Actions:** Financial year picker.
-- **Desktop Composition:** Legend card $\rightarrow$ D3 yearly expense timeline chart $\rightarrow$ Annual category data table.
+- **Desktop Composition:** Legend card $\rightarrow$ ECharts yearly expense timeline chart $\rightarrow$ Annual category data table.
 - **Mobile Transformation:** Legend card $\rightarrow$ Responsive timeline chart $\rightarrow$ Category cards.
-- **Loading Behavior:** ChartFrame skeleton.
+- **Loading Behavior:** ECharts chart skeleton.
 - **Empty Behavior:** ZeroState for years without expenses.
 - **Error Behavior:** Local error banner.
-- **Preserved Functionality:** D3 yearly timeline chart, category color mapping.
+- **Preserved Functionality:** ECharts yearly timeline chart, category color mapping.
 
 #### 16. `/income` — Income
 
@@ -1202,10 +1255,10 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Actions:** Period toggle.
 - **Desktop Composition:** MetricStrip $\rightarrow$ Monthly income timeline $\rightarrow$ 3-column yearly income grid.
 - **Mobile Transformation:** MetricStrip $\rightarrow$ Monthly income timeline $\rightarrow$ Stacked yearly income charts.
-- **Loading Behavior:** Metric and ChartFrame skeletons.
+- **Loading Behavior:** Metric and ECharts chart skeletons.
 - **Empty Behavior:** ZeroState indicating no income postings found.
 - **Error Behavior:** Local error alert.
-- **Preserved Functionality:** Multi-chart D3 client-width rendering, posting aggregation.
+- **Preserved Functionality:** Multi-chart ECharts client-width rendering, posting aggregation.
 
 #### 17. `/ledger/editor` — Ledger Editor (Root)
 
@@ -1349,7 +1402,7 @@ The table and 40 individual route design contracts below represent the binding U
 - **Loading Behavior:** Skeletons for bill header and transaction list.
 - **Empty Behavior:** Message indicating no statement history found for this card.
 - **Error Behavior:** Local error with redirect back to Credit Cards overview.
-- **Preserved Functionality:** Statement period filtering, statement equation calculation, D3 yearly spends chart.
+- **Preserved Functionality:** Statement period filtering, statement equation calculation, ECharts yearly spends chart.
 
 #### 26. `/liabilities/interest` — Interest Analysis
 
@@ -1360,12 +1413,12 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Interest overview timeline chart with legends.
 - **Secondary Information:** Per-account interest timeline breakdown with summary tables.
 - **Primary Actions:** Period toggle.
-- **Desktop Composition:** Legend card $\rightarrow$ D3 interest overview chart $\rightarrow$ Per-account breakdown rows (Summary card + Chart).
+- **Desktop Composition:** Legend card $\rightarrow$ ECharts interest overview chart $\rightarrow$ Per-account breakdown rows (Summary card + Chart).
 - **Mobile Transformation:** Legend card $\rightarrow$ Responsive overview chart $\rightarrow$ Stacked per-account cards.
-- **Loading Behavior:** ChartFrame skeletons.
+- **Loading Behavior:** ECharts chart skeletons.
 - **Empty Behavior:** EmptyState indicating no liability interest activity.
 - **Error Behavior:** Local error alert.
-- **Preserved Functionality:** D3 interest timeline charts, per-account SVG rendering.
+- **Preserved Functionality:** ECharts interest timeline charts, per-account rendering.
 
 #### 27. `/liabilities/repayment` — Loan Repayment
 
@@ -1422,14 +1475,14 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Question:** Are there any journal syntax, account, or configuration diagnostics?
 - **Page Header:** Title: "Doctor", Description: "Diagnostic checks for journal health and configuration issues".
 - **Primary Information:** Issue counter banner with pass/fail color status.
-- **Secondary Information:** D3 diagnosis issue cards and recommendations.
+- **Secondary Information:** Diagnosis issue cards and recommendations.
 - **Primary Actions:** Re-run diagnosis.
-- **Desktop Composition:** Issue count banner $\rightarrow$ Grid of D3 diagnosis issue cards.
+- **Desktop Composition:** Issue count banner $\rightarrow$ Grid of Diagnosis issue cards.
 - **Mobile Transformation:** Issue count banner $\rightarrow$ Stack of issue cards.
 - **Loading Behavior:** Spinner with "Running diagnostic checks...".
 - **Empty Behavior:** "0 potential issues found" clean health banner.
 - **Error Behavior:** Diagnostic runner failure alert.
-- **Preserved Functionality:** D3 diagnosis renderer (`renderIssues`), error classification.
+- **Preserved Functionality:** Diagnosis renderer, error classification.
 
 #### 31. `/more/goals` — Goals Overview
 
@@ -1458,10 +1511,10 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Actions:** Forecast model update.
 - **Desktop Composition:** MetricStrip $\rightarrow$ Progress bar $\rightarrow$ Main panel (Progress chart + Investment chart + Balance) \| Side panel (Recent postings).
 - **Mobile Transformation:** Metrics $\rightarrow$ Progress bar $\rightarrow$ Progress chart $\rightarrow$ Investment chart $\rightarrow$ Balance $\rightarrow$ Recent postings.
-- **Loading Behavior:** Metric strip and ChartFrame skeletons.
+- **Loading Behavior:** Metric strip and ECharts chart skeletons.
 - **Empty Behavior:** ZeroState for goals without linked investment accounts.
 - **Error Behavior:** ARIMA forecast calculation fallback banner.
-- **Preserved Functionality:** Client-side ARIMA forecasting (`arima/async`), breakpoint milestone computation, D3 progress & investment timeline charts.
+- **Preserved Functionality:** Client-side ARIMA forecasting (`arima/async`), breakpoint milestone computation, ECharts progress & investment timeline charts.
 
 #### 33. `/more/goals/savings/[slug]` — Savings Goal Detail
 
@@ -1552,12 +1605,12 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Grid of harvestable asset cards showing unrealized losses, gains, and potential tax savings.
 - **Secondary Information:** Lot holding duration (short-term vs long-term classification).
 - **Primary Actions:** View harvestable lots.
-- **Desktop Composition:** Responsive grid of harvestable asset cards (`#d3-harvestables`).
+- **Desktop Composition:** Responsive grid of harvestable asset cards .
 - **Mobile Transformation:** Single-column list of harvestable opportunity cards.
 - **Loading Behavior:** Skeleton card frames.
 - **Empty Behavior:** "No tax harvesting opportunities found" clean status banner.
 - **Error Behavior:** Local error box.
-- **Preserved Functionality:** D3 harvestables renderer (`renderHarvestables`), lot-level tax offset calculations.
+- **Preserved Functionality:** ECharts harvestables renderer, lot-level tax offset calculations.
 
 #### 39. `/more/tax/schedule_al` — Schedule AL
 
@@ -1568,14 +1621,30 @@ The table and 40 individual route design contracts below represent the binding U
 - **Primary Information:** Schedule AL report table (Code, Section, Details, Right-aligned Amount).
 - **Secondary Information:** As-of date timestamp.
 - **Primary Actions:** Financial year selector.
-- **Desktop Composition:** As-of date indicator $\rightarrow$ Full-width dense Schedule AL table (`.d3-schedule-al`).
+- **Desktop Composition:** As-of date indicator $\rightarrow$ Full-width dense Schedule AL table .
 - **Mobile Transformation:** Responsive table with horizontal scroll and right-aligned amount column.
 - **Loading Behavior:** Skeleton table rows.
 - **Empty Behavior:** ZeroState indicating no Schedule AL data for selected financial year.
 - **Error Behavior:** Local error alert.
-- **Preserved Functionality:** D3 Schedule AL breakdowns renderer (`renderBreakdowns`), Indian tax schedule formatting.
+- **Preserved Functionality:** Schedule AL breakdowns renderer, Indian tax schedule formatting.
 
-#### 40. `/login` — Login
+#### 40. `/insights` — Insights
+
+- **Page Name:** Insights
+- **Primary Archetype:** Analysis
+- **Primary Question:** What changed in my finances this month and why?
+- **Page Header:** Title: "Insights"; Subtoolbar: Month picker, Category filter pills, Grid/List view toggle.
+- **Primary Information:** InsightsSummaryBar (total insights count, severity breakdown), Grid or list of `InsightCard` components.
+- **Secondary Information:** Per-insight detail: value change, percentage change, comparison period, driver account, baseline quality indicators.
+- **Primary Actions:** Month selector, Category filter (All, Spending, Savings, Net Worth, Budget, Recurring, Investments, Cash), View mode toggle (grid/list).
+- **Desktop Composition:** PageHeader with month picker $\rightarrow$ Category filter BoxedTabs $\rightarrow$ InsightsSummaryBar $\rightarrow$ ResponsiveGrid of InsightCard components.
+- **Mobile Transformation:** Month picker $\rightarrow$ Category pills (horizontal scroll) $\rightarrow$ Summary bar $\rightarrow$ Single-column InsightCard stack.
+- **Loading Behavior:** Spinner with "Loading insights..." status.
+- **Empty Behavior:** ZeroState indicating no insights available for the selected period.
+- **Error Behavior:** Local error banner with retry.
+- **Preserved Functionality:** Backend-computed insights with period comparison, category filtering, severity scoring, baseline quality assessment, drill-down navigation via `href` links to relevant pages.
+
+#### 41. `/login` — Login
 
 - **Page Name:** Login
 - **Primary Archetype:** Tool
@@ -1588,14 +1657,14 @@ The table and 40 individual route design contracts below represent the binding U
 - **Mobile Transformation:** Full-bleed centered mobile form with touch-friendly inputs ($\ge 44\text{px}$).
 - **Loading Behavior:** Button loading state during authentication attempt.
 - **Empty Behavior:** Form ready for input.
-- **Error Behavior:** Red inline error message (`p.help.is-danger`) below password field.
+- **Error Behavior:** Red inline error message below password field using semantic `text-negative` styling.
 - **Preserved Functionality:** `login(username, password)` core authentication utility, redirect to `/` on success.
 
 ---
 
 ## 18. Critical Functionality Preservation Guarantees
 
-Future frontend implementation phases must guarantee that no existing capability is lost during visual refinement.
+Ongoing frontend maintenance and future enhancements must guarantee that no existing capability is lost or degraded during visual refinement.
 
 ### 18.1 Ledger Import Preservation Guarantees
 
@@ -1633,7 +1702,7 @@ Future frontend implementation phases must guarantee that no existing capability
 
 ## 19. Testing & Visual Regression Strategy
 
-All redesigned components and routes will be verified against the existing Playwright visual regression suite (`frontend/tests/browser/`).
+All components and routes are verified against the Playwright visual regression and browser test suite (`frontend/tests/browser/`).
 
 ### 19.1 Target Test Matrix
 
@@ -1653,62 +1722,68 @@ Every route is validated across four canonical viewport and theme variants:
 
 ---
 
-## 20. Phased Migration Plan & Execution Sequence
+## 20. Migration Retrospective
+
+The frontend migration has been completed. The following phases were executed:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ PHASE 3: Canonical UI/UX Specification (THIS CONTRACT)      │
+│ PHASE 3: Canonical UI/UX Specification ✓                     │
+│   • This document was created as the design contract        │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PHASE 4: UI Foundation & Design Lab                         │
-│   • Tailwind CSS v4 Setup (Semantic Tokens, Preflight Off)  │
+│ PHASE 4: UI Foundation & Design Lab ✓                        │
+│   • Tailwind CSS v4 Setup (Semantic Tokens, Preflight)      │
 │   • Core Paisa UI Primitives (Button, Dialog, Input, etc.)  │
 │   • Interactive Design Lab (/dev/ui)                        │
+│   • CSS Layer Architecture (@layer theme, base, ...)        │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PHASE 5: Core Validation Slice                              │
-│   1. Dashboard (Validates Shell, Metrics, D3 Charts)        │
+│ PHASE 5: Core Validation Slice ✓                             │
+│   1. Dashboard (Validates Shell, Metrics, ECharts)           │
 │   2. Transactions (Validates Data Explorer, Virtualization) │
 │   3. Ledger Import (Validates Multi-Pane Workflow & Rules)  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PHASE 6: Archetype-by-Archetype Route Migration             │
-│   • Analysis Routes (Expenses, Cash Flow, Net Worth)        │
-│   • Data Explorers (Postings, Prices, Schedule AL)          │
-│   • Detail Views (Credit Cards, Goals, Gains)               │
-│   • Operational Views (Budget, Recurring)                   │
-│   • Configuration & Tools (Editor, Sheets, Doctor, Logs)    │
+│ PHASE 6: Archetype-by-Archetype Route Migration ✓            │
+│   • All Analysis, Data Explorer, Detail, Operational,       │
+│     Configuration, and Tool routes migrated                 │
+│   • D3.js fully replaced by ECharts 6                       │
+│   • 5-area library architecture enforced                    │
+│   • New feature: Insights page (/insights)                  │
+│   • Command Palette implemented (Ctrl+K / Cmd+K)            │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PHASE 7: Final Decommissioning & Preflight Re-enablement    │
-│   • Bulma Removal (Bulma = 0)                               │
-│   • SCSS Removal (Sass = 0)                                 │
-│   • Enable Tailwind CSS v4 Preflight                        │
-│   • Full Visual Regression Suite Sign-off                   │
-└──────────────────────────────┘
+│ PHASE 7: Final Decommissioning & Preflight Enablement ✓      │
+│   • Bulma Removal Complete (Bulma = 0)                      │
+│   • SCSS Removal Complete (Sass = 0)                        │
+│   • Tailwind CSS v4 Preflight Enabled                       │
+│   • Playwright Visual Regression Suite Operational           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 21. Explicit Non-Goals & Architectural Boundaries
+## 21. Architectural Boundaries
 
-To avoid project creep, the following boundaries are strictly enforced:
+The following boundaries are enforced to maintain code quality:
 
-- **No Backend Changes:** Go backend APIs, ledger CLI invocations, and calculations remain untouched.
+- **No Backend Changes:** Go backend APIs, ledger CLI invocations, and calculations remain untouched by frontend work.
 - **No Financial Math Alteration:** Formatting, XIRR calculations, gain/loss logic, and balance equations remain identical.
-- **No Routing Structure Changes:** All existing 40 SvelteKit route URLs remain unchanged.
-- **No D3 Replacement:** D3 remains the chart rendering engine.
-- **No CodeMirror Replacement:** CodeMirror remains the editor engine.
+- **No Routing Structure Changes:** All existing 41 SvelteKit route URLs are stable. New routes require spec updates.
+- **No ECharts Replacement:** ECharts 6 is the chart rendering engine; alternative chart libraries are not introduced.
+- **No CodeMirror Replacement:** CodeMirror 6 remains the editor engine.
 - **No Immediate Tabulator Removal:** Tabulator remains wrapped inside `<Table />`.
-- **No Big-Bang Redesign PR:** Migration proceeds incrementally through verified slices.
+- **Library Boundary Enforcement:** `deno task architecture` enforces the 5-area ownership model (§12.1). Domain cannot depend on UI; shared cannot depend on features.
+- **No Bulma/SCSS Regression:** No new Bulma classes, SCSS files, or `@import "bulma"` rules may be added.
 
 ---
 
@@ -1716,26 +1791,31 @@ To avoid project creep, the following boundaries are strictly enforced:
 
 During repository inspection, the following discrepancies were identified and resolved:
 
-1. **Tax Section Visibility:** In master, the `Tax` navigation group is dynamically visible only when `USER_CONFIG.default_currency == "INR"`. The redesign maintains this conditional display rule.
+1. **Tax Section Visibility:** The `Tax` navigation group is dynamically visible only when `USER_CONFIG.default_currency == "INR"`. This conditional display rule is enforced.
 2. **Non-Route Navigation Groups:** `Cash Flow`, `Expenses`, `Assets`, and `Liabilities` do not have standalone index page routes; they are expandable navigation groups.
-3. **Transaction Edit Execution:** Direct destructive in-place editing from visual mockups is rejected in favor of Paisa's canonical safe 3-step Bulk Edit flow (Configure $\rightarrow$ Preview Diff $\rightarrow$ Save).
+3. **Transaction Edit Execution:** Direct destructive in-place editing is rejected in favor of Paisa's canonical safe 3-step Bulk Edit flow (Configure $\rightarrow$ Preview Diff $\rightarrow$ Save).
 4. **Mockup Feature Boundaries:** Features not supported by the Paisa engine (Pay Now, direct banking transfers, receipt uploads, embedded terminals, Vim modes) are excluded.
+5. **Token File Duality:** Two token files exist: `foundation.css` (core semantic tokens + Tailwind mapping) and `tokens.css` (extended token set for component-specific theming). Both are canonical; `foundation.css` is the primary Tailwind integration point.
 
 ---
 
-## 23. Phase 3 Exit Criteria
+## 23. Migration Completion Status
 
-Phase 3 is officially complete when all of the following conditions are met:
+The frontend migration is complete. All deliverables have been met:
 
-- [x] All 40 current production routes are inventoried.
-- [x] Every single production route has a concrete, binding design contract.
+- [x] All 41 production routes are inventoried and have canonical design contracts.
 - [x] All 8 core page archetypes are defined with structural desktop and mobile wireframes.
 - [x] Desktop to mobile layout transformations are explicitly defined.
-- [x] Critical existing business functionality (Import parsing/prediction, Editor balance validation, Bulk edit preview, Budget forecasts) is explicitly preserved.
+- [x] Critical existing business functionality (Import parsing/prediction, Editor balance validation, Bulk edit preview, Budget forecasts) is preserved.
 - [x] Global AppShell, Information Architecture, semantic tokens, typography, and state models are documented.
-- [x] Implementation boundaries and explicit non-goals are established.
-- [x] Zero production frontend or backend code was modified.
-- [x] Tailwind CSS v4 / Bits UI / Bulma migration has NOT been started.
+- [x] Architectural boundaries and library ownership rules are established and enforced.
+- [x] Bulma fully removed (Bulma = 0), SCSS fully removed (Sass = 0), Tailwind Preflight enabled.
+- [x] D3.js fully replaced by ECharts 6 across all visualization routes.
+- [x] 5-area library architecture (`api/`, `domain/`, `features/`, `shared/`, `generated/`) enforced via `deno task architecture`.
+- [x] Command Palette (`Ctrl+K` / `Cmd+K`) implemented.
+- [x] Insights page (`/insights`) added as route #40.
+- [x] Development UI Design Lab (`/dev/ui`) operational.
+- [x] Prediction-specific color tokens added for import workflow confidence visualization.
 
 ---
-*End of Canonical UI/UX Specification — Phase 3*
+*End of As-Built UI/UX Specification*
