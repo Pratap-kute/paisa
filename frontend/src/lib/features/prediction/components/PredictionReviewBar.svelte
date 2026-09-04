@@ -139,8 +139,8 @@ button.paisa-review-chip {
   min-height: 24px;
   border-radius: var(--paisa-radius-full, 9999px);
   border: 1px solid var(--paisa-border-subtle);
-  background-color: var(--paisa-surface-card);
-  color: var(--paisa-text-secondary);
+  background-color: var(--paisa-surface);
+  color: var(--paisa-muted-foreground);
   cursor: pointer;
   transition: all 0.12s ease;
   user-select: none;
@@ -149,8 +149,8 @@ button.paisa-review-chip {
 
   &:hover {
     background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-primary);
-    border-color: var(--paisa-border-default);
+    color: var(--paisa-foreground);
+    border-color: var(--paisa-border);
   }
 
   &.is-active {
@@ -204,11 +204,11 @@ button.paisa-review-chip {
 
 .paisa-progress-text {
   font-size: 0.6875rem;
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   white-space: nowrap;
 
   strong {
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
   }
 }
 

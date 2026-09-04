@@ -7,7 +7,7 @@
 .tabulator {
   width: 100%;
   background-color: var(--paisa-table-bg);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   border-radius: var(--paisa-radius-sm);
   border: 1px solid var(--paisa-table-border);
 }
@@ -36,7 +36,7 @@
   .tabulator .tabulator-header .tabulator-col.tabulator-sortable.tabulator-col-sorter-element:hover,
   .tabulator .tabulator-header .tabulator-col:hover {
     background-color: var(--paisa-surface-hover) !important;
-    color: var(--paisa-text-primary) !important;
+    color: var(--paisa-foreground) !important;
   }
 }
 
@@ -44,7 +44,7 @@
 .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="ascending"],
 .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="descending"] {
   background-color: var(--paisa-table-header-bg);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
 }
 
 .tabulator .tabulator-header .tabulator-col.tabulator-moving {
@@ -80,7 +80,7 @@
 
 /* Sorter arrows matching design tokens */
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter .tabulator-arrow {
-  border-bottom: 6px solid var(--paisa-text-muted);
+  border-bottom: 6px solid var(--paisa-muted-foreground);
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
 }
@@ -113,18 +113,18 @@
 
 .tabulator .tabulator-tableholder .tabulator-table {
   background-color: var(--paisa-table-bg) !important;
-  color: var(--paisa-text-primary) !important;
+  color: var(--paisa-foreground) !important;
 }
 
 .tabulator-row,
 .tabulator-row.tabulator-row-even {
   background-color: var(--paisa-table-bg) !important;
-  color: var(--paisa-text-primary) !important;
+  color: var(--paisa-foreground) !important;
 }
 
 .tabulator .tabulator-row {
   background-color: var(--paisa-table-bg);
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   border-bottom: 1px solid var(--paisa-table-border);
   font-size: var(--paisa-font-size-sm);
 }
@@ -153,7 +153,7 @@
 
 .tabulator .tabulator-footer {
   background-color: var(--paisa-table-header-bg);
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   border-top: 1px solid var(--paisa-table-border);
 }
 

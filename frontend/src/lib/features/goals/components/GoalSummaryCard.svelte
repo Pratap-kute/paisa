@@ -42,16 +42,16 @@ let completed = $derived(percentComplete(goal));
       {#if action}
         <span
           use:action
-          class="mr-2 text-lg text-[var(--paisa-muted-foreground)] paisa-clickable shrink-0"
+          class="mr-2 text-lg text-muted-foreground paisa-clickable shrink-0"
         >
           <i class="fas fa-grip-vertical"></i>
         </span>
       {/if}
       <a
-        class="secondary-link text-[var(--paisa-muted-foreground)] min-w-0"
+        class="secondary-link text-muted-foreground min-w-0"
         href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
       >
-        <h4 class="text-xl text-[var(--paisa-muted-foreground)] truncate">{goal.name}</h4>
+        <h4 class="text-xl text-muted-foreground truncate">{goal.name}</h4>
       </a>
     </div>
     {#if goal.icon}
@@ -69,7 +69,7 @@ let completed = $derived(percentComplete(goal));
   </div>
   <Progress small showPercent={false} progressPercent={completed} />
   <div
-    class="flex justify-between text-[var(--paisa-muted-foreground)] text-sm mt-1">
+    class="flex justify-between text-muted-foreground text-sm mt-1">
     <div>{formatPercentage(completed / 100, 2)}</div>
     <div>{formatDate(goal.targetDate)}</div>
   </div>

@@ -17,11 +17,11 @@ let { assetBreakdown }: Props = $props();
 
 <Card padding="sm" interactive>
   <div class="my-1 flex items-center justify-between">
-    <div class="mr-2 truncate text-[var(--paisa-muted-foreground)] custom-icon"
+    <div class="mr-2 truncate text-muted-foreground custom-icon"
       title={assetBreakdown.group}>
       <span style={accountColorStyle(firstName(assetBreakdown.group))}
       >{iconText(assetBreakdown.group)}</span>
-      <a class="text-[var(--paisa-primary)] hover:underline"
+      <a class="text-primary hover:underline"
         href="/assets/gain/{assetBreakdown.group}">
         {restName(restName(assetBreakdown.group))}</a>
     </div>

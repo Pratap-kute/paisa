@@ -35,9 +35,9 @@ onMount(async () => {
 
   <Section>
     <ZeroState item={!isEmpty}>
-      <p class="text-sm text-[var(--paisa-muted-foreground)]">
-        <strong class="text-[var(--paisa-foreground)]">Oops!</strong> You haven't configured any credit cards yet. Checkout the
-        <a href={helpUrl("credit-card")} class="text-[var(--paisa-primary)] underline">docs</a> page to get started.
+      <p class="text-sm text-muted-foreground">
+        <strong class="text-foreground">Oops!</strong> You haven't configured any credit cards yet. Checkout the
+        <a href={helpUrl("credit-card")} class="text-primary underline">docs</a> page to get started.
       </p>
     </ZeroState>
 

@@ -156,9 +156,9 @@ onMount(async () => {
         </ChartFrame>
       {:else}
         <ZeroState item={[]}>
-          <p class="text-sm text-[var(--paisa-muted-foreground)]">
+          <p class="text-sm text-muted-foreground">
             No allocation targets configured.
-            <a href="/more/config" class="text-[var(--paisa-primary)] underline">
+            <a href="/more/config" class="text-primary underline">
               Configure allocation targets
             </a>
             in settings to compare current vs target weights.
@@ -190,13 +190,13 @@ onMount(async () => {
       </Section>
 
       <Section title="Allocation Table" subtitle="Leaf accounts with share of portfolio">
-        <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+        <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle">
           <Table data={aggregateLeafNodes} {columns} options={{ layout: "fitDataFill" }} />
         </div>
       </Section>
     {:else}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           No asset allocation data available.
         </p>
       </ZeroState>

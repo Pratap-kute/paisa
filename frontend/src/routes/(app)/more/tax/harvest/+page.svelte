@@ -65,9 +65,9 @@ function gainStatus(value: number): "positive" | "negative" | "neutral" {
 }
 
 function gainClass(value: number) {
-  if (value > 0) return "text-[var(--paisa-positive)]";
-  if (value < 0) return "text-[var(--paisa-negative)]";
-  return "text-[var(--paisa-muted-foreground)]";
+  if (value > 0) return "text-positive";
+  if (value < 0) return "text-negative";
+  return "text-muted-foreground";
 }
 
 onMount(async () => {
@@ -97,13 +97,13 @@ onMount(async () => {
     {#snippet actions()}
       {#if !isEmpty && harvestables.length > 0}
         <div class="flex items-center gap-2">
-          <label for="holding-select" class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+          <label for="holding-select" class="text-xs font-medium text-muted-foreground">
             Holding:
           </label>
           <select
             id="holding-select"
             bind:value={selectedAccount}
-            class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-2.5 py-1 text-xs font-semibold text-[var(--paisa-text-primary)] shadow-sm transition-colors focus:border-[var(--paisa-brand-primary)] focus:outline-none"
+            class="rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-2.5 py-1 text-xs font-semibold text-foreground shadow-sm transition-colors focus:border-[var(--paisa-primary)] focus:outline-none"
           >
             {#each harvestables as h}
               <option value={h.account}>
@@ -160,10 +160,10 @@ onMount(async () => {
           <Card padding="none" class="w-full overflow-hidden">
             {#snippet header()}
               <div class="flex items-center justify-between">
-                <span class="text-base font-semibold text-[var(--paisa-foreground)]">
+                <span class="text-base font-semibold text-foreground">
                   All Harvestable Holdings Summary
                 </span>
-                <span class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                <span class="text-xs font-medium text-muted-foreground">
                   {harvestables.length} holdings
                 </span>
               </div>
@@ -172,7 +172,7 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+                  <tr class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground">
                     <th class="px-3.5 py-2.5">Holding Account</th>
                     <th class="px-3.5 py-2.5">Tax Category</th>
                     <th class="px-3.5 py-2.5 text-right">Harvestable Units</th>
@@ -187,33 +187,33 @@ onMount(async () => {
                     {@const val = h.harvestable_units * h.current_unit_price}
                     {@const pct = harvestablePercentage(h)}
                     <tr
-                      class="cursor-pointer transition-colors hover:bg-[var(--paisa-surface-hover)]"
+                      class="cursor-pointer transition-colors hover:bg-surface-hover"
                       onclick={() => (selectedAccount = h.account)}
                     >
-                      <td class="whitespace-nowrap px-3.5 py-2.5 font-semibold text-[var(--paisa-brand-primary)]">
+                      <td class="whitespace-nowrap px-3.5 py-2.5 font-semibold text-primary">
                         {restName(h.account)}
                       </td>
                       <td class="whitespace-nowrap px-3.5 py-2.5">
-                        <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+                        <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-xs font-mono text-muted-foreground">
                           {h.tax_category}
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-[var(--paisa-text-primary)]">
+                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-foreground">
                         {formatFloat(h.harvestable_units)}
-                        <span class="ml-1 text-[0.6875rem] text-[var(--paisa-text-muted)]">
+                        <span class="ml-1 text-[0.6875rem] text-muted-foreground">
                           / {formatFloat(h.total_units)}
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-[var(--paisa-text-secondary)]">
+                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-muted-foreground">
                         {formatCurrency(h.current_unit_price, 2)}
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums text-[var(--paisa-text-primary)]">
+                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums text-foreground">
                         {formatCurrency(val)}
                       </td>
                       <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums {gainClass(h.unrealized_gain)}">
                         {formatCurrency(h.unrealized_gain)}
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-[var(--paisa-positive)]">
+                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-positive">
                         {formatFloat(pct)}%
                       </td>
                     </tr>
@@ -224,7 +224,7 @@ onMount(async () => {
           </Card>
 
           <div class="flex flex-col gap-[var(--paisa-space-4)]">
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               All Holding Details & Simulators
             </h3>
             {#each harvestables as h (h.account)}

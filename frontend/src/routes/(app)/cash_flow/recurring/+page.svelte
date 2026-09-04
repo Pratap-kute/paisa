@@ -92,7 +92,7 @@ onMount(async () => {
   {#if !isEmpty}
     <Section title="Calendar" subtitle="Scheduled recurring items for the selected month">
       <div
-        class="mb-3 hidden grid-cols-7 gap-2 text-center text-xs font-semibold uppercase tracking-wide text-[var(--paisa-muted-foreground)] md:grid"
+        class="mb-3 hidden grid-cols-7 gap-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid"
       >
         {#each dayjs.weekdaysShort(true) as day}
           <div>{day}</div>
@@ -122,7 +122,7 @@ onMount(async () => {
     {#if isLoading && !isEmpty}
       <div class="flex flex-col gap-3" aria-hidden="true">
         {#each Array(4) as _}
-          <div class="h-16 animate-pulse rounded-lg bg-[var(--paisa-surface-hover)]"></div>
+          <div class="h-16 animate-pulse rounded-lg bg-surface-hover"></div>
         {/each}
       </div>
     {:else}

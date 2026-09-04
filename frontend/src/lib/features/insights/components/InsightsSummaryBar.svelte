@@ -37,21 +37,21 @@ let compName = $derived.by(() => {
 </script>
 
 <div
-  class="rounded-xl p-3.5 sm:p-4 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
+  class="rounded-xl p-3.5 sm:p-4 bg-surface border border-border-subtle shadow-xs">
   <div
     class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <!-- Left: Status Greeting -->
     <div class="space-y-0.5">
       <div class="flex items-center gap-1.5">
         <span
-          class="inline-flex items-center justify-center h-1.5 w-1.5 rounded-full bg-[var(--paisa-primary)]"></span>
+          class="inline-flex items-center justify-center h-1.5 w-1.5 rounded-full bg-primary"></span>
         <span
-          class="text-[11px] font-semibold uppercase tracking-wider text-[var(--paisa-primary)]">
+          class="text-[11px] font-semibold uppercase tracking-wider text-primary">
           {monthName} Financial Health
         </span>
       </div>
       <h3
-        class="text-sm sm:text-base font-bold text-[var(--paisa-foreground)] tracking-tight">
+        class="text-sm sm:text-base font-bold text-foreground tracking-tight">
         {#if criticalCount > 0}
           {criticalCount} {criticalCount === 1 ? 'area requires' : 'areas require'} attention
         {:else if insights.length > 0}
@@ -60,7 +60,7 @@ let compName = $derived.by(() => {
           All clear for this month
         {/if}
       </h3>
-      <p class="text-[11px] text-[var(--paisa-muted-foreground)]">
+      <p class="text-[11px] text-muted-foreground">
         Compared against {compName} {isPartial ? '(month-to-date)' : '(full month)'}.
       </p>
     </div>
@@ -68,22 +68,22 @@ let compName = $derived.by(() => {
     <!-- Right: Metric Stat Chips -->
     <div class="flex items-center gap-2 flex-wrap">
       {#if criticalCount > 0}
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--paisa-negative-subtle)] border border-[var(--paisa-negative)]/20 text-[var(--paisa-negative)]">
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-negative-subtle border border-[var(--paisa-negative)]/20 text-negative">
           <i class="fa-solid fa-triangle-exclamation text-xs"></i>
           <span class="text-xs font-bold">{criticalCount} Attention</span>
         </div>
       {/if}
 
       {#if positiveCount > 0}
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--paisa-positive-subtle)] border border-[var(--paisa-positive)]/20 text-[var(--paisa-positive)]">
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-positive-subtle border border-[var(--paisa-positive)]/20 text-positive">
           <i class="fa-solid fa-arrow-trend-up text-xs"></i>
           <span class="text-xs font-bold">{positiveCount} Positive</span>
         </div>
       {/if}
 
-      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] text-[var(--paisa-muted-foreground)]">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-hover border border-border-subtle text-muted-foreground">
         <i class="fa-solid fa-list-check text-xs"></i>
-        <span class="text-xs font-semibold text-[var(--paisa-foreground)]">{insights.length} Total</span>
+        <span class="text-xs font-semibold text-foreground">{insights.length} Total</span>
       </div>
     </div>
   </div>

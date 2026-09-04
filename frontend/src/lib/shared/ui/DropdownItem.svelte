@@ -23,7 +23,7 @@ let {
   {disabled}
   {textValue}
   onSelect={onselect}
-  class="paisa-dropdown-item flex cursor-default select-none items-center px-3 py-2 text-sm text-[var(--paisa-foreground)] outline-none data-[highlighted]:bg-[var(--paisa-surface-hover)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 {className}"
+  class="paisa-dropdown-item flex cursor-default select-none items-center px-3 py-2 text-sm text-foreground outline-none data-[highlighted]:bg-surface-hover data-[disabled]:pointer-events-none data-[disabled]:opacity-50 {className}"
 >
   {@render children?.()}
 </DropdownMenu.Item>

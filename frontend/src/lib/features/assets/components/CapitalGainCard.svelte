@@ -19,9 +19,9 @@ let activeGains = $derived(
 );
 
 function gainClass(value: number) {
-  if (value > 0) return "text-[var(--paisa-positive)]";
-  if (value < 0) return "text-[var(--paisa-negative)]";
-  return "text-[var(--paisa-muted-foreground)]";
+  if (value > 0) return "text-positive";
+  if (value < 0) return "text-negative";
+  return "text-muted-foreground";
 }
 </script>
 
@@ -29,10 +29,10 @@ function gainClass(value: number) {
   {#if !hideHeader}
     {#snippet header()}
       <div class="flex items-center justify-between">
-        <span class="text-base font-semibold text-[var(--paisa-foreground)]">
+        <span class="text-base font-semibold text-foreground">
           {financialYear}
         </span>
-        <span class="text-xs font-medium text-[var(--paisa-muted-foreground)]">
+        <span class="text-xs font-medium text-muted-foreground">
           {activeGains.length} {activeGains.length === 1 ? "asset" : "assets"} realized
         </span>
       </div>
@@ -42,7 +42,7 @@ function gainClass(value: number) {
   <div class="w-full overflow-x-auto">
     <table class="w-full min-w-[980px] border-collapse text-sm">
       <thead>
-        <tr class="border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] text-left text-xs font-medium text-[var(--paisa-muted-foreground)]">
+        <tr class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground">
           <th class="w-10 px-3 py-2.5 text-center"></th>
           <th class="px-3 py-2.5">Asset Account</th>
           <th class="px-3 py-2.5">Tax Category</th>
@@ -62,43 +62,43 @@ function gainClass(value: number) {
           <Toggleable>
             {#snippet toggle({ active, onclick })}
               <tr
-                class="cursor-pointer transition-colors hover:bg-[var(--paisa-surface-hover)] {active
-                  ? 'bg-[var(--paisa-surface-hover)]'
+                class="cursor-pointer transition-colors hover:bg-surface-hover {active
+                  ? 'bg-surface-hover'
                   : ''}"
                 onclick={(e) => onclick(e)}
               >
                 <td class="px-3 py-2.5 text-center">
-                  <span class="inline-flex h-5 w-5 items-center justify-center rounded text-[var(--paisa-primary)] transition-transform">
+                  <span class="inline-flex h-5 w-5 items-center justify-center rounded text-primary transition-transform">
                     <i
                       class="fas {active ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs"
                       aria-hidden="true"
                     ></i>
                   </span>
                 </td>
-                <td class="px-3 py-2.5 font-medium text-[var(--paisa-text-primary)]">
+                <td class="px-3 py-2.5 font-medium text-foreground">
                   {cg.account}
                 </td>
                 <td class="px-3 py-2.5">
-                  <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2 py-0.5 text-xs font-mono text-[var(--paisa-text-secondary)]">
+                  <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-xs font-mono text-muted-foreground">
                     {cg.tax_category}
                   </span>
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-[var(--paisa-text-primary)]">
+                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
                   {formatFloat(fy.units)}
                 </td>
                 <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
-                  <div class="font-medium text-[var(--paisa-text-primary)]">
+                  <div class="font-medium text-foreground">
                     {formatCurrency(fy.purchase_price)}
                   </div>
-                  <div class="text-[0.6875rem] text-[var(--paisa-text-muted)]">
+                  <div class="text-[0.6875rem] text-muted-foreground">
                     {formatCurrency(fy.units > 0 ? fy.purchase_price / fy.units : 0, 2)} / unit
                   </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums">
-                  <div class="font-medium text-[var(--paisa-text-primary)]">
+                  <div class="font-medium text-foreground">
                     {formatCurrency(fy.sell_price)}
                   </div>
-                  <div class="text-[0.6875rem] text-[var(--paisa-text-muted)]">
+                  <div class="text-[0.6875rem] text-muted-foreground">
                     {formatCurrency(fy.units > 0 ? fy.sell_price / fy.units : 0, 2)} / unit
                   </div>
                 </td>
@@ -108,13 +108,13 @@ function gainClass(value: number) {
                 <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(fy.tax.taxable)}">
                   {formatCurrency(fy.tax.taxable)}
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.short_term !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.short_term !== 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}">
                   {formatCurrency(fy.tax.short_term)}
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.long_term !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.long_term !== 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}">
                   {formatCurrency(fy.tax.long_term)}
                 </td>
-                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.slab !== 0 ? 'font-semibold text-[var(--paisa-text-primary)]' : 'text-[var(--paisa-muted-foreground)]'}">
+                <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums {fy.tax.slab !== 0 ? 'font-semibold text-foreground' : 'text-muted-foreground'}">
                   {formatCurrency(fy.tax.slab)}
                 </td>
               </tr>

@@ -116,18 +116,18 @@ function unlessZero(value: number, text: string) {
         />
       </div>
 
-      <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2.5 py-1.5 text-[0.8125rem] text-[var(--paisa-muted-foreground)] max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
+      <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised px-2.5 py-1.5 text-[0.8125rem] text-muted-foreground max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
         <p class="m-0 inline">
-          <b class="text-[var(--paisa-foreground)]">{filteredPostings.length}</b> posting(s)
+          <b class="text-foreground">{filteredPostings.length}</b> posting(s)
         </p>
       </div>
     </div>
 
     {#if postings}
-      <div class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
+      <div class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
         <div class="paisa-posting-table-container">
           <div class="paisa-posting-table">
-            <div class="posting-row items-baseline gap-1 px-3 pb-2 pt-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)]">
+            <div class="posting-row items-baseline gap-1 px-3 pb-2 pt-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
               <div>Date</div>
               <div>Description</div>
               <div>Account</div>
@@ -153,18 +153,18 @@ function unlessZero(value: number, text: string) {
                     {#if p}
                       {@const c = change(p)}
                       <div
-                    class="posting-row items-baseline gap-1 px-3 pt-1 transition-colors hover:bg-[var(--paisa-surface-hover)]"
+                    class="posting-row items-baseline gap-1 px-3 pt-1 transition-colors hover:bg-surface-hover"
                     {style}
                   >
-                    <div class="text-[0.8125rem] text-[var(--paisa-foreground)]">
+                    <div class="text-[0.8125rem] text-foreground">
                       {p.date.format("DD MMM YYYY")}
                     </div>
-                    <div class="paisa-truncate text-xs text-[var(--paisa-foreground)]" title={p.payee}>
+                    <div class="paisa-truncate text-xs text-foreground" title={p.payee}>
                       <PostingStatus posting={p} />
                       <PostingNote posting={p} />
                       <a class="secondary-link" href={postingUrl(p)}>{p.payee}</a>
                     </div>
-                    <div class="custom-icon paisa-truncate text-[0.8125rem] text-[var(--paisa-foreground)]" title={p.account}>
+                    <div class="custom-icon paisa-truncate text-[0.8125rem] text-foreground" title={p.account}>
                       <div class="flex">
                         <span class="mr-1" style={accountColorStyle(firstName(p.account))}
                           >{iconText(p.account)}</span
@@ -194,13 +194,13 @@ function unlessZero(value: number, text: string) {
               {/key}
             {:else}
               <ZeroState item={[]}>
-                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
+                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl text-muted-foreground">
                   <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                <div class="mb-1 text-[0.9375rem] font-semibold text-[var(--paisa-foreground)]">
+                <div class="mb-1 text-[0.9375rem] font-semibold text-foreground">
                   No postings match your search
                 </div>
-                <div class="max-w-[360px] text-[0.8125rem] text-[var(--paisa-muted-foreground)]">
+                <div class="max-w-[360px] text-[0.8125rem] text-muted-foreground">
                   Try adjusting your query terms, account filters, or date range.
                 </div>
               </ZeroState>
@@ -209,8 +209,8 @@ function unlessZero(value: number, text: string) {
         </div>
       </div>
     {:else}
-      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] px-6 py-16 text-sm text-[var(--paisa-muted-foreground)]">
-        <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paisa-border-strong)] border-t-[var(--paisa-primary)]"></div>
+      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"></div>
         <span>Loading postings...</span>
       </div>
     {/if}

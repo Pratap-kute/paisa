@@ -2,11 +2,13 @@ import { expect } from "@std/expect";
 import {
   extractDefinedCssVariables,
   findBitsUiViolations,
+  findBulmaClassViolations,
   findBulmaViolations,
-  findDeprecatedTokenViolations,
+  findForbiddenTokenViolations,
   findImportantViolations,
   findRawPaletteViolations,
   findUndefinedTokenViolations,
+  FORBIDDEN_BULMA_CLASSES,
 } from "./check_ui_spec.ts";
 
 Deno.test("findRawPaletteViolations catches arbitrary raw palette classes", () => {
@@ -74,6 +76,60 @@ Deno.test("findBulmaViolations catches old Bulma imports", () => {
   expect(violations[0].rule).toBe("no-bulma-imports");
 });
 
+Deno.test("findBulmaClassViolations catches removed classes in class attributes and directives", () => {
+  const sample = `
+    <div class="has-text-success is-size-7"></div>
+    <div class={'table ' + (compact ? 'is-narrow' : '')}></div>
+    <div class:has-text-right={alignAmounts}></div>
+  `;
+  const violations = findBulmaClassViolations(
+    "src/routes/(app)/sample/+page.svelte",
+    sample,
+  );
+  expect(violations.map((violation) => violation.detail)).toEqual([
+    expect.stringContaining("has-text-success"),
+    expect.stringContaining("is-size-7"),
+    expect.stringContaining("table"),
+    expect.stringContaining("is-narrow"),
+    expect.stringContaining("has-text-right"),
+  ]);
+  expect(
+    violations.every((violation) =>
+      violation.rule === "no-bulma-compat-classes"
+    ),
+  ).toBe(true);
+});
+
+Deno.test("findBulmaClassViolations covers every removed compatibility class", () => {
+  const content = `<div class="${
+    [...FORBIDDEN_BULMA_CLASSES].join(" ")
+  }"></div>`;
+  const violations = findBulmaClassViolations(
+    "src/lib/features/sample/Legacy.svelte",
+    content,
+  );
+  expect(violations.length).toBe(FORBIDDEN_BULMA_CLASSES.size);
+});
+
+Deno.test("findBulmaClassViolations avoids prose, selectors, and partial-name false positives", () => {
+  const sample = `
+    // Do not add has-text-danger to application markup.
+    const description = "table is-narrow";
+    const tableRows = [];
+    .has-text-info { color: red; }
+    <div class="paisa-table is-smallish has-text-greyish"></div>
+  `;
+  expect(
+    findBulmaClassViolations("src/routes/sample.svelte", sample),
+  ).toEqual([]);
+  expect(
+    findBulmaClassViolations(
+      "src/lib/shared/styles/legacy/bulma-compat.css",
+      `.has-text-info { color: red; }`,
+    ),
+  ).toEqual([]);
+});
+
 Deno.test("findImportantViolations enforces integration allowlist", () => {
   const sample = `.rule { color: red !important; }`;
   const disallowed = findImportantViolations("src/routes/+page.svelte", sample);
@@ -85,29 +141,66 @@ Deno.test("findImportantViolations enforces integration allowlist", () => {
     sample,
   );
   expect(allowed.length).toBe(0);
+
+  const removedCompatibilityFile = findImportantViolations(
+    "src/lib/shared/styles/legacy/bulma-compat.css",
+    sample,
+  );
+  expect(removedCompatibilityFile.length).toBe(1);
 });
 
-Deno.test("findDeprecatedTokenViolations catches deprecated tokens in app code", () => {
+Deno.test("findForbiddenTokenViolations catches removed tokens in every file", () => {
   const sample = `
     <span class="text-[var(--paisa-danger)] bg-[var(--paisa-danger-light)]">Error</span>
     <span class="text-[var(--paisa-success)] bg-[var(--paisa-success-light)]">OK</span>
     <span class="text-[var(--paisa-info)] bg-[var(--paisa-info-light)]">Info</span>
+    .legacy { color: var(--paisa-text-primary); background: var(--paisa-surface-card); }
   `;
-  const violations = findDeprecatedTokenViolations(
+  const violations = findForbiddenTokenViolations(
     "src/routes/(app)/sample/+page.svelte",
     sample,
   );
-  expect(violations.length).toBe(6);
-  expect(violations.every((v) => v.rule === "no-deprecated-paisa-tokens")).toBe(
+  expect(violations.length).toBe(8);
+  expect(violations.every((v) => v.rule === "no-forbidden-paisa-tokens")).toBe(
     true,
   );
 
-  // Allowed in legacy compatibility files
-  const allowed = findDeprecatedTokenViolations(
-    "src/lib/shared/styles/legacy-compat.css",
+  const definitionViolations = findForbiddenTokenViolations(
+    "src/lib/shared/theme/tokens.css",
     sample,
   );
-  expect(allowed.length).toBe(0);
+  expect(definitionViolations.length).toBe(8);
+});
+
+Deno.test("findForbiddenTokenViolations covers the complete removed token set", () => {
+  const removedTokens = [
+    "--paisa-canvas-bg",
+    "--paisa-surface-bg",
+    "--paisa-surface-card",
+    "--paisa-surface-active",
+    "--paisa-surface-muted",
+    "--paisa-text-primary",
+    "--paisa-text-secondary",
+    "--paisa-text-muted",
+    "--paisa-text-inverse",
+    "--paisa-brand-primary",
+    "--paisa-brand-primary-hover",
+    "--paisa-brand-primary-light",
+    "--paisa-brand-accent",
+    "--paisa-border-default",
+    "--paisa-success",
+    "--paisa-success-light",
+    "--paisa-danger",
+    "--paisa-danger-light",
+    "--paisa-info",
+    "--paisa-info-light",
+    "--paisa-warning-light",
+  ];
+  const violations = findForbiddenTokenViolations(
+    "src/lib/shared/styles/foundation.css",
+    removedTokens.map((token) => `${token}: red;`).join("\n"),
+  );
+  expect(violations.length).toBe(removedTokens.length);
 });
 
 Deno.test("findUndefinedTokenViolations flags undefined tokens but allows dynamic allowlist", () => {

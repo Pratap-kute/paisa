@@ -303,15 +303,15 @@ function handleKeydown(event: KeyboardEvent) {
           {#if option.value === activeId}
         <Card padding="none" class="w-full overflow-hidden">
           <!-- Section Title Bar -->
-          <div class="border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] p-4 sm:p-5">
+          <div class="border-b border-border bg-surface-raised p-4 sm:p-5">
             <div class="flex items-center justify-between gap-3">
               <div class="flex items-center gap-3">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--paisa-radius-md)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-brand-primary)] shadow-sm">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--paisa-radius-md)] bg-surface-raised text-primary shadow-sm">
                   <i class="fas {activeSection.icon} text-base"></i>
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <h2 class="m-0 text-base font-bold text-[var(--paisa-text-primary)]">
+                    <h2 class="m-0 text-base font-bold text-foreground">
                       {activeSection.label}
                     </h2>
                     {#if sectionCount != null}
@@ -319,7 +319,7 @@ function handleKeydown(event: KeyboardEvent) {
                     {/if}
                   </div>
                   {#if activeSection.description}
-                    <p class="mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">
+                    <p class="mt-0.5 text-xs text-muted-foreground">
                       {activeSection.description}
                     </p>
                   {/if}
@@ -332,7 +332,7 @@ function handleKeydown(event: KeyboardEvent) {
           <div class="p-4 sm:p-6">
             {#if error}
               <div
-                class="mb-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-[var(--paisa-negative-subtle)] px-4 py-3 text-xs font-mono whitespace-pre-wrap text-[var(--paisa-negative)] shadow-sm"
+                class="mb-4 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)]/20 bg-negative-subtle px-4 py-3 text-xs font-mono whitespace-pre-wrap text-negative shadow-sm"
                 role="alert"
               >
                 {error}
@@ -364,7 +364,7 @@ function handleKeydown(event: KeyboardEvent) {
 
           <!-- Sticky Action Bar -->
           <div
-            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--paisa-border-default)] bg-[var(--paisa-surface-raised)] px-4 py-3 sm:px-6"
+            class="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-3 border-t border-border bg-surface-raised px-4 py-3 sm:px-6"
           >
             <Button
               variant="ghost"

@@ -62,7 +62,7 @@ $effect(() => {
     <div class="paisa-diff-header">
       <div class="paisa-diff-title-area">
         <div class="paisa-diff-filename">
-          <i class="fa-solid fa-file-code text-[var(--paisa-primary)] mr-2"></i>
+          <i class="fa-solid fa-file-code text-primary mr-2"></i>
           {#if changedOldFiles.length > 0}
             <span>{changedOldFiles[selectedFileIndex]?.name}</span>
             <span class="paisa-diff-counter">[{selectedFileIndex + 1}/{changedNewFiles.length}]</span>
@@ -117,9 +117,9 @@ $effect(() => {
       <div class="diff-editor" bind:this={editorDom}></div>
       {#if changedOldFiles.length === 0}
         <div class="paisa-diff-empty">
-          <i class="fa-solid fa-circle-check text-2xl text-[var(--paisa-positive)] mb-2"></i>
+          <i class="fa-solid fa-circle-check text-2xl text-positive mb-2"></i>
           <p class="font-medium text-sm">No changes detected</p>
-          <p class="text-xs text-[var(--paisa-muted-foreground)] mt-1">Make sure the bulk edit arguments are correct.</p>
+          <p class="text-xs text-muted-foreground mt-1">Make sure the bulk edit arguments are correct.</p>
         </div>
       {/if}
     </div>

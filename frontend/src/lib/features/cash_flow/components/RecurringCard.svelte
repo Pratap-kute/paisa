@@ -23,16 +23,16 @@ let dueAmount = $derived(formatCurrencyCrude(totalRecurring(ts)));
 
 {#if compact}
   <div
-  class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3 transition-colors hover:bg-[var(--paisa-surface-hover)]"
+  class="rounded-lg border border-border-subtle bg-surface-raised p-3 transition-colors hover:bg-surface-hover"
 >
   <RecurringSchedule {schedule} amount={dueAmount} />
   <div
-    class="mt-1.5 flex flex-wrap items-center gap-2 px-2 text-xs text-[var(--paisa-muted-foreground)]">
+    class="mt-1.5 flex flex-wrap items-center gap-2 px-2 text-xs text-muted-foreground">
       <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
       {#if schedule?.scheduled}
         <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
         <span aria-hidden="true">·</span>
-        <span class={isPastDue ? "font-medium text-[var(--paisa-negative)]" : ""}>
+        <span class={isPastDue ? "font-medium text-negative" : ""}>
           {isPastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}
         </span>
       {/if}
@@ -40,18 +40,18 @@ let dueAmount = $derived(formatCurrencyCrude(totalRecurring(ts)));
 </div>
 {:else}
   <div
-  class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] p-4"
+  class="rounded-lg border border-border-subtle bg-surface p-4"
 >
   <div
-    class="mb-3 text-base font-semibold text-[var(--paisa-muted-foreground)]">{ts.key}</div>
+    class="mb-3 text-base font-semibold text-muted-foreground">{ts.key}</div>
   <RecurringSchedule {schedule} amount={dueAmount} />
   <div
-    class="mt-2 flex flex-wrap items-center gap-2 px-2 text-xs text-[var(--paisa-muted-foreground)]">
+    class="mt-2 flex flex-wrap items-center gap-2 px-2 text-xs text-muted-foreground">
       <Badge variant="neutral" size="sm" rounded>{intervalText(ts)}</Badge>
       {#if schedule?.scheduled}
         <span class="tabular-nums">{schedule.scheduled.format("DD MMM YYYY")}</span>
         <span aria-hidden="true">·</span>
-        <span class={isPastDue ? "font-medium text-[var(--paisa-negative)]" : ""}>
+        <span class={isPastDue ? "font-medium text-negative" : ""}>
           {isPastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}
         </span>
       {/if}

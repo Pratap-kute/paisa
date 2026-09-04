@@ -1,0 +1,35 @@
+/** Global element defaults built on the canonical design foundation. */
+
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--paisa-canvas);
+    color: var(--paisa-foreground);
+    font-family: var(--paisa-font-ui);
+    font-size: var(--paisa-font-size-sm);
+    line-height: var(--paisa-line-height-normal);
+  }
+
+  a {
+    color: var(--paisa-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--paisa-primary);
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--paisa-font-code);
+  }
+}

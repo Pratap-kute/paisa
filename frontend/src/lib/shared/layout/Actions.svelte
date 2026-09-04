@@ -45,7 +45,7 @@ function onWindowClick(event: MouseEvent) {
 }
 
 const menuItemClass =
-  "flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--paisa-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-primary)]";
+  "flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-foreground transition-colors hover:bg-surface-hover hover:text-primary";
 </script>
 
 <svelte:window onclick={onWindowClick} />
@@ -53,7 +53,7 @@ const menuItemClass =
 <div bind:this={dropdownEl} class="relative">
   <button
     type="button"
-    class="inline-flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-md border-0 bg-transparent text-[var(--paisa-muted-foreground)] transition-colors hover:bg-[var(--paisa-surface-hover)] hover:text-[var(--paisa-foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]"
+    class="inline-flex h-11 w-11 min-h-11 min-w-11 items-center justify-center rounded-md border-0 bg-transparent text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]"
     aria-label="More actions"
     aria-haspopup="true"
     aria-expanded={open}
@@ -68,7 +68,7 @@ const menuItemClass =
   {#if open}
     <div
       role="menu"
-      class="absolute top-full z-50 mt-1 min-w-max rounded-md border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] py-1 shadow-[var(--paisa-shadow-lg)] {isMobile()
+      class="absolute top-full z-50 mt-1 min-w-max rounded-md border border-border-subtle bg-surface py-1 shadow-[var(--paisa-shadow-lg)] {isMobile()
         ? 'left-0'
         : 'right-0'}"
     >
@@ -99,11 +99,11 @@ const menuItemClass =
         <i class="fas fa-layer-group w-5 text-center text-xs" aria-hidden="true"></i>
         <span>Update MF Portfolios</span>
       </button>
-      <hr class="my-1 border-0 border-t border-[var(--paisa-border-subtle)]" />
+      <hr class="my-1 border-0 border-t border-border-subtle" />
       <div role="none" class="px-4 py-2">
         <label
           for={obscureId}
-          class="flex w-full cursor-pointer items-center gap-2 text-sm text-[var(--paisa-foreground)] transition-colors hover:text-[var(--paisa-primary)]"
+          class="flex w-full cursor-pointer items-center gap-2 text-sm text-foreground transition-colors hover:text-primary"
         >
           <input bind:checked={$obscure} id={obscureId} type="checkbox" class="sr-only" />
           <i
@@ -114,7 +114,7 @@ const menuItemClass =
         </label>
       </div>
       {#if showLogout}
-        <hr class="my-1 border-0 border-t border-[var(--paisa-border-subtle)]" />
+        <hr class="my-1 border-0 border-t border-border-subtle" />
         <button type="button" role="menuitem" onclick={() => doLogout()} class={menuItemClass}>
           <i class="fas fa-arrow-right-from-bracket w-5 text-center text-xs" aria-hidden="true"></i>
           <span>Logout</span>

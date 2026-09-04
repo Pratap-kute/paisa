@@ -128,7 +128,7 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
               onchange={handleProviderChange}
             />
             {#if selectedProvider.description}
-              <p class="mt-1 text-xs text-[var(--paisa-muted-foreground)]">{@html selectedProvider.description}</p>
+              <p class="mt-1 text-xs text-muted-foreground">{@html selectedProvider.description}</p>
             {/if}
           {/snippet}
         </FormField>
@@ -181,7 +181,7 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
                   {/key}
                 {/if}
                 {#if field.help}
-                  <p class="mt-1 text-xs text-[var(--paisa-muted-foreground)]">{@html field.help}</p>
+                  <p class="mt-1 text-xs text-muted-foreground">{@html field.help}</p>
                 {/if}
               {/snippet}
             </FormField>

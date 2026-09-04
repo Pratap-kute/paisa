@@ -139,9 +139,9 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
   <Section>
     {#if isEmpty}
       <ZeroState item={false}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
-          <strong class="text-[var(--paisa-foreground)]">Oops!</strong> You haven't configured any goals yet. Checkout the
-          <a href={helpUrl("goals")} class="text-[var(--paisa-primary)] underline">docs</a> page to get started.
+        <p class="text-sm text-muted-foreground">
+          <strong class="text-foreground">Oops!</strong> You haven't configured any goals yet. Checkout the
+          <a href={helpUrl("goals")} class="text-primary underline">docs</a> page to get started.
         </p>
       </ZeroState>
     {:else}

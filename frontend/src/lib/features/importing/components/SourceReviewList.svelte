@@ -169,27 +169,27 @@ function indicatorClass(
 </script>
 
 <div
-  class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-[var(--paisa-canvas-bg)]">
+  class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-canvas">
   {#if reviewItems.length === 0}
-    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-[var(--paisa-text-secondary)]">
-      <i class="fas fa-file-circle-question mb-2 text-3xl text-[var(--paisa-text-muted)]"></i>
-      <p class="text-base font-semibold text-[var(--paisa-text-primary)]">No Transactions Generated</p>
-      <p class="mt-1 text-xs text-[var(--paisa-text-secondary)]">
+    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground">
+      <i class="fas fa-file-circle-question mb-2 text-3xl text-muted-foreground"></i>
+      <p class="text-base font-semibold text-foreground">No Transactions Generated</p>
+      <p class="mt-1 text-xs text-muted-foreground">
         The active template did not match rows in this file. Select a matching template above, or switch to <strong>Raw Data</strong> to view all source rows.
       </p>
     </div>
   {:else if visibleItems.length === 0}
-    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-[var(--paisa-text-secondary)]">
-      <i class="fas fa-filter-circle-xmark mb-2 text-3xl text-[var(--paisa-text-muted)]"></i>
-      <p class="text-base font-semibold text-[var(--paisa-text-primary)]">No Matching Transactions</p>
-      <p class="mt-1 text-xs text-[var(--paisa-text-secondary)]">No transactions match the selected prediction filter.</p>
+    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground">
+      <i class="fas fa-filter-circle-xmark mb-2 text-3xl text-muted-foreground"></i>
+      <p class="text-base font-semibold text-foreground">No Matching Transactions</p>
+      <p class="mt-1 text-xs text-muted-foreground">No transactions match the selected prediction filter.</p>
       {#if onClearFilter}
         <button
           type="button"
-          class="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1.5 text-xs font-medium text-[var(--paisa-text-primary)] shadow-sm transition-colors hover:bg-[var(--paisa-surface-hover)]"
+          class="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-surface-hover"
           onclick={() => onClearFilter?.()}
         >
-          <i class="fas fa-filter-slash text-[10px] text-[var(--paisa-brand-primary)]"></i>
+          <i class="fas fa-filter-slash text-[10px] text-primary"></i>
           <span>View All Transactions</span>
         </button>
       {/if}
@@ -199,7 +199,7 @@ function indicatorClass(
       {#each visibleItems as item (item.sourceRowIndex)}
         <button
           type="button"
-          class="flex w-full min-h-[52px] cursor-pointer items-stretch border-0 bg-[var(--paisa-surface-card)] p-0 text-left transition-colors hover:bg-[var(--paisa-surface-hover)] {selectedSourceRowIndex === item.sourceRowIndex ? 'bg-[var(--paisa-brand-primary-light)]' : ''}"
+          class="flex w-full min-h-[52px] cursor-pointer items-stretch border-0 bg-surface p-0 text-left transition-colors hover:bg-surface-hover {selectedSourceRowIndex === item.sourceRowIndex ? 'bg-primary-subtle' : ''}"
           onclick={() => onSelectRow(item.sourceRowIndex)}
         >
           <div
@@ -208,24 +208,24 @@ function indicatorClass(
 
           <div class="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2">
             <div class="flex min-w-0 items-baseline justify-between gap-2">
-              <span class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-[var(--paisa-text-primary)]" title={item.payee}>{item.payee}</span>
+              <span class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-foreground" title={item.payee}>{item.payee}</span>
               {#if item.amount}
-                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-[var(--paisa-negative)]' : 'text-[var(--paisa-text-primary)]'}">
+                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-negative' : 'text-foreground'}">
                   {item.amount}
                 </span>
               {/if}
             </div>
 
             <div class="flex min-w-0 items-center justify-between gap-2">
-              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-[var(--paisa-text-secondary)]">
+              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-muted-foreground">
                 {#if item.date}
                   <span class="shrink-0 tabular-nums">{item.date}</span>
                 {/if}
                 {#if item.date && item.account}
-                  <span class="shrink-0 text-[var(--paisa-text-muted)]">·</span>
+                  <span class="shrink-0 text-muted-foreground">·</span>
                 {/if}
                 {#if item.account}
-                  <span class="min-w-0 flex-1 truncate text-[var(--paisa-text-muted)]" title={item.account}>{item.account}</span>
+                  <span class="min-w-0 flex-1 truncate text-muted-foreground" title={item.account}>{item.account}</span>
                 {/if}
               </div>
 

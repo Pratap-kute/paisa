@@ -115,19 +115,19 @@ function levelVariant(
       <Card padding="md" class="w-full overflow-hidden">
         <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div class="flex items-center gap-4 text-center md:text-left">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full {issues.length === 0 ? 'bg-[var(--paisa-positive)]/10 text-[var(--paisa-positive)]' : 'bg-[var(--paisa-negative)]/10 text-[var(--paisa-negative)]'} text-xl">
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full {issues.length === 0 ? 'bg-positive/10 text-positive' : 'bg-negative/10 text-negative'} text-xl">
               <i class="fas {issues.length === 0 ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
             </div>
             <div>
               <div class="flex items-center justify-center gap-2 md:justify-start">
-                <h2 class="text-base font-bold text-[var(--paisa-text-primary)]">
+                <h2 class="text-base font-bold text-foreground">
                   {issues.length === 0 ? "All Systems Operational" : `${issues.length} potential issue(s) found`}
                 </h2>
                 <Badge variant={issues.length === 0 ? "success" : "danger"} size="sm" rounded>
                   {issues.length === 0 ? "Healthy" : "Attention Required"}
                 </Badge>
               </div>
-              <p class="text-xs text-[var(--paisa-muted-foreground)]">
+              <p class="text-xs text-muted-foreground">
                 {issues.length === 0
                   ? "Your ledger journals, configuration files, and price records are healthy with no syntax or balance errors."
                   : "Review the diagnostic reports below to resolve configuration warnings or journal inconsistencies."}
@@ -137,7 +137,7 @@ function levelVariant(
 
           <div class="flex items-center gap-2">
             {#if lastChecked}
-              <span class="text-xs text-[var(--paisa-text-muted)]">
+              <span class="text-xs text-muted-foreground">
                 Last checked: {lastChecked.toLocaleTimeString()}
               </span>
             {/if}
@@ -171,23 +171,23 @@ function levelVariant(
 
       <!-- Diagnostic Checks Grid -->
       <div>
-        <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+        <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Diagnostic Suite
         </h3>
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {#each diagnosticChecks as check}
-            <div class="flex items-start gap-3 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] p-3.5 shadow-sm">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--paisa-radius-sm)] bg-[var(--paisa-surface-raised)] text-[var(--paisa-brand-primary)]">
+            <div class="flex items-start gap-3 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface p-3.5 shadow-sm">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--paisa-radius-sm)] bg-surface-raised text-primary">
                 <i class={check.icon}></i>
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-[var(--paisa-text-primary)]">{check.title}</span>
-                  <span class="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-[var(--paisa-positive)]">
+                  <span class="text-xs font-bold text-foreground">{check.title}</span>
+                  <span class="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-positive">
                     <i class="fas fa-check text-[0.625rem]"></i> Active
                   </span>
                 </div>
-                <p class="mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">
+                <p class="mt-0.5 text-xs text-muted-foreground">
                   {check.desc}
                 </p>
               </div>
@@ -199,26 +199,26 @@ function levelVariant(
       <!-- Issues List (when issues exist) -->
       {#if issues.length > 0}
         <div>
-          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Detected Issues & Recommendations
           </h3>
           <div class="flex flex-col gap-3" data-testid="diagnosis-list">
             {#each issues as issue, index (`${issue.level}-${issue.summary}-${index}`)}
               <Card padding="md" class="border-l-4 border-l-[var(--paisa-{issue.level === 'danger' ? 'negative' : (issue.level === 'warning' ? 'warning' : 'primary')} )]">
-                <div class="flex items-center justify-between gap-2 border-b border-[var(--paisa-border-subtle)] pb-2">
+                <div class="flex items-center justify-between gap-2 border-b border-border-subtle pb-2">
                   <div class="flex items-center gap-2">
                     <Badge variant={levelVariant(issue.level)} size="sm" class="uppercase">
                       {issue.level || "info"}
                     </Badge>
-                    <h4 class="text-sm font-semibold text-[var(--paisa-text-primary)]">
+                    <h4 class="text-sm font-semibold text-foreground">
                       {issue.summary}
                     </h4>
                   </div>
                 </div>
-                <div class="pt-2 text-xs text-[var(--paisa-text-secondary)]">
+                <div class="pt-2 text-xs text-muted-foreground">
                   <div class="leading-relaxed">{@html issue.description}</div>
                   {#if issue.details}
-                    <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-2.5 font-mono text-[0.75rem] text-[var(--paisa-text-primary)]">
+                    <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised p-2.5 font-mono text-[0.75rem] text-foreground">
                       {@html issue.details}
                     </div>
                   {/if}

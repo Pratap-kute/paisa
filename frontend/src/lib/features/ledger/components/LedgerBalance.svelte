@@ -456,7 +456,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
   height: 100%;
   min-height: 0;
   flex-direction: column;
-  background-color: var(--paisa-surface-bg);
+  background-color: var(--paisa-surface);
 }
 
 .paisa-ledger-balance-context {
@@ -467,13 +467,13 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
   padding: 0.4rem var(--paisa-space-3);
   border-bottom: 1px solid var(--paisa-border-subtle);
   background-color: var(--paisa-surface-hover);
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   font-size: 0.675rem;
   line-height: 1.35;
 
   > span:first-child {
     margin-top: 1px;
-    color: var(--paisa-brand-primary);
+    color: var(--paisa-primary);
     flex-shrink: 0;
   }
 }
@@ -507,16 +507,16 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 .paisa-ledger-balance-heading.is-root {
   margin-top: var(--paisa-space-3);
   padding: 0.45rem var(--paisa-space-3);
-  border-top: 1px solid var(--paisa-border-default);
+  border-top: 1px solid var(--paisa-border);
   border-bottom: 1px solid var(--paisa-border-subtle);
-  background-color: var(--paisa-surface-muted);
+  background-color: var(--paisa-surface-raised);
 
   &:first-child {
     margin-top: 0;
   }
 
   .paisa-ledger-balance-heading-label {
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
     font-size: 0.7rem;
     font-weight: var(--paisa-font-weight-bold);
     letter-spacing: 0.055em;
@@ -530,7 +530,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
   padding-bottom: 0.2rem;
 
   .paisa-ledger-balance-heading-label {
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
     font-weight: var(--paisa-font-weight-semibold);
   }
 }
@@ -538,7 +538,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 .paisa-ledger-balance-heading-label {
   min-width: 0;
   overflow: hidden;
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   font-size: var(--paisa-font-size-xs);
   line-height: 1.4;
   text-overflow: ellipsis;
@@ -546,7 +546,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 }
 
 .paisa-ledger-balance-heading-total {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   font-family: var(--paisa-font-mono);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -572,7 +572,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 .paisa-ledger-balance-account {
   min-width: 0;
   overflow: hidden;
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   font-size: var(--paisa-font-size-xs);
   font-weight: var(--paisa-font-weight-medium);
   line-height: 1.45;
@@ -596,7 +596,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 }
 
 .paisa-ledger-balance-amount {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   font-family: var(--paisa-font-mono);
   font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
@@ -607,7 +607,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 }
 
 .paisa-ledger-balance-unit {
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
   font-family: var(--paisa-font-mono);
   font-size: 0.625rem;
   font-weight: var(--paisa-font-weight-semibold);
@@ -622,12 +622,12 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
   align-items: baseline;
   margin-top: var(--paisa-space-4);
   padding: var(--paisa-space-3);
-  border-top: 1px solid var(--paisa-border-default);
-  background-color: var(--paisa-surface-muted);
+  border-top: 1px solid var(--paisa-border);
+  background-color: var(--paisa-surface-raised);
 }
 
 .paisa-ledger-balance-net-label {
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   font-size: 0.675rem;
   font-weight: var(--paisa-font-weight-bold);
   letter-spacing: 0.055em;
@@ -635,7 +635,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 }
 
 .paisa-ledger-balance-net-value {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   font-family: var(--paisa-font-mono);
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
@@ -646,7 +646,7 @@ let netBalance = $derived(findNetBalance(groups, baseCurrency));
 
 .paisa-ledger-balance-raw {
   padding: 1px var(--paisa-space-3);
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
   font-family: var(--paisa-font-mono);
   font-size: 0.7rem;
   white-space: pre-wrap;

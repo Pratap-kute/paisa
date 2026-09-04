@@ -126,7 +126,7 @@ ul.ledger-file-tree {
   min-height: 30px;
   border-radius: var(--paisa-radius-sm);
 
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   font-size: var(--paisa-font-size-xs);
 
   transition:
@@ -152,10 +152,10 @@ ul.ledger-file-tree {
 
   &:hover {
     background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
 
     .chevron {
-      color: var(--paisa-text-primary);
+      color: var(--paisa-foreground);
     }
   }
 }
@@ -169,7 +169,7 @@ ul.ledger-file-tree {
   align-items: center;
   justify-content: center;
 
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
   font-size: 0.5rem;
   line-height: 1;
 
@@ -214,15 +214,15 @@ ul.ledger-file-tree {
 
   &:hover {
     background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
   }
 
   &.is-active {
-    background-color: var(--paisa-brand-primary-light);
-    color: var(--paisa-brand-primary);
+    background-color: var(--paisa-primary-subtle);
+    color: var(--paisa-primary);
     font-weight: var(--paisa-font-weight-medium);
 
-    box-shadow: inset 2px 0 0 var(--paisa-brand-primary);
+    box-shadow: inset 2px 0 0 var(--paisa-primary);
   }
 }
 

@@ -79,10 +79,10 @@ const MONTHS = [
 </script>
 
 <div
-  class="relative inline-flex h-8 items-stretch rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] shadow-xs">
+  class="relative inline-flex h-8 items-stretch rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface shadow-xs">
   <button
     type="button"
-    class="paisa-month-nav rounded-l-[calc(var(--paisa-radius-md)-1px)] border-r border-[var(--paisa-border-subtle)]"
+    class="paisa-month-nav rounded-l-[calc(var(--paisa-radius-md)-1px)] border-r border-border-subtle"
     aria-label="Previous month"
     disabled={!isAllowed(valueDate.add(-1, "month"), min, max)}
     onclick={() => select(valueDate.add(-1, "month"))}
@@ -99,9 +99,9 @@ const MONTHS = [
       aria-expanded={open}
       onclick={() => (open = !open)}
     >
-      <i class="fas fa-calendar-days text-xs text-[var(--paisa-muted-foreground)]" aria-hidden="true"></i>
+      <i class="fas fa-calendar-days text-xs text-muted-foreground" aria-hidden="true"></i>
       <span class="font-semibold text-xs">{valueDate.format("MMM YYYY")}</span>
-      <i class="fas fa-angle-down text-[0.625rem] text-[var(--paisa-muted-foreground)] transition-transform duration-150 {open ? 'rotate-180' : ''}" aria-hidden="true"></i>
+      <i class="fas fa-angle-down text-[0.625rem] text-muted-foreground transition-transform duration-150 {open ? 'rotate-180' : ''}" aria-hidden="true"></i>
     </button>
 
     {#if open}
@@ -112,14 +112,14 @@ const MONTHS = [
         onclick={() => (open = false)}
       ></button>
       <div
-        class="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full z-50 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised,var(--paisa-surface))] shadow-[var(--paisa-shadow-lg)]"
+        class="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full z-50 mt-1 min-w-[16rem] overflow-hidden rounded-[var(--paisa-radius-md)] border border-border-subtle bg-[var(--paisa-surface-raised,var(--paisa-surface))] shadow-[var(--paisa-shadow-lg)]"
         role="listbox"
       >
-        <div class="border-b border-[var(--paisa-border-subtle)] p-2">
+        <div class="border-b border-border-subtle p-2">
           <div class="flex items-center justify-between gap-2">
             <button
               type="button"
-              class="paisa-month-nav rounded border border-[var(--paisa-border-subtle)]"
+              class="paisa-month-nav rounded border border-border-subtle"
               aria-label="Previous year"
               disabled={selectedYear - 1 < min.year()}
               onclick={() => selectedYear--}
@@ -138,7 +138,7 @@ const MONTHS = [
             </select>
             <button
               type="button"
-              class="paisa-month-nav rounded border border-[var(--paisa-border-subtle)]"
+              class="paisa-month-nav rounded border border-border-subtle"
               aria-label="Next year"
               disabled={selectedYear + 1 > max.year()}
               onclick={() => selectedYear++}
@@ -152,11 +152,11 @@ const MONTHS = [
             {#if isAllowed(dayjs(`${selectedYear}-${i + 1}`, "YYYY-M"), min, max)}
               <button
                 type="button"
-                class="rounded-[var(--paisa-radius-sm)] px-2 py-1.5 text-xs font-medium transition-colors hover:bg-[var(--paisa-surface-hover)] {valueDate.year() == selectedYear && valueDate.month() == i ? 'bg-[var(--paisa-primary-subtle)] font-semibold text-[var(--paisa-primary)]' : 'text-[var(--paisa-foreground)]'}"
+                class="rounded-[var(--paisa-radius-sm)] px-2 py-1.5 text-xs font-medium transition-colors hover:bg-surface-hover {valueDate.year() == selectedYear && valueDate.month() == i ? 'bg-primary-subtle font-semibold text-primary' : 'text-foreground'}"
                 onclick={() => selectMonth(i)}
               >{month}</button>
             {:else}
-              <span class="px-2 py-1.5 text-center text-xs text-[var(--paisa-muted-foreground)] opacity-40">{month}</span>
+              <span class="px-2 py-1.5 text-center text-xs text-muted-foreground opacity-40">{month}</span>
             {/if}
           {/each}
         </div>
@@ -166,7 +166,7 @@ const MONTHS = [
 
   <button
     type="button"
-    class="paisa-month-nav rounded-r-[calc(var(--paisa-radius-md)-1px)] border-l border-[var(--paisa-border-subtle)]"
+    class="paisa-month-nav rounded-r-[calc(var(--paisa-radius-md)-1px)] border-l border-border-subtle"
     aria-label="Next month"
     disabled={!isAllowed(valueDate.add(1, "month"), min, max)}
     onclick={() => select(valueDate.add(1, "month"))}

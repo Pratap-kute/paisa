@@ -104,9 +104,9 @@ $effect(() => {
   />
 
   {#if historicalPeriod && requestedPeriod}
-    <div class="mb-3 text-sm text-[var(--paisa-muted-foreground)]">
+    <div class="mb-3 text-sm text-muted-foreground">
       Showing {currentMonthBudget?.date.format("MMMM YYYY") || requestedPeriod} ·
-      <a href="/expense/budget" class="text-[var(--paisa-primary)]">
+      <a href="/expense/budget" class="text-primary">
         Clear period filter
       </a>
     </div>
@@ -138,13 +138,13 @@ $effect(() => {
       </MetricStrip>
 
       <div
-        class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-[var(--paisa-space-4)] py-[var(--paisa-space-3)]"
+        class="rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-[var(--paisa-space-4)] py-[var(--paisa-space-3)]"
         aria-label="Checking balance context"
       >
-        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--paisa-muted-foreground)]">
+        <div class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Checking Balance
         </div>
-        <div class="mt-1 text-sm font-semibold tabular-nums text-[var(--paisa-foreground)]">
+        <div class="mt-1 text-sm font-semibold tabular-nums text-foreground">
           {#if isLoading}
             —
           {:else}
@@ -166,19 +166,19 @@ $effect(() => {
           {@const percent = budgetProgress(accountBudget)}
           <div
             id={accountBudget.account === page.url.searchParams.get("account") ? "insight-account" : undefined}
-            class="rounded-lg border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] p-3"
+            class="rounded-lg border border-border-subtle bg-surface-raised p-3"
           >
             <div class="mb-1.5 flex items-center justify-between gap-2">
               <span
-                class="truncate text-sm font-medium text-[var(--paisa-foreground)]"
+                class="truncate text-sm font-medium text-foreground"
                 title={accountBudget.account}
               >
                 {restName(accountBudget.account)}
               </span>
               <span
                 class="whitespace-nowrap text-xs font-semibold tabular-nums {isOverspent
-                  ? 'text-[var(--paisa-negative)]'
-                  : 'text-[var(--paisa-warning)]'}"
+                  ? 'text-negative'
+                  : 'text-warning'}"
               >
                 {isOverspent ? "Over by " : "Available "}
                 {formatCurrency(Math.abs(accountBudget.available))}
@@ -187,14 +187,14 @@ $effect(() => {
             <div class="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
               <div
                 class="h-full rounded-full transition-all {isOverspent
-                  ? 'bg-[var(--paisa-negative)]'
+                  ? 'bg-negative'
                   : percent > 85
-                    ? 'bg-[var(--paisa-warning)]'
-                    : 'bg-[var(--paisa-positive)]'}"
+                    ? 'bg-warning'
+                    : 'bg-positive'}"
                 style="width: {Math.min(100, Math.max(0, percent))}%"
               ></div>
             </div>
-            <div class="flex items-center justify-between text-xs tabular-nums text-[var(--paisa-muted-foreground)]">
+            <div class="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
               <span>Spent {formatCurrency(accountBudget.actual)}</span>
               <span>Budget {formatCurrency(accountBudget.forecast)}</span>
               {#if accountBudget.rollover !== 0}

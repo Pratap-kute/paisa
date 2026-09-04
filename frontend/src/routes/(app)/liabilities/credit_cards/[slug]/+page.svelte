@@ -91,7 +91,7 @@ onMount(async () => {
     {#snippet leading()}
       <a
         href="/liabilities/credit_cards"
-        class="inline-flex items-center gap-1 text-sm text-[var(--paisa-muted-foreground)] transition-colors hover:text-[var(--paisa-foreground)]"
+        class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
         <span>Credit Cards</span>
@@ -135,7 +135,7 @@ onMount(async () => {
 
     <Section title="Statement Equation">
       <div
-        class="flex items-center gap-3 overflow-x-auto rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-card)] px-4 py-3"
+        class="flex items-center gap-3 overflow-x-auto rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-4 py-3"
       >
         <Metric
           class="!border-0 !p-0"
@@ -143,7 +143,7 @@ onMount(async () => {
           value={formatCurrency(currentBill.openingBalance)}
         />
         <span
-          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          class="shrink-0 text-lg text-muted-foreground"
           aria-hidden="true"
         >
           <i class="fas fa-plus"></i>
@@ -155,7 +155,7 @@ onMount(async () => {
           status="negative"
         />
         <span
-          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          class="shrink-0 text-lg text-muted-foreground"
           aria-hidden="true"
         >
           <i class="fas fa-minus"></i>
@@ -167,7 +167,7 @@ onMount(async () => {
           status="positive"
         />
         <span
-          class="shrink-0 text-lg text-[var(--paisa-muted-foreground)]"
+          class="shrink-0 text-lg text-muted-foreground"
           aria-hidden="true"
         >
           <i class="fas fa-equals"></i>
@@ -181,7 +181,7 @@ onMount(async () => {
       </div>
 
       <div
-        class="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--paisa-muted-foreground)]"
+        class="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
       >
         <span class="custom-icon text-base">{iconify(creditCard.account)}</span>
         <span class="inline-flex items-center gap-1">
