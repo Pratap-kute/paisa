@@ -148,6 +148,7 @@ func registerFinancialRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/api/logs", GetLogsHandler)
 	router.GET("/api/account/tf_idf", GetTfIdfHandler(db))
 	router.GET("/api/prediction/history", GetPredictionHistoryHandler(db))
+	router.POST("/api/prediction/merchant-rule", MaxBodySize(DefaultJSONLimit), UpsertMerchantRuleHandler)
 	router.GET("/api/credit_cards", GetCreditCardsHandler(db))
 	router.GET("/api/credit_cards/:account", GetCreditCardHandler(db))
 }

@@ -685,6 +685,57 @@ func GetPredictionHistoryHandler(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// UpsertMerchantRuleHandler godoc
+//
+// @ID upsertMerchantRule
+// @Summary Add or update a merchant prediction rule
+// @Description Upserts a merchant to account rule in paisa.yaml under prediction.merchant_rules. Returns 409 in readonly mode.
+// @Tags Predictions
+// @Accept json
+// @Produce json
+// @Param request body dto.MerchantRuleUpsertRequest true "Merchant rule details"
+// @Success 200 {object} dto.MerchantRuleSaveResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 409 {object} dto.ErrorResponse
+// @Failure 413 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.MerchantRuleSaveResponse
+// @Security PaisaAuth
+// @Router /prediction/merchant-rule [post]
+func UpsertMerchantRuleHandler(c *gin.Context) {
+	if config.GetConfig().Readonly {
+		c.JSON(http.StatusConflict, dto.ErrorResponse{
+			Error:   "READONLY_MODE",
+			Message: "Configuration cannot be changed in readonly mode",
+		})
+		return
+	}
+
+	var req dto.MerchantRuleUpsertRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		status, body := mapBindingOrFileError(err)
+		c.JSON(status, body)
+		return
+	}
+
+	rule, err := config.UpsertMerchantRule(req.Merchant, req.Account, req.Prefix)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "INVALID_REQUEST",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, dto.MerchantRuleSaveResponse{
+		Rule: dto.MerchantRuleResponse{
+			Account:   rule.Account,
+			Merchant:  rule.Merchant,
+			Merchants: rule.Merchants,
+		},
+		Saved: true,
+	})
+}
+
 // GetCreditCardsHandler godoc
 //
 // @ID getCreditCards

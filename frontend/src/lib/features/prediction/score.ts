@@ -21,8 +21,8 @@ export interface ScoredAccount {
   split: boolean;
 }
 
-export function normalizePrefix(prefix: string): string {
-  return prefix.replace(/:+$/, "");
+export function normalizePrefix(prefix?: string): string {
+  return (prefix || "").replace(/:+$/, "");
 }
 
 export function accountMatchesPrefix(account: string, prefix: string): boolean {

@@ -25,3 +25,21 @@ type PredictionHistoryEntryResponse struct {
 type PredictionHistoryResponse struct {
 	History []PredictionHistoryEntryResponse `json:"history"`
 }
+
+type MerchantRuleUpsertRequest struct {
+	Merchant string `json:"merchant"`
+	Account  string `json:"account"`
+	Prefix   string `json:"prefix,omitempty"`
+}
+
+type MerchantRuleResponse struct {
+	Account   string   `json:"account"`
+	Merchant  string   `json:"merchant,omitempty"`
+	Merchants []string `json:"merchants,omitempty"`
+}
+
+type MerchantRuleSaveResponse struct {
+	Rule    MerchantRuleResponse `json:"rule"`
+	Saved   bool                 `json:"saved"`
+	Message string               `json:"message,omitempty"`
+}

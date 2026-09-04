@@ -14,6 +14,9 @@ import type {
   PredictionInput,
   PredictionOptions,
   PredictionResult,
+  PredictionReviewProgress,
+  PredictionReviewState,
+  PredictionReviewStatus,
   UserOverride,
 } from "./types";
 
@@ -48,6 +51,19 @@ function merchantOverrideKey(merchantKey: string, prefix: string): string {
   return `${merchantKey}::${normalizePrefix(prefix)}`;
 }
 
+export function computeInputFingerprint(
+  input: PredictionInput,
+  merchantKey?: string,
+): string {
+  const normMerchant = merchantKey ||
+    normalizeDescription(input.description || "").merchantKey;
+  const amountStr = input.amount != null ? String(input.amount) : "";
+  const commodityStr = input.commodity || "";
+  const src = input.sourceAccount || "";
+  const prefix = normalizePrefix(input.prefix || "");
+  return `${normMerchant}|${amountStr}|${commodityStr}|${src}|${prefix}`;
+}
+
 function merchantRulesFromConfig(): PredictionOptions["merchantRules"] {
   try {
     const config = (globalThis as {
@@ -70,10 +86,12 @@ export class PredictionSession {
   results = new Map<string, PredictionResult>();
   overrides = new Map<string, UserOverride>();
   merchantOverrides = new Map<string, string>();
+  reviewStates = new Map<string, PredictionReviewState>();
   private fingerprint = "";
   private inputs = new Map<string, PredictionInput>();
   private lastRowIndex: number | undefined = undefined;
   private nextInvocation = 0;
+  private visitedKeysInRender = new Set<string>();
 
   reset() {
     this.index = null;
@@ -82,10 +100,12 @@ export class PredictionSession {
     this.results = new Map();
     this.overrides = new Map();
     this.merchantOverrides = new Map();
+    this.reviewStates = new Map();
     this.fingerprint = "";
     this.inputs = new Map();
     this.lastRowIndex = undefined;
     this.nextInvocation = 0;
+    this.visitedKeysInRender = new Set();
   }
 
   beginRender() {
@@ -94,12 +114,14 @@ export class PredictionSession {
     this.inputs = new Map();
     this.lastRowIndex = undefined;
     this.nextInvocation = 0;
+    this.visitedKeysInRender = new Set();
   }
 
   clearPreview() {
     this.results = new Map();
     this.overrides = new Map();
     this.merchantOverrides = new Map();
+    this.reviewStates = new Map();
     this.currentImport = { rows: [] };
     this.inputs = new Map();
     this.lastRowIndex = undefined;
@@ -143,6 +165,8 @@ export class PredictionSession {
       helperInvocationIndex,
       keyed.prefix,
     );
+    this.visitedKeysInRender.add(key);
+
     this.currentImport.rows.push({
       rowIndex: keyed.rowIndex,
       helperInvocationIndex,
@@ -156,6 +180,15 @@ export class PredictionSession {
     this.inputs.set(key, keyed);
 
     const normalized = normalizeDescription(keyed.description);
+    const fingerprint = computeInputFingerprint(keyed, normalized.merchantKey);
+
+    // If template edit materially changed the input for this key, reset review state & override
+    const existingReview = this.reviewStates.get(key);
+    if (existingReview && existingReview.inputFingerprint !== fingerprint) {
+      this.reviewStates.delete(key);
+      this.overrides.delete(key);
+    }
+
     const rowOverride = this.overrides.get(key);
     if (rowOverride) {
       const result = userResult(
@@ -200,6 +233,19 @@ export class PredictionSession {
       }
     }
     this.results.set(key, result);
+
+    if (!this.reviewStates.has(key)) {
+      const reviewRequired = this.requiresReview(result);
+      this.reviewStates.set(key, {
+        status: "UNREVIEWED",
+        initialAccount: result.account,
+        currentAccount: result.account,
+        initialConfidence: result.confidence,
+        wasReviewRequired: reviewRequired,
+        inputFingerprint: fingerprint,
+      });
+    }
+
     return result;
   }
 
@@ -218,6 +264,24 @@ export class PredictionSession {
       ) {
         result.confidence = "NEEDS_REVIEW";
       }
+
+      const reviewState = this.reviewStates.get(key);
+      if (reviewState && reviewState.status === "UNREVIEWED") {
+        reviewState.initialConfidence = result.confidence;
+        if (this.requiresReview(result)) {
+          reviewState.wasReviewRequired = true;
+        }
+      }
+    }
+
+    // Prune stale reviewStates and overrides for keys not present in this render pass
+    if (this.visitedKeysInRender.size > 0) {
+      for (const key of [...this.reviewStates.keys()]) {
+        if (!this.visitedKeysInRender.has(key)) {
+          this.reviewStates.delete(key);
+          this.overrides.delete(key);
+        }
+      }
     }
   }
 
@@ -227,10 +291,77 @@ export class PredictionSession {
     account: string,
     helperInvocationIndex = 0,
   ) {
+    const key = predictionKey(rowIndex, helperInvocationIndex, prefix);
     this.overrides.set(
-      predictionKey(rowIndex, helperInvocationIndex, prefix),
+      key,
       { account, source: "USER" },
     );
+    const existing = this.reviewStates.get(key);
+    const input = this.inputs.get(key);
+    const fingerprint = input
+      ? computeInputFingerprint(
+        input,
+        normalizeDescription(input.description || "").merchantKey,
+      )
+      : existing?.inputFingerprint || "";
+
+    this.reviewStates.set(key, {
+      status: "CORRECTED",
+      initialAccount: existing?.initialAccount || account,
+      currentAccount: account,
+      initialConfidence: existing?.initialConfidence || "UNKNOWN",
+      wasReviewRequired: existing ? existing.wasReviewRequired : true,
+      inputFingerprint: fingerprint,
+      reviewedAt: Date.now(),
+    });
+  }
+
+  confirmPrediction(
+    rowIndex: number,
+    prefix: string,
+    account?: string,
+    helperInvocationIndex = 0,
+  ): { status: PredictionReviewStatus; account: string } {
+    const key = predictionKey(rowIndex, helperInvocationIndex, prefix);
+    const current = this.results.get(key);
+    const targetAccount = account || current?.account || unknownAccount(prefix);
+    const existing = this.reviewStates.get(key);
+    const isCorrected = Boolean(
+      existing
+        ? targetAccount !== existing.initialAccount
+        : current && account && account !== current.account,
+    );
+    const status: PredictionReviewStatus = isCorrected
+      ? "CORRECTED"
+      : "ACCEPTED";
+
+    const input = this.inputs.get(key);
+    const fingerprint = input
+      ? computeInputFingerprint(
+        input,
+        normalizeDescription(input.description || "").merchantKey,
+      )
+      : existing?.inputFingerprint || "";
+
+    if (isCorrected) {
+      this.overrides.set(key, { account: targetAccount, source: "USER" });
+    }
+
+    this.reviewStates.set(key, {
+      status,
+      initialAccount: existing?.initialAccount || current?.account ||
+        targetAccount,
+      currentAccount: targetAccount,
+      initialConfidence: existing?.initialConfidence || current?.confidence ||
+        "UNKNOWN",
+      wasReviewRequired: existing
+        ? existing.wasReviewRequired
+        : (current ? this.requiresReview(current) : true),
+      inputFingerprint: fingerprint,
+      reviewedAt: Date.now(),
+    });
+
+    return { status, account: targetAccount };
   }
 
   applyToSimilar(
@@ -238,25 +369,74 @@ export class PredictionSession {
     prefix: string,
     account: string,
     helperInvocationIndex = 0,
-  ) {
-    const current = this.results.get(
-      predictionKey(rowIndex, helperInvocationIndex, prefix),
-    );
+  ): { appliedCount: number } {
+    const targetKey = predictionKey(rowIndex, helperInvocationIndex, prefix);
+    const current = this.results.get(targetKey);
     const merchantKey = current?.merchantKey || "";
-    this.setOverride(rowIndex, prefix, account, helperInvocationIndex);
-    if (!merchantKey) return;
+
+    this.confirmPrediction(rowIndex, prefix, account, helperInvocationIndex);
+    const affectedRowIndices = new Set<number>();
+    if (rowIndex != null) {
+      affectedRowIndices.add(rowIndex);
+    }
+
+    if (merchantKey) {
+      const normalized = normalizePrefix(prefix);
+      const now = Date.now();
+      for (const [key, result] of this.results) {
+        if (key === targetKey) continue;
+        if (normalizePrefix(result.prefix) !== normalized) continue;
+        if (result.merchantKey !== merchantKey) continue;
+        if (this.overrides.has(key)) continue;
+
+        this.overrides.set(key, { account, source: "USER" });
+
+        const existing = this.reviewStates.get(key);
+        const input = this.inputs.get(key);
+        const fingerprint = input
+          ? computeInputFingerprint(input, merchantKey)
+          : existing?.inputFingerprint || "";
+
+        this.reviewStates.set(key, {
+          status: "CORRECTED",
+          initialAccount: existing?.initialAccount || result.account,
+          currentAccount: account,
+          initialConfidence: existing?.initialConfidence || result.confidence,
+          wasReviewRequired: existing
+            ? existing.wasReviewRequired
+            : this.requiresReview(result),
+          inputFingerprint: fingerprint,
+          reviewedAt: now,
+        });
+
+        if (result.rowIndex != null) {
+          affectedRowIndices.add(result.rowIndex);
+        }
+      }
+    }
+
+    return { appliedCount: affectedRowIndices.size };
+  }
+
+  similarPredictionsCount(
+    rowIndex: number,
+    prefix: string,
+    helperInvocationIndex = 0,
+  ): number {
+    const targetKey = predictionKey(rowIndex, helperInvocationIndex, prefix);
+    const current = this.results.get(targetKey);
+    const merchantKey = current?.merchantKey || "";
+    if (!merchantKey) return 0;
+
     const normalized = normalizePrefix(prefix);
-    for (const [key, result] of this.results) {
+    const matchedRowIndices = new Set<number>();
+    for (const result of this.results.values()) {
+      if (result.rowIndex == null || result.rowIndex === rowIndex) continue;
       if (normalizePrefix(result.prefix) !== normalized) continue;
       if (result.merchantKey !== merchantKey) continue;
-      if (
-        this.overrides.has(key) &&
-        result.rowIndex !== rowIndex
-      ) {
-        continue;
-      }
-      this.overrides.set(key, { account, source: "USER" });
+      matchedRowIndices.add(result.rowIndex);
     }
+    return matchedRowIndices.size;
   }
 
   alwaysUseMerchant(merchantKey: string, prefix: string, account: string) {
@@ -266,6 +446,172 @@ export class PredictionSession {
       merchantOverrideKey(merchantKey, prefix),
       account,
     );
+  }
+
+  requiresReview(result: PredictionResult): boolean {
+    return (
+      result.confidence === "NEEDS_REVIEW" ||
+      result.confidence === "UNKNOWN" ||
+      result.possibleTransfer === true
+    );
+  }
+
+  isPredictionResolved(result: PredictionResult): boolean {
+    const key = predictionKey(
+      result.rowIndex,
+      result.helperInvocationIndex,
+      result.prefix,
+    );
+    const reviewState = this.reviewStates.get(key);
+    if (reviewState) {
+      if (!reviewState.wasReviewRequired) return true;
+      return reviewState.status === "ACCEPTED" ||
+        reviewState.status === "CORRECTED";
+    }
+    return !this.requiresReview(result);
+  }
+
+  isRowResolved(rowIndex: number): boolean {
+    const rowResults = this.resultsForRow(rowIndex);
+    if (rowResults.length === 0) return true;
+    return rowResults.every((r) => this.isPredictionResolved(r));
+  }
+
+  getReviewState(
+    rowIndex?: number,
+    helperInvocationIndex = 0,
+    prefix = "",
+  ): PredictionReviewState | undefined {
+    return this.reviewStates.get(
+      predictionKey(rowIndex, helperInvocationIndex, prefix),
+    );
+  }
+
+  getInput(
+    rowIndex?: number,
+    helperInvocationIndex = 0,
+    prefix = "",
+  ): PredictionInput | undefined {
+    return this.inputs.get(
+      predictionKey(rowIndex, helperInvocationIndex, prefix),
+    );
+  }
+
+  unresolvedPredictions(): PredictionResult[] {
+    const unresolved: PredictionResult[] = [];
+    for (const [key, result] of this.results) {
+      const reviewState = this.reviewStates.get(key);
+      const needed = reviewState
+        ? reviewState.wasReviewRequired
+        : this.requiresReview(result);
+      if (!needed) continue;
+
+      const resolved = reviewState
+        ? (reviewState.status === "ACCEPTED" ||
+          reviewState.status === "CORRECTED")
+        : false;
+      if (!resolved) {
+        unresolved.push(result);
+      }
+    }
+
+    const priority = (r: PredictionResult): number => {
+      if (r.confidence === "UNKNOWN") return 1;
+      if (r.possibleTransfer) return 2;
+      return 3;
+    };
+
+    return unresolved.sort((a, b) => {
+      const prioA = priority(a);
+      const prioB = priority(b);
+      if (prioA !== prioB) return prioA - prioB;
+      const rowA = a.rowIndex ?? 0;
+      const rowB = b.rowIndex ?? 0;
+      if (rowA !== rowB) return rowA - rowB;
+      return a.helperInvocationIndex - b.helperInvocationIndex;
+    });
+  }
+
+  unresolvedRows(): number[] {
+    const unresolved = this.unresolvedPredictions();
+    const seen = new Set<number>();
+    const rows: number[] = [];
+    for (const item of unresolved) {
+      if (item.rowIndex != null && !seen.has(item.rowIndex)) {
+        seen.add(item.rowIndex);
+        rows.push(item.rowIndex);
+      }
+    }
+    return rows;
+  }
+
+  reviewProgress(): PredictionReviewProgress {
+    const allRowIndices = new Set<number>();
+    const reviewRequiredRowIndices = new Set<number>();
+
+    for (const [key, result] of this.results) {
+      if (result.rowIndex != null) {
+        allRowIndices.add(result.rowIndex);
+        const reviewState = this.reviewStates.get(key);
+        const wasRequired = reviewState
+          ? reviewState.wasReviewRequired
+          : this.requiresReview(result);
+        if (wasRequired) {
+          reviewRequiredRowIndices.add(result.rowIndex);
+        }
+      }
+    }
+
+    let reviewedCount = 0;
+    for (const rowIndex of reviewRequiredRowIndices) {
+      if (this.isRowResolved(rowIndex)) {
+        reviewedCount += 1;
+      }
+    }
+
+    const reviewRequiredRows = reviewRequiredRowIndices.size;
+    const reviewedRows = reviewedCount;
+    const unresolvedRows = Math.max(0, reviewRequiredRows - reviewedRows);
+    const percent = reviewRequiredRows === 0
+      ? 100
+      : Math.round((reviewedRows / reviewRequiredRows) * 100);
+
+    return {
+      totalRows: allRowIndices.size,
+      reviewRequiredRows,
+      reviewedRows,
+      unresolvedRows,
+      percent,
+      total: reviewRequiredRows,
+      reviewed: reviewedRows,
+      remaining: unresolvedRows,
+    };
+  }
+
+  nextUnresolved(
+    currentRowIndex?: number,
+    currentHelperInvocationIndex = 0,
+    currentPrefix?: string,
+  ): PredictionResult | null {
+    const queue = this.unresolvedPredictions();
+    if (queue.length === 0) return null;
+
+    if (currentRowIndex == null) {
+      return queue[0];
+    }
+
+    const currentIdx = queue.findIndex(
+      (r) =>
+        r.rowIndex === currentRowIndex &&
+        r.helperInvocationIndex === currentHelperInvocationIndex &&
+        (currentPrefix == null || r.prefix === currentPrefix),
+    );
+
+    if (currentIdx === -1) {
+      return queue[0];
+    }
+
+    return queue[currentIdx + 1] || queue[0];
   }
 
   counts(): Record<
@@ -288,6 +634,7 @@ export class PredictionSession {
     rowIndex: number;
     confidence: Confidence;
     possibleTransfer: boolean;
+    resolved: boolean;
     results: PredictionResult[];
   }> {
     const byRow = new Map<number, PredictionResult[]>();
@@ -302,6 +649,7 @@ export class PredictionSession {
       rowIndex,
       confidence: worstConfidence(results.map((item) => item.confidence)),
       possibleTransfer: results.some((item) => item.possibleTransfer),
+      resolved: results.every((r) => this.isPredictionResolved(r)),
       results,
     }));
   }

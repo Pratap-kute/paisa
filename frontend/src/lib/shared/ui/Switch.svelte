@@ -30,7 +30,8 @@ function handleChange(e: Event) {
 }
 </script>
 
-<div class="paisa-switch-field" style="--paisa-switch-color: {color}">
+<div class="paisa-switch-field"
+  style={color ? `--paisa-switch-color: ${color}` : undefined}>
   <input
     {id}
     type="checkbox"
@@ -66,51 +67,54 @@ function handleChange(e: Event) {
 .paisa-switch + label {
   position: relative;
   display: inline-flex;
-  height: 2.5em;
+  min-height: 1.5rem;
   align-items: center;
-  padding-left: 3.5rem;
-  padding-top: 0.2rem;
-  font-size: 1rem;
+  padding-left: 3rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
   cursor: pointer;
-  color: var(--paisa-foreground);
+  color: var(--paisa-foreground, var(--paisa-text-primary));
+  user-select: none;
 }
 
 .paisa-switch + label::before {
   position: absolute;
-  top: calc(50% - 0.75rem);
+  top: 50%;
+  transform: translateY(-50%);
   left: 0;
-  width: 3rem;
-  height: 1.5rem;
-  border-radius: var(--paisa-radius-full);
-  background: var(--paisa-input-border);
+  width: 2.5rem;
+  height: 1.375rem;
+  border-radius: var(--paisa-radius-full, 9999px);
+  background: var(--paisa-border-strong, #475569);
   content: "";
   transition: background var(--paisa-transition-fast, 150ms ease);
 }
 
 .paisa-switch + label::after {
   position: absolute;
-  top: calc(50% - 0.5rem);
-  left: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0.1875rem;
   width: 1rem;
   height: 1rem;
   border-radius: 50%;
-  background: var(--paisa-surface-bg);
-  box-shadow: var(--paisa-shadow-sm);
+  background: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
   content: "";
-  transition: transform var(--paisa-transition-fast, 150ms ease);
+  transition: transform var(--paisa-transition-fast, 150ms ease), background
+    var(--paisa-transition-fast, 150ms ease);
 }
 
 .paisa-switch:checked + label::before {
-  background: var(--paisa-switch-color, var(--paisa-primary));
+  background: var(--paisa-switch-color, var(--paisa-primary, #3b82f6));
 }
 
 .paisa-switch:checked + label::after {
-  transform: translateX(1.625rem);
+  transform: translateY(-50%) translateX(1.125rem);
 }
 
 .paisa-switch:focus-visible + label::before {
-  outline: 2px solid var(--paisa-primary);
+  outline: 2px solid var(--paisa-primary, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -120,26 +124,23 @@ function handleChange(e: Event) {
 }
 
 .paisa-switch-sm + label {
-  height: 2.5em;
-  padding-left: 2.75rem;
-  padding-top: 0.2rem;
+  min-height: 1.25rem;
+  padding-left: 2.375rem;
   font-size: 0.75rem;
 }
 
 .paisa-switch-sm + label::before {
-  top: calc(50% - 0.5625rem);
-  width: 2.25rem;
+  width: 2rem;
   height: 1.125rem;
 }
 
 .paisa-switch-sm + label::after {
-  top: calc(50% - 0.375rem);
-  left: 0.1875rem;
-  width: 0.75rem;
-  height: 0.75rem;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .paisa-switch-sm:checked + label::after {
-  transform: translateX(1.125rem);
+  transform: translateY(-50%) translateX(0.875rem);
 }
 </style>

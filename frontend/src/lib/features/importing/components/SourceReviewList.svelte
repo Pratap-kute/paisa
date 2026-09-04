@@ -21,11 +21,13 @@ interface Props {
     rowIndex: number;
     confidence: Confidence;
     possibleTransfer: boolean;
+    resolved?: boolean;
     results: PredictionResult[];
   }>;
   selectedSourceRowIndex: number | null;
   predictionFilter: ConfidenceFilter;
   onSelectRow: (rowIndex: number) => void;
+  onClearFilter?: () => void;
 }
 
 let {
@@ -35,6 +37,7 @@ let {
   selectedSourceRowIndex = null,
   predictionFilter = null,
   onSelectRow,
+  onClearFilter,
 }: Props = $props();
 
 function summaryForRow(rowIndex: number) {
@@ -51,6 +54,7 @@ interface ParsedReviewItem {
   account: string;
   confidence: Confidence | null;
   possibleTransfer: boolean;
+  resolved: boolean;
   isVisible: boolean;
 }
 
@@ -132,6 +136,7 @@ function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
     account,
     confidence: summary?.confidence || null,
     possibleTransfer: summary?.possibleTransfer || false,
+    resolved: summary?.resolved ?? false,
     isVisible,
   };
 }
@@ -178,6 +183,16 @@ function indicatorClass(
       <i class="fas fa-filter-circle-xmark mb-2 text-3xl text-[var(--paisa-text-muted)]"></i>
       <p class="text-base font-semibold text-[var(--paisa-text-primary)]">No Matching Transactions</p>
       <p class="mt-1 text-xs text-[var(--paisa-text-secondary)]">No transactions match the selected prediction filter.</p>
+      {#if onClearFilter}
+        <button
+          type="button"
+          class="mt-3 inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-1.5 text-xs font-medium text-[var(--paisa-text-primary)] shadow-sm transition-colors hover:bg-[var(--paisa-surface-hover)]"
+          onclick={() => onClearFilter?.()}
+        >
+          <i class="fas fa-filter-slash text-[10px] text-[var(--paisa-brand-primary)]"></i>
+          <span>View All Transactions</span>
+        </button>
+      {/if}
     </div>
   {:else}
     <div class="flex flex-col gap-px bg-[var(--paisa-border-subtle)]" role="list" aria-label="Transaction Review List">
@@ -195,14 +210,14 @@ function indicatorClass(
             <div class="flex min-w-0 items-baseline justify-between gap-2">
               <span class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-[var(--paisa-text-primary)]" title={item.payee}>{item.payee}</span>
               {#if item.amount}
-                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums {item.isDebit ? 'text-[var(--paisa-danger)]' : 'text-[var(--paisa-text-primary)]'}">
+                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-[var(--paisa-danger)]' : 'text-[var(--paisa-text-primary)]'}">
                   {item.amount}
                 </span>
               {/if}
             </div>
 
             <div class="flex min-w-0 items-center justify-between gap-2">
-              <div class="flex min-w-0 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-[var(--paisa-text-secondary)]">
+              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-[var(--paisa-text-secondary)]">
                 {#if item.date}
                   <span class="shrink-0 tabular-nums">{item.date}</span>
                 {/if}
@@ -210,14 +225,15 @@ function indicatorClass(
                   <span class="shrink-0 text-[var(--paisa-text-muted)]">·</span>
                 {/if}
                 {#if item.account}
-                  <span class="truncate text-[var(--paisa-text-muted)]" title={item.account}>{item.account}</span>
+                  <span class="min-w-0 flex-1 truncate text-[var(--paisa-text-muted)]" title={item.account}>{item.account}</span>
                 {/if}
               </div>
 
-              <div class="flex shrink-0 items-center">
+              <div class="flex shrink-0 items-center ml-2">
                 <PredictionRowBadge
                   confidence={item.confidence}
                   possibleTransfer={item.possibleTransfer}
+                  resolved={item.resolved}
                 />
               </div>
             </div>
