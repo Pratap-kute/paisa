@@ -368,6 +368,7 @@ describe("dashboard summaries", () => {
     expect(items[0]).toMatchObject({
       id: "goal:overdue:overdue",
       title: "Fourth Goal goal is overdue",
+      iconIsGlyph: true,
     });
   });
 

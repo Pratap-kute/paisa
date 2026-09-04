@@ -14,6 +14,7 @@ import {
   presentInsight,
 } from "$lib/features/insights/presentation";
 import { formatCurrency } from "$lib/shared/formatters/currency";
+import { iconGlyphOr } from "$lib/shared/ui/icon";
 import dayjs, { type Dayjs } from "dayjs";
 
 export type MetricStatus =
@@ -57,6 +58,7 @@ export interface DashboardAttentionItem {
   title: string;
   detail?: string;
   icon: string;
+  iconIsGlyph?: boolean;
   status: MetricStatus;
   href: string;
   priority: number;
@@ -311,7 +313,8 @@ export function buildDashboardAttention(
       detail: `${formatCurrency(goal.current)} of ${
         formatCurrency(goal.target)
       } completed`,
-      icon: goal.icon || "fa-solid fa-bullseye",
+      icon: iconGlyphOr(goal.icon),
+      iconIsGlyph: true,
       status: "warning",
       href: `/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`,
       priority: 200,

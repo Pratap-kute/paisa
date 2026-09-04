@@ -54,7 +54,11 @@ const statusClass: Record<MetricStatus, string> = {
             class="group flex min-w-0 items-start gap-2 rounded-md py-2 focus-visible:outline-2 focus-visible:outline-[var(--paisa-primary)]"
             data-testid="dashboard-attention-item"
           >
-            <i class={`${item.icon} ${statusClass[item.status]} mt-0.5 w-4 shrink-0 text-xs text-center`} aria-hidden="true"></i>
+            {#if item.iconIsGlyph}
+              <span class={`custom-icon ${statusClass[item.status]} mt-0.5 w-4 shrink-0 text-center text-sm`} aria-hidden="true">{item.icon}</span>
+            {:else}
+              <i class={`${item.icon} ${statusClass[item.status]} mt-0.5 w-4 shrink-0 text-xs text-center`} aria-hidden="true"></i>
+            {/if}
             <span class="min-w-0 flex-1">
               <span class="block text-sm font-medium leading-snug text-[var(--paisa-foreground)] group-hover:text-[var(--paisa-primary)] break-words">{item.title}</span>
               {#if item.detail}<span class="mt-0.5 block text-xs leading-snug text-[var(--paisa-muted-foreground)] line-clamp-2 break-words">{item.detail}</span>{/if}

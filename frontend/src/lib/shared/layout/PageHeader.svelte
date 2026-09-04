@@ -2,9 +2,11 @@
 import type { Snippet } from "svelte";
 import { helpUrl } from "$lib/shared/browser/navigation";
 import Badge from "$lib/shared/ui/Badge.svelte";
+import { iconGlyphOr } from "$lib/shared/ui/icon";
 
 interface Props {
   title: string;
+  titleIcon?: string;
   description?: string;
   help?: string;
   tag?: string;
@@ -23,6 +25,7 @@ interface Props {
 
 let {
   title,
+  titleIcon,
   description,
   help,
   tag,
@@ -44,7 +47,10 @@ let {
       {/if}
       <div>
         <div class="paisa-page-header-title-row">
-          <h1 class="paisa-page-title">{title}</h1>
+          <h1 class="paisa-page-title">
+            {#if titleIcon}<span class="custom-icon" aria-hidden="true">{iconGlyphOr(titleIcon)}</span>{/if}
+            <span>{title}</span>
+          </h1>
           {#if help}
             <a
               class="paisa-help-link"
@@ -120,6 +126,9 @@ let {
   font-weight: var(--paisa-font-weight-bold);
   color: var(--paisa-text-primary);
   line-height: var(--paisa-line-height-tight);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--paisa-space-2);
 }
 
 .paisa-help-link {

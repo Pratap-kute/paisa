@@ -51,18 +51,18 @@ let isGrouped = $derived(
 );
 </script>
 
-<div>
+<div class="space-y-4">
   {#each groupedPostings as groupedPosting}
-    <div class={isGrouped && "mb-3"}>
+    <section>
       {#if isGrouped}
         <div
-          class="flex justify-between paisa-negative-mb-1 text-sm font-bold text-[var(--paisa-muted-foreground)]"
+          class="mb-2 flex items-baseline justify-between gap-3 border-b border-[var(--paisa-border-subtle)] pb-1 text-sm font-bold text-[var(--paisa-muted-foreground)]"
         >
           <div>{groupedPosting.key}</div>
           <div>{formatCurrency(groupedPosting.total)}</div>
         </div>
       {/if}
       {@render children?.({ groupedPostings: groupedPosting.postings, })}
-    </div>
+    </section>
   {/each}
 </div>

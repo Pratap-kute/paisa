@@ -1,8 +1,10 @@
 <script lang="ts">
 import type { Snippet } from "svelte";
+import { iconGlyphOr } from "$lib/shared/ui/icon";
 
 interface Props {
   title?: string;
+  titleIcon?: string;
   subtitle?: string;
   titleHref?: string;
   fill?: boolean;
@@ -13,6 +15,7 @@ interface Props {
 
 let {
   title,
+  titleIcon,
   subtitle,
   titleHref,
   fill = false,
@@ -29,9 +32,15 @@ let {
         {#if title}
           <div class="paisa-section-title-wrap">
             {#if titleHref}
-              <a class="paisa-section-title-link" href={titleHref}>{title}</a>
+              <a class="paisa-section-title-link" href={titleHref}>
+                {#if titleIcon}<span class="custom-icon" aria-hidden="true">{iconGlyphOr(titleIcon)}</span>{/if}
+                <span>{title}</span>
+              </a>
             {:else}
-              <span class="paisa-section-title">{title}</span>
+              <span class="paisa-section-title">
+                {#if titleIcon}<span class="custom-icon" aria-hidden="true">{iconGlyphOr(titleIcon)}</span>{/if}
+                <span>{title}</span>
+              </span>
             {/if}
           </div>
         {/if}
@@ -83,6 +92,13 @@ let {
 
 .paisa-section-title-link:hover {
   color: var(--paisa-brand-primary);
+}
+
+.paisa-section-title,
+.paisa-section-title-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--paisa-space-2);
 }
 
 .paisa-section-subtitle {
