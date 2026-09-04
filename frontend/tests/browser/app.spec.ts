@@ -245,7 +245,7 @@ test("an API failure leaves a visible error instead of a blank page", async ({ p
   );
   await page.goto("/");
   await expect(page.locator("body")).toContainText(
-    /error|failed|report this issue/i,
+    /unavailable|could not be loaded|failed|report this issue/i,
   );
 });
 
