@@ -14,7 +14,7 @@ export function sumPostings(postings: Posting[]) {
 }
 
 export function transactionTotal(transaction: Transaction) {
-  return sumBy(transaction.postings, (t) => max([0, t.amount]));
+  return sumBy(transaction.postings, (t) => max([0, t.amount]) ?? 0);
 }
 
 export function groupSumBy(

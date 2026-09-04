@@ -22,12 +22,14 @@ import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
 import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
 import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
 import {
+  buildDashboardAttention,
+  buildExpensePace,
   buildExpenseTrend,
   buildNetWorthTrend,
   currentExpenses,
   summarizeBudget,
   summarizeCash,
-  summarizeInsights,
+  summarizeUpcomingRecurring,
 } from "$lib/features/dashboard/summary";
 import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
 import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
@@ -54,8 +56,8 @@ import { refresh } from "../../store";
 
 const period = now().format("YYYY-MM");
 let expenseMonth = $state(period);
-let goalSummaries: GoalSummary[] = $state([]);
-let transactionSequences: TransactionSequence[] = $state([]);
+let allGoalSummaries: GoalSummary[] = $state([]);
+let allTransactionSequences: TransactionSequence[] = $state([]);
 let cashFlows: CashFlow[] = $state([]);
 let expenses: Record<string, Posting[]> = $state({});
 let networth: Networth | undefined = $state();
@@ -64,6 +66,7 @@ let budgetsByMonth: Record<string, Budget> = $state({});
 let checkingBalances: Record<string, AssetBreakdown> = $state({});
 let isEmpty = $state(false);
 let dashboardLoading = $state(true);
+let dashboardFailed = $state(false);
 let insightsLoading = $state(true);
 let insightsFailed = $state(false);
 let insightsResponse: InsightsResult | null = $state(null);
@@ -82,7 +85,6 @@ let expenseBreakdown = $derived(
 let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
 let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
 let cashSummary = $derived(summarizeCash(checkingBalances));
-let insightSummary = $derived(summarizeInsights(insightsResponse?.insights));
 let insightsAvailable = $derived(
   !insightsLoading && !insightsFailed && insightsResponse !== null,
 );
@@ -102,6 +104,43 @@ let expenseTrend = $derived(
     insightsResponse?.isPartial,
     insightsResponse?.comparisonPeriod,
   ),
+);
+let dashboardAsOf = $derived(
+  insightsResponse?.period === period && insightsResponse.asOf.isValid()
+    ? insightsResponse.asOf
+    : now(),
+);
+let visibleGoalSummaries = $derived(
+  take(
+    sortBy(allGoalSummaries, (goal) => -goal.priority),
+    3,
+  ),
+);
+let visibleTransactionSequences = $derived(take(allTransactionSequences, 5));
+let recurringSummary = $derived(
+  summarizeUpcomingRecurring(
+    allTransactionSequences,
+    dashboardAsOf,
+    cashSummary.available ? cashSummary.total : undefined,
+  ),
+);
+let expensePace = $derived(
+  buildExpensePace(
+    currentPeriodExpenseTotal,
+    period,
+    dashboardAsOf,
+    budgetSummary.configured ? budgetSummary.planned : undefined,
+  ),
+);
+let attentionItems = $derived(
+  buildDashboardAttention({
+    insights: insightsResponse?.insights,
+    recurring: recurringSummary,
+    goals: allGoalSummaries,
+    asOf: dashboardAsOf,
+    isPartial: insightsResponse?.isPartial,
+    comparisonPeriod: insightsResponse?.comparisonPeriod,
+  }),
 );
 let periodContext = $derived(
   insightsResponse?.period === period && insightsResponse.asOf.isValid()
@@ -126,22 +165,13 @@ async function loadDashboard() {
     const res = await api.dashboard.getDashboard();
     expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
     cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
-    goalSummaries = take(
-      sortBy(
-        (res.goalSummaries as unknown as GoalSummary[]) || [],
-        (goal) => -goal.priority,
-      ),
-      3,
-    );
+    allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
     budgetsByMonth =
       (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
-    transactionSequences = take(
-      sortTrantionSequence(
-        enrichTrantionSequence(
-          (res.transactionSequences as unknown as TransactionSequence[]) || [],
-        ),
+    allTransactionSequences = sortTrantionSequence(
+      enrichTrantionSequence(
+        (res.transactionSequences as unknown as TransactionSequence[]) || [],
       ),
-      5,
     );
     networth = (res.networth?.networth as unknown as Networth) || undefined;
     checkingBalances =
@@ -151,6 +181,8 @@ async function loadDashboard() {
       >) || {};
     transactions = (res.transactions as unknown as Transaction[]) || [];
     isEmpty = transactions.length === 0;
+  } catch {
+    dashboardFailed = true;
   } finally {
     dashboardLoading = false;
   }
@@ -180,7 +212,12 @@ onMount(() => {
 </script>
 
 <Page width="analysis">
-  {#if isEmpty && !dashboardLoading}
+  {#if dashboardFailed && !dashboardLoading}
+    <div class="rounded-xl p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs" data-testid="dashboard-unavailable">
+      <h2 class="text-base font-semibold text-[var(--paisa-foreground)]">Dashboard unavailable</h2>
+      <p class="mt-1 text-sm text-[var(--paisa-muted-foreground)]">Your dashboard data could not be loaded. Please try again.</p>
+    </div>
+  {:else if isEmpty && !dashboardLoading}
     <div class="max-w-3xl mx-auto py-8">
       <div class="p-6 sm:p-8 rounded-xl bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
         <ZeroState item={false}>
@@ -214,6 +251,7 @@ onMount(() => {
         cash={cashSummary}
         expenses={currentPeriodExpenseTotal}
         {expenseTrend}
+        {expensePace}
         expenseRecorded={currentPeriodExpenses.length > 0}
         budget={budgetSummary}
         {period}
@@ -221,11 +259,8 @@ onMount(() => {
       />
 
       <DashboardInsightGateway
-        preview={insightSummary.preview}
-        attentionCount={insightSummary.attentionCount}
+        items={attentionItems}
         {period}
-        isPartial={insightsResponse?.isPartial}
-        comparisonPeriod={insightsResponse?.comparisonPeriod}
         loading={insightsLoading}
         failed={insightsFailed}
       />
@@ -288,14 +323,14 @@ onMount(() => {
       <DashboardCashAccounts accounts={cashSummary.accounts} />
 
       <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:min-w-0">
-        {#if goalSummaries.length > 0}
+        {#if visibleGoalSummaries.length > 0}
           <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs min-w-0">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">Goals</span>
               <a href="/more/goals" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">View All</a>
             </div>
             <div class="space-y-3">
-              {#each goalSummaries as goal (goal.name)}
+              {#each visibleGoalSummaries as goal (goal.name)}
                 {@const completed = goal.target > 0 ? goal.current / goal.target : 0}
                 <a href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`} class="block p-3 rounded-lg bg-[var(--paisa-surface-raised)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] min-w-0" data-testid="dashboard-goal-item">
                   <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-[var(--paisa-foreground)] truncate">{goal.name}</span><span class="text-xs font-semibold tabular-nums whitespace-nowrap">{formatPercentage(completed, 1)}</span></div>
@@ -310,14 +345,23 @@ onMount(() => {
           </section>
         {/if}
 
-        {#if transactionSequences.length > 0}
+        {#if visibleTransactionSequences.length > 0}
           <section class="rounded-xl p-4 sm:p-6 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs min-w-0">
             <div class="flex items-center justify-between mb-3">
               <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)]">Upcoming / Recurring</a>
               <a href="/cash_flow/recurring" class="text-xs font-semibold text-[var(--paisa-primary)] uppercase tracking-wider hover:underline">View All</a>
             </div>
+            {#if recurringSummary.pastDueCount > 0 || recurringSummary.upcomingCount > 0}
+              <p class="mb-2 text-xs font-medium text-[var(--paisa-muted-foreground)]" data-testid="dashboard-recurring-summary">
+                {#if recurringSummary.pastDueCount > 0}
+                  <span class="text-[var(--paisa-negative)]">{recurringSummary.pastDueCount} {recurringSummary.pastDueCount === 1 ? "payment" : "payments"} past due</span>
+                  {#if recurringSummary.upcomingCount > 0}<span> · </span>{/if}
+                {/if}
+                {#if recurringSummary.upcomingCount > 0}<span>{formatCurrency(recurringSummary.upcomingAmount)} due in the next {recurringSummary.horizonDays} days</span>{/if}
+              </p>
+            {/if}
             <div class="divide-y divide-[var(--paisa-border-subtle)]">
-              {#each transactionSequences as sequence (sequence.key)}
+              {#each visibleTransactionSequences as sequence (sequence.key)}
                 {@const schedule = nextUnpaidSchedule(sequence)}
                 {@const pastDue = schedule?.scheduled?.isBefore(now()) ?? false}
                 <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0" data-testid="dashboard-recurring-item">

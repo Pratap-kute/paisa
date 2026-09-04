@@ -3,6 +3,8 @@ import { describe, it as test } from "@std/testing/bdd";
 import type { AssetBreakdown } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
+import type { GoalSummary } from "$lib/domain/goals_models";
+import type { TransactionSequence } from "$lib/domain/recurring";
 import dayjs from "dayjs";
 
 Object.defineProperty(globalThis, "localStorage", {
@@ -25,11 +27,14 @@ globalThis.USER_CONFIG = {
 
 const {
   buildExpenseTrend,
+  buildDashboardAttention,
+  buildExpensePace,
   buildNetWorthTrend,
   periodUrl,
   summarizeBudget,
   summarizeCash,
   summarizeInsights,
+  summarizeUpcomingRecurring,
 } = await import("./summary.ts");
 
 function cash(group: string, marketAmount: number): AssetBreakdown {
@@ -80,6 +85,61 @@ function budget(accounts: AccountBudget[]): Budget {
     endOfMonthBalance: 0,
     availableThisMonth: 0,
     forecast: 0,
+  };
+}
+
+function recurring(
+  key: string,
+  scheduled: string,
+  amount: number,
+  account = "Expenses:Bills",
+): TransactionSequence {
+  const transaction = {
+    id: key,
+    date: dayjs("2026-08-01"),
+    payee: key,
+    beginLine: 1,
+    endLine: 2,
+    fileName: "main.ledger",
+    postings: [
+      { account, amount } as never,
+      {
+        account: "Assets:Checking",
+        amount: account.startsWith("Income:") ? amount : -amount,
+      } as never,
+    ],
+  };
+  const schedule = {
+    key,
+    amount,
+    scheduled: dayjs(scheduled),
+    actual: null,
+    transaction: null,
+  } as never;
+  const isPast = dayjs(scheduled).isBefore(dayjs("2026-08-10"), "day");
+  return {
+    key,
+    period: "",
+    interval: 30,
+    transactions: [transaction],
+    schedules: [schedule],
+    pastSchedules: isPast ? [schedule] : [],
+    futureSchedules: isPast ? [] : [schedule],
+    schedulesByMonth: {},
+  } as TransactionSequence;
+}
+
+function goal(overrides: Partial<GoalSummary> = {}): GoalSummary {
+  return {
+    id: "goal",
+    type: "savings",
+    name: "Emergency Fund",
+    icon: "fa-solid fa-piggy-bank",
+    current: 72_000,
+    target: 100_000,
+    targetDate: "2026-08-01",
+    priority: 0,
+    ...overrides,
   };
 }
 
@@ -185,5 +245,138 @@ describe("dashboard summaries", () => {
     expect(periodUrl("/expense/monthly", "2026-08")).toBe(
       "/expense/monthly?period=2026-08",
     );
+  });
+
+  test("projects current-month expenses after the first two days", () => {
+    expect(buildExpensePace(1_000, "2026-08", dayjs("2026-08-02")))
+      .toBeUndefined();
+    expect(buildExpensePace(0, "2026-08", dayjs("2026-08-10")))
+      .toBeUndefined();
+    expect(buildExpensePace(1_000, "2026-07", dayjs("2026-08-10")))
+      .toBeUndefined();
+    expect(buildExpensePace(10_000, "2026-08", dayjs("2026-08-10")))
+      .toMatchObject({ projectedExpenses: 31_000, status: "neutral" });
+    expect(buildExpensePace(2_800, "2026-02", dayjs("2026-02-28")))
+      .toMatchObject({ projectedExpenses: 2_800 });
+  });
+
+  test("marks a deterministic projection above the configured budget", () => {
+    expect(buildExpensePace(10_000, "2026-08", dayjs("2026-08-10"), 25_000))
+      .toMatchObject({
+        projectedExpenses: 31_000,
+        overBudget: 6_000,
+        status: "warning",
+      });
+  });
+
+  test("summarizes outgoing recurring obligations within an inclusive 14-day horizon", () => {
+    const result = summarizeUpcomingRecurring(
+      [
+        recurring("past", "2026-08-09", 500),
+        recurring("today", "2026-08-10", 1_000),
+        recurring("boundary", "2026-08-24", 2_000),
+        recurring("outside", "2026-08-25", 4_000),
+        recurring("salary", "2026-08-15", 50_000, "Income:Salary"),
+        recurring("transfer", "2026-08-15", 3_000, "Assets:Savings"),
+      ],
+      dayjs("2026-08-10"),
+      5_000,
+    );
+    expect(result).toMatchObject({
+      upcomingAmount: 3_000,
+      upcomingCount: 2,
+      pastDueAmount: 500,
+      pastDueCount: 1,
+      cashAfterUpcoming: 2_000,
+    });
+    expect(result.earliestDueDate?.format("YYYY-MM-DD")).toBe("2026-08-10");
+  });
+
+  test("preserves missing cash and reports a deterministic shortage", () => {
+    const sequences = [recurring("rent", "2026-08-12", 8_000)];
+    const withoutCash = summarizeUpcomingRecurring(
+      sequences,
+      dayjs("2026-08-10"),
+    );
+    expect(withoutCash.upcomingAmount).toBe(8_000);
+    expect(withoutCash.cashAfterUpcoming).toBeUndefined();
+    expect(summarizeUpcomingRecurring(sequences, dayjs("2026-08-10"), 5_000))
+      .toMatchObject({ cashAfterUpcoming: -3_000 });
+    expect(summarizeUpcomingRecurring([], dayjs("2026-08-10")))
+      .toMatchObject({ upcomingCount: 0, pastDueCount: 0 });
+  });
+
+  test("orders, deduplicates, and caps cross-domain attention", () => {
+    const recurringSummary = summarizeUpcomingRecurring(
+      [recurring("rent", "2026-08-09", 8_000)],
+      dayjs("2026-08-10"),
+      5_000,
+    );
+    const items = buildDashboardAttention({
+      insights: [
+        insight({ id: "warning-low", severity: "warning", score: 10 }),
+        insight({ id: "critical", severity: "critical", score: 1 }),
+        insight({ id: "warning-high", severity: "warning", score: 20 }),
+      ],
+      recurring: recurringSummary,
+      goals: [goal()],
+      asOf: dayjs("2026-08-10"),
+    });
+    expect(items.map((item) => item.id)).toEqual([
+      "insight:critical",
+      "recurring:past-due",
+      "insight:warning-high",
+    ]);
+
+    const duplicateBudget = buildDashboardAttention({
+      insights: [
+        insight({
+          id: "risk",
+          type: "budget_risk",
+          account: "Expenses:Food",
+          severity: "warning",
+          score: 5,
+        }),
+        insight({
+          id: "overspent",
+          type: "budget_overspent",
+          account: "Expenses:Food",
+          severity: "warning",
+          score: 10,
+        }),
+      ],
+      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+      asOf: dayjs("2026-08-10"),
+    });
+    expect(duplicateBudget).toHaveLength(1);
+    expect(duplicateBudget[0].id).toBe("insight:overspent");
+  });
+
+  test("adds only overdue incomplete goals and inspects every supplied goal", () => {
+    const items = buildDashboardAttention({
+      insights: undefined,
+      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+      goals: [
+        goal({ id: "complete", current: 100_000 }),
+        goal({ id: "future", targetDate: "2026-09-01" }),
+        goal({ id: "invalid", targetDate: "" }),
+        goal({ id: "overdue", name: "Fourth Goal" }),
+      ],
+      asOf: dayjs("2026-08-10"),
+    });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      id: "goal:overdue:overdue",
+      title: "Fourth Goal goal is overdue",
+    });
+  });
+
+  test("does not manufacture positive attention when insights are missing", () => {
+    expect(buildDashboardAttention({
+      insights: null,
+      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+      goals: [],
+      asOf: dayjs("2026-08-10"),
+    })).toEqual([]);
   });
 });

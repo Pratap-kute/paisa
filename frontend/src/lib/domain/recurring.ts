@@ -1,9 +1,9 @@
 import type dayjs from "dayjs";
 import type { Transaction } from "$lib/domain/ledger";
 export interface TransactionSchedule {
-  actual: dayjs.Dayjs;
+  actual: dayjs.Dayjs | null;
   scheduled: dayjs.Dayjs;
-  transaction: Transaction;
+  transaction: Transaction | null;
   key: string;
   amount: number;
 }

@@ -1,5 +1,10 @@
 <script lang="ts">
-import type { BudgetSummary, CashSummary, DashboardTrend } from "../summary";
+import type {
+  BudgetSummary,
+  CashSummary,
+  DashboardTrend,
+  ExpensePace,
+} from "../summary";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
 import { formatCurrency } from "$lib/shared/formatters/currency";
@@ -10,6 +15,7 @@ interface Props {
   cash: CashSummary;
   expenses: number;
   expenseTrend?: DashboardTrend;
+  expensePace?: ExpensePace;
   expenseRecorded: boolean;
   budget: BudgetSummary;
   period: string;
@@ -22,6 +28,7 @@ let {
   cash,
   expenses,
   expenseTrend,
+  expensePace,
   expenseRecorded,
   budget,
   period,
@@ -58,9 +65,15 @@ let {
       <Metric
         label="Expenses"
         value={formatCurrency(expenses)}
-        secondary={expenseRecorded ? "Month to date" : "No expenses recorded this month"}
-        trend={expenseTrend?.text}
-        trendStatus={expenseTrend?.status}
+        secondary={expenseRecorded
+          ? `Month to date${expensePace && expenseTrend ? ` · ${expenseTrend.text}` : ""}`
+          : "No expenses recorded this month"}
+        trend={expensePace
+          ? expensePace.overBudget !== undefined
+            ? `Projected ${formatCurrency(expensePace.projectedExpenses)} · ${formatCurrency(expensePace.overBudget)} over budget`
+            : `Projected ${formatCurrency(expensePace.projectedExpenses)} this month`
+          : expenseTrend?.text}
+        trendStatus={expensePace?.status ?? expenseTrend?.status}
         loading={loading}
       />
     </a>

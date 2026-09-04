@@ -123,6 +123,37 @@ test.describe("layout invariants", () => {
       .toBeVisible();
   });
 
+  test("dashboard keeps insights failure distinct from a healthy empty state", async ({ page }) => {
+    await page.route("**/api/insights**", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "unavailable" }),
+      }));
+    await page.goto("/");
+    const gateway = page.locator("[data-testid='dashboard-insights']");
+    await expect(gateway.getByText("Insights unavailable", { exact: true }))
+      .toBeVisible();
+    await expect(gateway.getByText("No material issues detected this month"))
+      .toHaveCount(0);
+    await expect(page.getByText("Status unavailable", { exact: true }).first())
+      .toBeVisible();
+  });
+
+  test("dashboard reports a dashboard API failure without showing onboarding", async ({ page }) => {
+    await page.route("**/api/dashboard", (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "unavailable" }),
+      }));
+    await page.goto("/");
+    await expect(page.locator("[data-testid='dashboard-unavailable']"))
+      .toBeVisible();
+    await expect(page.getByText("I want to get started", { exact: true }))
+      .toHaveCount(0);
+  });
+
   test("surviving dashboard section spans the row when Goals are absent", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/dashboard", async (route) => {

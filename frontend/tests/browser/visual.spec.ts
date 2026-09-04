@@ -221,9 +221,9 @@ for (const route of visualRoutes) {
           .toHaveCount(0);
         await expect(page.getByText("XIRR", { exact: true })).toHaveCount(0);
         expect(
-          await page.locator("[data-testid='dashboard-insight-preview']")
+          await page.locator("[data-testid='dashboard-attention-item']")
             .count(),
-        ).toBeLessThanOrEqual(1);
+        ).toBeLessThanOrEqual(3);
         expect(
           await page.locator("[data-testid='dashboard-budget-item']").count(),
         ).toBeLessThanOrEqual(3);

@@ -1,31 +1,28 @@
 <script lang="ts">
-import type { Insight } from "$lib/domain/insights";
-import { presentInsight } from "$lib/features/insights/presentation";
+import type { DashboardAttentionItem, MetricStatus } from "../summary";
 import Spinner from "$lib/shared/ui/Spinner.svelte";
 
 interface Props {
-  preview?: Insight;
-  attentionCount: number;
+  items: DashboardAttentionItem[];
   period: string;
-  isPartial?: boolean;
-  comparisonPeriod?: string;
   loading?: boolean;
   failed?: boolean;
 }
 
 let {
-  preview,
-  attentionCount,
+  items,
   period,
-  isPartial = false,
-  comparisonPeriod,
   loading = false,
   failed = false,
 }: Props = $props();
 
-let presentation = $derived(
-  preview ? presentInsight(preview, isPartial, comparisonPeriod) : undefined,
-);
+const statusClass: Record<MetricStatus, string> = {
+  neutral: "text-[var(--paisa-muted-foreground)]",
+  positive: "text-[var(--paisa-positive)]",
+  negative: "text-[var(--paisa-negative)]",
+  warning: "text-[var(--paisa-warning)]",
+  primary: "text-[var(--paisa-primary)]",
+};
 </script>
 
 <section
@@ -45,17 +42,26 @@ let presentation = $derived(
     <div class="py-3"><Spinner /></div>
   {:else if failed}
     <p class="mt-2 text-sm text-[var(--paisa-muted-foreground)]">Insights unavailable</p>
-  {:else if presentation}
-    <div class="mt-2 min-w-0" data-testid="dashboard-insight-preview">
+  {:else if items.length > 0}
+    <div class="mt-2 min-w-0">
       <p class="text-sm font-semibold text-[var(--paisa-foreground)]">
-        {attentionCount > 0
-          ? `${attentionCount} ${attentionCount === 1 ? "item needs" : "items need"} attention`
-          : "Latest financial context"}
+        {items.length} {items.length === 1 ? "item needs" : "items need"} attention
       </p>
-      <a href={presentation.href || `/insights?period=${period}`} class="mt-1 flex items-center gap-2 min-w-0 text-sm text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-primary)]">
-        <i class={`${presentation.icon} text-xs shrink-0`}></i>
-        <span class="truncate">{presentation.title}</span>
-      </a>
+      <div class="mt-1 divide-y divide-[var(--paisa-border-subtle)]">
+        {#each items as item (item.id)}
+          <a
+            href={item.href}
+            class="group flex min-w-0 items-start gap-2 rounded-md py-2 focus-visible:outline-2 focus-visible:outline-[var(--paisa-primary)]"
+            data-testid="dashboard-attention-item"
+          >
+            <i class={`${item.icon} ${statusClass[item.status]} mt-0.5 w-4 shrink-0 text-xs text-center`} aria-hidden="true"></i>
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-medium leading-snug text-[var(--paisa-foreground)] group-hover:text-[var(--paisa-primary)] break-words">{item.title}</span>
+              {#if item.detail}<span class="mt-0.5 block text-xs leading-snug text-[var(--paisa-muted-foreground)] line-clamp-2 break-words">{item.detail}</span>{/if}
+            </span>
+          </a>
+        {/each}
+      </div>
     </div>
   {:else}
     <p class="mt-2 text-sm text-[var(--paisa-muted-foreground)]">No material issues detected this month</p>
