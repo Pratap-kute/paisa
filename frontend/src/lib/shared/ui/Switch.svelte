@@ -73,7 +73,7 @@ function handleChange(e: Event) {
   font-size: 0.8125rem;
   line-height: 1.5;
   cursor: pointer;
-  color: var(--paisa-foreground, var(--paisa-text-primary));
+  color: var(--paisa-foreground, var(--paisa-foreground));
   user-select: none;
 }
 

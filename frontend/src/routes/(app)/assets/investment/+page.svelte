@@ -94,9 +94,9 @@ onMount(async () => {
   />
 
   {#if selectedPeriod}
-    <div class="mb-3 text-sm text-[var(--paisa-muted-foreground)]">
+    <div class="mb-3 text-sm text-muted-foreground">
       Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} ·
-      <a href="/assets/investment" class="text-[var(--paisa-primary)]">
+      <a href="/assets/investment" class="text-primary">
         Clear period filter
       </a>
     </div>
@@ -123,7 +123,7 @@ onMount(async () => {
 
   {#if !isLoading && !hasData}
     <ZeroState item={[]}>
-      <p class="text-sm text-[var(--paisa-muted-foreground)]">
+      <p class="text-sm text-muted-foreground">
         No investment postings found in the journal.
       </p>
     </ZeroState>

@@ -44,11 +44,15 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 ### 2.2 Styling Direction
 
 - **CSS Engine:** Tailwind CSS v4 + native CSS custom properties.
-- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/theme/tokens.css` (extended token set) and `$lib/shared/styles/foundation.css` (core tokens + Tailwind integration).
+- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/styles/foundation.css` (primary Tailwind integration point and canonical tokens) and `$lib/shared/theme/tokens.css` (extended token superset and integration mappings).
+- **Three Token Tiers:**
+  1. **Canonical Tokens:** Permitted for all application components and views (`--paisa-canvas`, `--paisa-surface`, `--paisa-surface-raised`, `--paisa-surface-hover`, `--paisa-foreground`, `--paisa-muted-foreground`, `--paisa-border`, `--paisa-border-subtle`, `--paisa-border-strong`, `--paisa-primary`, `--paisa-primary-subtle`, `--paisa-positive`, `--paisa-positive-subtle`, `--paisa-negative`, `--paisa-negative-subtle`, `--paisa-warning`, `--paisa-warning-subtle`, `--paisa-neutral`, `--paisa-prediction-*`).
+  2. **Specialized Tokens:** Stable integration and component semantics (`--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-tooltip-*`, `--paisa-login-*`) remain valid and should alias the canonical foundation where the semantics match.
+  3. **Removed Tokens:** Deprecated status tokens and legacy generic aliases are prohibited everywhere and enforced by automated spec guards. Application code representing financial statuses must use canonical financial semantics (`positive`, `negative`, `warning`, `primary`).
 - **CSS Layer Architecture:** Styles are organized via `@layer theme, base, components, utilities;` for controlled specificity.
 - **Migration Status (Complete):**
   $$\text{Bulma} = 0 \quad\big|\quad \text{Sass/SCSS} = 0 \quad\big|\quad \text{!important} \approx 0$$
-  Bulma and SCSS have been fully removed. Tailwind CSS v4 Preflight is **enabled** (`@import "tailwindcss/preflight.css" layer(base)`). A thin `legacy-compat.css` bridge provides class aliases (e.g., `.has-text-success`, `.table.is-hoverable`) consumed by Tabulator and legacy DOM output. No new Bulma-style classes may be added.
+  Bulma and SCSS have been fully removed. Tailwind CSS v4 Preflight is **enabled** (`@import "tailwindcss/preflight.css" layer(base)`). The former Bulma compatibility selectors had no runtime consumers and were removed; automated checks prevent their reintroduction in application markup.
 
 ### 2.3 UI Primitives & Accessibility Layer
 
@@ -67,6 +71,8 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 ## 3. Semantic Design Tokens & Theme System
 
 To ensure long-term maintainability and visual harmony across light and dark modes, all styling relies on a compact, stable set of semantic tokens. Unnecessary aliases that resolve to the same semantic role are avoided.
+
+Application code SHOULD prefer Tailwind semantic utilities (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`, etc.). Direct canonical token references (`var(--paisa-...)`) are permitted where Tailwind utilities are unsuitable, particularly component CSS, dynamic styles, vendor integration boundaries, SVG/chart rendering, and complex state-dependent classes. Deprecated tokens and raw palette colors remain strictly prohibited.
 
 ### 3.1 Token Definitions
 
@@ -212,7 +218,7 @@ To ensure long-term maintainability and visual harmony across light and dark mod
 
 ### 3.3 Semantic Utility Classes Rule
 
-Components and views must use semantic utility classes (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`). Direct use of raw color utilities (such as `text-red-500`, `bg-blue-600`, `bg-gray-100`) in application code is strictly forbidden.
+Components and views SHOULD prefer semantic utility classes (`bg-surface`, `text-foreground`, `text-muted-foreground`, `text-positive`, `text-negative`, `border-border`, etc.). Direct canonical token references (`var(--paisa-...)`) are permitted where Tailwind utilities are unsuitable, particularly component CSS, dynamic styles, vendor integration boundaries, SVG/chart rendering, and complex state-dependent classes. Direct use of raw color utilities (such as `text-red-500`, `bg-blue-600`, `bg-gray-100`) and deprecated tokens in application code is strictly forbidden.
 
 ---
 
@@ -313,21 +319,23 @@ A common failure in financial UI redesigns is creating "card soup"—wrapping ev
 
 ### 6.2 The Container Justification Rule
 
-A surface container (Card / Box / Panel) is **only permitted** when at least one of the following criteria is met:
+A surface container (Card / Box / Panel) is evaluated by its **visual and surface semantics** (elevation, shadows, outer bounding borders) rather than mere Svelte component file naming. A container is **permitted** when at least one of the following criteria is met:
 
 1. It encapsulates a **distinct financial entity** with its own identity (e.g., a specific Goal, a Recurring Bill item).
 2. It represents an **independently actionable or selectable** element (e.g., a clickable transaction record in mobile view).
 3. It bounds a **dense interactive workspace** (e.g., the CodeMirror editor pane, a spreadsheet preview grid).
 4. It isolates a **multi-field complex form section**.
+5. It encloses a **complex data table** requiring explicit overflow clipping (`overflow-x-auto`), sticky headers, scroll boundaries, or expandable detail panels. Where a simple section surface with hairline dividers suffices, prefer direct placement; do not, however, prohibit functional table containers.
 
-### 6.3 Separation Hierarchy (Before Adding Borders/Shadows)
+### 6.3 Separation Hierarchy & Surface Elevation Semantics
 
 When separating content, apply techniques in this strict order:
 $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3. Typography Hierarchy} \longrightarrow \text{4. Hairline Dividers} \longrightarrow \text{5. Backgrounds / Cards}$$
 
-- Charts do **not** automatically need wrapping cards; they live directly on section surfaces.
-- Metric strips do **not** need individual card enclosures for each number; they sit cleanly inside a unified horizontal strip with subtle vertical dividers.
-- Nested cards (a card inside another card) are **strictly forbidden**.
+- **No Chart Enclosures:** Charts do not automatically need wrapping cards; they live directly on section surfaces.
+- **Unified Metric Strips:** Metric strips do not need individual card enclosures for each number; they sit cleanly inside a unified horizontal strip with subtle vertical dividers.
+- **Nested Elevated Cards are Forbidden:** Placing an elevated, shadowed card inside another elevated, shadowed card is strictly forbidden.
+- **Expandable Detail Panels are Permitted:** An inner bordered table or expandable row inspector (such as `CapitalGainDetailCard` rendering inside an expanded table row) is a functional drill-down region on `var(--paisa-surface-raised)` with hairline borders, not an elevated card-in-card violation.
 
 ---
 
@@ -462,12 +470,14 @@ The AppShell header right region hosts:
 
 ### 9.3 PageHeader Responsibility Guarantee
 
-The global AppShell header **never** contains a static page title (such as "Dashboard" or "Paisa"). Every route renders its own `<PageHeader />` component containing:
+The global AppShell header **never** contains a static page title (such as "Dashboard" or "Paisa"). Page headers follow an explicit archetype rule:
 
-- Specific page title
-- Optional subtitle / description
-- Direct documentation link (`helpUrl(...)`)
-- Page-level primary actions snippet (e.g., Period Picker, Last N Months, Export, Create Button)
+- **Standard Routes (Overview, Analysis, Detail, Operational, Data Explorer):** Every route renders its own `<PageHeader />` component containing:
+  - Specific page title
+  - Optional subtitle / description
+  - Direct documentation link (`helpUrl(...)`)
+  - Page-level primary actions snippet (e.g., Period Picker, Last N Months, Export, Create Button)
+- **Specialized Workspaces (Tool and Workflow Archetypes):** Routes such as `/ledger/editor`, `/ledger/editor/[slug]`, and `/ledger/import` use an approved specialized workspace toolbar or topbar in place of the generic `<PageHeader />` when primary interactive controls form the page header itself. A redundant generic PageHeader above these workspaces is strictly avoided.
 
 ---
 
@@ -484,12 +494,13 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 - **Examples:** `/` (Dashboard), `/liabilities/credit_cards` (Overview), `/more/goals` (Goals Overview).
 - **Desktop Pattern:**
   1. `PageHeader` (Title + global actions)
-  2. `MetricStrip` (Net Worth, Invested, Gain/Loss, XIRR — no individual card enclosures)
+  2. `MetricStrip` (Net Worth, Cash Balance, Expenses, Budget — no individual card enclosures; includes trend and secondary status)
   3. Cash Accounts — compact horizontal summaries
-  4. Visualizations row (Cash Flow timeline | Spending breakdown)
-  5. Operations row (Needs Attention | Recent Activity)
-  6. Long-term summary row (Goals | Upcoming / Recurring)
-- **Mobile Transformation:** Ordered stack: Net Worth $\rightarrow$ secondary metrics $\rightarrow$ Cash Accounts $\rightarrow$ Cash Flow $\rightarrow$ Spending $\rightarrow$ Needs Attention $\rightarrow$ Recent Activity $\rightarrow$ Goals $\rightarrow$ Upcoming / Recurring.
+  4. Insights Gateway banner — directional anomaly and savings insights
+  5. Visualizations row (Cash Flow timeline | Spending breakdown)
+  6. Operations row (Needs Attention / Budget Health | Recent Activity)
+  7. Long-term summary row (Goals | Upcoming / Recurring)
+- **Mobile Transformation:** Ordered stack: Net Worth $\rightarrow$ secondary metrics $\rightarrow$ Cash Accounts $\rightarrow$ Insights $\rightarrow$ Cash Flow $\rightarrow$ Spending $\rightarrow$ Needs Attention $\rightarrow$ Recent Activity $\rightarrow$ Goals $\rightarrow$ Upcoming / Recurring.
 - **Prohibited Patterns:** Do not wrap individual KPI numbers in isolated cards. Do not render large decorative bank card graphics.
 
 #### Wireframe: Dashboard Desktop
@@ -498,9 +509,12 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 +-----------------------------------------------------------------------------------------------+
 | Dashboard                    Your financial position at a glance                [Last 30 Days]|
 +-----------------------------------------------------------------------------------------------+
-| NET WORTH: ₹84,20,500  |  INVESTED: ₹62,00,000  |  GAIN: +₹22,20,500 (+35.8%)  |  XIRR: 14.2% |
+| NET WORTH: ₹84,20,500  | CASH BALANCE: ₹2,39,400 | EXPENSES: ₹78,420    | BUDGET: On Track    |
+| ▲ +₹2.2L (+3.2%) MoM   | Across 3 accounts       | Projected ₹82,000    | ₹78k of ₹1.1L spent |
 +-----------------------------------------------------------------------------------------------+
 | Cash Accounts:  HDFC Checking: ₹1,42,000  ·  ICICI Savings: ₹85,400  ·  Cash Wallet: ₹12,000  |
++-----------------------------------------------------------------------------------------------+
+| [i] INSIGHTS: Dining spending +24% vs rolling median  ·  Savings rate at 42%    [View Insights]|
 +-------------------------------------------------------------+---------------------------------+
 | CASH FLOW                                                   | SPENDING (Jul 2026)             |
 | [=================== ECharts Monthly Flow Chart ===============] | Total: ₹78,420                  |
@@ -525,12 +539,23 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | [=] Paisa Dashboard               [:] |
 +---------------------------------------+
 | NET WORTH                             |
-| ₹84,20,500                            |
-| Gain: +₹22.2L (+35.8%)  XIRR: 14.2%   |
+| ₹84,20,500  ▲ +₹2.2L (+3.2%)          |
++---------------------------------------+
+| CASH BALANCE                          |
+| ₹2,39,400 (3 accounts)                |
++---------------------------------------+
+| EXPENSES                              |
+| ₹78,420 · Projected ₹82,000           |
++---------------------------------------+
+| BUDGET                                |
+| On Track · ₹78k of ₹1.1L planned      |
 +---------------------------------------+
 | CASH ACCOUNTS                         |
 | HDFC Checking                ₹1,42,000 |
 | ICICI Savings                  ₹85,400 |
++---------------------------------------+
+| [i] INSIGHTS                          |
+| Dining +24% vs rolling median         |
 +---------------------------------------+
 | CASH FLOW                             |
 | [=== ECharts Monthly Flow Chart ==========]|
@@ -678,7 +703,7 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
   2. `MetricStrip`: Available to Budget, Available to Spend, Projected Balance
   3. Checking Balance as secondary context
   4. Needs Attention: compact progress rows for overspent/tight envelopes
-  5. All Budgets: dominant dense table/list showing Budgeted, Spent, Remaining, and Progress Bar
+  5. All Budgets: dense comparison of Category, Budgeted, Spent, Remaining, and Progress. This may be presented as a dense data table or a dense structured list of records (such as `BudgetCard`), provided high information density and scanability are maintained without oversized decorative card containers.
 - **Mobile Transformation:** Metrics $\rightarrow$ checking balance $\rightarrow$ needs attention $\rightarrow$ compact budget records.
 
 #### Wireframe: Budget Desktop
@@ -694,11 +719,10 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 | NEEDS ATTENTION                                                                               |
 | Shopping: Spent ₹28,900 / Budget ₹20,000  [████████████████████████]  Overspent by ₹8,900     |
 +-----------------------------------------------------------------------------------------------+
-| ALL BUDGETS                                                                                   |
-| CATEGORY             BUDGETED        SPENT           REMAINING       PROGRESS                 |
-| Food & Dining        ₹25,000.00      ₹18,400.00      ₹6,600.00       [████████████░░░] 73.6%  |
-| Utilities            ₹10,000.00       ₹4,200.00      ₹5,800.00       [█████░░░░░░░░░░] 42.0%  |
-| Transportation        ₹8,000.00       ₹6,100.00      ₹1,900.00       [█████████░░░░░░] 76.2%  |
+| ALL BUDGETS (Dense Comparison: Table or Structured Record List)                               |
+| Food & Dining     Budgeted: ₹25,000.00  Spent: ₹18,400.00  Remaining: ₹6,600.00  [████████░]  |
+| Utilities         Budgeted: ₹10,000.00  Spent:  ₹4,200.00  Remaining: ₹5,800.00  [████░░░░]  |
+| Transportation    Budgeted:  ₹8,000.00  Spent:  ₹6,100.00  Remaining: ₹1,900.00  [███████░]  |
 +-----------------------------------------------------------------------------------------------+
 ```
 
@@ -708,27 +732,33 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 
 - **Purpose:** Modify system, currency, journal, commodity, and rule parameters cleanly.
 - **Desktop Pattern:**
-  - Left Nav Rail (13.5rem): Sticky list of configuration sections (General, Budget, Goals, Prediction, Accounts, Allocation Targets, Commodities, Credit Cards, Import Templates, Schedule AL, User Accounts).
-  - Main Panel: Section Title + Description + Schema Form Fields / Custom List Editor + Sticky Footer Bar with Reset to defaults, Discard, and Save changes.
-- **Mobile Transformation:** Section selector becomes a top scrollable pill bar or select menu; form fields stack vertically; save bar remains sticky at viewport bottom.
+  - `PageHeader` with title, description, and unsaved changes badge.
+  - Horizontal boxed section tabs selector (`Tabs variant="boxed"`) listing sections: General, Budget, Goals, Prediction, Accounts, Allocation Targets, Commodities, Credit Cards, Import Templates, Schedule AL, User Accounts.
+  - Active Section Surface: Section Title Bar (icon, name, count badge, description) + Dynamic JSON Schema form fields / custom list editors.
+  - Sticky Footer Bar: Reset to Defaults, Discard Changes, and Save Changes actions.
+- **Mobile Transformation:** Horizontal scrollable section tabs; form fields stack vertically; save bar remains sticky at viewport bottom.
 
 #### Wireframe: Configuration Desktop
 
 ```
 +-----------------------------------------------------------------------------------------------+
-| Configuration                Edit paisa.yaml settings by section                              |
-+----------------------+------------------------------------------------------------------------+
-| SECTIONS             | GENERAL CONFIGURATION                                                  |
-| > General            | Journal Path                                                           |
-|   Budget             | [ /home/user/finances/main.ledger                                    ] |
-|   Goals              |                                                                        |
-|   Prediction         | Default Currency                                     Locale            |
-|   Accounts           | [ INR                              ]                 [ en-IN         ] |
-|   Allocation Targets |                                                                        |
-|   Commodities        | [x] Obscure amounts by default                                         |
-|   Credit Cards       +------------------------------------------------------------------------+
-|   Import Templates   | [Reset to Defaults]                         [Discard]   [Save Changes] |
-+----------------------+------------------------------------------------------------------------+
+| Configuration       Edit paisa.yaml settings by section                 [● Unsaved Changes]   |
++-----------------------------------------------------------------------------------------------+
+| [ General ] [ Budget ] [ Goals ] [ Prediction ] [ Accounts ] [ Commodities ] [ Credit Cards ] |
++-----------------------------------------------------------------------------------------------+
+| [*] GENERAL CONFIGURATION                                                                     |
+| Core workspace settings and default journal paths                                             |
++-----------------------------------------------------------------------------------------------+
+| Journal Path                                                                                  |
+| [ /home/user/finances/main.ledger                                                           ] |
+|                                                                                               |
+| Default Currency                                     Locale                                   |
+| [ INR                              ]                 [ en-IN                                ] |
+|                                                                                               |
+| [x] Obscure amounts by default                                                                |
++-----------------------------------------------------------------------------------------------+
+| [Reset to Defaults]                                      [Discard Changes]     [Save Changes] |
++-----------------------------------------------------------------------------------------------+
 ```
 
 ---
@@ -828,7 +858,7 @@ Every data region, table, chart frame, and section in Paisa must explicitly hand
 
 1. **`loading`:** Render geometry-preserving skeletons. Skeletons must match final geometry; layout collapse is forbidden.
 2. **`loaded`:** Full data presentation with complete interaction support.
-3. **`empty`:** Informative zero-state component with an explicit explanation of *why* it is empty and a direct call to action.
+3. **`empty`:** Informative zero-state with an explicit explanation of *why* it is empty and a clear call to action or status feedback. Compliance is semantic: use shared `<ZeroState />` when a page-level actionable onboarding or empty status is appropriate; use local `<ChartFrame empty={...}>`, Tabulator empty alerts, or search-specific empty states when localized component handling is contextually superior.
 4. **`partial`:** Gracefully display available portions while rendering subtle warnings for missing slices.
 5. **`error`:** Section-localized error message with retry CTA.
 6. **`stale`:** Visible when a background sync or price update is running.
@@ -857,7 +887,7 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 │    ├── charts/: EChartSurface, TimeSeriesChart,             │
 │    │   ComparisonBarChart, FinancialHierarchyChart           │
 │    ├── editor/: CodeMirror foundations                      │
-│    ├── styles/: foundation.css, legacy-compat.css           │
+│    ├── styles/: foundation.css, base.css, utilities.css     │
 │    └── theme/: tokens.css, chartPalette.ts, color.ts        │
 ├─────────────────────────────────────────────────────────────┤
 │ 4. Domain ($lib/domain/)                                    │
@@ -1010,15 +1040,15 @@ The table and 41 individual route design contracts below represent the binding U
 - **Primary Archetype:** Overview
 - **Primary Question:** What is my current financial position at a glance?
 - **Page Header:** Breadcrumb: Home; Title: "Dashboard"; Subtoolbar: Obscure toggle, Sync action.
-- **Primary Information:** MetricStrip (Net Worth, Invested, Gain/Loss, XIRR), Cash Accounts summary.
-- **Secondary Information:** Cash Flow timeline chart, Current month expense breakdown, Needs attention alerts, Recent transactions list, Goals summary, Upcoming recurring items.
+- **Primary Information:** MetricStrip (Net Worth, Cash Balance, Expenses, Budget), Cash Accounts summary, Insights Gateway.
+- **Secondary Information:** Cash Flow timeline chart, Current month expense breakdown comparison, Budget health / Needs attention alerts, Recent activity postings list, Goals summary, Upcoming recurring items.
 - **Primary Actions:** Sync journal, Setup demo (in empty state).
-- **Desktop Composition:** MetricStrip $\rightarrow$ Cash Accounts strip $\rightarrow$ Cash Flow | Spending row $\rightarrow$ Needs Attention | Recent Activity row $\rightarrow$ Goals | Upcoming row.
-- **Mobile Transformation:** Strict single column stack: Net Worth $\rightarrow$ Secondary metrics $\rightarrow$ Cash Accounts $\rightarrow$ Cash Flow $\rightarrow$ Spending $\rightarrow$ Needs Attention $\rightarrow$ Recent Activity $\rightarrow$ Goals $\rightarrow$ Upcoming.
+- **Desktop Composition:** MetricStrip $\rightarrow$ Cash Accounts strip $\rightarrow$ Insights Gateway banner $\rightarrow$ Cash Flow | Spending row $\rightarrow$ Needs Attention / Budget Health | Recent Activity row $\rightarrow$ Goals | Upcoming recurring row.
+- **Mobile Transformation:** Strict single column stack: Net Worth $\rightarrow$ Secondary metrics $\rightarrow$ Cash Accounts $\rightarrow$ Insights Gateway $\rightarrow$ Cash Flow $\rightarrow$ Spending $\rightarrow$ Needs Attention $\rightarrow$ Recent Activity $\rightarrow$ Goals $\rightarrow$ Upcoming.
 - **Loading Behavior:** Geometry-preserving skeletons for metric strip and both chart frames.
 - **Empty Behavior:** Full-page `<ZeroState />` offering "Get Started" guide or "Setup Demo" button (`/api/init`).
 - **Error Behavior:** Section-localized alerts for failing API segments; remaining sections stay visible.
-- **Preserved Functionality:** Interactive ECharts cash flow chart with legends, ECharts month breakdown, Last N Months selector, direct drill-down links to all sections.
+- **Preserved Functionality:** Interactive ECharts cash flow chart with legends, ECharts month breakdown comparison, Last N Months selector, Insights integration, direct drill-down links to all sections.
 
 #### 2. `/assets/allocation` — Asset Allocation
 
@@ -1203,14 +1233,14 @@ The table and 41 individual route design contracts below represent the binding U
 - **Primary Question:** How much spending budget remains in each category this month?
 - **Page Header:** Title: "Budget", Description: "Monthly envelope budgeting and spending tracking"; Subtoolbar: Month picker.
 - **Primary Information:** MetricStrip (Available to Budget, Available to Spend, Projected Balance).
-- **Secondary Information:** Checking Balance context, Needs attention rows, All Budgets table/list.
+- **Secondary Information:** Checking Balance context, Needs attention rows, All Budgets dense comparison (Category, Budgeted, Spent, Remaining, Progress).
 - **Primary Actions:** Month selector.
-- **Desktop Composition:** MetricStrip $\rightarrow$ Checking balance context $\rightarrow$ Needs attention alerts $\rightarrow$ All Budgets table with progress bars.
-- **Mobile Transformation:** Metrics $\rightarrow$ Checking balance $\rightarrow$ Needs attention $\rightarrow$ Compact budget cards.
+- **Desktop Composition:** MetricStrip $\rightarrow$ Checking balance context $\rightarrow$ Needs attention alerts $\rightarrow$ All Budgets dense comparison (table or structured list of dense `BudgetCard` items).
+- **Mobile Transformation:** Metrics $\rightarrow$ Checking balance $\rightarrow$ Needs attention $\rightarrow$ Compact budget cards stack.
 - **Loading Behavior:** Skeleton metric items and budget row placeholders.
 - **Empty Behavior:** ZeroState with link to budget documentation.
 - **Error Behavior:** Local error banner.
-- **Preserved Functionality:** Checking balance context, Available to budget vs deficit calculation, spend forecast.
+- **Preserved Functionality:** Checking balance context, Available to budget vs deficit calculation, spend forecast, rollover tracking.
 
 #### 14. `/expense/monthly` — Monthly Expenses
 
@@ -1461,8 +1491,8 @@ The table and 41 individual route design contracts below represent the binding U
 - **Primary Information:** Dynamic JSON Schema form fields for active section (General, Budget, Goals, Prediction, Accounts, Allocation Targets, Commodities, Credit Cards, Import Templates, Schedule AL, User Accounts).
 - **Secondary Information:** Section item counters, schema field descriptions.
 - **Primary Actions:** Section selector, Reset to defaults, Discard changes, Save changes.
-- **Desktop Composition:** Left navigation rail (13.5rem) $\rightarrow$ Main settings panel with header count badge $\rightarrow$ Sticky bottom save/discard bar.
-- **Mobile Transformation:** Top horizontal section selector $\rightarrow$ Vertical form fields $\rightarrow$ Sticky bottom action bar.
+- **Desktop Composition:** PageHeader with unsaved changes badge $\rightarrow$ Section with horizontal boxed section tabs selector $\rightarrow$ Active section surface with header count badge and schema fields $\rightarrow$ Sticky bottom save/discard bar.
+- **Mobile Transformation:** Top horizontal scrollable section tabs $\rightarrow$ Vertical form fields $\rightarrow$ Sticky bottom save/discard bar.
 - **Loading Behavior:** Settings panel skeleton.
 - **Empty Behavior:** N/A (schema default fallback).
 - **Error Behavior:** Schema validation error alert box.

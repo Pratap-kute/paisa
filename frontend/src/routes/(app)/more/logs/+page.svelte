@@ -138,7 +138,7 @@ function formatTime(time: any): string {
         <div class="flex flex-wrap items-center gap-1.5">
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'all' ? 'bg-[var(--paisa-brand-primary)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'all' ? 'bg-primary text-inverse-foreground' : 'bg-surface-raised text-muted-foreground hover:bg-surface-hover'}"
             onclick={() => (selectedLevel = "all")}
           >
             <span>All</span>
@@ -148,7 +148,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'info' ? 'bg-[var(--paisa-info)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'info' ? 'bg-primary text-inverse-foreground' : 'bg-surface-raised text-muted-foreground hover:bg-surface-hover'}"
             onclick={() => (selectedLevel = "info")}
           >
             <span>Info</span>
@@ -158,7 +158,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'warning' ? 'bg-[var(--paisa-warning)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'warning' ? 'bg-warning text-inverse-foreground' : 'bg-surface-raised text-muted-foreground hover:bg-surface-hover'}"
             onclick={() => (selectedLevel = "warning")}
           >
             <span>Warning</span>
@@ -168,7 +168,7 @@ function formatTime(time: any): string {
 
           <button
             type="button"
-            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'error' ? 'bg-[var(--paisa-danger)] text-[var(--paisa-text-inverse)]' : 'bg-[var(--paisa-surface-2)] text-[var(--paisa-text-secondary)] hover:bg-[var(--paisa-surface-hover)]'}"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-[var(--paisa-radius-md)] px-2.5 py-1 text-xs font-semibold transition-colors {selectedLevel === 'error' ? 'bg-negative text-inverse-foreground' : 'bg-surface-raised text-muted-foreground hover:bg-surface-hover'}"
             onclick={() => (selectedLevel = "error")}
           >
             <span>Error</span>
@@ -179,17 +179,17 @@ function formatTime(time: any): string {
 
         <!-- Search Input -->
         <div class="relative flex flex-1 min-w-[200px] max-w-sm items-center">
-          <i class="fas fa-magnifying-glass absolute left-2.5 text-xs text-[var(--paisa-text-muted)]"></i>
+          <i class="fas fa-magnifying-glass absolute left-2.5 text-xs text-muted-foreground"></i>
           <input
             type="text"
             bind:value={searchQuery}
             placeholder="Search logs, routes, IPs..."
-            class="w-full rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-2)] py-1.5 pl-8 pr-3 text-xs text-[var(--paisa-text-primary)] placeholder-[var(--paisa-text-muted)] transition-colors focus:border-[var(--paisa-brand-primary)] focus:bg-[var(--paisa-surface)] focus:outline-none"
+            class="w-full rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised py-1.5 pl-8 pr-3 text-xs text-foreground placeholder-[var(--paisa-muted-foreground)] transition-colors focus:border-[var(--paisa-primary)] focus:bg-surface focus:outline-none"
           />
           {#if searchQuery}
             <button
               type="button"
-              class="absolute right-2 text-xs text-[var(--paisa-text-muted)] hover:text-[var(--paisa-text-primary)]"
+              class="absolute right-2 text-xs text-muted-foreground hover:text-foreground"
               aria-label="Clear search"
               onclick={() => (searchQuery = "")}
             >
@@ -202,10 +202,10 @@ function formatTime(time: any): string {
 
     <!-- Structured Virtualized Log Table -->
     <div
-      class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] shadow-sm"
+      class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-sm"
     >
       <!-- Header Row -->
-      <div class="flex min-w-[950px] items-center border-b border-[var(--paisa-border-default)] bg-[var(--paisa-surface-2)] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--paisa-text-secondary)]">
+      <div class="flex min-w-[950px] items-center border-b border-border bg-surface-raised px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         <div class="w-[155px] shrink-0">Timestamp</div>
         <div class="w-[75px] shrink-0">Level</div>
         <div class="w-[420px] shrink-0">Message</div>
@@ -215,7 +215,7 @@ function formatTime(time: any): string {
       {#if filteredLogs.length === 0}
         <div class="py-16">
           <ZeroState item={[]}>
-            <p class="text-sm text-[var(--paisa-muted-foreground)]">
+            <p class="text-sm text-muted-foreground">
               {logs.length === 0 ? "No logs recorded yet." : "No logs matching current filters."}
             </p>
           </ZeroState>
@@ -225,13 +225,13 @@ function formatTime(time: any): string {
           <svelte:fragment slot="item" let:index let:style>
             {@const log = filteredLogs[index]}
             {@const fields = omit(log, ["time", "level", "msg"])}
-            <div {style} class="border-b border-[var(--paisa-border-subtle)] transition-colors hover:bg-[var(--paisa-surface-hover)]">
+            <div {style} class="border-b border-border-subtle transition-colors hover:bg-surface-hover">
               <div
                 class="flex min-w-[950px] items-center gap-2 px-3 text-xs font-mono"
                 style="height: {ITEM_SIZE}px;"
               >
                 <!-- Timestamp -->
-                <div class="w-[155px] shrink-0 font-mono text-[0.75rem] text-[var(--paisa-muted-foreground)]">
+                <div class="w-[155px] shrink-0 font-mono text-[0.75rem] text-muted-foreground">
                   {formatTime(log.time)}
                 </div>
 
@@ -244,7 +244,7 @@ function formatTime(time: any): string {
 
                 <!-- Message -->
                 <div
-                  class="paisa-truncate w-[420px] shrink-0 text-[0.8125rem] font-medium text-[var(--paisa-text-primary)]"
+                  class="truncate w-[420px] shrink-0 text-[0.8125rem] font-medium text-foreground"
                   title={log.msg}
                 >
                   {log.msg}
@@ -252,12 +252,12 @@ function formatTime(time: any): string {
 
                 <!-- Structured Context Fields -->
                 <div
-                  class="paisa-truncate min-w-0 flex-1 text-[0.725rem] text-[var(--paisa-muted-foreground)]"
+                  class="truncate min-w-0 flex-1 text-[0.725rem] text-muted-foreground"
                 >
                   {#each Object.entries(fields) as [key, value]}
-                    <span class="mr-2 inline-flex items-center rounded bg-[var(--paisa-surface-2)] px-1.5 py-0.5 border border-[var(--paisa-border-subtle)]">
-                      <span class="text-[var(--paisa-text-secondary)]">{key}:</span>
-                      <span class="ml-1 font-semibold text-[var(--paisa-text-primary)]">{value}</span>
+                    <span class="mr-2 inline-flex items-center rounded bg-surface-raised px-1.5 py-0.5 border border-border-subtle">
+                      <span class="text-muted-foreground">{key}:</span>
+                      <span class="ml-1 font-semibold text-foreground">{value}</span>
                     </span>
                   {/each}
                 </div>

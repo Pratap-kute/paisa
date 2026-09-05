@@ -83,7 +83,7 @@ let {
 .paisa-section-title-link {
   font-size: var(--paisa-font-size-sm);
   font-weight: var(--paisa-font-weight-semibold);
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: var(--paisa-line-height-tight);
@@ -91,7 +91,7 @@ let {
 }
 
 .paisa-section-title-link:hover {
-  color: var(--paisa-brand-primary);
+  color: var(--paisa-primary);
 }
 
 .paisa-section-title,
@@ -103,7 +103,7 @@ let {
 
 .paisa-section-subtitle {
   font-size: var(--paisa-font-size-xs);
-  color: var(--paisa-text-muted);
+  color: var(--paisa-muted-foreground);
   margin-top: var(--paisa-space-1);
   margin-bottom: 0;
 }

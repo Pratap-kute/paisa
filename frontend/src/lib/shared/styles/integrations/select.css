@@ -6,33 +6,33 @@
   --border-focused: 1px solid var(--paisa-input-border-focus);
   --border-radius: var(--paisa-radius-sm);
   --input-color: var(--paisa-input-text);
-  --item-color: var(--paisa-text-primary);
+  --item-color: var(--paisa-foreground);
   --selected-item-color: var(--paisa-input-text);
   --placeholder-color: var(--paisa-input-placeholder);
-  --icons-color: var(--paisa-text-muted);
-  --clear-select-color: var(--paisa-text-muted);
-  --chevron-color: var(--paisa-text-muted);
+  --icons-color: var(--paisa-muted-foreground);
+  --clear-select-color: var(--paisa-muted-foreground);
+  --chevron-color: var(--paisa-muted-foreground);
 
   --list-background: var(--paisa-dropdown-bg);
   --list-border: 1px solid var(--paisa-dropdown-border);
   --list-shadow: var(--paisa-dropdown-shadow);
-  --list-empty-color: var(--paisa-text-muted);
+  --list-empty-color: var(--paisa-muted-foreground);
   --item-hover-bg: var(--paisa-surface-hover);
-  --item-hover-color: var(--paisa-text-primary);
-  --item-active-background: var(--paisa-surface-active);
-  --item-is-active-bg: var(--paisa-brand-primary-light, rgba(59, 130, 246, 0.15));
-  --item-is-active-color: var(--paisa-brand-primary, #3b82f6);
-  --item-is-not-selectable-color: var(--paisa-text-muted);
-  --group-title-color: var(--paisa-text-secondary);
-  --group-title-border-color: var(--paisa-border-default);
+  --item-hover-color: var(--paisa-foreground);
+  --item-active-background: var(--paisa-surface-hover);
+  --item-is-active-bg: var(--paisa-primary-subtle, rgba(59, 130, 246, 0.15));
+  --item-is-active-color: var(--paisa-primary, #3b82f6);
+  --item-is-not-selectable-color: var(--paisa-muted-foreground);
+  --group-title-color: var(--paisa-muted-foreground);
+  --group-title-border-color: var(--paisa-border);
 
-  --multi-item-bg: var(--paisa-surface-muted);
-  --multi-item-color: var(--paisa-text-primary);
-  --multi-item-outline: 1px solid var(--paisa-border-default);
-  --multi-item-clear-icon-color: var(--paisa-text-secondary);
+  --multi-item-bg: var(--paisa-surface-raised);
+  --multi-item-color: var(--paisa-foreground);
+  --multi-item-outline: 1px solid var(--paisa-border);
+  --multi-item-clear-icon-color: var(--paisa-muted-foreground);
 
   --disabled-background: var(--paisa-input-disabled-bg);
-  --disabled-border-color: var(--paisa-border-default);
+  --disabled-border-color: var(--paisa-border);
   --disabled-color: var(--paisa-input-disabled-text);
   --disabled-placeholder-color: var(--paisa-input-disabled-text);
   --error-background: var(--paisa-input-bg);
@@ -79,7 +79,7 @@ html .svelte-select.paisa-select-sm .chevron svg {
 }
 
 html .svelte-select-list.svelte-select-list {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   background: var(--paisa-dropdown-bg);
   border-color: var(--paisa-dropdown-border);
   border-radius: var(--paisa-radius-md, 0.5rem);
@@ -112,7 +112,7 @@ html .svelte-select-list.svelte-select-list::-webkit-scrollbar-thumb {
 }
 
 html .svelte-select-list.svelte-select-list::-webkit-scrollbar-thumb:hover {
-  background: var(--paisa-text-muted, #64748b);
+  background: var(--paisa-muted-foreground, #64748b);
 }
 
 html .svelte-select-list.svelte-select-list .item {
@@ -122,18 +122,18 @@ html .svelte-select-list.svelte-select-list .item {
 }
 
 html .svelte-select-list.svelte-select-list .item.hover:not(.active) {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
   background: var(--paisa-surface-hover);
 }
 
 html .svelte-select-list.svelte-select-list .item.active {
-  color: var(--paisa-brand-primary, #3b82f6);
-  background: var(--paisa-brand-primary-light, rgba(59, 130, 246, 0.15));
+  color: var(--paisa-primary, #3b82f6);
+  background: var(--paisa-primary-subtle, rgba(59, 130, 246, 0.15));
   font-weight: 600;
 }
 
 html .svelte-select.svelte-select .multi-item {
-  color: var(--paisa-text-primary);
-  background: var(--paisa-surface-muted);
-  outline-color: var(--paisa-border-default);
+  color: var(--paisa-foreground);
+  background: var(--paisa-surface-raised);
+  outline-color: var(--paisa-border);
 }

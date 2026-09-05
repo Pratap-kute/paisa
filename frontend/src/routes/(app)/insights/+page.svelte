@@ -148,10 +148,10 @@ const tabOptions = $derived.by(() => {
             />
           </div>
           <!-- View Mode Switcher -->
-        <div class="inline-flex rounded-lg bg-[var(--paisa-surface-raised)] p-1 border border-[var(--paisa-border-subtle)]">
+        <div class="inline-flex rounded-lg bg-surface-raised p-1 border border-border-subtle">
           <button
             type="button"
-            class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors {viewMode === 'grid' ? 'bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] shadow-xs' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-foreground)]'}"
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors {viewMode === 'grid' ? 'bg-surface text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}"
             onclick={() => (viewMode = "grid")}
             title="Card Grid View"
           >
@@ -160,7 +160,7 @@ const tabOptions = $derived.by(() => {
           </button>
           <button
             type="button"
-            class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors {viewMode === 'list' ? 'bg-[var(--paisa-surface)] text-[var(--paisa-foreground)] shadow-xs' : 'text-[var(--paisa-muted-foreground)] hover:text-[var(--paisa-foreground)]'}"
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors {viewMode === 'list' ? 'bg-surface text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'}"
             onclick={() => (viewMode = "list")}
             title="Compact List View"
           >
@@ -197,14 +197,14 @@ const tabOptions = $derived.by(() => {
         <Spinner />
       </div>
     {:else if filteredInsights.length === 0}
-      <div class="rounded-xl p-8 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)]">
+      <div class="rounded-xl p-8 bg-surface border border-border-subtle">
         <ZeroState item={false}>
           <div class="text-center space-y-2">
-            <i class="fa-solid fa-circle-check text-3xl text-[var(--paisa-positive)]"></i>
-            <h3 class="text-base font-semibold text-[var(--paisa-foreground)]">
+            <i class="fa-solid fa-circle-check text-3xl text-positive"></i>
+            <h3 class="text-base font-semibold text-foreground">
               No observations in this category
             </h3>
-            <p class="text-sm text-[var(--paisa-muted-foreground)] max-w-md mx-auto">
+            <p class="text-sm text-muted-foreground max-w-md mx-auto">
               No material deviations, risks, or unusual spikes were detected for {selectedCategory === 'all' ? 'this month' : selectedCategory}.
             </p>
           </div>
@@ -239,8 +239,8 @@ const tabOptions = $derived.by(() => {
         {#if attentionInsights.length > 0}
           <div class="space-y-2.5">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-triangle-exclamation text-xs text-[var(--paisa-negative)]"></i>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--paisa-foreground)]">
+              <i class="fa-solid fa-triangle-exclamation text-xs text-negative"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">
                 Needs Attention ({attentionInsights.length})
               </h3>
             </div>
@@ -260,8 +260,8 @@ const tabOptions = $derived.by(() => {
         {#if positiveInsights.length > 0}
           <div class="space-y-2.5">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-circle-check text-xs text-[var(--paisa-positive)]"></i>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--paisa-foreground)]">
+              <i class="fa-solid fa-circle-check text-xs text-positive"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">
                 Positive Trends ({positiveInsights.length})
               </h3>
             </div>
@@ -281,8 +281,8 @@ const tabOptions = $derived.by(() => {
         {#if observationInsights.length > 0}
           <div class="space-y-2.5">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-chart-line text-xs text-[var(--paisa-muted-foreground)]"></i>
-              <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--paisa-foreground)]">
+              <i class="fa-solid fa-chart-line text-xs text-muted-foreground"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-foreground">
                 Observations & Shifts ({observationInsights.length})
               </h3>
             </div>

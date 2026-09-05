@@ -26,24 +26,23 @@ const toneToBadgeVariant: Record<
 
 const toneToColorClass: Record<string, { icon: string; border: string }> = {
   positive: {
-    icon: "text-[var(--paisa-positive)] bg-[var(--paisa-positive-subtle)]",
+    icon: "text-positive bg-positive-subtle",
     border: "border-l-2 border-l-[var(--paisa-positive)]",
   },
   warning: {
-    icon: "text-[var(--paisa-warning)] bg-[var(--paisa-warning-subtle)]",
+    icon: "text-warning bg-warning-subtle",
     border: "border-l-2 border-l-[var(--paisa-warning)]",
   },
   critical: {
-    icon: "text-[var(--paisa-negative)] bg-[var(--paisa-negative-subtle)]",
+    icon: "text-negative bg-negative-subtle",
     border: "border-l-2 border-l-[var(--paisa-negative)]",
   },
   info: {
-    icon: "text-[var(--paisa-primary)] bg-[var(--paisa-primary-subtle)]",
+    icon: "text-primary bg-primary-subtle",
     border: "border-l-2 border-l-[var(--paisa-primary)]",
   },
   neutral: {
-    icon:
-      "text-[var(--paisa-muted-foreground)] bg-[var(--paisa-surface-hover)]",
+    icon: "text-muted-foreground bg-surface-hover",
     border: "border-l-2 border-l-[var(--paisa-border-strong)]",
   },
 };
@@ -53,7 +52,7 @@ let colorConfig = $derived(toneToColorClass[p.tone] || toneToColorClass.info);
 
 <a
   href={p.href}
-  class="flex items-center justify-between p-3.5 rounded-lg bg-[var(--paisa-surface)] hover:bg-[var(--paisa-surface-hover)] border border-[var(--paisa-border-subtle)] {colorConfig.border} transition-all group"
+  class="flex items-center justify-between p-3.5 rounded-lg bg-surface hover:bg-surface-hover border border-border-subtle {colorConfig.border} transition-all group"
 >
   <div class="flex items-center gap-3 min-w-0 pr-3">
     <div
@@ -62,15 +61,15 @@ let colorConfig = $derived(toneToColorClass[p.tone] || toneToColorClass.info);
     </div>
     <div class="min-w-0 flex-1">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-muted-foreground)]">
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {p.categoryLabel}
         </span>
-        <span class="text-sm font-semibold text-[var(--paisa-foreground)] group-hover:text-[var(--paisa-primary)] transition-colors">
+        <span class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
           {p.title}
         </span>
       </div>
       {#if p.description}
-        <p class="text-xs text-[var(--paisa-muted-foreground)] mt-0.5 truncate">
+        <p class="text-xs text-muted-foreground mt-0.5 truncate">
           {p.description}
         </p>
       {/if}
@@ -83,6 +82,6 @@ let colorConfig = $derived(toneToColorClass[p.tone] || toneToColorClass.info);
         {p.badgeText}
       </Badge>
     {/if}
-    <i class="fa-solid fa-chevron-right text-[10px] text-[var(--paisa-muted-foreground)] group-hover:text-[var(--paisa-primary)] group-hover:translate-x-0.5 transition-all"></i>
+    <i class="fa-solid fa-chevron-right text-[10px] text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all"></i>
   </div>
 </a>

@@ -244,9 +244,9 @@ onMount(async () => {
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5 max-md:w-full max-md:flex-col max-md:items-stretch">
-        <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-raised)] px-2.5 py-1.5 text-[0.8125rem] text-[var(--paisa-muted-foreground)] max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
+        <div class="whitespace-nowrap rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised px-2.5 py-1.5 text-[0.8125rem] text-muted-foreground max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:text-xs">
           <p class="m-0 inline">
-            <b class="text-[var(--paisa-foreground)]">{commodityCount}</b> commodity(ies)
+            <b class="text-foreground">{commodityCount}</b> commodity(ies)
           </p>
         </div>
 
@@ -261,7 +261,7 @@ onMount(async () => {
 
     {#if prices}
       {#if commodityCount > 0}
-        <div class="w-full min-w-0 overflow-hidden rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] shadow-[var(--paisa-shadow-sm)]">
+        <div class="w-full min-w-0 overflow-hidden rounded-[var(--paisa-radius-lg)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
           <Table
             data={tableData}
             tree
@@ -273,13 +273,13 @@ onMount(async () => {
         </div>
       {:else}
         <ZeroState item={[]}>
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--paisa-surface-raised)] text-xl text-[var(--paisa-muted-foreground)]">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl text-muted-foreground">
             <i class="fa-solid fa-chart-line"></i>
           </div>
-          <div class="mb-1 text-[0.9375rem] font-semibold text-[var(--paisa-foreground)]">
+          <div class="mb-1 text-[0.9375rem] font-semibold text-foreground">
             {commodityFilter.trim() ? "No commodities match your filter" : "No price quotes recorded"}
           </div>
-          <div class="max-w-[360px] text-[0.8125rem] text-[var(--paisa-muted-foreground)]">
+          <div class="max-w-[360px] text-[0.8125rem] text-muted-foreground">
             {commodityFilter.trim()
               ? "Try a different commodity name, type, or ID."
               : "Import ledger files with price directives or sync market prices to populate this view."}
@@ -287,8 +287,8 @@ onMount(async () => {
         </ZeroState>
       {/if}
     {:else}
-      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-[var(--paisa-border)] bg-[var(--paisa-surface)] px-6 py-16 text-sm text-[var(--paisa-muted-foreground)]">
-        <div class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--paisa-border-strong)] border-t-[var(--paisa-primary)]"></div>
+      <div class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"></div>
         <span>Loading prices...</span>
       </div>
     {/if}

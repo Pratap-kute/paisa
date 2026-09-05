@@ -77,7 +77,7 @@ onMount(async () => {
   >
     {#if !isLoading && !hasFilteredCashFlows}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           No cash-flow activity in this period.
         </p>
       </ZeroState>

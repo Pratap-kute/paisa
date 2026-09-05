@@ -25,7 +25,7 @@ let { postings, totalCount }: Props = $props();
   {#snippet action()}
     <a
       href="/ledger/posting"
-      class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-primary)] hover:underline"
+      class="text-xs font-semibold uppercase tracking-wider text-primary hover:underline"
     >View ledger</a>
   {/snippet}
 
@@ -35,7 +35,7 @@ let { postings, totalCount }: Props = $props();
         <div>
           {#each groupedPostings as posting}
             <a
-              class="paisa-posting-row mb-2 flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-default)] bg-[var(--paisa-surface-card)] px-3 py-2 text-[var(--paisa-text-secondary)] no-underline transition-colors hover:border-[var(--paisa-border-strong)] hover:text-[var(--paisa-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--paisa-primary)]"
+              class="paisa-posting-row mb-2 flex min-h-[54px] flex-col gap-1 rounded-[var(--paisa-radius-md)] border border-border bg-surface px-3 py-2 text-muted-foreground no-underline transition-colors hover:border-border-strong hover:text-foreground focus-visible:outline-2 focus-visible:outline-[var(--paisa-primary)]"
               href={postingUrl(posting)}
               style="border-left: 2px solid {posting.amount >= 0
                 ? posting.account.startsWith('Income:CapitalGains')
@@ -46,14 +46,14 @@ let { postings, totalCount }: Props = $props();
                   : COLORS.tertiary}"
             >
               <span class="flex min-w-0 items-center justify-between gap-2">
-                <span class="min-w-0 truncate text-xs text-[var(--paisa-text-secondary)]">{posting.payee}</span>
-                <span class="shrink-0 text-xs text-[var(--paisa-text-muted)]">{posting.date.format("DD MMM YYYY")}</span>
+                <span class="min-w-0 truncate text-xs text-muted-foreground">{posting.payee}</span>
+                <span class="shrink-0 text-xs text-muted-foreground">{posting.date.format("DD MMM YYYY")}</span>
               </span>
               <span class="flex min-w-0 items-center justify-between gap-2">
-                <span class="custom-icon min-w-0 flex-1 truncate text-xs text-[var(--paisa-text-muted)]">
+                <span class="custom-icon min-w-0 flex-1 truncate text-xs text-muted-foreground">
                   {iconify(restName(posting.account), { group: firstName(posting.account) })}
                 </span>
-                <span class="shrink-0 font-semibold tabular-nums text-[var(--paisa-text-primary)]">{formatCurrency(posting.amount)}</span>
+                <span class="shrink-0 font-semibold tabular-nums text-foreground">{formatCurrency(posting.amount)}</span>
               </span>
             </a>
           {/each}
@@ -61,6 +61,6 @@ let { postings, totalCount }: Props = $props();
       {/snippet}
     </PostingGroup>
   {:else}
-    <p class="text-sm text-[var(--paisa-muted-foreground)]">No postings recorded for this goal.</p>
+    <p class="text-sm text-muted-foreground">No postings recorded for this goal.</p>
   {/if}
 </Section>

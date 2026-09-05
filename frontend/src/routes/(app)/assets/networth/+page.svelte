@@ -102,8 +102,8 @@ onMount(async () => {
   </PageHeader>
 
   {#if selectedPeriod}
-    <div class="mb-3 text-sm text-[var(--paisa-muted-foreground)]">
-      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-[var(--paisa-primary)]">Clear period filter</a>
+    <div class="mb-3 text-sm text-muted-foreground">
+      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-primary">Clear period filter</a>
     </div>
   {/if}
 

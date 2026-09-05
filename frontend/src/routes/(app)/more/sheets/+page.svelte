@@ -65,7 +65,7 @@ async function createFile(destinationFile: string) {
         Create
       </Button>
       <p
-        class="text-sm font-medium text-[var(--paisa-muted-foreground)]">Create your first sheet</p>
+        class="text-sm font-medium text-muted-foreground">Create your first sheet</p>
     </div>
   </Section>
 </Page>

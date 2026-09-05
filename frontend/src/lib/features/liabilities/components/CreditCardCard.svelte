@@ -63,7 +63,7 @@ let bill = $derived(lastBill(creditCard));
     </div>
     <div>
       <a
-        class="secondary-link text-[var(--paisa-muted-foreground)]"
+        class="secondary-link text-muted-foreground"
         href="/liabilities/credit_cards/{encodeURIComponent(
           creditCard.account,
         )}"
@@ -77,14 +77,14 @@ let bill = $derived(lastBill(creditCard));
     <div class="flex flex-col">
       {#if bill}
         <div class="text-xs">
-          <span class="text-[var(--paisa-muted-foreground)]">Amount Due</span>
+          <span class="text-muted-foreground">Amount Due</span>
         </div>
         <div>
-          <span class="text-2xl text-[var(--paisa-foreground)]"
+          <span class="text-2xl text-foreground"
             >{formatCurrency(bill.closingBalance)}</span
           >
         </div>
-        <div class="text-xs text-[var(--paisa-muted-foreground)]">
+        <div class="text-xs text-muted-foreground">
           <DueDate
             dueDate={bill.dueDate}
             paidDate={bill.paidDate}
@@ -95,12 +95,12 @@ let bill = $derived(lastBill(creditCard));
     </div>
     <div class="flex flex-col">
       <div class="text-xs">
-        <span class="text-[var(--paisa-muted-foreground)]">Balance</span>
+        <span class="text-muted-foreground">Balance</span>
       </div>
       <div class="flex flex-col">
-        <span class="text-2xl text-[var(--paisa-foreground)]"
+        <span class="text-2xl text-foreground"
         >{formatCurrency(creditCard.balance)}</span>
-        <span class="text-xs text-[var(--paisa-muted-foreground)]"
+        <span class="text-xs text-muted-foreground"
         >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
             creditCard.creditLimit,
           )}
@@ -136,12 +136,12 @@ let bill = $derived(lastBill(creditCard));
   box-shadow: var(--paisa-shadow-md);
   background: linear-gradient(
     345deg,
-    var(--paisa-surface-bg) 0%,
-    var(--paisa-surface-bg) 60%,
+    var(--paisa-surface) 0%,
+    var(--paisa-surface) 60%,
     var(--paisa-surface-hover) calc(60% + 1px),
     var(--paisa-surface-hover) 85%,
-    var(--paisa-surface-active) calc(85% + 1px),
-    var(--paisa-surface-active) 95%,
+    var(--paisa-surface-hover) calc(85% + 1px),
+    var(--paisa-surface-hover) 95%,
     var(--paisa-border-strong) calc(95% + 1px),
     var(--paisa-border-strong) 100%
   );
@@ -161,6 +161,6 @@ let bill = $derived(lastBill(creditCard));
 }
 
 .nfc {
-  color: var(--paisa-text-primary);
+  color: var(--paisa-foreground);
 }
 </style>

@@ -319,7 +319,7 @@ $effect(() => {
       </ChartFrame>
     {:else}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           No historical expense activity in the selected date range.
         </p>
       </ZeroState>
@@ -334,7 +334,7 @@ $effect(() => {
       {#if hasSelectedMonthExpenses}
         <a
           href="/ledger/transaction?query={encodeURIComponent(`date:${$month}`)}"
-          class="text-xs font-semibold text-[var(--paisa-primary)] hover:underline"
+          class="text-xs font-semibold text-primary hover:underline"
         >
           View all in Transactions
         </a>
@@ -343,22 +343,22 @@ $effect(() => {
 
     {#if isEmpty(current_month_expenses)}
       <ZeroState item={[]}>
-        <p class="text-sm text-[var(--paisa-muted-foreground)]">
+        <p class="text-sm text-muted-foreground">
           {recentExpensesEmptyMessage}
         </p>
       </ZeroState>
     {:else}
-      <div class="flex flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]">
+      <div class="flex flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border-subtle">
         {#each current_month_expenses as exp}
           <a
-            class="flex items-center gap-[var(--paisa-space-3)] border-b border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface)] px-[var(--paisa-space-3)] py-[var(--paisa-space-2)] no-underline transition-colors last:border-b-0 hover:bg-[var(--paisa-surface-hover)]"
+            class="flex items-center gap-[var(--paisa-space-3)] border-b border-border-subtle bg-surface px-[var(--paisa-space-3)] py-[var(--paisa-space-2)] no-underline transition-colors last:border-b-0 hover:bg-surface-hover"
             href={postingUrl(exp)}
             style="--paisa-category-color: {expenseColor(expenseGroup(exp))}"
           >
             <div class="w-[3px] shrink-0 self-stretch rounded-[var(--paisa-radius-full)] bg-[var(--paisa-category-color)]"></div>
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span class="truncate text-sm font-semibold text-[var(--paisa-foreground)]" title={exp.payee}>{exp.payee}</span>
-              <span class="flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs text-[var(--paisa-muted-foreground)]">
+              <span class="truncate text-sm font-semibold text-foreground" title={exp.payee}>{exp.payee}</span>
+              <span class="flex min-w-0 items-center gap-1.5 overflow-hidden whitespace-nowrap text-xs text-muted-foreground">
                 <span class="shrink-0">{exp.date.format("DD MMM YYYY")}</span>
                 <span class="shrink-0">·</span>
                 <Badge variant="neutral" size="sm">
@@ -371,7 +371,7 @@ $effect(() => {
                 <span class="truncate" title={exp.account}>{exp.account}</span>
               </span>
             </div>
-            <span class="shrink-0 text-right text-sm font-semibold tabular-nums text-[var(--paisa-negative)]">{formatCurrency(exp.amount)}</span>
+            <span class="shrink-0 text-right text-sm font-semibold tabular-nums text-negative">{formatCurrency(exp.amount)}</span>
           </a>
         {/each}
       </div>

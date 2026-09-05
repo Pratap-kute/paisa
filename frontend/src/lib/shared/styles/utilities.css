@@ -1,0 +1,71 @@
+/** Shared Paisa utilities with active application or generated-DOM consumers. */
+
+.secondary-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.secondary-link:hover {
+  color: var(--paisa-primary);
+  text-decoration: underline;
+}
+
+.paisa-toast-container {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  right: 0;
+  display: flex;
+  width: 100%;
+  padding: 15px;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.paisa-toast-container.is-bottom {
+  top: auto;
+  bottom: 0;
+}
+
+.paisa-toast-container.is-center {
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.paisa-posting-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.paisa-posting-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.radial-progress {
+  --value: 0;
+  --size: 5rem;
+  --thickness: 0.25rem;
+  display: inline-grid;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  place-content: center;
+  border-radius: 50%;
+}
+
+.radial-progress::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(currentColor calc(var(--value) * 1%), transparent
+    0);
+  content: "";
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--thickness)),
+    #000 calc(100% - var(--thickness) + 1px)
+  );
+}

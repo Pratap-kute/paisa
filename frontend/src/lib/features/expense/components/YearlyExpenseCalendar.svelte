@@ -34,7 +34,7 @@ function detailHtml(point: ExpenseHeatmapData["points"][number]) {
   return tooltip(
     point.tooltipRows.map((row) => [
       [iconText(row.label), "custom-icon"],
-      [row.label, "paisa-truncate"],
+      [row.label, "truncate"],
       [formatPercentage(row.value / point.value, 1), "paisa-text-right"],
       [formatCurrency(row.value), "paisa-text-bold paisa-text-right"],
     ]),
@@ -158,7 +158,7 @@ function composition(point: ExpenseHeatmapData["points"][number]) {
 }
 
 .paisa-yearly-expense-month:not(.paisa-yearly-expense-month-active) {
-  background: var(--paisa-surface-subtle);
+  background: var(--paisa-surface-raised);
 }
 
 .paisa-yearly-expense-month-zero {

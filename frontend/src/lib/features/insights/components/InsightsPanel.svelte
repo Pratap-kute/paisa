@@ -29,12 +29,12 @@ let criticalCount = $derived(
 
 {#if loading}
   <div
-  class="rounded-xl p-3.5 sm:p-4 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs">
+  class="rounded-xl p-3.5 sm:p-4 bg-surface border border-border-subtle shadow-xs">
   <div class="flex items-center justify-between mb-2">
     <div class="flex items-center gap-2">
-      <i class="fa-solid fa-lightbulb text-xs text-[var(--paisa-primary)]"></i>
+      <i class="fa-solid fa-lightbulb text-xs text-primary"></i>
       <span
-        class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-foreground)]">
+        class="text-xs font-semibold uppercase tracking-wider text-foreground">
           Financial Insights
         </span>
     </div>
@@ -45,16 +45,16 @@ let criticalCount = $derived(
 </div>
 {:else if topInsights.length > 0}
   <div
-  class="rounded-xl p-3.5 sm:p-4 bg-[var(--paisa-surface)] border border-[var(--paisa-border-subtle)] shadow-xs flex flex-col min-w-0 space-y-2.5">
+  class="rounded-xl p-3.5 sm:p-4 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0 space-y-2.5">
   <!-- Header -->
   <div class="flex items-center justify-between gap-2">
     <div class="flex items-center gap-2">
-        <i class="fa-solid fa-lightbulb text-xs text-[var(--paisa-primary)]"></i>
-        <a href="/insights" class="text-xs font-semibold uppercase tracking-wider text-[var(--paisa-foreground)] hover:text-[var(--paisa-primary)] transition-colors">
+        <i class="fa-solid fa-lightbulb text-xs text-primary"></i>
+        <a href="/insights" class="text-xs font-semibold uppercase tracking-wider text-foreground hover:text-primary transition-colors">
           Financial Insights
         </a>
         {#if criticalCount > 0}
-          <span class="inline-flex items-center text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[var(--paisa-negative-subtle)] text-[var(--paisa-negative)] border border-[var(--paisa-negative)]/20">
+          <span class="inline-flex items-center text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-negative-subtle text-negative border border-[var(--paisa-negative)]/20">
             {criticalCount} {criticalCount === 1 ? 'alert' : 'alerts'}
           </span>
         {/if}
@@ -62,7 +62,7 @@ let criticalCount = $derived(
 
     <a
       href="/insights"
-      class="text-xs font-semibold text-[var(--paisa-primary)] hover:underline flex items-center gap-1 uppercase tracking-wider group"
+      class="text-xs font-semibold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider group"
     >
       <span>View all {insights.length}</span>
       <i

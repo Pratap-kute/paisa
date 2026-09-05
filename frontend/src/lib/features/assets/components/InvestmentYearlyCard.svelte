@@ -48,7 +48,7 @@ const rows = $derived([
 <Card padding="sm">
   {#snippet header()}
     <div class="flex items-center justify-between gap-[var(--paisa-space-2)]">
-      <span class="text-base font-semibold text-[var(--paisa-foreground)]">{financialYear}</span>
+      <span class="text-base font-semibold text-foreground">{financialYear}</span>
       <Badge variant={savingsVariant} size="sm" dot>
         {formatFloat(card.savings_rate)}%
       </Badge>
@@ -59,13 +59,13 @@ const rows = $derived([
     <table class="mb-0 w-full border-collapse text-xs">
       <tbody>
         {#each rows as row}
-          <tr class="border-b border-[var(--paisa-border-subtle)] last:border-b-0">
-            <td class="whitespace-nowrap px-2 py-1 text-[var(--paisa-muted-foreground)]">
+          <tr class="border-b border-border-subtle last:border-b-0">
+            <td class="whitespace-nowrap px-2 py-1 text-muted-foreground">
               {row.label}
             </td>
             <td
               class="whitespace-nowrap px-2 py-1 text-right font-semibold tabular-nums {row.highlight
-                ? 'text-[var(--paisa-primary)]'
+                ? 'text-primary'
                 : ''}"
             >
               {row.value}

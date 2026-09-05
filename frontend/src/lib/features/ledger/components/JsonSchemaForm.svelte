@@ -187,11 +187,11 @@ async function searchIcons(text: string) {
     {required}>
       {#snippet children()}
         <div class="flex flex-wrap gap-4">
-          <label class="inline-flex items-center gap-2 text-sm text-[var(--paisa-foreground)]">
+          <label class="inline-flex items-center gap-2 text-sm text-foreground">
             <input value="yes" bind:group={value} type="radio" name={radioName} {disabled} />
             Yes
           </label>
-          <label class="inline-flex items-center gap-2 text-sm text-[var(--paisa-foreground)]">
+          <label class="inline-flex items-center gap-2 text-sm text-foreground">
             <input value="no" bind:group={value} type="radio" name={radioName} {disabled} />
             No
           </label>
@@ -267,7 +267,7 @@ async function searchIcons(text: string) {
 {:else if schema["ui:widget"] == "price"}
   <div class="col-span-full flex min-w-0 flex-col gap-[var(--paisa-space-3)]">
   <div
-    class="flex items-center justify-between text-sm font-medium text-[var(--paisa-text-secondary)]"
+    class="flex items-center justify-between text-sm font-medium text-muted-foreground"
   >
     <span>{title}</span>
     <IconButton ariaLabel="Edit price code" onclick={() => (modalOpen = true)}>
@@ -319,12 +319,12 @@ async function searchIcons(text: string) {
     </div>
   {:else}
     <div
-  class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)]"
+  class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-border-subtle"
 >
       <div class="flex items-center">
         <button
           type="button"
-          class="paisa4-trigger-reset flex min-h-10 w-full items-center justify-between px-3 text-left text-sm font-semibold text-[var(--paisa-text-primary)]"
+          class="paisa4-trigger-reset flex min-h-10 w-full items-center justify-between px-3 text-left text-sm font-semibold text-foreground"
           onclick={() => (open = !open)}
           aria-expanded={open}
         >
@@ -334,7 +334,7 @@ async function searchIcons(text: string) {
       </div>
       {#if open}
         <div
-          class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] border-t border-[var(--paisa-border-subtle)] p-[var(--paisa-space-4)] md:grid-cols-2"
+          class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] border-t border-border-subtle p-[var(--paisa-space-4)] md:grid-cols-2"
         >
           {#each sortedProperties(schema) as [childKey, subSchema]}
             <JsonSchemaForm
@@ -355,15 +355,15 @@ async function searchIcons(text: string) {
   <div class="col-span-full flex min-w-0 flex-col gap-[var(--paisa-space-3)]">
     <div class="flex items-center gap-[var(--paisa-space-2)]">
       {#if title && !(variant === "panel" && depth === 0)}
-        <span class="mr-auto text-sm font-semibold text-[var(--paisa-text-primary)]">{title}</span>
+        <span class="mr-auto text-sm font-semibold text-foreground">{title}</span>
       {/if}
-      <span class="ml-auto text-xs text-[var(--paisa-text-muted)]">
+      <span class="ml-auto text-xs text-muted-foreground">
         {items.length}
         {items.length === 1 ? "item" : "items"}
       </span>
       <button
         type="button"
-        class="inline-flex h-7 items-center gap-[var(--paisa-space-1)] rounded-[var(--paisa-radius-sm)] border-0 bg-transparent px-[var(--paisa-space-2)] text-sm font-medium text-[var(--paisa-brand-primary)] hover:bg-[var(--paisa-surface-hover)]"
+        class="inline-flex h-7 items-center gap-[var(--paisa-space-1)] rounded-[var(--paisa-radius-sm)] border-0 bg-transparent px-[var(--paisa-space-2)] text-sm font-medium text-primary hover:bg-surface-hover"
         onclick={() => (value = [newItem(schema), ...items])}
       >
         <i class="fas fa-plus text-xs" aria-hidden="true"></i>
@@ -372,7 +372,7 @@ async function searchIcons(text: string) {
     </div>
     {#if items.length === 0}
       <p
-        class="m-0 rounded-[var(--paisa-radius-md)] border border-dashed border-[var(--paisa-border-default)] p-[var(--paisa-space-5)] text-center text-sm text-[var(--paisa-text-muted)]"
+        class="m-0 rounded-[var(--paisa-radius-md)] border border-dashed border-border p-[var(--paisa-space-5)] text-center text-sm text-muted-foreground"
       >
         Nothing here yet. Add one to get started.
       </p>
@@ -380,12 +380,12 @@ async function searchIcons(text: string) {
       {#each items as _item, i}
         {#if schema.items && typeof schema.items === "object" && !Array.isArray(schema.items)}
           <article
-            class="rounded-[var(--paisa-radius-md)] border border-[var(--paisa-border-subtle)] bg-[var(--paisa-surface-muted)] p-[var(--paisa-space-4)]"
+            class="rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised p-[var(--paisa-space-4)]"
           >
             <header
               class="mb-[var(--paisa-space-4)] flex items-center gap-[var(--paisa-space-2)]"
             >
-              <span class="mr-auto text-sm font-semibold text-[var(--paisa-text-primary)]">
+              <span class="mr-auto text-sm font-semibold text-foreground">
                 {(schema.items as Schema)["ui:header"] &&
                 items[i][(schema.items as Schema)["ui:header"]!]
                   ? items[i][(schema.items as Schema)["ui:header"]!]

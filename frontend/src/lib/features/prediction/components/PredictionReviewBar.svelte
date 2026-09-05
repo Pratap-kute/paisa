@@ -139,8 +139,8 @@ button.paisa-review-chip {
   min-height: 24px;
   border-radius: var(--paisa-radius-full, 9999px);
   border: 1px solid var(--paisa-border-subtle);
-  background-color: var(--paisa-surface-card);
-  color: var(--paisa-text-secondary);
+  background-color: var(--paisa-surface);
+  color: var(--paisa-muted-foreground);
   cursor: pointer;
   transition: all 0.12s ease;
   user-select: none;
@@ -149,17 +149,16 @@ button.paisa-review-chip {
 
   &:hover {
     background-color: var(--paisa-surface-hover);
-    color: var(--paisa-text-primary);
-    border-color: var(--paisa-border-default);
+    color: var(--paisa-foreground);
+    border-color: var(--paisa-border);
   }
 
   &.is-active {
-    background-color: var(--paisa-brand-primary-light, rgba(59, 130, 246,
-      0.12));
-    border-color: var(--paisa-brand-primary, #3b82f6);
-    color: var(--paisa-brand-primary, #3b82f6);
+    background-color: var(--paisa-primary-subtle);
+    border-color: var(--paisa-primary);
+    color: var(--paisa-primary);
     font-weight: 600;
-    box-shadow: 0 0 0 1px var(--paisa-brand-primary, #3b82f6);
+    box-shadow: 0 0 0 1px var(--paisa-primary);
   }
 }
 
@@ -171,23 +170,23 @@ button.paisa-review-chip {
 }
 
 .paisa-chip-dot-high {
-  background-color: var(--paisa-success, #10b981);
+  background-color: var(--paisa-prediction-high);
 }
 
 .paisa-chip-dot-medium {
-  background-color: var(--paisa-info, #3b82f6);
+  background-color: var(--paisa-prediction-medium);
 }
 
 .paisa-chip-dot-review {
-  background-color: var(--paisa-warning, #f59e0b);
+  background-color: var(--paisa-prediction-review);
 }
 
 .paisa-chip-dot-unknown {
-  background-color: var(--paisa-danger, #ef4444);
+  background-color: var(--paisa-prediction-unknown);
 }
 
 .paisa-chip-dot-transfer {
-  background-color: #8b5cf6;
+  background-color: var(--paisa-prediction-transfer);
 }
 
 .paisa-progress-section {
@@ -205,11 +204,11 @@ button.paisa-review-chip {
 
 .paisa-progress-text {
   font-size: 0.6875rem;
-  color: var(--paisa-text-secondary);
+  color: var(--paisa-muted-foreground);
   white-space: nowrap;
 
   strong {
-    color: var(--paisa-text-primary);
+    color: var(--paisa-foreground);
   }
 }
 
@@ -217,14 +216,14 @@ button.paisa-review-chip {
   width: 54px;
   height: 6px;
   border-radius: 3px;
-  background-color: var(--paisa-surface-muted, #f1f5f9);
+  background-color: var(--paisa-surface-hover);
   overflow: hidden;
   position: relative;
 }
 
 .paisa-progress-bar-fill {
   height: 100%;
-  background-color: var(--paisa-brand-primary, #3b82f6);
+  background-color: var(--paisa-primary);
   border-radius: 3px;
   transition: width 0.25s ease;
 }
@@ -238,8 +237,8 @@ button.paisa-review-chip {
   padding: 0.2rem 0.55rem;
   min-height: 24px;
   border-radius: var(--paisa-radius-sm, 4px);
-  background-color: var(--paisa-brand-primary, #3b82f6);
-  color: #ffffff;
+  background-color: var(--paisa-primary);
+  color: var(--paisa-inverse-foreground, #ffffff);
   border: none;
   cursor: pointer;
   transition: all 0.12s ease;
@@ -260,8 +259,8 @@ button.paisa-review-chip {
   gap: 0.35rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--paisa-success, #10b981);
-  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--paisa-positive);
+  background-color: var(--paisa-positive-subtle);
   padding: 0.2rem 0.5rem;
   border-radius: var(--paisa-radius-full, 9999px);
   white-space: nowrap;

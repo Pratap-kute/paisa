@@ -56,7 +56,7 @@ let isGrouped = $derived(
     <section>
       {#if isGrouped}
         <div
-          class="mb-2 flex items-baseline justify-between gap-3 border-b border-[var(--paisa-border-subtle)] pb-1 text-sm font-bold text-[var(--paisa-muted-foreground)]"
+          class="mb-2 flex items-baseline justify-between gap-3 border-b border-border-subtle pb-1 text-sm font-bold text-muted-foreground"
         >
           <div>{groupedPosting.key}</div>
           <div>{formatCurrency(groupedPosting.total)}</div>

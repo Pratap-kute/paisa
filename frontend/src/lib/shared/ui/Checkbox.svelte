@@ -33,7 +33,7 @@ function handleChange(e: Event) {
 </script>
 
 <label
-  class="inline-flex items-start gap-2 text-sm text-[var(--paisa-foreground)] {disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} {className}"
+  class="inline-flex items-start gap-2 text-sm text-foreground {disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} {className}"
   for={id}
 >
   <input
@@ -43,7 +43,7 @@ function handleChange(e: Event) {
     bind:checked
     {disabled}
     onchange={handleChange}
-    class="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--paisa-border-strong)] text-[var(--paisa-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] m-0"
+    class="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] m-0"
   />
   <div class="min-w-0">
     {#if children}
@@ -52,7 +52,7 @@ function handleChange(e: Event) {
       <span class="font-normal">{label}</span>
     {/if}
     {#if description}
-      <p class="m-0 mt-0.5 text-xs text-[var(--paisa-muted-foreground)]">{description}</p>
+      <p class="m-0 mt-0.5 text-xs text-muted-foreground">{description}</p>
     {/if}
   </div>
 </label>

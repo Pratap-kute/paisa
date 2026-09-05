@@ -21,14 +21,14 @@ let { posting, color, icon = false }: Props = $props();
 
 <Card padding="xs" class="my-2" style="border-left: 2px solid {color}">
   <div class="flex justify-between">
-    <div class="truncate text-xs text-[var(--paisa-muted-foreground)]">
+    <div class="truncate text-xs text-muted-foreground">
       <PostingStatus {posting} />
       <PostingNote {posting} />
-      <a class="text-[var(--paisa-primary)] hover:underline"
+      <a class="text-primary hover:underline"
         href={postingUrl(posting)}>{posting.payee}</a>
     </div>
-    <div class="min-w-[110px] text-right text-[var(--paisa-muted-foreground)]">
-      <span class="text-[var(--paisa-muted-foreground)]">
+    <div class="min-w-[110px] text-right text-muted-foreground">
+      <span class="text-muted-foreground">
         <i class="fas fa-calendar text-[10px]" aria-hidden="true"></i>
       </span>
       {posting.date.format("DD MMM YYYY")}
@@ -36,7 +36,7 @@ let { posting, color, icon = false }: Props = $props();
   </div>
   <hr class="my-1" />
   <div class="flex justify-between">
-    <div class="truncate text-[var(--paisa-muted-foreground)] custom-icon">
+    <div class="truncate text-muted-foreground custom-icon">
       {#if icon}
         {iconify(restName(posting.account), { group: firstName(posting.account) })}
       {:else}
@@ -45,7 +45,7 @@ let { posting, color, icon = false }: Props = $props();
     </div>
     <div class="flex items-baseline">
       <div
-        class="mr-1 truncate text-xs text-[var(--paisa-muted-foreground)]"
+        class="mr-1 truncate text-xs text-muted-foreground"
         class:hidden={posting.quantity == posting.amount}
       >
         {formatFloat(posting.quantity, 4)} @ {formatFloat(posting.amount / posting.quantity, 3)}
