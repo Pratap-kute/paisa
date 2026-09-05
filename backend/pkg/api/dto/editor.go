@@ -1,10 +1,11 @@
 package dto
 
 type LedgerFileRequest struct {
-	Name      string `json:"name"`
-	Version   string `json:"version,omitempty"`
-	Content   string `json:"content,omitempty"`
-	Operation string `json:"operation,omitempty"`
+	ExpectedContent *string `json:"expected_content,omitempty"`
+	Name            string  `json:"name"`
+	Version         string  `json:"version,omitempty"`
+	Content         string  `json:"content,omitempty"`
+	Operation       string  `json:"operation,omitempty"`
 }
 
 type SheetFileRequest struct {
@@ -14,10 +15,11 @@ type SheetFileRequest struct {
 }
 
 type LedgerFileResponse struct {
-	Name      string   `json:"name"`
-	Content   string   `json:"content"`
-	Versions  []string `json:"versions"`
-	Operation string   `json:"operation"`
+	ExpectedContent *string  `json:"expected_content,omitempty"`
+	Name            string   `json:"name"`
+	Content         string   `json:"content"`
+	Versions        []string `json:"versions"`
+	Operation       string   `json:"operation"`
 }
 
 type EditorFilesResponse struct {

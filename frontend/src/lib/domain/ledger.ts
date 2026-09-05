@@ -20,6 +20,8 @@ export interface Posting {
 }
 
 export interface Transaction {
+  tag_recurring?: string;
+  tag_period?: string;
   id: string;
   date: dayjs.Dayjs;
   payee: string;

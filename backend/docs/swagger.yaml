@@ -750,6 +750,8 @@ definitions:
     properties:
       content:
         type: string
+      expected_content:
+        type: string
       name:
         type: string
       operation:
@@ -760,6 +762,8 @@ definitions:
   dto.LedgerFileResponse:
     properties:
       content:
+        type: string
+      expected_content:
         type: string
       name:
         type: string

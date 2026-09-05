@@ -141,3 +141,41 @@ the next 3 schedules if valid.
     is more than **one transaction** with the same tag name. If you
     have only one transaction, wait untill the next transaction is added
     to see it on the recurring page.
+
+## Suggested recurring patterns
+
+The recurring page also reviews untagged history for deterministic patterns.
+Suggestions require at least three occurrences with compatible merchant,
+account, direction, and commodity context. Calendar-based matching tolerates
+small posting delays and month-end dates. Suggestions never affect confirmed
+expense totals.
+
+**Confirm recurring** adds `Recurring` metadata (or Beancount `recurring`
+metadata) to the displayed historical transactions. Paisa preserves the
+remaining source text, validates the edited files, creates its usual backups,
+saves, and synchronizes. If a file changed while being reviewed, reload before
+confirming. Confirmation across several files reports partial saves explicitly
+if a later file fails; successfully saved tags remain in the ledger.
+
+Continue applying the same recurring tag to future transactions, manually or
+with an existing ledger automation rule. Confirmation does not create an
+automatic merchant rule or change transaction categories.
+
+**Not recurring** hides the suggestion for the current page visit. Reloading or
+reopening the page may show it again; durable rejection rules are not stored.
+
+## Recurring intelligence
+
+Confirmed patterns show historical and typical amounts, expected date windows,
+amount changes, and conservative late or possibly-stopped indicators. An
+explicit `Period` remains authoritative. A manually tagged transaction remains
+confirmed even when there is not enough evidence to predict its next occurrence.
+
+Monthly and annual estimates include confirmed expenses only. Income, transfers,
+investments, unconfirmed suggestions, and possibly-stopped sequences do not
+inflate these commitments. Commodities are reported separately. Uncertain timing
+is excluded from annualized estimates and identified in the summary.
+
+The dashboard uses the same recurring analysis for its concise summary. The
+recurring page retains the existing calendar and scheduled-history view in an
+expandable section.

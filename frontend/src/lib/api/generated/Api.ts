@@ -397,6 +397,7 @@ export interface DtoLedgerErrorResponse {
 
 export interface DtoLedgerFileRequest {
   content?: string;
+  expected_content?: string;
   name?: string;
   operation?: string;
   version?: string;
@@ -404,6 +405,7 @@ export interface DtoLedgerFileRequest {
 
 export interface DtoLedgerFileResponse {
   content?: string;
+  expected_content?: string;
   name?: string;
   operation?: string;
   versions?: string[];

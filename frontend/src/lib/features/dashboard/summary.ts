@@ -1,3 +1,4 @@
+import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
 import type { AssetBreakdown, Networth } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
@@ -259,9 +260,11 @@ export function buildDashboardAttention(
       kind: "recurring",
       title: `${count} recurring ${
         count === 1 ? "payment is" : "payments are"
-      } past due`,
+      } later than usual`,
       detail: input.recurring.pastDueAmount > 0
-        ? `${formatCurrency(input.recurring.pastDueAmount)} overdue`
+        ? `${
+          formatCurrency(input.recurring.pastDueAmount)
+        } expected; no payment found`
         : undefined,
       icon: "fa-solid fa-clock-rotate-left",
       status: "negative",
@@ -471,4 +474,41 @@ export function summarizeBudget(
       : "positive",
     accounts,
   };
+}
+
+// Adapt the shared analysis to the existing dashboard attention contract.
+export function summarizeAnalyzedRecurring(
+  items: RecurringAnalysis[],
+  asOf: Dayjs,
+  currency: string,
+  cashBalance?: number,
+): UpcomingRecurringSummary {
+  const summary: UpcomingRecurringSummary = {
+    horizonDays: 7,
+    upcomingAmount: 0,
+    upcomingCount: 0,
+    pastDueAmount: 0,
+    pastDueCount: 0,
+  };
+  for (const item of items) {
+    if (
+      !item.confirmed || item.kind !== "expense" || item.commodity !== currency
+    ) continue;
+    if (item.flags.laterThanUsual) {
+      summary.pastDueCount++;
+      summary.pastDueAmount += item.expectedAmount ?? 0;
+    }
+    for (const date of item.upcomingDates) {
+      if (date.isAfter(asOf.add(7, "day"), "day")) continue;
+      summary.upcomingCount++;
+      summary.upcomingAmount += item.expectedAmount ?? 0;
+      if (!summary.earliestDueDate || date.isBefore(summary.earliestDueDate)) {
+        summary.earliestDueDate = date;
+      }
+    }
+  }
+  if (cashBalance !== undefined) {
+    summary.cashAfterUpcoming = cashBalance - summary.upcomingAmount;
+  }
+  return summary;
 }

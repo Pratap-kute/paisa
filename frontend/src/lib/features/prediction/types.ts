@@ -1,3 +1,5 @@
+import type { NormalizedDescription } from "$lib/domain/merchant";
+export type { NormalizedDescription } from "$lib/domain/merchant";
 export type Confidence =
   | "HIGH"
   | "MEDIUM"
@@ -121,14 +123,6 @@ export interface PredictionResult {
   prefix: string;
   rowIndex?: number;
   helperInvocationIndex: number;
-}
-
-export interface NormalizedDescription {
-  raw: string;
-  full: string;
-  noiseStripped: string;
-  tokens: string[];
-  merchantKey: string;
 }
 
 export interface IndexedPosting {

@@ -3027,6 +3027,9 @@ const docTemplate = `{
                 "content": {
                     "type": "string"
                 },
+                "expected_content": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3042,6 +3045,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
+                    "type": "string"
+                },
+                "expected_content": {
                     "type": "string"
                 },
                 "name": {

@@ -1,4 +1,6 @@
 <script lang="ts">
+import RecurringSummary from "$lib/features/cash_flow/components/RecurringSummary.svelte";
+import { analyzeConfirmedRecurring } from "$lib/domain/recurring_analysis";
 import { onMount } from "svelte";
 import dayjs from "dayjs";
 import { sumBy, take } from "es-toolkit";
@@ -13,10 +15,7 @@ import { restName } from "$lib/domain/account";
 import { now } from "$lib/domain/time";
 import {
   enrichTrantionSequence,
-  intervalText,
-  nextUnpaidSchedule,
   sortTrantionSequence,
-  totalRecurring,
 } from "$lib/domain/transaction_sequence";
 import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
 import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
@@ -27,9 +26,9 @@ import {
   buildExpenseTrend,
   buildNetWorthTrend,
   currentExpenses,
+  summarizeAnalyzedRecurring,
   summarizeBudget,
   summarizeCash,
-  summarizeUpcomingRecurring,
 } from "$lib/features/dashboard/summary";
 import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
 import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
@@ -116,11 +115,19 @@ let visibleGoalSummaries = $derived(
     3,
   ),
 );
-let visibleTransactionSequences = $derived(take(allTransactionSequences, 5));
+let recurringAnalysis = $derived(
+  analyzeConfirmedRecurring(allTransactionSequences, dashboardAsOf),
+);
+let visibleRecurring = $derived(
+  recurringAnalysis.filter((s) => s.upcomingDates.length > 0).sort((a, b) =>
+    a.upcomingDates[0].valueOf() - b.upcomingDates[0].valueOf()
+  ).slice(0, 5),
+);
 let recurringSummary = $derived(
-  summarizeUpcomingRecurring(
-    allTransactionSequences,
+  summarizeAnalyzedRecurring(
+    recurringAnalysis,
     dashboardAsOf,
+    USER_CONFIG.default_currency,
     cashSummary.available ? cashSummary.total : undefined,
   ),
 );
@@ -345,31 +352,18 @@ onMount(() => {
           </section>
         {/if}
 
-        {#if visibleTransactionSequences.length > 0}
+        {#if recurringAnalysis.length > 0}
           <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs min-w-0">
             <div class="flex items-center justify-between mb-3">
               <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Upcoming / Recurring</a>
               <a href="/cash_flow/recurring" class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline">View All</a>
             </div>
-            {#if recurringSummary.pastDueCount > 0 || recurringSummary.upcomingCount > 0}
-              <p class="mb-2 text-xs font-medium text-muted-foreground" data-testid="dashboard-recurring-summary">
-                {#if recurringSummary.pastDueCount > 0}
-                  <span class="text-negative">{recurringSummary.pastDueCount} {recurringSummary.pastDueCount === 1 ? "payment" : "payments"} past due</span>
-                  {#if recurringSummary.upcomingCount > 0}<span> · </span>{/if}
-                {/if}
-                {#if recurringSummary.upcomingCount > 0}<span class="tabular-nums font-semibold text-foreground">{formatCurrency(recurringSummary.upcomingAmount)}</span><span> due in the next {recurringSummary.horizonDays} days</span>{/if}
-              </p>
-            {/if}
+            <RecurringSummary items={recurringAnalysis} asOf={dashboardAsOf} compact />
             <div class="divide-y divide-[var(--paisa-border-subtle)]">
-              {#each visibleTransactionSequences as sequence (sequence.key)}
-                {@const schedule = nextUnpaidSchedule(sequence)}
-                {@const pastDue = schedule?.scheduled?.isBefore(now()) ?? false}
-                <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0" data-testid="dashboard-recurring-item">
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 min-w-0"><span class="text-sm font-medium text-foreground truncate">{sequence.key}</span><Badge variant="neutral" size="sm" rounded>{intervalText(sequence)}</Badge></div>
-                    {#if schedule?.scheduled}<p class={`text-xs mt-0.5 ${pastDue ? "text-negative font-medium" : "text-muted-foreground"}`}>{schedule.scheduled.format("DD MMM YYYY")} · {pastDue ? "Past due" : `Due ${schedule.scheduled.fromNow()}`}</p>{/if}
-                  </div>
-                  <span class="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrencyCrude(totalRecurring(sequence))}</span>
+              {#each visibleRecurring as item (item.key)}
+                <div class="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm" data-testid="dashboard-recurring-item">
+                  <div class="min-w-0"><span class="break-words font-medium">{item.displayName}</span><p class="text-xs text-muted-foreground">{item.rhythm.cadence} · Expected around {item.upcomingDates[0].format("D MMM")} · {item.kind ?? "Mixed"}</p></div>
+                  <span class="font-semibold tabular-nums">~{item.expectedAmount?.toLocaleString() ?? "Amount unavailable"} {item.commodity ?? ""}</span>
                 </div>
               {/each}
             </div>
