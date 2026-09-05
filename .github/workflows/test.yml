@@ -20,8 +20,8 @@ permissions:
   contents: read
 
 jobs:
-  nix-warmup:
-    name: Nix & Deno Warmup
+  lint:
+    name: Lint & Type-Check
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -29,21 +29,11 @@ jobs:
       - uses: ./.github/actions/ci-setup
         with:
           save-nix-cache: "true"
-
-  lint:
-    name: Lint & Type-Check
-    needs: nix-warmup
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/ci-setup
       - name: Lint and type-check
         run: nix develop --command make lint
 
   unit-coverage:
     name: Backend & Frontend Coverage
-    needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -63,11 +53,10 @@ jobs:
           name: coverage-report-${{ github.run_attempt }}
           if-no-files-found: ignore
           retention-days: 7
-          path: coverage/
+          path: frontend/coverage/
 
   integration:
     name: API Regression Tests
-    needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -82,17 +71,14 @@ jobs:
 
   browser:
     name: Browser E2E Tests
-    needs: nix-warmup
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
       - name: Browser E2E tests
-        run: |
-          nix develop --command bash -c "
-            make build-frontend test-e2e
-          "
+        # The test server builds the frontend with the required E2E flag.
+        run: nix develop --command make test-e2e
       - name: Upload browser test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -101,5 +87,5 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
           path: |
-            playwright-report/
-            test-results/
+            frontend/playwright-report/
+            frontend/test-results/

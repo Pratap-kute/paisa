@@ -33,3 +33,25 @@ runs:
     - name: Install frontend dependencies
       shell: bash
       run: nix develop --command bash -c "cd frontend && deno install"
+
+    - name: Locate Go caches
+      id: go-cache
+      shell: bash
+      run: |
+        nix develop --command bash -euc '
+          echo "modules=$(go env GOMODCACHE)"
+          echo "build=$(go env GOCACHE)"
+          echo "version=$(go env GOVERSION)"
+        ' >> "$GITHUB_OUTPUT"
+
+    - name: Restore or save Go caches
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ steps.go-cache.outputs.modules }}
+          ${{ steps.go-cache.outputs.build }}
+        # Separate writers by job; refresh compiled packages as source changes.
+        key: go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-${{ github.job }}-${{ github.sha }}
+        restore-keys: |
+          go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-${{ github.job }}-
+          go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-
