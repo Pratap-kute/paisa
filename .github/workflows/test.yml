@@ -30,7 +30,7 @@ jobs:
         with:
           save-nix-cache: "true"
       - name: Lint and type-check
-        run: nix develop --command make lint
+        run: nix develop "$PAISA_CI_PROFILE" --command make lint
 
   unit-coverage:
     name: Backend & Frontend Coverage
@@ -41,7 +41,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: Backend and frontend coverage
         run: |
-          nix develop --command bash -c "
+          nix develop "$PAISA_CI_PROFILE" --command bash -c "
             cd frontend && deno run -A npm:@sveltejs/kit sync
             cd ..
             make test-backend test-unit test-coverage
@@ -64,7 +64,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: API regression tests
         run: |
-          nix develop --command bash -c "
+          nix develop "$PAISA_CI_PROFILE" --command bash -c "
             cd backend && make build
             cd ../frontend && TZ=UTC deno task test:integration
           "
@@ -78,7 +78,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: Browser E2E tests
         # The test server builds the frontend with the required E2E flag.
-        run: nix develop --command make test-e2e
+        run: nix develop "$PAISA_CI_PROFILE" --command make test-e2e
       - name: Upload browser test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
