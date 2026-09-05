@@ -328,6 +328,21 @@ definitions:
           $ref: '#/definitions/dto.IssueResponse'
         type: array
     type: object
+  dto.EditorBatchSaveResponse:
+    properties:
+      message:
+        type: string
+      recovery_files:
+        additionalProperties:
+          type: string
+        type: object
+      rolled_back:
+        type: boolean
+      saved:
+        type: boolean
+      synced:
+        type: boolean
+    type: object
   dto.EditorFilesResponse:
     properties:
       accounts:
@@ -345,6 +360,13 @@ definitions:
       payees:
         items:
           type: string
+        type: array
+    type: object
+  dto.EditorSaveRequest:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/dto.LedgerFileResponse'
         type: array
     type: object
   dto.EditorSaveResponse:
@@ -750,6 +772,8 @@ definitions:
     properties:
       content:
         type: string
+      expected_content:
+        type: string
       name:
         type: string
       operation:
@@ -760,6 +784,8 @@ definitions:
   dto.LedgerFileResponse:
     properties:
       content:
+        type: string
+      expected_content:
         type: string
       name:
         type: string
@@ -1691,6 +1717,37 @@ paths:
       security:
       - PaisaAuth: []
       summary: Save ledger file and trigger database synchronization
+      tags:
+      - Editor
+  /editor/save_batch:
+    post:
+      consumes:
+      - application/json
+      description: Checks all source revisions, validates, backs up, writes and synchronizes
+        once. Restores earlier writes on failure; recovery_files identifies backups
+        if restoration fails. Not crash-atomic.
+      operationId: saveEditorFiles
+      parameters:
+      - description: Existing files and expected source content
+        in: body
+        name: files
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditorSaveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EditorBatchSaveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - PaisaAuth: []
+      summary: Save existing ledger files together with failure rollback
       tags:
       - Editor
   /editor/validate:

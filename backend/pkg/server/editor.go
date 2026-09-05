@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/api/dto"
@@ -118,7 +119,26 @@ func DeleteBackups(file LedgerFile) (gin.H, error) {
 	return gin.H{"file": lf}, nil
 }
 
+var ledgerWriteMu sync.Mutex
+
 func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
+	ledgerWriteMu.Lock()
+	defer ledgerWriteMu.Unlock()
+	if config.GetConfig().Readonly {
+		return gin.H{"saved": false, "synced": false, "message": "Readonly mode"}
+	}
+	if file.ExpectedContent != nil {
+		filePath, err := utils.BuildSubPath(filepath.Dir(config.GetJournalPath()), file.Name)
+		if err != nil {
+			return gin.H{"saved": false, "synced": false, "message": "Invalid file name"}
+		}
+		//nolint:gosec // BuildSubPath confines this user-requested read to the journal directory.
+		current, err := os.ReadFile(filePath)
+		if err != nil || string(current) != *file.ExpectedContent {
+			return gin.H{"saved": false, "synced": false, "message": "The ledger file changed. Reload before saving."}
+		}
+	}
+
 	errors, _, err := validateFile(file)
 	if err != nil {
 		msg := "Validation failed"
@@ -165,6 +185,9 @@ func SaveFile(db *gorm.DB, file LedgerFile) gin.H {
 			return gin.H{"errors": errors, "saved": false, "synced": false, "message": "Failed to read file"}
 		}
 
+		if file.ExpectedContent != nil && string(existingContent) != *file.ExpectedContent {
+			return gin.H{"saved": false, "synced": false, "message": "The ledger file changed. Reload before saving."}
+		}
 		err = os.WriteFile(backupPath, existingContent, perm)
 		if err != nil {
 			log.Warn(err)

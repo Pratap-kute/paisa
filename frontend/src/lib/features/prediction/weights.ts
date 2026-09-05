@@ -42,17 +42,4 @@ export const CONFIDENCE = {
   UNKNOWN_SCORE: 45,
 } as const;
 
-export const GENERIC_MERCHANT_KEYS = new Set([
-  "",
-  "upi",
-  "imps",
-  "neft",
-  "rtgs",
-  "pos",
-  "atm",
-  "transfer",
-  "payment",
-  "bill",
-  "to transfer",
-  "by transfer",
-]);
+export { GENERIC_MERCHANT_KEYS } from "$lib/domain/merchant";

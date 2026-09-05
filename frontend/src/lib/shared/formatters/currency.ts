@@ -110,3 +110,15 @@ export function formatFixedWidthFloat(
   }
   return formatted;
 }
+
+/** Commodity labels retain the same locale, precision and privacy policy as money elsewhere. */
+export function formatCommodityAmount(
+  value: number | undefined,
+  commodity?: string,
+  masked = get(obscure),
+): string {
+  if (value === undefined) return "Amount unavailable";
+  return `${formatCurrency(masked ? 0 : value)}${
+    commodity ? ` ${commodity}` : ""
+  }`;
+}

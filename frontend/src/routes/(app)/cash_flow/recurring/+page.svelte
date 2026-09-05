@@ -1,4 +1,5 @@
 <script lang="ts">
+import RecurringIntelligence from "$lib/features/cash_flow/components/RecurringIntelligence.svelte";
 import { isMobile } from "$lib/shared/browser/responsive";
 import { monthDays } from "$lib/domain/time";
 import type { TransactionSchedule } from "$lib/domain/recurring";
@@ -30,6 +31,7 @@ let transactionSequences: TransactionSequence[] = $state([]);
 let transactionSequencesDelayed: TransactionSequence[] = $state([]);
 let isEmpty = $state(false);
 let isLoading = $state(true);
+let loadError = $state("");
 let requestedPeriod = $derived(
   validPeriod(page.url.searchParams.get("period")),
 );
@@ -49,15 +51,14 @@ let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
   ),
 );
 
-onMount(async () => {
+async function loadRecurring() {
+  loadError = "";
   try {
     const res = await api.recurring.getRecurringTransactions();
     transactionSequences =
       (res.transaction_sequences as unknown as TransactionSequence[]) || [];
 
-    if (isEmptyValue(transactionSequences)) {
-      isEmpty = true;
-    }
+    isEmpty = isEmptyValue(transactionSequences);
 
     transactionSequences = sortTrantionSequence(
       enrichTrantionSequence(transactionSequences),
@@ -73,9 +74,16 @@ onMount(async () => {
     );
 
     transactionSequencesDelayed = transactionSequences;
+  } catch (error) {
+    loadError =
+      "Recurring transactions could not be loaded. Please reload the page.";
+    throw error;
   } finally {
     isLoading = false;
   }
+}
+onMount(() => {
+  void loadRecurring().catch(() => {/* The page displays loadError. */});
 });
 </script>
 
@@ -89,6 +97,12 @@ onMount(async () => {
     description="Track scheduled payments, bills, and subscriptions"
   />
 
+  {#if loadError}<p role="alert" class="text-sm text-negative">{loadError}</p>{/if}
+  <RecurringIntelligence sequences={transactionSequences}
+    onreload={loadRecurring} />
+
+  <details>
+    <summary class="cursor-pointer text-primary">Calendar and scheduled history</summary>
   {#if !isEmpty}
     <Section title="Calendar" subtitle="Scheduled recurring items for the selected month">
       <div
@@ -135,4 +149,5 @@ onMount(async () => {
       </div>
     {/if}
   </Section>
+  </details>
 </Page>

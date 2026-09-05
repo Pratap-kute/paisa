@@ -31,6 +31,7 @@ interface GoalSummary {
 }
 
 interface UserConfig {
+  ledger_cli?: "ledger" | "hledger" | "beancount";
   default_currency: string;
   readonly: boolean;
   locale: string;

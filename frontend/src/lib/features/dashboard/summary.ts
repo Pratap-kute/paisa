@@ -1,11 +1,10 @@
+import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
 import type { AssetBreakdown, Networth } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
 import type { GoalSummary } from "$lib/domain/goals_models";
 import type { Posting } from "$lib/domain/ledger";
-import type { TransactionSequence } from "$lib/domain/recurring";
 import { now } from "$lib/domain/time";
-import { totalRecurring } from "$lib/domain/transaction_sequence";
 import {
   type InsightTone,
   presentInsight,
@@ -87,7 +86,6 @@ export interface DashboardAttentionInput {
 }
 
 export const MIN_EXPENSE_PROJECTION_DAYS = 3;
-export const DEFAULT_RECURRING_HORIZON_DAYS = 14;
 
 const attentionSeverities = new Set(["critical", "warning"]);
 const budgetInsightTypes = new Set(["budget_overspent", "budget_risk"]);
@@ -107,19 +105,6 @@ function sortInsights(insights: Insight[]): Insight[] {
     (right.score ?? 0) - (left.score ?? 0) ||
     insightKey(left).localeCompare(insightKey(right))
   );
-}
-
-function isOutgoingRecurring(sequence: TransactionSequence): boolean {
-  const postings = sequence.transactions[0]?.postings ?? [];
-  const hasObligation = postings.some((posting) =>
-    posting.amount > 0 &&
-    (posting.account.startsWith("Expenses:") ||
-      posting.account.startsWith("Liabilities:"))
-  );
-  const fundedFromAsset = postings.some((posting) =>
-    posting.amount < 0 && posting.account.startsWith("Assets:")
-  );
-  return hasObligation && fundedFromAsset;
 }
 
 export function buildExpensePace(
@@ -155,56 +140,6 @@ export function buildExpensePace(
     overBudget,
     status: overBudget === undefined ? "neutral" : "warning",
   };
-}
-
-export function summarizeUpcomingRecurring(
-  sequences: TransactionSequence[] | null | undefined,
-  asOf: Dayjs,
-  cashBalance?: number,
-  horizonDays = DEFAULT_RECURRING_HORIZON_DAYS,
-): UpcomingRecurringSummary {
-  const summary: UpcomingRecurringSummary = {
-    horizonDays,
-    upcomingAmount: 0,
-    upcomingCount: 0,
-    pastDueAmount: 0,
-    pastDueCount: 0,
-  };
-  if (!asOf.isValid() || horizonDays < 0) return summary;
-
-  const start = asOf.startOf("day");
-  const end = start.add(horizonDays, "day").endOf("day");
-  for (const sequence of sequences ?? []) {
-    if (!isOutgoingRecurring(sequence)) continue;
-    const schedules = sequence.schedules ?? [
-      ...(sequence.pastSchedules ?? []),
-      ...(sequence.futureSchedules ?? []),
-    ];
-    const defaultAmount = totalRecurring(sequence);
-    for (const schedule of schedules) {
-      if (schedule.actual) continue;
-      const due = schedule.scheduled;
-      const amount = Number.isFinite(schedule.amount) && schedule.amount > 0
-        ? schedule.amount
-        : defaultAmount;
-      if (!due?.isValid() || !Number.isFinite(amount) || amount <= 0) continue;
-      if (due.isBefore(start, "day")) {
-        summary.pastDueCount++;
-        summary.pastDueAmount += amount;
-        continue;
-      }
-      if (due.isAfter(end, "day")) continue;
-      summary.upcomingCount++;
-      summary.upcomingAmount += amount;
-      if (!summary.earliestDueDate || due.isBefore(summary.earliestDueDate)) {
-        summary.earliestDueDate = due;
-      }
-    }
-  }
-  if (Number.isFinite(cashBalance)) {
-    summary.cashAfterUpcoming = cashBalance! - summary.upcomingAmount;
-  }
-  return summary;
 }
 
 export function buildDashboardAttention(
@@ -259,9 +194,11 @@ export function buildDashboardAttention(
       kind: "recurring",
       title: `${count} recurring ${
         count === 1 ? "payment is" : "payments are"
-      } past due`,
+      } later than usual`,
       detail: input.recurring.pastDueAmount > 0
-        ? `${formatCurrency(input.recurring.pastDueAmount)} overdue`
+        ? `${
+          formatCurrency(input.recurring.pastDueAmount)
+        } expected; no payment found`
         : undefined,
       icon: "fa-solid fa-clock-rotate-left",
       status: "negative",
@@ -471,4 +408,43 @@ export function summarizeBudget(
       : "positive",
     accounts,
   };
+}
+
+// Adapt the shared analysis to the existing dashboard attention contract.
+export function summarizeAnalyzedRecurring(
+  items: RecurringAnalysis[],
+  asOf: Dayjs,
+  currency: string,
+  cashBalance?: number,
+  horizonDays = 7,
+): UpcomingRecurringSummary {
+  const summary: UpcomingRecurringSummary = {
+    horizonDays,
+    upcomingAmount: 0,
+    upcomingCount: 0,
+    pastDueAmount: 0,
+    pastDueCount: 0,
+  };
+  if (!asOf.isValid() || horizonDays < 0) return summary;
+  for (const item of items) {
+    if (
+      !item.confirmed || !item.cashObligation || item.cashCommodity !== currency
+    ) continue;
+    if (item.flags.laterThanUsual) {
+      summary.pastDueCount++;
+      summary.pastDueAmount += item.expectedCashOutflowAmount ?? 0;
+    }
+    for (const date of item.upcomingDates) {
+      if (date.isAfter(asOf.add(horizonDays, "day"), "day")) continue;
+      summary.upcomingCount++;
+      summary.upcomingAmount += item.expectedCashOutflowAmount ?? 0;
+      if (!summary.earliestDueDate || date.isBefore(summary.earliestDueDate)) {
+        summary.earliestDueDate = date;
+      }
+    }
+  }
+  if (cashBalance !== undefined) {
+    summary.cashAfterUpcoming = cashBalance - summary.upcomingAmount;
+  }
+  return summary;
 }

@@ -141,3 +141,59 @@ the next 3 schedules if valid.
     is more than **one transaction** with the same tag name. If you
     have only one transaction, wait untill the next transaction is added
     to see it on the recurring page.
+
+## Suggested recurring patterns
+
+The recurring page also reviews untagged history for deterministic patterns.
+Suggestions require at least three occurrences with compatible merchant,
+account, direction, and commodity context. Calendar-based matching tolerates
+small posting delays and month-end dates. Suggestions never affect confirmed
+expense totals.
+
+**Confirm recurring** adds `Recurring` metadata (or Beancount `recurring`
+metadata) to the displayed historical transactions. Paisa preserves the
+remaining source text, validates the edited files, creates its usual backups,
+saves, and synchronizes. If a file changed while being reviewed, reload before
+confirming. Multi-file confirmation checks and validates every source before
+writing, then synchronizes once. A write or synchronization failure restores
+the batch. If restoration fails, the error lists recovery backups; restore those
+files before retrying. This protects against ordinary failures, but is not a
+crash-atomic filesystem transaction.
+
+Continue applying the same recurring tag to future transactions, manually or
+with an existing ledger automation rule. Confirmation does not create an
+automatic merchant rule or change transaction categories.
+
+**Not recurring** hides the suggestion for the current page visit. Reloading or
+reopening the page may show it again; durable rejection rules are not stored.
+
+## Recurring intelligence
+
+Confirmed patterns show historical and typical amounts, expected date windows,
+amount changes, and conservative late or possibly-stopped indicators. An
+explicit `Period` remains authoritative. A manually tagged transaction remains
+confirmed even when there is not enough evidence to predict its next occurrence.
+
+Monthly and annual estimates include confirmed expenses only. Income, transfers,
+investments, unconfirmed suggestions, and possibly-stopped sequences do not
+inflate these commitments. Commodities are reported separately. Uncertain timing
+is excluded from annualized estimates and identified in the summary.
+
+The dashboard uses the same recurring analysis for its concise summary. The
+recurring page retains the existing calendar and scheduled-history view in an
+expandable section.
+
+Monthly and annual figures measure expenses. Upcoming payment totals and the
+dashboard cash forecast include full cash obligations, including loan principal
+and card repayments. For example, a 10,000 loan payment with 2,000 interest adds
+2,000 to expense estimates and 10,000 to upcoming payments. Income, investments,
+and internal transfers are excluded from those payment totals.
+
+Amount-change alerts require both a 10% change and a commodity-specific floor:
+INR 10, USD/EUR/GBP 1, or JPY 100. Other currencies use one minor unit; other
+commodities use 0.01. All displayed amounts respect the shared locale, precision,
+and obscure-mode settings. Explicit periods display as “Explicit schedule” and
+do not produce inferred cadence-change alerts. “New” alone does not require
+attention.
+
+Suggestions render 25 at a time; use **Show more suggestions** to see more.

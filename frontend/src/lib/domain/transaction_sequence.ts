@@ -1,3 +1,8 @@
+import {
+  advanceOccurrence,
+  inferCadence,
+  type Rhythm,
+} from "./recurring_analysis";
 import { groupBy, partition } from "es-toolkit";
 import type { Transaction } from "$lib/domain/ledger";
 import type {
@@ -88,7 +93,7 @@ function zip(
 
 function enrich(ts: TransactionSequence) {
   const transactions = ts.transactions.slice().reverse();
-  const amount = totalRecurring(ts);
+  const amount = ts.transactions.length ? totalRecurring(ts) : 0;
   const start = transactions[0]?.date ?? now();
   let periodAvailable = false;
   let cron: CronExprs | undefined;
@@ -127,10 +132,11 @@ function enrich(ts: TransactionSequence) {
     );
   } else {
     const schedules: dayjs.Dayjs[] = transactions.map((t) => t.date);
+    const rhythm = inferCadence(ts.transactions.map((t) => t.date));
     let next = schedules.at(-1);
-    if (next) {
+    if (next && (rhythm.reliable || ts.interval > 0)) {
       do {
-        next = nextDate(ts, next);
+        next = nextDate(ts, next, rhythm);
         schedules.push(next);
       } while (schedules.length < 1000 && end.isAfter(next));
     }
@@ -189,16 +195,9 @@ export function intervalText(ts: TransactionSequence) {
   return `every ${ts.interval} days`;
 }
 
-function nextDate(ts: TransactionSequence, date: dayjs.Dayjs) {
-  if (ts.interval >= 28 && ts.interval <= 33) {
-    return date.add(1, "month");
-  }
-
-  if (ts.interval >= 360 && ts.interval <= 370) {
-    return date.add(1, "year");
-  }
-
-  return date.add(ts.interval, "day");
+function nextDate(ts: TransactionSequence, date: dayjs.Dayjs, rhythm: Rhythm) {
+  if (rhythm.reliable) return advanceOccurrence(date, rhythm);
+  return date.add(Math.max(1, ts.interval), "day");
 }
 
 export function totalRecurring(ts: TransactionSequence) {

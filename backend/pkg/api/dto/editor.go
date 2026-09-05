@@ -1,10 +1,11 @@
 package dto
 
 type LedgerFileRequest struct {
-	Name      string `json:"name"`
-	Version   string `json:"version,omitempty"`
-	Content   string `json:"content,omitempty"`
-	Operation string `json:"operation,omitempty"`
+	ExpectedContent *string `json:"expected_content,omitempty"`
+	Name            string  `json:"name"`
+	Version         string  `json:"version,omitempty"`
+	Content         string  `json:"content,omitempty"`
+	Operation       string  `json:"operation,omitempty"`
 }
 
 type SheetFileRequest struct {
@@ -14,10 +15,11 @@ type SheetFileRequest struct {
 }
 
 type LedgerFileResponse struct {
-	Name      string   `json:"name"`
-	Content   string   `json:"content"`
-	Versions  []string `json:"versions"`
-	Operation string   `json:"operation"`
+	ExpectedContent *string  `json:"expected_content,omitempty"`
+	Name            string   `json:"name"`
+	Content         string   `json:"content"`
+	Versions        []string `json:"versions"`
+	Operation       string   `json:"operation"`
 }
 
 type EditorFilesResponse struct {
@@ -71,4 +73,12 @@ type EditorSaveResponse struct {
 type SheetSaveResponse struct {
 	Saved   bool   `json:"saved"`
 	Message string `json:"message,omitempty"`
+}
+
+type EditorBatchSaveResponse struct {
+	Saved         bool              `json:"saved"`
+	Synced        bool              `json:"synced"`
+	RolledBack    bool              `json:"rolled_back"`
+	RecoveryFiles map[string]string `json:"recovery_files,omitempty"`
+	Message       string            `json:"message"`
 }
