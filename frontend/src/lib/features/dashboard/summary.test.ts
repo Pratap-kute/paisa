@@ -4,10 +4,11 @@ import type { AssetBreakdown } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
 import type { GoalSummary } from "$lib/domain/goals_models";
-import type {
-  TransactionSchedule,
-  TransactionSequence,
-} from "$lib/domain/recurring";
+import {
+  analyzeRecurring,
+  type RecurringAnalysis,
+} from "$lib/domain/recurring_analysis";
+import type { Posting, Transaction } from "$lib/domain/ledger";
 import dayjs from "dayjs";
 
 Object.defineProperty(globalThis, "localStorage", {
@@ -37,7 +38,7 @@ const {
   summarizeBudget,
   summarizeCash,
   summarizeInsights,
-  summarizeUpcomingRecurring,
+  summarizeAnalyzedRecurring,
 } = await import("./summary.ts");
 
 function cash(group: string, marketAmount: number): AssetBreakdown {
@@ -91,50 +92,47 @@ function budget(accounts: AccountBudget[]): Budget {
   };
 }
 
+function summarizeUpcomingRecurring(
+  items: RecurringAnalysis[],
+  asOf: dayjs.Dayjs,
+  cashBalance?: number,
+) {
+  return summarizeAnalyzedRecurring(items, asOf, "INR", cashBalance, 14);
+}
 function recurring(
   key: string,
   scheduled: string | string[],
   amount: number,
   account = "Expenses:Bills",
-): TransactionSequence {
+): RecurringAnalysis {
+  const dates = (Array.isArray(scheduled) ? scheduled : [scheduled]).map((d) =>
+    dayjs(d)
+  );
   const transaction = {
     id: key,
     date: dayjs("2026-08-01"),
     payee: key,
-    beginLine: 1,
-    endLine: 2,
-    fileName: "main.ledger",
     postings: [
-      { account, amount } as never,
+      {
+        account,
+        quantity: account.startsWith("Income:") ? -amount : amount,
+        commodity: "INR",
+      },
       {
         account: "Assets:Checking",
-        amount: account.startsWith("Income:") ? amount : -amount,
-      } as never,
-    ],
-  };
-  const schedules: TransactionSchedule[] = (
-    Array.isArray(scheduled) ? scheduled : [scheduled]
-  ).map((date) => ({
-    key,
-    amount,
-    scheduled: dayjs(date),
-    actual: null,
-    transaction: null,
-  }));
-  return {
-    key,
-    period: "",
-    interval: 30,
-    transactions: [transaction],
-    schedules,
-    pastSchedules: schedules.filter((schedule) =>
-      schedule.scheduled.isBefore(dayjs("2026-08-10"), "day")
-    ),
-    futureSchedules: schedules.filter((schedule) =>
-      !schedule.scheduled.isBefore(dayjs("2026-08-10"), "day")
-    ),
-    schedulesByMonth: {},
-  } as TransactionSequence;
+        quantity: account.startsWith("Income:") ? amount : -amount,
+        commodity: "INR",
+      },
+    ] as Posting[],
+  } as Transaction;
+  const item = analyzeRecurring(key, [transaction], true, dayjs("2026-08-10"))!;
+  item.upcomingDates = dates.filter((d) =>
+    !d.isBefore(dayjs("2026-08-10"), "day")
+  );
+  item.flags.laterThanUsual = dates.some((d) =>
+    d.isBefore(dayjs("2026-08-10"), "day")
+  );
+  return item;
 }
 
 function goal(overrides: Partial<GoalSummary> = {}): GoalSummary {
@@ -325,13 +323,13 @@ describe("dashboard summaries", () => {
     });
   });
 
-  test("counts past-due and future occurrences from the same sequence", () => {
+  test("counts a delayed sequence once alongside its future occurrences", () => {
     const result = summarizeUpcomingRecurring([
       recurring("weekly", ["2026-08-01", "2026-08-08", "2026-08-15"], 750),
     ], dayjs("2026-08-10"));
     expect(result).toMatchObject({
-      pastDueCount: 2,
-      pastDueAmount: 1_500,
+      pastDueCount: 1,
+      pastDueAmount: 750,
       upcomingCount: 1,
       upcomingAmount: 750,
     });

@@ -99,10 +99,11 @@ test("recurring confirmation uses editor persistence and survives page reload", 
     "**/api/editor/validate",
     (route) => route.fulfill({ json: { errors: [] } }),
   );
-  await page.route("**/api/editor/save", async (route) => {
+  await page.route("**/api/editor/save_batch", async (route) => {
     const body = route.request().postDataJSON();
-    expect(body.expected_content).toBe(journal);
-    savedContent = body.content;
+    expect(body.files).toHaveLength(1);
+    expect(body.files[0].expected_content).toBe(journal);
+    savedContent = body.files[0].content;
     confirmed = true;
     await route.fulfill({ json: { saved: true, synced: true } });
   });
@@ -117,4 +118,24 @@ test("recurring confirmation uses editor persistence and survives page reload", 
     .toHaveCount(0);
   await expect(page.getByTestId("recurring-intelligence-summary"))
     .toContainText("649 INR");
+});
+
+test("recurring amounts respect obscure mode", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("obscure", "true"));
+  await page.route(
+    "**/api/recurring",
+    (route) => route.fulfill({ json: { transaction_sequences: [] } }),
+  );
+  await page.route(
+    "**/api/transaction",
+    (route) => route.fulfill({ json: { transactions: history } }),
+  );
+  await page.goto("/cash_flow/recurring");
+  const row = page.getByTestId("recurring-intelligence-row");
+  await expect(row).toContainText(
+    "Amount increased from 0 INR to 0 INR (0.0%)",
+  );
+  await expect(row).not.toContainText("649");
+  await row.getByText("View history and pattern details").click();
+  await expect(row).not.toContainText("499");
 });

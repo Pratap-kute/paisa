@@ -80,39 +80,43 @@ describe("recurring ledger metadata edits", () => {
   });
 });
 
-it("reports partial saves and sync failures without claiming durable completion", async () => {
+it("sends one batch and reports rollback or recovery without claiming success", async () => {
   const { api } = await import("$lib/api");
   const { saveRecurringConfirmation } = await import(
     "./recurring_confirmation"
   );
-  const originalSave = api.editor.saveEditorFile;
-  let calls = 0;
+  const original = api.editor.saveEditorFiles;
   const edits = ["one.ledger", "two.ledger"].map((name) => ({
     name,
     content: "tagged",
     expected_content: "original",
   }));
+  let calls = 0;
   try {
-    api.editor.saveEditorFile = () =>
-      Promise.resolve(
-        ++calls === 1
-          ? { saved: true, synced: true }
-          : { saved: false, synced: false, message: "Write failed" },
-      );
-    await expect(saveRecurringConfirmation(edits)).rejects.toThrow(
-      "1 of 2 files saved",
-    );
-    api.editor.saveEditorFile = () =>
-      Promise.resolve({
-        saved: true,
+    api.editor.saveEditorFiles = (body) => {
+      calls++;
+      expect(body.files).toEqual(edits);
+      return Promise.resolve({
+        saved: false,
         synced: false,
-        message: "Sync failed",
+        rolled_back: true,
+        message: "All batch edits were restored",
+      });
+    };
+    await expect(saveRecurringConfirmation(edits)).rejects.toThrow("restored");
+    expect(calls).toBe(1);
+    api.editor.saveEditorFiles = () =>
+      Promise.resolve({
+        saved: false,
+        synced: false,
+        recovery_files: { "one.ledger": "one.backup" },
+        message: "Restoration needs attention",
       });
     await expect(saveRecurringConfirmation(edits)).rejects.toThrow(
-      "Sync failed",
+      "one.backup",
     );
   } finally {
-    api.editor.saveEditorFile = originalSave;
+    api.editor.saveEditorFiles = original;
   }
 });
 

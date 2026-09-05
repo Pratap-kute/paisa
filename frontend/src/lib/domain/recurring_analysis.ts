@@ -7,14 +7,19 @@ import type { TransactionSequence } from "./recurring";
 import { isGenericMerchant, normalizeDescription } from "./merchant";
 import { prefixMinutesSeconds } from "./time";
 
-// Product policy, not a user setting. Amount floors are in native commodity units.
+// Product policy, not a user setting. Known currency floors avoid treating
+// nominal units as equivalent. Other commodities use precision-aware noise floors.
 export const recurringPolicy = {
   minimumOccurrences: 3,
   highOccurrences: 4,
   calendarToleranceDays: 3,
   weeklyToleranceDays: 1,
   customMinimumOccurrences: 4,
-  minimumChangeAmount: 10,
+  minimumChangeAmounts: { INR: 10, USD: 1, EUR: 1, GBP: 1, JPY: 100 } as Record<
+    string,
+    number
+  >,
+  defaultMinorUnits: 100,
   minimumChangeRatio: 0.1,
   stableAmountRatio: 0.05,
   stoppedCycles: 2,
@@ -43,6 +48,10 @@ export interface Rhythm {
 export interface Occurrence {
   transaction: Transaction;
   amount: number;
+  expenseAmount: number;
+  cashOutflowAmount?: number;
+  cashCommodity?: string;
+  cashObligation: boolean;
   commodity: string;
   kind: RecurringKind;
   context: string;
@@ -54,6 +63,12 @@ export interface RecurringAnalysis {
   confirmed: boolean;
   occurrences: Occurrence[];
   rhythm: Rhythm;
+  scheduleSource: "inferred" | "explicit-period";
+  effectiveCadence: string;
+  expectedExpenseAmount?: number;
+  expectedCashOutflowAmount?: number;
+  cashCommodity?: string;
+  cashObligation: boolean;
   reliability: "high" | "medium" | "low";
   kind?: RecurringKind;
   commodity?: string;
@@ -218,6 +233,21 @@ export function economicOccurrence(
       )
     ? "investment"
     : "transfer";
+  const cashPostings = transaction.postings.filter((p) =>
+    p.account.startsWith("Assets:") && p.quantity < 0
+  );
+  const cashCommodities = new Set(cashPostings.map((p) => p.commodity));
+  const cashComparable = cashPostings.length > 0 &&
+    cashCommodities.size === 1 &&
+    cashPostings.every((p) => Number.isFinite(p.quantity));
+  const cashOutflowAmount = cashComparable
+    ? cashPostings.reduce((sum, p) => sum.minus(p.quantity), new BigNumber(0))
+      .toNumber()
+    : undefined;
+  const cashObligation = expenses.length > 0 ||
+    transaction.postings.some((p) =>
+      p.account.startsWith("Liabilities:") && p.quantity > 0
+    );
   const context = [
     ...new Set(
       transaction.postings.map((p) =>
@@ -228,6 +258,12 @@ export function economicOccurrence(
   return {
     transaction,
     amount: amount.abs().toNumber(),
+    expenseAmount: expenses.length ? amount.toNumber() : 0,
+    cashOutflowAmount: Number.isFinite(cashOutflowAmount)
+      ? cashOutflowAmount
+      : undefined,
+    cashCommodity: cashComparable ? cashPostings[0].commodity : undefined,
+    cashObligation,
     commodity: selected[0].commodity,
     kind,
     context,
@@ -275,7 +311,27 @@ export function analyzeRecurring(
     approximate,
     baselineStable,
     amountChange,
-  } = analyzeAmounts(amounts);
+  } = analyzeAmounts(
+    amounts,
+    comparable ? occurrences[0].commodity : undefined,
+  );
+  const expectedExpenseAmount = comparable
+    ? analyzeAmounts(
+      occurrences.map((o) => o.expenseAmount),
+      occurrences[0].commodity,
+    ).expectedAmount
+    : undefined;
+  const cashComparable = occurrences.length === transactions.length &&
+    occurrences.every((o) => o.cashOutflowAmount !== undefined) &&
+    new Set(occurrences.map((o) => o.cashCommodity)).size === 1;
+  const expectedCashOutflowAmount = cashComparable
+    ? analyzeAmounts(
+      occurrences.map((o) => o.cashOutflowAmount!),
+      occurrences[0].cashCommodity,
+    ).expectedAmount
+    : undefined;
+  const cashObligation = occurrences.length === transactions.length &&
+    occurrences.every((o) => o.cashObligation);
   const { expectedDate, future, scheduleError, annualFrequency } =
     predictRecurringDates(last.date, rhythm, asOf, period);
   const tolerance = period ? 0 : rhythm.tolerance;
@@ -299,6 +355,12 @@ export function analyzeRecurring(
     confirmed,
     occurrences,
     rhythm,
+    scheduleSource: period.trim() ? "explicit-period" : "inferred",
+    effectiveCadence: period.trim() ? "Explicit schedule" : rhythm.cadence,
+    expectedExpenseAmount,
+    expectedCashOutflowAmount,
+    cashCommodity: cashComparable ? occurrences[0].cashCommodity : undefined,
+    cashObligation,
     reliability: rhythm.reliable
       ? transactions.length >= recurringPolicy.highOccurrences
         ? "high"
@@ -336,7 +398,8 @@ export function analyzeRecurring(
           !d.isBefore(asOf, "day") && !d.isAfter(asOf.add(7, "day"), "day")
         ),
       laterThanUsual,
-      cadenceChanged: transactions.length >= 4 && previousRhythm.reliable &&
+      cadenceChanged: !period.trim() && transactions.length >= 4 &&
+        previousRhythm.reliable &&
         (!rhythm.reliable || previousRhythm.cadence !== rhythm.cadence),
     },
     reasons: [
@@ -424,34 +487,42 @@ export function summarizeRecurring(
       upcoming30: number;
     }
   >();
+  const totalFor = (commodity: string) => {
+    const total = totals.get(commodity) ??
+      { commodity, monthly: 0, annual: 0, upcoming7: 0, upcoming30: 0 };
+    totals.set(commodity, total);
+    return total;
+  };
   for (const s of sequences) {
+    if (!s.confirmed || s.lifecycle === "possibly-stopped") continue;
     if (
-      !s.confirmed || s.kind !== "expense" || !s.commodity ||
-      s.expectedAmount === undefined || s.lifecycle === "possibly-stopped"
-    ) continue;
-    const total = totals.get(s.commodity) ??
-      {
-        commodity: s.commodity,
-        monthly: 0,
-        annual: 0,
-        upcoming7: 0,
-        upcoming30: 0,
-      };
-    const frequency = s.annualFrequency;
-    if (frequency) {
-      const annual = new BigNumber(s.expectedAmount).times(frequency);
-      total.annual = annual.plus(total.annual).toNumber();
-      total.monthly = annual.div(12).plus(total.monthly).toNumber();
-    }
-    for (const date of s.upcomingDates) {
-      total.upcoming30 = new BigNumber(total.upcoming30).plus(s.expectedAmount)
-        .toNumber();
-      if (!date.isAfter(asOf.add(7, "day"), "day")) {
-        total.upcoming7 = new BigNumber(total.upcoming7).plus(s.expectedAmount)
-          .toNumber();
+      s.kind === "expense" && s.commodity &&
+      s.expectedExpenseAmount !== undefined
+    ) {
+      const total = totalFor(s.commodity);
+      if (s.annualFrequency) {
+        const annual = new BigNumber(s.expectedExpenseAmount).times(
+          s.annualFrequency,
+        );
+        total.annual = annual.plus(total.annual).toNumber();
+        total.monthly = annual.div(12).plus(total.monthly).toNumber();
       }
     }
-    totals.set(s.commodity, total);
+    if (
+      !s.cashObligation || !s.cashCommodity ||
+      s.expectedCashOutflowAmount === undefined
+    ) continue;
+    const total = totalFor(s.cashCommodity);
+    for (const date of s.upcomingDates) {
+      total.upcoming30 = new BigNumber(total.upcoming30).plus(
+        s.expectedCashOutflowAmount,
+      ).toNumber();
+      if (!date.isAfter(asOf.add(7, "day"), "day")) {
+        total.upcoming7 = new BigNumber(total.upcoming7).plus(
+          s.expectedCashOutflowAmount,
+        ).toNumber();
+      }
+    }
   }
   return {
     totals: [...totals.values()].sort((a, b) =>
@@ -462,15 +533,32 @@ export function summarizeRecurring(
         s.confirmed && s.kind === "expense" &&
         s.lifecycle !== "possibly-stopped" && !s.annualFrequency
       ).length,
-    attentionCount: sequences.filter((s) =>
-      s.confirmed &&
-      (s.flags.amountChanged || s.flags.laterThanUsual ||
-        s.flags.cadenceChanged)
-    ).length,
+    attentionCount: sequences.filter(needsRecurringAttention).length,
   };
 }
 
-function analyzeAmounts(amounts: number[]) {
+export function needsRecurringAttention(item: RecurringAnalysis): boolean {
+  return item.confirmed &&
+    (item.flags.amountChanged || item.flags.laterThanUsual ||
+      item.flags.cadenceChanged || !!item.scheduleError);
+}
+
+export function minimumRecurringChange(commodity?: string): number {
+  if (
+    commodity && recurringPolicy.minimumChangeAmounts[commodity] !== undefined
+  ) return recurringPolicy.minimumChangeAmounts[commodity];
+  // No purchasing-power equivalence is inferred for unknown commodities.
+  // Use one minor currency unit (or 0.01 for arbitrary commodities) plus the ratio.
+  if (commodity && /^[A-Z]{3}$/.test(commodity)) {
+    const digits =
+      new Intl.NumberFormat("en", { style: "currency", currency: commodity })
+        .resolvedOptions().maximumFractionDigits ?? 2;
+    return 10 ** -digits;
+  }
+  return 1 / recurringPolicy.defaultMinorUnits;
+}
+
+function analyzeAmounts(amounts: number[], commodity?: string) {
   const latestAmount = amounts.at(-1);
   const previousAmount = amounts.at(-2);
   const typicalAmount = amounts.length ? median(amounts) : undefined;
@@ -491,7 +579,7 @@ function analyzeAmounts(amounts: number[]) {
       ? Math.abs(difference) / previousAmount
       : undefined;
     if (
-      Math.abs(difference) >= recurringPolicy.minimumChangeAmount &&
+      Math.abs(difference) >= minimumRecurringChange(commodity) &&
       (ratio === undefined || ratio >= recurringPolicy.minimumChangeRatio)
     ) {
       amountChange = {

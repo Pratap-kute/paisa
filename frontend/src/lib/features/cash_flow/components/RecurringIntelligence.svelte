@@ -1,4 +1,6 @@
 <script lang="ts">
+import { obscure } from "$lib/shared/state/persisted";
+import { formatCommodityAmount } from "$lib/shared/formatters/currency";
 import { onMount } from "svelte";
 import { api } from "$lib/api";
 import type { Transaction } from "$lib/domain/ledger";
@@ -6,6 +8,7 @@ import type { TransactionSequence } from "$lib/domain/recurring";
 import {
   analyzeConfirmedRecurring,
   discoverRecurringCandidates,
+  needsRecurringAttention,
   type RecurringAnalysis,
 } from "$lib/domain/recurring_analysis";
 import { now } from "$lib/domain/time";
@@ -23,23 +26,20 @@ interface Props {
 let { sequences, onreload }: Props = $props();
 let history: Transaction[] = $state([]);
 let rejected: string[] = $state([]);
+let suggestionLimit = $state(25);
 let busy = $state(false);
 let loading = $state(true);
 let error = $state("");
 let notice = $state("");
 const asOf = now();
 let confirmed = $derived(analyzeConfirmedRecurring(sequences, asOf));
+let discovered = $derived(
+  discoverRecurringCandidates(history, sequences, asOf),
+);
 let candidates = $derived(
-  discoverRecurringCandidates(history, sequences, asOf).filter((c) =>
-    !rejected.includes(c.key)
-  ),
+  discovered.filter((c) => !rejected.includes(c.key)),
 );
-let attention = $derived(
-  confirmed.filter((s) =>
-    s.flags.amountChanged || s.flags.laterThanUsual || s.flags.cadenceChanged ||
-    s.lifecycle === "new"
-  ),
-);
+let attention = $derived(confirmed.filter(needsRecurringAttention));
 let upcoming = $derived(
   confirmed.flatMap((item) =>
     item.upcomingDates.map((date) => ({ item, date }))
@@ -97,7 +97,7 @@ async function confirm(candidate: RecurringAnalysis) {
 <Section title="Upcoming" subtitle="Expected occurrences in the next 30 days">
   <ul class="divide-y divide-border-subtle">
     {#each upcoming as { item, date }}
-      <li class="flex flex-wrap justify-between gap-2 py-2 text-sm"><span>{date.format("D MMM")} · {item.displayName} · {item.kind ?? "Mixed"}</span><span class="tabular-nums">~{item.expectedAmount?.toLocaleString() ?? "Amount unavailable"} {item.commodity ?? ""}</span></li>
+      <li class="flex flex-wrap justify-between gap-2 py-2 text-sm"><span>{date.format("D MMM")} · {item.displayName} · {item.kind ?? "Mixed"}</span><span class="tabular-nums">~{formatCommodityAmount(item.expectedCashOutflowAmount ?? item.expectedAmount, item.cashCommodity ?? item.commodity, $obscure)}</span></li>
     {:else}<li class="text-sm text-muted-foreground">No recurring payments expected in the next 30 days.</li>{/each}
   </ul>
 </Section>
@@ -119,9 +119,12 @@ async function confirm(candidate: RecurringAnalysis) {
   <div class="divide-y divide-border-subtle">
     {#if loading}<p role="status">Looking for recurring patterns…</p>
     {:else}
-      {#each candidates as item (item.key)}
+      {#each candidates.slice(0, suggestionLimit) as item (item.key)}
         <RecurringIntelligenceRow {item} {busy} readonly={USER_CONFIG.readonly} onconfirm={() => confirm(item)} onreject={() => { rejected = [...rejected, item.key]; }} />
       {:else}<p class="text-sm text-muted-foreground">{history.length < 3 ? "Not enough history to detect recurring transactions yet." : "No new recurring patterns found."}</p>{/each}
+    {/if}
+    {#if candidates.length > suggestionLimit}
+      <button type="button" class="mt-3 text-sm underline" onclick={() => suggestionLimit += 25}>Show more suggestions</button>
     {/if}
   </div>
 </Section>

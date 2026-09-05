@@ -549,6 +549,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/editor/save_batch": {
+            "post": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "description": "Checks all source revisions, validates, backs up, writes and synchronizes once. Restores earlier writes on failure; recovery_files identifies backups if restoration fails. Not crash-atomic.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Editor"
+                ],
+                "summary": "Save existing ledger files together with failure rollback",
+                "operationId": "saveEditorFiles",
+                "parameters": [
+                    {
+                        "description": "Existing files and expected source content",
+                        "name": "files",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.EditorSaveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EditorBatchSaveResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/editor/validate": {
             "post": {
                 "security": [
@@ -2382,6 +2428,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.EditorBatchSaveResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "recovery_files": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "rolled_back": {
+                    "type": "boolean"
+                },
+                "saved": {
+                    "type": "boolean"
+                },
+                "synced": {
+                    "type": "boolean"
+                }
+            }
+        },
         "dto.EditorFilesResponse": {
             "type": "object",
             "properties": {
@@ -2407,6 +2476,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.EditorSaveRequest": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.LedgerFileResponse"
                     }
                 }
             }

@@ -167,7 +167,11 @@ describe("merchant and financial semantics", () => {
       expect(item.kind).toBe(kind);
       return item;
     });
-    expect(summarizeRecurring(items, asOf).totals).toHaveLength(0);
+    expect(summarizeRecurring(items, asOf).totals[0]).toMatchObject({
+      monthly: 0,
+      annual: 0,
+      upcoming30: 10000,
+    });
     expect(summarizeRecurring([...items, analysis()], asOf).totals[0].monthly)
       .toBe(499);
     expect(economicOccurrence(tx("2026-08-01", -10))).toBeUndefined();
@@ -321,4 +325,77 @@ it("handles zero amounts and invalid numeric data without non-finite output", ()
   expect(economicOccurrence(tx("2026-08-08", Number.NaN))).toBeUndefined();
   expect(economicOccurrence(tx("2026-08-08", Number.POSITIVE_INFINITY)))
     .toBeUndefined();
+});
+
+it("separates loan expense from full cash obligation and card repayment", () => {
+  const ts = monthly().map((t) => ({
+    ...t,
+    postings: [
+      { account: "Assets:Bank", quantity: -10000, commodity: "INR" },
+      { account: "Liabilities:Loan", quantity: 8000, commodity: "INR" },
+      { account: "Expenses:Interest", quantity: 2000, commodity: "INR" },
+    ] as Posting[],
+  }));
+  const loan = analysis(ts, dayjs("2026-09-05"));
+  expect(loan.expectedExpenseAmount).toBe(2000);
+  expect(loan.expectedCashOutflowAmount).toBe(10000);
+  expect(summarizeRecurring([loan], dayjs("2026-09-05")).totals[0])
+    .toMatchObject({ monthly: 2000, upcoming7: 10000 });
+  const card = analysis(
+    ts.map((t) => ({
+      ...t,
+      postings: [
+        t.postings[0],
+        {
+          account: "Liabilities:Card",
+          quantity: 10000,
+          commodity: "INR",
+        } as Posting,
+      ],
+    })),
+    dayjs("2026-09-05"),
+  );
+  expect(card.expectedExpenseAmount).toBe(0);
+  expect(summarizeRecurring([loan, card], dayjs("2026-09-05")).totals[0])
+    .toMatchObject({ monthly: 2000, upcoming7: 20000 });
+});
+
+it("applies explicit commodity materiality without suppressing small dollar changes", () => {
+  for (
+    const [commodity, previous, latest, changed] of [
+      ["USD", 9.99, 12.99, true],
+      ["EUR", 9.99, 12.99, true],
+      ["INR", 100, 110, true],
+      ["INR", 10, 15, false],
+      ["JPY", 1000, 1200, true],
+      ["JPY", 100, 120, false],
+      ["USD", 9.99, 10, false],
+    ] as const
+  ) {
+    const item = analysis(
+      monthly([previous, previous, latest]).map((t) => ({
+        ...t,
+        postings: t.postings.map((p) => ({ ...p, commodity })),
+      })),
+    );
+    expect(!!item.amountChange).toBe(changed);
+  }
+});
+
+it("uses one attention rule and labels explicit schedules separately", async () => {
+  const { needsRecurringAttention } = await import("./recurring_analysis");
+  const fresh = analysis();
+  expect(fresh.lifecycle).toBe("new");
+  expect(needsRecurringAttention(fresh)).toBe(false);
+  expect(summarizeRecurring([fresh], asOf).attentionCount).toBe(0);
+  const explicit = analyzeRecurring(
+    "Explicit",
+    monthly(),
+    true,
+    asOf,
+    "8 SEP ?",
+  )!;
+  expect(explicit.scheduleSource).toBe("explicit-period");
+  expect(explicit.effectiveCadence).toBe("Explicit schedule");
+  expect(explicit.flags.cadenceChanged).toBe(false);
 });

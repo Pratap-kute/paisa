@@ -74,3 +74,11 @@ type SheetSaveResponse struct {
 	Saved   bool   `json:"saved"`
 	Message string `json:"message,omitempty"`
 }
+
+type EditorBatchSaveResponse struct {
+	Saved         bool              `json:"saved"`
+	Synced        bool              `json:"synced"`
+	RolledBack    bool              `json:"rolled_back"`
+	RecoveryFiles map[string]string `json:"recovery_files,omitempty"`
+	Message       string            `json:"message"`
+}

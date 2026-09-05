@@ -4,6 +4,8 @@ import dayjs from "dayjs";
 import type { Posting, Transaction } from "$lib/domain/ledger";
 import { analyzeRecurring } from "$lib/domain/recurring_analysis";
 import RecurringIntelligence from "./RecurringIntelligence.svelte";
+import { obscure } from "$lib/shared/state/persisted";
+import RecurringSummary from "./RecurringSummary.svelte";
 import RecurringIntelligenceRow from "./RecurringIntelligenceRow.svelte";
 
 const mocks = vi.hoisted(() => ({
@@ -46,6 +48,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   globalThis.__now = dayjs("2026-08-10");
   USER_CONFIG.readonly = false;
+  USER_CONFIG.display_precision = 2;
+  USER_CONFIG.locale = "en-IN";
+  obscure.set(false);
   mocks.history.mockResolvedValue({ transactions: history() });
   mocks.prepare.mockResolvedValue([{ name: "main.ledger" }]);
   mocks.save.mockResolvedValue(undefined);
@@ -128,7 +133,7 @@ test("row surfaces factual changes, stopped status and history", () => {
   )!;
   const view = render(RecurringIntelligenceRow, { item });
   expect(view.container.textContent).toContain(
-    "Amount increased from 499 INR to 649 INR",
+    "Amount increased from 499.00 INR to 649.00 INR",
   );
   expect(view.container.textContent).toContain("Possibly stopped");
   expect(view.container.querySelector("summary")?.textContent).toContain(
@@ -146,4 +151,37 @@ test("a stable upcoming row has no false amount warning", () => {
   expect(view.container.textContent).toContain("Expected around");
   expect(view.container.textContent).not.toContain("Amount increased");
   expect(view.container.textContent).not.toContain("Possibly stopped");
+});
+
+test("privacy masks amounts and percentages immediately when toggled", async () => {
+  const asOf = dayjs("2026-09-05");
+  const item = analyzeRecurring("Netflix", history(), true, asOf)!;
+  const row = render(RecurringIntelligenceRow, { item });
+  const summary = render(RecurringSummary, { items: [item], asOf });
+  expect(row.container.textContent).toContain("649.00 INR");
+  obscure.set(true);
+  await waitFor(() =>
+    expect(row.container.textContent).not.toContain("649.00")
+  );
+  expect(row.container.textContent).not.toContain("499.00");
+  expect(row.container.textContent).not.toContain("30.1%");
+  expect(summary.container.textContent).not.toContain("649.00");
+  expect(row.container.textContent).toContain("0.00 INR");
+  obscure.set(false);
+  await waitFor(() =>
+    expect(row.container.textContent).toContain("649.00 INR")
+  );
+});
+
+test("an explicit annual Period never renders a conflicting monthly cadence", () => {
+  const item = analyzeRecurring(
+    "Netflix",
+    history(),
+    true,
+    dayjs("2026-08-10"),
+    "8 SEP ?",
+  )!;
+  const view = render(RecurringIntelligenceRow, { item });
+  expect(view.container.textContent).toContain("Explicit schedule");
+  expect(view.container.textContent).not.toContain("monthly");
 });

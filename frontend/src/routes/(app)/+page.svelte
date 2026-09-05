@@ -1,4 +1,6 @@
 <script lang="ts">
+import { obscure } from "$lib/shared/state/persisted";
+import { formatCommodityAmount } from "$lib/shared/formatters/currency";
 import RecurringSummary from "$lib/features/cash_flow/components/RecurringSummary.svelte";
 import { analyzeConfirmedRecurring } from "$lib/domain/recurring_analysis";
 import { onMount } from "svelte";
@@ -41,12 +43,10 @@ import LegendCard from "$lib/shared/ui/LegendCard.svelte";
 import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
 import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 import Button from "$lib/shared/ui/Button.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
 import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
 import {
   formatCurrency,
-  formatCurrencyCrude,
   formatPercentage,
 } from "$lib/shared/formatters/currency";
 import { postingUrl } from "$lib/shared/browser/navigation";
@@ -362,8 +362,8 @@ onMount(() => {
             <div class="divide-y divide-[var(--paisa-border-subtle)]">
               {#each visibleRecurring as item (item.key)}
                 <div class="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm" data-testid="dashboard-recurring-item">
-                  <div class="min-w-0"><span class="break-words font-medium">{item.displayName}</span><p class="text-xs text-muted-foreground">{item.rhythm.cadence} · Expected around {item.upcomingDates[0].format("D MMM")} · {item.kind ?? "Mixed"}</p></div>
-                  <span class="font-semibold tabular-nums">~{item.expectedAmount?.toLocaleString() ?? "Amount unavailable"} {item.commodity ?? ""}</span>
+                  <div class="min-w-0"><span class="break-words font-medium">{item.displayName}</span><p class="text-xs text-muted-foreground">{item.effectiveCadence} · Expected around {item.upcomingDates[0].format("D MMM")} · {item.kind ?? "Mixed"}</p></div>
+                  <span class="font-semibold tabular-nums">~{formatCommodityAmount(item.expectedCashOutflowAmount ?? item.expectedAmount, item.cashCommodity ?? item.commodity, $obscure)}</span>
                 </div>
               {/each}
             </div>

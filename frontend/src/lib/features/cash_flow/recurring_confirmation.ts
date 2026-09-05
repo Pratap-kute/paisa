@@ -88,39 +88,21 @@ export async function prepareRecurringConfirmation(
       expected_content: original,
     };
   });
-  for (const edit of edits) {
-    const result = await api.editor.validateEditorFile(edit);
-    if (result.errors?.length) {
-      throw new Error(
-        `Ledger validation failed for ${edit.name}: ${
-          result.errors[0].message
-        }`,
-      );
-    }
-  }
   return edits;
 }
 
 export async function saveRecurringConfirmation(
   edits: RecurringFileEdit[],
 ): Promise<void> {
-  let saved = 0;
-  for (const edit of edits) {
-    try {
-      const response = await api.editor.saveEditorFile(edit);
-      if (response.saved) saved++;
-      if (!response.saved || !response.synced) {
-        throw new Error(
-          response.message || "Ledger save or synchronization failed",
-        );
-      }
-    } catch (error) {
-      const message = error instanceof Error
-        ? error.message
-        : "Ledger save failed";
-      throw new Error(
-        `${message}. ${saved} of ${edits.length} files saved. Reload history before retrying; saved tags remain in the ledger.`,
-      );
-    }
+  const response = await api.editor.saveEditorFiles({ files: edits });
+  if (!response.saved || !response.synced) {
+    const recovery = Object.entries(response.recovery_files ?? {}).map((
+      [name, backup],
+    ) => `${name}: ${backup}`).join("; ");
+    throw new Error(
+      `${response.message || "Batch save failed"}${
+        recovery ? ` Recovery backups: ${recovery}` : ""
+      }`,
+    );
   }
 }

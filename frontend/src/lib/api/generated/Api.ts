@@ -185,11 +185,23 @@ export interface DtoDiagnosisResponse {
   issues?: DtoIssueResponse[];
 }
 
+export interface DtoEditorBatchSaveResponse {
+  message?: string;
+  recovery_files?: Record<string, string>;
+  rolled_back?: boolean;
+  saved?: boolean;
+  synced?: boolean;
+}
+
 export interface DtoEditorFilesResponse {
   accounts?: string[];
   commodities?: string[];
   files?: DtoLedgerFileResponse[];
   payees?: string[];
+}
+
+export interface DtoEditorSaveRequest {
+  files?: DtoLedgerFileResponse[];
 }
 
 export interface DtoEditorSaveResponse {
@@ -1308,6 +1320,29 @@ export class Api<SecurityDataType extends unknown> {
         path: `/editor/save`,
         method: "POST",
         body: file,
+        secure: true,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Checks all source revisions, validates, backs up, writes and synchronizes once. Restores earlier writes on failure; recovery_files identifies backups if restoration fails. Not crash-atomic.
+     *
+     * @tags Editor
+     * @name SaveEditorFiles
+     * @summary Save existing ledger files together with failure rollback
+     * @request POST:/editor/save_batch
+     * @secure
+     */
+    saveEditorFiles: (
+      files: DtoEditorSaveRequest,
+      params: RequestParams = {},
+    ) =>
+      this.http.request<DtoEditorBatchSaveResponse, DtoErrorResponse>({
+        path: `/editor/save_batch`,
+        method: "POST",
+        body: files,
         secure: true,
         type: ContentType.Json,
         format: "json",

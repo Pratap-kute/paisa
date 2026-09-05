@@ -158,6 +158,7 @@ func registerEditorAndSheetRoutes(router *gin.Engine, db *gorm.DB) {
 	router.POST("/api/editor/file", MaxBodySize(DefaultEditorLimit), GetEditorFileHandler)
 	router.POST("/api/editor/file/delete_backups", MaxBodySize(DefaultEditorLimit), DeleteEditorBackupsHandler)
 	router.POST("/api/editor/validate", MaxBodySize(DefaultEditorLimit), ValidateEditorFileHandler)
+	router.POST("/api/editor/save_batch", MaxBodySize(DefaultEditorLimit), SaveEditorFilesHandler(db))
 	router.POST("/api/editor/save", MaxBodySize(DefaultEditorLimit), SaveEditorFileHandler(db))
 
 	router.GET("/api/sheets/files", GetSheetFilesHandler(db))
