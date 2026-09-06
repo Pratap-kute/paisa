@@ -279,7 +279,10 @@
       "current": 88243.71700716,
       "target": 7272727.2727272725,
       "targetDate": "",
-      "priority": 0
+      "priority": 0,
+      "swr": 3.3,
+      "yearlyExpense": 240000,
+      "yearlyExpenseSource": "configured"
     },
     {
       "type": "savings",
@@ -288,7 +291,15 @@
       "current": 88243.71700716,
       "target": 500000,
       "targetDate": "2025-02-07",
-      "priority": 0
+      "priority": 0,
+      "contributionHistory": [
+        {
+          "month": "2022-01",
+          "amount": 87998.01700716
+        }
+      ],
+      "rate": 8,
+      "yearlyExpense": 0
     }
   ],
   "networth": {
