@@ -341,8 +341,8 @@ onMount(() => {
             <div class="space-y-3">
               {#each visibleGoalSummaries as goal (goal.name)}
                 {@const completed = analyzeGoal(goal).progressRatio}
-                <a href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`} class="block p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle min-w-0" data-testid="dashboard-goal-item">
-                  <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-foreground truncate">{goal.name}</span><span class="text-xs font-semibold tabular-nums whitespace-nowrap">{formatPercentage(completed, 1)}</span></div>
+                <a href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`} class="group block p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle hover:border-border transition-all duration-150 min-w-0" data-testid="dashboard-goal-item">
+                  <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">{goal.name}</span><span class="text-xs font-semibold tabular-nums whitespace-nowrap">{formatPercentage(completed, 1)}</span></div>
                   <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] my-1.5"><div class="h-full rounded-full bg-primary" style={`width: ${Math.min(100, Math.max(0, completed * 100))}%`}></div></div>
                   <div class="flex items-center justify-between gap-3 text-xs text-muted-foreground tabular-nums">
                     <span class="truncate">{formatCurrency($obscure ? 0 : goal.current)} of {formatCurrency($obscure ? 0 : goal.target)}</span>

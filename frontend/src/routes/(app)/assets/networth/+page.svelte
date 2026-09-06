@@ -103,7 +103,7 @@ onMount(async () => {
 
   {#if selectedPeriod}
     <div class="mb-3 text-sm text-muted-foreground">
-      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-primary">Clear period filter</a>
+      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-primary hover:underline">Clear period filter</a>
     </div>
   {/if}
 

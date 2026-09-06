@@ -49,8 +49,8 @@ let { summary, period, isPartial = false, comparisonPeriod }: Props = $props();
                 : "Needs attention"
         )}
         {@const badgeColor = isOverspent ? "text-negative" : "text-warning"}
-        <a href={p?.href || `/expense/budget?period=${period}`} class="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 hover:text-primary" data-testid="dashboard-budget-item">
-          <span class="text-sm font-medium text-foreground truncate" title={item.budget.account}>{restName(item.budget.account)}</span>
+        <a href={p?.href || `/expense/budget?period=${period}`} class="group flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 transition-colors" data-testid="dashboard-budget-item">
+          <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate" title={item.budget.account}>{restName(item.budget.account)}</span>
           <span class="text-xs font-semibold {badgeColor} whitespace-nowrap">{badgeText}</span>
         </a>
       {/each}

@@ -130,7 +130,7 @@ onMount(() => {
   <Section title="Recurring Schedules" subtitle="Next unpaid occurrence for each recurring item">
     <ZeroState item={!isEmpty}>
       <strong>Oops!</strong> You haven't configured any recurring transactions yet. Checkout the
-      <a href={helpUrl("recurring")}>docs</a> page to get started.
+      <a href={helpUrl("recurring")} class="text-primary underline">docs</a> page to get started.
     </ZeroState>
 
     {#if isLoading && !isEmpty}

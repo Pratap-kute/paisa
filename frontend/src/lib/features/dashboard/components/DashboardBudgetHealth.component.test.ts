@@ -43,7 +43,9 @@ test("renders likely-over with projected overrun warning rather than overspent e
   });
 
   const text = container.textContent ?? "";
-  expect(text).toContain(`${formatCurrency(3000)} spent of ${formatCurrency(10000)} planned`);
+  expect(text).toContain(
+    `${formatCurrency(3000)} spent of ${formatCurrency(10000)} planned`,
+  );
   expect(text).toContain("Shopping");
   // Must show projected overrun with warning tone, NOT "Over by"
   expect(text).toContain(`~${formatCurrency(1000)} overrun`);

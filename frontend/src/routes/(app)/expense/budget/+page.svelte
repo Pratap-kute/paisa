@@ -129,7 +129,7 @@ $effect(() => {
   {#if historicalPeriod && requestedPeriod}
     <div class="mb-3 text-sm text-muted-foreground">
       Showing {currentMonthBudget?.date.format("MMMM YYYY") || requestedPeriod} ·
-      <a href="/expense/budget" class="text-primary">
+      <a href="/expense/budget" class="text-primary hover:underline">
         Clear period filter
       </a>
     </div>
@@ -293,7 +293,7 @@ $effect(() => {
   <Section title="All Budgets" subtitle="Budgeted, spent, remaining, and progress by category">
     <ZeroState item={!isEmpty}>
       <strong>Oops!</strong> You haven't set a budget yet. Checkout the
-      <a href={helpUrl("budget")}>docs</a> page to get started.
+      <a href={helpUrl("budget")} class="text-primary underline">docs</a> page to get started.
     </ZeroState>
 
     <div class="flex flex-col gap-3">

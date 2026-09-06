@@ -673,4 +673,3 @@ test("summarizeBudget uses observedSpend instead of full-month actual when proje
   const historicalSummary = summarizeBudget(historicalBudget);
   expect(historicalSummary.actual).toBe(11000);
 });
-
