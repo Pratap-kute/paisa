@@ -1924,6 +1924,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AccountBudgetProjectionResponse": {
+            "type": "object",
+            "properties": {
+                "daysInMonth": {
+                    "type": "integer"
+                },
+                "effectiveBudget": {
+                    "type": "number"
+                },
+                "elapsedDays": {
+                    "type": "integer"
+                },
+                "historicalSampleCount": {
+                    "type": "integer"
+                },
+                "observedSpend": {
+                    "type": "number"
+                },
+                "projectedOverrun": {
+                    "type": "number"
+                },
+                "projectedRemaining": {
+                    "type": "number"
+                },
+                "projectedSpend": {
+                    "type": "number"
+                },
+                "projectedUsageRatio": {
+                    "type": "number"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AccountBudgetResponse": {
             "type": "object",
             "properties": {
@@ -1947,6 +1985,9 @@ const docTemplate = `{
                 },
                 "forecast": {
                     "type": "number"
+                },
+                "projection": {
+                    "$ref": "#/definitions/dto.AccountBudgetProjectionResponse"
                 },
                 "rollover": {
                     "type": "number"
@@ -2137,6 +2178,35 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.BudgetOutlookResponse": {
+            "type": "object",
+            "properties": {
+                "atRiskCount": {
+                    "type": "integer"
+                },
+                "coverageCount": {
+                    "type": "integer"
+                },
+                "insufficientCount": {
+                    "type": "integer"
+                },
+                "likelyOverCount": {
+                    "type": "integer"
+                },
+                "onTrackCount": {
+                    "type": "integer"
+                },
+                "overspentCount": {
+                    "type": "integer"
+                },
+                "projectedOverrun": {
+                    "type": "number"
+                },
+                "totalBudgets": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.BudgetResponse": {
             "type": "object",
             "properties": {
@@ -2157,6 +2227,9 @@ const docTemplate = `{
                 },
                 "forecast": {
                     "type": "number"
+                },
+                "outlook": {
+                    "$ref": "#/definitions/dto.BudgetOutlookResponse"
                 }
             }
         },

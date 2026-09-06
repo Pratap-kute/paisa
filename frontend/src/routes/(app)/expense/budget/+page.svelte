@@ -41,23 +41,37 @@ let currentMonthAccountBudgets: AccountBudget[] = $derived(
 let showCurrentMonthMetrics = $derived(
   currentMonthBudget?.date.isSameOrAfter(monthStart) ?? false,
 );
+const severityOrder: Record<string, number> = {
+  "overspent": 3,
+  "likely-over": 2,
+  "at-risk": 1,
+};
+
 let attentionAccounts: AccountBudget[] = $derived(
-  currentMonthAccountBudgets.filter((accountBudget) =>
-    needsAttention(accountBudget)
-  ),
+  currentMonthAccountBudgets
+    .filter(needsAttention)
+    .sort((a, b) => {
+      const rankA = severityOrder[a.projection?.status ?? (a.available < 0 ? "overspent" : "")] ?? 0;
+      const rankB = severityOrder[b.projection?.status ?? (b.available < 0 ? "overspent" : "")] ?? 0;
+      if (rankB !== rankA) return rankB - rankA;
+      const overrunA = a.projection?.projectedOverrun ?? (a.available < 0 ? Math.abs(a.available) : 0);
+      const overrunB = b.projection?.projectedOverrun ?? (b.available < 0 ? Math.abs(b.available) : 0);
+      return overrunB - overrunA;
+    }),
 );
 
 function needsAttention(accountBudget: AccountBudget): boolean {
+  if (accountBudget.projection) {
+    const s = accountBudget.projection.status;
+    return s === "overspent" || s === "likely-over" || s === "at-risk";
+  }
   if (accountBudget.forecast === 0 && accountBudget.actual === 0) {
     return false;
   }
   if (accountBudget.available < 0) {
     return true;
   }
-  const percent = accountBudget.forecast > 0
-    ? (accountBudget.actual / accountBudget.forecast) * 100
-    : 0;
-  return percent > 85;
+  return false;
 }
 
 function budgetProgress(accountBudget: AccountBudget): number {
@@ -130,7 +144,7 @@ $effect(() => {
             loading={isLoading}
           />
           <Metric
-            label="Projected Month End Balance"
+            label="Planned Month-End Balance"
             value={formatCurrency(currentMonthBudget.endOfMonthBalance)}
             loading={isLoading}
           />
@@ -155,14 +169,54 @@ $effect(() => {
     </div>
   {/if}
 
+  {#if !historicalPeriod && currentMonthBudget?.outlook}
+    <div class="mb-[var(--paisa-space-5)]">
+      <Section title="Budget Outlook" subtitle="Deterministic month-end spending health across active categories">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+          <div class="rounded-lg border border-border-subtle bg-surface p-3 text-center">
+            <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">On Track</div>
+            <div class="mt-1 text-xl font-bold text-positive">{currentMonthBudget.outlook.onTrackCount}</div>
+          </div>
+          <div class="rounded-lg border border-border-subtle bg-surface p-3 text-center">
+            <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">At Risk</div>
+            <div class="mt-1 text-xl font-bold text-warning">{currentMonthBudget.outlook.atRiskCount}</div>
+          </div>
+          <div class="rounded-lg border border-border-subtle bg-surface p-3 text-center">
+            <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Likely Over</div>
+            <div class="mt-1 text-xl font-bold text-negative">{currentMonthBudget.outlook.likelyOverCount}</div>
+          </div>
+          <div class="rounded-lg border border-border-subtle bg-surface p-3 text-center">
+            <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Overspent</div>
+            <div class="mt-1 text-xl font-bold text-negative">{currentMonthBudget.outlook.overspentCount}</div>
+          </div>
+          {#if (currentMonthBudget.outlook.projectedOverrun ?? 0) > 0}
+            <div class="col-span-2 rounded-lg border border-border-subtle bg-surface p-3 text-center sm:col-span-4 lg:col-span-1">
+              <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">Projected Overrun</div>
+              <div class="mt-1 text-xl font-bold text-negative tabular-nums">
+                +{formatCurrency(currentMonthBudget.outlook.projectedOverrun ?? 0)}
+              </div>
+            </div>
+          {/if}
+        </div>
+        {#if currentMonthBudget.outlook.coverageCount < currentMonthBudget.outlook.totalBudgets}
+          <div class="mt-2 text-xs text-muted-foreground">
+            Projected spend available for {currentMonthBudget.outlook.coverageCount} of {currentMonthBudget.outlook.totalBudgets} active budgets
+          </div>
+        {/if}
+      </Section>
+    </div>
+  {/if}
+
   {#if !isLoading && attentionAccounts.length > 0}
     <Section
       title="Needs Attention"
-      subtitle="Overspent categories and envelopes near their budget limit"
+      subtitle="Overspent categories and envelopes projected to exceed or reach their budget"
     >
       <div class="flex flex-col gap-3">
         {#each attentionAccounts as accountBudget (accountBudget.account)}
-          {@const isOverspent = accountBudget.available < 0}
+          {@const isOverspent = accountBudget.projection?.status === "overspent" || accountBudget.available < 0}
+          {@const isLikelyOver = accountBudget.projection?.status === "likely-over"}
+          {@const isAtRisk = accountBudget.projection?.status === "at-risk"}
           {@const percent = budgetProgress(accountBudget)}
           <div
             id={accountBudget.account === page.url.searchParams.get("account") ? "insight-account" : undefined}
@@ -176,29 +230,41 @@ $effect(() => {
                 {restName(accountBudget.account)}
               </span>
               <span
-                class="whitespace-nowrap text-xs font-semibold tabular-nums {isOverspent
+                class="whitespace-nowrap text-xs font-semibold tabular-nums {isOverspent || isLikelyOver
                   ? 'text-negative'
                   : 'text-warning'}"
               >
-                {isOverspent ? "Over by " : "Available "}
-                {formatCurrency(Math.abs(accountBudget.available))}
+                {#if isOverspent}
+                  Over by {formatCurrency(Math.abs(accountBudget.available))}
+                {:else if isLikelyOver}
+                  ⚠ Likely over · ~{formatCurrency(accountBudget.projection?.projectedOverrun ?? 0)} over
+                {:else if isAtRisk}
+                  At risk · {formatCurrency(accountBudget.projection?.projectedRemaining ?? 0)} remaining
+                {:else}
+                  Available {formatCurrency(Math.abs(accountBudget.available))}
+                {/if}
               </span>
             </div>
             <div class="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
               <div
-                class="h-full rounded-full transition-all {isOverspent
+                class="h-full rounded-full transition-all {isOverspent || isLikelyOver
                   ? 'bg-negative'
-                  : percent > 85
+                  : isAtRisk
                     ? 'bg-warning'
                     : 'bg-positive'}"
                 style="width: {Math.min(100, Math.max(0, percent))}%"
               ></div>
             </div>
-            <div class="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
+            <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs tabular-nums text-muted-foreground">
               <span>Spent {formatCurrency(accountBudget.actual)}</span>
               <span>Budget {formatCurrency(accountBudget.forecast)}</span>
               {#if accountBudget.rollover !== 0}
                 <span>Rollover {formatCurrency(accountBudget.rollover)}</span>
+              {/if}
+              {#if accountBudget.projection?.projectedSpend !== undefined}
+                <span class="font-medium text-foreground">
+                  Projected {formatCurrency(accountBudget.projection.projectedSpend)}
+                </span>
               {/if}
             </div>
           </div>

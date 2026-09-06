@@ -10,6 +10,20 @@
  * ---------------------------------------------------------------
  */
 
+export interface DtoAccountBudgetProjectionResponse {
+  daysInMonth?: number;
+  effectiveBudget?: number;
+  elapsedDays?: number;
+  historicalSampleCount?: number;
+  observedSpend?: number;
+  projectedOverrun?: number;
+  projectedRemaining?: number;
+  projectedSpend?: number;
+  projectedUsageRatio?: number;
+  source?: string;
+  status?: string;
+}
+
 export interface DtoAccountBudgetResponse {
   account?: string;
   actual?: number;
@@ -17,6 +31,7 @@ export interface DtoAccountBudgetResponse {
   date?: string;
   expenses?: DtoPostingResponse[];
   forecast?: number;
+  projection?: DtoAccountBudgetProjectionResponse;
   rollover?: number;
 }
 
@@ -86,12 +101,24 @@ export interface DtoBalancedPostingsResponse {
   balancedPostings?: DtoBalancedPostingResponse[];
 }
 
+export interface DtoBudgetOutlookResponse {
+  atRiskCount?: number;
+  coverageCount?: number;
+  insufficientCount?: number;
+  likelyOverCount?: number;
+  onTrackCount?: number;
+  overspentCount?: number;
+  projectedOverrun?: number;
+  totalBudgets?: number;
+}
+
 export interface DtoBudgetResponse {
   accounts?: DtoAccountBudgetResponse[];
   availableThisMonth?: number;
   date?: string;
   endOfMonthBalance?: number;
   forecast?: number;
+  outlook?: DtoBudgetOutlookResponse;
 }
 
 export interface DtoBudgetsSummaryResponse {

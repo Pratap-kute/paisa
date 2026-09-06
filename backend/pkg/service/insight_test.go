@@ -278,7 +278,97 @@ func TestInsight_BudgetRiskAndOverspent(t *testing.T) {
 
 	require.NotNil(t, risk)
 	assert.Equal(t, InsightSeverityWarning, risk.Severity)
-	assert.True(t, decimal.NewFromInt(90).Equal(*risk.ChangePercent))
+	// Projected spend via calendar pace: 9000 / 20 * 31 = 13950
+	assert.True(t, decimal.NewFromInt(13950).Equal(*risk.Value))
+	assert.True(t, decimal.NewFromInt(10000).Equal(*risk.PreviousValue))
+	// Projected overrun: 13950 - 10000 = 3950
+	assert.True(t, decimal.NewFromInt(3950).Equal(*risk.Change))
+	assert.True(t, decimal.NewFromFloat(139.5).Equal(*risk.ChangePercent))
+}
+
+func TestInsight_BudgetRisk_AtRiskVsLikelyOver(t *testing.T) {
+	// Verify that detectBudgetRisk cleanly distinguishes at-risk from likely-over:
+	// - Likely-over: Value = projectedSpend, PreviousValue = effectiveBudget, Change = projectedOverrun
+	// - At-risk: Value = projectedSpend, PreviousValue = effectiveBudget, Change = projectedRemaining
+	spent := decimal.NewFromInt(9800)
+	rem := decimal.NewFromInt(200)
+	overrun := decimal.NewFromInt(3400)
+	likelySpent := decimal.NewFromInt(13400)
+	ratioAtRisk := decimal.NewFromFloat(0.98)
+	ratioLikely := decimal.NewFromFloat(1.34)
+
+	ctx := InsightContext{
+		Period:    "2026-09",
+		IsPartial: true,
+		Budget: BudgetResult{
+			BudgetsByMonth: map[string]Budget{
+				"2026-09": {
+					Accounts: []AccountBudget{
+						{
+							Account:  "Expenses:Food",
+							Forecast: decimal.NewFromInt(10000),
+							Actual:   decimal.NewFromInt(5000),
+							Projection: &AccountBudgetProjection{
+								Status:              BudgetProjectionStatusLikelyOver,
+								EffectiveBudget:     decimal.NewFromInt(10000),
+								ProjectedSpend:      &likelySpent,
+								ProjectedOverrun:    &overrun,
+								ProjectedUsageRatio: &ratioLikely,
+							},
+						},
+						{
+							Account:  "Expenses:Dining",
+							Forecast: decimal.NewFromInt(10000),
+							Actual:   decimal.NewFromInt(5000),
+							Projection: &AccountBudgetProjection{
+								Status:              BudgetProjectionStatusAtRisk,
+								EffectiveBudget:     decimal.NewFromInt(10000),
+								ProjectedSpend:      &spent,
+								ProjectedRemaining:  &rem,
+								ProjectedUsageRatio: &ratioAtRisk,
+							},
+						},
+						{
+							Account:  "Expenses:Safe",
+							Forecast: decimal.NewFromInt(10000),
+							Actual:   decimal.NewFromInt(2000),
+							Projection: &AccountBudgetProjection{
+								Status:          BudgetProjectionStatusOnTrack,
+								EffectiveBudget: decimal.NewFromInt(10000),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	insights := detectBudgetRisk(ctx)
+	require.Len(t, insights, 2)
+
+	var foodInsight, diningInsight *Insight
+	for i := range insights {
+		if insights[i].Account == "Expenses:Food" {
+			foodInsight = &insights[i]
+		}
+		if insights[i].Account == "Expenses:Dining" {
+			diningInsight = &insights[i]
+		}
+	}
+
+	require.NotNil(t, foodInsight)
+	assert.Equal(t, InsightTypeBudgetRisk, foodInsight.Type)
+	assert.Equal(t, 70, foodInsight.Score)
+	assert.True(t, decimal.NewFromInt(13400).Equal(*foodInsight.Value))
+	assert.True(t, decimal.NewFromInt(10000).Equal(*foodInsight.PreviousValue))
+	assert.True(t, decimal.NewFromInt(3400).Equal(*foodInsight.Change))
+
+	require.NotNil(t, diningInsight)
+	assert.Equal(t, InsightTypeBudgetRisk, diningInsight.Type)
+	assert.Equal(t, 48, diningInsight.Score)
+	assert.True(t, decimal.NewFromInt(9800).Equal(*diningInsight.Value))
+	assert.True(t, decimal.NewFromInt(10000).Equal(*diningInsight.PreviousValue))
+	assert.True(t, decimal.NewFromInt(200).Equal(*diningInsight.Change))
 }
 
 func TestInsight_RecurringExpenseIncrease(t *testing.T) {

@@ -824,48 +824,93 @@ func detectBudgetRisk(ctx InsightContext) []Insight {
 
 	for i := range budget.Accounts {
 		acc := &budget.Accounts[i]
-		isOverspent := acc.Available.IsNegative() || (acc.Forecast.IsPositive() && acc.Actual.GreaterThan(acc.Forecast))
 
-		if isOverspent {
-			overAmount := acc.Actual.Sub(acc.Forecast)
-			if acc.Available.IsNegative() && acc.Available.Abs().GreaterThan(overAmount) {
-				overAmount = acc.Available.Abs()
+		if ctx.IsPartial && acc.Projection != nil {
+			proj := acc.Projection
+			effectiveBudget := proj.EffectiveBudget
+
+			switch proj.Status {
+			case BudgetProjectionStatusOverspent:
+				overAmount := acc.Actual.Sub(effectiveBudget)
+				if overAmount.IsPositive() {
+					actual := acc.Actual
+					insights = append(insights, Insight{
+						ID:            fmt.Sprintf("budget_overspent:%s:%s", ctx.Period, acc.Account),
+						Type:          InsightTypeBudgetOverspent,
+						Category:      InsightCategoryBudget,
+						Severity:      InsightSeverityCritical,
+						Score:         85,
+						Value:         &actual,
+						PreviousValue: &effectiveBudget,
+						Change:        &overAmount,
+						Account:       acc.Account,
+						Period:        ctx.Period,
+						Href:          hrefExpenseBudget,
+					})
+				}
+			case BudgetProjectionStatusLikelyOver:
+				if proj.ProjectedSpend != nil && proj.ProjectedOverrun != nil {
+					usagePercent := decimal.Zero
+					if proj.ProjectedUsageRatio != nil {
+						usagePercent = proj.ProjectedUsageRatio.Mul(decimal.NewFromInt(100))
+					}
+					insights = append(insights, Insight{
+						ID:            fmt.Sprintf("budget_risk:%s:%s", ctx.Period, acc.Account),
+						Type:          InsightTypeBudgetRisk,
+						Category:      InsightCategoryBudget,
+						Severity:      InsightSeverityWarning,
+						Score:         70,
+						Value:         proj.ProjectedSpend,
+						PreviousValue: &effectiveBudget,
+						Change:        proj.ProjectedOverrun,
+						ChangePercent: &usagePercent,
+						Account:       acc.Account,
+						Period:        ctx.Period,
+						Href:          hrefExpenseBudget,
+					})
+				}
+			case BudgetProjectionStatusAtRisk:
+				if proj.ProjectedSpend != nil && proj.ProjectedRemaining != nil {
+					usagePercent := decimal.Zero
+					if proj.ProjectedUsageRatio != nil {
+						usagePercent = proj.ProjectedUsageRatio.Mul(decimal.NewFromInt(100))
+					}
+					insights = append(insights, Insight{
+						ID:            fmt.Sprintf("budget_risk:%s:%s", ctx.Period, acc.Account),
+						Type:          InsightTypeBudgetRisk,
+						Category:      InsightCategoryBudget,
+						Severity:      InsightSeverityWarning,
+						Score:         48,
+						Value:         proj.ProjectedSpend,
+						PreviousValue: &effectiveBudget,
+						Change:        proj.ProjectedRemaining,
+						ChangePercent: &usagePercent,
+						Account:       acc.Account,
+						Period:        ctx.Period,
+						Href:          hrefExpenseBudget,
+					})
+				}
+			case BudgetProjectionStatusOnTrack, BudgetProjectionStatusInsufficientData, BudgetProjectionStatusNoBudget:
+				// Deterministic: no warning emitted
 			}
-			if overAmount.LessThanOrEqual(decimal.Zero) {
-				continue
+		} else {
+			// Historical completed periods (or partial without projection): factual overspend check
+			effectiveBudget := acc.Forecast
+			if acc.Rollover.IsPositive() {
+				effectiveBudget = effectiveBudget.Add(acc.Rollover)
 			}
-			actual := acc.Actual
-			forecast := acc.Forecast
-			insights = append(insights, Insight{
-				ID:            fmt.Sprintf("budget_overspent:%s:%s", ctx.Period, acc.Account),
-				Type:          InsightTypeBudgetOverspent,
-				Category:      InsightCategoryBudget,
-				Severity:      InsightSeverityCritical,
-				Score:         85,
-				Value:         &actual,
-				PreviousValue: &forecast,
-				Change:        &overAmount,
-				Account:       acc.Account,
-				Period:        ctx.Period,
-				Href:          hrefExpenseBudget,
-			})
-		} else if acc.Forecast.IsPositive() && ctx.IsPartial {
-			// Only flag pacing risk for in-progress months if usage is high (>85%)
-			usagePercent := acc.Actual.Div(acc.Forecast).Mul(decimal.NewFromInt(100))
-			if usagePercent.GreaterThanOrEqual(decimal.NewFromInt(85)) && acc.Actual.LessThan(acc.Forecast) {
+			if acc.Actual.GreaterThan(effectiveBudget) {
+				overAmount := acc.Actual.Sub(effectiveBudget)
 				actual := acc.Actual
-				forecast := acc.Forecast
-				remaining := acc.Forecast.Sub(acc.Actual)
 				insights = append(insights, Insight{
-					ID:            fmt.Sprintf("budget_risk:%s:%s", ctx.Period, acc.Account),
-					Type:          InsightTypeBudgetRisk,
+					ID:            fmt.Sprintf("budget_overspent:%s:%s", ctx.Period, acc.Account),
+					Type:          InsightTypeBudgetOverspent,
 					Category:      InsightCategoryBudget,
-					Severity:      InsightSeverityWarning,
-					Score:         48,
+					Severity:      InsightSeverityCritical,
+					Score:         85,
 					Value:         &actual,
-					PreviousValue: &forecast,
-					Change:        &remaining,
-					ChangePercent: &usagePercent,
+					PreviousValue: &effectiveBudget,
+					Change:        &overAmount,
 					Account:       acc.Account,
 					Period:        ctx.Period,
 					Href:          hrefExpenseBudget,

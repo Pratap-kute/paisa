@@ -475,13 +475,38 @@ export function presentInsight(
     }
 
     case "budget_risk": {
-      const prev = Number(insight.previousValue ?? 0);
-      const chg = Number(insight.change ?? 0);
+      const projected = Number(insight.value ?? 0);
+      const effectiveBudget = Number(insight.previousValue ?? 0);
       const pct = Number(insight.changePercent ?? 0);
       const name = restName(insight.account || "") || insight.account ||
         "Budget";
-      const tone: InsightTone = pct >= 95 ? "critical" : "warning";
+      const isLikelyOver = projected > effectiveBudget;
+      const tone: InsightTone = isLikelyOver ? "critical" : "warning";
 
+      if (isLikelyOver) {
+        const overrun = projected - effectiveBudget;
+        return {
+          id: insight.id,
+          type: insight.type,
+          category: insight.category,
+          categoryLabel,
+          severity: insight.severity,
+          score: insight.score,
+          title: `${name} projected to exceed budget by ${formatCurrency(overrun)}`,
+          description: `${formatCurrency(projected)} projected vs ${formatCurrency(effectiveBudget)} available`,
+          icon: "fa-solid fa-triangle-exclamation",
+          tone,
+          badgeText: `~${formatCurrency(overrun)} projected overrun`,
+          heroMetric: formatCurrency(overrun),
+          heroLabel: "projected overrun",
+          progressPercent: Math.min(100, pct),
+          progressTone: "critical",
+          actionText: "Review Budget",
+          href: insight.href || "/expense/budget",
+        };
+      }
+
+      const remaining = Math.max(0, effectiveBudget - projected);
       return {
         id: insight.id,
         type: insight.type,
@@ -489,19 +514,15 @@ export function presentInsight(
         categoryLabel,
         severity: insight.severity,
         score: insight.score,
-        title: `${name} budget is ${formatFloat(pct, 0)}% used`,
-        description: `${formatCurrency(chg)} remaining of ${
-          formatCurrency(prev)
-        } forecast`,
+        title: `${name} projected close to its budget`,
+        description: `${formatCurrency(projected)} projected vs ${formatCurrency(effectiveBudget)} available · ${formatCurrency(remaining)} projected remaining`,
         icon: "fa-solid fa-triangle-exclamation",
         tone,
-        badgeText: `${formatFloat(pct, 0)}% used`,
-        heroMetric: `${formatFloat(pct, 0)}%`,
-        heroLabel: `${formatCurrency(chg)} remaining of ${
-          formatCurrency(prev)
-        }`,
+        badgeText: "At risk",
+        heroMetric: formatCurrency(remaining),
+        heroLabel: "projected remaining",
         progressPercent: Math.min(100, pct),
-        progressTone: tone === "critical" ? "critical" : "warning",
+        progressTone: "warning",
         actionText: "Review Budget",
         href: insight.href || "/expense/budget",
       };

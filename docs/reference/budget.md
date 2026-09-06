@@ -132,5 +132,47 @@ To recap, there are just two things you need to do.
 
 2. Adjust your budget as you spend and make sure there is no deficit.
 
+## Budget Forecasting & Early-Warning System
+
+For the active current month, Paisa augments reactive envelope tracking with an **early-warning forecasting system**. While your planned envelope (`Budget`) defines your intended allocation, Paisa computes a deterministic `Projected Spend` for each category before month-end.
+
+### Deterministic Projection Algorithm
+
+Paisa uses a strictly deterministic 4-tier fallback model without machine learning or statistical opacity:
+
+1. **Historical Timing (Primary)**:
+   If at least 3 completed historical months contain spending in this category, Paisa calculates the median fraction of monthly spending historically incurred by today's calendar day ($ProgressShare = \frac{SpentDay_{1..T}}{SpentTotal}$). If $ProgressShare \ge 5\%$, month-end spend is projected as:
+   $$\text{Projected Spend} = \frac{\text{Observed Spend through Today}}{ProgressShare}$$
+   This pattern-aware model naturally handles front-loaded expenses (such as rent or subscription fees paid on Day 2) without falsely alerting that spending will balloon $15\times$.
+
+2. **Historical Median (Fallback)**:
+   If historical timing has $< 5\%$ progress share (e.g. typical spending occurs later in the month), Paisa falls back to the median full-month total across available historical months.
+
+3. **Calendar Pace (Linear Fallback)**:
+   When insufficient historical months exist ($< 3$ samples), but at least 3 calendar days have elapsed in the current month ($T \ge 3$), Paisa projects spending linearly based on the month's elapsed days:
+   $$\text{Projected Spend} = \text{Observed Spend through Today} \times \frac{\text{Days in Month}}{\text{Elapsed Days}}$$
+
+4. **Insufficient Data**:
+   During the first 2 calendar days of a month without historical data, Paisa marks the category as `insufficient-data` rather than making wild linear extrapolations.
+
+### Future-Dated Postings and Rollover Semantics
+
+* **Observed vs Future Spend**: Paisa separates spending observed through today from future-dated postings already entered for later in the month. The month-end projection is strictly bounded below by actual recorded spend: $\max(\text{actual}, \text{pacingProjection})$.
+* **Effective Budget with Rollover**: Categories with positive rollover benefit from expanded capacity. Health thresholds compare projected spend against:
+  $$\text{Effective Budget} = \text{Planned Budget} + \max(\text{Rollover}, 0)$$
+  Deficit rollovers ($\text{Rollover} < 0$) are preserved as factual deficits.
+
+### Health Statuses
+
+| Status | Condition | Meaning |
+| :--- | :--- | :--- |
+| **Overspent** | $\text{Actual} > \text{Effective Budget}$ | Category is already overspent today. |
+| **Likely Over** | $\text{Projected} > 1.05 \times \text{Effective Budget}$ | Spending pace is projected to exceed budget by $> 5\%$. |
+| **At Risk** | $\text{Projected} \ge 0.95 \times \text{Effective Budget}$ | Spending pace is within $5\%$ of the budget threshold. |
+| **On Track** | $\text{Projected} < 0.95 \times \text{Effective Budget}$ | Spending is safely within the allocated envelope. |
+| **Insufficient Data** | Early in month with $< 3$ days & $< 3$ historical months | Pending further spending data. |
+
+Budget forecasting applies exclusively to the active current month. Historical months present factual ledger actuals, while future months display planned budget envelopes.
+
 [^1]: If you prefer to not have rollover feature, it can be disabled in the
     [configuration](../reference/config.md) page.
