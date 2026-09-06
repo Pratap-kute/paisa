@@ -1,7 +1,8 @@
 <script lang="ts">
 import { api } from "$lib/api";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { formatFloat } from "$lib/shared/formatters/currency";
+import SavingsGoalIntelligence from "$lib/features/goals/components/SavingsGoalIntelligence.svelte";
+import type { GoalSummary } from "$lib/domain/goals_models";
+import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
 import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
 import type { Point } from "$lib/domain/goals_models";
 import type { Posting } from "$lib/domain/ledger";
@@ -21,8 +22,6 @@ import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte"
 import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
 import Section from "$lib/shared/layout/Section.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
 import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
 import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
 import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
@@ -55,16 +54,13 @@ let savingsTotal = $state(0),
   balances: Record<string, AssetBreakdown> = $state({}),
   predictionsTimeline: Forecast[] = $state([]);
 
-let remainingAmount = $derived(Math.max(targetSavings - savingsTotal, 0));
-let projectedCompletion = $derived(
-  targetDateObject?.isValid()
-    ? targetDateObject.format("DD MMM YYYY")
-    : pmt > 0
-    ? "Based on monthly target"
-    : "Not projected",
-);
+let goal: GoalSummary | undefined = $state();
 
 onMount(async () => {
+  const detail = await api.goals.getGoalDetails(
+    "savings",
+    data.name,
+  ) as unknown as SavingsGoalProgress;
   ({
     savingsTotal,
     investmentTotal,
@@ -79,10 +75,13 @@ onMount(async () => {
     xirr,
     paymentPerPeriod,
     balances,
-  } = await api.goals.getGoalDetails(
-    "savings",
-    data.name,
-  ) as unknown as SavingsGoalProgress);
+  } = detail);
+  goal = {
+    ...detail,
+    current: savingsTotal,
+    id: `savings-${name}`,
+    priority: 0,
+  };
 
   savingsTimeline = savingsTimeline || [];
   postings = postings || [];
@@ -92,9 +91,13 @@ onMount(async () => {
     .reverse()
     .slice(0, 12);
 
-  if (targetSavings != 0) {
-    progressPercent = (savingsTotal / targetSavings) * 100;
-  }
+  progressPercent = Math.max(
+    0,
+    Math.min(
+      100,
+      calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
+    ),
+  );
 
   ({ pmt, targetDate } = solvePMTOrNper(
     targetSavings,
@@ -149,53 +152,8 @@ onMount(async () => {
     {/snippet}
   </PageHeader>
 
-  <MetricStrip cols={4}>
-    <Metric
-      label="Target Amount"
-      value={formatCurrency(targetSavings)}
-      secondary={targetDateObject?.isValid()
-        ? targetDateObject.format("DD MMM YYYY")
-        : undefined}
-      status="primary"
-    />
-    <Metric
-      label="Current Savings"
-      value={formatCurrency(savingsTotal)}
-      secondary="{formatFloat(xirr)} XIRR"
-      status="positive"
-    />
-    <Metric
-      label="Remaining Amount"
-      value={formatCurrency(remainingAmount)}
-      status={remainingAmount > 0 ? "warning" : "positive"}
-    />
-    <Metric
-      label="Projected Completion"
-      value={projectedCompletion}
-      secondary={pmt > 0
-        ? `${formatCurrency(pmt)} monthly target`
-        : rate > 0
-          ? `${formatFloat(rate, 2)} expected return`
-          : undefined}
-    />
-  </MetricStrip>
-
-  {#if pmt > 0}
-    <MetricStrip cols={2}>
-      <Metric
-        label="Net Investment"
-        value={formatCurrency(investmentTotal)}
-        secondary={`${formatCurrency(gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"}`}
-      />
-      <Metric
-        label="Monthly Investment Needed"
-        value={formatCurrency(pmt)}
-        secondary={rate > 0
-          ? `${formatFloat(rate, 2)} expected rate of return`
-          : undefined}
-        status="primary"
-      />
-    </MetricStrip>
+  {#if goal}
+    <SavingsGoalIntelligence {goal} {xirr} {investmentTotal} {gainTotal} />
   {/if}
 
   <Section>
@@ -206,7 +164,7 @@ onMount(async () => {
     class="paisa-goal-detail-layout grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-cols-[minmax(0,5fr)_minmax(20rem,2fr)]"
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
-      <Section title="{name} Progress" titleIcon={icon}>
+      <Section title="{name} Progress" titleIcon={icon} subtitle="Chart forecasts are illustrative and do not determine schedule health.">
         <ChartFrame height="tall">
           <GoalProgressChart
             points={savingsTimeline}

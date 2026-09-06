@@ -13,6 +13,8 @@ export interface Forecast {
 }
 
 export interface RetirementGoalProgress {
+  target?: number;
+  yearlyExpenseSource?: "configured" | "historical";
   savingsTotal: number;
   investmentTotal: number;
   gainTotal: number;
@@ -28,6 +30,7 @@ export interface RetirementGoalProgress {
 }
 
 export interface SavingsGoalProgress {
+  contributionHistory?: GoalContributionMonth[];
   investmentTotal: number;
   gainTotal: number;
   savingsTotal: number;
@@ -53,4 +56,15 @@ export interface GoalSummary {
   target: number;
   targetDate: string;
   priority: number;
+  contributionHistory?: GoalContributionMonth[];
+  rate?: number;
+  paymentPerPeriod?: number;
+  swr?: number;
+  yearlyExpense?: number;
+  yearlyExpenseSource?: "configured" | "historical";
+}
+
+export interface GoalContributionMonth {
+  month: string;
+  amount: number;
 }

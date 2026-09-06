@@ -6,8 +6,10 @@ import { iconGlyph } from "$lib/shared/ui/icon";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import Progress from "$lib/shared/ui/Progress.svelte";
-import dayjs from "dayjs";
 import type { Action } from "svelte/action";
+import { analyzeGoal } from "$lib/domain/goal_intelligence";
+import GoalHealth from "./GoalHealth.svelte";
+import { obscure } from "$lib/shared/state/persisted";
 
 interface Props {
   goal: GoalSummary;
@@ -17,23 +19,10 @@ interface Props {
 
 let { goal, small = false, action = null }: Props = $props();
 
-function formatDate(date: string) {
-  const d = dayjs(date, "YYYY-MM-DD", true);
-  if (d.isValid()) {
-    return d.fromNow();
-  }
-  return "";
-}
-
-function percentComplete(goal: GoalSummary) {
-  if (goal.target === 0) {
-    return 0;
-  }
-
-  return (goal.current / goal.target) * 100;
-}
-
-let completed = $derived(percentComplete(goal));
+let health = $derived(analyzeGoal(goal));
+let completed = $derived(
+  Math.max(0, Math.min(100, health.progressRatio * 100)),
+);
 </script>
 
 <Card padding="sm" class={small ? "mb-3" : ""}>
@@ -62,15 +51,16 @@ let completed = $derived(percentComplete(goal));
     {/if}
   </div>
   <div class="grid grid-cols-2 gap-3 mb-3">
-    <Metric label="Current" value={formatCurrency(goal.current)}
+    <Metric label="Current" value={formatCurrency($obscure ? 0 : goal.current)}
       status="positive" />
-    <Metric label="Target" value={formatCurrency(goal.target)}
+    <Metric label="Target" value={formatCurrency($obscure ? 0 : goal.target)}
       status="primary" />
   </div>
   <Progress small showPercent={false} progressPercent={completed} />
   <div
     class="flex justify-between text-muted-foreground text-sm mt-1">
-    <div>{formatPercentage(completed / 100, 2)}</div>
-    <div>{formatDate(goal.targetDate)}</div>
+    <div>{formatPercentage($obscure ? 0 : health.progressRatio, 2)} {goal.type === "retirement" ? "funded" : "complete"}</div>
+    <div>{health.targetDate ? `Target ${health.targetDate.format("DD MMM YYYY")}` : ""}</div>
   </div>
+  <GoalHealth {goal} compact={small} />
 </Card>

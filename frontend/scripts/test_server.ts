@@ -3,6 +3,8 @@ import { copyFixtureSourceToTemp } from "../tests/fixture_utils.ts";
 
 const root = fromFileUrl(new URL("../", import.meta.url));
 const sourceDir = join(root, "tests/fixture/browser");
+const backendPort = Number(Deno.env.get("PAISA_E2E_BACKEND_PORT") ?? 7500);
+const frontendPort = Number(Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173);
 const fixture = await copyFixtureSourceToTemp(sourceDir);
 const binary = join(
   fixture,
@@ -88,6 +90,9 @@ try {
     "--now",
     "2022-02-07",
     "update",
+    // Browser fixtures contain their own prices. Keep this setup deterministic
+    // and local: do not fetch live prices, portfolios, or taxation data.
+    "--journal",
   ], fixture);
   // Portfolio holdings normally come from an external provider, so journal
   // synchronization cannot recreate them in CI. Seed a small deterministic
@@ -122,7 +127,7 @@ try {
       join(fixture, "paisa.yaml"),
       "serve",
       "--port",
-      "7500",
+      String(backendPort),
       "--now",
       "2022-02-07",
     ],
@@ -135,16 +140,16 @@ try {
     stderr: "inherit",
   }).spawn();
   children.push(backend);
-  await waitForPort(7500);
+  await waitForPort(backendPort);
 
   const frontend = new Deno.Command(Deno.execPath(), {
     args: [
       "task",
       "preview",
       "--host",
-      "0.0.0.0",
+      "127.0.0.1",
       "--port",
-      "5173",
+      String(frontendPort),
       "--strictPort",
     ],
     cwd: root,
@@ -152,7 +157,7 @@ try {
     stderr: "inherit",
   }).spawn();
   children.push(frontend);
-  await waitForPort(5173);
+  await waitForPort(frontendPort);
 
   const failed = await Promise.race(children.map((child) => child.status));
   await stop(failed.code || 1);

@@ -3,6 +3,10 @@ import type { AssetBreakdown, Networth } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
 import type { GoalSummary } from "$lib/domain/goals_models";
+import {
+  goalStatusLabel,
+  summarizeGoalHealth,
+} from "$lib/domain/goal_intelligence";
 import type { Posting } from "$lib/domain/ledger";
 import { now } from "$lib/domain/time";
 import {
@@ -11,7 +15,7 @@ import {
 } from "$lib/features/insights/presentation";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { iconGlyphOr } from "$lib/shared/ui/icon";
-import dayjs, { type Dayjs } from "dayjs";
+import type { Dayjs } from "dayjs";
 
 export type MetricStatus =
   | "neutral"
@@ -239,23 +243,22 @@ export function buildDashboardAttention(
     });
   }
 
-  const overdueGoals = (input.goals ?? []).filter((goal) => {
-    const targetDate = goal.targetDate ? dayjs(goal.targetDate) : null;
-    return targetDate?.isValid() && targetDate.isBefore(input.asOf, "day") &&
-      Number.isFinite(goal.current) && Number.isFinite(goal.target) &&
-      goal.current < goal.target;
-  }).sort((left, right) =>
-    left.targetDate.localeCompare(right.targetDate) ||
-    left.name.localeCompare(right.name)
-  );
-  for (const goal of overdueGoals) {
+  const goalAttention = summarizeGoalHealth(input.goals ?? [], input.asOf)
+    .attention.slice(0, 1);
+  for (const { goal, analysis } of goalAttention) {
     result.push({
-      id: `goal:overdue:${goal.id || `${goal.type}:${goal.name}`}`,
+      id: `goal:${
+        analysis.state === "overdue" ? "overdue" : analysis.scheduleStatus
+      }:${goal.id || `${goal.type}:${goal.name}`}`,
       kind: "goal",
-      title: `${goal.name} goal is overdue`,
-      detail: `${formatCurrency(goal.current)} of ${
-        formatCurrency(goal.target)
-      } completed`,
+      title: `${goal.name}: ${goalStatusLabel(goal, analysis)}`,
+      detail: analysis.state === "overdue"
+        ? `${formatCurrency(analysis.remainingAmount)} remaining`
+        : `${
+          formatCurrency(analysis.actualMonthlyContribution ?? 0)
+        }/month recent pace · ${
+          formatCurrency(analysis.requiredMonthlyContribution ?? 0)
+        }/month required`,
       icon: iconGlyphOr(goal.icon),
       iconIsGlyph: true,
       status: "warning",

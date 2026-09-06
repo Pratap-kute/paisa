@@ -51,7 +51,10 @@ const server = new Deno.Command(Deno.execPath(), {
 }).spawn();
 
 try {
-  await waitForPort(5173, server.status);
+  await waitForPort(
+    Number(Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173),
+    server.status,
+  );
   const status = await new Deno.Command(Deno.execPath(), {
     args: ["task", "playwright", "test", ...Deno.args],
     stdin: "inherit",

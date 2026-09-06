@@ -1,6 +1,10 @@
 <script lang="ts">
 import { api } from "$lib/api";
+import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
+import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
+import type { GoalSummary } from "$lib/domain/goals_models";
 import { formatCurrency } from "$lib/shared/formatters/currency";
+import { obscure } from "$lib/shared/state/persisted";
 import { formatFloat } from "$lib/shared/formatters/currency";
 import type { AssetBreakdown } from "$lib/domain/assets";
 import type {
@@ -51,7 +55,13 @@ let savingsTotal = $state(0),
   balances: Record<string, AssetBreakdown> = $state({}),
   predictionsTimeline: Forecast[] = $state([]);
 
+let goal: GoalSummary | undefined = $state();
+
 onMount(async () => {
+  const detail = await api.goals.getGoalDetails(
+    "retirement",
+    data.name,
+  ) as unknown as RetirementGoalProgress;
   ({
     savingsTotal,
     investmentTotal,
@@ -64,18 +74,34 @@ onMount(async () => {
     name,
     postings,
     balances,
-  } = await api.goals.getGoalDetails(
-    "retirement",
-    data.name,
-  ) as unknown as RetirementGoalProgress);
-  targetSavings = yearlyExpense * (100 / swr);
+  } = detail);
+  savingsTimeline = savingsTimeline || [];
+  postings = postings || [];
+  balances = balances || {};
+  targetSavings = detail.target ??
+    (swr > 0 && Number.isFinite(swr) ? yearlyExpense * (100 / swr) : 0);
+  if (!Number.isFinite(targetSavings)) targetSavings = 0;
+  goal = {
+    ...detail,
+    current: savingsTotal,
+    target: targetSavings,
+    id: `retirement-${name}`,
+    priority: 0,
+    targetDate: "",
+  };
 
   latestPostings = sortBy(postings, (p: Posting) => p.date)
     .reverse()
     .slice(0, 12);
 
   if (yearlyExpense > 0) {
-    progressPercent = (savingsTotal / targetSavings) * 100;
+    progressPercent = Math.max(
+      0,
+      Math.min(
+        100,
+        calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
+      ),
+    );
     savingsX = savingsTotal / yearlyExpense;
     targetX = targetSavings / yearlyExpense;
   }
@@ -119,28 +145,30 @@ onMount(async () => {
   <MetricStrip cols={4}>
     <Metric
       label="Net Investment"
-      value={formatCurrency(investmentTotal)}
-      secondary={`${formatCurrency(gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatFloat(xirr)} XIRR`}
+      value={formatCurrency($obscure ? 0 : investmentTotal)}
+      secondary={`${formatCurrency($obscure ? 0 : gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatFloat(xirr)} XIRR`}
       status="primary"
     />
     <Metric
       label="Current Savings"
-      value={formatCurrency(savingsTotal)}
+      value={formatCurrency($obscure ? 0 : savingsTotal)}
       secondary="{formatFloat(savingsX, 0)}x times Yearly Expenses"
       status="positive"
     />
     <Metric
       label="Yearly Expenses"
-      value={formatCurrency(yearlyExpense)}
+      value={formatCurrency($obscure ? 0 : yearlyExpense)}
       status="negative"
     />
     <Metric
       label="Target Savings"
-      value={formatCurrency(targetSavings)}
+      value={formatCurrency($obscure ? 0 : targetSavings)}
       secondary="{formatFloat(targetX, 0)}x times Yearly Expenses (SWR {formatFloat(swr)})"
       status="primary"
     />
   </MetricStrip>
+
+  {#if goal}<Section title="Funding progress"><GoalHealth {goal} /></Section>{/if}
 
   <Section>
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />

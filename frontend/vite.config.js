@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 const apiProxy = {
   "/api": {
-    target: "http://localhost:7500",
+    target: `http://127.0.0.1:${process.env.PAISA_E2E_BACKEND_PORT ?? 7500}`,
   },
 };
 

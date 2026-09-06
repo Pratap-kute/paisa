@@ -2616,15 +2616,38 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.GoalContributionMonth": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.GoalDetailResponse": {
             "type": "object",
             "properties": {
+                "contributionHistory": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GoalContributionMonth"
+                    }
+                },
                 "summary": {
                     "$ref": "#/definitions/dto.GoalSummaryResponse"
+                },
+                "target": {
+                    "type": "number"
                 },
                 "timeline": {
                     "type": "object",
                     "additionalProperties": {}
+                },
+                "yearlyExpenseSource": {
+                    "type": "string"
                 }
             }
         },
@@ -2642,6 +2665,12 @@ const docTemplate = `{
         "dto.GoalSummaryResponse": {
             "type": "object",
             "properties": {
+                "contributionHistory": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GoalContributionMonth"
+                    }
+                },
                 "current": {
                     "type": "number"
                 },
@@ -2654,8 +2683,17 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "paymentPerPeriod": {
+                    "type": "number"
+                },
                 "priority": {
                     "type": "integer"
+                },
+                "rate": {
+                    "type": "number"
+                },
+                "swr": {
+                    "type": "number"
                 },
                 "target": {
                     "type": "number"
@@ -2664,6 +2702,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string"
+                },
+                "yearlyExpense": {
+                    "type": "number"
+                },
+                "yearlyExpenseSource": {
                     "type": "string"
                 }
             }

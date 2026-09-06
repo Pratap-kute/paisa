@@ -450,13 +450,28 @@ definitions:
           $ref: '#/definitions/dto.GainResponse'
         type: array
     type: object
+  dto.GoalContributionMonth:
+    properties:
+      amount:
+        type: number
+      month:
+        type: string
+    type: object
   dto.GoalDetailResponse:
     properties:
+      contributionHistory:
+        items:
+          $ref: '#/definitions/dto.GoalContributionMonth'
+        type: array
       summary:
         $ref: '#/definitions/dto.GoalSummaryResponse'
+      target:
+        type: number
       timeline:
         additionalProperties: {}
         type: object
+      yearlyExpenseSource:
+        type: string
     type: object
   dto.GoalSummariesResponse:
     properties:
@@ -467,6 +482,10 @@ definitions:
     type: object
   dto.GoalSummaryResponse:
     properties:
+      contributionHistory:
+        items:
+          $ref: '#/definitions/dto.GoalContributionMonth'
+        type: array
       current:
         type: number
       icon:
@@ -475,13 +494,23 @@ definitions:
         type: string
       name:
         type: string
+      paymentPerPeriod:
+        type: number
       priority:
         type: integer
+      rate:
+        type: number
+      swr:
+        type: number
       target:
         type: number
       targetDate:
         type: string
       type:
+        type: string
+      yearlyExpense:
+        type: number
+      yearlyExpenseSource:
         type: string
     type: object
   dto.GraphResponse:

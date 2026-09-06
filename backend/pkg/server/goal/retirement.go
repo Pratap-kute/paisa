@@ -1,6 +1,8 @@
 package goal
 
 import (
+	"math"
+
 	"github.com/ananthakumaran/paisa/pkg/accounting"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
@@ -22,17 +24,34 @@ func getRetirementSummary(db *gorm.DB, ps []posting.Posting, conf config.Retirem
 		yearlyExpenses = calculateAverageExpense(db, conf)
 	}
 
-	target := yearlyExpenses.Div(decimal.NewFromFloat(conf.SWR)).Mul(decimal.NewFromFloat(100))
+	target := retirementTarget(yearlyExpenses, conf.SWR)
 
 	return GoalSummary{
-		Type:     "retirement",
-		ID:       "retirement-" + conf.Name,
-		Name:     conf.Name,
-		Current:  savingsTotal,
-		Target:   target,
-		Icon:     conf.Icon,
-		Priority: conf.Priority,
+		Type:                "retirement",
+		ID:                  "retirement-" + conf.Name,
+		Name:                conf.Name,
+		Current:             savingsTotal,
+		Target:              target,
+		Icon:                conf.Icon,
+		Priority:            conf.Priority,
+		SWR:                 conf.SWR,
+		YearlyExpense:       yearlyExpenses,
+		YearlyExpenseSource: expenseSource(conf),
 	}
+}
+
+func retirementTarget(expenses decimal.Decimal, swr float64) decimal.Decimal {
+	if swr <= 0 || math.IsNaN(swr) || math.IsInf(swr, 0) {
+		return decimal.Zero
+	}
+	return expenses.Div(decimal.NewFromFloat(swr)).Mul(decimal.NewFromInt(100))
+}
+
+func expenseSource(conf config.RetirementGoal) string {
+	if conf.YearlyExpenses > 0 {
+		return "configured"
+	}
+	return "historical"
 }
 
 func calculateAverageExpense(db *gorm.DB, conf config.RetirementGoal) decimal.Decimal {
@@ -60,17 +79,19 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
 
 	return gin.H{
-		"type":            "retirement",
-		"name":            conf.Name,
-		"icon":            conf.Icon,
-		"savingsTimeline": service.RunningBalance(db, savings),
-		"savingsTotal":    savingsTotal,
-		"investmentTotal": investmentTotal,
-		"gainTotal":       gainsTotal,
-		"swr":             conf.SWR,
-		"yearlyExpense":   yearlyExpenses,
-		"xirr":            service.XIRR(db, savingsWithCapitalGains),
-		"postings":        savingsWithCapitalGains,
-		"balances":        balances,
+		"type":                "retirement",
+		"name":                conf.Name,
+		"icon":                conf.Icon,
+		"savingsTimeline":     service.RunningBalance(db, savings),
+		"savingsTotal":        savingsTotal,
+		"investmentTotal":     investmentTotal,
+		"gainTotal":           gainsTotal,
+		"swr":                 conf.SWR,
+		"yearlyExpense":       yearlyExpenses,
+		"yearlyExpenseSource": expenseSource(conf),
+		"target":              retirementTarget(yearlyExpenses, conf.SWR),
+		"xirr":                service.XIRR(db, savingsWithCapitalGains),
+		"postings":            savingsWithCapitalGains,
+		"balances":            balances,
 	}
 }

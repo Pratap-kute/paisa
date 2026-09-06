@@ -17,14 +17,16 @@ func getSavingsSummary(ps []posting.Posting, conf config.SavingsGoal) GoalSummar
 	savingsTotal := accounting.CurrentBalance(savings)
 
 	return GoalSummary{
-		Type:       "savings",
-		ID:         "savings-" + conf.Name,
-		Name:       conf.Name,
-		Current:    savingsTotal,
-		Target:     decimal.NewFromFloat(conf.Target),
-		TargetDate: conf.TargetDate,
-		Icon:       conf.Icon,
-		Priority:   conf.Priority,
+		Type:             "savings",
+		ID:               "savings-" + conf.Name,
+		Name:             conf.Name,
+		Current:          savingsTotal,
+		Target:           decimal.NewFromFloat(conf.Target),
+		TargetDate:       conf.TargetDate,
+		Icon:             conf.Icon,
+		Priority:         conf.Priority,
+		Rate:             conf.Rate,
+		PaymentPerPeriod: conf.PaymentPerPeriod,
 	}
 }
 
@@ -40,19 +42,20 @@ func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
 
 	return gin.H{
-		"type":             "savings",
-		"name":             conf.Name,
-		"icon":             conf.Icon,
-		"investmentTotal":  investmentTotal,
-		"savingsTotal":     savingsTotal,
-		"gainTotal":        savingsTotal.Sub(investmentTotal),
-		"savingsTimeline":  service.RunningBalance(db, savings),
-		"target":           decimal.NewFromFloat(conf.Target),
-		"targetDate":       conf.TargetDate,
-		"rate":             conf.Rate,
-		"paymentPerPeriod": conf.PaymentPerPeriod,
-		"xirr":             service.XIRR(db, savingsWithCapitalGains),
-		"postings":         savingsWithCapitalGains,
-		"balances":         balances,
+		"type":                "savings",
+		"name":                conf.Name,
+		"icon":                conf.Icon,
+		"investmentTotal":     investmentTotal,
+		"savingsTotal":        savingsTotal,
+		"gainTotal":           savingsTotal.Sub(investmentTotal),
+		"savingsTimeline":     service.RunningBalance(db, savings),
+		"target":              decimal.NewFromFloat(conf.Target),
+		"targetDate":          conf.TargetDate,
+		"rate":                conf.Rate,
+		"paymentPerPeriod":    conf.PaymentPerPeriod,
+		"xirr":                service.XIRR(db, savingsWithCapitalGains),
+		"postings":            savingsWithCapitalGains,
+		"balances":            balances,
+		"contributionHistory": contributionHistory(db, savingsWithCapitalGains, conf.Accounts),
 	}
 }

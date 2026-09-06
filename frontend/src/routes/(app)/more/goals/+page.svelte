@@ -3,6 +3,7 @@ import type { GoalSummary } from "$lib/domain/goals_models";
 import { dndzone } from "svelte-dnd-action";
 import { flip } from "svelte/animate";
 import GoalSummaryCard from "$lib/features/goals/components/GoalSummaryCard.svelte";
+import GoalHealthSummary from "$lib/features/goals/components/GoalHealthSummary.svelte";
 import ZeroState from "$lib/shared/ui/ZeroState.svelte";
 import { helpUrl } from "$lib/shared/browser/navigation";
 import { api } from "$lib/api";
@@ -136,7 +137,8 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
     description="Prioritize and track progress towards retirement, savings, and custom targets"
   />
 
-  <Section>
+  <GoalHealthSummary {goals} />
+  <Section title={goals.length ? "All Goals" : undefined}>
     {#if isEmpty}
       <ZeroState item={false}>
         <p class="text-sm text-muted-foreground">

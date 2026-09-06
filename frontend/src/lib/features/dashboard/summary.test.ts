@@ -419,7 +419,7 @@ describe("dashboard summaries", () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toMatchObject({
       id: "goal:overdue:overdue",
-      title: "Fourth Goal goal is overdue",
+      title: "Fourth Goal: Target date has passed",
       iconIsGlyph: true,
     });
   });
@@ -432,4 +432,45 @@ describe("dashboard summaries", () => {
       asOf: dayjs("2026-08-10"),
     })).toEqual([]);
   });
+});
+
+test("goal attention uses shared pace thresholds, respects priority and promotes only one goal", () => {
+  const asOf = dayjs("2026-08-10");
+  const history = ["2026-05", "2026-06", "2026-07"].map((month) => ({
+    month,
+    amount: 1000,
+  }));
+  const candidates = [
+    goal({
+      id: "low",
+      name: "Low",
+      targetDate: "2027-02-28",
+      priority: 1,
+      contributionHistory: history,
+    }),
+    goal({
+      id: "high",
+      name: "High",
+      targetDate: "2027-02-28",
+      priority: 10,
+      contributionHistory: history,
+    }),
+    goal({
+      id: "retirement",
+      type: "retirement",
+      targetDate: "2020-01-01",
+      priority: 100,
+      contributionHistory: history,
+    }),
+  ];
+  const items = buildDashboardAttention({
+    insights: [],
+    recurring: summarizeUpcomingRecurring([], asOf),
+    goals: candidates,
+    asOf,
+  }, 10);
+  expect(items).toHaveLength(1);
+  expect(items[0].id).toBe("goal:at-risk:high");
+  expect(items[0].title).toBe("High: At risk");
+  expect(items[0].detail).toContain("recent pace");
 });

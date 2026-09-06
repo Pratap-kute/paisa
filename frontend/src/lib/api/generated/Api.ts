@@ -248,9 +248,17 @@ export interface DtoGainsResponse {
   gain_breakdown?: DtoGainResponse[];
 }
 
+export interface DtoGoalContributionMonth {
+  amount?: number;
+  month?: string;
+}
+
 export interface DtoGoalDetailResponse {
+  contributionHistory?: DtoGoalContributionMonth[];
   summary?: DtoGoalSummaryResponse;
+  target?: number;
   timeline?: Record<string, any>;
+  yearlyExpenseSource?: string;
 }
 
 export interface DtoGoalSummariesResponse {
@@ -258,14 +266,20 @@ export interface DtoGoalSummariesResponse {
 }
 
 export interface DtoGoalSummaryResponse {
+  contributionHistory?: DtoGoalContributionMonth[];
   current?: number;
   icon?: string;
   id?: string;
   name?: string;
+  paymentPerPeriod?: number;
   priority?: number;
+  rate?: number;
+  swr?: number;
   target?: number;
   targetDate?: string;
   type?: string;
+  yearlyExpense?: number;
+  yearlyExpenseSource?: string;
 }
 
 export interface DtoGraphResponse {
