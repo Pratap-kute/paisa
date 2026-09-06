@@ -354,7 +354,7 @@ describe("dashboard summaries", () => {
     expect(items.map((item) => item.id)).toEqual([
       "insight:critical",
       "recurring:past-due",
-      "insight:warning-high",
+      "goal:overdue:goal",
     ]);
 
     const duplicateBudget = buildDashboardAttention({
@@ -473,4 +473,33 @@ test("goal attention uses shared pace thresholds, respects priority and promotes
   expect(items[0].id).toBe("goal:at-risk:high");
   expect(items[0].title).toBe("High: At risk");
   expect(items[0].detail).toContain("recent pace");
+});
+
+test("preserves goal severity and ranks critical goals above ordinary warnings", () => {
+  const asOf = dayjs("2026-08-10");
+  for (
+    const [amount, date, status, priority] of [
+      [1000, "2026-08-01", "negative", 550],
+      [1000, "2027-02-28", "negative", 550],
+      [3800, "2027-02-28", "warning", 200],
+    ] as const
+  ) {
+    const items = buildDashboardAttention({
+      insights: [insight({ id: "ordinary", severity: "warning" })],
+      recurring: summarizeUpcomingRecurring([], asOf),
+      goals: [
+        goal({
+          targetDate: date,
+          contributionHistory: ["2026-05", "2026-06", "2026-07"].map(
+            (month) => ({ month, amount }),
+          ),
+        }),
+      ],
+      asOf,
+    });
+    const goalItem = items.find((item) => item.kind === "goal");
+    expect(goalItem?.status).toBe(status);
+    expect(goalItem?.priority).toBe(priority);
+    expect(items[0].kind).toBe(status === "negative" ? "goal" : "insight");
+  }
 });

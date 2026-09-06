@@ -74,3 +74,45 @@ func TestContributionsWithSecuritiesAndStockSplits(t *testing.T) {
 	require.True(t, result[1].Amount.IsZero())
 	require.True(t, result[2].Amount.IsZero())
 }
+
+func TestDividendContributions(t *testing.T) {
+	asOf := time.Date(2026, 9, 5, 0, 0, 0, 0, time.Local)
+	tests := []struct {
+		name      string
+		assets    map[string]int64
+		income    int64
+		commodity string
+		accounts  []string
+		want      string
+	}{
+		{"cash dividend", map[string]int64{"Assets:Goal:Bank": 1000}, -1000, "INR", []string{"Assets:Goal:*"}, "0"},
+		{"reinvested dividend", map[string]int64{"Assets:Goal:Fund": 1000}, -1000, "AAPL", []string{"Assets:Goal:*"}, "0"},
+		{"split dividend", map[string]int64{"Assets:Goal:Bank": 600, "Assets:Goal:Fund": 400}, -1000, "INR", []string{"Assets:Goal:*"}, "0"},
+		{"partial account selection", map[string]int64{"Assets:Goal:Bank": 600, "Assets:Outside": 400}, -1000, "INR", []string{"Assets:Goal:*"}, "0"},
+		{"mixed funding retains contribution", map[string]int64{"Assets:Goal:Bank": 11000}, -1000, "INR", []string{"Assets:Goal:*"}, "10000"},
+		{"mixed split funding allocation", map[string]int64{"Assets:Goal:Bank": 6600, "Assets:Outside": 4400}, -1000, "INR", []string{"Assets:Goal:*"}, "6000"},
+		{"dividend net of fees", map[string]int64{"Assets:Goal:Bank": 990}, -1000, "INR", []string{"Assets:Goal:*"}, "0"},
+		{"reversed dividend", map[string]int64{"Assets:Goal:Bank": -1000}, 1000, "INR", []string{"Assets:Goal:*"}, "0"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := serviceTestDB(t)
+			date := asOf.AddDate(0, -1, 0)
+			incomeAccount := "Income:Dividend"
+			if tt.name == "cash dividend" {
+				incomeAccount += ":Stocks"
+			}
+			posts := []posting.Posting{{Date: date, TransactionID: "dividend", Account: incomeAccount, Commodity: "INR", Amount: decimal.NewFromInt(tt.income)}}
+			for account, amount := range tt.assets {
+				posts = append(posts, posting.Posting{Date: date, TransactionID: "dividend", Account: account, Commodity: tt.commodity, Amount: decimal.NewFromInt(amount), Quantity: decimal.NewFromInt(amount)})
+			}
+			// An unrelated deposit with the same date, payee and amount must survive.
+			posts = append(posts, posting.Posting{Date: date, TransactionID: "saving", Account: "Assets:Goal:Bank", Commodity: "INR", Amount: decimal.NewFromInt(1000)})
+			require.NoError(t, db.Create(&posts).Error)
+			result := MonthlyContributions(db, query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All(), tt.accounts, asOf)
+			require.Len(t, result, 1)
+			expected := decimal.RequireFromString(tt.want).Add(decimal.NewFromInt(1000))
+			require.True(t, expected.Equal(result[0].Amount), "expected %s got %s", expected, result[0].Amount)
+		})
+	}
+}

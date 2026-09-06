@@ -240,3 +240,42 @@ describe("time-series ECharts adapters", () => {
     expect(data.points[0].values.gain).toBe(120);
   });
 });
+
+describe("goal projection semantics", () => {
+  it("labels plan lines and tooltips without a forecast uncertainty band", () => {
+    const predictions = [{
+      date: dayjs("2027-03-01"),
+      value: 600000,
+      error: 0,
+    }];
+    for (
+      const [kind, label] of [["required-path", "Required path"], [
+        "configured-payment",
+        "Configured payment path",
+      ]] as const
+    ) {
+      const result = buildGoalProgressSeries([], predictions, [], 600000, kind);
+      expect(result.legends?.map((item) => item.label)).toContain(label);
+      expect(result.series.find((item) => item.key === "forecast")?.label).toBe(
+        label,
+      );
+      expect(result.series.find((item) => item.key === "forecastBandHigh"))
+        .toBeUndefined();
+      expect(result.points[0].tooltipRows).toContainEqual([label, 600000]);
+      expect(result.points[0].values.forecast).toBe(600000);
+    }
+  });
+  it("retains the forecast label and uncertainty for ARIMA", () => {
+    const result = buildGoalProgressSeries(
+      [],
+      [{ date: dayjs("2027-03-01"), value: 600000, error: 100 }],
+      [],
+      600000,
+    );
+    expect(result.series.find((item) => item.key === "forecast")?.label).toBe(
+      "Forecast",
+    );
+    expect(result.series.find((item) => item.key === "forecastBandHigh"))
+      .toBeDefined();
+  });
+});

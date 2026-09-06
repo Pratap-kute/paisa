@@ -19,7 +19,14 @@ func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	summaries := make([]GoalSummary, 0, len(goals.Retirement)+len(goals.Savings))
 	assetPostings := query.Init(db).Like("Assets:%").All()
 	assetPostings = service.PopulateMarketPrice(db, assetPostings)
-	contributionPostings := query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All()
+	// Reuse asset history: older activity is needed to retain observed zero
+	// months. Only the additional capital-gain offsets need a new bounded query.
+	contributionPostings := assetPostings
+	if len(goals.Savings) > 0 {
+		end := utils.BeginningOfMonth(utils.Now())
+		gains := query.Init(db).Like("Income:CapitalGains:%").Between(end.AddDate(0, -6, 0), end).All()
+		contributionPostings = append(contributionPostings, gains...)
+	}
 
 	for _, goal := range goals.Retirement {
 		summaries = append(summaries, getRetirementSummary(db, assetPostings, goal))

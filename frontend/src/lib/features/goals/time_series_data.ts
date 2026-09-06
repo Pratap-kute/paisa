@@ -13,12 +13,23 @@ import type {
 } from "$lib/shared/charts/echarts/period_series";
 import { sortBy } from "$lib/shared/utils/collection";
 
+export type GoalProjectionKind =
+  | "required-path"
+  | "configured-payment"
+  | "forecast";
+
 export function buildGoalProgressSeries(
   points: Point[],
   predictions: Forecast[],
   breakPoints: Point[],
   targetSavings: number,
+  projectionKind: GoalProjectionKind = "forecast",
 ): PeriodSeriesChartData {
+  const projectionLabel = {
+    "required-path": "Required path",
+    "configured-payment": "Configured payment path",
+    forecast: "Forecast",
+  }[projectionKind];
   const forecastPoints = points.slice(-1).concat(predictions);
   const progressRow = (value: number): [string, number, "percentage"] => [
     "Progress",
@@ -31,7 +42,7 @@ export function buildGoalProgressSeries(
     valueFormat: "currency",
     legends: [
       { label: "Actual", color: COLORS.secondary, shape: "square" },
-      { label: "Forecast", color: COLORS.primary, shape: "square" },
+      { label: projectionLabel, color: COLORS.primary, shape: "square" },
       { label: "Milestone", color: COLORS.tertiary, shape: "square" },
     ],
     series: [
@@ -43,18 +54,24 @@ export function buildGoalProgressSeries(
       },
       {
         key: "forecast",
-        label: "Forecast",
+        label: projectionLabel,
         intent: "line",
         dashed: true,
         color: COLORS.primary,
       },
-      {
-        key: "forecastBandHigh",
-        label: "Forecast Range",
-        intent: "area",
-        color: COLORS.primary,
-        areaOpacity: 0.12,
-      },
+      ...(projectionKind === "forecast"
+        ? [
+          {
+            key: "forecastBandHigh",
+            label: projectionKind === "forecast"
+              ? "Forecast Range"
+              : projectionLabel,
+            intent: "area",
+            color: COLORS.primary,
+            areaOpacity: 0.12,
+          } as const,
+        ]
+        : []),
       {
         key: "milestone",
         label: "Milestone",
@@ -84,7 +101,7 @@ export function buildGoalProgressSeries(
                 : 0),
           },
           tooltipRows: [
-            ["Forecast", point.value] as [string, number],
+            [projectionLabel, point.value] as [string, number],
             progressRow(point.value),
           ],
         })),

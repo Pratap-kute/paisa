@@ -135,3 +135,32 @@ test("drag handle keeps priority changes under user control", async ({ page }) =
     saved?.goals?.savings?.find((goal) => goal.name === "House")?.priority
   ).toBe(2);
 });
+
+test(
+  "dated Savings chart draws the required path label",
+  async ({ page }, testInfo) => {
+    await page.addInitScript(() => {
+      const original = CanvasRenderingContext2D.prototype.fillText;
+      const labels: string[] = [];
+      Object.assign(globalThis, { goalChartLabels: labels });
+      CanvasRenderingContext2D.prototype.fillText = function (
+        ...args: Parameters<typeof original>
+      ) {
+        labels.push(args[0]);
+        return original.apply(this, args);
+      };
+    });
+    await page.goto("/more/goals/savings/House");
+    const chart = page.locator(
+      "[data-testid='savings-goal-progress-echart'][data-chart-ready='true']",
+    );
+    await expect(chart).toBeVisible();
+    await expect.poll(() =>
+      page.evaluate(() =>
+        (globalThis as unknown as { goalChartLabels: string[] }).goalChartLabels
+          .includes("Required path")
+      )
+    ).toBe(true);
+    await chart.screenshot({ path: testInfo.outputPath("required-path.png") });
+  },
+);

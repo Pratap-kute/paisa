@@ -34,6 +34,10 @@ interface Props {
 
 let { data }: Props = $props();
 
+let projectionKind:
+  import("$lib/features/goals/time_series_data").GoalProjectionKind = $state(
+    "forecast",
+  );
 let targetDateObject: dayjs.Dayjs | undefined = $state();
 let savingsTotal = $state(0),
   investmentTotal = $state(0),
@@ -110,6 +114,10 @@ onMount(async () => {
   let nextPredictions: Forecast[] = [];
   targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
   if (targetDateObject.isValid()) {
+    projectionKind =
+      dayjs(goal?.targetDate, "YYYY-MM-DD", true).isValid() && goal?.targetDate
+        ? "required-path"
+        : "configured-payment";
     nextPredictions = project(
       targetSavings,
       rate,
@@ -167,6 +175,7 @@ onMount(async () => {
       <Section title="{name} Progress" titleIcon={icon} subtitle="Chart forecasts are illustrative and do not determine schedule health.">
         <ChartFrame height="tall">
           <GoalProgressChart
+            {projectionKind}
             points={savingsTimeline}
             predictions={predictionsTimeline}
             {breakPoints}

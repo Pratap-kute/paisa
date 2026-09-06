@@ -261,12 +261,15 @@ export function buildDashboardAttention(
         }/month required`,
       icon: iconGlyphOr(goal.icon),
       iconIsGlyph: true,
-      status: "warning",
+      status: analysis.attention === "critical" ? "negative" : "warning",
       href: `/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`,
-      priority: 200,
+      priority: analysis.attention === "critical" ? 550 : 200,
     });
   }
-  return result.slice(0, Math.max(0, limit));
+  return result.sort((a, b) => b.priority - a.priority).slice(
+    0,
+    Math.max(0, limit),
+  );
 }
 
 export function periodUrl(path: string, period: string): string {
