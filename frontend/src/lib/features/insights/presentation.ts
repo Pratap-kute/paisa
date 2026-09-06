@@ -481,7 +481,7 @@ export function presentInsight(
       const name = restName(insight.account || "") || insight.account ||
         "Budget";
       const isLikelyOver = projected > effectiveBudget;
-      const tone: InsightTone = isLikelyOver ? "critical" : "warning";
+      const tone: InsightTone = "warning";
 
       if (isLikelyOver) {
         const overrun = projected - effectiveBudget;
@@ -492,15 +492,19 @@ export function presentInsight(
           categoryLabel,
           severity: insight.severity,
           score: insight.score,
-          title: `${name} projected to exceed budget by ${formatCurrency(overrun)}`,
-          description: `${formatCurrency(projected)} projected vs ${formatCurrency(effectiveBudget)} available`,
+          title: `${name} projected to exceed budget by ${
+            formatCurrency(overrun)
+          }`,
+          description: `${formatCurrency(projected)} projected vs ${
+            formatCurrency(effectiveBudget)
+          } available`,
           icon: "fa-solid fa-triangle-exclamation",
           tone,
           badgeText: `~${formatCurrency(overrun)} projected overrun`,
           heroMetric: formatCurrency(overrun),
           heroLabel: "projected overrun",
           progressPercent: Math.min(100, pct),
-          progressTone: "critical",
+          progressTone: "warning",
           actionText: "Review Budget",
           href: insight.href || "/expense/budget",
         };
@@ -515,7 +519,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `${name} projected close to its budget`,
-        description: `${formatCurrency(projected)} projected vs ${formatCurrency(effectiveBudget)} available · ${formatCurrency(remaining)} projected remaining`,
+        description: `${formatCurrency(projected)} projected vs ${
+          formatCurrency(effectiveBudget)
+        } available · ${formatCurrency(remaining)} projected remaining`,
         icon: "fa-solid fa-triangle-exclamation",
         tone,
         badgeText: "At risk",

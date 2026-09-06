@@ -305,7 +305,7 @@ describe("presentInsight", () => {
 
     const pLikelyOver = presentInsight(likelyOver);
     expect(pLikelyOver.title).toContain("Food projected to exceed budget");
-    expect(pLikelyOver.tone).toBe("critical");
+    expect(pLikelyOver.tone).toBe("warning");
     expect(pLikelyOver.badgeText).toContain("overrun");
   });
 

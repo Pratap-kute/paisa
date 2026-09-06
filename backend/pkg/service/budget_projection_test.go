@@ -74,6 +74,64 @@ func TestProjectAccountBudget_ObservedVsFuturePostings(t *testing.T) {
 	assert.True(t, decimal.Zero.Equal(*proj.ProjectedOverrun))
 }
 
+func TestProjectAccountBudget_FuturePostingsDoNotTriggerOverspent(t *testing.T) {
+	// P0 Review scenario:
+	// Budget: ₹10,000.
+	// Spent through today (Sep 6): ₹3,000 (ObservedSpend).
+	// Future entry on Sep 20: ₹8,000.
+	// Total month known (Actual): ₹11,000.
+	//
+	// User has NOT overspent today (3,000 <= 10,000).
+	// But known postings will exceed budget (11,000 > 10,000).
+	// Status MUST be 'likely-over', NOT 'overspent'!
+	// Projected overrun: ₹1,000.
+
+	asOf := parseTestDate("2026-09-06")
+	budget := AccountBudget{
+		Account:  "Expenses:Groceries",
+		Forecast: decimal.NewFromInt(10000),
+		Actual:   decimal.NewFromInt(11000), // 3,000 observed + 8,000 future
+		Rollover: decimal.Zero,
+	}
+	observed := decimal.NewFromInt(3000)
+
+	history := []BudgetHistoryMonth{
+		{
+			Month:               parseTestDate("2026-08-01"),
+			MonthHasExpenseData: true,
+			FullMonthSpend:      decimal.NewFromInt(10000),
+			SpendThroughAsOfDay: decimal.NewFromInt(3000), // 30%
+		},
+		{
+			Month:               parseTestDate("2026-07-01"),
+			MonthHasExpenseData: true,
+			FullMonthSpend:      decimal.NewFromInt(10000),
+			SpendThroughAsOfDay: decimal.NewFromInt(3000), // 30%
+		},
+		{
+			Month:               parseTestDate("2026-06-01"),
+			MonthHasExpenseData: true,
+			FullMonthSpend:      decimal.NewFromInt(10000),
+			SpendThroughAsOfDay: decimal.NewFromInt(3000), // 30%
+		},
+	}
+
+	proj := ProjectAccountBudget(budget, observed, history, asOf)
+
+	require.NotNil(t, proj.ProjectedSpend)
+	// Pacing gives 3,000 / 0.30 = 10,000, but Actual is 11,000.
+	// Projected spend = max(11,000, 10,000) = 11,000.
+	assert.True(t, decimal.NewFromInt(11000).Equal(*proj.ProjectedSpend))
+	assert.True(t, decimal.NewFromInt(3000).Equal(proj.ObservedSpend))
+	assert.True(t, decimal.NewFromInt(10000).Equal(proj.EffectiveBudget))
+
+	// Critical P0 assertion: Must be likely-over, NOT overspent!
+	assert.Equal(t, BudgetProjectionStatusLikelyOver, proj.Status)
+	require.NotNil(t, proj.ProjectedOverrun)
+	assert.True(t, decimal.NewFromInt(1000).Equal(*proj.ProjectedOverrun))
+	assert.True(t, decimal.Zero.Equal(*proj.ProjectedRemaining))
+}
+
 func TestProjectAccountBudget_TimingVsFullMonthSamples(t *testing.T) {
 	// P1 scenario:
 	// 6 historical completed months with ledger expense data.

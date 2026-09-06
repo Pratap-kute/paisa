@@ -95,99 +95,11 @@ func ProjectAccountBudget(
 
 	// Case 1: No positive budget capacity configured
 	if effectiveBudget.LessThanOrEqual(decimal.Zero) {
-		if accountBudget.Actual.IsPositive() {
-			actualCopy := accountBudget.Actual
-			overrun := accountBudget.Actual.Sub(effectiveBudget)
-			return AccountBudgetProjection{
-				Status:                BudgetProjectionStatusOverspent,
-				EffectiveBudget:       effectiveBudget,
-				ObservedSpend:         observedSpend,
-				ProjectedSpend:        &actualCopy,
-				ProjectedOverrun:      &overrun,
-				ProjectedRemaining:    nil,
-				ProjectedUsageRatio:   nil,
-				Source:                BudgetProjectionSourceInsufficientData,
-				HistoricalSampleCount: 0,
-				ElapsedDays:           elapsedDays,
-				DaysInMonth:           daysInMonth,
-			}
-		}
-		return AccountBudgetProjection{
-			Status:                BudgetProjectionStatusNoBudget,
-			EffectiveBudget:       effectiveBudget,
-			ObservedSpend:         observedSpend,
-			ProjectedSpend:        nil,
-			ProjectedOverrun:      nil,
-			ProjectedRemaining:    nil,
-			ProjectedUsageRatio:   nil,
-			Source:                BudgetProjectionSourceInsufficientData,
-			HistoricalSampleCount: 0,
-			ElapsedDays:           elapsedDays,
-			DaysInMonth:           daysInMonth,
-		}
+		return projectUnbudgetedAccount(accountBudget, observedSpend, effectiveBudget, elapsedDays, daysInMonth)
 	}
 
 	// Case 2: Determine pacing projection based on observedSpend
-	var paceProjection *decimal.Decimal
-	source := BudgetProjectionSourceInsufficientData
-	historicalSampleCount := 0
-
-	// 2.1 Timing samples: months where FullMonthSpend > 0
-	timingShares := make([]decimal.Decimal, 0, len(history))
-	for _, h := range history {
-		if h.FullMonthSpend.IsPositive() {
-			share := h.SpendThroughAsOfDay.Div(h.FullMonthSpend)
-			if share.IsNegative() {
-				share = decimal.Zero
-			}
-			timingShares = append(timingShares, share)
-		}
-	}
-
-	// 2.2 Full-month samples: months with verified ledger expense data (including represented ₹0 category spend)
-	fullMonthSpends := make([]decimal.Decimal, 0, len(history))
-	for _, h := range history {
-		if h.MonthHasExpenseData {
-			fullMonthSpends = append(fullMonthSpends, h.FullMonthSpend)
-		}
-	}
-
-	if observedSpend.IsPositive() && len(timingShares) >= MinHistoricalSampleCount {
-		medianShare := Median(timingShares)
-		minShare := decimal.NewFromFloat(MinHistoricalProgressShare)
-		if medianShare.GreaterThanOrEqual(minShare) {
-			proj := observedSpend.Div(medianShare)
-			paceProjection = &proj
-			source = BudgetProjectionSourceHistoricalTiming
-			historicalSampleCount = len(timingShares)
-		} else if len(fullMonthSpends) >= MinHistoricalSampleCount {
-			// Median share < 5% -> fallback to historical full-month median to prevent exploding projection
-			medianSpend := Median(fullMonthSpends)
-			proj := decimal.Max(observedSpend, medianSpend)
-			paceProjection = &proj
-			source = BudgetProjectionSourceHistoricalMedian
-			historicalSampleCount = len(fullMonthSpends)
-		}
-	} else if observedSpend.IsZero() && len(fullMonthSpends) >= MinHistoricalSampleCount {
-		// Category normally occurs later in month: observed is ₹0, but historical full months had spend
-		medianSpend := Median(fullMonthSpends)
-		paceProjection = &medianSpend
-		source = BudgetProjectionSourceHistoricalMedian
-		historicalSampleCount = len(fullMonthSpends)
-	}
-
-	// 2.3 Calendar pace fallback
-	if paceProjection == nil {
-		if elapsedDays >= MinElapsedDaysForCalendarPace {
-			proj := observedSpend.Div(decimal.NewFromInt(int64(elapsedDays))).Mul(decimal.NewFromInt(int64(daysInMonth)))
-			paceProjection = &proj
-			source = BudgetProjectionSourceCalendarPace
-			historicalSampleCount = 0
-		} else {
-			source = BudgetProjectionSourceInsufficientData
-			historicalSampleCount = 0
-		}
-	}
+	paceProjection, source, historicalSampleCount := calculatePaceProjection(observedSpend, history, elapsedDays, daysInMonth)
 
 	// Safety clamping: projection can never be below known Actual (including future-dated ordinary postings)
 	var finalProjectedSpend *decimal.Decimal
@@ -201,33 +113,166 @@ func ProjectAccountBudget(
 		}
 		finalProjectedSpend = &proj
 	} else if accountBudget.Actual.GreaterThan(effectiveBudget) {
-		// Even with insufficient pacing data, if actual already exceeds effective budget, it's definitively overspent
 		actualCopy := accountBudget.Actual
 		finalProjectedSpend = &actualCopy
 	}
 
-	// Health status determination
+	status, projectedOverrun, projectedRemaining, projectedUsageRatio := determineProjectionHealth(
+		observedSpend,
+		effectiveBudget,
+		finalProjectedSpend,
+	)
+
+	return AccountBudgetProjection{
+		Status:                status,
+		EffectiveBudget:       effectiveBudget,
+		ObservedSpend:         observedSpend,
+		ProjectedSpend:        finalProjectedSpend,
+		ProjectedOverrun:      projectedOverrun,
+		ProjectedRemaining:    projectedRemaining,
+		ProjectedUsageRatio:   projectedUsageRatio,
+		Source:                source,
+		HistoricalSampleCount: historicalSampleCount,
+		ElapsedDays:           elapsedDays,
+		DaysInMonth:           daysInMonth,
+	}
+}
+
+func projectUnbudgetedAccount(
+	accountBudget AccountBudget,
+	observedSpend decimal.Decimal,
+	effectiveBudget decimal.Decimal,
+	elapsedDays int,
+	daysInMonth int,
+) AccountBudgetProjection {
+	actualCopy := accountBudget.Actual
+	if observedSpend.IsPositive() {
+		overrun := observedSpend.Sub(effectiveBudget)
+		if actualCopy.GreaterThan(observedSpend) {
+			overrun = actualCopy.Sub(effectiveBudget)
+		}
+		return AccountBudgetProjection{
+			Status:                BudgetProjectionStatusOverspent,
+			EffectiveBudget:       effectiveBudget,
+			ObservedSpend:         observedSpend,
+			ProjectedSpend:        &actualCopy,
+			ProjectedOverrun:      &overrun,
+			ProjectedRemaining:    nil,
+			ProjectedUsageRatio:   nil,
+			Source:                BudgetProjectionSourceCalendarPace,
+			HistoricalSampleCount: 0,
+			ElapsedDays:           elapsedDays,
+			DaysInMonth:           daysInMonth,
+		}
+	}
+	if accountBudget.Actual.IsPositive() {
+		overrun := accountBudget.Actual.Sub(effectiveBudget)
+		return AccountBudgetProjection{
+			Status:                BudgetProjectionStatusLikelyOver,
+			EffectiveBudget:       effectiveBudget,
+			ObservedSpend:         observedSpend,
+			ProjectedSpend:        &actualCopy,
+			ProjectedOverrun:      &overrun,
+			ProjectedRemaining:    nil,
+			ProjectedUsageRatio:   nil,
+			Source:                BudgetProjectionSourceCalendarPace,
+			HistoricalSampleCount: 0,
+			ElapsedDays:           elapsedDays,
+			DaysInMonth:           daysInMonth,
+		}
+	}
+	return AccountBudgetProjection{
+		Status:                BudgetProjectionStatusNoBudget,
+		EffectiveBudget:       effectiveBudget,
+		ObservedSpend:         observedSpend,
+		ProjectedSpend:        nil,
+		ProjectedOverrun:      nil,
+		ProjectedRemaining:    nil,
+		ProjectedUsageRatio:   nil,
+		Source:                BudgetProjectionSourceInsufficientData,
+		HistoricalSampleCount: 0,
+		ElapsedDays:           elapsedDays,
+		DaysInMonth:           daysInMonth,
+	}
+}
+
+func calculatePaceProjection(
+	observedSpend decimal.Decimal,
+	history []BudgetHistoryMonth,
+	elapsedDays int,
+	daysInMonth int,
+) (*decimal.Decimal, BudgetProjectionSource, int) {
+	// 1. Timing samples: months where FullMonthSpend > 0
+	timingShares := make([]decimal.Decimal, 0, len(history))
+	for _, h := range history {
+		if h.FullMonthSpend.IsPositive() {
+			share := h.SpendThroughAsOfDay.Div(h.FullMonthSpend)
+			if share.IsNegative() {
+				share = decimal.Zero
+			}
+			timingShares = append(timingShares, share)
+		}
+	}
+
+	// 2. Full-month samples: months with verified ledger expense data
+	fullMonthSpends := make([]decimal.Decimal, 0, len(history))
+	for _, h := range history {
+		if h.MonthHasExpenseData {
+			fullMonthSpends = append(fullMonthSpends, h.FullMonthSpend)
+		}
+	}
+
+	if observedSpend.IsPositive() && len(timingShares) >= MinHistoricalSampleCount {
+		medianShare := Median(timingShares)
+		minShare := decimal.NewFromFloat(MinHistoricalProgressShare)
+		if medianShare.GreaterThanOrEqual(minShare) {
+			proj := observedSpend.Div(medianShare)
+			return &proj, BudgetProjectionSourceHistoricalTiming, len(timingShares)
+		}
+		if len(fullMonthSpends) >= MinHistoricalSampleCount {
+			medianSpend := Median(fullMonthSpends)
+			proj := decimal.Max(observedSpend, medianSpend)
+			return &proj, BudgetProjectionSourceHistoricalMedian, len(fullMonthSpends)
+		}
+	} else if observedSpend.IsZero() && len(fullMonthSpends) >= MinHistoricalSampleCount {
+		medianSpend := Median(fullMonthSpends)
+		return &medianSpend, BudgetProjectionSourceHistoricalMedian, len(fullMonthSpends)
+	}
+
+	// 3. Calendar pace fallback
+	if elapsedDays >= MinElapsedDaysForCalendarPace {
+		proj := observedSpend.Div(decimal.NewFromInt(int64(elapsedDays))).Mul(decimal.NewFromInt(int64(daysInMonth)))
+		return &proj, BudgetProjectionSourceCalendarPace, 0
+	}
+
+	return nil, BudgetProjectionSourceInsufficientData, 0
+}
+
+func determineProjectionHealth(
+	observedSpend decimal.Decimal,
+	effectiveBudget decimal.Decimal,
+	finalProjectedSpend *decimal.Decimal,
+) (BudgetProjectionStatus, *decimal.Decimal, *decimal.Decimal, *decimal.Decimal) {
 	var status BudgetProjectionStatus
 	var projectedOverrun *decimal.Decimal
 	var projectedRemaining *decimal.Decimal
 	var projectedUsageRatio *decimal.Decimal
 
 	switch {
-	case accountBudget.Actual.GreaterThan(effectiveBudget):
+	case observedSpend.GreaterThan(effectiveBudget):
 		status = BudgetProjectionStatusOverspent
-		overrun := accountBudget.Actual.Sub(effectiveBudget)
+		overrun := observedSpend.Sub(effectiveBudget)
+		if finalProjectedSpend != nil && finalProjectedSpend.GreaterThan(observedSpend) {
+			overrun = finalProjectedSpend.Sub(effectiveBudget)
+		}
 		projectedOverrun = &overrun
 		rem := decimal.Zero
 		projectedRemaining = &rem
 		if finalProjectedSpend != nil {
 			ratio := finalProjectedSpend.Div(effectiveBudget)
 			projectedUsageRatio = &ratio
-			if finalProjectedSpend.GreaterThan(accountBudget.Actual) {
-				projOverrun := finalProjectedSpend.Sub(effectiveBudget)
-				projectedOverrun = &projOverrun
-			}
 		} else {
-			ratio := accountBudget.Actual.Div(effectiveBudget)
+			ratio := observedSpend.Div(effectiveBudget)
 			projectedUsageRatio = &ratio
 		}
 	case finalProjectedSpend == nil:
@@ -261,19 +306,7 @@ func ProjectAccountBudget(
 		}
 	}
 
-	return AccountBudgetProjection{
-		Status:                status,
-		EffectiveBudget:       effectiveBudget,
-		ObservedSpend:         observedSpend,
-		ProjectedSpend:        finalProjectedSpend,
-		ProjectedOverrun:      projectedOverrun,
-		ProjectedRemaining:    projectedRemaining,
-		ProjectedUsageRatio:   projectedUsageRatio,
-		Source:                source,
-		HistoricalSampleCount: historicalSampleCount,
-		ElapsedDays:           elapsedDays,
-		DaysInMonth:           daysInMonth,
-	}
+	return status, projectedOverrun, projectedRemaining, projectedUsageRatio
 }
 
 // ComputeBudgetOutlook calculates an aggregate summary across all active envelope budgets.

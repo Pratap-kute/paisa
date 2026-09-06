@@ -51,11 +51,17 @@ let attentionAccounts: AccountBudget[] = $derived(
   currentMonthAccountBudgets
     .filter(needsAttention)
     .sort((a, b) => {
-      const rankA = severityOrder[a.projection?.status ?? (a.available < 0 ? "overspent" : "")] ?? 0;
-      const rankB = severityOrder[b.projection?.status ?? (b.available < 0 ? "overspent" : "")] ?? 0;
+      const rankA = severityOrder[
+        a.projection?.status ?? (a.available < 0 ? "overspent" : "")
+      ] ?? 0;
+      const rankB = severityOrder[
+        b.projection?.status ?? (b.available < 0 ? "overspent" : "")
+      ] ?? 0;
       if (rankB !== rankA) return rankB - rankA;
-      const overrunA = a.projection?.projectedOverrun ?? (a.available < 0 ? Math.abs(a.available) : 0);
-      const overrunB = b.projection?.projectedOverrun ?? (b.available < 0 ? Math.abs(b.available) : 0);
+      const overrunA = a.projection?.projectedOverrun ??
+        (a.available < 0 ? Math.abs(a.available) : 0);
+      const overrunB = b.projection?.projectedOverrun ??
+        (b.available < 0 ? Math.abs(b.available) : 0);
       return overrunB - overrunA;
     }),
 );
@@ -78,7 +84,10 @@ function budgetProgress(accountBudget: AccountBudget): number {
   if (accountBudget.forecast <= 0) {
     return 0;
   }
-  return (accountBudget.actual / accountBudget.forecast) * 100;
+  const spent = accountBudget.projection
+    ? accountBudget.projection.observedSpend
+    : accountBudget.actual;
+  return (spent / accountBudget.forecast) * 100;
 }
 
 onMount(async () => {
@@ -214,9 +223,10 @@ $effect(() => {
     >
       <div class="flex flex-col gap-3">
         {#each attentionAccounts as accountBudget (accountBudget.account)}
-          {@const isOverspent = accountBudget.projection?.status === "overspent" || accountBudget.available < 0}
+          {@const isOverspent = accountBudget.projection ? accountBudget.projection.status === "overspent" : accountBudget.available < 0}
           {@const isLikelyOver = accountBudget.projection?.status === "likely-over"}
           {@const isAtRisk = accountBudget.projection?.status === "at-risk"}
+          {@const spentAmount = accountBudget.projection ? accountBudget.projection.observedSpend : accountBudget.actual}
           {@const percent = budgetProgress(accountBudget)}
           <div
             id={accountBudget.account === page.url.searchParams.get("account") ? "insight-account" : undefined}
@@ -230,14 +240,14 @@ $effect(() => {
                 {restName(accountBudget.account)}
               </span>
               <span
-                class="whitespace-nowrap text-xs font-semibold tabular-nums {isOverspent || isLikelyOver
+                class="whitespace-nowrap text-xs font-semibold tabular-nums {isOverspent
                   ? 'text-negative'
                   : 'text-warning'}"
               >
                 {#if isOverspent}
-                  Over by {formatCurrency(Math.abs(accountBudget.available))}
+                  Over by {formatCurrency(accountBudget.projection?.projectedOverrun ?? Math.abs(accountBudget.available))}
                 {:else if isLikelyOver}
-                  ⚠ Likely over · ~{formatCurrency(accountBudget.projection?.projectedOverrun ?? 0)} over
+                  ⚠ Likely over · ~{formatCurrency(accountBudget.projection?.projectedOverrun ?? 0)} overrun
                 {:else if isAtRisk}
                   At risk · {formatCurrency(accountBudget.projection?.projectedRemaining ?? 0)} remaining
                 {:else}
@@ -247,16 +257,23 @@ $effect(() => {
             </div>
             <div class="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)]">
               <div
-                class="h-full rounded-full transition-all {isOverspent || isLikelyOver
+                class="h-full rounded-full transition-all {isOverspent
                   ? 'bg-negative'
-                  : isAtRisk
+                  : isLikelyOver || isAtRisk
                     ? 'bg-warning'
                     : 'bg-positive'}"
                 style="width: {Math.min(100, Math.max(0, percent))}%"
               ></div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs tabular-nums text-muted-foreground">
-              <span>Spent {formatCurrency(accountBudget.actual)}</span>
+              <span>
+                Spent {formatCurrency(spentAmount)}
+                {#if accountBudget.actual > spentAmount}
+                  <span class="text-xs text-muted-foreground" title="Total known spend including future postings: {formatCurrency(accountBudget.actual)}">
+                    ({formatCurrency(accountBudget.actual)} committed)
+                  </span>
+                {/if}
+              </span>
               <span>Budget {formatCurrency(accountBudget.forecast)}</span>
               {#if accountBudget.rollover !== 0}
                 <span>Rollover {formatCurrency(accountBudget.rollover)}</span>

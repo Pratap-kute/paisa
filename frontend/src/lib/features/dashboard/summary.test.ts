@@ -628,4 +628,3 @@ test("summarizeBudget uses outlook and projections directly, decoupling from ins
   expect(summaryAllGood.statusLabel).toBe("No categories need attention");
   expect(summaryAllGood.attentionCount).toBe(0);
 });
-

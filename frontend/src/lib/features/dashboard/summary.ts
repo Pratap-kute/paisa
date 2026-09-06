@@ -412,7 +412,8 @@ export function summarizeBudget(
       : "No categories need attention";
   }
 
-  const attentionAccounts: Array<{ budget: AccountBudget; insight?: Insight }> = [];
+  const attentionAccounts: Array<{ budget: AccountBudget; insight?: Insight }> =
+    [];
   const seenAccounts = new Set<string>();
 
   const insightByAccount = new Map<string, Insight>();
@@ -431,7 +432,8 @@ export function summarizeBudget(
   const candidateAccounts = budget.accounts
     .filter((acc) => {
       const projStatus = acc.projection?.status;
-      return projStatus === "overspent" || projStatus === "likely-over" || projStatus === "at-risk";
+      return projStatus === "overspent" || projStatus === "likely-over" ||
+        projStatus === "at-risk";
     })
     .sort((a, b) => {
       const rankA = severityRank[a.projection?.status ?? ""] ?? 0;
@@ -454,7 +456,10 @@ export function summarizeBudget(
 
   if (attentionAccounts.length === 0 && insights) {
     for (const ins of insights) {
-      if (!ins.account || seenAccounts.has(ins.account) || !budgetInsightTypes.has(ins.type)) continue;
+      if (
+        !ins.account || seenAccounts.has(ins.account) ||
+        !budgetInsightTypes.has(ins.type)
+      ) continue;
       const acc = accountsByName.get(ins.account);
       if (!acc) continue;
       seenAccounts.add(ins.account);
