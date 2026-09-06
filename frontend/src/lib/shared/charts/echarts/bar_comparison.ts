@@ -89,9 +89,9 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
   ];
 
   return [
-    `<strong class="custom-icon">${point.label}</strong>`,
+    `<strong>${point.label}</strong>`,
     ...rows.map((row) =>
-      `<span class="custom-icon">${row.label}</span>: <strong>${
+      `${row.label}: <strong>${
         formatValue(row.value, row.format ?? data.valueFormat)
       }</strong>`
     ),
@@ -130,13 +130,8 @@ function buildComparisonBarLayout(
       trigger: "item",
       confine: true,
       borderColor,
-      className: "paisa-echart-tooltip",
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: {
-        color: theme?.tooltipTextColor ?? textColor,
-        fontFamily: theme?.tooltipFontFamily ?? "var(--paisa-font-icon)",
-      },
-      extraCssText: "font-family: var(--paisa-font-icon);",
+      textStyle: { color: theme?.tooltipTextColor ?? textColor },
       formatter: (params: unknown) => tooltipFormatter(data, params),
     },
     xAxis: {

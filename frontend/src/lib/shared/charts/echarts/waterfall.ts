@@ -45,14 +45,12 @@ function buildIncomeStatementWaterfallLayout(
     tooltip: {
       trigger: "item",
       confine: true,
-      className: "paisa-echart-tooltip",
       backgroundColor: theme?.tooltipSurfaceColor,
       borderColor: theme?.borderColor,
       extraCssText:
-        "max-width: 340px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border-radius: 8px; font-family: var(--paisa-font-icon);",
+        "max-width: 340px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border-radius: 8px;",
       textStyle: {
         color: theme?.tooltipTextColor ?? theme?.textColor,
-        fontFamily: theme?.tooltipFontFamily ?? "var(--paisa-font-icon)",
         fontSize: 12,
       },
       formatter: (params: { seriesName?: string; dataIndex?: number }) => {

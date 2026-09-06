@@ -31,12 +31,8 @@
   color: var(--paisa-tooltip-text);
   box-shadow: var(--paisa-shadow-lg);
   padding: 0.35rem 0.6rem;
-  font-family: var(--paisa-font-icon);
+  font-family: var(--paisa-font-sans);
   font-size: var(--paisa-font-size-xs);
-}
-
-.paisa-echart-tooltip {
-  font-family: var(--paisa-font-icon);
 }
 
 .paisa-tooltip-arrow {

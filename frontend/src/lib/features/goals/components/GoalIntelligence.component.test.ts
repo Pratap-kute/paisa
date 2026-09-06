@@ -83,7 +83,7 @@ test("completed goal has no contribution warnings and shows Target funded", () =
   expect(view.getByText("Goal reached")).toBeInTheDocument();
   expect(view.queryByText("Required")).toBeNull();
   expect(view.queryByText("Target date has passed")).toBeNull();
-  expect(view.getAllByText("Target funded").length).toBeGreaterThanOrEqual(1);
+  expect(view.getByText("Target funded")).toBeInTheDocument();
 });
 test("retirement renders funding and expense basis without schedule claims", () => {
   const view = render(GoalSummaryCard, {
@@ -111,7 +111,8 @@ test("retirement target funded and configured expense source", () => {
       yearlyExpenseSource: "configured",
     }),
   });
-  expect(view.getAllByText("Target funded").length).toBeGreaterThanOrEqual(1);
+  expect(view.getByText("100%+ funded")).toBeInTheDocument();
+  expect(view.getByText("Target funded")).toBeInTheDocument();
   expect(view.getByText("Using configured yearly expenses"))
     .toBeInTheDocument();
 });

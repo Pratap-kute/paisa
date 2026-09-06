@@ -27,10 +27,13 @@ let completed = $derived(
 );
 
 let progressLabel = $derived.by(() => {
-  if (health.progressRatio >= 1 || health.state === "completed") {
-    return "Target funded";
+  if ($obscure) {
+    return `0.0% ${goal.type === "retirement" ? "funded" : "complete"}`;
   }
-  const pct = formatPercentage($obscure ? 0 : health.progressRatio, 1);
+  if (health.progressRatio >= 1 || health.state === "completed") {
+    return goal.type === "retirement" ? "100%+ funded" : "Target funded";
+  }
+  const pct = formatPercentage(health.progressRatio, 1);
   return `${pct} ${goal.type === "retirement" ? "funded" : "complete"}`;
 });
 

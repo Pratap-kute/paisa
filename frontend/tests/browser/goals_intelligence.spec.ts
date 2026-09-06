@@ -164,3 +164,36 @@ test(
     await chart.screenshot({ path: testInfo.outputPath("required-path.png") });
   },
 );
+
+test("two-goal grid is bounded and centered on ultra-wide viewports", async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.route(
+    "**/api/goals",
+    (route) =>
+      route.fulfill({
+        json: {
+          goals: [savings, {
+            ...savings,
+            type: "retirement",
+            id: "retirement-test",
+            name: "Retirement",
+          }],
+        },
+      }),
+  );
+  await page.goto("/more/goals");
+  const grid = page.locator(".max-w-5xl");
+  await expect(grid).toBeVisible();
+  const box = await grid.boundingBox();
+  expect(box).not.toBeNull();
+  if (box) {
+    expect(box.width).toBeLessThanOrEqual(1024 + 32);
+    const contentBox = await page.locator(".paisa-page-content").boundingBox();
+    expect(contentBox).not.toBeNull();
+    if (contentBox) {
+      const leftGap = box.x - contentBox.x;
+      const rightGap = (contentBox.x + contentBox.width) - (box.x + box.width);
+      expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(8);
+    }
+  }
+});

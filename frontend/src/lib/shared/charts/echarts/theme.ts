@@ -1,6 +1,5 @@
 export interface PaisaChartTheme {
   fontFamily: string;
-  tooltipFontFamily?: string;
   textColor: string;
   mutedColor: string;
   borderColor: string;
@@ -31,7 +30,6 @@ function seriesToken(index: number, fallback: string): string {
 export function readPaisaChartTheme(): PaisaChartTheme {
   return {
     fontFamily: token("--paisa-font-sans", "sans-serif"),
-    tooltipFontFamily: token("--paisa-font-icon", "sans-serif"),
     textColor: token("--paisa-foreground", "currentColor"),
     mutedColor: token("--paisa-muted-foreground", "currentColor"),
     borderColor: token("--paisa-border-subtle", "currentColor"),

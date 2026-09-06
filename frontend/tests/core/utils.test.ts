@@ -13,7 +13,7 @@ import { firstName } from "$lib/domain/account";
 import { monthDays, setNow } from "$lib/domain/time";
 import { forEachMonth, forEachYear } from "$lib/shared/formatters/date";
 import {
-  formatCurrencyCompact,
+  formatCurrencyCrude,
   formatCurrencyCrudeWithPrecision,
 } from "$lib/shared/formatters/currency";
 import { obscure } from "$lib/shared/state/persisted";
@@ -65,14 +65,14 @@ describe("core utilities", () => {
   });
 
   test("formats compact currency and respects obscure mode", () => {
-    expect(formatCurrencyCompact(218863)).toBe("2.19L");
-    expect(formatCurrencyCompact(19386000)).toBe("1.94Cr");
-    expect(formatCurrencyCompact(800000)).toBe("8L");
-    expect(formatCurrencyCompact(0)).toBe("0");
-    expect(formatCurrencyCompact(-250000)).toBe("−2.5L");
+    expect(formatCurrencyCrude(218863)).toBe("2.19L");
+    expect(formatCurrencyCrude(19386000)).toBe("1.94Cr");
+    expect(formatCurrencyCrude(800000)).toBe("8L");
+    expect(formatCurrencyCrude(0)).toBe("0");
+    expect(formatCurrencyCrude(-250000)).toBe("−2.5L");
 
     obscure.set(true);
-    expect(formatCurrencyCompact(19386000)).toBe("0");
+    expect(formatCurrencyCrude(19386000)).toBe("0");
     expect(formatCurrency(19386000)).toBe("0.00");
     obscure.set(false);
   });
