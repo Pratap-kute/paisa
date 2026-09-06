@@ -172,7 +172,7 @@ onMount(async () => {
     class="paisa-goal-detail-layout grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-cols-[minmax(0,5fr)_minmax(20rem,2fr)]"
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
-      <Section title="{name} Progress" titleIcon={icon} subtitle="Chart forecasts are illustrative and do not determine schedule health.">
+      <Section title="{name} Progress" titleIcon={icon} subtitle="Chart projections are illustrative and do not determine schedule health.">
         <ChartFrame height="tall">
           <GoalProgressChart
             {projectionKind}
