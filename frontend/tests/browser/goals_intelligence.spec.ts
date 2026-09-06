@@ -165,7 +165,7 @@ test(
   },
 );
 
-test("two-goal grid is bounded and centered on ultra-wide viewports", async ({ page }) => {
+test("two-goal grid is bounded and left-aligned with page margin on ultra-wide viewports", async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.route(
     "**/api/goals",
@@ -191,9 +191,8 @@ test("two-goal grid is bounded and centered on ultra-wide viewports", async ({ p
     const contentBox = await page.locator(".paisa-page-content").boundingBox();
     expect(contentBox).not.toBeNull();
     if (contentBox) {
-      const leftGap = box.x - contentBox.x;
-      const rightGap = (contentBox.x + contentBox.width) - (box.x + box.width);
-      expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(8);
+      // Grid is flush with the page content left margin
+      expect(Math.abs(box.x - contentBox.x)).toBeLessThanOrEqual(2);
     }
   }
 });

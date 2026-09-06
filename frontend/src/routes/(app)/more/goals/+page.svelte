@@ -131,7 +131,7 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
   <title>Financial Goals - Paisa</title>
 </svelte:head>
 
-<Page width="standard">
+<Page width="analysis">
   <PageHeader
     title="Financial Goals"
     description="Prioritize and track progress towards retirement, savings, and custom targets"
@@ -149,9 +149,9 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
     {:else}
       <div
         class="{goals.length === 1
-          ? 'grid w-full max-w-xl mx-auto gap-5 grid-cols-1'
+          ? 'grid w-full max-w-xl gap-5 grid-cols-1'
           : goals.length === 2
-          ? 'grid w-full max-w-5xl mx-auto gap-5 grid-cols-1 min-[769px]:grid-cols-2'
+          ? 'grid w-full max-w-5xl gap-5 grid-cols-1 min-[769px]:grid-cols-2'
           : 'grid w-full gap-5 grid-cols-1 min-[769px]:grid-cols-2 xl:grid-cols-3'}"
         use:goalDndzone={{
           items: goals,
