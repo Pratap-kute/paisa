@@ -13,8 +13,10 @@ import { firstName } from "$lib/domain/account";
 import { monthDays, setNow } from "$lib/domain/time";
 import { forEachMonth, forEachYear } from "$lib/shared/formatters/date";
 import {
+  formatCurrencyCompact,
   formatCurrencyCrudeWithPrecision,
 } from "$lib/shared/formatters/currency";
+import { obscure } from "$lib/shared/state/persisted";
 import { sumPostings, transactionTotal } from "$lib/domain/transactions";
 import { buildTree } from "$lib/shared/utils/tree";
 import { darkenOrLighten } from "$lib/shared/theme/color";
@@ -60,6 +62,19 @@ describe("core utilities", () => {
     expect(formatPercentage(0.125, 1)).toBe("12.5%");
     expect(formatFixedWidthFloat(2, 6, 1)).toBe("   2.0");
     expect(formatFixedWidthFloat(1234, 2, 0)).toBe("1,234");
+  });
+
+  test("formats compact currency and respects obscure mode", () => {
+    expect(formatCurrencyCompact(218863)).toBe("2.19L");
+    expect(formatCurrencyCompact(19386000)).toBe("1.94Cr");
+    expect(formatCurrencyCompact(800000)).toBe("8L");
+    expect(formatCurrencyCompact(0)).toBe("0");
+    expect(formatCurrencyCompact(-250000)).toBe("−2.5L");
+
+    obscure.set(true);
+    expect(formatCurrencyCompact(19386000)).toBe("0");
+    expect(formatCurrency(19386000)).toBe("0.00");
+    obscure.set(false);
   });
 
   test("iterates calendar periods", () => {

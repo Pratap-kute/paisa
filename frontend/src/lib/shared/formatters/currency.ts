@@ -39,6 +39,13 @@ export function formatCurrencyCrude(value: number): string {
   return formatCurrencyCrudeWithPrecision(value, -1);
 }
 
+export function formatCurrencyCompact(
+  value: number,
+  precision = -1,
+): string {
+  return formatCurrencyCrudeWithPrecision(value, precision);
+}
+
 export function formatCurrencyCrudeWithPrecision(
   value: number,
   precision: number,

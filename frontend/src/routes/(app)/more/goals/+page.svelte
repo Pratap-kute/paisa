@@ -148,7 +148,11 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
       </ZeroState>
     {:else}
       <div
-        class="grid w-full gap-4 grid-cols-1 min-[769px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1440px]:grid-cols-4"
+        class="{goals.length === 1
+          ? 'grid w-full max-w-xl gap-5 grid-cols-1'
+          : goals.length === 2
+          ? 'grid w-full max-w-5xl gap-5 grid-cols-1 min-[769px]:grid-cols-2'
+          : 'grid w-full gap-5 grid-cols-1 min-[769px]:grid-cols-2 xl:grid-cols-3'}"
         use:goalDndzone={{
           items: goals,
           dropTargetStyle: {},
@@ -159,7 +163,7 @@ const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
         onfinalize={handleFinalize}
       >
         {#each goals as goal (goal.id)}
-          <div animate:flip={{ duration: 300 }} class="min-w-0">
+          <div animate:flip={{ duration: 300 }} class="min-w-0 h-full">
             <GoalSummaryCard action={dragHandle} {goal} />
           </div>
         {/each}

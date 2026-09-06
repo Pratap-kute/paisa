@@ -1,9 +1,11 @@
 <script lang="ts">
 import Card from "$lib/shared/ui/Card.svelte";
-import { formatPercentage } from "$lib/shared/formatters/currency";
+import {
+  formatCurrencyCrude,
+  formatPercentage,
+} from "$lib/shared/formatters/currency";
 import type { GoalSummary } from "$lib/domain/goals_models";
 import { iconGlyph } from "$lib/shared/ui/icon";
-import { formatCurrency } from "$lib/shared/formatters/currency";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import Progress from "$lib/shared/ui/Progress.svelte";
 import type { Action } from "svelte/action";
@@ -23,44 +25,73 @@ let health = $derived(analyzeGoal(goal));
 let completed = $derived(
   Math.max(0, Math.min(100, health.progressRatio * 100)),
 );
+
+let progressLabel = $derived.by(() => {
+  if (health.progressRatio >= 1 || health.state === "completed") {
+    return "Target funded";
+  }
+  const pct = formatPercentage($obscure ? 0 : health.progressRatio, 1);
+  return `${pct} ${goal.type === "retirement" ? "funded" : "complete"}`;
+});
+
+let targetDateText = $derived(
+  health.targetDate ? `Target ${health.targetDate.format("MMM YYYY")}` : "",
+);
 </script>
 
-<Card padding="sm" class={small ? "mb-3" : ""}>
-  <div class="flex items-center justify-between mb-4">
-    <div class="flex items-center min-w-0">
-      {#if action}
-        <span
-          use:action
-          class="mr-2 text-lg text-muted-foreground paisa-clickable shrink-0"
+<Card padding="md"
+  class="{small ? 'mb-3' : 'h-full'} flex flex-col justify-between group">
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center min-w-0">
+        {#if action}
+          <span
+            use:action
+            role="button"
+            aria-label={`Reorder ${goal.name} goal`}
+            tabindex="0"
+            class="mr-2 text-base text-muted-foreground opacity-40 hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded transition-opacity paisa-clickable shrink-0"
+          >
+            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+          </span>
+        {/if}
+        <a
+          class="secondary-link min-w-0"
+          href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
         >
-          <i class="fas fa-grip-vertical"></i>
-        </span>
+          <h4 class="text-lg font-semibold text-foreground truncate">{goal.name}</h4>
+        </a>
+      </div>
+      {#if goal.icon}
+        <span
+          class="{small ? 'text-2xl' : 'text-3xl'} custom-icon inline-flex items-center shrink-0 ml-2"
+          >{iconGlyph(goal.icon)}</span
+        >
       {/if}
-      <a
-        class="secondary-link text-muted-foreground min-w-0"
-        href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
-      >
-        <h4 class="text-xl text-muted-foreground truncate">{goal.name}</h4>
-      </a>
     </div>
-    {#if goal.icon}
-      <span
-        class="{small ? 'text-2xl' : 'text-3xl'} custom-icon inline-flex items-center shrink-0"
-        >{iconGlyph(goal.icon)}</span
-      >
-    {/if}
+
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <Metric
+        label="Current"
+        value={formatCurrencyCrude($obscure ? 0 : goal.current)}
+        status="neutral"
+      />
+      <Metric
+        label="Target"
+        value={formatCurrencyCrude($obscure ? 0 : goal.target)}
+        status="neutral"
+      />
+    </div>
+
+    <Progress small showPercent={false} progressPercent={completed} />
+    <div class="flex justify-between text-muted-foreground text-sm mt-1.5">
+      <div class="font-medium text-foreground">{progressLabel}</div>
+      <div>{targetDateText}</div>
+    </div>
   </div>
-  <div class="grid grid-cols-2 gap-3 mb-3">
-    <Metric label="Current" value={formatCurrency($obscure ? 0 : goal.current)}
-      status="positive" />
-    <Metric label="Target" value={formatCurrency($obscure ? 0 : goal.target)}
-      status="primary" />
-  </div>
-  <Progress small showPercent={false} progressPercent={completed} />
+
   <div
-    class="flex justify-between text-muted-foreground text-sm mt-1">
-    <div>{formatPercentage($obscure ? 0 : health.progressRatio, 2)} {goal.type === "retirement" ? "funded" : "complete"}</div>
-    <div>{health.targetDate ? `Target ${health.targetDate.format("DD MMM YYYY")}` : ""}</div>
+    class="flex-1 flex flex-col justify-end mt-3 pt-3 border-t border-border-subtle">
+    <GoalHealth {goal} compact />
   </div>
-  <GoalHealth {goal} compact={small} />
 </Card>

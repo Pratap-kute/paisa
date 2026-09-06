@@ -5,6 +5,7 @@ import relativeTime from "dayjs/plugin/relativeTime.js";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import type { GoalSummary } from "$lib/domain/goals_models";
 import { obscure } from "$lib/shared/state/persisted";
+import type { Action } from "svelte/action";
 import GoalSummaryCard from "./GoalSummaryCard.svelte";
 import GoalHealthSummary from "./GoalHealthSummary.svelte";
 import SavingsGoalIntelligence from "./SavingsGoalIntelligence.svelte";
@@ -53,8 +54,9 @@ for (
       }),
     });
     expect(view.getByText(label)).toBeInTheDocument();
-    expect(view.getByText(/Required 60,000.00\/month/)).toBeInTheDocument();
-    expect(view.getByText(/Recent pace/)).toBeInTheDocument();
+    expect(view.getByText("Required")).toBeInTheDocument();
+    expect(view.getAllByText("60K/mo").length).toBeGreaterThanOrEqual(1);
+    expect(view.getByText("Recent pace")).toBeInTheDocument();
   });
 }
 test("overdue is factual and includes remaining amount", () => {
@@ -62,7 +64,8 @@ test("overdue is factual and includes remaining amount", () => {
     goal: goal({ targetDate: "2026-09-04" }),
   });
   expect(view.getByText("Target date has passed")).toBeInTheDocument();
-  expect(view.getByText("3,60,000.00 remaining")).toBeInTheDocument();
+  expect(view.getByText("3.6L")).toBeInTheDocument();
+  expect(view.getByText("Remaining")).toBeInTheDocument();
 });
 test("short history displays required pace without a warning", () => {
   const view = render(GoalSummaryCard, {
@@ -73,14 +76,14 @@ test("short history displays required pace without a warning", () => {
   expect(view.queryByText("On track")).toBeNull();
   expect(view.queryByText("At risk")).toBeNull();
 });
-test("completed goal has no contribution warnings", () => {
+test("completed goal has no contribution warnings and shows Target funded", () => {
   const view = render(GoalSummaryCard, {
     goal: goal({ current: 720000, targetDate: "2020-01-01" }),
   });
   expect(view.getByText("Goal reached")).toBeInTheDocument();
-  expect(view.queryByText(/Required/)).toBeNull();
+  expect(view.queryByText("Required")).toBeNull();
   expect(view.queryByText("Target date has passed")).toBeNull();
-  expect(view.getByText(/120.00% complete/)).toBeInTheDocument();
+  expect(view.getAllByText("Target funded").length).toBeGreaterThanOrEqual(1);
 });
 test("retirement renders funding and expense basis without schedule claims", () => {
   const view = render(GoalSummaryCard, {
@@ -93,8 +96,8 @@ test("retirement renders funding and expense basis without schedule claims", () 
     }),
   });
   expect(view.getByText("Tracking")).toBeInTheDocument();
-  expect(view.getByText(/40.00% funded/)).toBeInTheDocument();
-  expect(view.getByText("Based on historical yearly expenses"))
+  expect(view.getByText(/40.0% funded/)).toBeInTheDocument();
+  expect(view.getByText("Based on historical expenses"))
     .toBeInTheDocument();
   expect(view.queryByText("Target date has passed")).toBeNull();
 });
@@ -108,7 +111,7 @@ test("retirement target funded and configured expense source", () => {
       yearlyExpenseSource: "configured",
     }),
   });
-  expect(view.getByText("Target funded")).toBeInTheDocument();
+  expect(view.getAllByText("Target funded").length).toBeGreaterThanOrEqual(1);
   expect(view.getByText("Using configured yearly expenses"))
     .toBeInTheDocument();
 });
@@ -121,7 +124,7 @@ test("no deadline remains explicit with a payment projection", () => {
     }),
   });
   expect(view.getByText("No deadline configured")).toBeInTheDocument();
-  expect(view.getByText("At 15,000.00/month configured payment"))
+  expect(view.getByText("At 15K/mo configured payment"))
     .toBeInTheDocument();
 });
 test("empty overview has no invented metrics or warnings", () => {
@@ -139,6 +142,31 @@ test("attention excludes unassessable and completed goals", () => {
   expect(view.getByRole("link", { name: "Late" })).toBeInTheDocument();
   expect(view.queryByRole("link", { name: "Done" })).toBeNull();
   expect(view.queryByRole("link", { name: "New" })).toBeNull();
+});
+test("card renders compact primary metrics and accessible drag handle", () => {
+  const actionMock: Action = () => ({ update: () => {}, destroy: () => {} });
+  const view = render(GoalSummaryCard, {
+    goal: goal({ current: 240000, target: 600000 }),
+    action: actionMock,
+  });
+  expect(view.getByText("2.4L")).toBeInTheDocument();
+  expect(view.getByText("6L")).toBeInTheDocument();
+  const handle = view.getByRole("button", { name: "Reorder House goal" });
+  expect(handle).toBeInTheDocument();
+  expect(handle.querySelector(".fa-grip-vertical")).not.toBeNull();
+});
+test("long goal name wraps/truncates safely without crashing", () => {
+  const view = render(GoalSummaryCard, {
+    goal: goal({
+      name:
+        "A very long descriptive name for a home down payment and family emergency fund",
+    }),
+  });
+  expect(
+    view.getByText(
+      "A very long descriptive name for a home down payment and family emergency fund",
+    ),
+  ).toBeInTheDocument();
 });
 test("privacy masks current, target, required pace, recent pace and remaining on cards and details", async () => {
   const input = goal({

@@ -80,8 +80,13 @@ function buildFinancialHierarchyLayout(
       trigger: "item",
       confine: true,
       borderColor: theme?.borderColor,
+      className: "paisa-echart-tooltip",
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: { color: theme?.tooltipTextColor ?? theme?.textColor },
+      textStyle: {
+        color: theme?.tooltipTextColor ?? theme?.textColor,
+        fontFamily: theme?.tooltipFontFamily ?? "var(--paisa-font-icon)",
+      },
+      extraCssText: "font-family: var(--paisa-font-icon);",
       formatter: tooltip,
     },
   };

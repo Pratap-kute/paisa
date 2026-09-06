@@ -201,10 +201,13 @@ function buildCashFlowSankeyLayout(
     trigger: "item",
     confine: true,
     borderColor,
+    className: "paisa-echart-tooltip",
     backgroundColor: options.theme?.tooltipSurfaceColor,
     textStyle: {
       color: options.theme?.tooltipTextColor ?? textColor,
+      fontFamily: options.theme?.tooltipFontFamily ?? "var(--paisa-font-icon)",
     },
+    extraCssText: "font-family: var(--paisa-font-icon);",
     formatter: (
       params: { dataType?: string; data?: Record<string, unknown> },
     ) => {

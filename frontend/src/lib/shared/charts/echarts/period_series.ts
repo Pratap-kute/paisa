@@ -121,7 +121,7 @@ function tooltipFormatter(
     const remaining = sorted.slice(maxVisible);
 
     formattedRows = visible.map(([label, value, format]) =>
-      `${label}: <strong>${
+      `<span class="custom-icon">${label}</span>: <strong>${
         formatValue(value, format ?? data.valueFormat)
       }</strong>`
     );
@@ -134,7 +134,7 @@ function tooltipFormatter(
     );
   } else {
     formattedRows = rawRows.map(([label, value, format]) =>
-      `${label}: <strong>${
+      `<span class="custom-icon">${label}</span>: <strong>${
         formatValue(value, format ?? data.valueFormat)
       }</strong>`
     );
@@ -237,8 +237,13 @@ function buildPeriodSeriesLayout(
       trigger: "axis",
       confine: true,
       borderColor,
+      className: "paisa-echart-tooltip",
       backgroundColor: theme?.tooltipSurfaceColor,
-      textStyle: { color: theme?.tooltipTextColor ?? textColor },
+      textStyle: {
+        color: theme?.tooltipTextColor ?? textColor,
+        fontFamily: theme?.tooltipFontFamily ?? "var(--paisa-font-icon)",
+      },
+      extraCssText: "font-family: var(--paisa-font-icon);",
       formatter: (params: unknown) => tooltipFormatter(data, params),
     },
     xAxis: horizontal ? valueAxis : periodAxis,
