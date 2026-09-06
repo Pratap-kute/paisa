@@ -84,7 +84,20 @@
             "rollover": 4000,
             "available": 12000,
             "date": "2022-02-01T00:00:00Z",
-            "expenses": []
+            "expenses": [],
+            "projection": {
+              "status": "on-track",
+              "effectiveBudget": 12000,
+              "observedSpend": 0,
+              "projectedSpend": 0,
+              "projectedOverrun": 0,
+              "projectedRemaining": 12000,
+              "projectedUsageRatio": 0,
+              "source": "calendar-pace",
+              "historicalSampleCount": 0,
+              "elapsedDays": 7,
+              "daysInMonth": 28
+            }
           },
           {
             "account": "Expenses:Rent",
@@ -112,7 +125,20 @@
                 "market_amount": 0,
                 "balance": 0
               }
-            ]
+            ],
+            "projection": {
+              "status": "likely-over",
+              "effectiveBudget": 20000,
+              "observedSpend": 20000,
+              "projectedSpend": 80000,
+              "projectedOverrun": 60000,
+              "projectedRemaining": 0,
+              "projectedUsageRatio": 4,
+              "source": "calendar-pace",
+              "historicalSampleCount": 0,
+              "elapsedDays": 7,
+              "daysInMonth": 28
+            }
           },
           {
             "account": "Expenses:Utilities",
@@ -121,12 +147,35 @@
             "rollover": 3000,
             "available": 6000,
             "date": "2022-02-01T00:00:00Z",
-            "expenses": []
+            "expenses": [],
+            "projection": {
+              "status": "on-track",
+              "effectiveBudget": 6000,
+              "observedSpend": 0,
+              "projectedSpend": 0,
+              "projectedOverrun": 0,
+              "projectedRemaining": 6000,
+              "projectedUsageRatio": 0,
+              "source": "calendar-pace",
+              "historicalSampleCount": 0,
+              "elapsedDays": 7,
+              "daysInMonth": 28
+            }
           }
         ],
         "availableThisMonth": 18000,
         "endOfMonthBalance": -1902.4374871296,
-        "forecast": 31000
+        "forecast": 31000,
+        "outlook": {
+          "onTrackCount": 2,
+          "atRiskCount": 0,
+          "likelyOverCount": 1,
+          "overspentCount": 0,
+          "insufficientCount": 0,
+          "totalBudgets": 3,
+          "coverageCount": 3,
+          "projectedOverrun": 60000
+        }
       }
     },
     "checkingBalance": 23097.5625128704,

@@ -136,8 +136,6 @@ test.describe("layout invariants", () => {
       .toBeVisible();
     await expect(gateway.getByText("No material issues detected this month"))
       .toHaveCount(0);
-    await expect(page.getByText("Status unavailable", { exact: true }).first())
-      .toBeVisible();
   });
 
   test("dashboard reports a dashboard API failure without showing onboarding", async ({ page }) => {
