@@ -44,7 +44,7 @@ export interface BudgetSummary {
   attentionCount: number;
   statusLabel: string;
   status: MetricStatus;
-  accounts: Array<{ budget: AccountBudget; insight: Insight }>;
+  accounts: Array<{ budget: AccountBudget; insight?: Insight }>;
 }
 
 export interface DashboardInsightsSummary {
@@ -357,8 +357,8 @@ export function summarizeInsights(
 
 export function summarizeBudget(
   budget: Budget | null | undefined,
-  insights: Insight[] | null | undefined,
-  insightsAvailable: boolean,
+  insights?: Insight[] | null | undefined,
+  insightsAvailable = true,
   limit = 3,
 ): BudgetSummary {
   if (!budget?.accounts?.length) {
@@ -373,46 +373,116 @@ export function summarizeBudget(
     };
   }
 
-  const budgetInsights = (insights ?? []).filter((insight) =>
-    budgetInsightTypes.has(insight.type) &&
-    attentionSeverities.has(insight.severity)
-  );
   const accountsByName = new Map(
     budget.accounts.map((account) => [account.account, account]),
   );
-  const seen = new Set<string>();
-  const accounts: BudgetSummary["accounts"] = [];
-  for (const insight of budgetInsights) {
-    if (!insight.account || seen.has(insight.account)) continue;
-    const account = accountsByName.get(insight.account);
-    if (!account) continue;
-    seen.add(insight.account);
-    accounts.push({ budget: account, insight });
-    if (accounts.length === limit) break;
+
+  const outlook = budget.outlook;
+  let attentionCount = 0;
+  let status: MetricStatus = "positive";
+  let statusLabel = "No categories need attention";
+
+  if (outlook) {
+    attentionCount = (outlook.overspentCount ?? 0) +
+      (outlook.likelyOverCount ?? 0) +
+      (outlook.atRiskCount ?? 0);
+    if (attentionCount > 0) {
+      status = (outlook.overspentCount ?? 0) > 0 ? "negative" : "warning";
+      statusLabel = `${attentionCount} ${
+        attentionCount === 1 ? "category needs" : "categories need"
+      } attention`;
+    } else {
+      status = "positive";
+      statusLabel = "No categories need attention";
+    }
+  } else if (!insightsAvailable) {
+    statusLabel = "Status unavailable";
+    status = "neutral";
+  } else {
+    const budgetInsights = (insights ?? []).filter((insight) =>
+      budgetInsightTypes.has(insight.type) &&
+      attentionSeverities.has(insight.severity)
+    );
+    attentionCount = budgetInsights.length;
+    status = attentionCount > 0 ? "warning" : "positive";
+    statusLabel = attentionCount > 0
+      ? `${attentionCount} ${
+        attentionCount === 1 ? "category needs" : "categories need"
+      } attention`
+      : "No categories need attention";
   }
 
-  const attentionCount = budgetInsights.length;
+  const attentionAccounts: Array<{ budget: AccountBudget; insight?: Insight }> =
+    [];
+  const seenAccounts = new Set<string>();
+
+  const insightByAccount = new Map<string, Insight>();
+  for (const ins of insights ?? []) {
+    if (ins.account && budgetInsightTypes.has(ins.type)) {
+      insightByAccount.set(ins.account, ins);
+    }
+  }
+
+  const severityRank: Record<string, number> = {
+    "overspent": 3,
+    "likely-over": 2,
+    "at-risk": 1,
+  };
+
+  const candidateAccounts = budget.accounts
+    .filter((acc) => {
+      const projStatus = acc.projection?.status;
+      return projStatus === "overspent" || projStatus === "likely-over" ||
+        projStatus === "at-risk";
+    })
+    .sort((a, b) => {
+      const rankA = severityRank[a.projection?.status ?? ""] ?? 0;
+      const rankB = severityRank[b.projection?.status ?? ""] ?? 0;
+      if (rankB !== rankA) return rankB - rankA;
+      const overrunA = a.projection?.projectedOverrun ?? 0;
+      const overrunB = b.projection?.projectedOverrun ?? 0;
+      return overrunB - overrunA;
+    });
+
+  for (const acc of candidateAccounts) {
+    if (seenAccounts.has(acc.account)) continue;
+    seenAccounts.add(acc.account);
+    attentionAccounts.push({
+      budget: acc,
+      insight: insightByAccount.get(acc.account),
+    });
+    if (attentionAccounts.length === limit) break;
+  }
+
+  if (attentionAccounts.length === 0 && insights) {
+    for (const ins of insights) {
+      if (
+        !ins.account || seenAccounts.has(ins.account) ||
+        !budgetInsightTypes.has(ins.type)
+      ) continue;
+      const acc = accountsByName.get(ins.account);
+      if (!acc) continue;
+      seenAccounts.add(ins.account);
+      attentionAccounts.push({ budget: acc, insight: ins });
+      if (attentionAccounts.length === limit) break;
+    }
+  }
+
   return {
     configured: true,
-    actual: budget.accounts.reduce((sum, account) => sum + account.actual, 0),
+    actual: budget.accounts.reduce(
+      (sum, account) =>
+        sum + (account.projection?.observedSpend ?? account.actual),
+      0,
+    ),
     planned: budget.accounts.reduce(
       (sum, account) => sum + account.forecast,
       0,
     ),
     attentionCount,
-    statusLabel: !insightsAvailable
-      ? "Status unavailable"
-      : attentionCount > 0
-      ? `${attentionCount} ${
-        attentionCount === 1 ? "category needs" : "categories need"
-      } attention`
-      : "No categories need attention",
-    status: !insightsAvailable
-      ? "neutral"
-      : attentionCount > 0
-      ? "warning"
-      : "positive",
-    accounts,
+    statusLabel,
+    status,
+    accounts: attentionAccounts,
   };
 }
 

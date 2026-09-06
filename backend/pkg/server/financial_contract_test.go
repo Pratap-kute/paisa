@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/accounting"
+	"github.com/ananthakumaran/paisa/pkg/api/dto"
 	"github.com/ananthakumaran/paisa/pkg/config"
 	modelCache "github.com/ananthakumaran/paisa/pkg/model/cache"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
@@ -359,6 +360,79 @@ func TestContract_ScenarioH_BudgetRolloverAndChildRollup(t *testing.T) {
 		assert.Equal(t, "0", ab.Rollover.String(), "No rollover when disabled")
 		assert.Equal(t, "4000", ab.Available.String(), "Available = 5000 forecast - 1000 actual = 4000")
 	})
+}
+
+func TestContract_BudgetForecasting_ActiveMonthVsHistoricalAndHierarchy(t *testing.T) {
+	db := setupContractTestDB(t, "budget:\n  rollover: yes\n")
+
+	// Fixed time: Sep 10, 2026
+	utils.SetNow("2026-09-10")
+	t.Cleanup(func() { utils.ResetNow() })
+
+	dAug := time.Date(2026, time.August, 1, 0, 0, 0, 0, time.Local)
+	dSep := time.Date(2026, time.September, 1, 0, 0, 0, 0, time.Local)
+
+	postings := []*posting.Posting{
+		// August historical forecast & actual
+		{TransactionID: "aug-fc-food", Date: dAug, Account: "Expenses:Food", Commodity: "INR", Amount: decimal.RequireFromString("10000"), Forecast: true},
+		{TransactionID: "aug-fc-dining", Date: dAug, Account: "Expenses:Food:Dining", Commodity: "INR", Amount: decimal.RequireFromString("5000"), Forecast: true},
+		{TransactionID: "aug-exp-groceries", Date: dAug, Account: "Expenses:Food:Groceries", Commodity: "INR", Amount: decimal.RequireFromString("7000")},
+		{TransactionID: "aug-exp-dining", Date: dAug, Account: "Expenses:Food:Dining", Commodity: "INR", Amount: decimal.RequireFromString("3000")},
+
+		// September active month forecast & actual
+		{TransactionID: "sep-fc-food", Date: dSep, Account: "Expenses:Food", Commodity: "INR", Amount: decimal.RequireFromString("10000"), Forecast: true},
+		{TransactionID: "sep-fc-dining", Date: dSep, Account: "Expenses:Food:Dining", Commodity: "INR", Amount: decimal.RequireFromString("5000"), Forecast: true},
+		{TransactionID: "sep-exp-groceries", Date: time.Date(2026, time.September, 5, 0, 0, 0, 0, time.Local), Account: "Expenses:Food:Groceries", Commodity: "INR", Amount: decimal.RequireFromString("2500")},
+		{TransactionID: "sep-exp-dining", Date: time.Date(2026, time.September, 8, 0, 0, 0, 0, time.Local), Account: "Expenses:Food:Dining", Commodity: "INR", Amount: decimal.RequireFromString("1500")},
+	}
+	for _, p := range postings {
+		require.NoError(t, db.Create(p).Error)
+	}
+
+	bRes := GetBudget(db)
+	budgetsByMonth := bRes.BudgetsByMonth
+
+	// Check August (historical month)
+	augBudget, ok := budgetsByMonth["2026-08"]
+	require.True(t, ok)
+	assert.Nil(t, augBudget.Outlook, "Historical month must NOT have predictive Outlook")
+	for _, a := range augBudget.Accounts {
+		assert.Nil(t, a.Projection, "Historical accounts must NOT have predictive Projection")
+	}
+
+	// Check September (active month)
+	sepBudget, ok := budgetsByMonth["2026-09"]
+	require.True(t, ok)
+	require.NotNil(t, sepBudget.Outlook, "Active month must have predictive Outlook")
+	assert.Equal(t, 2, sepBudget.Outlook.TotalBudgets)
+
+	// Verify account hierarchy and no double-counting
+	var foodBudget, diningBudget *dto.AccountBudgetResponse
+	for i := range sepBudget.Accounts {
+		if sepBudget.Accounts[i].Account == "Expenses:Food" {
+			foodBudget = &sepBudget.Accounts[i]
+		}
+		if sepBudget.Accounts[i].Account == "Expenses:Food:Dining" {
+			diningBudget = &sepBudget.Accounts[i]
+		}
+	}
+
+	require.NotNil(t, foodBudget)
+	require.NotNil(t, diningBudget)
+
+	// Dining expenses must be claimed by Expenses:Food:Dining (1500)
+	assert.Equal(t, "1500", diningBudget.Actual.String())
+	// Other food expenses (Groceries 2500) must be claimed by Expenses:Food (2500, NOT 4000)
+	assert.Equal(t, "2500", foodBudget.Actual.String())
+
+	// Projections must be present on both
+	require.NotNil(t, foodBudget.Projection)
+	assert.Equal(t, 10, foodBudget.Projection.ElapsedDays)
+	assert.Equal(t, 30, foodBudget.Projection.DaysInMonth)
+	assert.Equal(t, "2500", foodBudget.Projection.ObservedSpend.String())
+
+	require.NotNil(t, diningBudget.Projection)
+	assert.Equal(t, "1500", diningBudget.Projection.ObservedSpend.String())
 }
 
 // Scenario I: FIFO Isolation

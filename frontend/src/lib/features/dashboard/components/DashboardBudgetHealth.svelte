@@ -31,10 +31,27 @@ let { summary, period, isPartial = false, comparisonPeriod }: Props = $props();
   {#if summary.accounts.length > 0}
     <div class="mt-3 divide-y divide-[var(--paisa-border-subtle)]">
       {#each summary.accounts as item (item.budget.account)}
-        {@const p = presentInsight(item.insight, isPartial, comparisonPeriod)}
-        <a href={p.href || `/expense/budget?period=${period}`} class="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 hover:text-primary" data-testid="dashboard-budget-item">
-          <span class="text-sm font-medium text-foreground truncate" title={item.budget.account}>{restName(item.budget.account)}</span>
-          <span class="text-xs font-semibold text-warning whitespace-nowrap">{p.badgeText || "Needs attention"}</span>
+        {@const p = item.insight ? presentInsight(item.insight, isPartial, comparisonPeriod) : null}
+        {@const proj = item.budget.projection}
+        {@const isOverspent = proj
+          ? proj.status === "overspent"
+          : item.budget.available < 0}
+        {@const factualOverrun = proj
+          ? Math.max(proj.observedSpend - proj.effectiveBudget, 0)
+          : Math.max(-item.budget.available, 0)}
+        {@const badgeText = p?.badgeText || (
+          isOverspent
+            ? `Over by ${formatCurrency(factualOverrun)}`
+            : proj?.status === "likely-over"
+              ? `~${formatCurrency(proj.projectedOverrun ?? 0)} overrun`
+              : proj?.status === "at-risk"
+                ? "At risk"
+                : "Needs attention"
+        )}
+        {@const badgeColor = isOverspent ? "text-negative" : "text-warning"}
+        <a href={p?.href || `/expense/budget?period=${period}`} class="group flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 transition-colors" data-testid="dashboard-budget-item">
+          <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate" title={item.budget.account}>{restName(item.budget.account)}</span>
+          <span class="text-xs font-semibold {badgeColor} whitespace-nowrap">{badgeText}</span>
         </a>
       {/each}
     </div>

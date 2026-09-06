@@ -503,3 +503,173 @@ test("preserves goal severity and ranks critical goals above ordinary warnings",
     expect(items[0].kind).toBe(status === "negative" ? "goal" : "insight");
   }
 });
+
+test("summarizeBudget uses outlook and projections directly, decoupling from insights", () => {
+  const accOnTrack: AccountBudget = {
+    ...account("Expenses:Rent", 10000, 10000),
+    projection: {
+      status: "on-track",
+      projectedSpend: 10000,
+      source: "historical-timing",
+      effectiveBudget: 10000,
+      observedSpend: 10000,
+      historicalSampleCount: 5,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const accAtRisk: AccountBudget = {
+    ...account("Expenses:Groceries", 9600, 10000),
+    projection: {
+      status: "at-risk",
+      projectedSpend: 9800,
+      source: "historical-timing",
+      effectiveBudget: 10000,
+      observedSpend: 9600,
+      historicalSampleCount: 5,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const accLikelyOver: AccountBudget = {
+    ...account("Expenses:Dining", 8000, 10000),
+    projection: {
+      status: "likely-over",
+      projectedSpend: 13500,
+      projectedOverrun: 3500,
+      source: "calendar-pace",
+      effectiveBudget: 10000,
+      observedSpend: 8000,
+      historicalSampleCount: 0,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const accOverspent: AccountBudget = {
+    ...account("Expenses:Shopping", 12000, 10000),
+    available: -2000,
+    projection: {
+      status: "overspent",
+      projectedSpend: 15000,
+      projectedOverrun: 5000,
+      source: "historical-timing",
+      effectiveBudget: 10000,
+      observedSpend: 12000,
+      historicalSampleCount: 4,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const testBudget: Budget = {
+    ...budget([accOnTrack, accAtRisk, accLikelyOver, accOverspent]),
+    outlook: {
+      overspentCount: 1,
+      likelyOverCount: 1,
+      atRiskCount: 1,
+      onTrackCount: 1,
+      insufficientCount: 0,
+      totalBudgets: 4,
+      coverageCount: 4,
+      projectedOverrun: 8500,
+    },
+  };
+
+  // 1. Decoupled from insights: works even with null insights and insightsAvailable = false
+  const summaryNoInsights = summarizeBudget(testBudget, null, false);
+  expect(summaryNoInsights.configured).toBe(true);
+  expect(summaryNoInsights.attentionCount).toBe(3);
+  expect(summaryNoInsights.statusLabel).toBe("3 categories need attention");
+  expect(summaryNoInsights.status).toBe("negative"); // overspent present -> negative
+
+  // 2. Accounts are sorted by severity rank: overspent first, then likely-over, then at-risk
+  expect(summaryNoInsights.accounts.map((a) => a.budget.account)).toEqual([
+    "Expenses:Shopping",
+    "Expenses:Dining",
+    "Expenses:Groceries",
+  ]);
+
+  // 3. Status warning when likely-over/at-risk exist without overspent
+  const warningBudget: Budget = {
+    ...budget([accOnTrack, accAtRisk, accLikelyOver]),
+    outlook: {
+      overspentCount: 0,
+      likelyOverCount: 1,
+      atRiskCount: 1,
+      onTrackCount: 1,
+      insufficientCount: 0,
+      totalBudgets: 3,
+      coverageCount: 3,
+      projectedOverrun: 3500,
+    },
+  };
+  const summaryWarning = summarizeBudget(warningBudget);
+  expect(summaryWarning.status).toBe("warning");
+  expect(summaryWarning.statusLabel).toBe("2 categories need attention");
+
+  // 4. Status positive when all categories on track
+  const allOnTrackBudget: Budget = {
+    ...budget([accOnTrack]),
+    outlook: {
+      overspentCount: 0,
+      likelyOverCount: 0,
+      atRiskCount: 0,
+      onTrackCount: 1,
+      insufficientCount: 0,
+      totalBudgets: 1,
+      coverageCount: 1,
+    },
+  };
+  const summaryAllGood = summarizeBudget(allOnTrackBudget);
+  expect(summaryAllGood.status).toBe("positive");
+  expect(summaryAllGood.statusLabel).toBe("No categories need attention");
+  expect(summaryAllGood.attentionCount).toBe(0);
+});
+
+test("summarizeBudget uses observedSpend instead of full-month actual when projection exists", () => {
+  const accWithFuture: AccountBudget = {
+    ...account("Expenses:Shopping", 11000, 10000), // actual = 11,000 (3k observed + 8k future)
+    available: -1000,
+    projection: {
+      status: "likely-over",
+      projectedSpend: 11000,
+      projectedOverrun: 1000,
+      source: "historical-timing",
+      effectiveBudget: 10000,
+      observedSpend: 3000,
+      historicalSampleCount: 5,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const activeBudget: Budget = {
+    ...budget([accWithFuture]),
+    outlook: {
+      overspentCount: 0,
+      likelyOverCount: 1,
+      atRiskCount: 0,
+      onTrackCount: 0,
+      insufficientCount: 0,
+      totalBudgets: 1,
+      coverageCount: 1,
+      projectedOverrun: 1000,
+    },
+  };
+
+  const summary = summarizeBudget(activeBudget);
+  // actual must be 3000 (observed spend), NOT 11000 (full-month actual including future postings)
+  expect(summary.actual).toBe(3000);
+  expect(summary.planned).toBe(10000);
+
+  // Historical budget without projection continues to use actual
+  const historicalAcc: AccountBudget = {
+    ...account("Expenses:Shopping", 11000, 10000),
+  };
+  const historicalBudget: Budget = budget([historicalAcc]);
+  const historicalSummary = summarizeBudget(historicalBudget);
+  expect(historicalSummary.actual).toBe(11000);
+});

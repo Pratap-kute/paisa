@@ -19,15 +19,6 @@ function canShow(accountBudget: AccountBudget): boolean {
   return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
 }
 
-function availableStatus(
-  accountBudget: AccountBudget,
-): "positive" | "negative" | "neutral" {
-  if (accountBudget.available === 0) {
-    return "neutral";
-  }
-  return accountBudget.available > 0 ? "positive" : "negative";
-}
-
 const statusClasses = {
   positive: "bg-positive-subtle text-positive",
   negative: "bg-negative-subtle text-negative",
@@ -46,40 +37,110 @@ let tooltipContent = $derived(
   ),
 );
 
-let availableTone = $derived(availableStatus(accountBudget));
+let spentAmount = $derived(
+  accountBudget.projection
+    ? accountBudget.projection.observedSpend
+    : accountBudget.actual,
+);
+let effectiveBudget = $derived(
+  accountBudget.projection
+    ? accountBudget.projection.effectiveBudget
+    : accountBudget.forecast + Math.max(0, accountBudget.rollover),
+);
+let factualAvailable = $derived(effectiveBudget - spentAmount);
+let isFactuallyOverspent = $derived(
+  accountBudget.projection
+    ? accountBudget.projection.status === "overspent"
+    : factualAvailable < 0,
+);
+
+let availableTone = $derived(
+  factualAvailable === 0
+    ? "neutral"
+    : factualAvailable > 0
+    ? "positive"
+    : "negative",
+);
 let progressMax = $derived(
   Math.max(
     0,
     accountBudget.forecast,
-    accountBudget.actual,
-    accountBudget.actual - accountBudget.rollover,
+    spentAmount,
+    spentAmount - accountBudget.rollover,
   ),
 );
 let rolloverUsed = $derived(
-  accountBudget.rollover > 0 && accountBudget.actual > accountBudget.forecast
+  accountBudget.rollover > 0 && spentAmount > accountBudget.forecast
     ? Math.min(
-      accountBudget.actual - accountBudget.forecast,
+      spentAmount - accountBudget.forecast,
       accountBudget.rollover,
     )
     : 0,
 );
 let overspent = $derived(
-  accountBudget.actual > accountBudget.forecast
+  spentAmount > accountBudget.forecast
     ? Math.max(
-      accountBudget.actual - accountBudget.forecast -
+      spentAmount - accountBudget.forecast -
         Math.max(accountBudget.rollover, 0),
       0,
     )
     : 0,
 );
 let withinBudget = $derived(
-  Math.min(accountBudget.forecast, accountBudget.actual),
+  Math.min(accountBudget.forecast, spentAmount),
 );
 let widthPercent = $derived((amount: number) =>
   progressMax > 0
     ? `${Math.min(100, Math.max(0, (amount / progressMax) * 100))}%`
     : "0%"
 );
+
+let projectionBadge = $derived.by(() => {
+  const proj = accountBudget.projection;
+  if (!proj) return null;
+  const title = proj.source === "historical-timing"
+    ? `Based on spending timing from ${proj.historicalSampleCount} previous months`
+    : proj.source === "historical-median"
+    ? `Based on median spending from ${proj.historicalSampleCount} previous months`
+    : proj.source === "calendar-pace"
+    ? `Based on current month pace (${proj.elapsedDays} of ${proj.daysInMonth} days)`
+    : "Projection available after more spending history";
+
+  switch (proj.status) {
+    case "overspent":
+      return {
+        text: "Overspent",
+        class: "bg-negative-subtle text-negative",
+        title,
+      };
+    case "likely-over":
+      return {
+        text: `⚠ Likely over · ~${formatCurrency(proj.projectedOverrun ?? 0)}`,
+        class: "bg-warning-subtle text-warning font-semibold",
+        title,
+      };
+    case "at-risk":
+      return {
+        text: "At risk",
+        class: "bg-warning-subtle text-warning",
+        title,
+      };
+    case "on-track":
+      return {
+        text: "✓ On track",
+        class: "bg-positive-subtle text-positive",
+        title,
+      };
+    case "insufficient-data":
+      return {
+        text: "More data needed",
+        class: "bg-[var(--paisa-border-subtle)] text-muted-foreground",
+        title,
+      };
+    default:
+      return null;
+  }
+});
 </script>
 
 <Tooltip content={accountBudget.expenses.length === 0 ? null : tooltipContent}>
@@ -104,8 +165,16 @@ let widthPercent = $derived((amount: number) =>
         <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
           <span class="text-muted-foreground">Spent</span>
           <span class="font-semibold text-foreground">
-            {formatCurrency(accountBudget.actual)}
+            {formatCurrency(spentAmount)}
           </span>
+          {#if accountBudget.actual > spentAmount}
+            <span
+              class="text-xs text-muted-foreground"
+              title="Total known spend including future-dated postings: {formatCurrency(accountBudget.actual)}"
+            >
+              ({formatCurrency(accountBudget.actual)} committed)
+            </span>
+          {/if}
         </div>
       {/if}
       {#if !compact && accountBudget.rollover !== 0}
@@ -118,14 +187,30 @@ let widthPercent = $derived((amount: number) =>
           </span>
         </div>
       {/if}
+      {#if !compact && accountBudget.projection?.projectedSpend !== undefined}
+        <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
+          <span class="text-muted-foreground">Projected</span>
+          <span class="font-semibold text-foreground">
+            {formatCurrency(accountBudget.projection.projectedSpend)}
+          </span>
+        </div>
+      {/if}
       <div class="flex items-baseline gap-1.5 text-sm tabular-nums">
         <span class="text-muted-foreground">
-          {accountBudget.available >= 0 ? "Available" : "Overspent"}
+          {isFactuallyOverspent ? "Overspent" : "Available"}
         </span>
         <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {statusClasses[availableTone]}">
-          {formatCurrency(Math.abs(accountBudget.available))}
+          {formatCurrency(Math.abs(factualAvailable))}
         </span>
       </div>
+      {#if projectionBadge}
+        <span
+          class="rounded-full px-2.5 py-0.5 text-xs font-semibold {projectionBadge.class}"
+          title={projectionBadge.title}
+        >
+          {projectionBadge.text}
+        </span>
+      {/if}
     </div>
   </div>
 

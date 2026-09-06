@@ -22,8 +22,8 @@ let { accounts }: Props = $props();
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {#each accounts as account (account.group)}
         {@const name = restName(restName(account.group)) || restName(account.group) || account.group}
-        <a href={`/assets/gain/${encodeURIComponent(account.group)}`} class="flex items-center justify-between p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle transition-colors min-w-0" data-testid="dashboard-cash-account">
-          <span class="text-sm font-medium text-foreground truncate pr-3" title={account.group}>{name}</span>
+        <a href={`/assets/gain/${encodeURIComponent(account.group)}`} class="group flex items-center justify-between p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle hover:border-border transition-all duration-150 min-w-0" data-testid="dashboard-cash-account">
+          <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate pr-3" title={account.group}>{name}</span>
           <span class="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(account.marketAmount)}</span>
         </a>
       {/each}

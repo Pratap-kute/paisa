@@ -278,16 +278,35 @@ describe("presentInsight", () => {
       category: "budget",
       severity: "warning",
       score: 48,
-      value: 8900,
+      value: 9600,
       previousValue: 10000,
-      change: 1100,
-      changePercent: 89,
+      change: 400,
+      changePercent: 96,
       account: "Expenses:Utilities",
     };
 
     const pRisk = presentInsight(risk);
-    expect(pRisk.title).toContain("Utilities budget is 89% used");
+    expect(pRisk.title).toContain("Utilities projected close to its budget");
     expect(pRisk.tone).toBe("warning");
+    expect(pRisk.badgeText).toBe("At risk");
+
+    const likelyOver: _Insight = {
+      id: "budget_risk:2026-08:Expenses:Food",
+      type: "budget_risk",
+      category: "budget",
+      severity: "critical",
+      score: 75,
+      value: 11500,
+      previousValue: 10000,
+      change: 1500,
+      changePercent: 115,
+      account: "Expenses:Food",
+    };
+
+    const pLikelyOver = presentInsight(likelyOver);
+    expect(pLikelyOver.title).toContain("Food projected to exceed budget");
+    expect(pLikelyOver.tone).toBe("warning");
+    expect(pLikelyOver.badgeText).toContain("overrun");
   });
 
   test("presents cash warning", () => {

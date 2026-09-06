@@ -5,15 +5,51 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/service"
 )
 
+func AccountBudgetProjectionToDTO(p *service.AccountBudgetProjection) *dto.AccountBudgetProjectionResponse {
+	if p == nil {
+		return nil
+	}
+	return &dto.AccountBudgetProjectionResponse{
+		Status:                string(p.Status),
+		EffectiveBudget:       p.EffectiveBudget,
+		ObservedSpend:         p.ObservedSpend,
+		ProjectedSpend:        p.ProjectedSpend,
+		ProjectedOverrun:      p.ProjectedOverrun,
+		ProjectedRemaining:    p.ProjectedRemaining,
+		ProjectedUsageRatio:   p.ProjectedUsageRatio,
+		Source:                string(p.Source),
+		HistoricalSampleCount: p.HistoricalSampleCount,
+		ElapsedDays:           p.ElapsedDays,
+		DaysInMonth:           p.DaysInMonth,
+	}
+}
+
+func BudgetOutlookToDTO(o *service.BudgetOutlook) *dto.BudgetOutlookResponse {
+	if o == nil {
+		return nil
+	}
+	return &dto.BudgetOutlookResponse{
+		OnTrackCount:      o.OnTrackCount,
+		AtRiskCount:       o.AtRiskCount,
+		LikelyOverCount:   o.LikelyOverCount,
+		OverspentCount:    o.OverspentCount,
+		InsufficientCount: o.InsufficientCount,
+		TotalBudgets:      o.TotalBudgets,
+		CoverageCount:     o.CoverageCount,
+		ProjectedOverrun:  o.ProjectedOverrun,
+	}
+}
+
 func AccountBudgetToDTO(a service.AccountBudget) dto.AccountBudgetResponse {
 	return dto.AccountBudgetResponse{
-		Account:   a.Account,
-		Forecast:  a.Forecast,
-		Actual:    a.Actual,
-		Rollover:  a.Rollover,
-		Available: a.Available,
-		Date:      a.Date,
-		Expenses:  PostingsToDTO(a.Expenses),
+		Account:    a.Account,
+		Forecast:   a.Forecast,
+		Actual:     a.Actual,
+		Rollover:   a.Rollover,
+		Available:  a.Available,
+		Date:       a.Date,
+		Expenses:   PostingsToDTO(a.Expenses),
+		Projection: AccountBudgetProjectionToDTO(a.Projection),
 	}
 }
 
@@ -35,6 +71,7 @@ func BudgetToDTO(b service.Budget) dto.BudgetResponse {
 		AvailableThisMonth: b.AvailableThisMonth,
 		EndOfMonthBalance:  b.EndOfMonthBalance,
 		Forecast:           b.Forecast,
+		Outlook:            BudgetOutlookToDTO(b.Outlook),
 	}
 }
 

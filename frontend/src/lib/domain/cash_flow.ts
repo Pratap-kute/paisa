@@ -38,12 +38,52 @@ export interface IncomeYearlyCard {
   net_income: number;
 }
 
+export type BudgetProjectionStatus =
+  | "no-budget"
+  | "insufficient-data"
+  | "on-track"
+  | "at-risk"
+  | "likely-over"
+  | "overspent";
+
+export type BudgetProjectionSource =
+  | "historical-timing"
+  | "historical-median"
+  | "calendar-pace"
+  | "insufficient-data";
+
+export interface AccountBudgetProjection {
+  status: BudgetProjectionStatus;
+  effectiveBudget: number;
+  observedSpend: number;
+  projectedSpend?: number;
+  projectedOverrun?: number;
+  projectedRemaining?: number;
+  projectedUsageRatio?: number;
+  source: BudgetProjectionSource;
+  historicalSampleCount: number;
+  elapsedDays: number;
+  daysInMonth: number;
+}
+
+export interface BudgetOutlook {
+  onTrackCount: number;
+  atRiskCount: number;
+  likelyOverCount: number;
+  overspentCount: number;
+  insufficientCount: number;
+  totalBudgets: number;
+  coverageCount: number;
+  projectedOverrun?: number;
+}
+
 export interface Budget {
   date: dayjs.Dayjs;
   accounts: AccountBudget[];
   endOfMonthBalance: number;
   availableThisMonth: number;
   forecast: number;
+  outlook?: BudgetOutlook;
 }
 
 export interface AccountBudget {
@@ -55,4 +95,5 @@ export interface AccountBudget {
   available: number;
   rollover: number;
   expenses: Posting[];
+  projection?: AccountBudgetProjection;
 }

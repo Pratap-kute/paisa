@@ -1,5 +1,30 @@
 basePath: /api
 definitions:
+  dto.AccountBudgetProjectionResponse:
+    properties:
+      daysInMonth:
+        type: integer
+      effectiveBudget:
+        type: number
+      elapsedDays:
+        type: integer
+      historicalSampleCount:
+        type: integer
+      observedSpend:
+        type: number
+      projectedOverrun:
+        type: number
+      projectedRemaining:
+        type: number
+      projectedSpend:
+        type: number
+      projectedUsageRatio:
+        type: number
+      source:
+        type: string
+      status:
+        type: string
+    type: object
   dto.AccountBudgetResponse:
     properties:
       account:
@@ -16,6 +41,8 @@ definitions:
         type: array
       forecast:
         type: number
+      projection:
+        $ref: '#/definitions/dto.AccountBudgetProjectionResponse'
       rollover:
         type: number
     type: object
@@ -138,6 +165,25 @@ definitions:
           $ref: '#/definitions/dto.BalancedPostingResponse'
         type: array
     type: object
+  dto.BudgetOutlookResponse:
+    properties:
+      atRiskCount:
+        type: integer
+      coverageCount:
+        type: integer
+      insufficientCount:
+        type: integer
+      likelyOverCount:
+        type: integer
+      onTrackCount:
+        type: integer
+      overspentCount:
+        type: integer
+      projectedOverrun:
+        type: number
+      totalBudgets:
+        type: integer
+    type: object
   dto.BudgetResponse:
     properties:
       accounts:
@@ -152,6 +198,8 @@ definitions:
         type: number
       forecast:
         type: number
+      outlook:
+        $ref: '#/definitions/dto.BudgetOutlookResponse'
     type: object
   dto.BudgetsSummaryResponse:
     properties:
