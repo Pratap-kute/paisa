@@ -33,10 +33,15 @@ let { summary, period, isPartial = false, comparisonPeriod }: Props = $props();
       {#each summary.accounts as item (item.budget.account)}
         {@const p = item.insight ? presentInsight(item.insight, isPartial, comparisonPeriod) : null}
         {@const proj = item.budget.projection}
-        {@const isOverspent = proj?.status === "overspent" || item.budget.available < 0}
+        {@const isOverspent = proj
+          ? proj.status === "overspent"
+          : item.budget.available < 0}
+        {@const factualOverrun = proj
+          ? Math.max(proj.observedSpend - proj.effectiveBudget, 0)
+          : Math.max(-item.budget.available, 0)}
         {@const badgeText = p?.badgeText || (
           isOverspent
-            ? `Over by ${formatCurrency(Math.abs(item.budget.available))}`
+            ? `Over by ${formatCurrency(factualOverrun)}`
             : proj?.status === "likely-over"
               ? `~${formatCurrency(proj.projectedOverrun ?? 0)} overrun`
               : proj?.status === "at-risk"

@@ -19,15 +19,6 @@ function canShow(accountBudget: AccountBudget): boolean {
   return accountBudget.forecast !== 0 || accountBudget.actual !== 0;
 }
 
-function availableStatus(
-  accountBudget: AccountBudget,
-): "positive" | "negative" | "neutral" {
-  if (accountBudget.available === 0) {
-    return "neutral";
-  }
-  return accountBudget.available > 0 ? "positive" : "negative";
-}
-
 const statusClasses = {
   positive: "bg-positive-subtle text-positive",
   negative: "bg-negative-subtle text-negative",

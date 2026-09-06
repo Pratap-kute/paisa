@@ -628,3 +628,49 @@ test("summarizeBudget uses outlook and projections directly, decoupling from ins
   expect(summaryAllGood.statusLabel).toBe("No categories need attention");
   expect(summaryAllGood.attentionCount).toBe(0);
 });
+
+test("summarizeBudget uses observedSpend instead of full-month actual when projection exists", () => {
+  const accWithFuture: AccountBudget = {
+    ...account("Expenses:Shopping", 11000, 10000), // actual = 11,000 (3k observed + 8k future)
+    available: -1000,
+    projection: {
+      status: "likely-over",
+      projectedSpend: 11000,
+      projectedOverrun: 1000,
+      source: "historical-timing",
+      effectiveBudget: 10000,
+      observedSpend: 3000,
+      historicalSampleCount: 5,
+      elapsedDays: 10,
+      daysInMonth: 31,
+    },
+  };
+
+  const activeBudget: Budget = {
+    ...budget([accWithFuture]),
+    outlook: {
+      overspentCount: 0,
+      likelyOverCount: 1,
+      atRiskCount: 0,
+      onTrackCount: 0,
+      insufficientCount: 0,
+      totalBudgets: 1,
+      coverageCount: 1,
+      projectedOverrun: 1000,
+    },
+  };
+
+  const summary = summarizeBudget(activeBudget);
+  // actual must be 3000 (observed spend), NOT 11000 (full-month actual including future postings)
+  expect(summary.actual).toBe(3000);
+  expect(summary.planned).toBe(10000);
+
+  // Historical budget without projection continues to use actual
+  const historicalAcc: AccountBudget = {
+    ...account("Expenses:Shopping", 11000, 10000),
+  };
+  const historicalBudget: Budget = budget([historicalAcc]);
+  const historicalSummary = summarizeBudget(historicalBudget);
+  expect(historicalSummary.actual).toBe(11000);
+});
+

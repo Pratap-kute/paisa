@@ -831,16 +831,16 @@ func detectBudgetRisk(ctx InsightContext) []Insight {
 
 			switch proj.Status {
 			case BudgetProjectionStatusOverspent:
-				overAmount := acc.Actual.Sub(effectiveBudget)
+				spent := proj.ObservedSpend
+				overAmount := spent.Sub(effectiveBudget)
 				if overAmount.IsPositive() {
-					actual := acc.Actual
 					insights = append(insights, Insight{
 						ID:            fmt.Sprintf("budget_overspent:%s:%s", ctx.Period, acc.Account),
 						Type:          InsightTypeBudgetOverspent,
 						Category:      InsightCategoryBudget,
 						Severity:      InsightSeverityCritical,
 						Score:         85,
-						Value:         &actual,
+						Value:         &spent,
 						PreviousValue: &effectiveBudget,
 						Change:        &overAmount,
 						Account:       acc.Account,

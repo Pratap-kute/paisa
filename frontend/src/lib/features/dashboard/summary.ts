@@ -470,7 +470,11 @@ export function summarizeBudget(
 
   return {
     configured: true,
-    actual: budget.accounts.reduce((sum, account) => sum + account.actual, 0),
+    actual: budget.accounts.reduce(
+      (sum, account) =>
+        sum + (account.projection?.observedSpend ?? account.actual),
+      0,
+    ),
     planned: budget.accounts.reduce(
       (sum, account) => sum + account.forecast,
       0,

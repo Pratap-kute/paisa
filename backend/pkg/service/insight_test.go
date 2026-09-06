@@ -371,6 +371,54 @@ func TestInsight_BudgetRisk_AtRiskVsLikelyOver(t *testing.T) {
 	assert.True(t, decimal.NewFromInt(200).Equal(*diningInsight.Change))
 }
 
+func TestInsight_BudgetOverspent_UsesObservedSpendNotFullMonthActual(t *testing.T) {
+	// Regression test: factual overspending insight must use observedSpend today (11,000),
+	// not full-month actual including future postings (16,000).
+	observedSpend := decimal.NewFromInt(11000)
+	effectiveBudget := decimal.NewFromInt(10000)
+	fullMonthActual := decimal.NewFromInt(16000)
+	projectedSpend := decimal.NewFromInt(16000)
+	projectedOverrun := decimal.NewFromInt(6000)
+
+	ctx := InsightContext{
+		Period:    "2026-09",
+		IsPartial: true,
+		Budget: BudgetResult{
+			BudgetsByMonth: map[string]Budget{
+				"2026-09": {
+					Accounts: []AccountBudget{
+						{
+							Account:  "Expenses:Shopping",
+							Forecast: effectiveBudget,
+							Actual:   fullMonthActual,
+							Projection: &AccountBudgetProjection{
+								Status:           BudgetProjectionStatusOverspent,
+								EffectiveBudget:  effectiveBudget,
+								ObservedSpend:    observedSpend,
+								ProjectedSpend:   &projectedSpend,
+								ProjectedOverrun: &projectedOverrun,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	insights := detectBudgetRisk(ctx)
+	require.Len(t, insights, 1)
+
+	ins := insights[0]
+	assert.Equal(t, InsightTypeBudgetOverspent, ins.Type)
+	assert.Equal(t, InsightSeverityCritical, ins.Severity)
+	require.NotNil(t, ins.Value)
+	assert.True(t, decimal.NewFromInt(11000).Equal(*ins.Value), "Value must be observed spend (11,000), not full-month actual (16,000)")
+	require.NotNil(t, ins.PreviousValue)
+	assert.True(t, decimal.NewFromInt(10000).Equal(*ins.PreviousValue), "PreviousValue must be effective budget (10,000)")
+	require.NotNil(t, ins.Change)
+	assert.True(t, decimal.NewFromInt(1000).Equal(*ins.Change), "Change must be factual overrun (1,000 = 11,000 - 10,000), not full-month actual overrun (6,000)")
+}
+
 func TestInsight_RecurringExpenseIncrease(t *testing.T) {
 	db := setupInsightTestDB(t, "")
 
