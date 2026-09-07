@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	scenarioComplete    = "complete"
-	scenarioUnavailable = "unavailable"
+	scenarioComplete           = "complete"
+	scenarioUnavailable        = "unavailable"
+	reasonNoInvestmentActivity = "no_investment_activity"
 )
 
 // ScenarioError is safe to serialize; internal errors are never exposed.
@@ -46,6 +47,38 @@ func scenarioMedian(samples []decimal.Decimal, magnitude bool) ScenarioAssumptio
 	return a
 }
 
+type scenarioCategorizedPosts struct {
+	cash        []posting.Posting
+	investments []posting.Posting
+	net         []posting.Posting
+	income      []posting.Posting
+	expenses    []posting.Posting
+}
+
+func categorizeScenarioPostings(posts []posting.Posting) scenarioCategorizedPosts {
+	var c scenarioCategorizedPosts
+	for i := range posts {
+		p := &posts[i]
+		p.Date = p.Date.In(config.TimeZone())
+		if utils.IsSameOrParent(p.Account, "Assets:Checking") {
+			c.cash = append(c.cash, *p)
+		}
+		if investmentAccount(p.Account) || IsCapitalGains(*p) {
+			c.investments = append(c.investments, *p)
+		}
+		if utils.IsParent(p.Account, "Assets") || utils.IsParent(p.Account, "Liabilities") || IsCapitalGains(*p) {
+			c.net = append(c.net, *p)
+		}
+		if scenarioOperationalIncome(p.Account) {
+			c.income = append(c.income, *p)
+		}
+		if utils.IsParent(p.Account, "Expenses") {
+			c.expenses = append(c.expenses, *p)
+		}
+	}
+	return c
+}
+
 // BuildScenarioBaseline captures historical data once; projection never queries it.
 func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBaseline, error) {
 	asOf = asOf.In(config.TimeZone())
@@ -59,33 +92,15 @@ func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBa
 	if err := db.Where("date < ? AND forecast = ?", dayEnd, false).Order("date ASC").Find(&posts).Error; err != nil {
 		return b, err
 	}
-	cashPosts := []posting.Posting{}
-	investments := []posting.Posting{}
-	netPosts := []posting.Posting{}
-	incomePosts := []posting.Posting{}
-	expensePosts := []posting.Posting{}
-	for i := range posts {
-		p := &posts[i]
-		p.Date = p.Date.In(config.TimeZone())
-		if utils.IsSameOrParent(p.Account, "Assets:Checking") {
-			cashPosts = append(cashPosts, *p)
-		}
-		if investmentAccount(p.Account) || IsCapitalGains(*p) {
-			investments = append(investments, *p)
-		}
-		if utils.IsParent(p.Account, "Assets") || utils.IsParent(p.Account, "Liabilities") || IsCapitalGains(*p) {
-			netPosts = append(netPosts, *p)
-		}
-		if scenarioOperationalIncome(p.Account) {
-			incomePosts = append(incomePosts, *p)
-		}
-		if utils.IsParent(p.Account, "Expenses") {
-			expensePosts = append(expensePosts, *p)
-		}
-	}
+	categorized := categorizeScenarioPostings(posts)
+	cashPosts := categorized.cash
+	investments := categorized.investments
+	netPosts := categorized.net
+	incomePosts := categorized.income
+	expensePosts := categorized.expenses
 	addReason := func(code, field string) {
 		b.Quality.Reasons = append(b.Quality.Reasons, ScenarioReason{Code: code, Field: field})
-		if code != "no_investment_activity" && b.Quality.Status == scenarioComplete {
+		if code != reasonNoInvestmentActivity && b.Quality.Status == scenarioComplete {
 			b.Quality.Status = "partial"
 		}
 	}
@@ -99,7 +114,7 @@ func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBa
 	value, quality, _ := performanceValuation(db, events, dayEnd.Add(-time.Nanosecond))
 	b.CurrentInvestmentValue = value.BalanceAmount
 	if len(investments) == 0 {
-		addReason("no_investment_activity", "currentInvestmentValue")
+		addReason(reasonNoInvestmentActivity, "currentInvestmentValue")
 	}
 	for _, reason := range quality.Reasons {
 		addReason("estimated_investment_value", reason.Commodity)
@@ -133,13 +148,13 @@ func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBa
 	// An explicit first-time-investor assumption, not invented income/expense history.
 	if len(investments) == 0 {
 		zero := decimal.Zero
-		b.MonthlyInvestmentTransfer = ScenarioAssumption{Value: &zero, Source: "no_investment_activity", SampleCount: 0}
+		b.MonthlyInvestmentTransfer = ScenarioAssumption{Value: &zero, Source: reasonNoInvestmentActivity, SampleCount: 0}
 	}
 	for _, f := range []struct {
 		name string
 		a    ScenarioAssumption
 	}{{"income", b.MonthlyIncome}, {"expense", b.MonthlyExpenses}, {"contribution", b.MonthlyInvestmentTransfer}} {
-		if f.a.SampleCount < 6 && f.a.Source != "no_investment_activity" {
+		if f.a.SampleCount < 6 && f.a.Source != reasonNoInvestmentActivity {
 			addReason("insufficient_"+f.name+"_history", f.name)
 		}
 		if f.a.Source == "invalid_historical_magnitude" {

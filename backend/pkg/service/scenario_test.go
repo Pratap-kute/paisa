@@ -354,4 +354,3 @@ func TestScenarioFirstTimeInvestorCompleteStatus(t *testing.T) {
 	require.Len(t, b.Quality.Reasons, 1)
 	require.Equal(t, "no_investment_activity", b.Quality.Reasons[0].Code)
 }
-

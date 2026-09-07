@@ -83,9 +83,11 @@ const dirty = $derived(
   scenarioChanged ||
     fields.some((f) => overrides[f.key] !== undefined) ||
     horizon !== 60 ||
-    annual !== "0" ||
+    (Number.isFinite(Number(annual)) ? Number(annual) !== 0 : annual !== "0") ||
     overrideReturn ||
-    scenarioReturn !== "0" ||
+    (Number.isFinite(Number(scenarioReturn))
+      ? Number(scenarioReturn) !== 0
+      : scenarioReturn !== "0") ||
     events.length > 0,
 );
 const notices = $derived(scenarioQuality(baseline?.quality?.reasons));
