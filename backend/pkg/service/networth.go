@@ -47,224 +47,93 @@ func GetCurrentNetworth(db *gorm.DB) CurrentNetworthResult {
 }
 
 func ComputeNetworth(db *gorm.DB, postings []posting.Posting) Networth {
-	var networth Networth
-
 	if len(postings) == 0 {
-		return networth
+		return Networth{}
 	}
-
-	investment := decimal.Zero
-	withdrawal := decimal.Zero
-	balance := decimal.Zero
-
-	now := utils.EndOfToday()
-	for i := range postings {
-		p := &postings[i]
-		isInterest := IsInterest(db, *p)
-		isInterestRepayment := IsInterestRepayment(db, *p)
-		isStockSplit := IsStockSplit(db, *p)
-		isCapitalGains := IsCapitalGains(*p)
-
-		switch {
-		case isInterest || isInterestRepayment:
-			balance = balance.Add(p.Amount)
-		case isCapitalGains:
-			withdrawal = withdrawal.Add(p.Amount.Neg())
-		default:
-			if p.Amount.GreaterThan(decimal.Zero) && !isStockSplit {
-				investment = investment.Add(p.Amount)
-			}
-
-			if p.Amount.LessThan(decimal.Zero) && !isStockSplit {
-				withdrawal = withdrawal.Add(p.Amount.Neg())
-			}
-
-			balance = balance.Add(GetMarketPrice(db, *p, now))
-		}
-	}
-
-	gain := balance.Add(withdrawal).Sub(investment)
-	netInvestment := investment.Sub(withdrawal)
-	networth = Networth{
-		Date:                now,
-		InvestmentAmount:    investment,
-		WithdrawalAmount:    withdrawal,
-		GainAmount:          gain,
-		BalanceAmount:       balance,
-		NetInvestmentAmount: netInvestment,
-	}
-
-	return networth
+	return computeEventNetworth(db, loadInvestmentEvents(db, postings), utils.EndOfToday())
 }
 
 func ComputeNetworthOn(db *gorm.DB, postings []posting.Posting, onDate time.Time) Networth {
-	var networth Networth
 	if len(postings) == 0 {
-		return networth
+		return Networth{}
 	}
+	return computeEventNetworth(db, loadInvestmentEvents(db, postings), onDate)
+}
 
-	type RunningSum struct {
-		investment   decimal.Decimal
-		withdrawal   decimal.Decimal
-		balance      decimal.Decimal
-		balanceUnits decimal.Decimal
-	}
+type eventHolding struct{ amount, quantity decimal.Decimal }
+type eventAccumulator struct {
+	investment, withdrawal decimal.Decimal
+	holdings               map[string]eventHolding
+}
 
-	accumulator := make(map[string]RunningSum)
-	for i := range postings {
-		p := &postings[i]
-		if p.Date.After(onDate) {
-			continue
+func newEventAccumulator() *eventAccumulator {
+	return &eventAccumulator{holdings: map[string]eventHolding{}}
+}
+func (a *eventAccumulator) add(e investmentEvent) {
+	if e.CapitalGains {
+		a.withdrawal = a.withdrawal.Sub(e.Flow)
+	} else {
+		if e.Flow.IsPositive() {
+			a.investment = a.investment.Add(e.Flow)
 		}
-
-		rs := accumulator[p.Commodity]
-		isInterest := IsInterest(db, *p)
-		isInterestRepayment := IsInterestRepayment(db, *p)
-		isStockSplit := IsStockSplit(db, *p)
-		isCapitalGains := IsCapitalGains(*p)
-
-		switch {
-		case isInterest || isInterestRepayment:
-			rs.balance = rs.balance.Add(p.Amount)
-		case isCapitalGains:
-			rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-		default:
-			if p.Amount.GreaterThan(decimal.Zero) && !isStockSplit {
-				rs.investment = rs.investment.Add(p.Amount)
-			}
-
-			if p.Amount.LessThan(decimal.Zero) && !isStockSplit {
-				rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-			}
-
-			rs.balance = rs.balance.Add(GetMarketPrice(db, *p, onDate))
-			rs.balanceUnits = rs.balanceUnits.Add(p.Quantity)
-		}
-
-		accumulator[p.Commodity] = rs
-	}
-
-	investment := decimal.Zero
-	withdrawal := decimal.Zero
-	balance := decimal.Zero
-
-	for commodity, rs := range accumulator {
-		investment = investment.Add(rs.investment)
-		withdrawal = withdrawal.Add(rs.withdrawal)
-
-		if utils.IsCurrency(commodity) {
-			balance = balance.Add(rs.balance)
-		} else {
-			price := GetUnitPrice(db, commodity, onDate)
-			if !price.Value.Equal(decimal.Zero) {
-				balance = balance.Add(rs.balanceUnits.Mul(price.Value))
-			} else {
-				balance = balance.Add(rs.balance)
-			}
+		if e.Flow.IsNegative() {
+			a.withdrawal = a.withdrawal.Sub(e.Flow)
 		}
 	}
-
-	gain := balance.Add(withdrawal).Sub(investment)
-	netInvestment := investment.Sub(withdrawal)
-
-	return Networth{
-		Date:                onDate,
-		InvestmentAmount:    investment,
-		WithdrawalAmount:    withdrawal,
-		GainAmount:          gain,
-		BalanceAmount:       balance,
-		NetInvestmentAmount: netInvestment,
+	h := a.holdings[e.Posting.Commodity]
+	h.amount = h.amount.Add(e.Value)
+	h.quantity = h.quantity.Add(e.Units)
+	a.holdings[e.Posting.Commodity] = h
+}
+func (a *eventAccumulator) value(db *gorm.DB, date time.Time, units bool) Networth {
+	result := Networth{Date: date, InvestmentAmount: a.investment, WithdrawalAmount: a.withdrawal}
+	for commodity, h := range a.holdings {
+		value := h.amount
+		if !utils.IsCurrency(commodity) {
+			p := GetUnitPrice(db, commodity, date)
+			if !p.Value.IsZero() {
+				value = h.quantity.Mul(p.Value)
+			}
+			if units {
+				result.BalanceUnits = result.BalanceUnits.Add(h.quantity)
+			}
+		}
+		result.BalanceAmount = result.BalanceAmount.Add(value)
 	}
+	result.NetInvestmentAmount = result.InvestmentAmount.Sub(result.WithdrawalAmount)
+	result.GainAmount = result.BalanceAmount.Sub(result.NetInvestmentAmount)
+	return result
+}
+func computeEventNetworth(db *gorm.DB, events []investmentEvent, date time.Time) Networth {
+	a := newEventAccumulator()
+	for i := range events {
+		e := &events[i]
+		if !e.Posting.Date.After(date) {
+			a.add(*e)
+		}
+	}
+	return a.value(db, date, false)
 }
 
 func ComputeNetworthTimeline(db *gorm.DB, postings []posting.Posting, computeBalanceUnits bool) []Networth {
-	var networths []Networth
-	var p posting.Posting
-
+	result := []Networth{}
 	if len(postings) == 0 {
-		return []Networth{}
+		return result
 	}
-
-	type RunningSum struct {
-		investment   decimal.Decimal
-		withdrawal   decimal.Decimal
-		balance      decimal.Decimal
-		balanceUnits decimal.Decimal
-	}
-
-	accumulator := make(map[string]RunningSum)
-
+	events := loadInvestmentEvents(db, postings)
 	end := utils.EndOfToday()
-	for start := postings[0].Date; start.Before(end); start = start.AddDate(0, 0, 1) {
-		for len(postings) > 0 && (postings[0].Date.Before(start) || postings[0].Date.Equal(start)) {
-			p, postings = postings[0], postings[1:]
-			rs := accumulator[p.Commodity]
-
-			isInterest := IsInterest(db, p)
-			isInterestRepayment := IsInterestRepayment(db, p)
-			isStockSplit := IsStockSplit(db, p)
-			isCapitalGains := IsCapitalGains(p)
-
-			switch {
-			case isInterest || isInterestRepayment:
-				rs.balance = rs.balance.Add(p.Amount)
-			case isCapitalGains:
-				rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-			default:
-				if p.Amount.GreaterThan(decimal.Zero) && !isStockSplit {
-					rs.investment = rs.investment.Add(p.Amount)
-				}
-
-				if p.Amount.LessThan(decimal.Zero) && !isStockSplit {
-					rs.withdrawal = rs.withdrawal.Add(p.Amount.Neg())
-				}
-
-				rs.balance = rs.balance.Add(GetMarketPrice(db, p, start))
-				rs.balanceUnits = rs.balanceUnits.Add(p.Quantity)
-			}
-
-			accumulator[p.Commodity] = rs
+	accumulator := newEventAccumulator()
+	next := 0
+	for date := postings[0].Date; date.Before(end); date = date.AddDate(0, 0, 1) {
+		for next < len(events) && !events[next].Posting.Date.After(date) {
+			accumulator.add(events[next])
+			next++
 		}
-
-		investment := decimal.Zero
-		withdrawal := decimal.Zero
-		balance := decimal.Zero
-		balanceUnits := decimal.Zero
-
-		for commodity, rs := range accumulator {
-			investment = investment.Add(rs.investment)
-			withdrawal = withdrawal.Add(rs.withdrawal)
-
-			if utils.IsCurrency(commodity) {
-				balance = balance.Add(rs.balance)
-			} else {
-				if computeBalanceUnits {
-					balanceUnits = balanceUnits.Add(rs.balanceUnits)
-				}
-				price := GetUnitPrice(db, commodity, start)
-				if !price.Value.Equal(decimal.Zero) {
-					balance = balance.Add(rs.balanceUnits.Mul(price.Value))
-				} else {
-					balance = balance.Add(rs.balance)
-				}
-			}
-		}
-
-		gain := balance.Add(withdrawal).Sub(investment)
-		netInvestment := investment.Sub(withdrawal)
-		networths = append(networths, Networth{
-			Date:                start,
-			InvestmentAmount:    investment,
-			WithdrawalAmount:    withdrawal,
-			GainAmount:          gain,
-			BalanceAmount:       balance,
-			BalanceUnits:        balanceUnits,
-			NetInvestmentAmount: netInvestment,
-		})
-
-		if len(postings) == 0 && balance.Abs().LessThan(decimal.NewFromFloat(0.01)) {
+		n := accumulator.value(db, date, computeBalanceUnits)
+		result = append(result, n)
+		if !date.Before(postings[len(postings)-1].Date) && n.BalanceAmount.Abs().LessThan(decimal.NewFromFloat(0.01)) {
 			break
 		}
 	}
-	return networths
+	return result
 }

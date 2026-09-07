@@ -27,7 +27,7 @@ type AccountGain struct {
 }
 
 func GetGain(db *gorm.DB) []Gain {
-	postings := query.Init(db).Like("Assets:%", "Income:CapitalGains:%").NotAccountPrefix("Assets:Checking").All()
+	postings := query.Init(db).Like("Assets:%", "Income:CapitalGains:%").NotAccountPrefix("Assets:Checking").UntilToday().All()
 	postings = PopulateMarketPrice(db, postings)
 	byAccount := lo.GroupBy(postings, func(p posting.Posting) string {
 		if IsCapitalGains(p) {
@@ -47,7 +47,7 @@ func GetGain(db *gorm.DB) []Gain {
 
 func GetAccountGainData(db *gorm.DB, account string) (AccountGain, []posting.Posting) {
 	capitalGainsAccount := strings.Replace(account, "Assets", "Income:CapitalGains", 1)
-	postings := query.Init(db).AccountPrefix(account, capitalGainsAccount).All()
+	postings := query.Init(db).AccountPrefix(account, capitalGainsAccount).UntilToday().All()
 	postings = PopulateMarketPrice(db, postings)
 	gain := AccountGain{
 		Account:          account,
