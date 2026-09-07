@@ -15,7 +15,7 @@ type GoalSummaryResponse struct {
 	Rate                float64                 `json:"rate,omitempty"`
 	PaymentPerPeriod    float64                 `json:"paymentPerPeriod,omitempty"`
 	SWR                 float64                 `json:"swr,omitempty"`
-	YearlyExpense       decimal.Decimal         `json:"yearlyExpense,omitempty"`
+	YearlyExpense       decimal.Decimal         `json:"yearlyExpense"`
 	YearlyExpenseSource string                  `json:"yearlyExpenseSource,omitempty"`
 }
 
@@ -32,6 +32,6 @@ type GoalDetailResponse struct {
 	Summary             GoalSummaryResponse     `json:"summary"`
 	Timeline            map[string]any          `json:"timeline,omitempty"`
 	ContributionHistory []GoalContributionMonth `json:"contributionHistory,omitempty"`
-	Target              decimal.Decimal         `json:"target,omitempty"`
+	Target              decimal.Decimal         `json:"target"`
 	YearlyExpenseSource string                  `json:"yearlyExpenseSource,omitempty"`
 }

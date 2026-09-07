@@ -29,7 +29,7 @@ export const visualRoutes: VisualRoute[] = [
     name: "assets-gain",
     path: "/assets/gain",
     ready:
-      "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
+      "[data-testid='investment-performance-timeline'][data-chart-ready='true']",
   },
   {
     name: "assets-gain-detail",

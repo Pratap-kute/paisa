@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/ananthakumaran/paisa/pkg/api/dto"
@@ -129,8 +130,8 @@ func saveFiles(request dto.EditorSaveRequest, ops batchOperations) dto.EditorBat
 
 func rollbackFiles(files []batchFile, ops batchOperations, reason string, resync bool) dto.EditorBatchSaveResponse {
 	recovery := make(map[string]string)
-	for i := len(files) - 1; i >= 0; i-- {
-		file := files[i]
+	for i := range slices.Backward(files) {
+		file := &files[i]
 		// Do not overwrite a concurrent external editor's changes during recovery.
 		current, err := os.ReadFile(file.path)
 		if err != nil || string(current) != file.file.Content {

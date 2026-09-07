@@ -54,6 +54,7 @@ export interface PeriodSeriesChartData {
   axis?: PeriodAxis;
   granularity?: "day" | "month" | "financial-year" | "year";
   valueFormat?: PeriodValueFormat;
+  scale?: boolean;
 }
 
 export interface PeriodSeriesOptions {
@@ -180,6 +181,25 @@ function buildPeriodSeriesLayout(
   };
   const valueAxis = {
     type: "value",
+    scale: data.scale ?? false,
+    min: data.scale
+      ? (extent: { min: number; max: number }) => {
+        const span = extent.max - extent.min;
+        const pad = span > 0
+          ? span * 0.1
+          : Math.max(1, Math.abs(extent.min) * 0.05);
+        return Math.floor(extent.min - pad);
+      }
+      : undefined,
+    max: data.scale
+      ? (extent: { min: number; max: number }) => {
+        const span = extent.max - extent.min;
+        const pad = span > 0
+          ? span * 0.1
+          : Math.max(1, Math.abs(extent.max) * 0.05);
+        return Math.ceil(extent.max + pad);
+      }
+      : undefined,
     splitNumber: mobile ? 3 : 5,
     axisLabel: {
       color: mutedColor,

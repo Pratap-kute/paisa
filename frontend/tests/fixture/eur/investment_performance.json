@@ -1,0 +1,200 @@
+{
+  "startDate": "2021-04-01",
+  "endDate": "2022-02-07",
+  "account": "",
+  "openingValue": 0,
+  "closingValue": 10025.05,
+  "contributions": 10005.05,
+  "withdrawals": 0,
+  "netContribution": 10005.05,
+  "portfolioChange": 10025.05,
+  "investmentReturn": 20,
+  "periodReturn": null,
+  "sinceInceptionXirr": 0.0217,
+  "returnUnavailableReason": "insufficient_valuation_data",
+  "quality": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "valuation_fallback",
+        "commodity": "AAPL",
+        "date": "2022-02-07"
+      }
+    ]
+  },
+  "openingQuotes": [],
+  "closingQuotes": [
+    {
+      "commodity": "AAPL",
+      "date": "2022-01-15",
+      "source": "trade"
+    }
+  ],
+  "drivers": [
+    {
+      "account": "Assets:Equity:AAPL",
+      "openingValue": 0,
+      "closingValue": 10025.05,
+      "netContribution": 10005.05,
+      "returnAmount": 20,
+      "periodReturn": null,
+      "returnUnavailableReason": "insufficient_valuation_data",
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "AAPL",
+            "date": "2022-02-07"
+          }
+        ]
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2021-03-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-04-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-05-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-06-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-07-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-08-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-09-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-10-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-11-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-12-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2022-01-31",
+      "value": 10025.05,
+      "contributionBaseline": 10005.05,
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "AAPL",
+            "date": "2022-01-31"
+          }
+        ]
+      },
+      "quotes": [
+        {
+          "commodity": "AAPL",
+          "date": "2022-01-15",
+          "source": "trade"
+        }
+      ]
+    },
+    {
+      "date": "2022-02-07",
+      "value": 10025.05,
+      "contributionBaseline": 10005.05,
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "AAPL",
+            "date": "2022-02-07"
+          }
+        ]
+      },
+      "quotes": [
+        {
+          "commodity": "AAPL",
+          "date": "2022-01-15",
+          "source": "trade"
+        }
+      ]
+    }
+  ]
+}

@@ -141,9 +141,7 @@ func TestConcurrentInitializationUsesSQLiteLock(t *testing.T) {
 	errors := make(chan error, 2)
 	var wg sync.WaitGroup
 	for range 2 {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			<-start
 			db, err := initializePath(context.Background(), dbPath, migrations)
 			if err == nil {
@@ -156,7 +154,7 @@ func TestConcurrentInitializationUsesSQLiteLock(t *testing.T) {
 				}
 			}
 			errors <- err
-		}()
+		})
 	}
 	close(start)
 	wg.Wait()
