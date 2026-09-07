@@ -10,7 +10,7 @@ Current net worth uses the existing valuation path. The difference between net w
 
 Monthly operational income excludes capital gains, dividends, and interest. Monthly expenses include all `Expenses:*`, including taxes. Investment transfers use actual net external contributions, excluding reinvested dividends and internal investment transfers. Forecast and future postings are excluded.
 
-Each recurring assumption is the median of the most recent six completed historical months. One to five available months produce a partial baseline with a sample count. Observed zero months count; months before a series has history are not invented. With zero samples, the assumption is unavailable. A negative income or expense median caused by reversals is unavailable rather than converted to an absolute value.
+Each recurring assumption is the median of the most recent six completed historical months. One to five available months produce a partial baseline with a sample count. Observed zero months count; months before a series has history are not invented. Zero historical samples leave income and expenses unavailable. For investment transfers, no recorded investment activity is an explicit first-time-investor state: opening investments and baseline monthly investment transfer are zero. A negative income or expense median caused by reversals is unavailable rather than converted to an absolute value.
 
 A comparison requires known starting cash and all three recurring baseline assumptions. Manual values can be entered and retained, but never fabricate a missing baseline. There is no scenario-only result. Zero investment holdings are valid when the required recurring assumptions are available.
 

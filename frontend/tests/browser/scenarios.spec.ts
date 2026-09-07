@@ -95,14 +95,14 @@ test("scenario controls, events, reset and cash risk", async ({ page }) => {
   );
   await page.getByRole("button", { name: "1Y", exact: true }).click();
   await evaluated;
-  await page.getByLabel("Expected Annual Return (%) · shared").fill("8");
-  await page.getByLabel("Use a different scenario return").check();
+  await page.getByLabel("Expected Annual Return (%)").fill("8");
+  await page.getByLabel("Use separate scenario return rate").check();
   await page.getByLabel("Scenario Annual Return (%)", { exact: true }).fill(
     "-10",
   );
-  await page.getByRole("button", { name: "+ Add one-time event" }).click();
+  await page.getByRole("button", { name: "+ Add Event" }).click();
   await page.getByLabel("Amount", { exact: true }).fill("500000");
-  await page.getByLabel("Optional description").fill(
+  await page.getByLabel("Description").fill(
     "A long bonus description for an illustrative one-time cash event",
   );
   const request = page.waitForRequest((r) =>
@@ -110,15 +110,17 @@ test("scenario controls, events, reset and cash risk", async ({ page }) => {
     r.postDataJSON().oneTimeEvents?.[0]?.amount === 500000
   );
   await request;
-  await page.getByRole("button", { name: "Remove event" }).click();
-  await page.getByRole("button", { name: "Reset scenario" }).click();
+  await page.getByRole("button", { name: "Remove", exact: true }).click();
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(page.getByLabel("Monthly Income", { exact: true })).toHaveValue(
     "150000",
   );
-  await expect(page.getByLabel("Expected Annual Return (%) · shared"))
+  await expect(page.getByLabel("Expected Annual Return (%)"))
     .toHaveValue("0");
-  await expect(page.getByLabel("Use a different scenario return")).not
+  await expect(page.getByLabel("Use separate scenario return rate")).not
     .toBeChecked();
+  await expect(page.getByRole("button", { name: "Reset", exact: true }))
+    .toBeDisabled();
 });
 
 test("missing baseline is unavailable and manual values are retained", async ({ page }) => {
@@ -164,20 +166,32 @@ test("missing baseline is unavailable and manual values are retained", async ({ 
 });
 
 test("validation error and retry", async ({ page }) => {
-  let fail = true;
+  let status = 400;
   await page.route(
     "**/api/scenario/evaluate",
     (route) =>
-      fail
+      status === 400
         ? route.fulfill({
           status: 400,
           json: { code: "scenario_insufficient_investment_balance" },
+        })
+        : status === 500
+        ? route.fulfill({
+          status: 500,
+          json: { code: "scenario_calculation_failed" },
         })
         : route.fulfill({ json: result }),
   );
   await page.goto("/more/scenarios");
   await expect(page.getByRole("alert")).toContainText("withdrawal exceeds");
-  fail = false;
+  await expect(page.getByRole("button", { name: "Retry", exact: true })).toHaveCount(0);
+
+  status = 500;
+  await page.getByLabel("Monthly Income", { exact: true }).fill("160000");
+  await expect(page.getByRole("alert")).toContainText("Unable to calculate");
+  await expect(page.getByRole("button", { name: "Retry", exact: true })).toBeVisible();
+
+  status = 200;
   await page.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(page.locator('[data-testid="scenario-projection"]'))
     .toBeVisible();
@@ -233,9 +247,9 @@ for (const width of [390, 768, 1440, 1728]) {
           '[data-testid="scenario-projection"][data-chart-ready="true"]',
         ),
       ).toBeVisible();
-      await page.getByRole("button", { name: "+ Add one-time event" }).click();
+      await page.getByRole("button", { name: "+ Add Event" }).click();
       await page.getByLabel("Amount", { exact: true }).fill("50000000");
-      await page.getByLabel("Optional description").fill(
+      await page.getByLabel("Description").fill(
         "A long description of a future bonus or withdrawal to verify responsive controls",
       );
       await expect(
@@ -272,7 +286,7 @@ test("privacy masks scenario inputs, metrics and chart tooltips", async ({ page 
   );
   await expect(page.getByLabel("Monthly Income", { exact: true }))
     .toBeDisabled();
-  await page.getByRole("button", { name: "+ Add one-time event" }).click();
+  await page.getByRole("button", { name: "+ Add Event" }).click();
   await expect(page.getByLabel("Amount", { exact: true })).toHaveValue("••••");
   await expect(page.locator("body")).not.toContainText("1,50,000");
   await expect(page.locator("body")).not.toContainText("10,75,000");

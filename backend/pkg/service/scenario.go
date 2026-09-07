@@ -85,7 +85,7 @@ func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBa
 	}
 	addReason := func(code, field string) {
 		b.Quality.Reasons = append(b.Quality.Reasons, ScenarioReason{Code: code, Field: field})
-		if b.Quality.Status == scenarioComplete {
+		if code != "no_investment_activity" && b.Quality.Status == scenarioComplete {
 			b.Quality.Status = "partial"
 		}
 	}

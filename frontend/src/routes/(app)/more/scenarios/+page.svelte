@@ -71,10 +71,22 @@ const number = (value: string) =>
 const inputValue = (field: Field) =>
   overrides[field] ??
     scenarioInput(baseline?.[field]?.value, USER_CONFIG.display_precision);
-const changed = $derived(
-  fields.some((f) => number(overrides[f.key] ?? "") !== undefined) ||
+const scenarioChanged = $derived(
+  fields.some((f) => {
+    const val = number(overrides[f.key] ?? "");
+    return val !== undefined && val !== baseline?.[f.key]?.value;
+  }) ||
     events.length > 0 ||
     (overrideReturn && Number(scenarioReturn) !== Number(annual)),
+);
+const dirty = $derived(
+  scenarioChanged ||
+    fields.some((f) => overrides[f.key] !== undefined) ||
+    horizon !== 60 ||
+    annual !== "0" ||
+    overrideReturn ||
+    scenarioReturn !== "0" ||
+    events.length > 0,
 );
 const notices = $derived(scenarioQuality(baseline?.quality?.reasons));
 function restore() {
@@ -136,7 +148,6 @@ $effect(() => {
   incomplete = unfinished;
   retryable = false;
   error = "";
-  result = undefined;
   if (unfinished) return () => controller.abort();
   const timeout = setTimeout(() => {
     if (
@@ -202,7 +213,7 @@ const metrics = [
     {#snippet actions()}
       <div class="flex items-center gap-2">
         <BoxedTabs options={horizonOptions} bind:value={horizon} />
-        <Button variant="secondary" size="sm" onclick={restore} disabled={baselineLoading || !changed}>Reset</Button>
+        <Button variant="secondary" size="sm" onclick={restore} disabled={baselineLoading || !dirty}>Reset</Button>
       </div>
     {/snippet}
   </PageHeader>
@@ -255,7 +266,7 @@ const metrics = [
         <div class="space-y-1.5 pt-1">
           <div class="flex items-center justify-between text-xs">
             <label for="annual-return" class="font-medium text-foreground">Expected Annual Return (%)</label>
-            <span class="text-muted-foreground">Deterministic rate</span>
+            <span class="text-muted-foreground">Shared baseline + scenario</span>
           </div>
           <Input
             inputmode="decimal"
@@ -371,7 +382,7 @@ const metrics = [
           <span>Complete the event month, type, and amount to update the comparison.</span>
         </div>
       {/if}
-      {#if result?.available && !changed}
+      {#if result?.available && !scenarioChanged}
         <div class="mb-4 flex items-center gap-2 rounded-md border border-border bg-surface-raised px-3 py-2 text-xs text-muted-foreground">
           <i class="fas fa-circle-info shrink-0 text-muted-foreground" aria-hidden="true"></i>
           <span>No scenario changes yet. Adjust an assumption on the left to compare it with the baseline.</span>
@@ -400,7 +411,7 @@ const metrics = [
       {/if}
       {#if baselineLoading || evaluating}
         <div role="status" class="mb-3 text-xs text-muted-foreground animate-pulse">
-          {baselineLoading ? "Loading baseline…" : "Evaluating scenario…"}
+          {baselineLoading ? "Loading baseline…" : "Updating comparison…"}
         </div>
       {/if}
 
@@ -409,22 +420,26 @@ const metrics = [
           <div class="rounded-lg border border-border bg-surface p-3.5 flex flex-col justify-between min-h-[92px]">
             <div class="text-xs font-medium uppercase tracking-wider text-muted-foreground">{item.label}</div>
             <div class="mt-1.5">
-              {#if baselineLoading || evaluating}
-                <div class="space-y-1.5">
-                  <Skeleton width="6.5rem" height="1.5rem" />
-                  <Skeleton width="4.5rem" height="0.875rem" />
-                </div>
-              {:else if !result?.available}
+              {#if !result}
+                {#if baselineLoading || evaluating}
+                  <div class="space-y-1.5">
+                    <Skeleton width="6.5rem" height="1.5rem" />
+                    <Skeleton width="4.5rem" height="0.875rem" />
+                  </div>
+                {:else}
+                  <div class="text-base font-semibold text-muted-foreground">Unavailable</div>
+                {/if}
+              {:else if !result.available}
                 <div class="text-base font-semibold text-muted-foreground">Unavailable</div>
-              {:else if !changed}
-                <div class="text-lg font-semibold tabular-nums text-foreground">
+              {:else if !scenarioChanged}
+                <div class="paisa4-metric-value text-lg font-semibold tabular-nums text-foreground">
                   {money(result.baseline?.[item.key])}
                 </div>
                 <div class="mt-0.5 text-xs text-muted-foreground">Baseline = Scenario</div>
               {:else}
                 {@const delta = result.impact?.[item.delta]}
                 {@const tone = impactTone(item.key, delta, result.scenario?.[item.key])}
-                <div class="text-lg font-semibold tabular-nums text-foreground">
+                <div class="paisa4-metric-value text-lg font-semibold tabular-nums text-foreground">
                   {money(result.scenario?.[item.key])}
                 </div>
                 <div class="mt-0.5 flex items-center justify-between text-xs">
@@ -442,7 +457,7 @@ const metrics = [
       {#if result?.available}
         <div class="mt-4 rounded-lg border border-border bg-surface-raised p-3 space-y-2">
           <div class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cash Buffer & Health</div>
-          {#if !changed}
+          {#if !scenarioChanged}
             <p class="text-xs text-muted-foreground {result.scenario?.openingCashNegative || !!result.scenario?.firstNegativeCashMonth ? 'text-warning' : ''}">
               {#if result.scenario?.openingCashNegative}Opening cash is negative. {:else if result.scenario?.firstNegativeCashMonth}Cash turns negative in {result.scenario.firstNegativeCashMonth}. {:else}Cash buffer remains non-negative throughout projection. {/if}
               Lowest cash: <span class="font-medium text-foreground tabular-nums">{money(result.scenario?.minimumCashBalance)}</span>
@@ -514,7 +529,6 @@ const metrics = [
           data={chart}
           ariaLabel={$obscure ? "Baseline and scenario projection. Values hidden." : "Baseline dashed and scenario solid monthly projection"}
           testId="scenario-projection"
-          internalLegend
         />
       </ChartFrame>
     {:else}

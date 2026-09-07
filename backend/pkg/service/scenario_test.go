@@ -332,3 +332,26 @@ func TestScenarioFirstTimeInvestor(t *testing.T) {
 	require.True(t, r.Scenario.EndingInvestment.Equal(*scenarioMoney(240000)))
 	require.True(t, r.Impact.EndingNetWorthDelta.IsZero())
 }
+
+func TestScenarioFirstTimeInvestorCompleteStatus(t *testing.T) {
+	db := serviceTestDB(t)
+	ps := []posting.Posting{
+		performancePost("cash", "2026-03-01", "Assets:Checking", "INR", 200000, 200000),
+	}
+	// 6 months of historical income and expenses
+	for m := 3; m <= 8; m++ {
+		date := fmt.Sprintf("2026-%02d-15", m)
+		ps = append(ps,
+			performancePost(fmt.Sprintf("inc-%d", m), date, "Income:Salary", "INR", -50000, -50000),
+			performancePost(fmt.Sprintf("exp-%d", m), date, "Expenses:Rent", "INR", 20000, 20000),
+		)
+	}
+	require.NoError(t, db.Create(&ps).Error)
+	b, err := BuildScenarioBaseline(db, time.Date(2026, 9, 7, 0, 0, 0, 0, time.Local), 12)
+	require.NoError(t, err)
+	require.Equal(t, "complete", b.Quality.Status)
+	require.Equal(t, "no_investment_activity", b.MonthlyInvestmentTransfer.Source)
+	require.Len(t, b.Quality.Reasons, 1)
+	require.Equal(t, "no_investment_activity", b.Quality.Reasons[0].Code)
+}
+
