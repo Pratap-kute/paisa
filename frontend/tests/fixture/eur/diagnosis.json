@@ -1,3 +1,198 @@
 {
-  "issues": []
+  "summary": {
+    "total": 5,
+    "danger": 0,
+    "warning": 3,
+    "info": 2,
+    "passedChecks": 8,
+    "totalChecks": 11
+  },
+  "issues": [
+    {
+      "level": "warning",
+      "summary": "AAPL valuation fallback",
+      "description": "Paisa could not obtain a market quote for AAPL at the current valuation date and fell back to trade pricing.",
+      "details": "Context: Current portfolio valuation · Commodity: AAPL · Fallback source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "AAPL"
+      },
+      "affectedFeatures": [
+        "Net Worth",
+        "Scenario Planning"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/prices"
+      },
+      "metadata": {
+        "commodity": "AAPL",
+        "context": "Current portfolio valuation",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "AAPL valuation fallback (Current FY as-of)",
+      "description": "Paisa could not obtain a market quote for AAPL at Current FY as-of date (2022-02-07) and fell back to trade pricing.",
+      "details": "Context: Current FY closing/as-of valuation · Date: 2022-02-07 · Commodity: AAPL · Source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "AAPL"
+      },
+      "affectedFeatures": [
+        "Investment Performance"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/prices"
+      },
+      "metadata": {
+        "boundary": "closing",
+        "commodity": "AAPL",
+        "date": "2022-02-07",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "No Historical Expense Data",
+      "description": "Scenario Planning has zero completed months of expense history and cannot calculate a monthly expense baseline.",
+      "details": "Scenario Planning requires historical expense postings to compute baseline assumptions.",
+      "code": "insufficient_expense_history",
+      "category": "history",
+      "affectedFeatures": [
+        "Scenario Planning"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/scenarios"
+      },
+      "metadata": {
+        "samples": "0"
+      }
+    },
+    {
+      "level": "info",
+      "summary": "Limited Contribution History",
+      "description": "Scenario Planning currently uses 1 completed months of contribution history. The baseline is usable but based on less history than usual.",
+      "details": "Sample count: 1 of recommended 6 completed months.",
+      "code": "insufficient_contribution_history",
+      "category": "history",
+      "affectedFeatures": [
+        "Scenario Planning"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/scenarios"
+      },
+      "metadata": {
+        "samples": "1"
+      }
+    },
+    {
+      "level": "info",
+      "summary": "Limited Income History",
+      "description": "Scenario Planning currently uses 1 completed months of income history. The baseline is usable but based on less history than usual.",
+      "details": "Sample count: 1 of recommended 6 completed months.",
+      "code": "insufficient_income_history",
+      "category": "history",
+      "affectedFeatures": [
+        "Scenario Planning"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/scenarios"
+      },
+      "metadata": {
+        "samples": "1"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "code": "asset_balance_integrity",
+      "name": "Asset Balance Integrity",
+      "category": "ledger",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "posting_direction",
+      "name": "Posting Direction",
+      "category": "ledger",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "exchange_price_coverage",
+      "name": "Exchange Price Coverage",
+      "category": "valuation",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "journal_price_consistency",
+      "name": "Journal Price Consistency",
+      "category": "valuation",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "allocation_configuration",
+      "name": "Allocation Configuration",
+      "category": "configuration",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "current_valuation_quality",
+      "name": "Current Valuation Quality",
+      "category": "valuation",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 1
+    },
+    {
+      "code": "current_fy_valuation_quality",
+      "name": "Current FY Performance Valuation Quality",
+      "category": "valuation",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 1
+    },
+    {
+      "code": "investment_income_attribution",
+      "name": "Investment Income Attribution",
+      "category": "investments",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "performance_reconciliation",
+      "name": "Performance Reconciliation",
+      "category": "investments",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "scenario_history_readiness",
+      "name": "Scenario History Readiness",
+      "category": "history",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 3
+    },
+    {
+      "code": "scenario_checking_readiness",
+      "name": "Scenario Checking Account Readiness",
+      "category": "configuration",
+      "status": "passed",
+      "issueCount": 0
+    }
+  ]
 }

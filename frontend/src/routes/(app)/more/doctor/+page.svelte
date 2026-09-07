@@ -1,28 +1,77 @@
 <script lang="ts">
 import { api } from "$lib/api";
-import type { Issue } from "$lib/features/diagnosis/types";
-import { onMount } from "svelte";
+import type {
+  DiagnosisResponse,
+  DiagnosticCheck,
+  QualityIssue,
+} from "$lib/features/diagnosis/types";
+import DiagnosisStatusBanner from "$lib/features/diagnosis/components/DiagnosisStatusBanner.svelte";
+import DiagnosisMetrics from "$lib/features/diagnosis/components/DiagnosisMetrics.svelte";
+import QualityIssueRow from "$lib/features/diagnosis/components/QualityIssueRow.svelte";
+import HealthyChecksList from "$lib/features/diagnosis/components/HealthyChecksList.svelte";
 import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
 import Section from "$lib/shared/layout/Section.svelte";
 import Card from "$lib/shared/ui/Card.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
 import Button from "$lib/shared/ui/Button.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
+import { onMount } from "svelte";
 
-let issues: Issue[] = $state([]);
+let issues = $state<QualityIssue[]>([]);
+let checks = $state<DiagnosticCheck[]>([]);
+let summary = $state({
+  total: 0,
+  danger: 0,
+  warning: 0,
+  info: 0,
+  passedChecks: 0,
+  totalChecks: 11,
+});
 let isLoading = $state(true);
+let error = $state<string | null>(null);
 let lastChecked = $state<Date | null>(null);
 
+let attentionIssues = $derived(
+  issues.filter((i) => i.level === "danger" || i.level === "warning"),
+);
+
+let infoIssues = $derived(issues.filter((i) => i.level === "info"));
+
 async function runDiagnosis() {
+  if (isLoading && lastChecked !== null) return;
   isLoading = true;
+  error = null;
   try {
-    const response = await api.diagnosis.getDiagnosis() as unknown as {
-      issues: Issue[];
-    };
+    const response = (await api.diagnosis.getDiagnosis()) as unknown as DiagnosisResponse;
     issues = response.issues || [];
+    checks = response.checks || [];
+    if (response.summary) {
+      summary = {
+        total: response.summary.total ?? issues.length,
+        danger: response.summary.danger ?? 0,
+        warning: response.summary.warning ?? 0,
+        info: response.summary.info ?? 0,
+        passedChecks: response.summary.passedChecks ?? checks.filter((c) => c.status === "passed").length,
+        totalChecks: response.summary.totalChecks ?? (checks.length || 11),
+      };
+    } else {
+      let d = 0, w = 0, inf = 0;
+      for (const iss of issues) {
+        if (iss.level === "danger") d++;
+        else if (iss.level === "warning") w++;
+        else inf++;
+      }
+      summary = {
+        total: issues.length,
+        danger: d,
+        warning: w,
+        info: inf,
+        passedChecks: checks.filter((c) => c.status === "passed").length,
+        totalChecks: checks.length || 11,
+      };
+    }
     lastChecked = new Date();
+  } catch (err: unknown) {
+    error = err instanceof Error ? err.message : "Failed to load diagnostic results.";
   } finally {
     isLoading = false;
   }
@@ -31,61 +80,6 @@ async function runDiagnosis() {
 onMount(() => {
   runDiagnosis();
 });
-
-const diagnosticChecks = [
-  {
-    title: "Journal Syntax & Balance",
-    desc:
-      "Checks double-entry balance, valid accounts, and transaction formats",
-    icon: "fa-solid fa-scale-balanced",
-  },
-  {
-    title: "Configuration Health",
-    desc:
-      "Validates configuration parameters, file paths, and commodity mappings",
-    icon: "fa-solid fa-gear",
-  },
-  {
-    title: "Price DB & Commodities",
-    desc:
-      "Verifies historical price entries, dates, and currency exchange rates",
-    icon: "fa-solid fa-chart-line",
-  },
-  {
-    title: "Import Rules & Templates",
-    desc:
-      "Validates bank statement regex rules and auto-tagging transformations",
-    icon: "fa-solid fa-file-import",
-  },
-];
-
-let issueCounts = $derived.by(() => {
-  let warning = 0;
-  let danger = 0;
-  let info = 0;
-  for (const issue of issues) {
-    if (issue.level === "warning") warning++;
-    else if (issue.level === "danger" || issue.level === "error") danger++;
-    else info++;
-  }
-  return { total: issues.length, warning, danger, info };
-});
-
-function levelVariant(
-  level: string,
-): "info" | "warning" | "danger" | "neutral" {
-  switch (level?.toLowerCase()) {
-    case "danger":
-    case "error":
-      return "danger";
-    case "warning":
-      return "warning";
-    case "info":
-      return "info";
-    default:
-      return "neutral";
-  }
-}
 </script>
 
 <svelte:head>
@@ -95,11 +89,16 @@ function levelVariant(
 <Page width="analysis">
   <PageHeader
     title="Doctor"
-    description="Automated diagnostic checks for journal integrity, configuration, and price records"
+    description="Automated diagnostic checks for journal integrity, valuation, and reconciliation"
   >
     {#snippet actions()}
       <div class="flex items-center gap-2">
-        <Button variant="secondary" size="sm" onclick={runDiagnosis}>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={isLoading}
+          onclick={runDiagnosis}
+        >
           {#snippet icon()}
             <i class="fas fa-rotate-right {isLoading ? 'animate-spin' : ''}"></i>
           {/snippet}
@@ -110,122 +109,84 @@ function levelVariant(
   </PageHeader>
 
   <Section>
-    <div class="flex flex-col gap-5">
-      <!-- High-Level Health Status Banner -->
-      <Card padding="md" class="w-full overflow-hidden">
-        <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div class="flex items-center gap-4 text-center md:text-left">
-            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full {issues.length === 0 ? 'bg-positive/10 text-positive' : 'bg-negative/10 text-negative'} text-xl">
-              <i class="fas {issues.length === 0 ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
-            </div>
-            <div>
-              <div class="flex items-center justify-center gap-2 md:justify-start">
-                <h2 class="text-base font-bold text-foreground">
-                  {issues.length === 0 ? "All Systems Operational" : `${issues.length} potential issue(s) found`}
-                </h2>
-                <Badge variant={issues.length === 0 ? "success" : "danger"} size="sm" rounded>
-                  {issues.length === 0 ? "Healthy" : "Attention Required"}
-                </Badge>
+    <div class="flex flex-col gap-6">
+      {#if error}
+        <!-- Diagnostic Failure State -->
+        <Card padding="md" class="border-negative/30 bg-negative/5">
+          <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-negative/10 text-negative">
+                <i class="fa-solid fa-triangle-exclamation"></i>
               </div>
-              <p class="text-xs text-muted-foreground">
-                {issues.length === 0
-                  ? "Your ledger journals, configuration files, and price records are healthy with no syntax or balance errors."
-                  : "Review the diagnostic reports below to resolve configuration warnings or journal inconsistencies."}
-              </p>
+              <div>
+                <h3 class="text-sm font-bold text-foreground">
+                  Doctor could not complete the diagnostic checks
+                </h3>
+                <p class="text-xs text-muted-foreground">{error}</p>
+              </div>
             </div>
+            <Button variant="secondary" size="sm" onclick={runDiagnosis}>
+              Retry
+            </Button>
           </div>
+        </Card>
+      {:else}
+        <!-- Severity-Aware Health Status Banner -->
+        <DiagnosisStatusBanner
+          dangerCount={summary.danger}
+          warningCount={summary.warning}
+          infoCount={summary.info}
+          totalIssues={summary.total}
+          passedChecks={summary.passedChecks}
+          totalChecks={summary.totalChecks}
+          {lastChecked}
+          loading={isLoading}
+        />
 
-          <div class="flex items-center gap-2">
-            {#if lastChecked}
-              <span class="text-xs text-muted-foreground">
-                Last checked: {lastChecked.toLocaleTimeString()}
-              </span>
-            {/if}
+        <!-- KPI Metric Summary -->
+        <DiagnosisMetrics
+          dangerCount={summary.danger}
+          warningCount={summary.warning}
+          infoCount={summary.info}
+          passedChecks={summary.passedChecks}
+          totalChecks={summary.totalChecks}
+          loading={isLoading}
+        />
+
+        <!-- Needs Attention Section (Critical & Warnings) -->
+        {#if !isLoading && attentionIssues.length > 0}
+          <div data-testid="diagnosis-attention-section">
+            <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Needs Attention
+            </h3>
+            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden px-4">
+              {#each attentionIssues as issue, index (`attention-${index}-${issue.code}-${issue.entity?.id ?? ""}`)}
+                <QualityIssueRow {issue} />
+              {/each}
+            </Card>
           </div>
-        </div>
-      </Card>
+        {/if}
 
-      <!-- KPI Metric Summary -->
-      <MetricStrip cols="auto">
-        <Metric
-          label="Total Issues"
-          value={String(issueCounts.total)}
-          status={issueCounts.total === 0 ? "positive" : "negative"}
-        />
-        <Metric
-          label="Critical Errors"
-          value={String(issueCounts.danger)}
-          status={issueCounts.danger === 0 ? "neutral" : "negative"}
-        />
-        <Metric
-          label="Warnings"
-          value={String(issueCounts.warning)}
-          status={issueCounts.warning === 0 ? "neutral" : "warning"}
-        />
-        <Metric
-          label="Check Status"
-          value={isLoading ? "Scanning..." : (issues.length === 0 ? "Passed" : "Action Needed")}
-          status={issues.length === 0 ? "positive" : "warning"}
-        />
-      </MetricStrip>
+        <!-- Informational Section -->
+        {#if !isLoading && infoIssues.length > 0}
+          <div data-testid="diagnosis-info-section">
+            <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Information
+            </h3>
+            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden px-4">
+              {#each infoIssues as issue, index (`info-${index}-${issue.code}-${issue.entity?.id ?? ""}`)}
+                <QualityIssueRow {issue} />
+              {/each}
+            </Card>
+          </div>
+        {/if}
 
-      <!-- Diagnostic Checks Grid -->
-      <div>
-        <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Diagnostic Suite
-        </h3>
-        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {#each diagnosticChecks as check}
-            <div class="flex items-start gap-3 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface p-3.5 shadow-sm">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--paisa-radius-sm)] bg-surface-raised text-primary">
-                <i class={check.icon}></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-foreground">{check.title}</span>
-                  <span class="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-positive">
-                    <i class="fas fa-check text-[0.625rem]"></i> Active
-                  </span>
-                </div>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {check.desc}
-                </p>
-              </div>
-            </div>
-          {/each}
-        </div>
-      </div>
-
-      <!-- Issues List (when issues exist) -->
-      {#if issues.length > 0}
+        <!-- Healthy Checks Section -->
         <div>
-          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Detected Issues & Recommendations
+          <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Healthy Checks
           </h3>
-          <div class="flex flex-col gap-3" data-testid="diagnosis-list">
-            {#each issues as issue, index (`${issue.level}-${issue.summary}-${index}`)}
-              <Card padding="md" class="border-l-4 border-l-[var(--paisa-{issue.level === 'danger' ? 'negative' : (issue.level === 'warning' ? 'warning' : 'primary')} )]">
-                <div class="flex items-center justify-between gap-2 border-b border-border-subtle pb-2">
-                  <div class="flex items-center gap-2">
-                    <Badge variant={levelVariant(issue.level)} size="sm" class="uppercase">
-                      {issue.level || "info"}
-                    </Badge>
-                    <h4 class="text-sm font-semibold text-foreground">
-                      {issue.summary}
-                    </h4>
-                  </div>
-                </div>
-                <div class="pt-2 text-xs text-muted-foreground">
-                  <div class="leading-relaxed">{@html issue.description}</div>
-                  {#if issue.details}
-                    <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised p-2.5 font-mono text-[0.75rem] text-foreground">
-                      {@html issue.details}
-                    </div>
-                  {/if}
-                </div>
-              </Card>
-            {/each}
-          </div>
+          <HealthyChecksList {checks} />
         </div>
       {/if}
     </div>

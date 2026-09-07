@@ -13,7 +13,14 @@ import (
 	"gorm.io/gorm"
 )
 
-const performancePartial = "partial"
+const (
+	performancePartial         = "partial"
+	PerformancePresetCurrentFY = "current_fy"
+	ValuationSourceMarket      = "market"
+	ValuationSourceCost        = "cost"
+	ReasonValuationFallback    = "valuation_fallback"
+	ReasonUnattributedIncome   = "unattributed_investment_income"
+)
 
 var ErrPerformanceRange = errors.New("invalid_investment_performance_range")
 var ErrPerformanceReconciliation = errors.New("investment_performance_reconciliation_failed")
@@ -108,7 +115,7 @@ func resolvePerformancePeriod(o PerformanceOptions, first time.Time) (time.Time,
 		}
 	} else {
 		switch o.Preset {
-		case "", "current_fy":
+		case "", PerformancePresetCurrentFY:
 			start = utils.BeginningOfFinancialYear(today)
 		case "previous_fy":
 			start = utils.BeginningOfFinancialYear(today).AddDate(-1, 0, 0)
@@ -175,20 +182,20 @@ func performanceValuation(db *gorm.DB, events []investmentEvent, date time.Time)
 			continue
 		}
 		p := GetUnitPrice(db, commodity, date)
-		source := "market"
+		source := ValuationSourceMarket
 		quoteDate := ""
 		if !p.Date.IsZero() {
 			quoteDate = p.Date.Format("2006-01-02")
 		}
 		if p.Value.IsZero() {
-			source = "cost"
+			source = ValuationSourceCost
 		} else if p.CommodityType == config.Unknown {
 			source = "trade"
 		}
 		quotes = append(quotes, PerformanceQuote{Commodity: commodity, Date: quoteDate, Source: source})
-		if source != "market" {
+		if source != ValuationSourceMarket {
 			q.Status = performancePartial
-			q.Reasons = append(q.Reasons, PerformanceReason{Code: "valuation_fallback", Commodity: commodity, Date: date.Format("2006-01-02")})
+			q.Reasons = append(q.Reasons, PerformanceReason{Code: ReasonValuationFallback, Commodity: commodity, Date: date.Format("2006-01-02")})
 		}
 	}
 	return n, q, quotes
@@ -396,8 +403,8 @@ func flagUnattributedIncome(r *InvestmentPerformance, evidence []performanceInco
 		case len(item.accounts) == 0:
 			// globally unattributed
 			r.Quality.Status = performancePartial
-			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: "unattributed_investment_income", Date: item.date})
-			suppressPerformanceReturn(r, "unattributed_investment_income")
+			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: ReasonUnattributedIncome, Date: item.date})
+			suppressPerformanceReturn(r, ReasonUnattributedIncome)
 		case matched == 0:
 			// positively attributed outside this scope
 		case matched == len(item.accounts):
@@ -405,8 +412,8 @@ func flagUnattributedIncome(r *InvestmentPerformance, evidence []performanceInco
 		default:
 			// attribution crosses this scope boundary
 			r.Quality.Status = performancePartial
-			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: "unattributed_investment_income", Date: item.date})
-			suppressPerformanceReturn(r, "unattributed_investment_income")
+			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: ReasonUnattributedIncome, Date: item.date})
+			suppressPerformanceReturn(r, ReasonUnattributedIncome)
 		}
 	}
 }

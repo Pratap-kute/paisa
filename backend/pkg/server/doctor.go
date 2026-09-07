@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/query"
 	"github.com/ananthakumaran/paisa/pkg/service"
-	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
@@ -37,76 +35,74 @@ type Rule struct {
 	Predicate func(db *gorm.DB) []error
 }
 
-const DateFormat string = "02 Jan 2006"
+const DateFormat = "02 Jan 2006"
 
-var rules []Rule
-
-func init() {
-	rules = []Rule{
-		{
-			Issue: Issue{
-				Level:       ERROR,
-				Summary:     "Negative Balance",
-				Description: "The running balance of an <b>asset</b> account is not supposed to go negative at any time. This issue typically happens due to incorrect transaction entries.",
-			},
-			Predicate: ruleAssetRegisterNonNegative,
-		},
-		{
-			Issue: Issue{
-				Level:       ERROR,
-				Summary:     "Credit Entry",
-				Description: "Income account should never have credit entry.",
-			},
-			Predicate: ruleNonCreditAccount,
-		},
-		{
-			Issue: Issue{
-				Level:       ERROR,
-				Summary:     "Debit Entry",
-				Description: "Expense Account should never have debit entry.",
-			},
-			Predicate: ruleNonDebitAccount,
-		},
-		{
-			Issue: Issue{
-				Level:       ERROR,
-				Summary:     "Exchange Price Missing",
-				Description: "Exchange price is missing for the commodity.",
-			},
-			Predicate: ruleExchangePriceMissing,
-		},
-		{
-			Issue: Issue{
-				Level:       WARN,
-				Summary:     "Unit Price Mismatch",
-				Description: "Unit price used in the journal doesn't match the price fetched from external system.",
-			},
-			Predicate: ruleJournalPriceMismatch,
-		},
-		{
-			Issue: Issue{
-				Level:       WARN,
-				Summary:     "Asset Accounts missing from Allocation Target",
-				Description: "Asset accounts are not part of any allocation target.",
-			},
-			Predicate: ruleAllocationTargetMissingAssetAccounts,
-		},
-	}
-}
-
+// GetDiagnosis delegates to the canonical diagnosis service and adapts results to the DTO response.
 func GetDiagnosis(db *gorm.DB) dto.DiagnosisResponse {
-	issues := make([]dto.IssueResponse, 0, len(rules))
-	for _, rule := range rules {
-		for _, err := range rule.Predicate(db) {
-			issues = append(issues, dto.IssueResponse{
-				Level:       string(rule.Issue.Level),
-				Summary:     rule.Issue.Summary,
-				Description: rule.Issue.Description,
-				Details:     err.Error(),
-			})
+	res := service.GetDiagnosis(db)
+
+	issues := make([]dto.IssueResponse, 0, len(res.Issues))
+	for i := range res.Issues {
+		issue := &res.Issues[i]
+		var entity *dto.IssueEntity
+		if issue.Entity != nil {
+			entity = &dto.IssueEntity{
+				Type:  issue.Entity.Type,
+				ID:    issue.Entity.ID,
+				Label: issue.Entity.Label,
+			}
 		}
+		var action *dto.IssueAction
+		if issue.Action != nil {
+			action = &dto.IssueAction{
+				Label: issue.Action.Label,
+				Href:  issue.Action.Href,
+			}
+		}
+
+		issues = append(issues, dto.IssueResponse{
+			Level:            string(issue.Level),
+			Summary:          issue.Summary,
+			Description:      issue.Description,
+			Details:          issue.Details,
+			Code:             issue.Code,
+			Category:         string(issue.Category),
+			Entity:           entity,
+			AffectedFeatures: issue.AffectedFeatures,
+			Action:           action,
+			Metadata:         issue.Metadata,
+		})
 	}
-	return dto.DiagnosisResponse{Issues: issues}
+
+	checks := make([]dto.DiagnosticCheckResponse, 0, len(res.Checks))
+	for _, c := range res.Checks {
+		var maxSev *string
+		if c.MaxSeverity != nil {
+			s := string(*c.MaxSeverity)
+			maxSev = &s
+		}
+		checks = append(checks, dto.DiagnosticCheckResponse{
+			Code:        c.Code,
+			Name:        c.Name,
+			Category:    string(c.Category),
+			Status:      string(c.Status),
+			MaxSeverity: maxSev,
+			IssueCount:  c.IssueCount,
+		})
+	}
+
+	return dto.DiagnosisResponse{
+		Summary: dto.DiagnosisSummaryResponse{
+			Total:        res.Summary.Total,
+			Danger:       res.Summary.Danger,
+			Warning:      res.Summary.Warning,
+			Info:         res.Summary.Info,
+			PassedChecks: res.Summary.PassedChecks,
+			TotalChecks:  res.Summary.TotalChecks,
+		},
+		Issues: issues,
+		Checks: checks,
+	}
 }
 
 func ruleAssetRegisterNonNegative(db *gorm.DB) []error {
@@ -145,53 +141,6 @@ func ruleNonDebitAccount(db *gorm.DB) []error {
 		}
 	}
 	return errs
-}
-
-func ruleExchangePriceMissing(db *gorm.DB) []error {
-	errs := make([]error, 0)
-	postings := query.Init(db).Desc().All()
-
-	for i := range postings {
-		p := &postings[i]
-		if !utils.IsCurrency(p.Commodity) {
-			externalPrice := service.GetUnitPrice(db, p.Commodity, p.Date)
-			if externalPrice.CommodityName != "" && externalPrice.CommodityName != p.Commodity {
-				errs = append(errs, fmt.Errorf("exchange price from <b>%s</b> to your default currency <b>%s</b> is not specified for posting %s", p.Commodity, config.DefaultCurrency(), formatPosting(*p)))
-			}
-		}
-	}
-	return errs
-}
-
-func ruleJournalPriceMismatch(db *gorm.DB) []error {
-	errs := make([]error, 0)
-	postings := query.Init(db).Desc().All()
-	for i := range postings {
-		p := &postings[i]
-		if !utils.IsCurrency(p.Commodity) {
-			externalPrice := service.GetUnitPrice(db, p.Commodity, p.Date)
-			diff := externalPrice.Value.Sub(p.Price()).Abs()
-			if externalPrice.CommodityName == p.Commodity &&
-				externalPrice.CommodityType != config.Unknown &&
-				!service.IsSellWithCapitalGains(db, *p) &&
-				diff.GreaterThanOrEqual(decimal.NewFromFloat(0.0001)) {
-				errs = append(errs, fmt.Errorf("the price specified in your posting %s doesn't match the price <b>%.4f</b> (%s) fetched from external system", formatPosting(*p), externalPrice.Value.InexactFloat64(), externalPrice.Date.Format(DateFormat)))
-			}
-		}
-	}
-	return errs
-}
-
-func formatPosting(p posting.Posting) string {
-	var price string
-	if p.Quantity.Equal(p.Amount) {
-		price = fmt.Sprintf("%.4f %s", p.Quantity.InexactFloat64(), p.Commodity)
-	} else {
-		price = fmt.Sprintf("%.4f %s @ %.4f %s", p.Quantity.InexactFloat64(), p.Commodity, p.Price().InexactFloat64(), config.DefaultCurrency())
-	}
-
-	postingURL := fmt.Sprintf("/ledger/editor/%s#%d", url.PathEscape(p.FileName), p.TransactionBeginLine)
-	return fmt.Sprintf("<a href=\"%s\"> %s\t%s\t%s</a>", postingURL, p.Date.Format(DateFormat), p.Account, price)
 }
 
 func ruleAllocationTargetMissingAssetAccounts(db *gorm.DB) []error {
