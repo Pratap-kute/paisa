@@ -1536,6 +1536,114 @@
                 }
             }
         },
+        "/scenario/baseline": {
+            "get": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scenario"
+                ],
+                "summary": "Current assumptions for a what-if comparison",
+                "operationId": "getScenarioBaseline",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Projection months, 1–120 (default 60)",
+                        "name": "horizonMonths",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScenarioBaseline"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/scenario/evaluate": {
+            "post": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Scenario"
+                ],
+                "summary": "Compare a temporary scenario against the current trajectory",
+                "operationId": "evaluateScenario",
+                "parameters": [
+                    {
+                        "description": "Absolute overrides; annual returns are ratios",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScenarioRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScenarioResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/schedule_al": {
             "get": {
                 "security": [
@@ -4041,6 +4149,301 @@
                     "items": {
                         "$ref": "#/definitions/dto.TransactionSequenceResponse"
                     }
+                }
+            }
+        },
+        "dto.ScenarioAssumption": {
+            "type": "object",
+            "properties": {
+                "sampleCount": {
+                    "type": "integer"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number",
+                    "x-nullable": true
+                }
+            }
+        },
+        "dto.ScenarioAssumptions": {
+            "type": "object",
+            "properties": {
+                "annualInvestmentReturn": {
+                    "type": "number"
+                },
+                "horizonMonths": {
+                    "type": "integer"
+                },
+                "scenarioAnnualInvestmentReturn": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.ScenarioBaseline": {
+            "type": "object",
+            "properties": {
+                "asOfDate": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "currentCash": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "currentInvestmentValue": {
+                    "type": "number"
+                },
+                "currentNetWorth": {
+                    "type": "number"
+                },
+                "horizonMonths": {
+                    "type": "integer"
+                },
+                "monthlyExpenses": {
+                    "$ref": "#/definitions/dto.ScenarioAssumption"
+                },
+                "monthlyIncome": {
+                    "$ref": "#/definitions/dto.ScenarioAssumption"
+                },
+                "monthlyInvestmentTransfer": {
+                    "$ref": "#/definitions/dto.ScenarioAssumption"
+                },
+                "quality": {
+                    "$ref": "#/definitions/dto.ScenarioQuality"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "staticNetWorthComponent": {
+                    "type": "number",
+                    "x-nullable": true
+                }
+            }
+        },
+        "dto.ScenarioEvent": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ScenarioImpact": {
+            "type": "object",
+            "properties": {
+                "endingCashDelta": {
+                    "type": "number"
+                },
+                "endingInvestmentDelta": {
+                    "type": "number"
+                },
+                "endingNetWorthDelta": {
+                    "type": "number"
+                },
+                "investmentGrowthDelta": {
+                    "type": "number"
+                },
+                "minimumCashDelta": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.ScenarioPoint": {
+            "type": "object",
+            "properties": {
+                "cash": {
+                    "type": "number"
+                },
+                "expenses": {
+                    "type": "number"
+                },
+                "income": {
+                    "type": "number"
+                },
+                "investment": {
+                    "type": "number"
+                },
+                "investmentGrowth": {
+                    "type": "number"
+                },
+                "investmentTransfer": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "netWorth": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.ScenarioProjection": {
+            "type": "object",
+            "properties": {
+                "endDate": {
+                    "type": "string"
+                },
+                "endingCash": {
+                    "type": "number"
+                },
+                "endingInvestment": {
+                    "type": "number"
+                },
+                "endingNetWorth": {
+                    "type": "number"
+                },
+                "firstNegativeCashMonth": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "minimumCashBalance": {
+                    "type": "number"
+                },
+                "openingCash": {
+                    "type": "number"
+                },
+                "openingCashNegative": {
+                    "type": "boolean"
+                },
+                "openingInvestment": {
+                    "type": "number"
+                },
+                "openingNetWorth": {
+                    "type": "number"
+                },
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ScenarioPoint"
+                    }
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "totalExpenses": {
+                    "type": "number"
+                },
+                "totalIncome": {
+                    "type": "number"
+                },
+                "totalInvestmentGrowth": {
+                    "type": "number"
+                },
+                "totalInvestmentTransfers": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.ScenarioQuality": {
+            "type": "object",
+            "properties": {
+                "reasons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ScenarioReason"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ScenarioReason": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "field": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ScenarioRequest": {
+            "type": "object",
+            "properties": {
+                "annualInvestmentReturn": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "horizonMonths": {
+                    "type": "integer"
+                },
+                "monthlyExpenses": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "monthlyIncome": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "monthlyInvestmentTransfer": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "oneTimeEvents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ScenarioEvent"
+                    }
+                },
+                "scenarioAnnualInvestmentReturn": {
+                    "type": "number",
+                    "x-nullable": true
+                }
+            }
+        },
+        "dto.ScenarioResult": {
+            "type": "object",
+            "properties": {
+                "assumptions": {
+                    "$ref": "#/definitions/dto.ScenarioAssumptions"
+                },
+                "available": {
+                    "type": "boolean"
+                },
+                "baseline": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ScenarioProjection"
+                        }
+                    ],
+                    "x-nullable": true
+                },
+                "impact": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ScenarioImpact"
+                        }
+                    ],
+                    "x-nullable": true
+                },
+                "quality": {
+                    "$ref": "#/definitions/dto.ScenarioQuality"
+                },
+                "scenario": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ScenarioProjection"
+                        }
+                    ],
+                    "x-nullable": true
+                },
+                "snapshot": {
+                    "$ref": "#/definitions/dto.ScenarioBaseline"
                 }
             }
         },

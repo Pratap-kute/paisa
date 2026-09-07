@@ -78,7 +78,11 @@ export function normalizeApiError(err: unknown): AppApiError {
     const status = typeof errorObj.status === "number"
       ? errorObj.status
       : undefined;
-    const code = typeof errorObj.code === "string" ? errorObj.code : undefined;
+    const code = typeof errorObj.code === "string"
+      ? errorObj.code
+      : typeof nestedError?.code === "string"
+      ? nestedError.code
+      : undefined;
     return { status, code, message };
   }
 

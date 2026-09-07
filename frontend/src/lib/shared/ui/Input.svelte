@@ -10,7 +10,8 @@ type InputType =
   | "search"
   | "tel"
   | "url"
-  | "date";
+  | "date"
+  | "month";
 type InputSize = "sm" | "md" | "lg";
 
 interface Props {

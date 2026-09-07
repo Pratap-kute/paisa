@@ -1336,6 +1336,198 @@ definitions:
           $ref: '#/definitions/dto.TransactionSequenceResponse'
         type: array
     type: object
+  dto.ScenarioAssumption:
+    properties:
+      sampleCount:
+        type: integer
+      source:
+        type: string
+      value:
+        type: number
+        x-nullable: true
+    type: object
+  dto.ScenarioAssumptions:
+    properties:
+      annualInvestmentReturn:
+        type: number
+      horizonMonths:
+        type: integer
+      scenarioAnnualInvestmentReturn:
+        type: number
+    type: object
+  dto.ScenarioBaseline:
+    properties:
+      asOfDate:
+        type: string
+      currency:
+        type: string
+      currentCash:
+        type: number
+        x-nullable: true
+      currentInvestmentValue:
+        type: number
+      currentNetWorth:
+        type: number
+      horizonMonths:
+        type: integer
+      monthlyExpenses:
+        $ref: '#/definitions/dto.ScenarioAssumption'
+      monthlyIncome:
+        $ref: '#/definitions/dto.ScenarioAssumption'
+      monthlyInvestmentTransfer:
+        $ref: '#/definitions/dto.ScenarioAssumption'
+      quality:
+        $ref: '#/definitions/dto.ScenarioQuality'
+      startDate:
+        type: string
+      staticNetWorthComponent:
+        type: number
+        x-nullable: true
+    type: object
+  dto.ScenarioEvent:
+    properties:
+      amount:
+        type: number
+      label:
+        type: string
+      month:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.ScenarioImpact:
+    properties:
+      endingCashDelta:
+        type: number
+      endingInvestmentDelta:
+        type: number
+      endingNetWorthDelta:
+        type: number
+      investmentGrowthDelta:
+        type: number
+      minimumCashDelta:
+        type: number
+    type: object
+  dto.ScenarioPoint:
+    properties:
+      cash:
+        type: number
+      expenses:
+        type: number
+      income:
+        type: number
+      investment:
+        type: number
+      investmentGrowth:
+        type: number
+      investmentTransfer:
+        type: number
+      month:
+        type: string
+      netWorth:
+        type: number
+    type: object
+  dto.ScenarioProjection:
+    properties:
+      endDate:
+        type: string
+      endingCash:
+        type: number
+      endingInvestment:
+        type: number
+      endingNetWorth:
+        type: number
+      firstNegativeCashMonth:
+        type: string
+        x-nullable: true
+      minimumCashBalance:
+        type: number
+      openingCash:
+        type: number
+      openingCashNegative:
+        type: boolean
+      openingInvestment:
+        type: number
+      openingNetWorth:
+        type: number
+      points:
+        items:
+          $ref: '#/definitions/dto.ScenarioPoint'
+        type: array
+      startDate:
+        type: string
+      totalExpenses:
+        type: number
+      totalIncome:
+        type: number
+      totalInvestmentGrowth:
+        type: number
+      totalInvestmentTransfers:
+        type: number
+    type: object
+  dto.ScenarioQuality:
+    properties:
+      reasons:
+        items:
+          $ref: '#/definitions/dto.ScenarioReason'
+        type: array
+      status:
+        type: string
+    type: object
+  dto.ScenarioReason:
+    properties:
+      code:
+        type: string
+      field:
+        type: string
+    type: object
+  dto.ScenarioRequest:
+    properties:
+      annualInvestmentReturn:
+        type: number
+        x-nullable: true
+      horizonMonths:
+        type: integer
+      monthlyExpenses:
+        type: number
+        x-nullable: true
+      monthlyIncome:
+        type: number
+        x-nullable: true
+      monthlyInvestmentTransfer:
+        type: number
+        x-nullable: true
+      oneTimeEvents:
+        items:
+          $ref: '#/definitions/dto.ScenarioEvent'
+        type: array
+      scenarioAnnualInvestmentReturn:
+        type: number
+        x-nullable: true
+    type: object
+  dto.ScenarioResult:
+    properties:
+      assumptions:
+        $ref: '#/definitions/dto.ScenarioAssumptions'
+      available:
+        type: boolean
+      baseline:
+        allOf:
+        - $ref: '#/definitions/dto.ScenarioProjection'
+        x-nullable: true
+      impact:
+        allOf:
+        - $ref: '#/definitions/dto.ScenarioImpact'
+        x-nullable: true
+      quality:
+        $ref: '#/definitions/dto.ScenarioQuality'
+      scenario:
+        allOf:
+        - $ref: '#/definitions/dto.ScenarioProjection'
+        x-nullable: true
+      snapshot:
+        $ref: '#/definitions/dto.ScenarioBaseline'
+    type: object
   dto.ScheduleALEntryResponse:
     properties:
       amount:
@@ -2551,6 +2743,74 @@ paths:
       summary: Get recurring transaction sequences
       tags:
       - Recurring
+  /scenario/baseline:
+    get:
+      operationId: getScenarioBaseline
+      parameters:
+      - description: Projection months, 1–120 (default 60)
+        in: query
+        name: horizonMonths
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ScenarioBaseline'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - PaisaAuth: []
+      summary: Current assumptions for a what-if comparison
+      tags:
+      - Scenario
+  /scenario/evaluate:
+    post:
+      consumes:
+      - application/json
+      operationId: evaluateScenario
+      parameters:
+      - description: Absolute overrides; annual returns are ratios
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ScenarioRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ScenarioResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - PaisaAuth: []
+      summary: Compare a temporary scenario against the current trajectory
+      tags:
+      - Scenario
   /schedule_al:
     get:
       description: Computes Schedule AL assets and liabilities report

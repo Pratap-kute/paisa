@@ -707,6 +707,108 @@ export interface DtoRecurringTransactionsResponse {
   transaction_sequences?: DtoTransactionSequenceResponse[];
 }
 
+export interface DtoScenarioAssumption {
+  sampleCount?: number;
+  source?: string;
+  value?: number | null;
+}
+
+export interface DtoScenarioAssumptions {
+  annualInvestmentReturn?: number;
+  horizonMonths?: number;
+  scenarioAnnualInvestmentReturn?: number;
+}
+
+export interface DtoScenarioBaseline {
+  asOfDate?: string;
+  currency?: string;
+  currentCash?: number | null;
+  currentInvestmentValue?: number;
+  currentNetWorth?: number;
+  horizonMonths?: number;
+  monthlyExpenses?: DtoScenarioAssumption;
+  monthlyIncome?: DtoScenarioAssumption;
+  monthlyInvestmentTransfer?: DtoScenarioAssumption;
+  quality?: DtoScenarioQuality;
+  startDate?: string;
+  staticNetWorthComponent?: number | null;
+}
+
+export interface DtoScenarioEvent {
+  amount?: number;
+  label?: string;
+  month?: string;
+  type?: string;
+}
+
+export interface DtoScenarioImpact {
+  endingCashDelta?: number;
+  endingInvestmentDelta?: number;
+  endingNetWorthDelta?: number;
+  investmentGrowthDelta?: number;
+  minimumCashDelta?: number;
+}
+
+export interface DtoScenarioPoint {
+  cash?: number;
+  expenses?: number;
+  income?: number;
+  investment?: number;
+  investmentGrowth?: number;
+  investmentTransfer?: number;
+  month?: string;
+  netWorth?: number;
+}
+
+export interface DtoScenarioProjection {
+  endDate?: string;
+  endingCash?: number;
+  endingInvestment?: number;
+  endingNetWorth?: number;
+  firstNegativeCashMonth?: string | null;
+  minimumCashBalance?: number;
+  openingCash?: number;
+  openingCashNegative?: boolean;
+  openingInvestment?: number;
+  openingNetWorth?: number;
+  points?: DtoScenarioPoint[];
+  startDate?: string;
+  totalExpenses?: number;
+  totalIncome?: number;
+  totalInvestmentGrowth?: number;
+  totalInvestmentTransfers?: number;
+}
+
+export interface DtoScenarioQuality {
+  reasons?: DtoScenarioReason[];
+  status?: string;
+}
+
+export interface DtoScenarioReason {
+  code?: string;
+  field?: string;
+}
+
+export interface DtoScenarioRequest {
+  annualInvestmentReturn?: number | null;
+  horizonMonths?: number;
+  monthlyExpenses?: number | null;
+  monthlyIncome?: number | null;
+  monthlyInvestmentTransfer?: number | null;
+  oneTimeEvents?: DtoScenarioEvent[];
+  scenarioAnnualInvestmentReturn?: number | null;
+}
+
+export interface DtoScenarioResult {
+  assumptions?: DtoScenarioAssumptions;
+  available?: boolean;
+  baseline?: DtoScenarioProjection | null;
+  impact?: DtoScenarioImpact | null;
+  quality?: DtoScenarioQuality;
+  scenario?: DtoScenarioProjection | null;
+  snapshot?: DtoScenarioBaseline;
+}
+
 export interface DtoScheduleALEntryResponse {
   amount?: number;
   section?: DtoScheduleALSectionResponse;
@@ -2026,6 +2128,55 @@ export class Api<SecurityDataType extends unknown> {
         path: `/recurring`,
         method: "GET",
         secure: true,
+        format: "json",
+        ...params,
+      }),
+  };
+  scenario = {
+    /**
+     * No description
+     *
+     * @tags Scenario
+     * @name GetScenarioBaseline
+     * @summary Current assumptions for a what-if comparison
+     * @request GET:/scenario/baseline
+     * @secure
+     */
+    getScenarioBaseline: (
+      query?: {
+        /** Projection months, 1–120 (default 60) */
+        horizonMonths?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.http.request<DtoScenarioBaseline, Record<string, string>>({
+        path: `/scenario/baseline`,
+        method: "GET",
+        query: query,
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Scenario
+     * @name EvaluateScenario
+     * @summary Compare a temporary scenario against the current trajectory
+     * @request POST:/scenario/evaluate
+     * @secure
+     */
+    evaluateScenario: (
+      request: DtoScenarioRequest,
+      params: RequestParams = {},
+    ) =>
+      this.http.request<DtoScenarioResult, Record<string, string>>({
+        path: `/scenario/evaluate`,
+        method: "POST",
+        body: request,
+        secure: true,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

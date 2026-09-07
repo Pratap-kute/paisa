@@ -125,6 +125,8 @@ func registerFinancialRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/api/networth", GetNetworthHandler(db))
 	router.GET("/api/assets/balance", GetAssetsBalanceHandler(db))
 	router.GET("/api/investment/performance", GetInvestmentPerformanceHandler(db))
+	router.GET("/api/scenario/baseline", GetScenarioBaselineHandler(db))
+	router.POST("/api/scenario/evaluate", EvaluateScenarioHandler(db))
 	router.GET("/api/investment", GetInvestmentHandler(db))
 	router.GET("/api/gain", GetGainHandler(db))
 	router.GET("/api/gain/:account", GetAccountGainHandler(db))

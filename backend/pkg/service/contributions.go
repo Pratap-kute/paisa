@@ -21,6 +21,11 @@ type ContributionMonth struct {
 // selected account set then cancel its cost and realized gain exactly.
 // Completed months after the first asset activity are retained, including zeros.
 func MonthlyContributions(db *gorm.DB, ps []posting.Posting, accounts []string, asOf time.Time) []ContributionMonth {
+	return monthlyContributions(ps, accounts, asOf, func(window []posting.Posting) []investmentEvent { return loadInvestmentEvents(db, window) })
+}
+
+// monthlyContributions permits a captured snapshot to supply its own counterparts.
+func monthlyContributions(ps []posting.Posting, accounts []string, asOf time.Time, classify func([]posting.Posting) []investmentEvent) []ContributionMonth {
 	end := utils.BeginningOfMonth(asOf)
 	start := end.AddDate(0, -6, 0)
 	first := end
@@ -40,7 +45,7 @@ func MonthlyContributions(db *gorm.DB, ps []posting.Posting, accounts []string, 
 		}
 		window = append(window, *p)
 	}
-	events := loadInvestmentEvents(db, window)
+	events := classify(window)
 	for i := range events {
 		e := &events[i]
 		month := e.Posting.Date.Format("2006-01")

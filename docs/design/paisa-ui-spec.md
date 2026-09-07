@@ -1838,3 +1838,13 @@ The frontend migration is complete. All deliverables have been met:
 
 ---
 *End of As-Built UI/UX Specification*
+
+
+### What-if Scenarios — `/more/scenarios`
+
+- **Archetype:** Split Analysis; Wealth navigation after Goals.
+- **Header:** What-if Scenarios — Test financial changes without modifying your ledger.
+- **Desktop:** horizon/reset toolbar, assumptions and impact split, one comparison chart, collapsed methodology.
+- **Mobile:** assumptions, impact, chart, then methodology; all controls wrap without horizontal overflow.
+- **Comparison:** dashed neutral baseline, solid primary scenario; semantic colors only for deltas and cash risk.
+- **States:** loading, evaluation, retry, validation, partial history, unavailable baseline, empty investments, negative cash, and privacy masking. Unknown assumptions display Unavailable, never zero.
