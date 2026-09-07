@@ -34,6 +34,9 @@ import {
   summarizeBudget,
   summarizeCash,
 } from "$lib/features/dashboard/summary";
+import DashboardInvestmentPerformance from "$lib/features/dashboard/components/DashboardInvestmentPerformance.svelte";
+import type { DtoInvestmentPerformance } from "$lib/api";
+let investmentPerformance: DtoInvestmentPerformance | null | undefined = $state();
 import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
 import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
 import DashboardBudgetHealth from "$lib/features/dashboard/components/DashboardBudgetHealth.svelte";
@@ -174,6 +177,7 @@ async function loadDashboard() {
     const res = await api.dashboard.getDashboard();
     expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
     cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
+    investmentPerformance = res.investmentPerformance;
     allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
     budgetsByMonth =
       (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
@@ -266,6 +270,8 @@ onMount(() => {
         {period}
         loading={dashboardLoading}
       />
+
+      <DashboardInvestmentPerformance summary={investmentPerformance} loading={dashboardLoading} />
 
       <DashboardInsightGateway
         items={attentionItems}

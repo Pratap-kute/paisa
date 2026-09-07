@@ -1,4 +1,5 @@
 <script lang="ts">
+import InvestmentPerformance from "$lib/features/assets/components/InvestmentPerformance.svelte";
 import type { Gain } from "$lib/domain/assets";
 import type { Legend } from "$lib/shared/charts/types";
 import { goto } from "$app/navigation";
@@ -56,15 +57,18 @@ onMount(async () => {
 </script>
 
 <svelte:head>
-  <title>Asset Gain - Paisa</title>
+  <title>Investment Performance - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">
   <PageHeader
-    title="Asset Gain"
-    description="Realized and unrealized gains across investment holdings"
+    title="Investment Performance"
+    description="Period returns, investment gains, and return drivers"
   />
 
+  <InvestmentPerformance />
+
+  <Section title="Lifetime Investment Context">
   <MetricStrip cols={2}>
     <Metric
       label="Net Investment"
@@ -78,9 +82,10 @@ onMount(async () => {
       loading={isLoading}
     />
   </MetricStrip>
+  </Section>
 
   <Section
-    title="Gain Overview"
+    title="Lifetime Gain Overview"
     subtitle="Per-account investment, gain, and XIRR — click account labels to drill down"
   >
     {#if !isLoading && !hasGains}

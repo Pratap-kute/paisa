@@ -1,0 +1,332 @@
+{
+  "startDate": "2021-04-01",
+  "endDate": "2022-02-07",
+  "account": "",
+  "openingValue": 0,
+  "closingValue": 89048.13748716,
+  "contributions": 98829.73748716,
+  "withdrawals": 10027.3,
+  "netContribution": 88802.43748716,
+  "portfolioChange": 89048.13748716,
+  "investmentReturn": 245.7,
+  "periodReturn": null,
+  "sinceInceptionXirr": 0.032,
+  "returnUnavailableReason": "unattributed_investment_income",
+  "quality": {
+    "status": "partial",
+    "reasons": [
+      {
+        "code": "valuation_fallback",
+        "commodity": "ABNB",
+        "date": "2022-02-07"
+      },
+      {
+        "code": "valuation_fallback",
+        "commodity": "NIFTY",
+        "date": "2022-02-07"
+      },
+      {
+        "code": "valuation_fallback",
+        "commodity": "USD",
+        "date": "2022-02-07"
+      },
+      {
+        "code": "unattributed_investment_income",
+        "date": "2022-01-31"
+      }
+    ]
+  },
+  "openingQuotes": [],
+  "closingQuotes": [
+    {
+      "commodity": "ABNB",
+      "date": "2022-01-08",
+      "source": "trade"
+    },
+    {
+      "commodity": "NIFTY",
+      "date": "2022-02-07",
+      "source": "trade"
+    },
+    {
+      "commodity": "USD",
+      "date": "2022-01-08",
+      "source": "trade"
+    }
+  ],
+  "drivers": [
+    {
+      "account": "Assets:Equity:NIFTY",
+      "openingValue": 0,
+      "closingValue": 80218.4,
+      "netContribution": 80000,
+      "returnAmount": 218.4,
+      "periodReturn": null,
+      "returnUnavailableReason": "unattributed_investment_income",
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "NIFTY",
+            "date": "2022-02-07"
+          },
+          {
+            "code": "unattributed_investment_income",
+            "date": "2022-01-31"
+          }
+        ]
+      }
+    },
+    {
+      "account": "Assets:Equity:AAPL",
+      "openingValue": 0,
+      "closingValue": 0,
+      "netContribution": -27.3,
+      "returnAmount": 27.3,
+      "periodReturn": null,
+      "returnUnavailableReason": "unattributed_investment_income",
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "unattributed_investment_income",
+            "date": "2022-01-31"
+          }
+        ]
+      }
+    },
+    {
+      "account": "Assets:Dollar",
+      "openingValue": 0,
+      "closingValue": 804.42048,
+      "netContribution": 804.42048,
+      "returnAmount": 0,
+      "periodReturn": null,
+      "returnUnavailableReason": "unattributed_investment_income",
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "USD",
+            "date": "2022-02-07"
+          },
+          {
+            "code": "unattributed_investment_income",
+            "date": "2022-01-31"
+          }
+        ]
+      }
+    },
+    {
+      "account": "Assets:Equity:ABNB",
+      "openingValue": 0,
+      "closingValue": 8025.31700716,
+      "netContribution": 8025.31700716,
+      "returnAmount": 0,
+      "periodReturn": null,
+      "returnUnavailableReason": "unattributed_investment_income",
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "ABNB",
+            "date": "2022-02-07"
+          },
+          {
+            "code": "unattributed_investment_income",
+            "date": "2022-01-31"
+          }
+        ]
+      }
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2021-03-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-04-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-05-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-06-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-07-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-08-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-09-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-10-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-11-30",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2021-12-31",
+      "value": 0,
+      "contributionBaseline": 0,
+      "quality": {
+        "status": "complete",
+        "reasons": []
+      },
+      "quotes": []
+    },
+    {
+      "date": "2022-01-31",
+      "value": 88829.73748716,
+      "contributionBaseline": 88802.43748716,
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "ABNB",
+            "date": "2022-01-31"
+          },
+          {
+            "code": "valuation_fallback",
+            "commodity": "NIFTY",
+            "date": "2022-01-31"
+          },
+          {
+            "code": "valuation_fallback",
+            "commodity": "USD",
+            "date": "2022-01-31"
+          }
+        ]
+      },
+      "quotes": [
+        {
+          "commodity": "ABNB",
+          "date": "2022-01-08",
+          "source": "trade"
+        },
+        {
+          "commodity": "NIFTY",
+          "date": "2022-01-07",
+          "source": "trade"
+        },
+        {
+          "commodity": "USD",
+          "date": "2022-01-08",
+          "source": "trade"
+        }
+      ]
+    },
+    {
+      "date": "2022-02-07",
+      "value": 89048.13748716,
+      "contributionBaseline": 88802.43748716,
+      "quality": {
+        "status": "partial",
+        "reasons": [
+          {
+            "code": "valuation_fallback",
+            "commodity": "ABNB",
+            "date": "2022-02-07"
+          },
+          {
+            "code": "valuation_fallback",
+            "commodity": "NIFTY",
+            "date": "2022-02-07"
+          },
+          {
+            "code": "valuation_fallback",
+            "commodity": "USD",
+            "date": "2022-02-07"
+          }
+        ]
+      },
+      "quotes": [
+        {
+          "commodity": "ABNB",
+          "date": "2022-01-08",
+          "source": "trade"
+        },
+        {
+          "commodity": "NIFTY",
+          "date": "2022-02-07",
+          "source": "trade"
+        },
+        {
+          "commodity": "USD",
+          "date": "2022-01-08",
+          "source": "trade"
+        }
+      ]
+    }
+  ]
+}

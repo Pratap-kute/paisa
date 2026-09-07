@@ -508,7 +508,7 @@ const OPACITY: Record<string, Record<string, number>> = {
 
 export function accountColorStyle(account: string) {
   const normalized = account.toLowerCase();
-  const opacity = OPACITY[getColorPreference()]?.[normalized] || 1.0;
+  const opacity = OPACITY[getColorPreference() ?? ""]?.[normalized] || 1.0;
   let color = "hsl(0, 0%, 48%)";
 
   if (

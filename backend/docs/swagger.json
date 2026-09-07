@@ -971,6 +971,87 @@
                 }
             }
         },
+        "/investment/performance": {
+            "get": {
+                "security": [
+                    {
+                        "PaisaAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Investment"
+                ],
+                "summary": "Selected-period investment performance",
+                "operationId": "getInvestmentPerformance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "current_fy, previous_fy, one_year, since_inception",
+                        "name": "preset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive start YYYY-MM-DD",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Inclusive end YYYY-MM-DD",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Exact investment account or ancestor",
+                        "name": "accountPrefix",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include boundary timeline",
+                        "name": "timeline",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Include exact-account drivers",
+                        "name": "drivers",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.InvestmentPerformance"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/ledger": {
             "get": {
                 "security": [
@@ -2466,6 +2547,14 @@
                         "$ref": "#/definitions/dto.GoalSummaryResponse"
                     }
                 },
+                "investmentPerformance": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.InvestmentPerformance"
+                        }
+                    ],
+                    "x-nullable": true
+                },
                 "networth": {
                     "$ref": "#/definitions/dto.CurrentNetworthResponse"
                 },
@@ -3119,6 +3208,80 @@
                 }
             }
         },
+        "dto.InvestmentPerformance": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "closingQuotes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformanceQuote"
+                    }
+                },
+                "closingValue": {
+                    "type": "number"
+                },
+                "contributions": {
+                    "type": "number"
+                },
+                "drivers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformanceDriver"
+                    }
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "investmentReturn": {
+                    "type": "number"
+                },
+                "netContribution": {
+                    "type": "number"
+                },
+                "openingQuotes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformanceQuote"
+                    }
+                },
+                "openingValue": {
+                    "type": "number"
+                },
+                "periodReturn": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "portfolioChange": {
+                    "type": "number"
+                },
+                "quality": {
+                    "$ref": "#/definitions/dto.PerformanceQuality"
+                },
+                "returnUnavailableReason": {
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "sinceInceptionXirr": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "timeline": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformancePoint"
+                    }
+                },
+                "withdrawals": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.InvestmentResponse": {
             "type": "object",
             "properties": {
@@ -3450,6 +3613,105 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PerformanceDriver": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "closingValue": {
+                    "type": "number"
+                },
+                "netContribution": {
+                    "type": "number"
+                },
+                "openingValue": {
+                    "type": "number"
+                },
+                "periodReturn": {
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "quality": {
+                    "$ref": "#/definitions/dto.PerformanceQuality"
+                },
+                "returnAmount": {
+                    "type": "number"
+                },
+                "returnUnavailableReason": {
+                    "type": "string",
+                    "x-nullable": true
+                }
+            }
+        },
+        "dto.PerformancePoint": {
+            "type": "object",
+            "properties": {
+                "contributionBaseline": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "quality": {
+                    "$ref": "#/definitions/dto.PerformanceQuality"
+                },
+                "quotes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformanceQuote"
+                    }
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.PerformanceQuality": {
+            "type": "object",
+            "properties": {
+                "reasons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.PerformanceReason"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PerformanceQuote": {
+            "type": "object",
+            "properties": {
+                "commodity": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PerformanceReason": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "commodity": {
+                    "type": "string"
+                },
+                "date": {
                     "type": "string"
                 }
             }

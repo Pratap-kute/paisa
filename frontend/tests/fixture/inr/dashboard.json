@@ -561,5 +561,62 @@
       "fileName": "main.ledger",
       "note": ""
     }
-  ]
+  ],
+  "investmentPerformance": {
+    "startDate": "2021-04-01",
+    "endDate": "2022-02-07",
+    "account": "",
+    "openingValue": 0,
+    "closingValue": 89048.13748716,
+    "contributions": 98829.73748716,
+    "withdrawals": 10027.3,
+    "netContribution": 88802.43748716,
+    "portfolioChange": 89048.13748716,
+    "investmentReturn": 245.7,
+    "periodReturn": null,
+    "sinceInceptionXirr": 0.032,
+    "returnUnavailableReason": "unattributed_investment_income",
+    "quality": {
+      "status": "partial",
+      "reasons": [
+        {
+          "code": "valuation_fallback",
+          "commodity": "ABNB",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "valuation_fallback",
+          "commodity": "NIFTY",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "valuation_fallback",
+          "commodity": "USD",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "unattributed_investment_income",
+          "date": "2022-01-31"
+        }
+      ]
+    },
+    "openingQuotes": [],
+    "closingQuotes": [
+      {
+        "commodity": "ABNB",
+        "date": "2022-01-08",
+        "source": "trade"
+      },
+      {
+        "commodity": "NIFTY",
+        "date": "2022-02-07",
+        "source": "trade"
+      },
+      {
+        "commodity": "USD",
+        "date": "2022-01-08",
+        "source": "trade"
+      }
+    ]
+  }
 }

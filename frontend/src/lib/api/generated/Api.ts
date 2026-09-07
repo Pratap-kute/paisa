@@ -203,6 +203,7 @@ export interface DtoDashboardResponse {
   checkingBalances?: any;
   expenses?: DtoPeriodicPostingsSummaryResponse;
   goalSummaries?: DtoGoalSummaryResponse[];
+  investmentPerformance?: DtoInvestmentPerformance | null;
   networth?: DtoCurrentNetworthResponse;
   transactionSequences?: DtoTransactionSequenceResponse[];
   transactions?: DtoTransactionResponse[];
@@ -415,6 +416,27 @@ export interface DtoInsightsResponse {
   period?: string;
 }
 
+export interface DtoInvestmentPerformance {
+  account?: string;
+  closingQuotes?: DtoPerformanceQuote[];
+  closingValue?: number;
+  contributions?: number;
+  drivers?: DtoPerformanceDriver[];
+  endDate?: string;
+  investmentReturn?: number;
+  netContribution?: number;
+  openingQuotes?: DtoPerformanceQuote[];
+  openingValue?: number;
+  periodReturn?: number | null;
+  portfolioChange?: number;
+  quality?: DtoPerformanceQuality;
+  returnUnavailableReason?: string | null;
+  sinceInceptionXirr?: number | null;
+  startDate?: string;
+  timeline?: DtoPerformancePoint[];
+  withdrawals?: number;
+}
+
 export interface DtoInvestmentResponse {
   assets?: DtoPostingResponse[];
   yearly_cards?: DtoInvestmentYearlyCardResponse[];
@@ -540,6 +562,43 @@ export interface DtoNetworthTimelineItemResponse {
 export interface DtoNodeResponse {
   id?: number;
   name?: string;
+}
+
+export interface DtoPerformanceDriver {
+  account?: string;
+  closingValue?: number;
+  netContribution?: number;
+  openingValue?: number;
+  periodReturn?: number | null;
+  quality?: DtoPerformanceQuality;
+  returnAmount?: number;
+  returnUnavailableReason?: string | null;
+}
+
+export interface DtoPerformancePoint {
+  contributionBaseline?: number;
+  date?: string;
+  quality?: DtoPerformanceQuality;
+  quotes?: DtoPerformanceQuote[];
+  value?: number;
+}
+
+export interface DtoPerformanceQuality {
+  reasons?: DtoPerformanceReason[];
+  status?: string;
+}
+
+export interface DtoPerformanceQuote {
+  commodity?: string;
+  date?: string;
+  source?: string;
+}
+
+export interface DtoPerformanceReason {
+  account?: string;
+  code?: string;
+  commodity?: string;
+  date?: string;
 }
 
 export interface DtoPeriodicPostingsSummaryResponse {
@@ -1622,6 +1681,41 @@ export class Api<SecurityDataType extends unknown> {
       this.http.request<DtoInvestmentResponse, any>({
         path: `/investment`,
         method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Investment
+     * @name GetInvestmentPerformance
+     * @summary Selected-period investment performance
+     * @request GET:/investment/performance
+     * @secure
+     */
+    getInvestmentPerformance: (
+      query?: {
+        /** current_fy, previous_fy, one_year, since_inception */
+        preset?: string;
+        /** Inclusive start YYYY-MM-DD */
+        from?: string;
+        /** Inclusive end YYYY-MM-DD */
+        to?: string;
+        /** Exact investment account or ancestor */
+        accountPrefix?: string;
+        /** Include boundary timeline */
+        timeline?: boolean;
+        /** Include exact-account drivers */
+        drivers?: boolean;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.http.request<DtoInvestmentPerformance, Record<string, string>>({
+        path: `/investment/performance`,
+        method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
