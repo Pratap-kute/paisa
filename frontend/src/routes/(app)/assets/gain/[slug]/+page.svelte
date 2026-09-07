@@ -1,6 +1,4 @@
 <script lang="ts">
-import InvestmentPerformance from "$lib/features/assets/components/InvestmentPerformance.svelte";
-import { page } from "$app/state";
 import COLORS from "$lib/shared/theme/colors";
 import type { Networth } from "$lib/domain/assets";
 import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
@@ -18,7 +16,7 @@ import {
 import type { Posting } from "$lib/domain/ledger";
 import { api } from "$lib/api";
 import { last, sortBy } from "es-toolkit";
-import Button from "$lib/shared/ui/Button.svelte";
+import { onMount } from "svelte";
 import type { PageData } from "./$types";
 
 import { iconify } from "$lib/shared/ui/icon";
@@ -76,21 +74,8 @@ let legends = buildLegends();
 
 let postings: Posting[] = $state([]);
 
-let legacyFailed = $state(false);
-let legacyRetry = $state(0);
-$effect(() => {
-  const account = data.name;
-  legacyRetry;
-  const controller = new AbortController();
-  gain = undefined;
-  overview = undefined;
-  postings = [];
-  legacyFailed = false;
-  securityTypeEmpty = nameAndSecurityTypeEmpty = ratingEmpty = industryEmpty = true;
-  void (async () => {
-  try {
-  const res = await api.gain.getAccountGain(account, { signal: controller.signal });
-  if (controller.signal.aborted) return;
+onMount(async () => {
+  const res = await api.gain.getAccountGain(data.name);
   gain = res.gain_timeline_breakdown as unknown as AccountGain;
   assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
   name_and_security_type = (res.portfolio_allocation
@@ -125,11 +110,6 @@ $effect(() => {
   nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
   ratingEmpty = rating.length === 0;
   industryEmpty = industry.length === 0;
-  } catch {
-    if (!controller.signal.aborted) legacyFailed = true;
-  }
-  })();
-  return () => controller.abort();
 });
 </script>
 
@@ -144,25 +124,16 @@ $effect(() => {
   >
     {#snippet leading()}
       <a
-        href={`/assets/gain${page.url.search}`}
+        href="/assets/gain"
         class="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <i class="fas fa-chevron-left text-xs" aria-hidden="true"></i>
-        <span>Investment Performance</span>
+        <span>Gain</span>
       </a>
     {/snippet}
   </PageHeader>
 
-  <InvestmentPerformance account={data.name} />
-  {#if legacyFailed}
-    <div role="alert" class="flex flex-wrap items-center gap-3">
-      <p>Lifetime details could not be loaded.</p>
-      <Button onclick={() => legacyRetry++}>Retry lifetime details</Button>
-    </div>
-  {/if}
-
   {#if overview}
-    <Section title="Lifetime Investment Context">
     <MetricStrip cols={4}>
       <Metric label="Balance" value={formatCurrency(overview.balanceAmount)} />
       <Metric
@@ -182,7 +153,6 @@ $effect(() => {
           : undefined}
       />
     </MetricStrip>
-    </Section>
   {/if}
 
   <div class="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
@@ -269,7 +239,7 @@ $effect(() => {
         </Section>
       {/if}
 
-      <Section title="Lifetime Timeline">
+      <Section title="Timeline">
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
         <ChartFrame height="tall">
           {#if gain}

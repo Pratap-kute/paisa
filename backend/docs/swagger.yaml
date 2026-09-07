@@ -358,10 +358,6 @@ definitions:
         items:
           $ref: '#/definitions/dto.GoalSummaryResponse'
         type: array
-      investmentPerformance:
-        allOf:
-        - $ref: '#/definitions/dto.InvestmentPerformance'
-        x-nullable: true
       networth:
         $ref: '#/definitions/dto.CurrentNetworthResponse'
       transactionSequences:
@@ -789,56 +785,6 @@ definitions:
       period:
         type: string
     type: object
-  dto.InvestmentPerformance:
-    properties:
-      account:
-        type: string
-      closingQuotes:
-        items:
-          $ref: '#/definitions/dto.PerformanceQuote'
-        type: array
-      closingValue:
-        type: number
-      contributions:
-        type: number
-      drivers:
-        items:
-          $ref: '#/definitions/dto.PerformanceDriver'
-        type: array
-      endDate:
-        type: string
-      investmentReturn:
-        type: number
-      netContribution:
-        type: number
-      openingQuotes:
-        items:
-          $ref: '#/definitions/dto.PerformanceQuote'
-        type: array
-      openingValue:
-        type: number
-      periodReturn:
-        type: number
-        x-nullable: true
-      portfolioChange:
-        type: number
-      quality:
-        $ref: '#/definitions/dto.PerformanceQuality'
-      returnUnavailableReason:
-        type: string
-        x-nullable: true
-      sinceInceptionXirr:
-        type: number
-        x-nullable: true
-      startDate:
-        type: string
-      timeline:
-        items:
-          $ref: '#/definitions/dto.PerformancePoint'
-        type: array
-      withdrawals:
-        type: number
-    type: object
   dto.InvestmentResponse:
     properties:
       assets:
@@ -1054,71 +1000,6 @@ definitions:
       id:
         type: integer
       name:
-        type: string
-    type: object
-  dto.PerformanceDriver:
-    properties:
-      account:
-        type: string
-      closingValue:
-        type: number
-      netContribution:
-        type: number
-      openingValue:
-        type: number
-      periodReturn:
-        type: number
-        x-nullable: true
-      quality:
-        $ref: '#/definitions/dto.PerformanceQuality'
-      returnAmount:
-        type: number
-      returnUnavailableReason:
-        type: string
-        x-nullable: true
-    type: object
-  dto.PerformancePoint:
-    properties:
-      contributionBaseline:
-        type: number
-      date:
-        type: string
-      quality:
-        $ref: '#/definitions/dto.PerformanceQuality'
-      quotes:
-        items:
-          $ref: '#/definitions/dto.PerformanceQuote'
-        type: array
-      value:
-        type: number
-    type: object
-  dto.PerformanceQuality:
-    properties:
-      reasons:
-        items:
-          $ref: '#/definitions/dto.PerformanceReason'
-        type: array
-      status:
-        type: string
-    type: object
-  dto.PerformanceQuote:
-    properties:
-      commodity:
-        type: string
-      date:
-        type: string
-      source:
-        type: string
-    type: object
-  dto.PerformanceReason:
-    properties:
-      account:
-        type: string
-      code:
-        type: string
-      commodity:
-        type: string
-      date:
         type: string
     type: object
   dto.PeriodicPostingsSummaryResponse:
@@ -2190,58 +2071,6 @@ paths:
       summary: Get investment summary and savings rate
       tags:
       - Investments
-  /investment/performance:
-    get:
-      operationId: getInvestmentPerformance
-      parameters:
-      - description: current_fy, previous_fy, one_year, since_inception
-        in: query
-        name: preset
-        type: string
-      - description: Inclusive start YYYY-MM-DD
-        in: query
-        name: from
-        type: string
-      - description: Inclusive end YYYY-MM-DD
-        in: query
-        name: to
-        type: string
-      - description: Exact investment account or ancestor
-        in: query
-        name: accountPrefix
-        type: string
-      - description: Include boundary timeline
-        in: query
-        name: timeline
-        type: boolean
-      - description: Include exact-account drivers
-        in: query
-        name: drivers
-        type: boolean
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.InvestmentPerformance'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - PaisaAuth: []
-      summary: Selected-period investment performance
-      tags:
-      - Investment
   /ledger:
     get:
       description: Returns flat array of all journal postings with computed balances

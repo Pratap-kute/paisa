@@ -167,7 +167,3 @@ adding each icon set to Paisa would increase the app binary size. So a balance
 has to be struck between the number of icons and the app size. Feel free to
 start a discussion if you feel strongly about any icon set. The current icon
 sets are not final, they may be replaced if a better alternative is found.
-
-### Investment return reporting
-
-See [Investment performance](investment-performance.md) for period returns, shared dividend accounting, and valuation quality.

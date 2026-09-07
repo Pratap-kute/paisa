@@ -992,7 +992,7 @@ The table and 41 individual route design contracts below represent the binding U
 | **2** | `/assets/allocation` | Asset Allocation | Analysis | How are investments distributed across classes vs targets? |
 | **3** | `/assets/analysis` | Asset Analysis | Analysis | What is the detailed security-level performance and exposure? |
 | **4** | `/assets/balance` | Asset Balance | Analysis | What are the exact current balances of all asset accounts? |
-| **5** | `/assets/gain` | Investment Performance | Analysis | How much growth came from contributions versus return? |
+| **5** | `/assets/gain` | Asset Gain | Analysis | What are my realized and unrealized gains across assets? |
 | **6** | `/assets/gain/[slug]` | Asset Gain Detail | Detail | What is the lot-by-lot gain and performance for this asset? |
 | **7** | `/assets/investment` | Investment | Analysis | How much capital have I invested vs valuation over time? |
 | **8** | `/assets/networth` | Net Worth | Analysis | How is my total net worth trending over time? |
@@ -1098,26 +1098,37 @@ The table and 41 individual route design contracts below represent the binding U
 - **Error Behavior:** Local alert banner.
 - **Preserved Functionality:** Account tree hierarchy parsing, multi-commodity formatting.
 
-#### 5. `/assets/gain` — Investment Performance
+#### 5. `/assets/gain` — Asset Gain
 
-- **Primary Question:** How much portfolio growth came from contributions versus investment return?
-- **Page Header:** Investment Performance; period returns, investment gains, and return drivers.
-- **Primary Information:** URL-backed Current FY / Previous FY / 1 Year / Since Inception selector; Ending Value, Net Contribution, Investment Return, Period Return.
-- **Decomposition:** Opening Value + Contributions − Withdrawals + Investment Return = Ending Value. Portfolio Change remains a separate amount.
-- **Timeline:** Opening, month-end, and closing market value versus Opening Value + Cumulative Net Contribution; existing ECharts infrastructure.
-- **Drivers:** Positive returns largest first; negative returns most negative first; exact-account links preserve period selection. Percentages are not additive.
-- **Secondary Information:** Lifetime Gain and annualized since-inception XIRR through today; valuation sources and quality.
-- **Responsive:** Metrics and decomposition wrap; long account names truncate; no page overflow at 390, 768, 1440, or 1728 pixels.
-- **States:** Loading, retryable error, no activity, partial amounts, and unavailable percentage are distinct. All monetary values and chart tooltips respect obscure mode.
+- **Page Name:** Asset Gain
+- **Primary Archetype:** Analysis
+- **Primary Question:** What are my realized and unrealized capital gains across assets?
+- **Page Header:** Title: "Asset Gain", Description: "Realized and unrealized gains across investment holdings".
+- **Primary Information:** Gain overview category chart with legends, Gain timeline breakdown.
+- **Secondary Information:** Per-account gain details and historic performance.
+- **Primary Actions:** Period toggle.
+- **Desktop Composition:** Gain overview chart with legend card $\rightarrow$ Per-account gain timeline breakdown.
+- **Mobile Transformation:** Stacked overview chart followed by per-account gain cards.
+- **Loading Behavior:** ECharts chart skeletons.
+- **Empty Behavior:** ZeroState indicating no investment gains recorded.
+- **Error Behavior:** Localized chart error display.
+- **Preserved Functionality:** ECharts gain breakdown chart, interactive legends, account drill-down to `/assets/gain/[slug]`.
 
-#### 6. `/assets/gain/[slug]` — Account Investment Performance
+#### 6. `/assets/gain/[slug]` — Asset Gain Detail
 
-- **Primary Question:** How did this selected account portfolio perform during the period?
-- **Primary Information:** Same period selector, metrics, decomposition, timeline, and shared service as the portfolio page.
-- **Selection:** Exact account plus colon-delimited descendants. Transfers across that selection are contributions or withdrawals.
-- **Secondary Information:** Clearly labeled lifetime metrics, balance units, postings, and security allocation sections.
-- **Navigation:** Account links and the back link preserve selected-period URL state.
-- **Preserved Functionality:** Existing account route, lifetime timeline, XIRR, and asset composition views.
+- **Page Name:** Asset Gain Detail
+- **Primary Archetype:** Detail
+- **Primary Question:** What is the lot-by-lot gain and performance for this specific asset?
+- **Page Header:** Title: Asset account name (e.g. `Assets:Equity:HDFC`); Breadcrumb navigation back to `/assets/gain`.
+- **Primary Information:** Current valuation, Total gain/loss, XIRR, Net invested capital.
+- **Secondary Information:** Buy/sell transaction history, lot-wise cost basis.
+- **Primary Actions:** Back to Gain Overview.
+- **Desktop Composition:** Top KPI strip $\rightarrow$ Asset performance chart $\rightarrow$ Lot transaction history table.
+- **Mobile Transformation:** KPIs first $\rightarrow$ performance chart $\rightarrow$ transaction records.
+- **Loading Behavior:** Skeleton KPI strip and table rows.
+- **Empty Behavior:** Message indicating no transactions found for this asset.
+- **Error Behavior:** Local error banner with back button.
+- **Preserved Functionality:** URL slug decoding (`decodeURIComponent`), lot-by-lot XIRR computation.
 
 #### 7. `/assets/investment` — Investment
 

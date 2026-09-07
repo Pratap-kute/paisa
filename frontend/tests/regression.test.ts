@@ -83,12 +83,6 @@ async function verifyApi(
   await recordAndVerify(baselineDir, request, "/api/networth", "networth");
   await recordAndVerify(baselineDir, request, "/api/investment", "investment");
   await recordAndVerify(baselineDir, request, "/api/gain", "gain");
-  await recordAndVerify(
-    baselineDir,
-    request,
-    "/api/investment/performance?drivers=true&timeline=true",
-    "investment_performance",
-  );
   await recordAndVerify(baselineDir, request, "/api/allocation", "allocation");
   await recordAndVerify(
     baselineDir,
