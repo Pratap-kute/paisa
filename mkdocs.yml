@@ -2,13 +2,15 @@ site_description: Paisa is an open source personal finance manager. It helps you
 site_author: Anantha Kumaran
 site_name: Paisa
 site_url: https://paisa.fyi
-repo_url: https://github.com/ananthakumaran/paisa
-repo_name: ananthakumaran/paisa
+repo_url: https://github.com/Pratap-kute/paisa
+repo_name: Pratap-kute/paisa
 nav:
-  - index.md
+  - "Home": index.md
+  - "Product Tour": product-tour.md
   - "Getting Started":
       - getting-started/installation.md
       - getting-started/tutorial.md
+      - getting-started/journal-examples.md
   - "Reference":
       - reference/accounts.md
       - reference/investment-performance.md
@@ -38,7 +40,14 @@ nav:
           - reference/tax/capital-gains.md
           - reference/tax/schedule-al.md
       - reference/changelog.md
-  - "Demo": "https://demo.paisa.fyi"
+  - "Development":
+      - development/api.md
+      - development/testing.md
+      - "Showcase capture": images/showcase/capture.md
+      - "Showcase refresh audit": development/showcase-refresh-report.md
+      - design/frontend-chart-architecture.md
+      - design/paisa-ui-spec.md
+  - "Upstream Demo": "https://demo.paisa.fyi"
   - manifesto.md
   - faq.md
   - Blog:
@@ -124,7 +133,7 @@ copyright: |
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ananthakumaran/paisa
+      link: https://github.com/Pratap-kute/paisa
     - icon: simple/matrix
       link: https://matrix.to/#/#paisa:matrix.org
     - icon: fontawesome/brands/x-twitter
@@ -132,7 +141,7 @@ extra:
     - icon: fontawesome/brands/mastodon
       link: https://mastodon.social/@PaisaFinanceApp
     - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/ananthakumaran/paisa
+      link: https://hub.docker.com/r/pratapkute/paisa
   status:
     new: Recently added
   consent:

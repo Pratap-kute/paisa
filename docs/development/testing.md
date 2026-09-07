@@ -12,8 +12,9 @@ The frontend test stack has five layers:
 Run all frontend checks with `deno task test:frontend`.
 `deno task test:coverage` enforces a 60% minimum for statements, branches,
 functions, and lines across maintainable core logic in
-`src/lib/{core,domain,importing,ledger,sheet}`. It excludes generated parsers
-and browser-only rendering modules. The core HTML and LCOV reports are written
+`src/lib/{domain,features,shared}`. The exact includes and exclusions are
+defined in `frontend/vitest.config.ts`; generated parsers and selected browser-only
+modules are outside the core coverage surface. The core HTML and LCOV reports are written
 to `coverage/core`.
 
 Component coverage remains informational because route, chart, and Svelte

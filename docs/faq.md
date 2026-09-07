@@ -6,7 +6,7 @@ hide:
 
 # FAQs
 
-[**I already use ledger/hledger/beancount. How do I get started?**](#existing-user-getting-started)
+## I already use ledger/hledger/beancount. How do I get started? {#existing-user-getting-started}
 
 Go through the [installation](./getting-started/installation.md) docs and get
 the app working. Go to [configuration](./reference/config.md) page and update
@@ -15,7 +15,7 @@ should be able to view your journal data. Read the
 [accounts](./reference/accounts.md) docs to understand the account naming
 conventions followed by paisa.
 
-[**How do I get started?**](#getting-started)
+## How do I get started? {#getting-started}
 
 You have installed paisa and gone through the demo and you like it, but you
 don't know what to do next. There is no way you would sit and type all the
@@ -28,8 +28,7 @@ can just have a single expense transaction per month. You decide the
 few transactions per month like your salary, monthly expense and investments
 will go a long way and will give you pretty good picture of your finances.
 
-[**Mac Desktop app fails with executable file not found in $PATH
-error**](#exec-not-found)
+## Mac Desktop app fails with executable file not found in $PATH error {#exec-not-found}
 
 Mac Desktop apps are usually started with different PATH than what you would
 normally get in a Terminal app. Paisa does a fallback search in the following

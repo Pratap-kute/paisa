@@ -1,236 +1,55 @@
 ---
 hide:
-  - navigation
   - toc
-  - feedback
 ---
 
 <div class="hero" markdown>
-![Logo](./images/logo.svg)
+![Paisa logo](images/logo.svg)
 # Paisa
-<p class="subtitle">Personal Finance Manager</p>
+<p class="subtitle">Personal finance, grounded in a journal you own.</p>
 </div>
 
-<div class="home" markdown>
-=== ":material-currency-inr: INR"
+Paisa is an open-source personal finance manager built on Ledger double-entry accounting. It brings your spending, investments, liabilities, and plans into one view, with plain-text records under your control.
 
-    ```ledger
-    2022/01/01 Salary
-        Income:Salary:Acme     -100,000 INR
-        Assets:Checking         100,000 INR
+[Install Paisa](getting-started/installation.md){ .md-button .md-button--primary }
+[Take the Product Tour](product-tour.md){ .md-button }
+[Try the upstream demo](https://demo.paisa.fyi){ .md-button }
 
-    2022/01/03 Rent
-        Assets:Checking         -20,000 INR
-        Expenses:Rent
+This documentation describes the current repository. The upstream demo and [upstream hosted documentation](https://paisa.fyi) may represent a different revision, as may downloadable releases.
 
-    2022/01/07 Investment
-        Assets:Checking         -20,000 INR
-        Assets:Equity:NIFTY   168.690 NIFTY @ 118.56 INR
-    ```
+![Paisa overview: dashboard, budgets, portfolio analysis, statement import, and journal editor using synthetic data](images/showcase/paisa-overview.gif)
 
-=== ":material-currency-usd: USD"
+[View the static dashboard screenshot](images/showcase/dashboard.png). The sample journal also demonstrates data-quality and budget warnings.
 
-    ```ledger
-    2022/01/01 Salary
-        Income:Salary:Acme      $-5,000
-        Assets:Checking          $5,000
+## Is Paisa for me?
 
-    2022/01/03 Rent
-        Assets:Checking         $-2,000
-        Expenses:Rent
+Paisa is useful if you want to understand both everyday spending and long-term holdings, and are willing to maintain a journal or import statements. Accounts and postings take a little learning; the editor, templates, and visual reports help you work with them.
 
-    2022/01/07 Investment
-        Assets:Checking         $-1,000
-        Assets:Equity:AAPL   6.452 AAPL @ $154.97
-    ```
+## Why plain-text accounting?
 
-=== ":fontawesome-solid-euro-sign: EURO"
+A Ledger journal records both sides of a transaction. Your accounts describe what you own and owe, and how income and expenses change those balances. The journal and configuration are readable files you can back up, version, and use independently of Paisa.
 
-    ```ledger
-    commodity €
-        format €1.000,00
+Your journal stays with the instance you control. Optional price providers contact external services; running on someone else's server gives that host access to your data. Read the [manifesto](manifesto.md) for the project's philosophy and [authentication](reference/user-authentication.md) for hosting considerations.
 
-    commodity AAPL
-        format 1.000,00 AAPL
+## Explore your finances
 
-    2022/01/01 Salary
-        Income:Salary:Acme      €-5.000
-        Assets:Checking          €5.000
+- **Track and understand:** expenses, income, net worth, cash flow, investment performance, and allocation.
+- **Plan:** budgets, savings goals, retirement, recurring bills, and illustrative what-if scenarios.
+- **Bring in your records:** CSV, Excel, and PDF imports, reusable templates, and a journal editor.
+- **Check and calculate:** Doctor diagnostics and interactive sheets using journal data.
 
-    2022/01/03 Rent
-        Assets:Checking         €-2.000
-        Expenses:Rent
+The [Product Tour](product-tour.md) explains these workflows and links to detailed references.
 
-    2022/01/07 Investment
-        Assets:Checking      €-1.000,02
-        Assets:Equity:AAPL   6,453 AAPL @ €154,97
-    ```
+## Start with a working journal
 
-<p style="text-align: center; margin-bottom: 3rem">
-  <a class="md-button md-button--primary" style="margin-right: 50px;" href="/getting-started/installation/">Install</a>
-  <a class="md-button md-button--primary" href="https://demo.paisa.fyi">Demo</a>
-</p>
+1. [Install Paisa](getting-started/installation.md) using Desktop, CLI, Docker, or Nix.
+2. [Follow the tutorial](getting-started/tutorial.md) to get your first instance working.
+3. Explore [journal examples](getting-started/journal-examples.md), then [import your statements](reference/import.md).
 
-<div class="features-container" markdown>
-<div class="features" markdown>
-- :fontawesome-regular-file-lines: Builds on top of the **[ledger](https://www.ledger-cli.org/)** double entry accounting tool.
-- :octicons-shield-lock-16: Your financial **data** never leaves your system.
-- :simple-git: The journal and configuration information are stored in **plain text** files
-  that can be easily version controlled. You can collaborate with
-  others by giving access to the files.
-- :octicons-graph-24: Track the latest market **price** of your Mutual Fund, NPS Fund
-  and Stock holdings.
-- :fontawesome-regular-credit-card: Track and **budget** your **Expenses**.
-- :material-microsoft-excel: **Convert** CSV, Excel and PDF files to Ledger journal.
-- :fontawesome-solid-calculator: **Calculate** your taxes, emis, etc using **[sheets](./reference/sheets.md)**.
-- :octicons-goal-16: Track your **goals**.
-- :material-timer-sync: View your **recurring** transactions and **credit card** bills.
-- :material-beach: Plan your **retirement**.
-- :material-chart-bar: And many more **visualizations** to help you make any financial
-  decisions.
-</div>
+Find answers in the [FAQ](faq.md), or explore [development and testing](development/testing.md) to contribute.
 
-<div class="thumbnail-container app-frame win dark" data-title="Paisa">
-  <div class="thumbnail">
-    <iframe src="https://demo1.paisa.fyi" frameborder="0" scrolling="no"></iframe>
-  </div>
-</div>
-</div>
-</div>
+## Project history
 
-<div class="feature-card-container" markdown>
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-logo" markdown>
-:fontawesome-regular-file-lines:{ .feature-card-icon }
-</div>
-<div class="feature-card-right" markdown>
-# Plain Text
+Paisa was originally created by **[Anantha Kumaran](https://github.com/ananthakumaran)** and developed with contributions from the open-source community. This repository continues that work with maintenance, improvements, and new functionality while preserving the project's philosophy.
 
-All your financial data is stored in plain text files. Of course, we will not
-ask you to draw a picture on blank canvas. We provide enough guard rails to make
-data entry easy and error free. The editor comes with syntax highlighting, auto
-completion, error checking and auto formatting.
-
-</div>
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-equity" markdown>
-:octicons-shield-lock-16:{ .feature-card-icon }
-</div>
-
-<div class="feature-card-right" markdown>
-# Privacy
-
-Selling your data is not the indirect goal of the app. The app will never
-collect or send any data to any server. All your data is stored in your system.
-Checkout the [manifesto](./manifesto.md) for more.
-
-</div>
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-asset" markdown>
-:octicons-graph-24:{ .feature-card-icon }
-</div>
-<div class="feature-card-right" markdown>
-# Price Tracking
-
-Paisa supports various [price](./reference/commodities.md) data providers, so it
-can keep track of the latest price of all your assets. It also allows the user
-to enter the price manually, so you can use it to revalue your assets like
-house, car, land, etc.
-
-</div>
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-expense" markdown>
-:fontawesome-regular-credit-card:{ .feature-card-icon }
-</div>
-
-<div class="feature-card-right" markdown>
-# Budget and Expenses
-
-Paisa allows you to track your expenses at the granularity of your choice. You
-can customize the categories and subcategories to suit your needs, even icon is
-customizable. If you are tight on money, don't worry, paisa got you covered. You
-can set a [budget](./reference/budget.md) for each category and make sure you
-don't overspend.
-
-</div>
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-income" markdown>
-:material-microsoft-excel:{ .feature-card-icon }
-</div>
-<div class="feature-card-right" markdown>
-# Data Import
-
-You don't have to sit and manually enter all your transactions. You can get the
-account statements from your bank or credit card provider and import them into
-paisa. Paisa [import](./reference/import.md) system is flexible enough to handle
-most of the formats out there in the wild. Once you setup the import template,
-it will hardly take 5 minutes to import and categorize all your transactions
-each month.
-
-</div>
-
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-liability" markdown>
-:fontawesome-solid-calculator:{ .feature-card-icon }
-</div>
-
-<div class="feature-card-right" markdown>
-# Sheets
-
-Ever wanted to calculate your taxes, emis, etc? Paisa comes with a notepad
-calculator called [sheet](./reference/sheets.md) that can do all the
-calculations with the data from your ledger. The sheets are live and
-interactive, and will update automatically when you change the data in your
-ledger.
-
-</div>
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-logo" markdown>
-:octicons-goal-16:{ .feature-card-icon }
-</div>
-<div class="feature-card-right" markdown>
-# Goals
-
-Want to know how much you need to save for your next vacation? or how long it
-will take to buy a new car? Paisa can help you with planning and tracking your
-[goals](./reference/goals/index.md). If you know how much you can afford to save
-each month, paisa can tell you when you can achieve your goal. On the other
-hand, if you have a deadline, paisa can tell you how much you need to save each
-month to achieve your goal.
-
-</div>
-
-</div>
-
-<div class="feature-card" markdown>
-<div class="feature-card-left feature-card-icon feature-card-icon-expense" markdown>
-:material-timer-sync:{ .feature-card-icon }
-</div>
-
-<div class="feature-card-right" markdown>
-# Bills
-
-Paisa can help you track your [recurring](./reference/recurring.md) transactions
-like rent, emi, [credit card](./reference/credit-cards.md) bills, etc. The
-calendar view will show you all the bills that are due in the current month. You
-can set the recurring period of the transaction, which is flexible enough to
-handle any kind of schedule like weekly, monthly, quarterly, last day of the
-month, last day of the quarter, etc.
-
-</div>
-</div>
-
-<p></p>
-</div>
+See the [original project](https://github.com/ananthakumaran/paisa), [Git history](https://github.com/Pratap-kute/paisa/commits/master/), and [upstream](https://github.com/ananthakumaran/paisa/graphs/contributors) and [current contributors](https://github.com/Pratap-kute/paisa/graphs/contributors). Paisa remains licensed under the GNU AGPL version 3 or later.

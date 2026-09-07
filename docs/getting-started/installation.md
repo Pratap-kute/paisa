@@ -8,11 +8,17 @@ Paisa is available in two formats: a **Desktop Application** and a **CLI**
 (Command Line Interface). Both provide the same list of features, with the
 primary difference being how the user interface is launched.
 
+## Artifact sources
+
+This repository’s source and development history are at [Pratap-kute/paisa](https://github.com/Pratap-kute/paisa). Desktop and CLI download links below refer to this repository’s releases (verified assets in `v0.9.1`). Nix uses the upstream source. Published artifacts may differ from the implementation described in this repository.
+
+The Docker publishing workflow targets [`pratapkute/paisa`](https://hub.docker.com/r/pratapkute/paisa), whose `latest` tag was verified during this refresh. Check the available tags and release contents before selecting an image; the tag does not establish parity with current `master`.
+
 ## Desktop Application
 
 === "Linux"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-app-linux-amd64.deb`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-linux-amd64.deb`
     * You can install it either by double clicking the deb file or run the following commands in a Terminal
 
     ```console
@@ -22,7 +28,7 @@ primary difference being how the user interface is launched.
 
 === "Mac"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-app-macos-amd64.dmg`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-macos-amd64.dmg`
     * Open the dmg file and drag the Paisa app into Application folder
     * Since the app is not signed[^1], Mac will show a warning when
     you try to open the app. You can check the
@@ -37,7 +43,7 @@ primary difference being how the user interface is launched.
 
 === "Windows"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-app-windows-amd64.exe`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-windows-amd64.exe`
     * Since the app is not signed[^1], Windows will show multiple
     warnings, You might have to click `Keep anyway`, `More info`, `Run
     anyway` etc.
@@ -51,15 +57,16 @@ primary difference being how the user interface is launched.
 
     <a href="https://www.pikapods.com/pods?run=paisa" target="_blank"
     rel="noopener" markdown>![Run on PikaPods](../images/pika-pods.svg)</a><br />
-    PikaPods lets you run Paisa on a server with a few clicks. It handles app upgrades,
-    backup and hosting for you. Make sure to setup a [user
-    account](../reference/user-authentication.md) post installation.
+    This historical upstream hosting option is retained for context. The launch
+    link returned HTTP 404 during this refresh; availability and the deployed
+    revision are unverified. If using a third-party host, configure a [user
+    account](../reference/user-authentication.md).
 
 ## CLI
 
 === "Linux"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-cli-linux-amd64`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-linux-amd64`
     * Run the following commands in a Terminal
 
     ```console
@@ -71,7 +78,7 @@ primary difference being how the user interface is launched.
 
 === "Mac"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-cli-macos-amd64`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-macos-amd64`
     * Run the following commands in a Terminal
 
     ```console
@@ -84,7 +91,7 @@ primary difference being how the user interface is launched.
 
 === "Windows"
 
-    * Download the prebuilt [binary](https://github.com/ananthakumaran/paisa/releases/latest) named `paisa-cli-windows-amd64.exe`
+    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-windows-amd64.exe`
     * Since the binary is not signed[^1] with a certificate, you might get
     a warning from Windows. You would have to click `keep anyway`.
     * Run the following command in a Windows PowerShell. Make sure
@@ -150,14 +157,14 @@ schema is newer than it supports.
 
     ```console
     # mkdir -p /home/john/Documents/paisa/
-    # docker run -p 7500:7500 -v /home/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest
+    # docker run -p 127.0.0.1:7500:7500 -v /home/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest paisa serve --host 0.0.0.0
     ```
 
 === "Mac"
 
     ```console
     # mkdir -p /Users/john/Documents/paisa/
-    # docker run -p 7500:7500 -v /Users/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest
+    # docker run -p 127.0.0.1:7500:7500 -v /Users/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest paisa serve --host 0.0.0.0
     ```
 
 ## Nix Flake
