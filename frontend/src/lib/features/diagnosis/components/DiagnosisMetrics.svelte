@@ -21,7 +21,7 @@ let {
 }: Props = $props();
 </script>
 
-<MetricStrip cols="auto">
+<MetricStrip cols="auto" class="!mb-0">
   <Metric
     label="Critical"
     value={String(dangerCount)}

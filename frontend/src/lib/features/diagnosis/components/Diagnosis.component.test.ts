@@ -3,7 +3,10 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 import DiagnosisStatusBanner from "./DiagnosisStatusBanner.svelte";
 import QualityIssueRow from "./QualityIssueRow.svelte";
 import HealthyChecksList from "./HealthyChecksList.svelte";
-import type { DiagnosticCheck, QualityIssue } from "$lib/features/diagnosis/types";
+import type {
+  DiagnosticCheck,
+  QualityIssue,
+} from "$lib/features/diagnosis/types";
 import { obscure } from "$lib/shared/state/persisted";
 
 afterEach(() => cleanup());
@@ -80,8 +83,10 @@ test("QualityIssueRow renders issue details, entity, action, and affected featur
     level: "warning",
     category: "valuation",
     summary: "NIFTYBEES valuation fallback",
-    description: "Paisa could not obtain a market valuation on Current FY opening.",
-    details: "Valuation fell back to acquisition cost 250.50 INR on 2026-04-01.",
+    description:
+      "Paisa could not obtain a market valuation on Current FY opening.",
+    details:
+      "Valuation fell back to acquisition cost 250.50 INR on 2026-04-01.",
     entity: {
       type: "commodity",
       id: "NIFTYBEES",
@@ -100,7 +105,8 @@ test("QualityIssueRow renders issue details, entity, action, and affected featur
   expect(view.getByText("Valuation")).toBeTruthy();
   expect(view.getByText("Warning")).toBeTruthy();
   expect(view.getByText("NIFTYBEES")).toBeTruthy();
-  expect(view.getByText(/Paisa could not obtain a market valuation/i)).toBeTruthy();
+  expect(view.getByText(/Paisa could not obtain a market valuation/i))
+    .toBeTruthy();
   expect(view.getByText(/Investment Performance/i)).toBeTruthy();
   expect(view.getByText(/Net Worth/i)).toBeTruthy();
 

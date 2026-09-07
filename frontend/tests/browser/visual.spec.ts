@@ -139,8 +139,12 @@ async function expectDarkSelectTheme(page: Page) {
   });
   expect(colors.background).toBe("rgb(24, 32, 45)");
   expect(colors.foreground).toBe("rgb(248, 250, 252)");
-  expect(["#0f172a", "#18202d", "var(--paisa-surface)"]).toContain(colors.inputBackground);
-  expect(["#f8fafc", "var(--paisa-foreground)"]).toContain(colors.inputForeground);
+  expect(["#0f172a", "#18202d", "var(--paisa-surface)"]).toContain(
+    colors.inputBackground,
+  );
+  expect(["#f8fafc", "var(--paisa-foreground)"]).toContain(
+    colors.inputForeground,
+  );
 }
 
 async function applyVariant(
@@ -269,7 +273,9 @@ for (const route of visualRoutes) {
         await expect(page.locator(".svelte-select-list")).toBeVisible();
         const listBackground = await page.locator(".svelte-select-list")
           .evaluate((element) => getComputedStyle(element).backgroundColor);
-        expect(["rgb(30, 41, 59)", "rgb(31, 41, 55)"]).toContain(listBackground);
+        expect(["rgb(30, 41, 59)", "rgb(31, 41, 55)"]).toContain(
+          listBackground,
+        );
         await page.keyboard.press("Escape");
         await expect(page.locator(".svelte-select-list")).toBeHidden();
       }

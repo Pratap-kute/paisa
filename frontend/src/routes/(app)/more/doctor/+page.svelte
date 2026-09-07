@@ -41,7 +41,8 @@ async function runDiagnosis() {
   isLoading = true;
   error = null;
   try {
-    const response = (await api.diagnosis.getDiagnosis()) as unknown as DiagnosisResponse;
+    const response =
+      (await api.diagnosis.getDiagnosis()) as unknown as DiagnosisResponse;
     issues = response.issues || [];
     checks = response.checks || [];
     if (response.summary) {
@@ -50,7 +51,8 @@ async function runDiagnosis() {
         danger: response.summary.danger ?? 0,
         warning: response.summary.warning ?? 0,
         info: response.summary.info ?? 0,
-        passedChecks: response.summary.passedChecks ?? checks.filter((c) => c.status === "passed").length,
+        passedChecks: response.summary.passedChecks ??
+          checks.filter((c) => c.status === "passed").length,
         totalChecks: response.summary.totalChecks ?? (checks.length || 11),
       };
     } else {
@@ -71,7 +73,9 @@ async function runDiagnosis() {
     }
     lastChecked = new Date();
   } catch (err: unknown) {
-    error = err instanceof Error ? err.message : "Failed to load diagnostic results.";
+    error = err instanceof Error
+      ? err.message
+      : "Failed to load diagnostic results.";
   } finally {
     isLoading = false;
   }
@@ -159,7 +163,7 @@ onMount(() => {
             <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Needs Attention
             </h3>
-            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden px-4">
+            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden">
               {#each attentionIssues as issue, index (`attention-${index}-${issue.code}-${issue.entity?.id ?? ""}`)}
                 <QualityIssueRow {issue} />
               {/each}
@@ -173,7 +177,7 @@ onMount(() => {
             <h3 class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Information
             </h3>
-            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden px-4">
+            <Card padding="none" class="divide-y divide-border-subtle overflow-hidden">
               {#each infoIssues as issue, index (`info-${index}-${issue.code}-${issue.entity?.id ?? ""}`)}
                 <QualityIssueRow {issue} />
               {/each}

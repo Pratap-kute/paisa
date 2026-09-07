@@ -184,12 +184,14 @@ test("validation error and retry", async ({ page }) => {
   );
   await page.goto("/more/scenarios");
   await expect(page.getByRole("alert")).toContainText("withdrawal exceeds");
-  await expect(page.getByRole("button", { name: "Retry", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Retry", exact: true }))
+    .toHaveCount(0);
 
   status = 500;
   await page.getByLabel("Monthly Income", { exact: true }).fill("160000");
   await expect(page.getByRole("alert")).toContainText("Unable to calculate");
-  await expect(page.getByRole("button", { name: "Retry", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Retry", exact: true }))
+    .toBeVisible();
 
   status = 200;
   await page.getByRole("button", { name: "Retry", exact: true }).click();

@@ -33,7 +33,8 @@ let statusKind = $derived.by(() => {
 });
 </script>
 
-<Card padding="md" class="w-full overflow-hidden" data-testid="diagnosis-status-banner">
+<Card padding="md" class="w-full overflow-hidden"
+  data-testid="diagnosis-status-banner">
   {#if loading}
     <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
       <div class="flex items-center gap-4 text-center md:text-left">
@@ -80,7 +81,7 @@ let statusKind = $derived.by(() => {
             }"
           ></i>
         </div>
-        <div>
+        <div class="flex flex-col gap-1">
           <div class="flex items-center justify-center gap-2 md:justify-start">
             <h2 class="text-base font-bold text-foreground">
               {#if statusKind === "danger"}

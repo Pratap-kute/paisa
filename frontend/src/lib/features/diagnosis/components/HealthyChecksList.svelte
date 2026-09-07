@@ -31,7 +31,7 @@ let failedChecks = $derived(checks.filter((c) => c.status === "failed"));
     <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
       {#each passedChecks as check}
         <div
-          class="flex items-center justify-between rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-3.5 py-2.5 shadow-sm text-xs"
+          class="flex items-center justify-between rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface px-3.5 py-2.5 shadow-sm text-xs transition-colors hover:border-border hover:bg-surface-raised/40"
           data-testid="healthy-check-item"
         >
           <div class="flex items-center gap-2.5 min-w-0">
@@ -40,7 +40,7 @@ let failedChecks = $derived(checks.filter((c) => c.status === "failed"));
             </div>
             <span class="font-medium text-foreground truncate">{check.name || check.code}</span>
           </div>
-          <span class="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground ml-2">
+          <span class="ml-2 shrink-0 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
             {check.category || "General"}
           </span>
         </div>

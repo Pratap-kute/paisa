@@ -38,25 +38,27 @@ function maskText(text?: string): string {
 </script>
 
 <div
-  class="flex flex-col gap-2.5 py-4 text-sm transition-colors hover:bg-surface-hover/20"
+  class="flex items-start gap-3.5 px-4 py-4 sm:px-5 sm:py-4.5 text-sm transition-colors hover:bg-surface-hover/20"
   data-testid="diagnosis-issue-row"
   data-level={level}
   data-code={issue.code}
 >
-  <!-- Header: Icon, Title, Entity & Level/Category Badges -->
-  <div class="flex items-start justify-between gap-3">
-    <div class="flex min-w-0 items-start gap-2.5">
-      <div class="mt-0.5 shrink-0 text-sm">
-        {#if level === "danger" || level === "error"}
-          <i class="fa-solid fa-triangle-exclamation text-negative"></i>
-        {:else if level === "warning"}
-          <i class="fa-solid fa-circle-exclamation text-warning"></i>
-        {:else}
-          <i class="fa-solid fa-circle-info text-primary"></i>
-        {/if}
-      </div>
+  <!-- Left: Status Icon -->
+  <div class="flex h-5 w-5 shrink-0 items-center justify-center text-sm">
+    {#if level === "danger" || level === "error"}
+      <i class="fa-solid fa-triangle-exclamation text-negative"></i>
+    {:else if level === "warning"}
+      <i class="fa-solid fa-circle-exclamation text-warning"></i>
+    {:else}
+      <i class="fa-solid fa-circle-info text-primary"></i>
+    {/if}
+  </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+  <!-- Right: Content Column -->
+  <div class="flex min-w-0 flex-1 flex-col gap-2.5">
+    <!-- Header: Title, Entity & Level/Category Badges -->
+    <div class="flex flex-wrap items-center justify-between gap-2.5">
+      <div class="flex min-w-0 flex-wrap items-center gap-2">
         <h4 class="text-sm font-semibold text-foreground">
           {issue.summary}
         </h4>
@@ -68,61 +70,61 @@ function maskText(text?: string): string {
           </span>
         {/if}
       </div>
+
+      <div class="flex shrink-0 items-center gap-2">
+        <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
+          {formatCategory(issue.category)}
+        </span>
+        <Badge variant={badgeVariant} size="sm" rounded>
+          {levelLabel}
+        </Badge>
+      </div>
     </div>
 
-    <div class="flex shrink-0 items-center gap-2">
-      <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[0.6875rem] font-medium text-muted-foreground">
-        {formatCategory(issue.category)}
-      </span>
-      <Badge variant={badgeVariant} size="sm" rounded>
-        {levelLabel}
-      </Badge>
-    </div>
-  </div>
-
-  <!-- Body Description -->
-  <div class="pl-6">
+    <!-- Body Description -->
     <p class="text-xs leading-relaxed text-muted-foreground">
       {issue.description}
     </p>
 
     <!-- Context Details Bar -->
     {#if issue.details}
-      <div class="mt-2 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised/60 px-3 py-1.5 font-mono text-[0.6875rem] text-foreground/90">
+      <div class="rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised/60 px-3 py-1.5 font-mono text-[0.6875rem] text-foreground/90 overflow-x-auto select-all">
         {maskText(issue.details)}
       </div>
     {/if}
 
     <!-- Footer: Affects + Action Button -->
-    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-      {#if issue.affectedFeatures && issue.affectedFeatures.length > 0}
-        <div class="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-          <span class="font-medium text-foreground/75">Affects:</span>
-          {#each issue.affectedFeatures as feature, i}
-            <span class="inline-flex items-center">
-              <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[0.6875rem] font-medium text-foreground">
-                {feature}
+    {#if (issue.affectedFeatures && issue.affectedFeatures.length > 0) || issue.action}
+      <div class="mt-0.5 flex flex-wrap items-center justify-between gap-3 pt-1">
+        {#if issue.affectedFeatures && issue.affectedFeatures.length > 0}
+          <div class="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            <span class="font-medium text-foreground/75">Affects:</span>
+            {#each issue.affectedFeatures as feature, i}
+              <span class="inline-flex items-center">
+                <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[0.6875rem] font-medium text-foreground">
+                  {feature}
+                </span>
+                {#if i < issue.affectedFeatures.length - 1}
+                  <span class="mx-1 text-muted-foreground">·</span>
+                {/if}
               </span>
-              {#if i < issue.affectedFeatures.length - 1}
-                <span class="mx-1 text-muted-foreground">·</span>
-              {/if}
-            </span>
-          {/each}
-        </div>
-      {:else}
-        <div></div>
-      {/if}
+            {/each}
+          </div>
+        {:else}
+          <div></div>
+        {/if}
 
-      {#if issue.action}
-        <a
-          href={issue.action.href}
-          class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface px-2.5 py-1 text-xs font-medium text-foreground transition-all hover:bg-surface-raised hover:border-border group"
-          data-testid="issue-action-button"
-        >
-          <span>{issue.action.label}</span>
-          <i class="fa-solid fa-arrow-right text-[0.625rem] text-muted-foreground transition-transform group-hover:translate-x-0.5"></i>
-        </a>
-      {/if}
-    </div>
+        {#if issue.action}
+          <a
+            href={issue.action.href}
+            class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-foreground transition-all hover:bg-surface-raised hover:border-border hover:shadow-xs group"
+            data-testid="issue-action-button"
+          >
+            <span>{issue.action.label}</span>
+            <i class="fa-solid fa-arrow-right text-[0.625rem] text-muted-foreground transition-transform group-hover:translate-x-0.5"></i>
+          </a>
+        {/if}
+      </div>
+    {/if}
   </div>
 </div>
