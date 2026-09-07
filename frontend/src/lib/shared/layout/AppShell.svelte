@@ -155,6 +155,12 @@ const navSections: NavSection[] = [
         href: "/more/goals",
         icon: "fa-solid fa-bullseye",
       },
+      {
+        kind: "link",
+        label: "Scenarios",
+        href: "/more/scenarios",
+        icon: "fa-solid fa-flask",
+      },
     ],
   },
   {

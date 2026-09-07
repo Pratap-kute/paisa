@@ -249,8 +249,8 @@ func calculatePerformance(db *gorm.DB, events []investmentEvent, start, end time
 	}
 	if !active {
 		r.Quality.Status = "unavailable"
-		r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: "no_investment_activity"})
-		suppressPerformanceReturn(&r, "no_investment_activity")
+		r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: reasonNoInvestmentActivity})
+		suppressPerformanceReturn(&r, reasonNoInvestmentActivity)
 	}
 	return r, nil
 }

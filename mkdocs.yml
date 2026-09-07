@@ -12,6 +12,7 @@ nav:
   - "Reference":
       - reference/accounts.md
       - reference/investment-performance.md
+      - reference/scenario-planning.md
       - reference/commodities.md
       - reference/journal.md
       - reference/allocation-targets.md
