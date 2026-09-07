@@ -14,7 +14,6 @@ import { sumBy } from "es-toolkit";
 import { onMount } from "svelte";
 import Page from "$lib/shared/layout/Page.svelte";
 import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
 import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
 import Metric from "$lib/shared/layout/Metric.svelte";
 import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";

@@ -218,7 +218,7 @@ func TestUpsertMerchantRule_ConfigWriteMuSerialization(t *testing.T) {
 
 	var wg sync.WaitGroup
 	// Run concurrent SaveConfigObject and UpsertMerchantRule
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		wg.Add(2)
 		go func(idx int) {
 			defer wg.Done()

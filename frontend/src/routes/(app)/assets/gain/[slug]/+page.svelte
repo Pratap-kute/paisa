@@ -17,7 +17,7 @@ import {
 } from "$lib/features/assets/hierarchy_data";
 import type { Posting } from "$lib/domain/ledger";
 import { api } from "$lib/api";
-import { last, sortBy } from "es-toolkit";
+import { last } from "es-toolkit";
 import Button from "$lib/shared/ui/Button.svelte";
 import type { PageData } from "./$types";
 

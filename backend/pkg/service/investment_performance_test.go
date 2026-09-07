@@ -272,7 +272,7 @@ func TestPerformanceQueriesAreIndependentOfTimelineDays(t *testing.T) {
 	utils.SetNow("2026-09-06")
 	t.Cleanup(utils.ResetNow)
 	ps := make([]posting.Posting, 0, 30)
-	for i := 0; i < 30; i++ {
+	for i := range 30 {
 		ps = append(ps, performancePost(fmt.Sprint(i), "2020-01-01", fmt.Sprintf("Assets:Fund:%d", i), "INR", 1000, 1000))
 	}
 	require.NoError(t, db.Create(&ps).Error)

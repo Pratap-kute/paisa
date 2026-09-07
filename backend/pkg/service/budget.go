@@ -133,10 +133,7 @@ func ComputeBudget(db *gorm.DB, forecastPostings, expensesPostings []posting.Pos
 
 						asOfDay := asOf.Day()
 						daysInHMonth := utils.EndOfMonth(hMonth).Day()
-						cutoffDay := asOfDay
-						if cutoffDay > daysInHMonth {
-							cutoffDay = daysInHMonth
-						}
+						cutoffDay := min(asOfDay, daysInHMonth)
 						cutoff := time.Date(hMonth.Year(), hMonth.Month(), cutoffDay, 23, 59, 59, 999999999, config.TimeZone())
 
 						for _, acc := range accounts {

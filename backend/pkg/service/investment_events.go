@@ -83,10 +83,7 @@ func loadInvestmentEvents(db *gorm.DB, ps []posting.Posting) []investmentEvent {
 	counterparts := make([]posting.Posting, 0)
 	// Bound SQL parameters while avoiding one query per transaction.
 	for start := 0; start < len(ids); start += 500 {
-		end := start + 500
-		if end > len(ids) {
-			end = len(ids)
-		}
+		end := min(start+500, len(ids))
 		counterparts = append(counterparts, query.Init(db).Where("transaction_id IN ?", ids[start:end]).All()...)
 	}
 	return classifyInvestmentEvents(ps, counterparts)

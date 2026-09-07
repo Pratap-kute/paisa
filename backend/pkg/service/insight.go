@@ -444,16 +444,10 @@ func detectExpenseChange(ctx InsightContext) *Insight {
 				} else {
 					severity = InsightSeverityInfo
 				}
-				score = 50 + int(percent.IntPart())
-				if score > 75 {
-					score = 75
-				}
+				score = min(50+int(percent.IntPart()), 75)
 			} else {
 				severity = InsightSeverityPositive
-				score = 35 + int(percent.Abs().IntPart()/2)
-				if score > 55 {
-					score = 55
-				}
+				score = min(35+int(percent.Abs().IntPart()/2), 55)
 			}
 
 			insight := &Insight{
@@ -710,10 +704,7 @@ func detectSavingsRateChange(ctx InsightContext) *Insight {
 			}
 		} else {
 			severity = InsightSeverityPositive
-			score = 45 + int(diff.IntPart()/2)
-			if score > 65 {
-				score = 65
-			}
+			score = min(45+int(diff.IntPart()/2), 65)
 		}
 
 		return &Insight{
@@ -1016,10 +1007,7 @@ func detectRecurringIncrease(ctx InsightContext) []Insight {
 					severity = InsightSeverityWarning
 				}
 
-				score := 45 + int(percent.IntPart()/3)
-				if score > 75 {
-					score = 75
-				}
+				score := min(45+int(percent.IntPart()/3), 75)
 
 				baselineVal := baselineRes.BaselineValue
 				var baselinePtr *decimal.Decimal

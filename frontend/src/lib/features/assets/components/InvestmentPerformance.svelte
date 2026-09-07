@@ -90,16 +90,17 @@ function periodUnavailableSummary(reason?: string | null) {
     case "opening_balance_missing":
     case "closing_balance_missing":
     case "missing_market_quotes":
+    case "insufficient_valuation_data":
       return "Opening or closing market price is missing";
     case "zero_capital_base":
     case "insufficient_weighted_capital":
       return "Capital base was zero or negative";
-    case "unattributed_income":
+    case "unattributed_investment_income":
       return "Income attribution crosses scope";
     case "no_investment_activity":
       return "No activity in period";
     default:
-      return "Opening or closing market price is missing";
+      return "Return could not be calculated reliably";
   }
 }
 function selectPeriod(event: Event & { currentTarget: HTMLSelectElement }) {
@@ -177,19 +178,19 @@ function selectPeriod(event: Event & { currentTarget: HTMLSelectElement }) {
 
 {#if result && result.quality?.status !== "unavailable"}
   <Section
-  title="Performance Decomposition"
-  subtitle="Portfolio growth includes both money you supplied and investment returns."
-  class="[&_.paisa-section-title]:text-base [&_.paisa-section-title]:font-semibold [&_.paisa-section-title]:text-foreground [&_.paisa-section-title]:normal-case [&_.paisa-section-title]:tracking-normal"
->
-  <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    title="Performance Decomposition"
+    subtitle="Portfolio growth includes both money you supplied and investment returns."
+    class="[&_.paisa-section-title]:text-base [&_.paisa-section-title]:font-semibold [&_.paisa-section-title]:text-foreground [&_.paisa-section-title]:normal-case [&_.paisa-section-title]:tracking-normal"
+  >
+    <dl class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 xl:grid-cols-5 border-b border-border-subtle pb-5">
       {#each decomposition as row}
-        <div class="min-w-0 rounded-lg border border-border-subtle/80 bg-surface/40 p-3">
+        <div class="min-w-0">
           <dt class="text-xs font-medium text-muted-foreground">{row.label}</dt>
           <dd class="mt-1 break-words text-lg font-semibold tabular-nums text-foreground">{row.formatted}</dd>
         </div>
       {/each}
     </dl>
-</Section>
+  </Section>
 
   <Section
   title="Performance Timeline"
