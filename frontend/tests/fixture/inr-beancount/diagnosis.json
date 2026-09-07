@@ -5,6 +5,7 @@
     "warning": 9,
     "info": 3,
     "passedChecks": 7,
+    "failedChecks": 0,
     "totalChecks": 11
   },
   "issues": [
@@ -20,12 +21,12 @@
         "label": "ABNB"
       },
       "affectedFeatures": [
-        "Net Worth",
-        "Scenario Planning"
+        "net_worth",
+        "scenarios"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "commodity": "ABNB",
@@ -45,11 +46,11 @@
         "label": "ABNB"
       },
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "boundary": "closing",
@@ -70,12 +71,12 @@
         "label": "BTC"
       },
       "affectedFeatures": [
-        "Net Worth",
-        "Scenario Planning"
+        "net_worth",
+        "scenarios"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "commodity": "BTC",
@@ -95,11 +96,11 @@
         "label": "BTC"
       },
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "boundary": "closing",
@@ -120,12 +121,12 @@
         "label": "NIFTY"
       },
       "affectedFeatures": [
-        "Net Worth",
-        "Scenario Planning"
+        "net_worth",
+        "scenarios"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "commodity": "NIFTY",
@@ -145,11 +146,11 @@
         "label": "NIFTY"
       },
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "boundary": "closing",
@@ -170,12 +171,12 @@
         "label": "USD"
       },
       "affectedFeatures": [
-        "Net Worth",
-        "Scenario Planning"
+        "net_worth",
+        "scenarios"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "commodity": "USD",
@@ -195,11 +196,11 @@
         "label": "USD"
       },
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "boundary": "closing",
@@ -216,11 +217,11 @@
       "code": "unattributed_investment_income",
       "category": "investments",
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Performance",
-        "href": "/performance"
+        "href": "/assets/gain"
       },
       "metadata": {
         "date": "2022-01-31"
@@ -234,11 +235,11 @@
       "code": "insufficient_contribution_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "1"
@@ -252,11 +253,11 @@
       "code": "insufficient_expense_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "1"
@@ -270,11 +271,11 @@
       "code": "insufficient_income_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "1"

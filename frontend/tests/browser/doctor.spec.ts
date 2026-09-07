@@ -111,6 +111,40 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     ).toBeVisible();
   });
 
+  test("failed diagnostic check displays Diagnosis incomplete and does not claim Healthy", async ({ page }) => {
+    await page.route("**/api/diagnosis", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          summary: {
+            total: 0,
+            danger: 0,
+            warning: 0,
+            info: 0,
+            passedChecks: 10,
+            failedChecks: 1,
+            totalChecks: 11,
+          },
+          issues: [],
+          checks: healthyChecks.map((c) =>
+            c.code === "exchange_price_coverage"
+              ? { ...c, status: "failed", issueCount: 0 }
+              : c,
+          ),
+        }),
+      });
+    });
+
+    await page.goto("/more/doctor");
+
+    await expect(page.getByText("Diagnosis incomplete")).toBeVisible();
+    await expect(page.getByText("Incomplete", { exact: true })).toBeVisible();
+    await expect(page.getByText(/1 check could not run/i)).toBeVisible();
+    expect(await page.getByText("All Systems Operational").isVisible()).toBe(false);
+    expect(await page.getByText("Healthy", { exact: true }).isVisible()).toBe(false);
+  });
+
   test("critical danger state displays attention required banner and issue details", async ({ page }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({

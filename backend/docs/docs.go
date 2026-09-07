@@ -2717,6 +2717,9 @@ const docTemplate = `{
                 "danger": {
                     "type": "integer"
                 },
+                "failedChecks": {
+                    "type": "integer"
+                },
                 "info": {
                     "type": "integer"
                 },

@@ -22,12 +22,41 @@ test("DiagnosisStatusBanner renders Healthy on clean checks", () => {
     infoCount: 0,
     totalIssues: 0,
     passedChecks: 11,
+    failedChecks: 0,
     totalChecks: 11,
     loading: false,
   });
 
   expect(view.getByText("All Systems Operational")).toBeTruthy();
   expect(view.getByText("Healthy")).toBeTruthy();
+  expect(
+    view.getByText(
+      "All diagnostic checks completed without issues requiring attention.",
+    ),
+  ).toBeTruthy();
+});
+
+test("DiagnosisStatusBanner renders Incomplete when diagnostic check fails even with 0 quality issues", () => {
+  const view = render(DiagnosisStatusBanner, {
+    dangerCount: 0,
+    warningCount: 0,
+    infoCount: 0,
+    totalIssues: 0,
+    passedChecks: 10,
+    failedChecks: 1,
+    totalChecks: 11,
+    loading: false,
+  });
+
+  expect(view.getByText("Diagnosis incomplete")).toBeTruthy();
+  expect(view.getByText("Incomplete")).toBeTruthy();
+  expect(
+    view.getByText(
+      /1 check could not run. Financial data could not be fully verified./i,
+    ),
+  ).toBeTruthy();
+  expect(view.queryByText("All Systems Operational")).toBeNull();
+  expect(view.queryByText("Healthy")).toBeNull();
 });
 
 test("DiagnosisStatusBanner renders Attention Required on danger issues", () => {
@@ -37,6 +66,7 @@ test("DiagnosisStatusBanner renders Attention Required on danger issues", () => 
     infoCount: 0,
     totalIssues: 3,
     passedChecks: 9,
+    failedChecks: 0,
     totalChecks: 11,
     loading: false,
   });
@@ -52,6 +82,7 @@ test("DiagnosisStatusBanner renders Needs Review on warning-only issues", () => 
     infoCount: 1,
     totalIssues: 3,
     passedChecks: 9,
+    failedChecks: 0,
     totalChecks: 11,
     loading: false,
   });
@@ -68,6 +99,7 @@ test("DiagnosisStatusBanner renders Operational on info-only issues", () => {
     infoCount: 2,
     totalIssues: 2,
     passedChecks: 11,
+    failedChecks: 0,
     totalChecks: 11,
     loading: false,
   });
@@ -77,7 +109,7 @@ test("DiagnosisStatusBanner renders Operational on info-only issues", () => {
   expect(view.getByText(/2 informational notes available below/i)).toBeTruthy();
 });
 
-test("QualityIssueRow renders issue details, entity, action, and affected features", () => {
+test("QualityIssueRow renders issue details, entity, action, and maps machine affected feature IDs", () => {
   const issue: QualityIssue = {
     code: "valuation_fallback",
     level: "warning",
@@ -92,7 +124,7 @@ test("QualityIssueRow renders issue details, entity, action, and affected featur
       id: "NIFTYBEES",
       label: "NIFTYBEES",
     },
-    affectedFeatures: ["Investment Performance", "Net Worth"],
+    affectedFeatures: ["investment_performance", "net_worth"],
     action: {
       label: "Review Prices",
       href: "/ledger/price",
@@ -107,8 +139,8 @@ test("QualityIssueRow renders issue details, entity, action, and affected featur
   expect(view.getByText("NIFTYBEES")).toBeTruthy();
   expect(view.getByText(/Paisa could not obtain a market valuation/i))
     .toBeTruthy();
-  expect(view.getByText(/Investment Performance/i)).toBeTruthy();
-  expect(view.getByText(/Net Worth/i)).toBeTruthy();
+  expect(view.getByText("Investment Performance")).toBeTruthy();
+  expect(view.getByText("Net Worth")).toBeTruthy();
 
   const actionLink = view.getByTestId("issue-action-button");
   expect(actionLink.getAttribute("href")).toBe("/ledger/price");

@@ -22,11 +22,13 @@ import (
 const DateFormat = "02 Jan 2006"
 
 const (
-	featNetWorth              = "Net Worth"
-	featBalanceSheet          = "Balance Sheet"
-	featIncomeStatement       = "Income Statement"
-	featInvestmentPerformance = "Investment Performance"
-	featScenarioPlanning      = "Scenario Planning"
+	FeatureNetWorth              = "net_worth"
+	FeatureBalanceSheet          = "balance_sheet"
+	FeatureIncomeStatement       = "income_statement"
+	FeatureInvestmentPerformance = "investment_performance"
+	FeatureScenarios             = "scenarios"
+	FeatureAllocation            = "allocation"
+	FeatureCommodities           = "commodities"
 
 	entityAccount   = "account"
 	entityCommodity = "commodity"
@@ -66,15 +68,51 @@ func formatPostingText(p posting.Posting) string {
 	return fmt.Sprintf("%s\t%s\t%s", p.Date.Format(DateFormat), p.Account, price)
 }
 
+type diagnosisContext struct {
+	db *gorm.DB
+
+	currentFYPerformance       InvestmentPerformance
+	currentFYPerformanceErr    error
+	currentFYPerformanceLoaded bool
+
+	scenarioBaseline       ScenarioBaseline
+	scenarioBaselineErr    error
+	scenarioBaselineLoaded bool
+}
+
+func newDiagnosisContext(db *gorm.DB) *diagnosisContext {
+	return &diagnosisContext{db: db}
+}
+
+func (ctx *diagnosisContext) GetCurrentFYPerformance() (InvestmentPerformance, error) {
+	if !ctx.currentFYPerformanceLoaded {
+		ctx.currentFYPerformanceLoaded = true
+		ctx.currentFYPerformance, ctx.currentFYPerformanceErr = GetInvestmentPerformance(ctx.db, PerformanceOptions{
+			Preset:  PerformancePresetCurrentFY,
+			Drivers: true,
+		})
+	}
+	return ctx.currentFYPerformance, ctx.currentFYPerformanceErr
+}
+
+func (ctx *diagnosisContext) GetScenarioBaseline() (ScenarioBaseline, error) {
+	if !ctx.scenarioBaselineLoaded {
+		ctx.scenarioBaselineLoaded = true
+		ctx.scenarioBaseline, ctx.scenarioBaselineErr = BuildScenarioBaseline(ctx.db, utils.Now(), 1)
+	}
+	return ctx.scenarioBaseline, ctx.scenarioBaselineErr
+}
+
 type checkDefinition struct {
 	Code     string
 	Name     string
 	Category QualityCategory
-	Run      func(db *gorm.DB) ([]QualityIssue, error)
+	Run      func(ctx *diagnosisContext) ([]QualityIssue, error)
 }
 
 // GetDiagnosis runs all 11 canonical diagnostic checks against the database and returns structured results.
 func GetDiagnosis(db *gorm.DB) DiagnosisResult {
+	dctx := newDiagnosisContext(db)
 	checks := []checkDefinition{
 		{Code: "asset_balance_integrity", Name: "Asset Balance Integrity", Category: CategoryLedger, Run: checkAssetBalanceIntegrity},
 		{Code: "posting_direction", Name: "Posting Direction", Category: CategoryLedger, Run: checkPostingDirection},
@@ -93,7 +131,7 @@ func GetDiagnosis(db *gorm.DB) DiagnosisResult {
 	checkResults := make([]DiagnosticCheck, 0, len(checks))
 
 	for _, def := range checks {
-		issues, err := runSafeCheck(db, def.Run)
+		issues, err := runSafeCheck(dctx, def.Run)
 		check := DiagnosticCheck{
 			Code:       def.Code,
 			Name:       def.Name,
@@ -126,13 +164,13 @@ func GetDiagnosis(db *gorm.DB) DiagnosisResult {
 	}
 }
 
-func runSafeCheck(db *gorm.DB, fn func(db *gorm.DB) ([]QualityIssue, error)) (issues []QualityIssue, err error) {
+func runSafeCheck(ctx *diagnosisContext, fn func(ctx *diagnosisContext) ([]QualityIssue, error)) (issues []QualityIssue, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("check panicked: %v", r)
 		}
 	}()
-	return fn(db)
+	return fn(ctx)
 }
 
 func highestSeverity(issues []QualityIssue) QualityLevel {
@@ -173,8 +211,13 @@ func calculateDiagnosisSummary(issues []QualityIssue, checks []DiagnosticCheck) 
 		}
 	}
 	for i := range checks {
-		if checks[i].Status == CheckStatusPassed {
+		switch checks[i].Status {
+		case CheckStatusPassed:
 			summary.PassedChecks++
+		case CheckStatusFailed:
+			summary.FailedChecks++
+		case CheckStatusIssues:
+			// issues count towards summary.Total, not passed/failed checks
 		}
 	}
 	return summary
@@ -243,7 +286,8 @@ func sortIssues(issues []QualityIssue) {
 }
 
 // 1. Asset balance integrity: running balance of asset account must not be negative.
-func checkAssetBalanceIntegrity(db *gorm.DB) ([]QualityIssue, error) {
+func checkAssetBalanceIntegrity(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 	assets := query.Init(db).Like("Assets:%").All()
 
@@ -262,7 +306,7 @@ func checkAssetBalanceIntegrity(db *gorm.DB) ([]QualityIssue, error) {
 						ID:    account,
 						Label: account,
 					},
-					AffectedFeatures: []string{featNetWorth, featBalanceSheet},
+					AffectedFeatures: []string{FeatureNetWorth, FeatureBalanceSheet},
 					Action: &IssueAction{
 						Label: "View Account",
 						Href:  urlAssetsBalance,
@@ -281,7 +325,8 @@ func checkAssetBalanceIntegrity(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 2. Posting direction: positive income (invalid credit) or negative expense (invalid debit).
-func checkPostingDirection(db *gorm.DB) ([]QualityIssue, error) {
+func checkPostingDirection(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 
 	// Income should not be credited with a positive amount (excluding capital gains)
@@ -301,7 +346,7 @@ func checkPostingDirection(db *gorm.DB) ([]QualityIssue, error) {
 					ID:    p.Account,
 					Label: p.Account,
 				},
-				AffectedFeatures: []string{featIncomeStatement, featScenarioPlanning},
+				AffectedFeatures: []string{FeatureIncomeStatement, FeatureScenarios},
 				Action: &IssueAction{
 					Label: actionEditTransaction,
 					Href:  formatEditorURL(*p),
@@ -332,7 +377,7 @@ func checkPostingDirection(db *gorm.DB) ([]QualityIssue, error) {
 					ID:    p.Account,
 					Label: p.Account,
 				},
-				AffectedFeatures: []string{featIncomeStatement, featScenarioPlanning},
+				AffectedFeatures: []string{FeatureIncomeStatement, FeatureScenarios},
 				Action: &IssueAction{
 					Label: actionEditTransaction,
 					Href:  formatEditorURL(*p),
@@ -350,7 +395,8 @@ func checkPostingDirection(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 3. Exchange price coverage: missing exchange price for non-currency foreign commodities.
-func checkExchangePriceCoverage(db *gorm.DB) ([]QualityIssue, error) {
+func checkExchangePriceCoverage(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 	postings := query.Init(db).Desc().All()
 
@@ -377,7 +423,7 @@ func checkExchangePriceCoverage(db *gorm.DB) ([]QualityIssue, error) {
 						ID:    p.Commodity,
 						Label: p.Commodity,
 					},
-					AffectedFeatures: []string{featNetWorth, featInvestmentPerformance},
+					AffectedFeatures: []string{FeatureNetWorth, FeatureInvestmentPerformance},
 					Action: &IssueAction{
 						Label: actionReviewPrices,
 						Href:  urlPrices,
@@ -395,7 +441,8 @@ func checkExchangePriceCoverage(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 4. Journal price consistency: transaction unit price vs quote mismatch.
-func checkJournalPriceConsistency(db *gorm.DB) ([]QualityIssue, error) {
+func checkJournalPriceConsistency(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 	postings := query.Init(db).Desc().All()
 
@@ -420,7 +467,7 @@ func checkJournalPriceConsistency(db *gorm.DB) ([]QualityIssue, error) {
 						ID:    p.Commodity,
 						Label: p.Commodity,
 					},
-					AffectedFeatures: []string{featInvestmentPerformance, "Commodities"},
+					AffectedFeatures: []string{FeatureInvestmentPerformance, FeatureCommodities},
 					Action: &IssueAction{
 						Label: actionEditTransaction,
 						Href:  formatEditorURL(*p),
@@ -439,7 +486,8 @@ func checkJournalPriceConsistency(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 5. Allocation configuration: asset accounts missing from allocation targets.
-func checkAllocationConfiguration(db *gorm.DB) ([]QualityIssue, error) {
+func checkAllocationConfiguration(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 	if len(config.GetConfig().AllocationTargets) == 0 {
 		return issues, nil
@@ -481,7 +529,7 @@ func checkAllocationConfiguration(db *gorm.DB) ([]QualityIssue, error) {
 				ID:    ignoredAccounts[0],
 				Label: ignoredAccounts[0],
 			},
-			AffectedFeatures: []string{"Asset Allocation"},
+			AffectedFeatures: []string{FeatureAllocation},
 			Action: &IssueAction{
 				Label: "Review Allocation",
 				Href:  urlAllocation,
@@ -496,7 +544,8 @@ func checkAllocationConfiguration(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 6. Current valuation quality: checks current portfolio valuation used by Net Worth and Scenario Planning.
-func checkCurrentValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
+func checkCurrentValuationQuality(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 
 	asOf := utils.Now().In(config.TimeZone())
@@ -541,7 +590,7 @@ func checkCurrentValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
 					ID:    q.Commodity,
 					Label: q.Commodity,
 				},
-				AffectedFeatures: []string{featNetWorth, featScenarioPlanning},
+				AffectedFeatures: []string{FeatureNetWorth, FeatureScenarios},
 				Action: &IssueAction{
 					Label: actionReviewPrices,
 					Href:  urlPrices,
@@ -559,10 +608,10 @@ func checkCurrentValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 7. Current FY valuation quality: checks default Investment Performance period opening and closing/as-of boundaries.
-func checkCurrentFYValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
+func checkCurrentFYValuationQuality(ctx *diagnosisContext) ([]QualityIssue, error) {
 	issues := make([]QualityIssue, 0)
 
-	perf, err := GetInvestmentPerformance(db, PerformanceOptions{Preset: PerformancePresetCurrentFY})
+	perf, err := ctx.GetCurrentFYPerformance()
 	if err != nil {
 		// If reconciliation failed or range error, performance check handles it
 		if errors.Is(err, ErrPerformanceReconciliation) {
@@ -589,7 +638,7 @@ func checkCurrentFYValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
 						ID:    q.Commodity,
 						Label: q.Commodity,
 					},
-					AffectedFeatures: []string{featInvestmentPerformance},
+					AffectedFeatures: []string{FeatureInvestmentPerformance},
 					Action: &IssueAction{
 						Label: actionReviewPrices,
 						Href:  urlPrices,
@@ -622,7 +671,7 @@ func checkCurrentFYValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
 						ID:    q.Commodity,
 						Label: q.Commodity,
 					},
-					AffectedFeatures: []string{featInvestmentPerformance},
+					AffectedFeatures: []string{FeatureInvestmentPerformance},
 					Action: &IssueAction{
 						Label: actionReviewPrices,
 						Href:  urlPrices,
@@ -642,10 +691,10 @@ func checkCurrentFYValuationQuality(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 8. Investment attribution: globally unattributed dividend or interest income.
-func checkInvestmentIncomeAttribution(db *gorm.DB) ([]QualityIssue, error) {
+func checkInvestmentIncomeAttribution(ctx *diagnosisContext) ([]QualityIssue, error) {
 	issues := make([]QualityIssue, 0)
 
-	perf, err := GetInvestmentPerformance(db, PerformanceOptions{Preset: PerformancePresetCurrentFY})
+	perf, err := ctx.GetCurrentFYPerformance()
 	if err != nil {
 		if errors.Is(err, ErrPerformanceReconciliation) {
 			return issues, nil
@@ -662,7 +711,7 @@ func checkInvestmentIncomeAttribution(db *gorm.DB) ([]QualityIssue, error) {
 				Summary:          "Unattributed Investment Income",
 				Description:      "Dividend or interest income is not attributed to a specific investment commodity or account. Return calculations cannot accurately attribute this income to the underlying security.",
 				Details:          fmt.Sprintf("Investment income on %s is not attributed to an investment commodity or account.", reason.Date),
-				AffectedFeatures: []string{featInvestmentPerformance},
+				AffectedFeatures: []string{FeatureInvestmentPerformance},
 				Action: &IssueAction{
 					Label: "Review Performance",
 					Href:  urlPerformance,
@@ -678,10 +727,10 @@ func checkInvestmentIncomeAttribution(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 9. Performance reconciliation: evaluates portfolio scope for current_fy.
-func checkPerformanceReconciliation(db *gorm.DB) ([]QualityIssue, error) {
+func checkPerformanceReconciliation(ctx *diagnosisContext) ([]QualityIssue, error) {
 	issues := make([]QualityIssue, 0)
 
-	_, err := GetInvestmentPerformance(db, PerformanceOptions{Preset: PerformancePresetCurrentFY, Drivers: true})
+	_, err := ctx.GetCurrentFYPerformance()
 	if err != nil && errors.Is(err, ErrPerformanceReconciliation) {
 		issues = append(issues, QualityIssue{
 			Code:             "investment_performance_reconciliation_failed",
@@ -690,7 +739,7 @@ func checkPerformanceReconciliation(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "Investment Performance Did Not Reconcile",
 			Description:      "The portfolio valuation and performance identity (Closing Value = Opening Value + Net Contributions + Investment Return) failed to reconcile for the current financial year.",
 			Details:          "Context: Current financial year · Entire investment portfolio",
-			AffectedFeatures: []string{featInvestmentPerformance},
+			AffectedFeatures: []string{FeatureInvestmentPerformance},
 			Action: &IssueAction{
 				Label: "Review Performance",
 				Href:  urlPerformance,
@@ -713,7 +762,8 @@ func checkPerformanceReconciliation(db *gorm.DB) ([]QualityIssue, error) {
 // - 1-5 months: info (insufficient_*_history)
 // - 0 months: warning (insufficient_*_history)
 // - first-time investor: info (no_investment_activity), suppresses contribution history issue.
-func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
+func checkScenarioHistoryReadiness(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 
 	var count int64
@@ -724,7 +774,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 		return issues, nil
 	}
 
-	baseline, err := BuildScenarioBaseline(db, utils.Now(), 1)
+	baseline, err := ctx.GetScenarioBaseline()
 	if err != nil {
 		return nil, err
 	}
@@ -738,7 +788,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "No Historical Income Data",
 			Description:      "Scenario Planning has zero completed months of income history and cannot calculate a monthly income baseline.",
 			Details:          "Scenario Planning requires historical income postings to compute baseline assumptions.",
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -755,7 +805,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "Limited Income History",
 			Description:      fmt.Sprintf("Scenario Planning currently uses %d completed months of income history. The baseline is usable but based on less history than usual.", baseline.MonthlyIncome.SampleCount),
 			Details:          fmt.Sprintf("Sample count: %d of recommended 6 completed months.", baseline.MonthlyIncome.SampleCount),
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -775,7 +825,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "No Historical Expense Data",
 			Description:      "Scenario Planning has zero completed months of expense history and cannot calculate a monthly expense baseline.",
 			Details:          "Scenario Planning requires historical expense postings to compute baseline assumptions.",
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -792,7 +842,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "Limited Expense History",
 			Description:      fmt.Sprintf("Scenario Planning currently uses %d completed months of expense history. The baseline is usable but based on less history than usual.", baseline.MonthlyExpenses.SampleCount),
 			Details:          fmt.Sprintf("Sample count: %d of recommended 6 completed months.", baseline.MonthlyExpenses.SampleCount),
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -814,7 +864,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "No Previous Investment Activity",
 			Description:      "Paisa will use ₹0 as your baseline monthly investment transfer for Scenario Planning.",
 			Details:          "No investment transactions found. Scenario baseline starts with zero investment holdings and zero monthly transfer.",
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -831,7 +881,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "No Historical Contribution Data",
 			Description:      "Scenario Planning has zero completed months of contribution history.",
 			Details:          "Scenario Planning requires historical investment contributions to compute baseline transfers.",
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -848,7 +898,7 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 			Summary:          "Limited Contribution History",
 			Description:      fmt.Sprintf("Scenario Planning currently uses %d completed months of contribution history. The baseline is usable but based on less history than usual.", baseline.MonthlyInvestmentTransfer.SampleCount),
 			Details:          fmt.Sprintf("Sample count: %d of recommended 6 completed months.", baseline.MonthlyInvestmentTransfer.SampleCount),
-			AffectedFeatures: []string{featScenarioPlanning},
+			AffectedFeatures: []string{FeatureScenarios},
 			Action: &IssueAction{
 				Label: actionReviewScenarios,
 				Href:  urlScenarios,
@@ -863,7 +913,8 @@ func checkScenarioHistoryReadiness(db *gorm.DB) ([]QualityIssue, error) {
 }
 
 // 11. Scenario checking readiness: checks Assets:Checking availability.
-func checkScenarioCheckingReadiness(db *gorm.DB) ([]QualityIssue, error) {
+func checkScenarioCheckingReadiness(ctx *diagnosisContext) ([]QualityIssue, error) {
+	db := ctx.db
 	issues := make([]QualityIssue, 0)
 
 	var count int64
@@ -874,7 +925,7 @@ func checkScenarioCheckingReadiness(db *gorm.DB) ([]QualityIssue, error) {
 		return issues, nil
 	}
 
-	baseline, err := BuildScenarioBaseline(db, utils.Now(), 1)
+	baseline, err := ctx.GetScenarioBaseline()
 	if err != nil {
 		return nil, err
 	}
@@ -893,7 +944,7 @@ func checkScenarioCheckingReadiness(db *gorm.DB) ([]QualityIssue, error) {
 					ID:    accountAssetsChecking,
 					Label: accountAssetsChecking,
 				},
-				AffectedFeatures: []string{featScenarioPlanning},
+				AffectedFeatures: []string{FeatureScenarios},
 				Action: &IssueAction{
 					Label: "Review Accounts",
 					Href:  urlConfig,

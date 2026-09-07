@@ -12,7 +12,6 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 )
 
 func diagnosisPost(id, date, account, commodity string, qty, amt float64) posting.Posting {
@@ -64,14 +63,14 @@ func TestDiagnosisAssetBalanceIntegrity(t *testing.T) {
 	p := diagnosisPost("tx-1", "2026-01-01", "Assets:Checking", "INR", -500, -500)
 	require.NoError(t, db.Create(&p).Error)
 
-	issues, err := checkAssetBalanceIntegrity(db)
+	issues, err := checkAssetBalanceIntegrity(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "negative_asset_balance", issues[0].Code)
 	assert.Equal(t, LevelDanger, issues[0].Level)
 	assert.Equal(t, CategoryLedger, issues[0].Category)
 	assert.Equal(t, "Assets:Checking", issues[0].Entity.ID)
-	assert.Contains(t, issues[0].AffectedFeatures, "Net Worth")
+	assert.Contains(t, issues[0].AffectedFeatures, FeatureNetWorth)
 }
 
 func TestDiagnosisPostingDirection(t *testing.T) {
@@ -83,7 +82,7 @@ func TestDiagnosisPostingDirection(t *testing.T) {
 	p2 := diagnosisPost("tx-exp", "2026-01-02", "Expenses:Dining", "INR", -150, -150)
 	require.NoError(t, db.Create(&[]posting.Posting{p1, p2}).Error)
 
-	issues, err := checkPostingDirection(db)
+	issues, err := checkPostingDirection(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 2)
 
@@ -103,7 +102,7 @@ func TestDiagnosisExchangePriceCoverage(t *testing.T) {
 	p := diagnosisPost("clean", "2026-02-01", "Assets:Bank", "INR", 100, 100)
 	require.NoError(t, db.Create(&p).Error)
 
-	issues, err := checkExchangePriceCoverage(db)
+	issues, err := checkExchangePriceCoverage(newDiagnosisContext(db))
 	require.NoError(t, err)
 	assert.Empty(t, issues)
 }
@@ -130,7 +129,7 @@ func TestDiagnosisJournalPriceConsistency(t *testing.T) {
 	}
 	require.NoError(t, db.Create(&p).Error)
 
-	issues, err := checkJournalPriceConsistency(db)
+	issues, err := checkJournalPriceConsistency(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "journal_price_mismatch", issues[0].Code)
@@ -154,7 +153,7 @@ allocation_targets:
       - Assets:Equity:MappedFund
 `), ""))
 
-	issues, err := checkAllocationConfiguration(db)
+	issues, err := checkAllocationConfiguration(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "allocation_target_missing_account", issues[0].Code)
@@ -171,15 +170,15 @@ func TestDiagnosisCurrentValuationQualityFallback(t *testing.T) {
 	p := diagnosisPost("tx-stock", "2026-08-01", "Assets:Stocks", "TATAMOTORS", 10, 10000)
 	require.NoError(t, db.Create(&p).Error)
 
-	issues, err := checkCurrentValuationQuality(db)
+	issues, err := checkCurrentValuationQuality(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "valuation_fallback", issues[0].Code)
 	assert.Equal(t, LevelWarning, issues[0].Level)
 	assert.Equal(t, "TATAMOTORS", issues[0].Entity.ID)
 	assert.Contains(t, issues[0].Details, "Current portfolio valuation")
-	assert.Contains(t, issues[0].AffectedFeatures, "Net Worth")
-	assert.Contains(t, issues[0].AffectedFeatures, "Scenario Planning")
+	assert.Contains(t, issues[0].AffectedFeatures, FeatureNetWorth)
+	assert.Contains(t, issues[0].AffectedFeatures, FeatureScenarios)
 }
 
 func TestDiagnosisInvestmentAttribution(t *testing.T) {
@@ -197,7 +196,7 @@ func TestDiagnosisInvestmentAttribution(t *testing.T) {
 	}
 	require.NoError(t, db.Create(&tx).Error)
 
-	issues, err := checkInvestmentIncomeAttribution(db)
+	issues, err := checkInvestmentIncomeAttribution(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "unattributed_investment_income", issues[0].Code)
@@ -225,7 +224,7 @@ func TestDiagnosisScenarioHistoryReadiness(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&ps).Error)
 
-		issues, err := checkScenarioHistoryReadiness(db)
+		issues, err := checkScenarioHistoryReadiness(newDiagnosisContext(db))
 		require.NoError(t, err)
 		require.Len(t, issues, 1)
 		assert.Equal(t, "no_investment_activity", issues[0].Code)
@@ -257,7 +256,7 @@ func TestDiagnosisScenarioHistoryReadiness(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&ps).Error)
 
-		issues, err := checkScenarioHistoryReadiness(db)
+		issues, err := checkScenarioHistoryReadiness(newDiagnosisContext(db))
 		require.NoError(t, err)
 
 		foundIncome := false
@@ -288,7 +287,7 @@ func TestDiagnosisScenarioHistoryReadiness(t *testing.T) {
 		}
 		require.NoError(t, db.Create(&ps).Error)
 
-		issues, err := checkScenarioHistoryReadiness(db)
+		issues, err := checkScenarioHistoryReadiness(newDiagnosisContext(db))
 		require.NoError(t, err)
 
 		var incomeIssue *QualityIssue
@@ -314,7 +313,7 @@ func TestDiagnosisScenarioCheckingReadiness(t *testing.T) {
 	}
 	require.NoError(t, db.Create(&ps).Error)
 
-	issues, err := checkScenarioCheckingReadiness(db)
+	issues, err := checkScenarioCheckingReadiness(newDiagnosisContext(db))
 	require.NoError(t, err)
 	require.Len(t, issues, 1)
 	assert.Equal(t, "no_checking_account", issues[0].Code)
@@ -342,12 +341,28 @@ func TestDiagnosisDeterministicOrdering(t *testing.T) {
 func TestDiagnosisPanicIsolation(t *testing.T) {
 	db := serviceTestDB(t)
 
-	panickingCheck := func(db *gorm.DB) ([]QualityIssue, error) {
+	panickingCheck := func(ctx *diagnosisContext) ([]QualityIssue, error) {
 		panic("unexpected runtime error in check")
 	}
 
-	issues, err := runSafeCheck(db, panickingCheck)
+	issues, err := runSafeCheck(newDiagnosisContext(db), panickingCheck)
 	assert.Empty(t, issues)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "panicked")
+}
+
+func TestDiagnosisFailedCheckUpdatesSummary(t *testing.T) {
+	// Verify that a failed diagnostic check updates FailedChecks and is NOT counted as passed or healthy
+	checks := []DiagnosticCheck{
+		{Code: "asset_balance_integrity", Status: CheckStatusPassed},
+		{Code: "valuation_quality", Status: CheckStatusFailed},
+		{Code: "posting_direction", Status: CheckStatusPassed},
+	}
+	summary := calculateDiagnosisSummary(nil, checks)
+	assert.Equal(t, 1, summary.FailedChecks)
+	assert.Equal(t, 2, summary.PassedChecks)
+	assert.Equal(t, 3, summary.TotalChecks)
+	assert.Equal(t, 0, summary.Danger)
+	assert.Equal(t, 0, summary.Warning)
+	assert.Equal(t, 0, summary.Total)
 }

@@ -67,6 +67,7 @@ type DiagnosisSummary struct {
 	Warning      int `json:"warning"`
 	Info         int `json:"info"`
 	PassedChecks int `json:"passedChecks"`
+	FailedChecks int `json:"failedChecks"`
 	TotalChecks  int `json:"totalChecks"`
 }
 

@@ -5,6 +5,7 @@
     "warning": 3,
     "info": 2,
     "passedChecks": 8,
+    "failedChecks": 0,
     "totalChecks": 11
   },
   "issues": [
@@ -20,12 +21,12 @@
         "label": "AAPL"
       },
       "affectedFeatures": [
-        "Net Worth",
-        "Scenario Planning"
+        "net_worth",
+        "scenarios"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "commodity": "AAPL",
@@ -45,11 +46,11 @@
         "label": "AAPL"
       },
       "affectedFeatures": [
-        "Investment Performance"
+        "investment_performance"
       ],
       "action": {
         "label": "Review Prices",
-        "href": "/prices"
+        "href": "/ledger/price"
       },
       "metadata": {
         "boundary": "closing",
@@ -66,11 +67,11 @@
       "code": "insufficient_expense_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "0"
@@ -84,11 +85,11 @@
       "code": "insufficient_contribution_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "1"
@@ -102,11 +103,11 @@
       "code": "insufficient_income_history",
       "category": "history",
       "affectedFeatures": [
-        "Scenario Planning"
+        "scenarios"
       ],
       "action": {
         "label": "Review Scenarios",
-        "href": "/scenarios"
+        "href": "/more/scenarios"
       },
       "metadata": {
         "samples": "1"

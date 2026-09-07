@@ -9,9 +9,11 @@ interface Props {
   infoCount?: number;
   totalIssues?: number;
   passedChecks?: number;
+  failedChecks?: number;
   totalChecks?: number;
   lastChecked?: Date | null;
   loading?: boolean;
+  onretry?: () => void;
 }
 
 let {
@@ -20,17 +22,22 @@ let {
   infoCount = 0,
   totalIssues = 0,
   passedChecks = 0,
+  failedChecks = 0,
   totalChecks = 0,
   lastChecked = null,
   loading = false,
+  onretry,
 }: Props = $props();
 
-let statusKind = $derived.by(() => {
-  if (dangerCount > 0) return "danger";
-  if (warningCount > 0) return "warning";
-  if (infoCount > 0) return "info";
-  return "clean";
-});
+let statusKind = $derived.by(
+  (): "danger" | "failed" | "warning" | "info" | "clean" => {
+    if (dangerCount > 0) return "danger";
+    if (failedChecks > 0) return "failed";
+    if (warningCount > 0) return "warning";
+    if (infoCount > 0) return "info";
+    return "clean";
+  },
+);
 </script>
 
 <Card padding="md" class="w-full overflow-hidden"
@@ -62,7 +69,7 @@ let statusKind = $derived.by(() => {
           class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl {
             statusKind === 'danger'
               ? 'bg-negative/10 text-negative'
-              : statusKind === 'warning'
+              : statusKind === 'failed' || statusKind === 'warning'
                 ? 'bg-warning/10 text-warning'
                 : statusKind === 'info'
                   ? 'bg-primary/10 text-primary'
@@ -71,7 +78,7 @@ let statusKind = $derived.by(() => {
         >
           <i
             class="fas {
-              statusKind === 'danger'
+              statusKind === 'danger' || statusKind === 'failed'
                 ? 'fa-triangle-exclamation'
                 : statusKind === 'warning'
                   ? 'fa-circle-exclamation'
@@ -86,6 +93,8 @@ let statusKind = $derived.by(() => {
             <h2 class="text-base font-bold text-foreground">
               {#if statusKind === "danger"}
                 {dangerCount} potential issue(s) found
+              {:else if statusKind === "failed"}
+                Diagnosis incomplete
               {:else if statusKind === "warning"}
                 No blocking issues · {warningCount} potential issue(s) found
               {:else if statusKind === "info"}
@@ -98,7 +107,7 @@ let statusKind = $derived.by(() => {
               variant={
                 statusKind === "danger"
                   ? "danger"
-                  : statusKind === "warning"
+                  : statusKind === "failed" || statusKind === "warning"
                     ? "warning"
                     : statusKind === "info"
                       ? "info"
@@ -109,6 +118,8 @@ let statusKind = $derived.by(() => {
             >
               {#if statusKind === "danger"}
                 Attention Required
+              {:else if statusKind === "failed"}
+                Incomplete
               {:else if statusKind === "warning"}
                 Needs Review
               {:else if statusKind === "info"}
@@ -121,14 +132,30 @@ let statusKind = $derived.by(() => {
           <p class="text-xs text-muted-foreground">
             {#if statusKind === "danger"}
               Review and resolve the integrity issues below to ensure accurate financial reporting.
+            {:else if statusKind === "failed"}
+              {failedChecks === 1
+                ? "1 check could not run. Financial data could not be fully verified."
+                : `${failedChecks} checks could not run. Financial data could not be fully verified.`}
             {:else if statusKind === "warning"}
               {warningCount} need review{infoCount > 0 ? ` · ${infoCount} informational` : ""}
             {:else if statusKind === "info"}
               {infoCount} informational note{infoCount > 1 ? "s" : ""} available below.
             {:else}
-              Your ledger journals, configuration files, and price records are healthy with no syntax or balance errors.
+              All diagnostic checks completed without issues requiring attention.
             {/if}
           </p>
+          {#if statusKind === "failed" && onretry}
+            <div class="mt-1.5 flex justify-center md:justify-start">
+              <button
+                type="button"
+                onclick={onretry}
+                class="inline-flex items-center gap-1.5 rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface px-2.5 py-1 text-xs font-medium text-foreground transition-all hover:bg-surface-raised hover:border-border"
+              >
+                <i class="fas fa-rotate-right text-[0.6875rem] text-muted-foreground"></i>
+                <span>Retry Diagnosis</span>
+              </button>
+            </div>
+          {/if}
         </div>
       </div>
 

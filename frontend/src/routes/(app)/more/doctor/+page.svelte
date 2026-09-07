@@ -24,6 +24,7 @@ let summary = $state({
   warning: 0,
   info: 0,
   passedChecks: 0,
+  failedChecks: 0,
   totalChecks: 11,
 });
 let isLoading = $state(true);
@@ -53,6 +54,8 @@ async function runDiagnosis() {
         info: response.summary.info ?? 0,
         passedChecks: response.summary.passedChecks ??
           checks.filter((c) => c.status === "passed").length,
+        failedChecks: response.summary.failedChecks ??
+          checks.filter((c) => c.status === "failed").length,
         totalChecks: response.summary.totalChecks ?? (checks.length || 11),
       };
     } else {
@@ -68,6 +71,7 @@ async function runDiagnosis() {
         warning: w,
         info: inf,
         passedChecks: checks.filter((c) => c.status === "passed").length,
+        failedChecks: checks.filter((c) => c.status === "failed").length,
         totalChecks: checks.length || 11,
       };
     }
@@ -142,9 +146,11 @@ onMount(() => {
           infoCount={summary.info}
           totalIssues={summary.total}
           passedChecks={summary.passedChecks}
+          failedChecks={summary.failedChecks}
           totalChecks={summary.totalChecks}
           {lastChecked}
           loading={isLoading}
+          onretry={runDiagnosis}
         />
 
         <!-- KPI Metric Summary -->

@@ -218,6 +218,7 @@ export interface DtoDiagnosisResponse {
 
 export interface DtoDiagnosisSummaryResponse {
   danger?: number;
+  failedChecks?: number;
   info?: number;
   passedChecks?: number;
   total?: number;

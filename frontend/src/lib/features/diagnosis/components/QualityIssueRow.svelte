@@ -1,5 +1,8 @@
 <script lang="ts">
-import type { QualityIssue } from "$lib/features/diagnosis/types";
+import {
+  formatFeatureName,
+  type QualityIssue,
+} from "$lib/features/diagnosis/types";
 import Badge from "$lib/shared/ui/Badge.svelte";
 import Button from "$lib/shared/ui/Button.svelte";
 import { obscure } from "$lib/shared/state/persisted";
@@ -102,7 +105,7 @@ function maskText(text?: string): string {
             {#each issue.affectedFeatures as feature, i}
               <span class="inline-flex items-center">
                 <span class="rounded bg-surface-raised px-1.5 py-0.5 text-[0.6875rem] font-medium text-foreground">
-                  {feature}
+                  {formatFeatureName(feature)}
                 </span>
                 {#if i < issue.affectedFeatures.length - 1}
                   <span class="mx-1 text-muted-foreground">·</span>

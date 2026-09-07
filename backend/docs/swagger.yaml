@@ -393,6 +393,8 @@ definitions:
     properties:
       danger:
         type: integer
+      failedChecks:
+        type: integer
       info:
         type: integer
       passedChecks:
