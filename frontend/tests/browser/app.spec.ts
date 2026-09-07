@@ -216,7 +216,7 @@ test("doctor diagnostics page reports system status", async ({ page }) => {
   await page.goto("/more/doctor");
   await expect(
     page.getByText(
-      /(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found)/i,
+      /(diagnostic issue\(s\) detected|all systems operational|potential issue\(s\) found|no blocking issues)/i,
     ),
   ).toBeVisible();
   await assertNavigationVisible(page);

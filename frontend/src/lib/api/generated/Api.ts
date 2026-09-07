@@ -211,7 +211,29 @@ export interface DtoDashboardResponse {
 }
 
 export interface DtoDiagnosisResponse {
+  checks?: DtoDiagnosticCheckResponse[];
   issues?: DtoIssueResponse[];
+  summary?: DtoDiagnosisSummaryResponse;
+}
+
+export interface DtoDiagnosisSummaryResponse {
+  danger?: number;
+  failedChecks?: number;
+  info?: number;
+  passedChecks?: number;
+  total?: number;
+  totalChecks?: number;
+  warning?: number;
+}
+
+export interface DtoDiagnosticCheckResponse {
+  category?: string;
+  code?: string;
+  issueCount?: number;
+  maxSeverity?: string;
+  name?: string;
+  /** "passed" | "issues" | "failed" */
+  status?: string;
 }
 
 export interface DtoEditorBatchSaveResponse {
@@ -456,10 +478,27 @@ export interface DtoInvestmentYearlyCardResponse {
   start_date?: string;
 }
 
+export interface DtoIssueAction {
+  href?: string;
+  label?: string;
+}
+
+export interface DtoIssueEntity {
+  id?: string;
+  label?: string;
+  type?: string;
+}
+
 export interface DtoIssueResponse {
+  action?: DtoIssueAction;
+  affectedFeatures?: string[];
+  category?: string;
+  code?: string;
   description?: string;
   details?: string;
+  entity?: DtoIssueEntity;
   level?: string;
+  metadata?: Record<string, string>;
   summary?: string;
 }
 

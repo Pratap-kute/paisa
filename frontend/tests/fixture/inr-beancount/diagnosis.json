@@ -1,3 +1,368 @@
 {
-  "issues": []
+  "summary": {
+    "total": 12,
+    "danger": 0,
+    "warning": 9,
+    "info": 3,
+    "passedChecks": 7,
+    "failedChecks": 0,
+    "totalChecks": 11
+  },
+  "issues": [
+    {
+      "level": "warning",
+      "summary": "ABNB valuation fallback",
+      "description": "Paisa could not obtain a market quote for ABNB at the current valuation date and fell back to cost pricing.",
+      "details": "Context: Current portfolio valuation · Commodity: ABNB · Fallback source: cost",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "ABNB"
+      },
+      "affectedFeatures": [
+        "net_worth",
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "commodity": "ABNB",
+        "context": "Current portfolio valuation",
+        "source": "cost"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "ABNB valuation fallback (Current FY as-of)",
+      "description": "Paisa could not obtain a market quote for ABNB at Current FY as-of date (2022-02-07) and fell back to cost pricing.",
+      "details": "Context: Current FY closing/as-of valuation · Date: 2022-02-07 · Commodity: ABNB · Source: cost",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "ABNB"
+      },
+      "affectedFeatures": [
+        "investment_performance"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "boundary": "closing",
+        "commodity": "ABNB",
+        "date": "2022-02-07",
+        "source": "cost"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "BTC valuation fallback",
+      "description": "Paisa could not obtain a market quote for BTC at the current valuation date and fell back to cost pricing.",
+      "details": "Context: Current portfolio valuation · Commodity: BTC · Fallback source: cost",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "BTC"
+      },
+      "affectedFeatures": [
+        "net_worth",
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "commodity": "BTC",
+        "context": "Current portfolio valuation",
+        "source": "cost"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "BTC valuation fallback (Current FY as-of)",
+      "description": "Paisa could not obtain a market quote for BTC at Current FY as-of date (2022-02-07) and fell back to cost pricing.",
+      "details": "Context: Current FY closing/as-of valuation · Date: 2022-02-07 · Commodity: BTC · Source: cost",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "BTC"
+      },
+      "affectedFeatures": [
+        "investment_performance"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "boundary": "closing",
+        "commodity": "BTC",
+        "date": "2022-02-07",
+        "source": "cost"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "NIFTY valuation fallback",
+      "description": "Paisa could not obtain a market quote for NIFTY at the current valuation date and fell back to trade pricing.",
+      "details": "Context: Current portfolio valuation · Commodity: NIFTY · Fallback source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "NIFTY"
+      },
+      "affectedFeatures": [
+        "net_worth",
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "commodity": "NIFTY",
+        "context": "Current portfolio valuation",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "NIFTY valuation fallback (Current FY as-of)",
+      "description": "Paisa could not obtain a market quote for NIFTY at Current FY as-of date (2022-02-07) and fell back to trade pricing.",
+      "details": "Context: Current FY closing/as-of valuation · Date: 2022-02-07 · Commodity: NIFTY · Source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "NIFTY"
+      },
+      "affectedFeatures": [
+        "investment_performance"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "boundary": "closing",
+        "commodity": "NIFTY",
+        "date": "2022-02-07",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "USD valuation fallback",
+      "description": "Paisa could not obtain a market quote for USD at the current valuation date and fell back to trade pricing.",
+      "details": "Context: Current portfolio valuation · Commodity: USD · Fallback source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "USD"
+      },
+      "affectedFeatures": [
+        "net_worth",
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "commodity": "USD",
+        "context": "Current portfolio valuation",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "USD valuation fallback (Current FY as-of)",
+      "description": "Paisa could not obtain a market quote for USD at Current FY as-of date (2022-02-07) and fell back to trade pricing.",
+      "details": "Context: Current FY closing/as-of valuation · Date: 2022-02-07 · Commodity: USD · Source: trade",
+      "code": "valuation_fallback",
+      "category": "valuation",
+      "entity": {
+        "type": "commodity",
+        "label": "USD"
+      },
+      "affectedFeatures": [
+        "investment_performance"
+      ],
+      "action": {
+        "label": "Review Prices",
+        "href": "/ledger/price"
+      },
+      "metadata": {
+        "boundary": "closing",
+        "commodity": "USD",
+        "date": "2022-02-07",
+        "source": "trade"
+      }
+    },
+    {
+      "level": "warning",
+      "summary": "Unattributed Investment Income",
+      "description": "Dividend or interest income is not attributed to a specific investment commodity or account. Return calculations cannot accurately attribute this income to the underlying security.",
+      "details": "Investment income on 2022-01-31 is not attributed to an investment commodity or account.",
+      "code": "unattributed_investment_income",
+      "category": "investments",
+      "affectedFeatures": [
+        "investment_performance"
+      ],
+      "action": {
+        "label": "Review Performance",
+        "href": "/assets/gain"
+      },
+      "metadata": {
+        "date": "2022-01-31"
+      }
+    },
+    {
+      "level": "info",
+      "summary": "Limited Contribution History",
+      "description": "Scenario Planning currently uses 1 completed months of contribution history. The baseline is usable but based on less history than usual.",
+      "details": "Sample count: 1 of recommended 6 completed months.",
+      "code": "insufficient_contribution_history",
+      "category": "history",
+      "affectedFeatures": [
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/more/scenarios"
+      },
+      "metadata": {
+        "samples": "1"
+      }
+    },
+    {
+      "level": "info",
+      "summary": "Limited Expense History",
+      "description": "Scenario Planning currently uses 1 completed months of expense history. The baseline is usable but based on less history than usual.",
+      "details": "Sample count: 1 of recommended 6 completed months.",
+      "code": "insufficient_expense_history",
+      "category": "history",
+      "affectedFeatures": [
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/more/scenarios"
+      },
+      "metadata": {
+        "samples": "1"
+      }
+    },
+    {
+      "level": "info",
+      "summary": "Limited Income History",
+      "description": "Scenario Planning currently uses 1 completed months of income history. The baseline is usable but based on less history than usual.",
+      "details": "Sample count: 1 of recommended 6 completed months.",
+      "code": "insufficient_income_history",
+      "category": "history",
+      "affectedFeatures": [
+        "scenarios"
+      ],
+      "action": {
+        "label": "Review Scenarios",
+        "href": "/more/scenarios"
+      },
+      "metadata": {
+        "samples": "1"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "code": "asset_balance_integrity",
+      "name": "Asset Balance Integrity",
+      "category": "ledger",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "posting_direction",
+      "name": "Posting Direction",
+      "category": "ledger",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "exchange_price_coverage",
+      "name": "Exchange Price Coverage",
+      "category": "valuation",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "journal_price_consistency",
+      "name": "Journal Price Consistency",
+      "category": "valuation",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "allocation_configuration",
+      "name": "Allocation Configuration",
+      "category": "configuration",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "current_valuation_quality",
+      "name": "Current Valuation Quality",
+      "category": "valuation",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 4
+    },
+    {
+      "code": "current_fy_valuation_quality",
+      "name": "Current FY Performance Valuation Quality",
+      "category": "valuation",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 4
+    },
+    {
+      "code": "investment_income_attribution",
+      "name": "Investment Income Attribution",
+      "category": "investments",
+      "status": "issues",
+      "maxSeverity": "warning",
+      "issueCount": 1
+    },
+    {
+      "code": "performance_reconciliation",
+      "name": "Performance Reconciliation",
+      "category": "investments",
+      "status": "passed",
+      "issueCount": 0
+    },
+    {
+      "code": "scenario_history_readiness",
+      "name": "Scenario History Readiness",
+      "category": "history",
+      "status": "issues",
+      "maxSeverity": "info",
+      "issueCount": 3
+    },
+    {
+      "code": "scenario_checking_readiness",
+      "name": "Scenario Checking Account Readiness",
+      "category": "configuration",
+      "status": "passed",
+      "issueCount": 0
+    }
+  ]
 }

@@ -2694,11 +2694,70 @@ const docTemplate = `{
         "dto.DiagnosisResponse": {
             "type": "object",
             "properties": {
+                "checks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.DiagnosticCheckResponse"
+                    }
+                },
                 "issues": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.IssueResponse"
                     }
+                },
+                "summary": {
+                    "$ref": "#/definitions/dto.DiagnosisSummaryResponse"
+                }
+            }
+        },
+        "dto.DiagnosisSummaryResponse": {
+            "type": "object",
+            "properties": {
+                "danger": {
+                    "type": "integer"
+                },
+                "failedChecks": {
+                    "type": "integer"
+                },
+                "info": {
+                    "type": "integer"
+                },
+                "passedChecks": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalChecks": {
+                    "type": "integer"
+                },
+                "warning": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.DiagnosticCheckResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "issueCount": {
+                    "type": "integer"
+                },
+                "maxSeverity": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "\"passed\" | \"issues\" | \"failed\"",
+                    "type": "string"
                 }
             }
         },
@@ -3456,17 +3515,66 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.IssueAction": {
+            "type": "object",
+            "properties": {
+                "href": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.IssueEntity": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.IssueResponse": {
             "type": "object",
             "properties": {
+                "action": {
+                    "$ref": "#/definitions/dto.IssueAction"
+                },
+                "affectedFeatures": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "details": {
                     "type": "string"
                 },
+                "entity": {
+                    "$ref": "#/definitions/dto.IssueEntity"
+                },
                 "level": {
                     "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "summary": {
                     "type": "string"

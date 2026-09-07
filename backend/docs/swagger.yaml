@@ -378,10 +378,49 @@ definitions:
     type: object
   dto.DiagnosisResponse:
     properties:
+      checks:
+        items:
+          $ref: '#/definitions/dto.DiagnosticCheckResponse'
+        type: array
       issues:
         items:
           $ref: '#/definitions/dto.IssueResponse'
         type: array
+      summary:
+        $ref: '#/definitions/dto.DiagnosisSummaryResponse'
+    type: object
+  dto.DiagnosisSummaryResponse:
+    properties:
+      danger:
+        type: integer
+      failedChecks:
+        type: integer
+      info:
+        type: integer
+      passedChecks:
+        type: integer
+      total:
+        type: integer
+      totalChecks:
+        type: integer
+      warning:
+        type: integer
+    type: object
+  dto.DiagnosticCheckResponse:
+    properties:
+      category:
+        type: string
+      code:
+        type: string
+      issueCount:
+        type: integer
+      maxSeverity:
+        type: string
+      name:
+        type: string
+      status:
+        description: '"passed" | "issues" | "failed"'
+        type: string
     type: object
   dto.EditorBatchSaveResponse:
     properties:
@@ -878,14 +917,46 @@ definitions:
       start_date:
         type: string
     type: object
+  dto.IssueAction:
+    properties:
+      href:
+        type: string
+      label:
+        type: string
+    type: object
+  dto.IssueEntity:
+    properties:
+      id:
+        type: string
+      label:
+        type: string
+      type:
+        type: string
+    type: object
   dto.IssueResponse:
     properties:
+      action:
+        $ref: '#/definitions/dto.IssueAction'
+      affectedFeatures:
+        items:
+          type: string
+        type: array
+      category:
+        type: string
+      code:
+        type: string
       description:
         type: string
       details:
         type: string
+      entity:
+        $ref: '#/definitions/dto.IssueEntity'
       level:
         type: string
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
       summary:
         type: string
     type: object
