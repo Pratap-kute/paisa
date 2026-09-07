@@ -63,6 +63,7 @@ export function performanceSeries(
     axis: "time",
     granularity: "day",
     valueFormat: "currency",
+    scale: true,
     series: [
       {
         key: "value",

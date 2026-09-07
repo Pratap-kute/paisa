@@ -46,3 +46,23 @@ test("privacy changes mask already-rendered monetary values", async () => {
   expect(container.textContent).not.toContain(visible);
   obscure.set(false);
 });
+
+test("shows reconciliation failure error message", () => {
+  const { container } = render(DashboardInvestmentPerformance, {
+    error: "investment_performance_reconciliation_failed",
+  });
+  expect(container.textContent).toContain(
+    "Investment performance could not be calculated because the data did not reconcile.",
+  );
+  expect(container.textContent).not.toContain("Performance unavailable");
+});
+
+test("shows generic calculation failure error message", () => {
+  const { container } = render(DashboardInvestmentPerformance, {
+    error: "investment_performance_failed",
+  });
+  expect(container.textContent).toContain(
+    "Investment performance could not be calculated.",
+  );
+  expect(container.textContent).not.toContain("Performance unavailable");
+});

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -46,4 +47,25 @@ func TestInvestmentPerformanceContract(t *testing.T) {
 	actual := dashboard["investmentPerformance"].(*dto.InvestmentPerformance)
 	require.Equal(t, mapper.InvestmentPerformanceToDTO(expected), *actual)
 	require.NotNil(t, actual.SinceInceptionXIRR)
+	require.Nil(t, dashboard["investmentPerformanceError"])
+}
+
+func TestInvestmentPerformanceDashboardSummaryMapping(t *testing.T) {
+	// 1. Success case: nil error
+	summary, errCode := investmentPerformanceDashboardSummary(service.InvestmentPerformance{StartDate: "2026-04-01"}, nil)
+	require.NotNil(t, summary)
+	require.Nil(t, errCode)
+	require.Equal(t, "2026-04-01", summary.StartDate)
+
+	// 2. Reconciliation error
+	summary, errCode = investmentPerformanceDashboardSummary(service.InvestmentPerformance{}, service.ErrPerformanceReconciliation)
+	require.Nil(t, summary)
+	require.NotNil(t, errCode)
+	require.Equal(t, "investment_performance_reconciliation_failed", *errCode)
+
+	// 3. Generic error
+	summary, errCode = investmentPerformanceDashboardSummary(service.InvestmentPerformance{}, errors.New("something went wrong"))
+	require.Nil(t, summary)
+	require.NotNil(t, errCode)
+	require.Equal(t, "investment_performance_failed", *errCode)
 }

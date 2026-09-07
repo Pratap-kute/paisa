@@ -3,9 +3,11 @@ import InvestmentPerformance from "$lib/features/assets/components/InvestmentPer
 import type { Gain } from "$lib/domain/assets";
 import type { Legend } from "$lib/shared/charts/types";
 import { goto } from "$app/navigation";
+import { page } from "$app/state";
 import LegendCard from "$lib/shared/ui/LegendCard.svelte";
 import { buildLegends } from "$lib/features/assets/gain";
 import { buildGainOverviewComparison } from "$lib/features/assets/chart_comparison_data";
+import { performanceLink } from "$lib/features/assets/performance";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { api } from "$lib/api";
 import { sumBy } from "es-toolkit";
@@ -34,7 +36,7 @@ let chartEvents = $derived([
     handler: (event: { dataIndex?: number }) => {
       if (typeof event.dataIndex !== "number") return;
       const account = overviewData.points[event.dataIndex]?.key;
-      if (account) goto(`/assets/gain/${account}`);
+      if (account) goto(performanceLink(account, page.url.searchParams));
     },
   },
 ]);
@@ -68,46 +70,62 @@ onMount(async () => {
 
   <InvestmentPerformance />
 
-  <Section title="Lifetime Investment Context">
-  <MetricStrip cols={2}>
-    <Metric
-      label="Net Investment"
-      value={formatCurrency(totalInvestment)}
-      loading={isLoading}
-    />
-    <Metric
-      label="Total Gain / Loss"
-      value={formatCurrency(totalGain)}
-      status={totalGain >= 0 ? "positive" : "negative"}
-      loading={isLoading}
-    />
-  </MetricStrip>
-  </Section>
+  <details
+    class="mt-8 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface p-4 transition-colors"
+    data-testid="lifetime-context-disclosure">
+    <summary
+      class="cursor-pointer select-none font-medium text-foreground flex items-center justify-between">
+      <span class="flex items-center gap-2">
+        <i class="fas fa-history text-xs text-muted-foreground"
+          aria-hidden="true"></i>
+        <span>Lifetime investment context</span>
+      </span>
+      <span
+        class="text-xs text-muted-foreground font-normal">All-time portfolio metrics & account overview</span>
+    </summary>
 
-  <Section
-    title="Lifetime Gain Overview"
-    subtitle="Per-account investment, gain, and XIRR — click account labels to drill down"
-  >
-    {#if !isLoading && !hasGains}
-      <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          No investment gains recorded.
-        </p>
-      </ZeroState>
-    {:else}
-      <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
-      <ChartFrame
-        height="compact"
-        rows={Math.max(5, overviewData.points.length)}
-        class="[&_.paisa-chart-frame-body]:overflow-y-visible"
-      >
-        <ComparisonBarChart
-          data={overviewData}
-          ariaLabel="Asset gain account overview"
-          testId="asset-gain-overview-echart"
-          events={chartEvents}
+    <div class="mt-4 pt-4 border-t border-border-subtle space-y-6">
+      <MetricStrip cols={2}>
+        <Metric
+          label="Net Investment"
+          value={formatCurrency(totalInvestment)}
+          loading={isLoading}
         />
-      </ChartFrame>
-    {/if}
-  </Section>
+        <Metric
+          label="Total Gain / Loss"
+          value={formatCurrency(totalGain)}
+          status={totalGain >= 0 ? "positive" : "negative"}
+          loading={isLoading}
+        />
+      </MetricStrip>
+
+      <div>
+        <div class="mb-3">
+          <h3 class="text-sm font-medium text-foreground">Lifetime Gain Overview</h3>
+          <p class="text-xs text-muted-foreground">Per-account investment, gain, and XIRR — click bars to drill down</p>
+        </div>
+        {#if !isLoading && !hasGains}
+          <ZeroState item={[]}>
+            <p class="text-sm text-muted-foreground">
+              No investment gains recorded.
+            </p>
+          </ZeroState>
+        {:else}
+          <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
+          <ChartFrame
+            height="compact"
+            rows={Math.max(5, overviewData.points.length)}
+            class="[&_.paisa-chart-frame-body]:overflow-y-visible"
+          >
+            <ComparisonBarChart
+              data={overviewData}
+              ariaLabel="Asset gain account overview"
+              testId="asset-gain-overview-echart"
+              events={chartEvents}
+            />
+          </ChartFrame>
+        {/if}
+      </div>
+    </div>
+  </details>
 </Page>

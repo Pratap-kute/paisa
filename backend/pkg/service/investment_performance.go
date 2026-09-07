@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"slices"
 	"sort"
 	"time"
 
@@ -370,7 +371,7 @@ func collectIncomeEvidence(all []posting.Posting, start, end time.Time) []perfor
 			if utils.IsSameOrParent(p.Account, "Assets:Checking") {
 				checking = true
 			}
-			if investmentAccount(p.Account) {
+			if investmentAccount(p.Account) && !slices.Contains(evidence.accounts, p.Account) {
 				evidence.accounts = append(evidence.accounts, p.Account)
 			}
 		}
@@ -385,14 +386,24 @@ func flagUnattributedIncome(r *InvestmentPerformance, evidence []performanceInco
 		return
 	}
 	for _, item := range evidence {
-		found := false
+		matched := 0
 		for _, account := range item.accounts {
 			if selected(account) {
-				found = true
-				break
+				matched++
 			}
 		}
-		if !found {
+		switch {
+		case len(item.accounts) == 0:
+			// globally unattributed
+			r.Quality.Status = performancePartial
+			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: "unattributed_investment_income", Date: item.date})
+			suppressPerformanceReturn(r, "unattributed_investment_income")
+		case matched == 0:
+			// positively attributed outside this scope
+		case matched == len(item.accounts):
+			// all evidence contained inside this scope
+		default:
+			// attribution crosses this scope boundary
 			r.Quality.Status = performancePartial
 			r.Quality.Reasons = append(r.Quality.Reasons, PerformanceReason{Code: "unattributed_investment_income", Date: item.date})
 			suppressPerformanceReturn(r, "unattributed_investment_income")

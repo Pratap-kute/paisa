@@ -237,4 +237,33 @@ describe("chart option contracts", () => {
     expect(comparison.points[0].label).toBe("Equity");
     expect(comparison.points[0].value).toBe(100000);
   });
+
+  it("supports scaled value axis with padded bounds for non-zero baselines", () => {
+    const option = buildPeriodSeriesOption({
+      points: [
+        { period: "2026-04-01", values: { value: 19500000 } },
+        { period: "2026-09-06", values: { value: 21800000 } },
+      ],
+      series: [
+        { key: "value", label: "Market Value", intent: "line" },
+      ],
+      scale: true,
+    }, { theme }) as {
+      yAxis: {
+        scale?: boolean;
+        min?: (extent: { min: number; max: number }) => number;
+        max?: (extent: { min: number; max: number }) => number;
+      };
+    };
+
+    expect(option.yAxis.scale).toBe(true);
+    expect(typeof option.yAxis.min).toBe("function");
+    expect(typeof option.yAxis.max).toBe("function");
+
+    const computedMin = option.yAxis.min!({ min: 19500000, max: 21800000 });
+    const computedMax = option.yAxis.max!({ min: 19500000, max: 21800000 });
+    expect(computedMin).toBeLessThan(19500000);
+    expect(computedMax).toBeGreaterThan(21800000);
+    expect(computedMin).toBeGreaterThan(0);
+  });
 });

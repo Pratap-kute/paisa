@@ -4,13 +4,25 @@ import { obscure } from "$lib/shared/state/persisted";
 import Section from "$lib/shared/layout/Section.svelte";
 import { formatCurrency } from "$lib/shared/formatters/currency";
 import { performancePercent } from "$lib/features/assets/performance";
-let { summary, loading = false }: {
+let { summary, error = null, loading = false }: {
   summary?: DtoInvestmentPerformance | null;
+  error?: string | null;
   loading?: boolean;
 } = $props();
+
+function performanceErrorMessage(code: string) {
+  switch (code) {
+    case "investment_performance_reconciliation_failed":
+      return "Investment performance could not be calculated because the data did not reconcile.";
+    default:
+      return "Investment performance could not be calculated.";
+  }
+}
 </script>
 <Section title="Investment Performance · Current FY">
   {#if loading}<p class="text-sm text-muted-foreground">Loading performance…</p>
+  {:else if error}
+    <p class="text-sm paisa-text-danger">{performanceErrorMessage(error)}</p>
   {:else if summary && summary.quality?.status !== "unavailable"}
     <div class="flex flex-wrap items-baseline gap-3"><span class="text-lg font-semibold tabular-nums">{formatCurrency($obscure ? 0 : summary.investmentReturn ?? 0)} investment return</span><span class="text-sm">{summary.periodReturn == null ? "Period return unavailable" : `${performancePercent($obscure ? 0 : summary.periodReturn)} period return`}</span></div>
     {#if summary.quality?.status === "partial"}<p class="text-sm text-muted-foreground">Partial data · amounts may be estimates.</p>{/if}

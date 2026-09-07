@@ -86,48 +86,56 @@ $effect(() => {
   overview = undefined;
   postings = [];
   legacyFailed = false;
-  securityTypeEmpty = nameAndSecurityTypeEmpty = ratingEmpty = industryEmpty = true;
+  securityTypeEmpty =
+    nameAndSecurityTypeEmpty =
+    ratingEmpty =
+    industryEmpty =
+      true;
   void (async () => {
-  try {
-  const res = await api.gain.getAccountGain(account, { signal: controller.signal });
-  if (controller.signal.aborted) return;
-  gain = res.gain_timeline_breakdown as unknown as AccountGain;
-  assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
-  name_and_security_type = (res.portfolio_allocation
-    ?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
-  security_type = (res.portfolio_allocation
-    ?.security_type as unknown as PortfolioAggregate[]) || [];
-  rating =
-    (res.portfolio_allocation?.rating as unknown as PortfolioAggregate[]) || [];
-  industry =
-    (res.portfolio_allocation?.industry as unknown as PortfolioAggregate[]) ||
-    [];
-  commodities = (res.portfolio_allocation?.commodities as unknown as any) || [];
+    try {
+      const res = await api.gain.getAccountGain(account, {
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      gain = res.gain_timeline_breakdown as unknown as AccountGain;
+      assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
+      name_and_security_type = (res.portfolio_allocation
+        ?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
+      security_type = (res.portfolio_allocation
+        ?.security_type as unknown as PortfolioAggregate[]) || [];
+      rating =
+        (res.portfolio_allocation?.rating as unknown as PortfolioAggregate[]) ||
+        [];
+      industry = (res.portfolio_allocation
+        ?.industry as unknown as PortfolioAggregate[]) ||
+        [];
+      commodities = (res.portfolio_allocation?.commodities as unknown as any) ||
+        [];
 
-  overview = last(gain.networthTimeline as any);
-  postings = [...(gain.postings || [])]
-    .sort((a, b) => {
-      const da = a.date
-        ? (typeof a.date === "string"
-          ? new Date(a.date).getTime()
-          : (a.date as any).valueOf())
-        : 0;
-      const db = b.date
-        ? (typeof b.date === "string"
-          ? new Date(b.date).getTime()
-          : (b.date as any).valueOf())
-        : 0;
-      return db - da;
-    })
-    .slice(0, 100) as unknown as Posting[];
-  selectedCommodities = [...commodities];
-  securityTypeEmpty = security_type.length === 0;
-  nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
-  ratingEmpty = rating.length === 0;
-  industryEmpty = industry.length === 0;
-  } catch {
-    if (!controller.signal.aborted) legacyFailed = true;
-  }
+      overview = last(gain.networthTimeline as any);
+      postings = [...(gain.postings || [])]
+        .sort((a, b) => {
+          const da = a.date
+            ? (typeof a.date === "string"
+              ? new Date(a.date).getTime()
+              : (a.date as any).valueOf())
+            : 0;
+          const db = b.date
+            ? (typeof b.date === "string"
+              ? new Date(b.date).getTime()
+              : (b.date as any).valueOf())
+            : 0;
+          return db - da;
+        })
+        .slice(0, 100) as unknown as Posting[];
+      selectedCommodities = [...commodities];
+      securityTypeEmpty = security_type.length === 0;
+      nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
+      ratingEmpty = rating.length === 0;
+      industryEmpty = industry.length === 0;
+    } catch {
+      if (!controller.signal.aborted) legacyFailed = true;
+    }
   })();
   return () => controller.abort();
 });

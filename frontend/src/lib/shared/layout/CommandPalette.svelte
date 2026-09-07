@@ -164,11 +164,19 @@ const staticCommands: CommandItem[] = [
   },
   {
     id: "nav-asset-gain",
-    title: "Capital Gains & Losses",
-    description: "Realized and unrealized investment returns",
+    title: "Investment Performance",
+    description: "Period returns, investment gains, and return drivers",
     icon: "fa-solid fa-arrow-trend-up",
     category: "Navigation",
-    keywords: ["gains", "losses", "returns", "xirr", "cagr", "performance"],
+    keywords: [
+      "gains",
+      "losses",
+      "returns",
+      "xirr",
+      "cagr",
+      "performance",
+      "investment",
+    ],
     action: () => navigate("/assets/gain"),
   },
   // Liabilities

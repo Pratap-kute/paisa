@@ -2562,6 +2562,10 @@ const docTemplate = `{
                     ],
                     "x-nullable": true
                 },
+                "investmentPerformanceError": {
+                    "type": "string",
+                    "x-nullable": true
+                },
                 "networth": {
                     "$ref": "#/definitions/dto.CurrentNetworthResponse"
                 },

@@ -204,6 +204,7 @@ export interface DtoDashboardResponse {
   expenses?: DtoPeriodicPostingsSummaryResponse;
   goalSummaries?: DtoGoalSummaryResponse[];
   investmentPerformance?: DtoInvestmentPerformance | null;
+  investmentPerformanceError?: string | null;
   networth?: DtoCurrentNetworthResponse;
   transactionSequences?: DtoTransactionSequenceResponse[];
   transactions?: DtoTransactionResponse[];

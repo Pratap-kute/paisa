@@ -104,6 +104,9 @@ export function createEChartSurfaceController(options: {
     if (!chart || !dimensions) return;
     if (isReady) return;
     isReady = true;
+    (options.element as HTMLDivElement & {
+      __paisa_chart__?: EChartSurfaceEngine;
+    }).__paisa_chart__ = chart;
     options.element.dataset.chartReady = "true";
     options.onreadinesschange?.(true);
     options.onready?.();
@@ -162,6 +165,9 @@ export function createEChartSurfaceController(options: {
       isReady = false;
       options.onreadinesschange?.(false);
       delete options.element.dataset.chartReady;
+      delete (options.element as HTMLDivElement & {
+        __paisa_chart__?: EChartSurfaceEngine;
+      }).__paisa_chart__;
     },
     chart() {
       return chart;

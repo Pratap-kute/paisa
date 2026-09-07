@@ -143,3 +143,63 @@ test("performance amount privacy", async ({ page }) => {
     "50,000 investment return",
   );
 });
+
+test("lifetime chart navigation preserves preset and custom date query params", async ({ page }) => {
+  await page.route(
+    "**/api/investment/performance**",
+    (route) => route.fulfill({ json: result }),
+  );
+
+  // 1. Preset query param preservation
+  await page.goto("/assets/gain?preset=previous_fy");
+  await page.locator("summary", { hasText: "Lifetime investment context" })
+    .click();
+  const chartPreset = page.locator(
+    "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
+  );
+  await expect(chartPreset).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector(
+      "[data-testid='asset-gain-overview-echart']",
+    ) as
+      | (Element & {
+        __paisa_chart__?: {
+          trigger: (event: string, payload: unknown) => void;
+        };
+      })
+      | null;
+    el?.__paisa_chart__?.trigger("click", {
+      targetType: "series.bar",
+      dataIndex: 0,
+    });
+  });
+  await expect(page).toHaveURL(/preset=previous_fy/);
+  await expect(page).toHaveURL(/\/assets\/gain\/Assets%3A/);
+
+  // 2. Custom date query params preservation
+  await page.goto("/assets/gain?from=2026-04-01&to=2026-09-06");
+  await page.locator("summary", { hasText: "Lifetime investment context" })
+    .click();
+  const chartCustom = page.locator(
+    "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
+  );
+  await expect(chartCustom).toBeVisible();
+  await page.evaluate(() => {
+    const el = document.querySelector(
+      "[data-testid='asset-gain-overview-echart']",
+    ) as
+      | (Element & {
+        __paisa_chart__?: {
+          trigger: (event: string, payload: unknown) => void;
+        };
+      })
+      | null;
+    el?.__paisa_chart__?.trigger("click", {
+      targetType: "series.bar",
+      dataIndex: 0,
+    });
+  });
+  await expect(page).toHaveURL(/from=2026-04-01/);
+  await expect(page).toHaveURL(/to=2026-09-06/);
+  await expect(page).toHaveURL(/\/assets\/gain\/Assets%3A/);
+});

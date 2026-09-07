@@ -132,7 +132,7 @@ const navSections: NavSection[] = [
           { label: "Balance", href: "/assets/balance" },
           { label: "Net Worth", href: "/assets/networth" },
           { label: "Investment", href: "/assets/investment" },
-          { label: "Gain", href: "/assets/gain" },
+          { label: "Performance", href: "/assets/gain" },
           { label: "Allocation", href: "/assets/allocation" },
           { label: "Analysis", href: "/assets/analysis" },
         ],

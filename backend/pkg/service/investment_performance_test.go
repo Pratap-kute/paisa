@@ -312,3 +312,101 @@ func TestModifiedDietzUsesCalendarDaysAcrossDST(t *testing.T) {
 	require.True(t, value.Sub(decimal.RequireFromString("0.1")).Abs().LessThan(decimal.RequireFromString("0.000000000001")))
 	require.Equal(t, "America/New_York", start.Location().String())
 }
+
+func TestPerformanceAttributionABIsolation(t *testing.T) {
+	db := serviceTestDB(t)
+	utils.SetNow("2026-09-06")
+	t.Cleanup(utils.ResetNow)
+	ps := []posting.Posting{
+		performancePost("openA", "2026-03-01", "Assets:Brokerage:A", "INR", 1000, 1000),
+		performancePost("openB", "2026-03-01", "Assets:Brokerage:B", "INR", 1000, 1000),
+		// Income evidence positively associated with B (does not affect A)
+		performancePost("divB", "2026-04-01", "Income:Dividend", "INR", -100, -100),
+		performancePost("divB", "2026-04-01", "Assets:Checking", "INR", 100, 100),
+		performancePost("divB", "2026-04-01", "Assets:Brokerage:B", "INR", 100, 100),
+	}
+	require.NoError(t, db.Create(&ps).Error)
+
+	// Drivers check: A must remain complete with available return
+	r, err := GetInvestmentPerformance(db, PerformanceOptions{Drivers: true})
+	require.NoError(t, err)
+	var driverA *PerformanceDriver
+	for i := range r.Drivers {
+		if r.Drivers[i].Account == "Assets:Brokerage:A" {
+			driverA = &r.Drivers[i]
+			break
+		}
+	}
+	require.NotNil(t, driverA)
+	require.Equal(t, "complete", driverA.Quality.Status)
+	require.NotNil(t, driverA.PeriodReturn)
+	require.Nil(t, driverA.ReturnUnavailableReason)
+
+	// Drilldown check for A
+	rA, err := GetInvestmentPerformance(db, PerformanceOptions{AccountPrefix: "Assets:Brokerage:A"})
+	require.NoError(t, err)
+	require.Equal(t, "complete", rA.Quality.Status)
+	require.NotNil(t, rA.PeriodReturn)
+	require.Nil(t, rA.ReturnUnavailableReason)
+}
+
+func TestPerformanceAttributionHierarchyAndMixedTransaction(t *testing.T) {
+	db := serviceTestDB(t)
+	utils.SetNow("2026-09-06")
+	t.Cleanup(utils.ResetNow)
+	ps := []posting.Posting{
+		performancePost("openA", "2026-03-01", "Assets:Brokerage:A", "INR", 1000, 1000),
+		performancePost("openB", "2026-03-01", "Assets:Brokerage:B", "INR", 1000, 1000),
+		performancePost("openC", "2026-03-01", "Assets:Retirement:C", "INR", 1000, 1000),
+		// Mixed income evidence containing both A and B (and multiple postings to A to test deduplication)
+		performancePost("mixed", "2026-04-01", "Income:Dividend", "INR", -100, -100),
+		performancePost("mixed", "2026-04-01", "Assets:Checking", "INR", 100, 100),
+		performancePost("mixed", "2026-04-01", "Assets:Brokerage:A", "INR", 50, 50),
+		performancePost("mixed", "2026-04-01", "Assets:Brokerage:A", "INR", 10, 10),
+		performancePost("mixed", "2026-04-01", "Assets:Brokerage:B", "INR", 40, 40),
+	}
+	require.NoError(t, db.Create(&ps).Error)
+
+	// 1. Assets:Brokerage (parent of A and B) contains all accounts in the evidence -> complete
+	rBrokerage, err := GetInvestmentPerformance(db, PerformanceOptions{AccountPrefix: "Assets:Brokerage"})
+	require.NoError(t, err)
+	require.Equal(t, "complete", rBrokerage.Quality.Status)
+	require.NotNil(t, rBrokerage.PeriodReturn)
+	require.Nil(t, rBrokerage.ReturnUnavailableReason)
+
+	// 2. Assets:Brokerage:A (matches 1 of 2 accounts in evidence) -> partial
+	rA, err := GetInvestmentPerformance(db, PerformanceOptions{AccountPrefix: "Assets:Brokerage:A"})
+	require.NoError(t, err)
+	require.Equal(t, "partial", rA.Quality.Status)
+	require.Nil(t, rA.PeriodReturn)
+	require.Equal(t, "unattributed_investment_income", *rA.ReturnUnavailableReason)
+	// Deduplication check: reason appears exactly once
+	countA := 0
+	for _, reason := range rA.Quality.Reasons {
+		if reason.Code == "unattributed_investment_income" {
+			countA++
+		}
+	}
+	require.Equal(t, 1, countA)
+
+	// 3. Assets:Brokerage:B (matches 1 of 2 accounts in evidence) -> partial
+	rB, err := GetInvestmentPerformance(db, PerformanceOptions{AccountPrefix: "Assets:Brokerage:B"})
+	require.NoError(t, err)
+	require.Equal(t, "partial", rB.Quality.Status)
+	require.Nil(t, rB.PeriodReturn)
+	require.Equal(t, "unattributed_investment_income", *rB.ReturnUnavailableReason)
+
+	// 4. Assets:Retirement:C (unrelated, matches 0 accounts in evidence) -> complete
+	rC, err := GetInvestmentPerformance(db, PerformanceOptions{AccountPrefix: "Assets:Retirement:C"})
+	require.NoError(t, err)
+	require.Equal(t, "complete", rC.Quality.Status)
+	require.NotNil(t, rC.PeriodReturn)
+	require.Nil(t, rC.ReturnUnavailableReason)
+
+	// 5. Whole portfolio (contains A, B, and C) -> complete
+	rAll, err := GetInvestmentPerformance(db, PerformanceOptions{})
+	require.NoError(t, err)
+	require.Equal(t, "complete", rAll.Quality.Status)
+	require.NotNil(t, rAll.PeriodReturn)
+	require.Nil(t, rAll.ReturnUnavailableReason)
+}
