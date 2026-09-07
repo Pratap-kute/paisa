@@ -19,6 +19,7 @@ interface Props {
   name?: string;
   autocomplete?: HTMLInputAttributes["autocomplete"];
   type?: InputType;
+  inputmode?: HTMLInputAttributes["inputmode"];
   value?: string | number;
   placeholder?: string;
   size?: InputSize;
@@ -39,6 +40,7 @@ let {
   id,
   name,
   autocomplete,
+  inputmode,
   type = "text",
   value = $bindable(""),
   placeholder = "",
@@ -69,6 +71,7 @@ const sizeClasses: Record<InputSize, string> = {
     {id}
     {name}
     {autocomplete}
+    {inputmode}
     {type}
     bind:value
     {placeholder}

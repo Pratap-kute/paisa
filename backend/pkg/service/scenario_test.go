@@ -199,7 +199,7 @@ func TestScenarioUnknownIsNotZero(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, b.CurrentCash)
 	require.Nil(t, b.MonthlyIncome.Value)
-	require.Nil(t, b.MonthlyInvestmentTransfer.Value)
+	require.True(t, b.MonthlyInvestmentTransfer.Value.IsZero())
 	require.True(t, b.CurrentInvestmentValue.IsZero())
 	r, err := EvaluateScenario(b, ScenarioRequest{HorizonMonths: 60, MonthlyIncome: scenarioMoney(150000), MonthlyExpenses: scenarioMoney(75000), MonthlyInvestmentTransfer: scenarioMoney(20000)})
 	require.NoError(t, err)
@@ -308,4 +308,27 @@ func TestScenarioBaselineQueriesDoNotScaleWithAccounts(t *testing.T) {
 			require.Equal(t, 1, queries, "currency accounts should be captured by one posting query")
 		})
 	}
+}
+
+func TestScenarioFirstTimeInvestor(t *testing.T) {
+	db := serviceTestDB(t)
+	ps := []posting.Posting{
+		performancePost("cash", "2026-03-01", "Assets:Checking", "INR", 200000, 200000),
+		performancePost("income", "2026-03-01", "Income:Salary", "INR", -50000, -50000),
+		performancePost("expense", "2026-03-01", "Expenses:Food", "INR", 10000, 10000),
+	}
+	require.NoError(t, db.Create(&ps).Error)
+	b, err := BuildScenarioBaseline(db, time.Date(2026, 9, 7, 0, 0, 0, 0, time.Local), 12)
+	require.NoError(t, err)
+	require.Equal(t, "no_investment_activity", b.MonthlyInvestmentTransfer.Source)
+	require.Zero(t, b.MonthlyInvestmentTransfer.SampleCount)
+	for _, reason := range b.Quality.Reasons {
+		require.NotEqual(t, "insufficient_contribution_history", reason.Code)
+	}
+	r, err := EvaluateScenario(b, ScenarioRequest{HorizonMonths: 12, MonthlyInvestmentTransfer: scenarioMoney(20000)})
+	require.NoError(t, err)
+	require.True(t, r.Available)
+	require.True(t, r.Baseline.EndingInvestment.IsZero())
+	require.True(t, r.Scenario.EndingInvestment.Equal(*scenarioMoney(240000)))
+	require.True(t, r.Impact.EndingNetWorthDelta.IsZero())
 }

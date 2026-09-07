@@ -130,11 +130,16 @@ func BuildScenarioBaseline(db *gorm.DB, asOf time.Time, horizon int) (ScenarioBa
 		samples = append(samples, c.Amount)
 	}
 	b.MonthlyInvestmentTransfer = scenarioMedian(samples, false)
+	// An explicit first-time-investor assumption, not invented income/expense history.
+	if len(investments) == 0 {
+		zero := decimal.Zero
+		b.MonthlyInvestmentTransfer = ScenarioAssumption{Value: &zero, Source: "no_investment_activity", SampleCount: 0}
+	}
 	for _, f := range []struct {
 		name string
 		a    ScenarioAssumption
 	}{{"income", b.MonthlyIncome}, {"expense", b.MonthlyExpenses}, {"contribution", b.MonthlyInvestmentTransfer}} {
-		if f.a.SampleCount < 6 {
+		if f.a.SampleCount < 6 && f.a.Source != "no_investment_activity" {
 			addReason("insufficient_"+f.name+"_history", f.name)
 		}
 		if f.a.Source == "invalid_historical_magnitude" {

@@ -1,4 +1,8 @@
-import type { DtoScenarioResult } from "$lib/api";
+import type {
+  DtoScenarioAssumption,
+  DtoScenarioReason,
+  DtoScenarioResult,
+} from "$lib/api";
 import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
 import COLORS from "$lib/shared/theme/colors";
 
@@ -12,7 +16,7 @@ export function scenarioSeries(
     axis: "category",
     granularity: "month",
     scale: true,
-    valueFormat: "currency",
+    valueFormat: "compactCurrency",
     series: [
       {
         key: "baseline",
@@ -28,18 +32,43 @@ export function scenarioSeries(
         color: COLORS.primary,
       },
     ],
-    points: (result.baseline?.points ?? []).map((point, i) => {
-      const baseline = hidden ? 0 : point[metric] ?? 0;
-      const scenario = hidden ? 0 : result.scenario?.points?.[i]?.[metric] ?? 0;
-      return {
-        period: point.month ?? "",
-        values: { baseline, scenario },
-        tooltipRows: [["Baseline", baseline], ["Scenario", scenario], [
-          "Difference",
-          scenario - baseline,
-        ]],
-      };
-    }),
+    points: [
+      ...(result.snapshot?.asOfDate
+        ? [{
+          period: "Opening",
+          values: {
+            baseline: hidden ? 0 : result.baseline?.[openingKey(metric)] ?? 0,
+            scenario: hidden ? 0 : result.scenario?.[openingKey(metric)] ?? 0,
+          },
+          tooltipRows: [
+            [
+              "Baseline",
+              hidden ? 0 : result.baseline?.[openingKey(metric)] ?? 0,
+            ],
+            [
+              "Scenario",
+              hidden ? 0 : result.scenario?.[openingKey(metric)] ?? 0,
+            ],
+            ["Difference", 0],
+          ] as [string, number][],
+        }]
+        : []),
+      ...(result.baseline?.points ?? []).map((point, i) => {
+        const baseline = hidden ? 0 : point[metric] ?? 0;
+        const scenario = hidden
+          ? 0
+          : result.scenario?.points?.[i]?.[metric] ?? 0;
+        return {
+          period: point.month ?? "",
+          values: { baseline, scenario },
+          tooltipRows: [
+            ["Baseline", baseline],
+            ["Scenario", scenario],
+            ["Difference", scenario - baseline],
+          ] as [string, number][],
+        };
+      }),
+    ],
   };
 }
 export function scenarioMessage(code?: string): string {
@@ -63,7 +92,7 @@ export function qualityMessage(code?: string): string {
     case "no_checking_account":
       return "Starting cash is unavailable because no checking account was found.";
     case "no_investment_activity":
-      return "No investment activity was found. Opening investment value is zero.";
+      return "No recorded investment activity. Opening investments are zero; the baseline monthly transfer is assumed to be zero.";
     case "estimated_investment_value":
       return "Investment value uses an estimated price or cost fallback.";
     case "insufficient_income_history":
@@ -77,4 +106,60 @@ export function qualityMessage(code?: string): string {
     default:
       return "Some baseline information is incomplete.";
   }
+}
+
+function openingKey(
+  metric: ScenarioMetric,
+): "openingCash" | "openingInvestment" | "openingNetWorth" {
+  return metric === "cash"
+    ? "openingCash"
+    : metric === "investment"
+    ? "openingInvestment"
+    : "openingNetWorth";
+}
+export function scenarioInput(
+  value: number | null | undefined,
+  precision = 0,
+): string {
+  return value == null
+    ? ""
+    : value.toFixed(Math.max(0, Math.min(20, precision)));
+}
+export function scenarioSource(assumption?: DtoScenarioAssumption): string {
+  if (!assumption) return "Loading";
+  if (assumption.source === "no_investment_activity") {
+    return "Assumed zero · no recorded investment activity";
+  }
+  if (assumption.value == null) {
+    return assumption.source === "invalid_historical_magnitude"
+      ? "Unavailable · historical reversals"
+      : "Unavailable · no completed history";
+  }
+  return `${
+    (assumption.sampleCount ?? 0) < 6 ? "Limited history" : "Historical median"
+  } · ${assumption.sampleCount} completed months`;
+}
+export function scenarioQuality(reasons: DtoScenarioReason[] = []): string[] {
+  return [
+    ...new Set(
+      reasons.map((reason) =>
+        reason.code === "estimated_investment_value" && reason.field
+          ? `${reason.field} — investment value uses an estimated price or cost fallback.`
+          : qualityMessage(reason.code)
+      ),
+    ),
+  ];
+}
+export function impactTone(
+  key: string,
+  delta = 0,
+  balance = 0,
+): "positive" | "negative" | "warning" | "neutral" {
+  if (key === "endingNetWorth") {
+    return delta > 0 ? "positive" : delta < 0 ? "negative" : "neutral";
+  }
+  if ((key === "endingCash" || key === "minimumCashBalance") && balance < 0) {
+    return "warning";
+  }
+  return "neutral";
 }
