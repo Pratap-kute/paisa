@@ -1292,6 +1292,7 @@
       "note": ""
     }
   ],
+  "investmentPerformanceError": null,
   "investmentPerformance": {
     "startDate": "2021-04-01",
     "endDate": "2022-02-07",

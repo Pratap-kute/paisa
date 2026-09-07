@@ -178,11 +178,12 @@ function selectPeriod(event: Event & { currentTarget: HTMLSelectElement }) {
 
 {#if result && result.quality?.status !== "unavailable"}
   <Section
-    title="Performance Decomposition"
-    subtitle="Portfolio growth includes both money you supplied and investment returns."
-    class="[&_.paisa-section-title]:text-base [&_.paisa-section-title]:font-semibold [&_.paisa-section-title]:text-foreground [&_.paisa-section-title]:normal-case [&_.paisa-section-title]:tracking-normal"
-  >
-    <dl class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 xl:grid-cols-5 border-b border-border-subtle pb-5">
+  title="Performance Decomposition"
+  subtitle="Portfolio growth includes both money you supplied and investment returns."
+  class="[&_.paisa-section-title]:text-base [&_.paisa-section-title]:font-semibold [&_.paisa-section-title]:text-foreground [&_.paisa-section-title]:normal-case [&_.paisa-section-title]:tracking-normal"
+>
+  <dl
+    class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 xl:grid-cols-5 border-b border-border-subtle pb-5">
       {#each decomposition as row}
         <div class="min-w-0">
           <dt class="text-xs font-medium text-muted-foreground">{row.label}</dt>
@@ -190,7 +191,7 @@ function selectPeriod(event: Event & { currentTarget: HTMLSelectElement }) {
         </div>
       {/each}
     </dl>
-  </Section>
+</Section>
 
   <Section
   title="Performance Timeline"
