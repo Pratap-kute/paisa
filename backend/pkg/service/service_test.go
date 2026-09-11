@@ -227,3 +227,29 @@ func TestSavingsSummaryParity(t *testing.T) {
 	assert.True(t, summary.NetExpense.Equal(card.NetExpense))
 	assert.True(t, summary.SavingsRate.Equal(card.SavingsRate))
 }
+
+func TestSortGraph(t *testing.T) {
+	input := Graph{
+		Nodes: []Node{
+			{Name: "Expenses:Food"},
+			{Name: "Expenses:Auto"},
+			{Name: "Expenses:Travel"},
+		},
+		Links: []Link{
+			{Source: 2, Target: 1},
+			{Source: 1, Target: 3},
+			{Source: 1, Target: 2},
+		},
+	}
+	sorted := SortGraph(input)
+	assert.Equal(t, "Expenses:Auto", sorted.Nodes[0].Name)
+	assert.Equal(t, "Expenses:Food", sorted.Nodes[1].Name)
+	assert.Equal(t, "Expenses:Travel", sorted.Nodes[2].Name)
+
+	assert.Equal(t, uint(1), sorted.Links[0].Source)
+	assert.Equal(t, uint(2), sorted.Links[0].Target)
+	assert.Equal(t, uint(1), sorted.Links[1].Source)
+	assert.Equal(t, uint(3), sorted.Links[1].Target)
+	assert.Equal(t, uint(2), sorted.Links[2].Source)
+	assert.Equal(t, uint(1), sorted.Links[2].Target)
+}

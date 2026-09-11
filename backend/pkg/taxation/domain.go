@@ -185,19 +185,19 @@ func ComputeCapitalGains(db *gorm.DB, account string, commodity config.Commodity
 }
 
 func GetScheduleAL(db *gorm.DB) map[string]ScheduleAL {
-	postings := query.Init(db).Like("Assets:%", "Liabilities:%").All()
+	allPostings := query.Init(db).Like("Assets:%", "Liabilities:%").All()
 	scheduleALs := make(map[string]ScheduleAL)
 
-	start := utils.Now().AddDate(1, 0, 0)
-	for {
-		start = utils.BeginningOfFinancialYear(start)
-		postings = lo.Filter(postings, func(p posting.Posting, _ int) bool { return p.Date.Before(start) })
-		if len(postings) == 0 {
+	fyStart := utils.BeginningOfFinancialYear(utils.Now().AddDate(1, 0, 0))
+	for range 200 {
+		filtered := lo.Filter(allPostings, func(p posting.Posting, _ int) bool { return p.Date.Before(fyStart) })
+		if len(filtered) == 0 {
 			break
 		}
 
-		start = start.AddDate(0, 0, -1)
-		scheduleALs[utils.FYHuman(start)] = ScheduleAL{Entries: ComputeScheduleAL(postings), Date: start}
+		fyEnd := fyStart.AddDate(0, 0, -1)
+		scheduleALs[utils.FYHuman(fyEnd)] = ScheduleAL{Entries: ComputeScheduleAL(filtered), Date: fyEnd}
+		fyStart = utils.BeginningOfFinancialYear(fyEnd)
 	}
 	return scheduleALs
 }

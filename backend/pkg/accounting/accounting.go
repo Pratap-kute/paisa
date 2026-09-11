@@ -25,7 +25,7 @@ func Register(postings []posting.Posting) []Balance {
 	current := Balance{Quantity: decimal.Zero}
 	for i := range postings {
 		p := &postings[i]
-		sameDay := p.Date.Equal(current.Date)
+		sameDay := len(balances) > 0 && p.Date.Equal(current.Date)
 		current = Balance{Date: p.Date, Quantity: p.Quantity.Add(current.Quantity), Commodity: p.Commodity}
 		if sameDay {
 			balances[len(balances)-1] = current
@@ -37,12 +37,15 @@ func Register(postings []posting.Posting) []Balance {
 }
 
 func FilterByGlob(postings []posting.Posting, accounts []string) []posting.Posting {
+	accounts = lo.Filter(accounts, func(accountGlob string, _ int) bool {
+		return accountGlob != ""
+	})
 	if len(accounts) == 0 {
 		return postings
 	}
 
 	negatePresent := lo.SomeBy(accounts, func(accountGlob string) bool {
-		return accountGlob != "" && accountGlob[0] == '!'
+		return accountGlob[0] == '!'
 	})
 	var combine func(collection []string, predicate func(item string) bool) bool
 	if negatePresent {

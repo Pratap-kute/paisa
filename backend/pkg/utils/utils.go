@@ -44,9 +44,9 @@ func FY(date time.Time) string {
 	}
 
 	if date.Month() < config.GetConfig().FinancialYearStartingMonth {
-		return fmt.Sprintf("%d-%d", date.Year()-1, date.Year()%100)
+		return fmt.Sprintf("%d-%02d", date.Year()-1, date.Year()%100)
 	} else {
-		return fmt.Sprintf("%d-%d", date.Year(), (date.Year()+1)%100)
+		return fmt.Sprintf("%d-%02d", date.Year(), (date.Year()+1)%100)
 	}
 }
 
@@ -56,17 +56,17 @@ func FYHuman(date time.Time) string {
 	}
 
 	if date.Month() < config.GetConfig().FinancialYearStartingMonth {
-		return fmt.Sprintf("%d - %d", date.Year()-1, date.Year()%100)
+		return fmt.Sprintf("%d - %02d", date.Year()-1, date.Year()%100)
 	} else {
-		return fmt.Sprintf("%d - %d", date.Year(), (date.Year()+1)%100)
+		return fmt.Sprintf("%d - %02d", date.Year(), (date.Year()+1)%100)
 	}
 }
 
 func YearHumanCutOffAt(date time.Time, cutoff time.Time) string {
 	if date.Month() < cutoff.Month() || date.Month() == cutoff.Month() && date.Day() < cutoff.Day() {
-		return fmt.Sprintf("%d - %d", date.Year()-1, date.Year()%100)
+		return fmt.Sprintf("%d - %02d", date.Year()-1, date.Year()%100)
 	} else {
-		return fmt.Sprintf("%d - %d", date.Year(), (date.Year()+1)%100)
+		return fmt.Sprintf("%d - %02d", date.Year(), (date.Year()+1)%100)
 	}
 }
 

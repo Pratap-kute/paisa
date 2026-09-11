@@ -86,12 +86,12 @@ func GetExpense(db *gorm.DB) ExpenseResult {
 func SortGraph(graph Graph) Graph {
 	nodes := graph.Nodes
 	sort.Slice(nodes, func(i, j int) bool {
-		return graph.Nodes[i].Name < graph.Nodes[j].Name
+		return nodes[i].Name < nodes[j].Name
 	})
 
 	links := graph.Links
 	sort.Slice(links, func(i, j int) bool {
-		return graph.Links[i].Source < graph.Links[j].Source || (graph.Links[i].Source == graph.Links[j].Source && graph.Links[i].Target < graph.Links[j].Target)
+		return links[i].Source < links[j].Source || (links[i].Source == links[j].Source && links[i].Target < links[j].Target)
 	})
 	return Graph{
 		Nodes: nodes,

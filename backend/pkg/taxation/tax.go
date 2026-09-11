@@ -14,9 +14,6 @@ import (
 
 var (
 	EquityGrandfatherDate, DebtIndexationRevocationDate, CiiStartDate time.Time
-	oneYear                                                           = time.Hour * 24 * 365
-	threeYears                                                        = oneYear * 3
-	twoYears                                                          = oneYear * 2
 )
 
 func init() {
@@ -38,7 +35,6 @@ func Add(a, b Tax) Tax {
 }
 
 func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity, purchasePrice decimal.Decimal, purchaseDate time.Time, sellPrice decimal.Decimal, sellDate time.Time) Tax {
-	dateDiff := sellDate.Sub(purchaseDate)
 	gain := sellPrice.Mul(quantity).Sub(purchasePrice.Mul(quantity))
 
 	if (commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65) && sellDate.Before(EquityGrandfatherDate) {
@@ -49,12 +45,12 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 		purchasePrice = service.GetUnitPrice(db, commodity.Name, EquityGrandfatherDate).Value
 	}
 
-	if commodity.TaxCategory == config.Debt && purchaseDate.After(CiiStartDate) && dateDiff > threeYears {
+	if commodity.TaxCategory == config.Debt && purchaseDate.After(CiiStartDate) && calendarYearsExceed(purchaseDate, sellDate, 3) {
 		//nolint:gosec // CII index is always a small positive integer <= 1000
 		purchasePrice = purchasePrice.Mul(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(sellDate)))).Div(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(purchaseDate))))))
 	}
 
-	if commodity.TaxCategory == config.UnlistedEquity && purchaseDate.After(CiiStartDate) && dateDiff > twoYears {
+	if commodity.TaxCategory == config.UnlistedEquity && purchaseDate.After(CiiStartDate) && calendarYearsExceed(purchaseDate, sellDate, 2) {
 		//nolint:gosec // CII index is always a small positive integer <= 1000
 		purchasePrice = purchasePrice.Mul(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(sellDate)))).Div(decimal.NewFromInt(int64(cii.GetIndex(db, utils.FY(purchaseDate))))))
 	}
@@ -65,7 +61,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	slab := decimal.Zero
 
 	if commodity.TaxCategory == config.Equity || commodity.TaxCategory == config.Equity65 {
-		if dateDiff > oneYear {
+		if calendarYearsExceed(purchaseDate, sellDate, 1) {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.10))
 		} else {
 			shortTerm = taxable.Mul(decimal.NewFromFloat(0.15))
@@ -73,7 +69,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.Debt {
-		if dateDiff > threeYears && purchaseDate.Before(DebtIndexationRevocationDate) {
+		if calendarYearsExceed(purchaseDate, sellDate, 3) && purchaseDate.Before(DebtIndexationRevocationDate) {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable
@@ -81,7 +77,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.Equity35 {
-		if dateDiff > threeYears {
+		if calendarYearsExceed(purchaseDate, sellDate, 3) {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable
@@ -89,7 +85,7 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	if commodity.TaxCategory == config.UnlistedEquity {
-		if dateDiff > twoYears {
+		if calendarYearsExceed(purchaseDate, sellDate, 2) {
 			longTerm = taxable.Mul(decimal.NewFromFloat(0.20))
 		} else {
 			slab = taxable
@@ -97,4 +93,11 @@ func Calculate(db *gorm.DB, quantity decimal.Decimal, commodity config.Commodity
 	}
 
 	return Tax{Gain: gain, Taxable: taxable, ShortTerm: shortTerm, LongTerm: longTerm, Slab: slab}
+}
+
+// calendarYearsExceed returns true if the duration from start to end
+// exceeds the given number of calendar years. This correctly handles
+// leap years unlike a fixed time.Duration comparison.
+func calendarYearsExceed(start, end time.Time, years int) bool {
+	return end.After(start.AddDate(years, 0, 0))
 }

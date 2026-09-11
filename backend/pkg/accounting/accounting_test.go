@@ -69,6 +69,52 @@ func TestRegister(t *testing.T) {
 	assert.Equal(t, "12", got[1].Quantity.String())
 }
 
+func TestRegisterZeroDate(t *testing.T) {
+	// First posting has zero date (time.Time{}), ensure Register does not panic with index out of range
+	zeroDatePosting := posting.Posting{
+		Account:   "Assets:Cash",
+		Commodity: "INR",
+		Quantity:  decimal.NewFromInt(10),
+		Amount:    decimal.NewFromInt(10),
+	}
+	got := Register([]posting.Posting{zeroDatePosting})
+	require.Len(t, got, 1)
+	assert.Equal(t, "10", got[0].Quantity.String())
+}
+
+func TestFilterByGlob(t *testing.T) {
+	postings := []posting.Posting{
+		{Account: "Assets:Bank:Checking"},
+		{Account: "Assets:Broker:Stocks"},
+		{Account: "Expenses:Food:Dining"},
+	}
+
+	t.Run("matches positive glob", func(t *testing.T) {
+		got := FilterByGlob(postings, []string{"Assets:*"})
+		require.Len(t, got, 2)
+		assert.Equal(t, "Assets:Bank:Checking", got[0].Account)
+		assert.Equal(t, "Assets:Broker:Stocks", got[1].Account)
+	})
+
+	t.Run("handles empty string in accounts gracefully", func(t *testing.T) {
+		got := FilterByGlob(postings, []string{"", "Assets:Bank:*"})
+		require.Len(t, got, 1)
+		assert.Equal(t, "Assets:Bank:Checking", got[0].Account)
+	})
+
+	t.Run("handles only empty string by returning all", func(t *testing.T) {
+		got := FilterByGlob(postings, []string{""})
+		require.Len(t, got, 3)
+	})
+
+	t.Run("negation filters out accounts and ignores empty strings", func(t *testing.T) {
+		got := FilterByGlob(postings, []string{"!Expenses:*", ""})
+		require.Len(t, got, 2)
+		assert.Equal(t, "Assets:Bank:Checking", got[0].Account)
+		assert.Equal(t, "Assets:Broker:Stocks", got[1].Account)
+	})
+}
+
 func TestBalanceAggregates(t *testing.T) {
 	postings := []posting.Posting{
 		accountingPosting(1, "Assets:A", "INR", "10", "10"),

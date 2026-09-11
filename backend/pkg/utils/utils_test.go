@@ -4,7 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -73,4 +75,26 @@ func TestBuildSubPath_SymlinkEscape(t *testing.T) {
 	p, err := BuildSubPath(baseDir, "main.ledger")
 	assert.NoError(t, err)
 	assert.Equal(t, validFile, p)
+}
+
+func TestFYFormatting(t *testing.T) {
+	require.NoError(t, config.LoadConfig([]byte("journal_path: main.ledger\ndb_path: paisa.db\n"), ""))
+
+	t.Run("century boundary year 2099", func(t *testing.T) {
+		d := time.Date(2099, time.May, 1, 0, 0, 0, 0, time.UTC)
+		assert.Equal(t, "2099-00", FY(d))
+		assert.Equal(t, "2099 - 00", FYHuman(d))
+	})
+
+	t.Run("single digit year boundary", func(t *testing.T) {
+		d := time.Date(2004, time.May, 1, 0, 0, 0, 0, time.UTC)
+		assert.Equal(t, "2004-05", FY(d))
+		assert.Equal(t, "2004 - 05", FYHuman(d))
+	})
+
+	t.Run("before financial year start month", func(t *testing.T) {
+		d := time.Date(2005, time.February, 1, 0, 0, 0, 0, time.UTC)
+		assert.Equal(t, "2004-05", FY(d))
+		assert.Equal(t, "2004 - 05", FYHuman(d))
+	})
 }

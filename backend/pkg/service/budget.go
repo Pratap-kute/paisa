@@ -94,9 +94,6 @@ func ComputeBudget(db *gorm.DB, forecastPostings, expensesPostings []posting.Pos
 			for _, account := range accounts {
 				fs := forecastsByAccount[account]
 				es := expensesByAssignedAccount[account]
-				if !ok {
-					es = []posting.Posting{}
-				}
 
 				budget := buildBudget(date, account, balance[account], fs, es, date.Before(currentMonth))
 				if budget.Available.IsPositive() {

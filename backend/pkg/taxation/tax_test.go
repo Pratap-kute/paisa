@@ -100,6 +100,30 @@ func TestCalculateEquity(t *testing.T) {
 		assert.True(t, tax.Slab.IsZero())
 	})
 
+	t.Run("equity holding across leap year exactly 1 calendar year is short term", func(t *testing.T) {
+		purchaseDate := parseDate("2024-01-01")
+		sellDate := parseDate("2025-01-01")
+		qty := decimal.NewFromInt(10)
+		buyPrice := decimal.NewFromInt(100)
+		sellPrice := decimal.NewFromInt(200)
+
+		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
+		assert.True(t, decimal.NewFromInt(150).Equal(tax.ShortTerm), "held <= 1 calendar year should be short term")
+		assert.True(t, tax.LongTerm.IsZero())
+	})
+
+	t.Run("equity holding across leap year exceeding 1 calendar year is long term", func(t *testing.T) {
+		purchaseDate := parseDate("2024-01-01")
+		sellDate := parseDate("2025-01-02")
+		qty := decimal.NewFromInt(10)
+		buyPrice := decimal.NewFromInt(100)
+		sellPrice := decimal.NewFromInt(200)
+
+		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
+		assert.True(t, decimal.NewFromInt(100).Equal(tax.LongTerm), "held > 1 calendar year should be long term")
+		assert.True(t, tax.ShortTerm.IsZero())
+	})
+
 	t.Run("sold before grandfather date is tax exempt", func(t *testing.T) {
 		purchaseDate := parseDate("2017-01-01")
 		sellDate := parseDate("2018-01-15") // before 2018-02-01
@@ -177,4 +201,17 @@ func TestCalculateDebt(t *testing.T) {
 		assert.True(t, tax.LongTerm.GreaterThan(decimal.Zero), "Long term tax should be non-zero")
 		assert.Equal(t, decimal.Zero, tax.Slab)
 	})
+}
+
+func TestGetScheduleAL(t *testing.T) {
+	db := taxTestDB(t)
+
+	posts := []posting.Posting{
+		{Date: parseDate("2021-05-01"), Account: "Assets:Bank", Amount: decimal.NewFromInt(50000)},
+		{Date: parseDate("2022-05-01"), Account: "Assets:Bank", Amount: decimal.NewFromInt(30000)},
+	}
+	require.NoError(t, db.Create(&posts).Error)
+
+	scheduleALs := GetScheduleAL(db)
+	assert.NotEmpty(t, scheduleALs)
 }
