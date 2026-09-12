@@ -356,3 +356,12 @@ a.finbodhi {
 a.finbodhi:hover {
   color: oklab(0.7 -0.135571 0.102569 / 0.9);
 }
+
+/* Local product captures retain their aspect ratio in both Material palettes. */
+.md-content img[src*="images/showcase/"] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+}
