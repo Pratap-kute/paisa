@@ -84,6 +84,8 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 							goto RESTART
 						}
 					}
+					found = true
+					break
 				}
 			}
 		}

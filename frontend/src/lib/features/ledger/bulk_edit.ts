@@ -75,7 +75,7 @@ function renameAccount(
   }
 
   const regex = new RegExp(
-    `^((?:\t|\\s{2})\\s*)(${
+    `^((?:\t|\\s{2})\\s*(?:[*!]\\s+)?)(${
       escapeRegExp(args.oldAccountName)
     })((?:\t|\\s{2}).*|\\s*)$`,
   );

@@ -68,11 +68,12 @@ func TestService_ConcurrentPriceAndInterestCache(t *testing.T) {
 	for range 4 {
 		wg.Go(func() {
 			p := posting.Posting{
-				Account:   "Assets:Checking",
-				Payee:     "Acme Bank",
-				Amount:    decimal.NewFromInt(500),
-				Commodity: "INR",
-				Date:      d1,
+				TransactionID: "tx1",
+				Account:       "Assets:Checking",
+				Payee:         "Acme Bank",
+				Amount:        decimal.NewFromInt(500),
+				Commodity:     "INR",
+				Date:          d1,
 			}
 			for {
 				select {

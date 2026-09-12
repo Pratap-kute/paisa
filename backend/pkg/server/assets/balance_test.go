@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ananthakumaran/paisa/pkg/config"
 	"github.com/ananthakumaran/paisa/pkg/model/cache"
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
@@ -97,3 +98,25 @@ func TestComputeBreakdownsHierarchicalRollup(t *testing.T) {
 	assert.Equal(t, "100", breakdowns["Assets:Checking"].MarketAmount.String())
 	assert.Equal(t, "500", breakdowns["Assets:Equity"].MarketAmount.String())
 }
+
+func TestInterestMustBelongToSameTransaction(t *testing.T) {
+	require.NoError(t, config.LoadConfig([]byte("journal_path: main.ledger\ndb_path: paisa.db\n"), ""))
+	db := assetTestDB(t)
+	makePost := func(id, account string, amount float64) posting.Posting {
+		p := assetPosting(account, "INR", amount, amount)
+		p.TransactionID = id
+		p.Payee = "SBI"
+		return p
+	}
+	ps := []posting.Posting{
+		makePost("interest", "Assets:Checking:SBI", 1000),
+		makePost("interest", "Income:Interest:SBI", -1000),
+		makePost("deposit", "Assets:FixedDeposit:SBI", 1000),
+		makePost("deposit", "Assets:Checking:SBI", -1000),
+	}
+	require.NoError(t, db.Create(&ps).Error)
+	got := GetBalance(db)["asset_breakdowns"].(map[string]AssetBreakdown)["Assets:FixedDeposit:SBI"]
+	assert.Equal(t, "1000", got.InvestmentAmount.String())
+	assert.Equal(t, "0", got.GainAmount.String())
+}
+

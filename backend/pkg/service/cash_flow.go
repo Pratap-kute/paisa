@@ -49,7 +49,7 @@ func ComputeCashFlow(q *query.Query, balance decimal.Decimal) []CashFlow {
 		return []CashFlow{}
 	}
 
-	end := utils.MaxTime(utils.EndOfToday(), postings[len(postings)-1].Date)
+	end := utils.MaxTime(utils.EndOfToday(), utils.EndOfMonth(postings[len(postings)-1].Date))
 	for start := utils.BeginningOfMonth(postings[0].Date); start.Before(end); start = start.AddDate(0, 1, 0) {
 		cashFlow := CashFlow{Date: start}
 

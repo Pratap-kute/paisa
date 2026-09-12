@@ -10,6 +10,7 @@ import (
 	"github.com/ananthakumaran/paisa/pkg/model/posting"
 	"github.com/ananthakumaran/paisa/pkg/model/price"
 	"github.com/ananthakumaran/paisa/pkg/model/transaction"
+	"github.com/ananthakumaran/paisa/pkg/utils"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -152,9 +153,9 @@ func TestInterestMatching(t *testing.T) {
 		fn   func(*gorm.DB, posting.Posting) bool
 		want bool
 	}{
-		{name: "matching interest counter posting", post: posting.Posting{Date: date, Payee: "Bank", Commodity: "INR", Amount: decimal.NewFromInt(10)}, fn: IsInterest, want: true},
+		{name: "matching interest counter posting", post: posting.Posting{TransactionID: "interest-source", Date: date, Payee: "Bank", Commodity: "INR", Amount: decimal.NewFromInt(10)}, fn: IsInterest, want: true},
 		{name: "interest payee mismatch", post: posting.Posting{Date: date, Payee: "Other", Commodity: "INR", Amount: decimal.NewFromInt(10)}, fn: IsInterest, want: false},
-		{name: "matching repayment counter posting", post: posting.Posting{Date: date, Payee: "Lender", Commodity: "INR", Amount: decimal.NewFromInt(-15)}, fn: IsInterestRepayment, want: true},
+		{name: "matching repayment counter posting", post: posting.Posting{TransactionID: "repayment-source", Date: date, Payee: "Lender", Commodity: "INR", Amount: decimal.NewFromInt(-15)}, fn: IsInterestRepayment, want: true},
 		{name: "expense interest account is repayment", post: posting.Posting{Date: date, Account: "Expenses:Interest:Loan", Commodity: "INR", Amount: decimal.NewFromInt(15)}, fn: IsInterestRepayment, want: true},
 	}
 	for _, tt := range tests {
@@ -252,4 +253,45 @@ func TestSortGraph(t *testing.T) {
 	assert.Equal(t, uint(3), sorted.Links[1].Target)
 	assert.Equal(t, uint(2), sorted.Links[2].Source)
 	assert.Equal(t, uint(1), sorted.Links[2].Target)
+}
+
+func auditPair(tx, date, debit, credit string, amount int64, forecast bool) []posting.Posting {
+	d, _ := time.ParseInLocation("2006-01-02", date, config.TimeZone())
+	a := decimal.NewFromInt(amount)
+	return []posting.Posting{
+		{TransactionID: tx, Date: d, Account: debit, Commodity: "INR", Quantity: a, Amount: a, Forecast: forecast},
+		{TransactionID: tx, Date: d, Account: credit, Commodity: "INR", Quantity: a.Neg(), Amount: a.Neg(), Forecast: forecast},
+	}
+}
+
+func TestBudgetDoesNotReserveRolloverTwice(t *testing.T) {
+	db := serviceTestDB(t)
+	require.NoError(t, config.LoadConfig([]byte("journal_path: main.ledger\ndb_path: paisa.db\nbudget:\n  rollover: yes\n"), ""))
+	utils.SetNow("2026-09-11")
+	t.Cleanup(utils.ResetNow)
+	ps := auditPair("salary", "2026-08-01", "Assets:Checking", "Income:Salary", 20000, false)
+	ps = append(ps, auditPair("aug-budget", "2026-08-01", "Expenses:Food", "Assets:Checking", 5000, true)...)
+	ps = append(ps, auditPair("aug-food", "2026-08-02", "Expenses:Food", "Assets:Checking", 3000, false)...)
+	ps = append(ps, auditPair("sep-budget", "2026-09-01", "Expenses:Food", "Assets:Checking", 5000, true)...)
+	ps = append(ps, auditPair("sep-food", "2026-09-02", "Expenses:Food", "Assets:Checking", 1000, false)...)
+	require.NoError(t, db.Create(&ps).Error)
+	got := GetBudget(db)
+	require.Equal(t, "16000", got.CheckingBalance.String())
+	require.Equal(t, "6000", got.BudgetsByMonth["2026-09"].AvailableThisMonth.String())
+	// 20,000 salary - 4,000 actual expenses - 6,000 remaining budget = 10,000.
+	require.Equal(t, "10000", got.AvailableForBudgeting.String())
+	require.Equal(t, "10000", got.BudgetsByMonth["2026-09"].EndOfMonthBalance.String())
+}
+
+func TestCashFlowIncludesFutureMonthOnFirstDay(t *testing.T) {
+	db := serviceTestDB(t)
+	utils.SetNow("2026-09-11")
+	t.Cleanup(utils.ResetNow)
+	ps := auditPair("sep-salary", "2026-09-01", "Assets:Checking", "Income:Salary", 50000, false)
+	ps = append(ps, auditPair("oct-rent", "2026-10-01", "Expenses:Rent", "Assets:Checking", 15000, false)...)
+	require.NoError(t, db.Create(&ps).Error)
+	got := GetCashFlow(db)
+	require.Len(t, got, 2, "October rent must appear in its month, as ordinary future postings do on October 2")
+	require.Equal(t, "15000", got[1].Expenses.String())
+	require.Equal(t, "35000", got[1].Balance.String())
 }

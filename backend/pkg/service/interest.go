@@ -175,7 +175,8 @@ func IsInterest(db *gorm.DB, p posting.Posting) bool {
 	intPostings := icache.get(db, p.Date.Unix())
 	for i := range intPostings {
 		ip := &intPostings[i]
-		if ip.Date.Equal(p.Date) &&
+		if ip.TransactionID == p.TransactionID &&
+			ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {
 			return true

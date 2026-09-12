@@ -187,8 +187,14 @@ func ComputeBudget(db *gorm.DB, forecastPostings, expensesPostings []posting.Pos
 				},
 			)
 
-			availableForBudgeting = availableForBudgeting.Sub(availableThisMonth)
-			endOfMonthBalance := availableForBudgeting
+			var endOfMonthBalance decimal.Decimal
+			if config.GetConfig().Budget.Rollover == config.Yes {
+				endOfMonthBalance = checkingBalance.Sub(availableThisMonth)
+				availableForBudgeting = endOfMonthBalance
+			} else {
+				availableForBudgeting = availableForBudgeting.Sub(availableThisMonth)
+				endOfMonthBalance = availableForBudgeting
+			}
 
 			budgetsByMonth[month] = Budget{
 				Date:               date,

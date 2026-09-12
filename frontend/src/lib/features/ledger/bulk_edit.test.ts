@@ -53,4 +53,37 @@ describe("bulk_editor", () => {
       });
     },
   );
+
+  test("rename * posting preserves status and changes account", () => {
+    const content = `2026/01/01 Lunch\n    * Expenses:Food                               20 INR\n    Assets:Checking                              -20 INR`;
+    const file: LedgerFile = { type: "file", name: "main.ledger", content, versions: [] };
+    const txs = [{
+      fileName: "main.ledger",
+      beginLine: 1,
+      endLine: 3,
+      postings: [{ account: "Expenses:Food" }, { account: "Assets:Checking" }]
+    }];
+    const { newFiles: [res] } = applyChanges([file], txs as any, "rename_account", {
+      oldAccountName: "Expenses:Food",
+      newAccountName: "Expenses:Dining",
+    });
+    expect(res.content).toContain("* Expenses:Dining");
+  });
+
+  test("rename ! posting preserves status and changes account", () => {
+    const content = `2026/01/01 Lunch\n    ! Expenses:Food                               20 INR\n    Assets:Checking                              -20 INR`;
+    const file: LedgerFile = { type: "file", name: "main.ledger", content, versions: [] };
+    const txs = [{
+      fileName: "main.ledger",
+      beginLine: 1,
+      endLine: 3,
+      postings: [{ account: "Expenses:Food" }, { account: "Assets:Checking" }]
+    }];
+    const { newFiles: [res] } = applyChanges([file], txs as any, "rename_account", {
+      oldAccountName: "Expenses:Food",
+      newAccountName: "Expenses:Dining",
+    });
+    expect(res.content).toContain("! Expenses:Dining");
+  });
 });
+
