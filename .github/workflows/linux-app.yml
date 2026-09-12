@@ -35,10 +35,16 @@ jobs:
           wails doctor
           wails build -tags webkit2_40
           cp build/bin/Paisa build/linux/usr/local/bin
-          cp -r build/linux paisa_0.9.1_amd64
-          dpkg --build paisa_0.9.1_amd64
+          if [[ "$GITHUB_REF_NAME" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="0.0.0-dev"
+          fi
+          package_dir="paisa_${version}_amd64"
+          cp -r build/linux "$package_dir"
+          dpkg --build "$package_dir"
           cd ..
-          mv desktop/paisa_0.9.1_amd64.deb paisa-app-linux-amd64.deb
+          mv "desktop/${package_dir}.deb" paisa-app-linux-amd64.deb
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

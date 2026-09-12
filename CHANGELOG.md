@@ -1,5 +1,44 @@
 # CHANGELOG
 
+### 0.9.2 (2026-09-12)
+
+#### Reliability and accounting fixes
+
+- Fixed interest and interest-repayment matching across transaction boundaries.
+- Fixed repeated budget rollover deductions and omitted final future cash-flow months.
+- Fixed split balanced-posting export and dividend treatment in investment XIRR.
+- Fixed bulk account renaming for cleared and pending postings.
+
+#### Financial planning and analysis
+
+- Added investment-performance reporting with contribution, income, gain, benchmark,
+  and timeline breakdowns.
+- Added scenario planning with baseline comparisons and projected outcomes.
+- Added goal intelligence for savings and retirement goals, including health,
+  projections, contributions, and recent activity.
+- Added period-aware investment and insight drilldowns with historical filtering.
+- Added financial insights, savings summaries, category-spike detection, and
+  rolling-median anomaly analysis.
+- Added budget projections, budget health indicators, and clearer forecast labels.
+
+#### Workflow improvements
+
+- Added recurring-transaction analysis, schedules, upcoming entries, and recurring
+  confirmation workflows.
+- Added prediction review workflows with confidence scores and merchant rules.
+- Added batch ledger-editor operations and improved account-renaming behavior.
+- Added richer diagnosis and data-quality checks with actionable status displays.
+- Improved mobile layouts, dashboard metrics, investment drilldowns, and period
+  selection across the application.
+
+#### Platform and developer experience
+
+- Expanded API coverage and regenerated API documentation for goals, insights,
+  scenarios, investment performance, diagnosis, and editor batch operations.
+- Improved CI setup and caching, added broader regression coverage, and refreshed
+  the product showcase and documentation.
+
+
 ### 0.9.1 (2026-08-27)
 
 #### Security
