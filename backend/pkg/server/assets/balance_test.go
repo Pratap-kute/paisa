@@ -119,4 +119,3 @@ func TestInterestMustBelongToSameTransaction(t *testing.T) {
 	assert.Equal(t, "1000", got.InvestmentAmount.String())
 	assert.Equal(t, "0", got.GainAmount.String())
 }
-

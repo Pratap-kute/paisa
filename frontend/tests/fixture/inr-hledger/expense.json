@@ -37,142 +37,6 @@
       "balance": 0
     }
   ],
-  "graph": {
-    "2021 - 22": {
-      "nodes": [
-        {
-          "name": "Assets:Checking"
-        },
-        {
-          "name": "Assets:Dollar"
-        },
-        {
-          "name": "Assets:Equity:AAPL"
-        },
-        {
-          "name": "Assets:Equity:ABNB"
-        },
-        {
-          "name": "Assets:Equity:NIFTY"
-        },
-        {
-          "name": "Expenses"
-        },
-        {
-          "name": "Expenses:Charges"
-        },
-        {
-          "name": "Expenses:Rent"
-        },
-        {
-          "name": "Income"
-        },
-        {
-          "name": "Income:CapitalGains"
-        },
-        {
-          "name": "Income:CapitalGains:Equity"
-        },
-        {
-          "name": "Income:CapitalGains:Equity:AAPL"
-        },
-        {
-          "name": "Income:Interest"
-        },
-        {
-          "name": "Income:Interest:Checking"
-        },
-        {
-          "name": "Income:Salary"
-        },
-        {
-          "name": "Income:Salary:Acme"
-        }
-      ],
-      "links": [
-        {
-          "source": 1,
-          "target": 5,
-          "value": 20100
-        },
-        {
-          "source": 1,
-          "target": 7,
-          "value": 80000
-        },
-        {
-          "source": 1,
-          "target": 8,
-          "value": 16050.6340142592
-        },
-        {
-          "source": 1,
-          "target": 9,
-          "value": 10000
-        },
-        {
-          "source": 1,
-          "target": 10,
-          "value": 804.42048
-        },
-        {
-          "source": 2,
-          "target": 1,
-          "value": 121027.3
-        },
-        {
-          "source": 3,
-          "target": 2,
-          "value": 120000
-        },
-        {
-          "source": 4,
-          "target": 3,
-          "value": 120000
-        },
-        {
-          "source": 5,
-          "target": 6,
-          "value": 20000
-        },
-        {
-          "source": 5,
-          "target": 11,
-          "value": 100
-        },
-        {
-          "source": 9,
-          "target": 1,
-          "value": 10000
-        },
-        {
-          "source": 12,
-          "target": 2,
-          "value": 27.3
-        },
-        {
-          "source": 13,
-          "target": 12,
-          "value": 27.3
-        },
-        {
-          "source": 14,
-          "target": 13,
-          "value": 27.3
-        },
-        {
-          "source": 15,
-          "target": 2,
-          "value": 1000
-        },
-        {
-          "source": 16,
-          "target": 15,
-          "value": 1000
-        }
-      ]
-    }
-  },
   "month_wise": {
     "expenses": {
       "2022-01": [
@@ -312,24 +176,6 @@
         },
         {
           "date": "2022-01-08T00:00:00Z",
-          "payee": "Buy ABNB",
-          "account": "Assets:Equity:ABNB",
-          "commodity": "ABNB",
-          "quantity": 0.76,
-          "amount": 8025.3170071296,
-          "status": "unmarked",
-          "tag_recurring": "",
-          "tag_period": "",
-          "transaction_begin_line": 30,
-          "file_name": "main.ledger",
-          "forecast": false,
-          "note": "",
-          "transaction_note": "",
-          "market_amount": 0,
-          "balance": 0
-        },
-        {
-          "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
           "account": "Assets:Equity:NIFTY",
           "commodity": "NIFTY",
@@ -383,6 +229,24 @@
           "balance": 0
         },
         {
+          "date": "2022-01-08T00:00:00Z",
+          "payee": "Buy ABNB",
+          "account": "Assets:Equity:ABNB",
+          "commodity": "ABNB",
+          "quantity": 0.76,
+          "amount": 0.76,
+          "status": "unmarked",
+          "tag_recurring": "",
+          "tag_period": "",
+          "transaction_begin_line": 30,
+          "file_name": "main.ledger",
+          "forecast": false,
+          "note": "",
+          "transaction_note": "",
+          "market_amount": 0,
+          "balance": 0
+        },
+        {
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -406,7 +270,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 8025.3170071296,
+          "amount": 0.76,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -579,24 +443,6 @@
         },
         {
           "date": "2022-01-08T00:00:00Z",
-          "payee": "Buy ABNB",
-          "account": "Assets:Equity:ABNB",
-          "commodity": "ABNB",
-          "quantity": 0.76,
-          "amount": 8025.3170071296,
-          "status": "unmarked",
-          "tag_recurring": "",
-          "tag_period": "",
-          "transaction_begin_line": 30,
-          "file_name": "main.ledger",
-          "forecast": false,
-          "note": "",
-          "transaction_note": "",
-          "market_amount": 0,
-          "balance": 0
-        },
-        {
-          "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
           "account": "Assets:Equity:NIFTY",
           "commodity": "NIFTY",
@@ -650,6 +496,24 @@
           "balance": 0
         },
         {
+          "date": "2022-01-08T00:00:00Z",
+          "payee": "Buy ABNB",
+          "account": "Assets:Equity:ABNB",
+          "commodity": "ABNB",
+          "quantity": 0.76,
+          "amount": 0.76,
+          "status": "unmarked",
+          "tag_recurring": "",
+          "tag_period": "",
+          "transaction_begin_line": 30,
+          "file_name": "main.ledger",
+          "forecast": false,
+          "note": "",
+          "transaction_note": "",
+          "market_amount": 0,
+          "balance": 0
+        },
+        {
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -673,7 +537,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 8025.3170071296,
+          "amount": 0.76,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -706,5 +570,141 @@
       ]
     },
     "taxes": {}
+  },
+  "graph": {
+    "2021 - 22": {
+      "nodes": [
+        {
+          "name": "Assets:Checking"
+        },
+        {
+          "name": "Assets:Dollar"
+        },
+        {
+          "name": "Assets:Equity:AAPL"
+        },
+        {
+          "name": "Assets:Equity:ABNB"
+        },
+        {
+          "name": "Assets:Equity:NIFTY"
+        },
+        {
+          "name": "Expenses"
+        },
+        {
+          "name": "Expenses:Charges"
+        },
+        {
+          "name": "Expenses:Rent"
+        },
+        {
+          "name": "Income"
+        },
+        {
+          "name": "Income:CapitalGains"
+        },
+        {
+          "name": "Income:CapitalGains:Equity"
+        },
+        {
+          "name": "Income:CapitalGains:Equity:AAPL"
+        },
+        {
+          "name": "Income:Interest"
+        },
+        {
+          "name": "Income:Interest:Checking"
+        },
+        {
+          "name": "Income:Salary"
+        },
+        {
+          "name": "Income:Salary:Acme"
+        }
+      ],
+      "links": [
+        {
+          "source": 1,
+          "target": 5,
+          "value": 20100
+        },
+        {
+          "source": 1,
+          "target": 7,
+          "value": 80000
+        },
+        {
+          "source": 1,
+          "target": 8,
+          "value": 10000
+        },
+        {
+          "source": 1,
+          "target": 9,
+          "value": 1.52
+        },
+        {
+          "source": 1,
+          "target": 10,
+          "value": 804.42048
+        },
+        {
+          "source": 2,
+          "target": 1,
+          "value": 121027.3
+        },
+        {
+          "source": 3,
+          "target": 2,
+          "value": 120000
+        },
+        {
+          "source": 4,
+          "target": 3,
+          "value": 120000
+        },
+        {
+          "source": 5,
+          "target": 6,
+          "value": 20000
+        },
+        {
+          "source": 5,
+          "target": 11,
+          "value": 100
+        },
+        {
+          "source": 8,
+          "target": 1,
+          "value": 10000
+        },
+        {
+          "source": 12,
+          "target": 2,
+          "value": 27.3
+        },
+        {
+          "source": 13,
+          "target": 12,
+          "value": 27.3
+        },
+        {
+          "source": 14,
+          "target": 13,
+          "value": 27.3
+        },
+        {
+          "source": 15,
+          "target": 2,
+          "value": 1000
+        },
+        {
+          "source": 16,
+          "target": 15,
+          "value": 1000
+        }
+      ]
+    }
   }
 }

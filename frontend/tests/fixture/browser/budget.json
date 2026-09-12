@@ -163,7 +163,7 @@
         }
       ],
       "availableThisMonth": 18000,
-      "endOfMonthBalance": -1902.4374871296,
+      "endOfMonthBalance": 5097.5625128704,
       "forecast": 31000,
       "outlook": {
         "onTrackCount": 2,
@@ -208,10 +208,10 @@
         }
       ],
       "availableThisMonth": 49000,
-      "endOfMonthBalance": -50902.4374871296,
+      "endOfMonthBalance": -25902.4374871296,
       "forecast": 31000
     }
   },
   "checkingBalance": 23097.5625128704,
-  "availableForBudgeting": -50902.4374871296
+  "availableForBudgeting": -25902.4374871296
 }

@@ -1,8 +1,8 @@
 {
   "budget": {
-    "availableForBudgeting": 4072.2455057408,
     "budgetsByMonth": {},
-    "checkingBalance": 4072.2455057408
+    "checkingBalance": 4072.2455057408,
+    "availableForBudgeting": 4072.2455057408
   },
   "cashFlows": [
     {
@@ -10,7 +10,7 @@
       "income": 121027.3,
       "expenses": 20100,
       "liabilities": 0,
-      "investment": 96855.0544942592,
+      "investment": 80805.94048,
       "tax": 0,
       "checking": 4072.2455057408,
       "balance": 4072.2455057408
@@ -70,17 +70,75 @@
     ]
   },
   "goalSummaries": [],
+  "investmentPerformance": {
+    "startDate": "2021-04-01",
+    "endDate": "2022-02-07",
+    "account": "",
+    "openingValue": 0,
+    "closingValue": 81024.34048,
+    "contributions": 90805.94048,
+    "withdrawals": 10027.3,
+    "netContribution": 80778.64048,
+    "portfolioChange": 81024.34048,
+    "investmentReturn": 245.7,
+    "periodReturn": null,
+    "sinceInceptionXirr": 0.0357,
+    "returnUnavailableReason": "unattributed_investment_income",
+    "quality": {
+      "status": "partial",
+      "reasons": [
+        {
+          "code": "valuation_fallback",
+          "commodity": "ABNB",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "valuation_fallback",
+          "commodity": "NIFTY",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "valuation_fallback",
+          "commodity": "USD",
+          "date": "2022-02-07"
+        },
+        {
+          "code": "unattributed_investment_income",
+          "date": "2022-01-31"
+        }
+      ]
+    },
+    "openingQuotes": [],
+    "closingQuotes": [
+      {
+        "commodity": "ABNB",
+        "date": "",
+        "source": "cost"
+      },
+      {
+        "commodity": "NIFTY",
+        "date": "2022-02-07",
+        "source": "trade"
+      },
+      {
+        "commodity": "USD",
+        "date": "2022-01-08",
+        "source": "trade"
+      }
+    ]
+  },
+  "investmentPerformanceError": null,
   "networth": {
     "networth": {
       "date": "2022-02-07T23:59:59.999999999Z",
-      "investmentAmount": 236882.3544942592,
+      "investmentAmount": 220833.24048,
       "withdrawalAmount": 136982.3544942592,
       "gainAmount": 1245.7,
-      "balanceAmount": 101145.7,
+      "balanceAmount": 85096.5859857408,
       "balanceUnits": 0,
-      "netInvestmentAmount": 99900
+      "netInvestmentAmount": 83850.8859857408
     },
-    "xirr": 12.85
+    "xirr": 14.91
   },
   "transactionSequences": [],
   "transactions": [
@@ -141,7 +199,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 8025.3170071296,
+          "amount": 0.76,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -383,7 +441,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 8025.3170071296,
+          "amount": 0.76,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -702,63 +760,5 @@
       "fileName": "main.ledger",
       "note": ""
     }
-  ],
-  "investmentPerformanceError": null,
-  "investmentPerformance": {
-    "startDate": "2021-04-01",
-    "endDate": "2022-02-07",
-    "account": "",
-    "openingValue": 0,
-    "closingValue": 97073.4544942592,
-    "contributions": 106855.0544942592,
-    "withdrawals": 10027.3,
-    "netContribution": 96827.7544942592,
-    "portfolioChange": 97073.4544942592,
-    "investmentReturn": 245.7,
-    "periodReturn": null,
-    "sinceInceptionXirr": 0.0299,
-    "returnUnavailableReason": "unattributed_investment_income",
-    "quality": {
-      "status": "partial",
-      "reasons": [
-        {
-          "code": "valuation_fallback",
-          "commodity": "ABNB",
-          "date": "2022-02-07"
-        },
-        {
-          "code": "valuation_fallback",
-          "commodity": "NIFTY",
-          "date": "2022-02-07"
-        },
-        {
-          "code": "valuation_fallback",
-          "commodity": "USD",
-          "date": "2022-02-07"
-        },
-        {
-          "code": "unattributed_investment_income",
-          "date": "2022-01-31"
-        }
-      ]
-    },
-    "openingQuotes": [],
-    "closingQuotes": [
-      {
-        "commodity": "ABNB",
-        "date": "",
-        "source": "cost"
-      },
-      {
-        "commodity": "NIFTY",
-        "date": "2022-02-07",
-        "source": "trade"
-      },
-      {
-        "commodity": "USD",
-        "date": "2022-01-08",
-        "source": "trade"
-      }
-    ]
-  }
+  ]
 }

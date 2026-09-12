@@ -65,13 +65,11 @@ func balancePostings(postings []posting.Posting) []PostingPair {
 						pair.CounterPosting = *p
 						pending = slices.Delete(pending, i, i+1)
 						pairs = append(pairs, pair)
-						found = true
 					case pair.Posting.Amount.Abs().LessThan(p.Amount.Abs()):
 						counter, remaining := p.Split(pair.Posting.Amount.Neg())
 						pair.CounterPosting = counter
 						pending[i] = remaining
 						pairs = append(pairs, pair)
-						found = true
 					default:
 						current, remaining := pair.Posting.Split(p.Amount.Neg())
 						pair.Posting = current

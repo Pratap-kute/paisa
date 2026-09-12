@@ -3,14 +3,14 @@
   "endDate": "2022-02-07",
   "account": "",
   "openingValue": 0,
-  "closingValue": 97073.4544942592,
-  "contributions": 106855.0544942592,
+  "closingValue": 81024.34048,
+  "contributions": 90805.94048,
   "withdrawals": 10027.3,
-  "netContribution": 96827.7544942592,
-  "portfolioChange": 97073.4544942592,
+  "netContribution": 80778.64048,
+  "portfolioChange": 81024.34048,
   "investmentReturn": 245.7,
   "periodReturn": null,
-  "sinceInceptionXirr": 0.0299,
+  "sinceInceptionXirr": 0.0357,
   "returnUnavailableReason": "unattributed_investment_income",
   "quality": {
     "status": "partial",
@@ -122,8 +122,8 @@
     {
       "account": "Assets:Equity:ABNB",
       "openingValue": 0,
-      "closingValue": 16050.6340142592,
-      "netContribution": 16050.6340142592,
+      "closingValue": 1.52,
+      "netContribution": 1.52,
       "returnAmount": 0,
       "periodReturn": null,
       "returnUnavailableReason": "unattributed_investment_income",
@@ -246,8 +246,8 @@
     },
     {
       "date": "2022-01-31",
-      "value": 96855.0544942592,
-      "contributionBaseline": 96827.7544942592,
+      "value": 80805.94048,
+      "contributionBaseline": 80778.64048,
       "quality": {
         "status": "partial",
         "reasons": [
@@ -288,8 +288,8 @@
     },
     {
       "date": "2022-02-07",
-      "value": 97073.4544942592,
-      "contributionBaseline": 96827.7544942592,
+      "value": 81024.34048,
+      "contributionBaseline": 80778.64048,
       "quality": {
         "status": "partial",
         "reasons": [

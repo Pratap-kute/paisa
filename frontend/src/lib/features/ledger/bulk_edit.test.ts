@@ -2,7 +2,7 @@ import { describe, it as test } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
 import { applyChanges } from "./bulk_edit";
-import type { LedgerFile } from "$lib/domain/ledger";
+import type { LedgerFile, Transaction } from "$lib/domain/ledger";
 import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {
@@ -58,12 +58,15 @@ describe("bulk_editor", () => {
     const content = `2026/01/01 Lunch\n    * Expenses:Food                               20 INR\n    Assets:Checking                              -20 INR`;
     const file: LedgerFile = { type: "file", name: "main.ledger", content, versions: [] };
     const txs = [{
+      id: "status-cleared",
+      date: undefined,
+      payee: "Lunch",
       fileName: "main.ledger",
       beginLine: 1,
       endLine: 3,
       postings: [{ account: "Expenses:Food" }, { account: "Assets:Checking" }]
-    }];
-    const { newFiles: [res] } = applyChanges([file], txs as any, "rename_account", {
+    }] as unknown as Transaction[];
+    const { newFiles: [res] } = applyChanges([file], txs, "rename_account", {
       oldAccountName: "Expenses:Food",
       newAccountName: "Expenses:Dining",
     });
@@ -74,16 +77,18 @@ describe("bulk_editor", () => {
     const content = `2026/01/01 Lunch\n    ! Expenses:Food                               20 INR\n    Assets:Checking                              -20 INR`;
     const file: LedgerFile = { type: "file", name: "main.ledger", content, versions: [] };
     const txs = [{
+      id: "status-pending",
+      date: undefined,
+      payee: "Lunch",
       fileName: "main.ledger",
       beginLine: 1,
       endLine: 3,
       postings: [{ account: "Expenses:Food" }, { account: "Assets:Checking" }]
-    }];
-    const { newFiles: [res] } = applyChanges([file], txs as any, "rename_account", {
+    }] as unknown as Transaction[];
+    const { newFiles: [res] } = applyChanges([file], txs, "rename_account", {
       oldAccountName: "Expenses:Food",
       newAccountName: "Expenses:Dining",
     });
     expect(res.content).toContain("! Expenses:Dining");
   });
 });
-
