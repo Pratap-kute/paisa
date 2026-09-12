@@ -156,6 +156,7 @@ func TestInterestMatching(t *testing.T) {
 		{name: "matching interest counter posting", post: posting.Posting{TransactionID: "interest-source", Date: date, Payee: "Bank", Commodity: "INR", Amount: decimal.NewFromInt(10)}, fn: IsInterest, want: true},
 		{name: "interest payee mismatch", post: posting.Posting{Date: date, Payee: "Other", Commodity: "INR", Amount: decimal.NewFromInt(10)}, fn: IsInterest, want: false},
 		{name: "matching repayment counter posting", post: posting.Posting{TransactionID: "repayment-source", Date: date, Payee: "Lender", Commodity: "INR", Amount: decimal.NewFromInt(-15)}, fn: IsInterestRepayment, want: true},
+		{name: "repayment from different transaction must not match", post: posting.Posting{TransactionID: "different-source", Date: date, Payee: "Lender", Commodity: "INR", Amount: decimal.NewFromInt(-15)}, fn: IsInterestRepayment, want: false},
 		{name: "expense interest account is repayment", post: posting.Posting{Date: date, Account: "Expenses:Interest:Loan", Commodity: "INR", Amount: decimal.NewFromInt(15)}, fn: IsInterestRepayment, want: true},
 	}
 	for _, tt := range tests {

@@ -157,7 +157,8 @@ func IsInterestRepayment(db *gorm.DB, p posting.Posting) bool {
 	repPostings := irepaymentCache.get(db, p.Date.Unix())
 	for i := range repPostings {
 		ip := &repPostings[i]
-		if ip.Date.Equal(p.Date) &&
+		if ip.TransactionID == p.TransactionID &&
+			ip.Date.Equal(p.Date) &&
 			ip.Amount.Neg().Equal(p.Amount) &&
 			ip.Payee == p.Payee {
 			return true
