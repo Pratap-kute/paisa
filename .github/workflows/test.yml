@@ -65,6 +65,7 @@ jobs:
       - name: API regression tests
         run: |
           nix develop "$PAISA_CI_PROFILE" --command bash -c "
+            hledger --version
             cd backend && make build
             cd ../frontend && TZ=UTC deno task test:integration
           "

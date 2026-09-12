@@ -8,6 +8,9 @@
 - Fixed repeated budget rollover deductions and omitted final future cash-flow months.
 - Fixed split balanced-posting export and dividend treatment in investment XIRR.
 - Fixed bulk account renaming for cleared and pending postings.
+- Fixed hledger unit and total cost parsing for modern JSON output while retaining
+  compatibility with older versions. Sync journals to refresh previously imported amounts.
+- Upgraded the development and CI hledger pin to 1.52.4.
 
 #### Financial planning and analysis
 

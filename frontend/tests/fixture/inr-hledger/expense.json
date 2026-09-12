@@ -176,6 +176,24 @@
         },
         {
           "date": "2022-01-08T00:00:00Z",
+          "payee": "Buy ABNB",
+          "account": "Assets:Equity:ABNB",
+          "commodity": "ABNB",
+          "quantity": 0.76,
+          "amount": 8025.3170071296,
+          "status": "unmarked",
+          "tag_recurring": "",
+          "tag_period": "",
+          "transaction_begin_line": 30,
+          "file_name": "main.ledger",
+          "forecast": false,
+          "note": "",
+          "transaction_note": "",
+          "market_amount": 0,
+          "balance": 0
+        },
+        {
+          "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
           "account": "Assets:Equity:NIFTY",
           "commodity": "NIFTY",
@@ -229,24 +247,6 @@
           "balance": 0
         },
         {
-          "date": "2022-01-08T00:00:00Z",
-          "payee": "Buy ABNB",
-          "account": "Assets:Equity:ABNB",
-          "commodity": "ABNB",
-          "quantity": 0.76,
-          "amount": 0.76,
-          "status": "unmarked",
-          "tag_recurring": "",
-          "tag_period": "",
-          "transaction_begin_line": 30,
-          "file_name": "main.ledger",
-          "forecast": false,
-          "note": "",
-          "transaction_note": "",
-          "market_amount": 0,
-          "balance": 0
-        },
-        {
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -270,7 +270,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 0.76,
+          "amount": 8025.3170071296,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -443,6 +443,24 @@
         },
         {
           "date": "2022-01-08T00:00:00Z",
+          "payee": "Buy ABNB",
+          "account": "Assets:Equity:ABNB",
+          "commodity": "ABNB",
+          "quantity": 0.76,
+          "amount": 8025.3170071296,
+          "status": "unmarked",
+          "tag_recurring": "",
+          "tag_period": "",
+          "transaction_begin_line": 30,
+          "file_name": "main.ledger",
+          "forecast": false,
+          "note": "",
+          "transaction_note": "",
+          "market_amount": 0,
+          "balance": 0
+        },
+        {
+          "date": "2022-01-08T00:00:00Z",
           "payee": "Investment 2",
           "account": "Assets:Equity:NIFTY",
           "commodity": "NIFTY",
@@ -496,24 +514,6 @@
           "balance": 0
         },
         {
-          "date": "2022-01-08T00:00:00Z",
-          "payee": "Buy ABNB",
-          "account": "Assets:Equity:ABNB",
-          "commodity": "ABNB",
-          "quantity": 0.76,
-          "amount": 0.76,
-          "status": "unmarked",
-          "tag_recurring": "",
-          "tag_period": "",
-          "transaction_begin_line": 30,
-          "file_name": "main.ledger",
-          "forecast": false,
-          "note": "",
-          "transaction_note": "",
-          "market_amount": 0,
-          "balance": 0
-        },
-        {
           "date": "2022-01-09T00:00:00Z",
           "payee": "Multi Currency Debit",
           "account": "Assets:Dollar",
@@ -537,7 +537,7 @@
           "account": "Assets:Equity:ABNB",
           "commodity": "ABNB",
           "quantity": 0.76,
-          "amount": 0.76,
+          "amount": 8025.3170071296,
           "status": "unmarked",
           "tag_recurring": "",
           "tag_period": "",
@@ -637,12 +637,12 @@
         {
           "source": 1,
           "target": 8,
-          "value": 10000
+          "value": 16050.6340142592
         },
         {
           "source": 1,
           "target": 9,
-          "value": 1.52
+          "value": 10000
         },
         {
           "source": 1,
@@ -675,7 +675,7 @@
           "value": 100
         },
         {
-          "source": 8,
+          "source": 9,
           "target": 1,
           "value": 10000
         },
