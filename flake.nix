@@ -31,11 +31,26 @@
           };
         };
         hledger = { inherit (hledgerPackages) hledger; };
+        docsPython = pkgs.python312.override {
+          packageOverrides = _: previous: {
+            # backrefs' timing-based timeout test is flaky on shared CI runners.
+            backrefs = previous.backrefs.overridePythonAttrs (_: {
+              doCheck = false;
+            });
+          };
+        };
       in {
         devShells.default = import ./shell.nix {
           inherit pkgs;
           inherit hledger;
           unstable = pkgs;
+        };
+        devShells.docs = pkgs.mkShell {
+          packages = [
+            (docsPython.withPackages (pythonPackages: [
+              pythonPackages.mkdocs-material
+            ]))
+          ];
         };
       });
 }
