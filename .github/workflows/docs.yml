@@ -15,11 +15,10 @@ on:
       - "shell.nix"
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   publish:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

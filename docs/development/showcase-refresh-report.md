@@ -1,5 +1,13 @@
 # Documentation and showcase refresh audit
 
+> **Historical audit:** This report records the repository state at the revision
+> named below. Subsequent work moved this repository's documentation to
+> [GitHub Pages](https://pratap-kute.github.io/paisa/), corrected its canonical
+> URL and project-site asset paths, and automated deployment from `master`.
+> Statements below about `paisa.fyi`, the earlier announcement banner, or the
+> site not being deployed describe that earlier snapshot rather than the current
+> documentation configuration.
+
 ## Revision and scope
 
 Audited application: `ae11475933ede60da058272e72f155d47c474c02`.

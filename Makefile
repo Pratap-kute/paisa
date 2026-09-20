@@ -163,6 +163,7 @@ docs: ## Serve documentation locally with live-reload (port 8000)
 
 docs-build publish: ## Build static documentation site with MkDocs
 	mkdocs build --strict
+	touch site/.nojekyll
 
 # ------------------------------------------------------------------------------
 # Code Generation & Tooling
