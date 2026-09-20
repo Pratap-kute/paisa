@@ -3508,25 +3508,21 @@ them. The page has two parts:</p>
 <p>Enter an account name, date, amount, or regular expression directly.</p>
 <div class="language-query highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="s">Expenses:Utilities:Electricity</span>
 </span></code></pre></div>
-<p>This will search for all transactions that have a posting with account named
-Expenses:Utilities:Electricity. By default, the search is case insensitive and
-will do a substring match. So, <code class="language-query highlight"><span class="s">Expenses:Utilities</span></code> will match
-Expenses:Utilities:Electricity account as well. If you want to search an account
-name which has special characters like space in it, you can use double quotes to
-enclose it like <code class="language-query highlight"><span class="s">&quot;Expenses:Utilities:Hair Cut&quot;</span></code>.</p>
-<p>You can also search on transaction date. For example, if you want to show all
-the transactions made on 1st Jan 2023, just type <code class="language-query highlight"><span class="na">[2023-01-01]</span></code>. If you
-want to see all made on that month, just leave out the day part
-<code class="language-query highlight"><span class="na">[2023-01]</span></code>. You can do the same with year, <code class="language-query highlight"><span class="na">[2023]</span></code> will show
-all the transactions made in 2023.</p>
+<p>This finds transactions containing a posting under
+<code>Expenses:Utilities:Electricity</code>. Searches are case-insensitive substring
+matches by default, so <code class="language-query highlight"><span class="s">Expenses:Utilities</span></code> also matches that account.
+Put account names containing spaces in double quotes, for example
+<code class="language-query highlight"><span class="s">&quot;Expenses:Utilities:Hair Cut&quot;</span></code>.</p>
+<p>You can also search by date. <code class="language-query highlight"><span class="na">[2023-01-01]</span></code> matches one day,
+<code class="language-query highlight"><span class="na">[2023-01]</span></code> matches a month, and <code class="language-query highlight"><span class="na">[2023]</span></code> matches a year.</p>
 <p>There is experimental support for natural language date. You can do queries like
 <code class="language-query highlight"><span class="na">[last month]</span></code>, <code class="language-query highlight"><span class="na">[last year]</span></code>, <code class="language-query highlight"><span class="na">[this month]</span></code>,
 <code class="language-query highlight"><span class="na">[last</span><span class="na">week]</span></code>, <code class="language-query highlight"><span class="na">[jan 2023]</span></code>, etc.</p>
-<p>Let's say you want to search by amount. You can do that by typing <code class="language-query highlight"><span class="m">42</span></code>,
-it will show all the transactions that have a posting with that amount.</p>
-<p>If you want to match one exact account, use a regular expression.
-Just type <code class="language-query highlight"><span class="s">/^Assets:Equity:APPLE$/</span></code>, you can also do case insensitive
-search by using the modifier <code>i</code> like <code class="language-query highlight"><span class="s">/^Assets:Equity:APPLE$/i</span></code>.</p>
+<p>To search by amount, enter a value such as <code class="language-query highlight"><span class="m">42</span></code>. Paisa finds
+transactions containing a posting with that amount.</p>
+<p>To match one exact account, use a regular expression such as
+<code class="language-query highlight"><span class="s">/^Assets:Equity:APPLE$/</span></code>. Add the <code>i</code> modifier for a case-insensitive
+match: <code class="language-query highlight"><span class="s">/^Assets:Equity:APPLE$/i</span></code>.</p>
 <h3 id="property">Property searches<a class="headerlink" href="#property" title="Permanent link">&para;</a></h3>
 <p>You can also search based on properties like account, commodity, amount, total,
 filename, note, payee and date.</p>
@@ -3562,16 +3558,16 @@ following:</p>
 </ul>
 <p>Some property, operator, and value combinations do not make sense. If a query
 is invalid, the UI shows an error before you apply it.</p>
-<p>In fact, in the previous format we saw, if the property and operator is not
-specified and a default set is chosen based on the value type. For example,
+<p>When you omit the property and operator, Paisa chooses them from the value you
+entered. For example,
 <code class="language-query highlight"><span class="m">42</span></code> will be treated as <code class="language-query highlight"><span class="kc">amount</span> <span class="o">=</span> <span class="m">42</span></code>,
 <code class="language-query highlight"><span class="s">Expenses:Utilities</span></code> will be treated as
 <code class="language-query highlight"><span class="kc">account</span> <span class="o">=</span> <span class="s">Expenses:Utilities</span></code>, <code class="language-query highlight"><span class="s">/Expenses:Utilities/i</span></code> will be
 treated as <code class="language-query highlight"><span class="kc">account</span> <span class="o">=~</span> <span class="s">/Expenses:Utilities/i</span></code>, <code class="language-query highlight"><span class="na">[2023-01]</span></code> will
 be treated as <code class="language-query highlight"><span class="kc">date</span> <span class="o">=</span> <span class="na">[2023-01]</span></code>.</p>
 <h3 id="combined-searches">Combined searches<a class="headerlink" href="#combined-searches" title="Permanent link">&para;</a></h3>
-<p>You can combine multiple property based queries using <code>AND</code> and <code>OR</code>, you can
-negate them using <code>NOT</code></p>
+<p>Combine property searches with <code>AND</code> or <code>OR</code>, and negate a condition with
+<code>NOT</code>:</p>
 <div class="language-query highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kc">account</span> <span class="o">=</span> <span class="s">Expenses:Utilities</span> <span class="k">AND</span> <span class="kc">payee</span> <span class="o">=~</span> <span class="s">/uber/i</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kc">commodity</span> <span class="o">=</span> <span class="s">GOLD</span> <span class="k">OR</span> <span class="kc">total</span> <span class="o">&gt;</span> <span class="m">5000</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kc">date</span> <span class="o">&gt;=</span> <span class="na">[2023-01-01]</span> <span class="k">AND</span> <span class="kc">date</span> <span class="o">&lt;</span> <span class="na">[2023-04-01]</span>
@@ -3579,8 +3575,8 @@ negate them using <code>NOT</code></p>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="na">[last year]</span> <span class="k">AND</span> <span class="err">(</span><span class="kc">payee</span> <span class="o">=~</span> <span class="s">/swiggy/i</span> <span class="k">OR</span> <span class="kc">payee</span> <span class="o">=~</span> <span class="s">/phonepe/i</span><span class="err">)</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="kc">total</span> <span class="o">&lt;</span> <span class="m">5000</span> <span class="k">AND</span> <span class="k">NOT</span> <span class="kc">account</span> <span class="o">=</span> <span class="s">Expenses:Utilities</span>
 </span></code></pre></div>
-<p>If you leave out the conditional operator, it will be treated as <code class="language-query highlight"><span class="k">AND</span></code>.
-Both of the below queries are the same</p>
+<p>If you leave out the conditional operator, Paisa uses <code>AND</code>. These queries are
+equivalent:</p>
 <div class="language-query highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kc">account</span> <span class="o">=</span> <span class="s">Expenses:Utilities</span> <span class="kc">payee</span> <span class="o">=~</span> <span class="s">/uber/i</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kc">account</span> <span class="o">=</span> <span class="s">Expenses:Utilities</span> <span class="k">AND</span> <span class="kc">payee</span> <span class="o">=~</span> <span class="s">/uber/i</span>
 </span></code></pre></div>

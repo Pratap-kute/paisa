@@ -1499,6 +1499,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Merchant rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3313,6 +3330,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Merchant rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3419,13 +3453,12 @@
 Suggestions help with the first pass; you review them in the preview before
 anything is added to the journal.</p>
 <h2 id="how-a-suggestion-is-made">How a suggestion is made<a class="headerlink" href="#how-a-suggestion-is-made" title="Permanent link">&para;</a></h2>
-<p>Paisa checks these sources in order:</p>
-<ol>
-<li>A saved merchant rule, when one matches.</li>
-<li>Similar descriptions and account choices from your ledger history.</li>
-<li>A local text model for less familiar descriptions.</li>
-<li><code>Unknown</code> when there is not enough evidence.</li>
-</ol>
+<p>Paisa first checks saved merchant rules, then compares the transaction with
+your committed ledger history. Historical matches consider the merchant,
+source account, direction, currency, amount, and recency. If there is still no
+confident match, Paisa can use an older keyword-similarity fallback.</p>
+<p>When the evidence is weak, Paisa marks the suggestion for review or returns
+<code>Unknown</code> instead of treating it as certain.</p>
 <p>The result includes a confidence level and a reason where available. Low-
 confidence and unknown suggestions should be reviewed or replaced before you
 save the import.</p>
@@ -3439,6 +3472,10 @@ rule is the option that persists for future imports; Paisa does not silently
 change your journal categories.</p>
 <p>Prediction runs locally on the data available to Paisa. It does not send your
 statement to an external AI service.</p>
+<h3 id="technical-notes">Technical notes<a class="headerlink" href="#technical-notes" title="Permanent link">&para;</a></h3>
+<p>The legacy fallback represents account descriptions with TF-IDF and compares
+them using cosine similarity. It can produce <strong>Needs Review</strong> or <strong>Unknown</strong>, but
+never a high-confidence suggestion.</p>
 
 
 

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="How to secure Paisa by adding user account">
+        <meta name="description" content="Protect the Paisa web interface with a username and password.">
       
       
         <meta name="author" content="Paisa contributors">
@@ -3360,17 +3360,13 @@
   
 
 
-<h1 id="user-authentication">User Authentication<a class="headerlink" href="#user-authentication" title="Permanent link">&para;</a></h1>
-<p>You can setup username and password to make sure only you can access the
-application. Go to <code>Configuration</code> page and expand the <code>User
-Accounts</code> section.
-You can click the <span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512m-24-168v-64h-64c-13.3 0-24-10.7-24-24s10.7-24 24-24h64v-64c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24h-64v64c0 13.3-10.7 24-24 24s-24-10.7-24-24"/></svg></span> icon to add a new username and
-password. Once you save the configuration, you will get logged out if you had
-not logged in earlier via another account.</p>
-<p>It is important to understand that authentication only protects the application
-user interface. If someone can access your computer and they can access the
-folder where Paisa stores the ledger and database files, they will be able to
-view your data.</p>
+<h1 id="user-authentication">User authentication<a class="headerlink" href="#user-authentication" title="Permanent link">&para;</a></h1>
+<p>You can add a username and password to protect the Paisa web interface. Open
+<strong>Configuration</strong>, expand <strong>User Accounts</strong>, and click
+<span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512m-24-168v-64h-64c-13.3 0-24-10.7-24-24s10.7-24 24-24h64v-64c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24h-64v64c0 13.3-10.7 24-24 24s-24-10.7-24-24"/></svg></span> to add an account. Saving the first account
+signs you out so you can log in with the new credentials.</p>
+<p>Authentication protects the web interface, not the files on disk. Anyone who
+can read your Paisa data directory can still access your journal and database.</p>
 <h2 id="password-storage">Password storage<a class="headerlink" href="#password-storage" title="Permanent link">&para;</a></h2>
 <p>Passwords created or changed by current versions of Paisa are stored as
 Argon2id hashes, not as plain text. Older configurations that contain a
@@ -3381,11 +3377,9 @@ can remove the user account from the <a href="../config/">configuration</a> file
 up a new one.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>If you run paisa on a server and access it over public internet,
-make sure to use it over <strong>https</strong> and use a <strong>strong password</strong>. If you
-run it over plain http, <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man in the
-middle</a>
-attack can be performed to obtain the data including your password.</p>
+<p>If you expose Paisa over a network, use HTTPS and a strong password. Plain
+HTTP can expose your login credentials and financial data to anyone able to
+intercept the connection.</p>
 </div>
 
 
