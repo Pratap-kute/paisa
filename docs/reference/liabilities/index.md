@@ -1,5 +1,5 @@
 ---
-description: "Understand balances, interest, repayments, and credit cards in Paisa."
+description: Track outstanding debt, interest costs, principal repayments, and credit-card utilization from your journal.
 ---
 
 # Liabilities

@@ -1,5 +1,5 @@
 ---
-description: "How to setup envelope budgeting in Paisa, an open source personal finance manager"
+description: Set monthly envelope budgets and compare planned spending with transactions from your journal.
 ---
 
 # Budget

@@ -1,6 +1,6 @@
 ---
 title: Financial goals
-description: "How to configure goals in Paisa to track your financial objectives"
+description: Track progress toward savings and retirement goals using accounts and assumptions from Paisa.
 ---
 
 # Goals

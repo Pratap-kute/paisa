@@ -25,7 +25,11 @@ Choose the area that matches what you want to do.
 
     ---
 
-    Review [Portfolio Analysis](../reference/analysis.md), configure [commodities and prices](../reference/commodities.md), compare [allocation targets](../reference/allocation-targets.md), and measure [investment performance](../reference/investment-performance.md).
+    See how much you invested in [financial reports](../reference/financial-reports.md#investment-activity), review what you own with [Portfolio Analysis](../reference/analysis.md), configure [prices](../reference/commodities.md), compare [allocation targets](../reference/allocation-targets.md), and measure [investment performance](../reference/investment-performance.md).
+
+    **Investment** shows how much money went in over time. **Investment
+    Performance** shows how it performed. **Portfolio Analysis** shows what the
+    portfolio contains.
 
 -   :material-map-marker-path: **Planning and checks**
 

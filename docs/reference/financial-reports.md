@@ -1,5 +1,5 @@
 ---
-description: "Choose the Paisa report that answers your financial question."
+description: Compare balances, net worth, income, expenses, cash flow, and investment activity from your journal.
 ---
 
 # Financial reports

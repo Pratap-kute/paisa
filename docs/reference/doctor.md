@@ -1,3 +1,7 @@
+---
+description: Find journal, price, allocation, valuation, and reconciliation problems that can affect Paisa reports.
+---
+
 # Doctor
 
 Open **More → Doctor** to find journal and valuation problems that affect Paisa's

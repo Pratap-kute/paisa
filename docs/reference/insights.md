@@ -1,5 +1,5 @@
 ---
-description: "Find useful changes in spending, savings, budgets, and net worth."
+description: Review month-to-month changes in spending, savings, budgets, recurring costs, cash, and net worth.
 ---
 
 # Financial Insights

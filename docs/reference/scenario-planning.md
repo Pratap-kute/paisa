@@ -1,3 +1,7 @@
+---
+description: Compare temporary what-if assumptions with your financial baseline without changing the journal.
+---
+
 # Scenario planning
 
 Open **Wealth → Scenarios** to compare a financial change with your existing

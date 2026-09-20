@@ -1,7 +1,7 @@
 {
   "name": "Paisa",
   "short_name": "Paisa",
-  "description": "Personal Finance Manager",
+  "description": "Self-hosted personal finance for plain-text accounting",
   "icons": [
     {
       "src": "android-chrome-192x192.png",

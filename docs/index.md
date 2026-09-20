@@ -1,7 +1,8 @@
 ---
 hide:
   - toc
-description: Track spending, investments, and financial plans with a journal you control.
+title: Paisa – Open-Source Personal Finance Manager
+description: Self-hosted personal finance for Ledger, hledger, and Beancount with budgets, investments, imports, goals, and financial insights.
 ---
 
 <div class="hero" markdown>

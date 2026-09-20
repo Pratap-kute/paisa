@@ -2,11 +2,11 @@
 
 # Paisa
 
-A private, open-source personal finance manager built on plain-text double-entry accounting.
-
-Paisa turns a [Ledger](https://www.ledger-cli.org/) journal into clear reports
-for spending, investments, liabilities, and financial plans. Your journal stays
-in readable files that you control.
+Paisa is a privacy-first, self-hosted, open-source personal finance manager for
+plain-text accounting. It turns Ledger, hledger, and Beancount journals into a
+visual financial dashboard for expense tracking, budgeting, investments,
+portfolio analysis, liabilities, goals, recurring transactions, and financial
+insights. Your journal stays in readable files that you control.
 
 [Documentation](https://pratap-kute.github.io/paisa/) · [Product Tour](https://pratap-kute.github.io/paisa/product-tour/) · [Installation](https://pratap-kute.github.io/paisa/getting-started/installation/) · [Releases](https://github.com/Pratap-kute/paisa/releases/latest)
 
@@ -16,7 +16,8 @@ in readable files that you control.
 
 - Follow income, expenses, net worth, cash flow, investments, and liabilities.
 - Set budgets, savings goals, retirement plans, and what-if scenarios.
-- Import CSV, Excel, and PDF statements with reusable templates.
+- Import CSV, Excel, and PDF bank statements with reusable templates and review
+  account suggestions before saving.
 - Edit and validate a plain-text journal without giving up ownership of it.
 - Find accounting and valuation problems with Doctor.
 

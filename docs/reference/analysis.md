@@ -1,5 +1,5 @@
 ---
-description: "Portfolio Analysis shows your investment holdings and groups them by security, industry, and rating."
+description: See what your portfolio contains and group underlying holdings by security, industry, or rating.
 ---
 
 # Portfolio Analysis

@@ -1,5 +1,5 @@
 ---
-description: "How to configure recurring transactions in Paisa"
+description: Track regular bills and subscriptions, confirm suggested patterns, and review upcoming or missed payments.
 ---
 
 # Recurring transactions

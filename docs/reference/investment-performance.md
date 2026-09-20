@@ -1,3 +1,7 @@
+---
+description: Separate investment returns from contributions using period performance, XIRR, timelines, and account drivers.
+---
+
 # Investment performance
 
 Investment Activity (`/assets/investment`) describes money added to investments.

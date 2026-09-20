@@ -1,5 +1,5 @@
 ---
-description: "Understand account suggestions during statement imports."
+description: Understand and review merchant rules, confidence levels, and account suggestions during statement imports.
 ---
 
 # Account suggestions

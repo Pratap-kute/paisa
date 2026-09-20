@@ -1,5 +1,5 @@
 ---
-description: "How to import CSV, TXT, XLS, XLSX or PDF files into Paisa"
+description: Import CSV, Excel, text, or PDF bank statements and review the generated Ledger entries before saving.
 ---
 
 # Import statements
