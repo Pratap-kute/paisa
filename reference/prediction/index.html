@@ -1480,6 +1480,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-a-suggestion-is-made" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3311,6 +3322,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#how-a-suggestion-is-made" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3452,6 +3474,18 @@
 <p>When you import a statement, Paisa can suggest an account for each transaction.
 Suggestions help with the first pass; you review them in the preview before
 anything is added to the journal.</p>
+<p><img alt="Statement import with high, medium, unknown, and possible-transfer account suggestions" src="../../images/showcase/account-suggestions.png" /></p>
+<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<p>Suppose a statement contains <code>SWIGGY INSTAMART BANGALORE</code> for ₹1,248. A saved
+merchant rule or several matching transactions in your journal may produce:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Suggested account: Expenses:Groceries
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Confidence: High
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>Reason: known merchant with matching ledger history
+</span></code></pre></div>
+<p>An ambiguous description such as <code>AMAZON</code> may have been recorded under
+<code>Expenses:Shopping</code> four times and <code>Expenses:Books</code> three times. Paisa marks a
+split history like this for review instead of pretending that one answer is
+certain.</p>
 <h2 id="how-a-suggestion-is-made">How a suggestion is made<a class="headerlink" href="#how-a-suggestion-is-made" title="Permanent link">&para;</a></h2>
 <p>Paisa first checks saved merchant rules, then compares the transaction with
 your committed ledger history. Historical matches consider the merchant,

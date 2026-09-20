@@ -3220,6 +3220,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#example-loan-payment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example loan payment
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -3338,6 +3357,7 @@
 <h1 id="liabilities">Liabilities<a class="headerlink" href="#liabilities" title="Permanent link">&para;</a></h1>
 <p>Paisa separates the main parts of debt tracking so you can see what you owe,
 what it costs, and how quickly it is being repaid.</p>
+<p><img alt="Liability interest overview with loan drawdown, repayment, balance, and APR" src="../../images/showcase/liabilities.png" /></p>
 <ul>
 <li><strong>Balance</strong> shows outstanding liability balances from your journal.</li>
 <li><strong>Interest</strong> shows interest paid, loan drawdowns, repayments, balance, and APR
@@ -3348,6 +3368,15 @@ what it costs, and how quickly it is being repaid.</p>
 </ul>
 <p>Paisa reads these values from your journal. It does not connect to lenders or
 initiate payments.</p>
+<h2 id="example-loan-payment">Example loan payment<a class="headerlink" href="#example-loan-payment" title="Permanent link">&para;</a></h2>
+<p>Separate principal from interest in the journal so Paisa can report each part:</p>
+<div class="language-ledger highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="na">2026/09/05</span> <span class="gh">Home loan payment</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="s">    Liabilities:HomeLoan</span><span class="err">       </span><span class="m">18000</span><span class="err"> </span><span class="k">INR</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="s">    Expenses:Interest</span><span class="err">           </span><span class="m">7000</span><span class="err"> </span><span class="k">INR</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="s">    Assets:Checking</span><span class="err">           </span><span class="m">-25000</span><span class="err"> </span><span class="k">INR</span>
+</span></code></pre></div>
+<p>This payment reduces the loan principal by ₹18,000, records ₹7,000 as interest
+expense, and moves ₹25,000 out of checking.</p>
 <p>See <a href="balance/">Balances</a>, <a href="../credit-cards/">Credit cards</a>,
 <a href="interest/">Interest</a>, and <a href="repayment/">Repayments</a> for the individual
 views.</p>
