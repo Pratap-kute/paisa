@@ -54,7 +54,7 @@ Drop in a CSV, Excel, or PDF statement, choose a template, and inspect the
 generated Ledger entries. Fix unknown categories or mapping problems before
 saving. Templates make a bank's recurring layout reusable.
 
-[Import statements](reference/import.md)
+[Import statements](reference/import.md) · [Account suggestions](reference/prediction.md)
 
 ## Edit the journal
 

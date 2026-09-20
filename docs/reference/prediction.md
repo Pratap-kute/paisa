@@ -10,12 +10,13 @@ anything is added to the journal.
 
 ## How a suggestion is made
 
-Paisa checks these sources in order:
+Paisa first checks saved merchant rules, then compares the transaction with
+your committed ledger history. Historical matches consider the merchant,
+source account, direction, currency, amount, and recency. If there is still no
+confident match, Paisa can use an older keyword-similarity fallback.
 
-1. A saved merchant rule, when one matches.
-2. Similar descriptions and account choices from your ledger history.
-3. A local text model for less familiar descriptions.
-4. `Unknown` when there is not enough evidence.
+When the evidence is weak, Paisa marks the suggestion for review or returns
+`Unknown` instead of treating it as certain.
 
 The result includes a confidence level and a reason where available. Low-
 confidence and unknown suggestions should be reviewed or replaced before you
@@ -34,3 +35,9 @@ change your journal categories.
 
 Prediction runs locally on the data available to Paisa. It does not send your
 statement to an external AI service.
+
+### Technical notes
+
+The legacy fallback represents account descriptions with TF-IDF and compares
+them using cosine similarity. It can produce **Needs Review** or **Unknown**, but
+never a high-confidence suggestion.

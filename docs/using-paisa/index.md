@@ -13,13 +13,13 @@ Choose the area that matches what you want to do.
 
     ---
 
-    Understand [accounts](../reference/accounts.md), review [financial reports](../reference/financial-reports.md), set [budgets](../reference/budget.md), and track [recurring transactions](../reference/recurring.md).
+    Understand [accounts](../reference/accounts.md), explore [financial reports](../reference/financial-reports.md) and [Insights](../reference/insights.md), manage [budgets](../reference/budget.md) and [recurring payments](../reference/recurring.md), and review [liabilities](../reference/liabilities/index.md).
 
 -   :material-file-import-outline: **Journal and imports**
 
     ---
 
-    Work with the [journal](../reference/journal.md), use the [editor](../reference/editor.md), [import statements](../reference/import.md), or [edit transactions in bulk](../reference/bulk-edit.md).
+    Edit your [journal](../reference/journal.md), [import statements](../reference/import.md), review [account suggestions](../reference/prediction.md), and make [bulk changes](../reference/bulk-edit.md).
 
 -   :material-chart-line: **Investments**
 

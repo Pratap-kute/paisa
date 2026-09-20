@@ -21,30 +21,26 @@ Enter an account name, date, amount, or regular expression directly.
 Expenses:Utilities:Electricity
 ```
 
-This will search for all transactions that have a posting with account named
-Expenses:Utilities:Electricity. By default, the search is case insensitive and
-will do a substring match. So, `#!query Expenses:Utilities` will match
-Expenses:Utilities:Electricity account as well. If you want to search an account
-name which has special characters like space in it, you can use double quotes to
-enclose it like `#!query "Expenses:Utilities:Hair Cut"`.
+This finds transactions containing a posting under
+`Expenses:Utilities:Electricity`. Searches are case-insensitive substring
+matches by default, so `#!query Expenses:Utilities` also matches that account.
+Put account names containing spaces in double quotes, for example
+`#!query "Expenses:Utilities:Hair Cut"`.
 
-You can also search on transaction date. For example, if you want to show all
-the transactions made on 1st Jan 2023, just type `#!query [2023-01-01]`. If you
-want to see all made on that month, just leave out the day part
-`#!query [2023-01]`. You can do the same with year, `#!query [2023]` will show
-all the transactions made in 2023.
+You can also search by date. `#!query [2023-01-01]` matches one day,
+`#!query [2023-01]` matches a month, and `#!query [2023]` matches a year.
 
 There is experimental support for natural language date. You can do queries like
 `#!query [last month]`, `#!query [last year]`, `#!query [this month]`,
 `#!query [last
 week]`, `#!query [jan 2023]`, etc.
 
-Let's say you want to search by amount. You can do that by typing `#!query 42`,
-it will show all the transactions that have a posting with that amount.
+To search by amount, enter a value such as `#!query 42`. Paisa finds
+transactions containing a posting with that amount.
 
-If you want to match one exact account, use a regular expression.
-Just type `#!query /^Assets:Equity:APPLE$/`, you can also do case insensitive
-search by using the modifier `i` like `#!query /^Assets:Equity:APPLE$/i`.
+To match one exact account, use a regular expression such as
+`#!query /^Assets:Equity:APPLE$/`. Add the `i` modifier for a case-insensitive
+match: `#!query /^Assets:Equity:APPLE$/i`.
 
 ### Property searches {#property}
 
@@ -86,8 +82,8 @@ The operator can be any of the following:
 Some property, operator, and value combinations do not make sense. If a query
 is invalid, the UI shows an error before you apply it.
 
-In fact, in the previous format we saw, if the property and operator is not
-specified and a default set is chosen based on the value type. For example,
+When you omit the property and operator, Paisa chooses them from the value you
+entered. For example,
 `#!query 42` will be treated as `#!query amount = 42`,
 `#!query Expenses:Utilities` will be treated as
 `#!query account = Expenses:Utilities`, `#!query /Expenses:Utilities/i` will be
@@ -96,8 +92,8 @@ be treated as `#!query date = [2023-01]`.
 
 ### Combined searches
 
-You can combine multiple property based queries using `AND` and `OR`, you can
-negate them using `NOT`
+Combine property searches with `AND` or `OR`, and negate a condition with
+`NOT`:
 
 ```query
 account = Expenses:Utilities AND payee =~ /uber/i
@@ -108,8 +104,8 @@ account = Expenses:Utilities AND payee =~ /uber/i AND (total > 5000 OR total < 1
 total < 5000 AND NOT account = Expenses:Utilities
 ```
 
-If you leave out the conditional operator, it will be treated as `#!query AND`.
-Both of the below queries are the same
+If you leave out the conditional operator, Paisa uses `AND`. These queries are
+equivalent:
 
 ```query
 account = Expenses:Utilities payee =~ /uber/i

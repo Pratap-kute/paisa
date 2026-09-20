@@ -1,20 +1,16 @@
 ---
-description: "How to secure Paisa by adding user account"
+description: "Protect the Paisa web interface with a username and password."
 ---
 
-# User Authentication
+# User authentication
 
-You can setup username and password to make sure only you can access the
-application. Go to `Configuration` page and expand the `User
-Accounts` section.
-You can click the :fontawesome-solid-circle-plus: icon to add a new username and
-password. Once you save the configuration, you will get logged out if you had
-not logged in earlier via another account.
+You can add a username and password to protect the Paisa web interface. Open
+**Configuration**, expand **User Accounts**, and click
+:fontawesome-solid-circle-plus: to add an account. Saving the first account
+signs you out so you can log in with the new credentials.
 
-It is important to understand that authentication only protects the application
-user interface. If someone can access your computer and they can access the
-folder where Paisa stores the ledger and database files, they will be able to
-view your data.
+Authentication protects the web interface, not the files on disk. Anyone who
+can read your Paisa data directory can still access your journal and database.
 
 ## Password storage
 
@@ -29,8 +25,6 @@ up a new one.
 
 !!! warning
 
-    If you run paisa on a server and access it over public internet,
-    make sure to use it over **https** and use a **strong password**. If you
-    run it over plain http, [man in the
-    middle](https://en.wikipedia.org/wiki/Man-in-the-middle_attack)
-    attack can be performed to obtain the data including your password.
+    If you expose Paisa over a network, use HTTPS and a strong password. Plain
+    HTTP can expose your login credentials and financial data to anyone able to
+    intercept the connection.
