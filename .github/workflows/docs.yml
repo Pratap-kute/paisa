@@ -3,9 +3,15 @@ name: Docs
 on:
   push:
     branches:
-      - docs/*
-    tags:
-      - "*"
+      - master
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "overrides/**"
+      - ".github/workflows/docs.yml"
+      - "Makefile"
+      - "shell.nix"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,14 +20,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - uses: cachix/install-nix-action@v30
         with:
           nix_path: nixpkgs=channel:nixos-24.11
       - name: Build docs
         run: nix develop --command make publish
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@v4.7.3
         with:
           branch: gh-pages
           folder: site

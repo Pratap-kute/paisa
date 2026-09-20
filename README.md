@@ -6,7 +6,7 @@ A private, open-source personal finance manager built on plain-text double-entry
 
 Bring expenses, investments, and financial plans together while keeping your journal in files you control. Paisa builds on [Ledger](https://www.ledger-cli.org/), with visual reports, reusable statement imports, and an integrated editor.
 
-[Documentation](docs/index.md) · [Product Tour](docs/product-tour.md) · [Installation](docs/getting-started/installation.md) · [Releases](https://github.com/Pratap-kute/paisa/releases) · [Upstream demo](https://demo.paisa.fyi)
+[Documentation](https://pratap-kute.github.io/paisa/) · [Product Tour](https://pratap-kute.github.io/paisa/product-tour/) · [Installation](https://pratap-kute.github.io/paisa/getting-started/installation/) · [Releases](https://github.com/Pratap-kute/paisa/releases) · [Upstream demo](https://demo.paisa.fyi)
 
 The documentation in this repository describes this checkout. The [upstream hosted documentation](https://paisa.fyi) and demo may show a different version; packaged releases may also differ.
 
