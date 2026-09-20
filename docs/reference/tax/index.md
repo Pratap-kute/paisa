@@ -1,12 +1,16 @@
+---
+title: Tax reports
+description: Tax reports and calculations available in Paisa.
+---
+
 # Tax
 
 Paisa provides few features to help with tax filing and tax optimization.
 
-## Disclaimer
+!!! warning "Check current tax rules"
 
-The author of this tool is not an accountant, the calculations are made based on
-their interpretation of rules and regulation. This tool is distributed free
-hoping it would be useful. The users are advised to consult a tax accountant
-before making any decision based on the information provided here. Check the
-[LICENSE](https://github.com/ananthakumaran/paisa/blob/master/COPYING) of paisa
-for more details.
+    Paisa's tax pages are calculation aids, not accounting or tax advice. Rules
+    change, and the reports depend on how your journal is recorded. Check the
+    current regulations and consult a qualified professional before filing or
+    making a tax decision. Paisa is provided under the
+    [GNU AGPL-3.0-or-later](https://github.com/Pratap-kute/paisa/blob/master/COPYING).

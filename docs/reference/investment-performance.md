@@ -4,6 +4,9 @@ Investment Activity (`/assets/investment`) describes money added to investments.
 Investment Performance (`/assets/gain`) describes the economic return those
 investments produced. Portfolio Analysis (`/assets/analysis`) describes what you own.
 
+Use Investment Performance when you want to separate growth caused by market
+returns from growth caused by new contributions.
+
 Select Current FY, Previous FY, 1 Year, or Since Inception. The URL preserves the
 selection, including when you open an account. Explicit `from` and `to` dates are
 inclusive. Current FY follows your configured financial-year start. One Year ends
@@ -28,7 +31,7 @@ withdrew money. The timeline compares market value with opening value plus
 cumulative net contributions. The difference is investment return since the
 selected period began. It samples opening, month-end, and closing boundaries.
 
-## Accounting methodology
+## What counts as an investment flow
 
 The investment universe contains asset accounts other than `Assets:Checking` and
 its descendants. Forecast and future entries are excluded. Selecting an account
@@ -60,7 +63,7 @@ Exact-account return amounts reconcile to the portfolio's return. Account return
 percentages are not additive. A reconciliation failure is an error, never an
 invented balancing account.
 
-## Period Return and XIRR
+## Period return and XIRR
 
 Period Return uses Modified Dietz, without annualization:
 
@@ -93,11 +96,9 @@ existing on-or-before rule; their source dates are disclosed without assuming an
 arbitrary freshness threshold. An estimated intermediate chart point does not
 invalidate a percentage calculated from reliable endpoints.
 
-The Dashboard's Current FY summary consumes the same Go service. API consumers can
-request `/api/investment/performance` with `preset`, or `from` and `to`, and optional
-`accountPrefix`, `timeline=true`, and `drivers=true`. Detail flags default false.
-Invalid ranges receive HTTP 400; reconciliation failures receive HTTP 500 with
-`investment_performance_reconciliation_failed`.
+The Dashboard's Current FY summary uses the same calculation. API clients can
+request `/api/investment/performance` with `preset`, or `from` and `to`, plus
+optional `accountPrefix`, `timeline=true`, and `drivers=true` parameters.
 
 This feature provides historical facts, not benchmarks, forecasting, investment
 advice, trading, AI, or scenario planning.

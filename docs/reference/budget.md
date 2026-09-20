@@ -132,13 +132,15 @@ To recap, there are just two things you need to do.
 
 2. Adjust your budget as you spend and make sure there is no deficit.
 
-## Budget Forecasting & Early-Warning System
+## Spending forecast
 
-For the active current month, Paisa augments reactive envelope tracking with an **early-warning forecasting system**. While your planned envelope (`Budget`) defines your intended allocation, Paisa computes a deterministic `Projected Spend` for each category before month-end.
+For the current month, Paisa estimates where each category may finish. Your
+envelope remains the planned amount; **Projected Spend** is an early warning,
+not a new budget.
 
-### Deterministic Projection Algorithm
+### How the projection is chosen
 
-Paisa uses a strictly deterministic 4-tier fallback model without machine learning or statistical opacity:
+Paisa uses the following rules in order:
 
 1. **Historical Timing (Primary)**:
    If at least 3 completed historical months contain spending in this category, Paisa calculates the median fraction of monthly spending historically incurred by today's calendar day ($ProgressShare = \frac{SpentDay_{1..T}}{SpentTotal}$). If $ProgressShare \ge 5\%$, month-end spend is projected as:
@@ -152,8 +154,9 @@ Paisa uses a strictly deterministic 4-tier fallback model without machine learni
    When insufficient historical months exist ($< 3$ samples), but at least 3 calendar days have elapsed in the current month ($T \ge 3$), Paisa projects spending linearly based on the month's elapsed days:
    $$\text{Projected Spend} = \text{Observed Spend through Today} \times \frac{\text{Days in Month}}{\text{Elapsed Days}}$$
 
-4. **Insufficient Data**:
-   During the first 2 calendar days of a month without historical data, Paisa marks the category as `insufficient-data` rather than making wild linear extrapolations.
+4. **Insufficient data**:
+   During the first two days of a month without enough history, Paisa waits for
+   more data instead of extrapolating from a very small sample.
 
 ### Future-Dated Postings and Rollover Semantics
 

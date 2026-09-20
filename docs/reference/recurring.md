@@ -167,7 +167,7 @@ automatic merchant rule or change transaction categories.
 **Not recurring** hides the suggestion for the current page visit. Reloading or
 reopening the page may show it again; durable rejection rules are not stored.
 
-## Recurring intelligence
+## Confirmed pattern details
 
 Confirmed patterns show historical and typical amounts, expected date windows,
 amount changes, and conservative late or possibly-stopped indicators. An

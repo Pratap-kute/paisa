@@ -1,195 +1,127 @@
 ---
-description: "How to install Paisa, an open source personal finance manager"
+description: Install the Paisa desktop app, CLI, or Docker image.
 ---
 
 # Installation
 
-Paisa is available in two formats: a **Desktop Application** and a **CLI**
-(Command Line Interface). Both provide the same list of features, with the
-primary difference being how the user interface is launched.
+Choose the desktop app for the simplest setup. Use the CLI when you want to run
+Paisa from a terminal or on a server. Both use the same journal and reports.
 
-## Artifact sources
+Download files from the [latest `Pratap-kute/paisa` release](https://github.com/Pratap-kute/paisa/releases/latest).
 
-This repository’s source and development history are at [Pratap-kute/paisa](https://github.com/Pratap-kute/paisa). Desktop and CLI download links below refer to this repository’s releases (verified assets in `v0.9.1`). Nix uses the upstream source. Published artifacts may differ from the implementation described in this repository.
-
-The Docker publishing workflow targets [`pratapkute/paisa`](https://hub.docker.com/r/pratapkute/paisa), whose `latest` tag was verified during this refresh. Check the available tags and release contents before selecting an image; the tag does not establish parity with current `master`.
-
-## Desktop Application
+## Desktop app
 
 === "Linux"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-linux-amd64.deb`
-    * You can install it either by double clicking the deb file or run the following commands in a Terminal
+    Download `paisa-app-linux-amd64.deb`, then install it:
 
-    ```console
-    # cd ~/Downloads
-    # sudo dpkg -i paisa-app-linux-amd64.deb
+    ```bash
+    cd ~/Downloads
+    sudo dpkg -i paisa-app-linux-amd64.deb
     ```
 
-=== "Mac"
+=== "macOS"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-macos-amd64.dmg`
-    * Open the dmg file and drag the Paisa app into Application folder
-    * Since the app is not signed[^1], Mac will show a warning when
-    you try to open the app. You can check the
-    [support](https://support.apple.com/en-us/HT202491) page for more
-    details. If you don't get any option to open the app, go to the
-    Application folder, right click on the icon and select
-    open. Usually, this should present you with an option to open.
-    * Paisa will store all your journals, configuration files, and other
-    related files in a folder named `paisa` which will be located in your
-    `Documents` folder. When you open the app on your Mac for the
-    first time, a permission dialog will appear. Click Allow, then close and reopen the app.
+    Download `paisa-app-macos-amd64.dmg`, open it, and drag Paisa into
+    **Applications**.
+
+    The app is not code-signed. If macOS blocks the first launch, open
+    **Applications**, Control-click Paisa, and choose **Open**. Apple's
+    [security guide](https://support.apple.com/en-in/guide/mac-help/mh40616/mac)
+    explains this exception.
+
+    On first launch, allow access to the Documents folder. Paisa stores its
+    journal, configuration, and database in `Documents/paisa` by default.
 
 === "Windows"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-app-windows-amd64.exe`
-    * Since the app is not signed[^1], Windows will show multiple
-    warnings, You might have to click `Keep anyway`, `More info`, `Run
-    anyway` etc.
-    * Paisa will store all your journals, configuration files, and other
-    related files in a folder named `paisa` which will be located in your
-    `Documents` folder.
+    Download `paisa-app-windows-amd64.exe` and run it. The app is not
+    code-signed, so Windows may ask you to confirm that you want to keep and run
+    the file.
 
-## Third Party Hosted Options [^2]
+    Paisa stores its journal, configuration, and database in
+    `Documents\paisa` by default.
 
-=== "PikaPods"
-
-    <a href="https://www.pikapods.com/pods?run=paisa" target="_blank"
-    rel="noopener" markdown>![Run on PikaPods](../images/pika-pods.svg)</a><br />
-    This historical upstream hosting option is retained for context. The launch
-    link returned HTTP 404 during this refresh; availability and the deployed
-    revision are unverified. If using a third-party host, configure a [user
-    account](../reference/user-authentication.md).
-
-## CLI
+## Command-line app
 
 === "Linux"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-linux-amd64`
-    * Run the following commands in a Terminal
+    Download `paisa-cli-linux-amd64`, then install it as `paisa`:
 
-    ```console
-    # cd ~/Downloads
-    # mv paisa-cli-linux-amd64 paisa
-    # chmod u+x paisa
-    # mv paisa /usr/local/bin
+    ```bash
+    cd ~/Downloads
+    chmod u+x paisa-cli-linux-amd64
+    sudo mv paisa-cli-linux-amd64 /usr/local/bin/paisa
+    paisa serve
     ```
 
-=== "Mac"
+=== "macOS"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-macos-amd64`
-    * Run the following commands in a Terminal
+    Download `paisa-cli-macos-amd64`, then install it as `paisa`:
 
-    ```console
-    # cd ~/Downloads
-    # mv paisa-cli-macos-amd64 paisa
-    # chmod u+x paisa
-    # xattr -dr com.apple.quarantine paisa
-    # mv paisa /usr/local/bin
+    ```bash
+    cd ~/Downloads
+    chmod u+x paisa-cli-macos-amd64
+    xattr -dr com.apple.quarantine paisa-cli-macos-amd64
+    sudo mv paisa-cli-macos-amd64 /usr/local/bin/paisa
+    paisa serve
     ```
 
 === "Windows"
 
-    * Download the prebuilt [binary](https://github.com/Pratap-kute/paisa/releases/latest) named `paisa-cli-windows-amd64.exe`
-    * Since the binary is not signed[^1] with a certificate, you might get
-    a warning from Windows. You would have to click `keep anyway`.
-    * Run the following command in a Windows PowerShell. Make sure
-    you are in the correct folder. You should see something like `PS C:\Users\yourname>`
+    Download `paisa-cli-windows-amd64.exe`. In PowerShell, move it to a stable
+    location and start it:
 
-    ```pwsh-session
-    PS C:\Users\john> mv .\Downloads\paisa-cli-windows-amd64.exe .\paisa.exe
+    ```powershell
+    Move-Item "$HOME\Downloads\paisa-cli-windows-amd64.exe" "$HOME\paisa.exe"
+    & "$HOME\paisa.exe" serve
     ```
 
-    * The `paisa.exe` binary will be placed in the user's home directory. You
-    can access it via PowerShell. Just open a new PowerShell window,
-    which will start in the home directory. Then, you can run `.\paisa.exe serve`
+Open [http://localhost:7500](http://localhost:7500), then continue with
+[First setup](tutorial.md).
 
-!!! tip
+!!! note "Ledger dependency"
 
-    Paisa depends on the **[ledger](https://www.ledger-cli.org/download.html)** binary. The prebuilt
-    paisa binaries come with an embedded ledger binary and will use it if
-    it's not already installed on your system. If you prefer to install the
-    ledger yourself, follow the installation instructions on [ledger](https://www.ledger-cli.org/download.html) site.
-
-## CLI Quick Start
-
-Paisa will store all your journals, configuration files, and other related files
-in a folder named `paisa` which will be located in your `Documents` folder.
-
-=== "Linux"
-
-    ```console
-    # paisa serve
-    ```
-
-=== "Mac"
-
-    ```console
-    # paisa serve
-    ```
-
-=== "Windows"
-
-    ```pwsh-session
-    PS C:\Users\john> .\paisa.exe serve
-    ```
-
-Go to [http://localhost:7500](http://localhost:7500). Read the
-[tutorial](./tutorial.md) to learn more.
+    Release binaries include Ledger and use it when no compatible `ledger`
+    executable is available on your system. You can also install
+    [Ledger](https://www.ledger-cli.org/download.html) yourself.
 
 ## Docker
 
-Paisa CLI is available on
-[dockerhub](https://hub.docker.com/r/pratapkute/paisa). The default image
-only supports ledger. `paisa:<version>-hledger`, `paisa:<version>-beancount` or
-`paisa:<version>-all` image variants can be used if you want to use paisa with
-others.
-
-Paisa upgrades its SQLite database automatically when it starts; no migration
-command is required. Back up the mounted directory before upgrading. The
-database file and its containing directory must be writable because Paisa
-updates financial data and SQLite may create journal files beside the database.
-After an upgrade, an older Paisa version may refuse to open a database whose
-schema is newer than it supports.
+Docker images are published as
+[`pratapkute/paisa`](https://hub.docker.com/r/pratapkute/paisa). The default
+image uses Ledger. Release tags can also include `-hledger`, `-beancount`, and
+`-all` variants.
 
 === "Linux"
 
-    ```console
-    # mkdir -p /home/john/Documents/paisa/
-    # docker run -p 127.0.0.1:7500:7500 -v /home/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest paisa serve --host 0.0.0.0
+    ```bash
+    mkdir -p "$HOME/Documents/paisa"
+    docker run --rm -p 127.0.0.1:7500:7500 \
+      -v "$HOME/Documents/paisa:/documents" \
+      -w /documents \
+      pratapkute/paisa:latest paisa serve --host 0.0.0.0
     ```
 
-=== "Mac"
+=== "macOS"
 
-    ```console
-    # mkdir -p /Users/john/Documents/paisa/
-    # docker run -p 127.0.0.1:7500:7500 -v /Users/john/Documents/paisa/:/documents -w /documents pratapkute/paisa:latest paisa serve --host 0.0.0.0
+    ```bash
+    mkdir -p "$HOME/Documents/paisa"
+    docker run --rm -p 127.0.0.1:7500:7500 \
+      -v "$HOME/Documents/paisa:/documents" \
+      -w /documents \
+      pratapkute/paisa:latest paisa serve --host 0.0.0.0
     ```
 
-## Nix Flake
+!!! warning "Back up before upgrading"
 
-Paisa CLI is available as a nix flake.
+    Paisa upgrades its SQLite database when needed. Back up the mounted data
+    directory before changing versions and make sure the directory is writable.
+    An older Paisa build may not open a database that has already been upgraded.
 
-=== "Linux"
+## Nix and source builds
 
-    ```console
-    # nix profile install github:ananthakumaran/paisa
-    ```
-
-=== "Mac"
-
-    ```console
-    # nix profile install github:ananthakumaran/paisa
-    ```
-
-[^1]: I offer Paisa as a free app, and I don't generate any revenue from it.
-    Code signing would require me to pay $99 for Mac and approximately $300 for
-    Windows each and every year to get the necessary certificates. I can't
-    justify spending that much for an app that doesn't generate any income.
-    Unfortunately, as a result, you would have to jump through hoops to get it
-    working.
-
-[^2]: As the name implies, these are third party hosting solutions operated by
-    independent companies. I may receive affiliate compensation for linking to
-    their websites.
+This repository's `flake.nix` provides development environments; it does not
+export an installable Paisa package. Contributors can use the Nix workflow in
+the [development guide](../development/index.md). For normal use, choose a
+release binary or Docker image above.

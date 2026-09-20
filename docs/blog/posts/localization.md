@@ -1,12 +1,13 @@
 ---
 date: 2024-01-03
-comments: true
+authors:
+  - anantha-kumaran
 categories:
   - configuration
   - locale
 hide:
   - feedback
-description: "How to setup Paisa for your country."
+description: "Configure number, currency, and date formats in Paisa."
 ---
 
 # Localization

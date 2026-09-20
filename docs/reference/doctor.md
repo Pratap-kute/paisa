@@ -1,12 +1,15 @@
-# Financial Data Quality & Reconciliation (Doctor)
+# Doctor
 
-Open **More → Doctor** to inspect the integrity and reconciliation of your financial data. Doctor is Paisa's canonical data quality engine: it verifies accounting invariants, quote coverage, portfolio reconciliation, and feature readiness so you can trust the numbers shown across Net Worth, Investment Performance, Allocation, and Scenario Planning.
+Open **More → Doctor** to find journal and valuation problems that affect Paisa's
+reports. It checks posting directions, prices, allocation configuration,
+investment reconciliation, and whether Scenario Planning has enough history.
 
-Doctor is strictly **read-only and non-destructive**. It never mutates your journal, modifies ledger transactions, or updates database records automatically.
+Doctor is read-only. It links to records that need attention but never changes
+the journal or creates balancing entries.
 
-## Diagnostic Checks
+## Checks
 
-Doctor runs a frozen suite of 11 financial data quality checks across six categories:
+Doctor runs these checks:
 
 | Check | Category | Code | Severity when Found |
 | :--- | :--- | :--- | :--- |
@@ -22,7 +25,7 @@ Doctor runs a frozen suite of 11 financial data quality checks across six catego
 | **Scenario history readiness** | History | `insufficient_income_history`, `insufficient_expense_history`, `insufficient_contribution_history`, `no_investment_activity` | Info / Warning |
 | **Scenario checking readiness** | Configuration | `no_checking_account` | Warning |
 
-### Execution vs Results
+### Check results
 
 Every diagnostic check reports both its execution health and its finding status:
 
@@ -32,15 +35,15 @@ Every diagnostic check reports both its execution health and its finding status:
 
 ---
 
-## Severity Definitions
+## Severity
 
-- **Danger (Critical)**: Fundamental accounting violations or missing exchange rates that invalidate portfolio balances or reportable net worth. For example, negative asset running balances or a failure of the fundamental investment return identity.
-- **Warning**: Missing external market quotes, non-market valuation fallbacks, unattributed investment income, or unmapped accounts in target allocations. Calculations proceed using fallback heuristics, but results are partial or estimated.
-- **Info**: Operational notes and baseline readiness notices that do not indicate bad data. For example, fewer than six completed months of history for scenario baseline assumptions, or first-time investor status.
+- **Danger**: An accounting violation or missing exchange rate can invalidate a balance or report.
+- **Warning**: Paisa can continue, but a fallback or incomplete configuration makes a result partial or estimated.
+- **Info**: A useful note, such as limited scenario history, that does not mean the journal is wrong.
 
 ---
 
-## Valuation Quality & Boundaries
+## Valuation checks
 
 Doctor verifies commodity valuation using the same valuation logic as Investment Performance and Net Worth:
 
@@ -50,7 +53,7 @@ Doctor verifies commodity valuation using the same valuation logic as Investment
 
 When market quotes are unavailable, Paisa falls back to historical trade or cost pricing, resulting in a `valuation_fallback` issue.
 
-### Explicit Boundary Scope
+### Date range
 
 Doctor evaluates valuation quality across two specific boundary contexts:
 
@@ -63,7 +66,7 @@ Doctor also checks for **journal price mismatches**, flagging when a transaction
 
 ---
 
-## Investment Attribution & Reconciliation
+## Investment income and reconciliation
 
 ### Income Attribution
 
@@ -78,7 +81,7 @@ If this identity fails to hold within rounding tolerance, or if performance deco
 
 ---
 
-## Scenario Planning Readiness
+## Scenario readiness
 
 Scenario Planning calculates recurring baseline medians from up to six completed historical months:
 
@@ -89,7 +92,7 @@ Scenario Planning calculates recurring baseline medians from up to six completed
 
 ---
 
-## Privacy & Safety
+## Privacy and safety
 
 - **Privacy Mode**: When privacy mode is enabled in Paisa, Doctor masks all account balances, transaction quantities, and currency amounts across summaries, issue details, and metadata attributes.
 - **Direct Navigation**: Every issue provides direct navigation links (e.g. `Review Prices →`, `Review Allocation →`, `Open Transaction →`) to view or edit the affected records in Paisa.

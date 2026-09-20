@@ -2,23 +2,20 @@
 description: "Documentation on how to search and edit transactions in bulk in Paisa, an open source personal finance manager"
 ---
 
-# Bulk Edit
+# Bulk edit
 
-Paisa provides bulk transaction editor to search and modify multiple
-transactions at once. The interface is made of two parts:
+Bulk edit finds a set of transactions and applies one reviewed change to all of
+them. The page has two parts:
 
-1. Search input box allows you to narrow down the transactions you are
-   interested in making changes
+1. Search narrows the transaction list.
 
-2. Bulk Edit form allows you to make changes to the narrowed down set of
-   transactions.
+2. The edit form previews and applies the change.
 
 ## Search
 
-#### Plain
+### Plain searches
 
-Paisa provides a powerful search query interface. Let's start with a few example
-queries.
+Enter an account name, date, amount, or regular expression directly.
 
 ```query
 Expenses:Utilities:Electricity
@@ -49,7 +46,7 @@ if you want to search a exact Account, you can do that using Regular Expression.
 Just type `#!query /^Assets:Equity:APPLE$/`, you can also do case insensitive
 search by using the modifier `i` like `#!query /^Assets:Equity:APPLE$/i`.
 
-#### Property
+### Property searches {#property}
 
 You can also search based on properties like account, commodity, amount, total,
 filename, note, payee and date.
@@ -97,7 +94,7 @@ specified and a default set is chosen based on the value type. For example,
 treated as `#!query account =~ /Expenses:Utilities/i`, `#!query [2023-01]` will
 be treated as `#!query date = [2023-01]`.
 
-#### Conditional
+### Combined searches
 
 You can combine multiple property based queries using `AND` and `OR`, you can
 negate them using `NOT`
@@ -119,8 +116,7 @@ account = Expenses:Utilities payee =~ /uber/i
 account = Expenses:Utilities AND payee =~ /uber/i
 ```
 
-## Bulk Edit Form
+## Edit and review
 
-Currently bulk edit form supports only account rename feature. More will be
-added later. The preview button allows you to see the changes before you save
-them. It will show a side by side diff of the changes.
+Bulk edit currently supports renaming accounts. Use **Preview** to inspect the
+side-by-side diff before saving.

@@ -2,19 +2,23 @@
 description: "How to import CSV, TXT, XLS, XLSX or PDF files into Paisa"
 ---
 
-# Import
+# Import statements
 
-Paisa provides ability to convert **CSV**, **TXT**, **XLS**, **XLSX** or **PDF**
-files to Ledger file format. The import page is made of three components.
+Import converts rows from **CSV**, **TXT**, **XLS**, **XLSX**, or **PDF** files
+into Ledger transactions. The page shows the source data, the generated journal,
+and the template that connects the two.
 
-!!! example "Experimental" PDF support is in an experimental stage and may not
-accurately detect rows.
+!!! warning "Review PDF imports carefully"
 
-1. File Preview - You can drag and drop files here to preview the contents.
+    PDF table detection is experimental and may split or misread rows. Always
+    compare the preview with the original statement before saving.
 
-2. Ledger Preview - This is where the converted ledger file will be shown.
+## Workflow
 
-3. Template Editor - This is where you can edit the template.
+1. Drop a statement into **File Preview** and check the detected rows.
+2. Choose a built-in template or adapt one in **Template Editor**.
+3. Review every entry in **Ledger Preview**, especially `Unknown` accounts.
+4. Save only after the preview matches the statement.
 
 Each row in the CSV file is converted to a transaction in the ledger. This
 conversion is controlled by the template.
@@ -44,18 +48,18 @@ like this.
 The template is written in [Handlebars](https://handlebarsjs.com/). Paisa
 provides a few helper functions to make it easier to write the template.
 
-#### Template Management
+## Manage templates
 
 Paisa ships with a few built-in templates. You can also create your own. To
 create a new template, edit the template and click on the `Save As` button. User
 defined custom templates are stored in the configuration file.
 
-!!! tip The import system is designed to be extensible and might not be
-intuitive if you are not accustomed to coding. If you are unable to create a
-template suitable for your file, please open an issue with a sample file, and we
-will provide assistance, possibly adding it to the built-in templates.
+!!! tip
 
-#### Template Data
+    If you need help with a template, open an issue with a redacted sample.
+    Remove names, account numbers, addresses, and transaction details first.
+
+## Template data
 
 1. **ROW** - This is the current row being processed. You can refer to any
    column using their alphabets. For example, `ROW.A` refers to the first
@@ -146,7 +150,7 @@ will provide assistance, possibly adding it to the built-in templates.
 
 </details>
 
-#### Template Helpers
+## Template helpers
 
 #### `#!typescript eq(a: any, b: any): boolean`
 

@@ -157,13 +157,16 @@ format fmt: ## Format frontend and Go source files
 
 ##@ Documentation
 
-.PHONY: docs docs-build publish
+.PHONY: docs docs-build docs-check publish
 docs: ## Serve documentation locally with live-reload (port 8000)
 	mkdocs serve -a 0.0.0.0:8000
 
 docs-build publish: ## Build static documentation site with MkDocs
 	mkdocs build --strict
 	touch site/.nojekyll
+
+docs-check: publish ## Validate generated documentation links, metadata, and search
+	python scripts/check_docs.py site
 
 # ------------------------------------------------------------------------------
 # Code Generation & Tooling

@@ -1,6 +1,7 @@
 ---
 date: 2024-01-26
-comments: true
+authors:
+  - anantha-kumaran
 categories:
   - sovereign-gold-bond
   - gold
@@ -12,6 +13,12 @@ description: "How to track Sovereign Gold Bond price and calculate returns."
 ---
 
 # Sovereign Gold Bond
+
+!!! note "Historical article"
+
+    Anantha Kumaran wrote this article in January 2024. Tax rules and RBI terms
+    can change; check current official guidance before making financial or tax
+    decisions.
 
 Reserve Bank of India started issuing a new type of bond called
 [Sovereign Gold Bond](https://www.rbi.org.in/commonperson/English/Scripts/FAQs.aspx?Id=1658)

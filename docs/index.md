@@ -1,6 +1,7 @@
 ---
 hide:
   - toc
+description: Track spending, investments, and financial plans with a journal you control.
 ---
 
 <div class="hero" markdown>
@@ -9,47 +10,73 @@ hide:
 <p class="subtitle">Personal finance, grounded in a journal you own.</p>
 </div>
 
-Paisa is an open-source personal finance manager built on Ledger double-entry accounting. It brings your spending, investments, liabilities, and plans into one view, with plain-text records under your control.
+Paisa is an open-source personal finance manager built on Ledger double-entry
+accounting. It brings spending, investments, liabilities, and plans into one
+place while keeping your records in plain-text files.
 
 [Install Paisa](getting-started/installation.md){ .md-button .md-button--primary }
 [Take the Product Tour](product-tour.md){ .md-button }
-[Try the upstream demo](https://demo.paisa.fyi){ .md-button }
+[View on GitHub](https://github.com/Pratap-kute/paisa){ .md-button }
 
-This documentation describes the current repository. The upstream demo and [upstream hosted documentation](https://paisa.fyi) may represent a different revision, as may downloadable releases.
+![Paisa dashboard showing balances, cash flow, and recent activity](images/showcase/dashboard.png)
 
-![Paisa overview: dashboard, budgets, portfolio analysis, statement import, and journal editor using synthetic data](images/showcase/paisa-overview.gif)
+## Your data stays understandable
 
-[View the static dashboard screenshot](images/showcase/dashboard.png). The sample journal also demonstrates data-quality and budget warnings.
+A Ledger journal records both sides of every transaction. It remains readable,
+portable, and easy to back up even when Paisa is not running. Paisa builds its
+reports from that journal and stores derived data in a local SQLite database.
 
-## Is Paisa for me?
+You can run Paisa on your own computer or a server you control. Configured price
+providers make requests to external services, and any third-party host can
+access the data stored there.
 
-Paisa is useful if you want to understand both everyday spending and long-term holdings, and are willing to maintain a journal or import statements. Accounts and postings take a little learning; the editor, templates, and visual reports help you work with them.
+## What can I do with Paisa?
 
-## Why plain-text accounting?
+<div class="grid cards" markdown>
 
-A Ledger journal records both sides of a transaction. Your accounts describe what you own and owe, and how income and expenses change those balances. The journal and configuration are readable files you can back up, version, and use independently of Paisa.
+-   :material-chart-box-outline: **Understand your finances**
 
-Your journal stays with the instance you control. Optional price providers contact external services; running on someone else's server gives that host access to your data. Read the [manifesto](manifesto.md) for the project's philosophy and [authentication](reference/user-authentication.md) for hosting considerations.
+    ---
 
-## Explore your finances
+    Review expenses, income, net worth, cash flow, liabilities, investment performance, and allocation.
 
-- **Track and understand:** expenses, income, net worth, cash flow, investment performance, and allocation.
-- **Plan:** budgets, savings goals, retirement, recurring bills, and illustrative what-if scenarios.
-- **Bring in your records:** CSV, Excel, and PDF imports, reusable templates, and a journal editor.
-- **Check and calculate:** Doctor diagnostics and interactive sheets using journal data.
+-   :material-map-marker-path: **Plan ahead**
 
-The [Product Tour](product-tour.md) explains these workflows and links to detailed references.
+    ---
 
-## Start with a working journal
+    Set budgets and goals, review recurring commitments, and explore retirement or what-if scenarios.
 
-1. [Install Paisa](getting-started/installation.md) using Desktop, CLI, Docker, or Nix.
-2. [Follow the tutorial](getting-started/tutorial.md) to get your first instance working.
-3. Explore [journal examples](getting-started/journal-examples.md), then [import your statements](reference/import.md).
+-   :material-file-import-outline: **Bring in your records**
 
-Find answers in the [FAQ](faq.md), or explore [development and testing](development/testing.md) to contribute.
+    ---
+
+    Import CSV, Excel, and PDF statements, reuse templates, and review the generated entries before saving.
+
+-   :material-stethoscope: **Find problems early**
+
+    ---
+
+    Use Doctor to find accounting, valuation, allocation, and reconciliation issues in your data.
+
+</div>
+
+## Get started
+
+1. [Install Paisa](getting-started/installation.md).
+2. Follow [First setup](getting-started/tutorial.md) to create a working journal.
+3. Explore the [Product Tour](product-tour.md) or jump to [Using Paisa](using-paisa/index.md).
+
+!!! note "Which version do these docs describe?"
+
+    This site follows the maintained
+    [`Pratap-kute/paisa`](https://github.com/Pratap-kute/paisa) repository.
+    A packaged release can lag behind the documentation. Upstream resources are
+    listed separately in [Project history and community](project/index.md).
 
 ## Project history
 
-Paisa was originally created by **[Anantha Kumaran](https://github.com/ananthakumaran)** and developed with contributions from the open-source community. This repository continues that work with maintenance, improvements, and new functionality while preserving the project's philosophy.
+Paisa was originally created by **[Anantha Kumaran](https://github.com/ananthakumaran)**
+and developed with contributions from the open-source community. This repository
+continues that work while preserving its history and AGPL license.
 
-See the [original project](https://github.com/ananthakumaran/paisa), [Git history](https://github.com/Pratap-kute/paisa/commits/master/), and [upstream](https://github.com/ananthakumaran/paisa/graphs/contributors) and [current contributors](https://github.com/Pratap-kute/paisa/graphs/contributors). Paisa remains licensed under the GNU AGPL version 3 or later.
+[Read the project history](project/index.md) · [Read the manifesto](manifesto.md)

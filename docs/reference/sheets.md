@@ -92,7 +92,7 @@ years_to_double(14)
 
 #### Query
 
-Query is what makes sheets powerful. It allows you to query your
+Queries let a sheet pull values from your
 ledger postings and do calculations on them. The example below shows
 how to calculate cost basis of your assets so you can report them to
 Income Tax department.

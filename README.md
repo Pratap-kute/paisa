@@ -4,58 +4,61 @@
 
 A private, open-source personal finance manager built on plain-text double-entry accounting.
 
-Bring expenses, investments, and financial plans together while keeping your journal in files you control. Paisa builds on [Ledger](https://www.ledger-cli.org/), with visual reports, reusable statement imports, and an integrated editor.
+Paisa turns a [Ledger](https://www.ledger-cli.org/) journal into clear reports
+for spending, investments, liabilities, and financial plans. Your journal stays
+in readable files that you control.
 
-[Documentation](https://pratap-kute.github.io/paisa/) · [Product Tour](https://pratap-kute.github.io/paisa/product-tour/) · [Installation](https://pratap-kute.github.io/paisa/getting-started/installation/) · [Releases](https://github.com/Pratap-kute/paisa/releases) · [Upstream demo](https://demo.paisa.fyi)
+[Documentation](https://pratap-kute.github.io/paisa/) · [Product Tour](https://pratap-kute.github.io/paisa/product-tour/) · [Installation](https://pratap-kute.github.io/paisa/getting-started/installation/) · [Releases](https://github.com/Pratap-kute/paisa/releases/latest)
 
-The documentation in this repository describes this checkout. The [upstream hosted documentation](https://paisa.fyi) and demo may show a different version; packaged releases may also differ.
+![Paisa dashboard showing balances, cash flow, and recent activity](docs/images/showcase/dashboard.png)
 
-![Paisa overview: dashboard, budgets, portfolio analysis, statement import, and journal editor using synthetic data](docs/images/showcase/paisa-overview.gif)
+## What you can do
 
-[View the static dashboard screenshot](docs/images/showcase/dashboard.png). The sample journal also demonstrates data-quality and budget warnings.
+- Follow income, expenses, net worth, cash flow, investments, and liabilities.
+- Set budgets, savings goals, retirement plans, and what-if scenarios.
+- Import CSV, Excel, and PDF statements with reusable templates.
+- Edit and validate a plain-text journal without giving up ownership of it.
+- Find accounting and valuation problems with Doctor.
 
-## What Paisa can do
+See the [Product Tour](https://pratap-kute.github.io/paisa/product-tour/) for a guided look at the main workflows.
 
-| Your goal | What you can do |
-| --- | --- |
-| Track | Follow net worth, income, expenses, assets, investments, and liabilities. |
-| Understand | Explore cash flow, spending categories, asset allocation, investment gains, and XIRR where sufficient data is available. |
-| Plan | Set budgets and savings goals, explore retirement plans and what-if scenarios, and review recurring transactions and credit-card bills. |
-| Import | Convert CSV, Excel, and PDF statements using reusable templates; review the generated Ledger journal before saving. |
-| Own your data | Keep your journal and configuration in version-control-friendly files; run Paisa locally or on your own server. |
+## Quick start
 
-Explore the [Product Tour](docs/product-tour.md), including financial data checks with Doctor and interactive calculation sheets.
+Download the desktop app or CLI from the [latest release](https://github.com/Pratap-kute/paisa/releases/latest).
+With the CLI installed, start Paisa with:
 
-## Why Paisa?
-
-- **A journal you own.** Plain-text accounting keeps your records readable outside Paisa and independent of a proprietary database format.
-- **Double-entry foundations.** Accounts connect where money comes from, where it goes, and what you own or owe.
-- **One financial picture.** Expense management and investment analysis share the same journal.
-- **Repeatable imports.** Reuse statement templates and review transactions in an approachable editor.
-
-Your journal stays with the Paisa instance you control. Configured market-price providers make external requests; self-hosting and third-party hosting have different privacy boundaries. Read the [manifesto](docs/manifesto.md) and [authentication guide](docs/reference/user-authentication.md).
-
-## Quick Start
-
-[Install the Desktop application or CLI](docs/getting-started/installation.md). With the CLI installed, start the local web interface:
-
-```sh
+```bash
 paisa serve
 ```
 
-Open [Paisa on localhost:7500](http://localhost:7500), then follow the [tutorial](docs/getting-started/tutorial.md) to create your first journal. The installation guide also covers Docker and Nix, with artifact sources identified explicitly.
+Open [http://localhost:7500](http://localhost:7500), then follow the
+[first-setup tutorial](https://pratap-kute.github.io/paisa/getting-started/tutorial/).
+The [installation guide](https://pratap-kute.github.io/paisa/getting-started/installation/)
+also covers Docker and platform-specific setup.
 
-## Community
+## Community and contributing
 
-[Report an issue](https://github.com/Pratap-kute/paisa/issues) in this repository or join the established [Paisa Matrix community](https://matrix.to/#/#paisa:matrix.org). See the [FAQ](docs/faq.md) for common questions.
+Use the [issue tracker](https://github.com/Pratap-kute/paisa/issues) for bugs,
+feature requests, and documentation corrections. The established
+[Paisa Matrix room](https://matrix.to/#/#paisa:matrix.org) remains available for
+community discussion.
 
-## Project History & Credits
+Development and testing instructions are in the
+[contributor documentation](https://pratap-kute.github.io/paisa/development/).
 
-Paisa was originally created by **[Anantha Kumaran](https://github.com/ananthakumaran)** and has grown through the work of its contributors.
+## Project history
 
-This repository continues that work with ongoing maintenance, improvements, and new features while preserving Paisa's original philosophy and open-source history.
+Paisa was originally created by **[Anantha Kumaran](https://github.com/ananthakumaran)**
+and has grown through the work of its contributors. This repository continues
+that work with maintenance, documentation, and new functionality.
 
-See the [original project](https://github.com/ananthakumaran/paisa), [Git history](https://github.com/Pratap-kute/paisa/commits/master/), and [upstream](https://github.com/ananthakumaran/paisa/graphs/contributors) and [current repository contributors](https://github.com/Pratap-kute/paisa/graphs/contributors) for the contribution record.
+See the [original project](https://github.com/ananthakumaran/paisa), the
+[current Git history](https://github.com/Pratap-kute/paisa/commits/master/), and
+the [original](https://github.com/ananthakumaran/paisa/graphs/contributors) and
+[current](https://github.com/Pratap-kute/paisa/graphs/contributors) contributor lists.
+The [upstream documentation](https://paisa.fyi/) and
+[upstream demo](https://demo.paisa.fyi/) are historical project resources and
+may describe another revision.
 
 ## License
 

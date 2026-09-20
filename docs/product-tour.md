@@ -1,76 +1,91 @@
+---
+description: A guided tour of Paisa's main workflows and reports.
+---
+
 # Product Tour
 
-Start with your financial picture, then explore the records and plans behind it. These capabilities describe this repository’s audited implementation; upstream demos and packaged releases may differ. All showcase images use synthetic data in this checkout running locally.
+This tour starts with the big picture, then moves through the records and plans
+behind it. Screenshots use sample data.
 
-## Dashboard
+## See your financial picture
 
-![Dashboard with synthetic account balances and cash-flow charts](images/showcase/dashboard.png)
+![Dashboard with account balances and cash-flow charts](images/showcase/dashboard.png)
 
-This sample journal also demonstrates missing cash-summary data and partial investment valuations; those messages remain visible. See your financial position and recent activity together. Follow net worth, income, and expenses, then open a detailed report to understand the accounts behind a total.
+The Dashboard brings balances, net worth, income, expenses, cash flow, and
+recent activity together. Open a report when you need to trace a total back to
+its accounts and transactions.
 
-[Accounts](reference/accounts.md) · [Analysis](reference/analysis.md)
+[Learn about accounts](reference/accounts.md) · [Explore financial reports](reference/analysis.md)
 
-## Expenses and budgets
+## Keep spending on track
 
-![Expense budget categories with synthetic spending and remaining balances](images/showcase/expenses-budget.png)
+![Expense budgets with spending and remaining balances](images/showcase/expenses-budget.png)
 
-Group spending using your account hierarchy and compare it with category budgets. Review actual spending and available amounts before deciding where to adjust your plan.
+Group expenses with your account hierarchy, set monthly envelopes, and compare
+actual spending with the amount available. Paisa also highlights categories
+whose current pace may exceed their budget.
 
-[Budgets](reference/budget.md) · [Accounts](reference/accounts.md)
+[Set up budgets](reference/budget.md) · [Review recurring transactions](reference/recurring.md)
 
-## Assets and investments
+## Understand investments
 
-![Portfolio Analysis charts showing synthetic fund holdings by security type, rating, and industry](images/showcase/investments.png)
+![Portfolio Analysis charts showing holdings by security type, rating, and industry](images/showcase/investments.png)
 
-Inspect holdings, allocation, and investment returns. The current implementation separates contributions from investment return and reports XIRR when sufficient data is available; valuation quality and missing data matter when interpreting results.
+Review holdings, allocation, contributions, and investment return. Paisa can
+calculate period return and XIRR when the journal contains enough price and
+cash-flow data.
 
-[Investment performance](reference/investment-performance.md) · [Allocation targets](reference/allocation-targets.md) · [Commodities and prices](reference/commodities.md)
+[Investment performance](reference/investment-performance.md) · [Allocation targets](reference/allocation-targets.md) · [Prices](reference/commodities.md)
 
-## Cash flow and financial analysis
+## Import a statement
 
-Explore monthly and yearly cash flow and an income statement to understand how earnings turn into spending and savings. Interactive sheets let you calculate with values from your journal.
+![Statement import with a template and generated Ledger preview](images/showcase/import.png)
 
-[Analysis](reference/analysis.md) · [Sheets](reference/sheets.md)
+Drop in a CSV, Excel, or PDF statement, choose a template, and inspect the
+generated Ledger entries. Fix unknown categories or mapping problems before
+saving. Templates make a bank's recurring layout reusable.
 
-## Import bank and card statements
+[Import statements](reference/import.md)
 
-![Synthetic statement imported with a reusable template and generated Ledger preview](images/showcase/import.png)
+## Edit the journal
 
-Load a CSV, Excel, or PDF statement, choose or adapt an import template, and review the generated journal. In this sample, unknown categories are explicitly marked for review before saving. Templates map statement fields to Ledger entries; support for a file format does not mean every bank layout works without configuration.
+![Syntax-highlighted Ledger journal in the Paisa editor](images/showcase/ledger-editor.png)
 
-[Import templates and review](reference/import.md)
+The built-in editor adds syntax highlighting, completion, formatting, and
+validation without replacing the plain-text journal. You can still use your
+normal editor, backups, and version-control workflow.
 
-## Ledger editor
+[Use the editor](reference/editor.md) · [Understand the journal](reference/journal.md)
 
-![Syntax-highlighted synthetic Ledger journal in the Paisa editor](images/showcase/ledger-editor.png)
+## Plan for goals
 
-Plain text remains the source of truth, with syntax highlighting, completion, validation, and formatting to support editing. Review your entries before saving and keep your journal in your own backup or version-control workflow.
+![Savings and retirement goals](images/showcase/goals-recurring.png)
 
-[Editor](reference/editor.md) · [Journal](reference/journal.md)
-
-## Goals and planning
-
-![Savings and retirement goals populated from synthetic accounts](images/showcase/goals-recurring.png)
-
-Track progress toward a savings target and explore retirement assumptions. What-if Scenarios compares cash, investments, and net worth under selected income, expense, transfer, and return assumptions; it is an illustrative projection, not a market prediction.
+Track a savings target, work through retirement assumptions, or compare a
+what-if scenario. Scenarios change only the projection; they do not edit your
+journal or predict market performance.
 
 [Goals](reference/goals/index.md) · [Retirement](reference/goals/retirement.md) · [Scenario planning](reference/scenario-planning.md)
 
-## Recurring transactions and credit cards
+## Review commitments
 
-Review scheduled recurring transactions and upcoming credit-card bills. Configure recurrence and card statement dates to organize what is due; these views do not connect to your bank or initiate payments.
+Recurring views help you see bills that are due or may have been missed. Credit
+card pages organize statements and repayments. Paisa does not connect to your
+bank or initiate payments.
 
 [Recurring transactions](reference/recurring.md) · [Credit cards](reference/credit-cards.md)
 
-## Check financial data with Doctor
+## Check your data
 
-Open More → Doctor to inspect accounting, valuation, allocation, and reconciliation findings. Review the affected records using the provided links; diagnostics do not automatically alter your journal.
+Doctor finds accounting, valuation, allocation, and reconciliation issues. Each
+finding links back to the records you need to review; Doctor never rewrites the
+journal automatically.
 
-[Doctor](reference/doctor.md)
+[Run Doctor](reference/doctor.md)
 
-## Privacy and data ownership
+## Keep control of the files
 
-Run Paisa locally or on a server you control. Journals and configuration remain readable files, while Paisa maintains a local database for its reports. External price services and third-party hosts have their own data boundaries.
+Your journal and configuration remain readable files. Paisa maintains a local
+database for reports, and interactive sheets can calculate with journal values.
 
-[Journal](reference/journal.md) · [Configuration](reference/config.md) · [Authentication](reference/user-authentication.md) · [Manifesto](manifesto.md)
-
+[Configuration](reference/config.md) · [Authentication](reference/user-authentication.md) · [Sheets](reference/sheets.md)

@@ -1,60 +1,75 @@
-site_description: Paisa is an open source personal finance manager. It helps you with tracking investments like mutual funds, stocks etc. It helps with expenses categorization, budgeting and money management in general.
-site_author: Anantha Kumaran
+site_description: Track spending, investments, and financial plans with plain-text double-entry accounting.
+site_author: Paisa contributors
 site_name: Paisa
 site_url: https://pratap-kute.github.io/paisa/
 repo_url: https://github.com/Pratap-kute/paisa
 repo_name: Pratap-kute/paisa
+edit_uri: edit/master/docs/
+exclude_docs: |
+  development/showcase-refresh-report.md
+  images/showcase/capture.md
+  images/showcase/paisa-overview.gif
 nav:
   - "Home": index.md
   - "Product Tour": product-tour.md
   - "Getting Started":
-      - getting-started/installation.md
-      - getting-started/tutorial.md
-      - getting-started/journal-examples.md
+      - "Overview": getting-started/index.md
+      - "Install Paisa": getting-started/installation.md
+      - "First setup": getting-started/tutorial.md
+      - "Journal examples": getting-started/journal-examples.md
+  - "Using Paisa":
+      - "Overview": using-paisa/index.md
+      - "Everyday finances":
+          - "Accounts": reference/accounts.md
+          - "Financial reports": reference/analysis.md
+          - "Budgets": reference/budget.md
+          - "Recurring transactions": reference/recurring.md
+          - "Credit cards": reference/credit-cards.md
+      - "Journal and imports":
+          - "Journal": reference/journal.md
+          - "Editor": reference/editor.md
+          - "Import statements": reference/import.md
+          - "Bulk edit": reference/bulk-edit.md
+      - "Investments":
+          - "Commodities and prices": reference/commodities.md
+          - "Allocation targets": reference/allocation-targets.md
+          - "Investment performance": reference/investment-performance.md
+      - "Planning":
+          - "Scenario planning": reference/scenario-planning.md
+          - "Goals":
+              - "Overview": reference/goals/index.md
+              - "Retirement": reference/goals/retirement.md
+              - "Savings": reference/goals/savings.md
+      - "Tools":
+          - "Doctor": reference/doctor.md
+          - "Sheets": reference/sheets.md
   - "Reference":
-      - reference/accounts.md
-      - reference/investment-performance.md
-      - reference/scenario-planning.md
-      - reference/doctor.md
-      - reference/commodities.md
-      - reference/journal.md
-      - reference/allocation-targets.md
-      - reference/budget.md
-      - reference/bulk-edit.md
-      - reference/import.md
-      - reference/recurring.md
-      - reference/sheets.md
-      - reference/config.md
-      - "Goals":
-          - reference/goals/index.md
-          - reference/goals/retirement.md
-          - reference/goals/savings.md
-      - reference/ledger-cli.md
-      - reference/editor.md
-      - reference/user-authentication.md
-      - reference/credit-cards.md
-      - reference/analysis.md
+      - "Overview": reference/index.md
+      - "Configuration": reference/config.md
+      - "Ledger CLI": reference/ledger-cli.md
+      - "Authentication": reference/user-authentication.md
       - "Tax":
-          - reference/tax/index.md
-          - reference/tax/tax-harvesting.md
-          - reference/tax/capital-gains.md
-          - reference/tax/schedule-al.md
-      - reference/changelog.md
+          - "Overview": reference/tax/index.md
+          - "Tax harvesting": reference/tax/tax-harvesting.md
+          - "Capital gains": reference/tax/capital-gains.md
+          - "Schedule AL": reference/tax/schedule-al.md
+      - "Changelog": reference/changelog.md
+  - "FAQ": faq.md
+  - "Project":
+      - "History and community": project/index.md
+      - "Manifesto": manifesto.md
+      - "Blog": blog/index.md
   - "Development":
-      - development/api.md
-      - development/testing.md
-      - "Showcase capture": images/showcase/capture.md
-      - "Showcase refresh audit": development/showcase-refresh-report.md
-      - design/frontend-chart-architecture.md
-      - design/paisa-ui-spec.md
-  - "Upstream Demo": "https://demo.paisa.fyi"
-  - manifesto.md
-  - faq.md
-  - Blog:
-      - blog/index.md
+      - "Overview": development/index.md
+      - "API": development/api.md
+      - "Testing": development/testing.md
+      - "Design":
+          - "Chart architecture": design/frontend-chart-architecture.md
+          - "UI specification": design/paisa-ui-spec.md
 theme:
   custom_dir: overrides
   name: material
+  font: false
   favicon: images/favicon.png
   icon:
     logo: paisa/logo
@@ -77,16 +92,25 @@ theme:
   features:
     - content.tabs.link
     - content.code.copy
+    - content.code.select
     - content.code.annotate
+    - content.action.edit
+    - content.action.view
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
     - navigation.tabs
-    - navigation.expand
+    - navigation.tabs.sticky
+    - navigation.sections
     - navigation.indexes
+    - navigation.path
     - navigation.top
     - navigation.footer
+    - toc.follow
     - search.suggest
     - search.highlight
-    - announce.dismiss
+    - search.share
 
 markdown_extensions:
   - toc:
@@ -122,57 +146,21 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 
-extra_javascript:
-  - javascripts/extra.js
 extra_css:
-  - stylesheets/device-frames.min.css
   - stylesheets/extra.css
 
 copyright: |
-  Copyright © 2022 - 2025 Anantha Kumaran <br \> <a href="#__consent">Change cookie settings</a>
+  Paisa was originally created by <a href="https://github.com/ananthakumaran">Anantha Kumaran</a>.
+  Maintained by <a href="https://github.com/Pratap-kute/paisa/graphs/contributors">contributors</a>
+  and licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING">AGPL-3.0-or-later</a>.
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/Pratap-kute/paisa
-    - icon: simple/matrix
-      link: https://matrix.to/#/#paisa:matrix.org
-    - icon: fontawesome/brands/x-twitter
-      link: https://twitter.com/PaisaFinanceApp
-    - icon: fontawesome/brands/mastodon
-      link: https://mastodon.social/@PaisaFinanceApp
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/pratapkute/paisa
   status:
     new: Recently added
-  consent:
-    actions:
-      - accept
-      - reject
-      - manage
-    title: Cookie consent
-    description: >-
-      We use cookies to recognize your repeated visits and preferences, as well
-      as to measure the effectiveness of our documentation and whether users
-      find what they're searching for. With your consent, you're helping us to
-      make our documentation better.
-  analytics:
-    provider: google
-    property: G-NL7XFHE65Z
-    feedback:
-      title: Was this page helpful?
-      ratings:
-        - icon: material/thumb-up-outline
-          name: This page was helpful
-          data: 1
-          note: >-
-            Thanks for your feedback!
-        - icon: material/thumb-down-outline
-          name: This page could be improved
-          data: 0
-          note: >-
-            Thanks for your feedback! Help us improve this page by
-            using our <a href="https://docs.google.com/forms/d/e/1FAIpQLSejpTiljuhsviEvXFBN-Z5rJZ_dkXHV5RaZzqpyCAZF1nIFiQ/viewform?usp=pp_url&entry.1125403938={url}" target="_blank" rel="noopener">feedback form</a>.
-
 plugins:
   - search
   - blog

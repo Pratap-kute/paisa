@@ -1,42 +1,43 @@
 ---
-description: "Frequently asked Questions about Paisa: personal finance manager"
-hide:
-  - navigation
+description: Answers to common questions about setting up and using Paisa.
 ---
 
-# FAQs
+# Frequently asked questions
 
-## I already use ledger/hledger/beancount. How do I get started? {#existing-user-getting-started}
+## I already use Ledger, hledger, or Beancount. How do I start? {#existing-user-getting-started}
 
-Go through the [installation](./getting-started/installation.md) docs and get
-the app working. Go to [configuration](./reference/config.md) page and update
-`journal_path`, `ledger_cli`, `default_currency` and `locale`. At this point you
-should be able to view your journal data. Read the
-[accounts](./reference/accounts.md) docs to understand the account naming
-conventions followed by paisa.
+[Install Paisa](getting-started/installation.md), then open
+[Configuration](reference/config.md) and set your journal path, accounting CLI,
+default currency, locale, and time zone. Once the journal loads, read
+[Accounts](reference/accounts.md) for the account conventions used by Paisa's
+reports.
 
-## How do I get started? {#getting-started}
+## Do I need to enter my full financial history? {#getting-started}
 
-You have installed paisa and gone through the demo and you like it, but you
-don't know what to do next. There is no way you would sit and type all the
-transactions you have made in the last decade or so.
+No. Start at the level of detail that is useful to you. An opening balance,
+monthly income, major expenses, and investment contributions can already show a
+useful picture. Add more detail later or use [statement import](reference/import.md)
+when you are comfortable with the journal.
 
-Paisa is an accounting application and you can focus on things that matters to
-you the most. For example, if you are not interested in tracking expenses, you
-can just have a single expense transaction per month. You decide the
-**granularity** at which you want to record the transactions. Just recording a
-few transactions per month like your salary, monthly expense and investments
-will go a long way and will give you pretty good picture of your finances.
+## Where does Paisa store my data?
 
-## Mac Desktop app fails with executable file not found in $PATH error {#exec-not-found}
+Desktop and CLI installations use `Documents/paisa` by default. Your journal
+and configuration are plain-text files. Paisa also maintains a SQLite database
+for reports; it can rebuild much of that data from the journal, but you should
+still back up the whole directory.
 
-Mac Desktop apps are usually started with different PATH than what you would
-normally get in a Terminal app. Paisa does a fallback search in the following
-folders before throwing the error. Check if your executable binary is in any of
-the folder listed below, if not, create a symbolic link from one of the folders
-to your executable binary.
+## Does Paisa connect to my bank?
 
-```
+No. Statement import works with files that you provide, and Paisa does not
+initiate payments. Configured market-price providers can make external requests
+for prices.
+
+## Why does the macOS app report that an executable is missing? {#exec-not-found}
+
+Apps launched from Finder often receive a smaller `PATH` than Terminal. Paisa
+checks these common locations before reporting an error:
+
+```text
 /bin
 /usr/bin
 /usr/local/bin
@@ -44,3 +45,14 @@ to your executable binary.
 /usr/sbin
 /opt/homebrew/bin
 ```
+
+If your configured accounting CLI is elsewhere, update its path in
+[Configuration](reference/config.md) or create a symlink in one of those
+directories.
+
+## Where should I report a problem?
+
+Open an issue in the
+[`Pratap-kute/paisa` issue tracker](https://github.com/Pratap-kute/paisa/issues).
+Include the Paisa version, operating system, accounting CLI, and the relevant
+error message. Remove personal financial data before attaching files or logs.

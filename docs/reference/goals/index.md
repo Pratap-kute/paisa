@@ -1,4 +1,5 @@
 ---
+title: Financial goals
 description: "How to configure goals in Paisa to track your financial objectives"
 ---
 
@@ -14,7 +15,7 @@ Paisa currently supports two types of goals:
 2. [Savings](./savings.md)
 
 More goal types will be added in the future. Feel free to create a
-[discussion](https://github.com/ananthakumaran/paisa/discussions) if you have
+[issue tracker](https://github.com/Pratap-kute/paisa/issues) if you have
 any suggestions.
 
 ### Create Goal

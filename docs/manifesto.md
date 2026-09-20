@@ -6,6 +6,11 @@ hide:
 
 # Manifesto
 
+!!! note "Project history"
+
+    Anantha Kumaran wrote this manifesto for the original Paisa project. Its
+    principles continue to guide the maintained repository.
+
 ## 1. Data Ownership :fontawesome-solid-key:
 
 User owns the data. It should be possible to migrate all the data to another app
