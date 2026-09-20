@@ -4,9 +4,9 @@ description: "How to configure credit cards in Paisa"
 
 # Credit Cards
 
-Paisa allows you to track your credit card bills and payments. Let's say you
-have a liability account called `Liabilities:CreditCard:Freedom` to track your
-real world credit card, you can configure it in Paisa as follows:
+Add each card under `credit_cards` and connect it to the liability account you
+already use in your journal. Paisa can then show the balance, statement period,
+payment due date, credit limit, and utilization.
 
 ```yaml
 credit_cards:
@@ -27,12 +27,9 @@ credit_cards:
 6. The last 4 digits of the card number
 7. The expiration date of the card
 
-The above configuration can be done from the `More > Configuration` page. Expand
-the `Credit Cards` section and click :fontawesome-solid-circle-plus: icon to add
-a new one
+You can add this from `More > Configuration`. Expand **Credit Cards** and click
+:fontawesome-solid-circle-plus: to add a card.
 
-Once configured, the credit card will show up on the
-`Liabilities >
-Credit Cards` page. Paisa will automatically calculate and
-display various information like the amount due, payment due date, credit limit
-utilized, etc.
+Once configured, the card appears under `Liabilities > Credit Cards`. Paisa
+calculates the amount due, payment date, limit used, and related balance from
+your journal.

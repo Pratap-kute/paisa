@@ -27,6 +27,15 @@ whose current pace may exceed their budget.
 
 [Set up budgets](reference/budget.md) · [Review recurring transactions](reference/recurring.md)
 
+## Spot changes and unusual activity
+
+Financial Insights compares a selected month with your history and highlights
+spending changes, budget risk, cash warnings, and positive trends. The
+observations are deterministic summaries of your journal data, not advice from
+an external AI service.
+
+[Explore Financial Insights](reference/insights.md)
+
 ## Understand investments
 
 ![Portfolio Analysis charts showing holdings by security type, rating, and industry](images/showcase/investments.png)
@@ -73,7 +82,7 @@ Recurring views help you see bills that are due or may have been missed. Credit
 card pages organize statements and repayments. Paisa does not connect to your
 bank or initiate payments.
 
-[Recurring transactions](reference/recurring.md) · [Credit cards](reference/credit-cards.md)
+[Recurring transactions](reference/recurring.md) · [Liabilities](reference/liabilities/index.md)
 
 ## Check your data
 

@@ -18,6 +18,24 @@ file named `paisa/paisa.yaml` inside User Documents folder. The default
 configuration is tuned for Indians, users from other countries would have to
 change the `default_currency` and `locale`.
 
+## Common settings
+
+These are the settings most people change first:
+
+| Setting | Purpose | Example |
+| --- | --- | --- |
+| `default_currency` | Currency used for totals and conversions | `INR` |
+| `locale` | Number and date formatting | `en-IN` |
+| `financial_year_starting_month` | First month of the financial year | `4` |
+| `ledger_cli` | Ledger engine used to read journals | `ledger` |
+| `journal_path` | Main journal file | `/home/john/Documents/paisa/main.ledger` |
+| `db_path` | SQLite database file | `/home/john/Documents/paisa/paisa.db` |
+
+The web interface can edit the same settings. Use the sections below when you
+need an option that is not shown in this quick list.
+
+## Complete example
+
 ### Accounts
 
 In many places, paisa expects you to specify a list of accounts. You can type

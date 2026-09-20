@@ -16,15 +16,16 @@ user interface. If someone can access your computer and they can access the
 folder where Paisa stores the ledger and database files, they will be able to
 view your data.
 
-## Implementation details
+## Password storage
 
-Paisa uses
-[cryptographic hash function](https://en.wikipedia.org/wiki/Cryptographic_hash_function)
-sha-256 to convert your password to digest before storing it in the
-configuration file. This has few implications. No one can look at the
-configuration file and get the password, this includes you as well. If you
-forget the password, you can remove the user accounts from
-[configuration](./config.md) file to get back access.
+Passwords created or changed by current versions of Paisa are stored as
+Argon2id hashes, not as plain text. Older configurations that contain a
+`sha256:` password still work; after a successful login, Paisa upgrades that
+credential to Argon2id automatically.
+
+No one can read the original password from `paisa.yaml`. If you forget it, you
+can remove the user account from the [configuration](./config.md) file and set
+up a new one.
 
 !!! warning
 

@@ -4,9 +4,11 @@ description: "How to configure recurring transactions in Paisa"
 
 # Recurring
 
-Some of the transactions recur on a regular interval and it might be useful to
-know the next due date for such transactions. Recurring page shows the upcoming
-or recently missed transactions.
+Recurring transactions are regular payments such as rent, subscriptions,
+insurance, and loan payments. The Recurring page shows upcoming and recently
+missed payments, along with the dates Paisa expects next.
+
+## Mark a transaction as recurring
 
 Paisa depends on the posting metadata to identify which transactions are
 recurring. This metadata can be added in couple of ways. Let's say you pay rent
@@ -41,7 +43,7 @@ The first part of the metadata before the colon is called tag name. It should be
 `Recurring`. The second part is the tag value. This value is used to group
 transactions.
 
-Tagging each and every posting can be tiresome. Ledger has a feature called
+Tagging every posting can be tiresome. Ledger has a feature called
 [Automated Transaction](https://ledger-cli.org/doc/ledger3.html#Automated-Transactions)
 which can make this process simpler.
 
@@ -139,7 +141,7 @@ the next 3 schedules if valid.
 
     Recurring page will only display a transaction as recurring if there
     is more than **one transaction** with the same tag name. If you
-    have only one transaction, wait untill the next transaction is added
+    have only one transaction, wait until the next transaction is added
     to see it on the recurring page.
 
 ## Suggested recurring patterns

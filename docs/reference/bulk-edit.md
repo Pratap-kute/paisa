@@ -42,7 +42,7 @@ week]`, `#!query [jan 2023]`, etc.
 Let's say you want to search by amount. You can do that by typing `#!query 42`,
 it will show all the transactions that have a posting with that amount.
 
-if you want to search a exact Account, you can do that using Regular Expression.
+If you want to match one exact account, use a regular expression.
 Just type `#!query /^Assets:Equity:APPLE$/`, you can also do case insensitive
 search by using the modifier `i` like `#!query /^Assets:Equity:APPLE$/i`.
 
@@ -83,8 +83,8 @@ The operator can be any of the following:
 - **\>** greater than
 - **\>=** greater than or equal
 
-Not all the combinations of property, operator and value would work, if in
-doubt, just try it out, the UI will show you an error if the query is not valid.
+Some property, operator, and value combinations do not make sense. If a query
+is invalid, the UI shows an error before you apply it.
 
 In fact, in the previous format we saw, if the property and operator is not
 specified and a default set is chosen based on the value type. For example,

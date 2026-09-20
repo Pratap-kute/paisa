@@ -1,18 +1,19 @@
 ---
-description: "The Analysis page shows you what securities you own along with their amount and percentage. It also categorizes the securities by their industry and rating."
+description: "Portfolio Analysis shows your investment holdings and groups them by security, industry, and rating."
 ---
 
-# Analysis
+# Portfolio Analysis
 
-Ledger represents everything except currency as commodities. A commodity could
-represent physical object like Gold or certificates like Stock, Bond etc. Some
-commodities like Mutual Fund is a container for Securities. When you own a
-mutual fund unit, you indirectly own these securities.
+Ledger represents everything except currency as commodities. A commodity can
+be gold, a share, a bond, or a mutual fund. When you own a mutual fund unit,
+you indirectly own its underlying securities.
 
-The Analysis page unwraps the container and shows you what securities you own
-along with their amount and percentage. It also categorizes the securities by
-their industry and rating.
+Portfolio Analysis unwraps supported funds and shows the securities you own,
+along with their amount and percentage. It can also group them by industry and
+rating.
 
-!!! example "Experimental" The data that powers this page comes from various
-sources and might not be 100% accurate. Before you make any decision based on
-this information, double check via different source.
+!!! warning
+
+    Underlying-holding data comes from external sources and may be incomplete
+    or out of date. Verify important details before making an investment
+    decision.
