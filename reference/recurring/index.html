@@ -18,7 +18,7 @@
         <link rel="prev" href="../budget/">
       
       
-        <link rel="next" href="../credit-cards/">
+        <link rel="next" href="../liabilities/">
       
       
         
@@ -869,6 +869,8 @@
       
         
       
+        
+      
     
     
     
@@ -980,6 +982,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../insights/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Insights
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../budget/" class="md-nav__link">
         
   
@@ -1068,6 +1098,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#mark-a-transaction-as-recurring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mark a transaction as recurring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#period" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1132,6 +1173,135 @@
   
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../liabilities/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Liabilities
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2_6" id="__nav_4_2_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Liabilities
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/interest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interest
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/repayment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repayments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../credit-cards/" class="md-nav__link">
         
@@ -1162,6 +1332,14 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
               
                 
   
@@ -1170,6 +1348,8 @@
   
     
     
+      
+        
       
         
       
@@ -1298,6 +1478,34 @@
     
   
     Import statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Account suggestions
   
 
     
@@ -3035,6 +3243,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#mark-a-transaction-as-recurring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mark a transaction as recurring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#period" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3184,9 +3403,10 @@
 
 
 <h1 id="recurring">Recurring<a class="headerlink" href="#recurring" title="Permanent link">&para;</a></h1>
-<p>Some of the transactions recur on a regular interval and it might be useful to
-know the next due date for such transactions. Recurring page shows the upcoming
-or recently missed transactions.</p>
+<p>Recurring transactions are regular payments such as rent, subscriptions,
+insurance, and loan payments. The Recurring page shows upcoming and recently
+missed payments, along with the dates Paisa expects next.</p>
+<h2 id="mark-a-transaction-as-recurring">Mark a transaction as recurring<a class="headerlink" href="#mark-a-transaction-as-recurring" title="Permanent link">&para;</a></h2>
 <p>Paisa depends on the posting metadata to identify which transactions are
 recurring. This metadata can be added in couple of ways. Let's say you pay rent
 every month and you want to mark it as recurring, a typical journal would like
@@ -3213,7 +3433,7 @@ below</p>
 <p>The first part of the metadata before the colon is called tag name. It should be
 <code>Recurring</code>. The second part is the tag value. This value is used to group
 transactions.</p>
-<p>Tagging each and every posting can be tiresome. Ledger has a feature called
+<p>Tagging every posting can be tiresome. Ledger has a feature called
 <a href="https://ledger-cli.org/doc/ledger3.html#Automated-Transactions">Automated Transaction</a>
 which can make this process simpler.</p>
 <div class="language-ledger highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>= Expenses:Rent
@@ -3315,7 +3535,7 @@ the next 3 schedules if valid.</p>
 <p class="admonition-title">Warning</p>
 <p>Recurring page will only display a transaction as recurring if there
 is more than <strong>one transaction</strong> with the same tag name. If you
-have only one transaction, wait untill the next transaction is added
+have only one transaction, wait until the next transaction is added
 to see it on the recurring page.</p>
 </div>
 <h2 id="suggested-recurring-patterns">Suggested recurring patterns<a class="headerlink" href="#suggested-recurring-patterns" title="Permanent link">&para;</a></h2>
@@ -3419,13 +3639,13 @@ attention.</p>
         
         
           
-          <a href="../credit-cards/" class="md-footer__link md-footer__link--next" aria-label="Next: Credit cards">
+          <a href="../liabilities/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Credit cards
+                Overview
               </div>
             </div>
             <div class="md-footer__button md-icon">

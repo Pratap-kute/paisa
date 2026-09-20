@@ -862,6 +862,8 @@
       
         
       
+        
+      
     
     
     
@@ -970,6 +972,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../insights/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Insights
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../budget/" class="md-nav__link">
         
   
@@ -1025,6 +1055,135 @@
   
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../liabilities/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Liabilities
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2_6" id="__nav_4_2_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Liabilities
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/interest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interest
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/repayment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repayments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../credit-cards/" class="md-nav__link">
         
@@ -1055,6 +1214,14 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
               
                 
   
@@ -1063,6 +1230,8 @@
   
     
     
+      
+        
       
         
       
@@ -1188,6 +1357,34 @@
     
   
     Import statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Account suggestions
   
 
     
@@ -1960,10 +2157,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#implementation-details" class="md-nav__link">
+  <a href="#password-storage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation details
+        Password storage
       
     </span>
   </a>
@@ -2982,10 +3179,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#implementation-details" class="md-nav__link">
+  <a href="#password-storage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Implementation details
+        Password storage
       
     </span>
   </a>
@@ -3084,14 +3281,14 @@ not logged in earlier via another account.</p>
 user interface. If someone can access your computer and they can access the
 folder where Paisa stores the ledger and database files, they will be able to
 view your data.</p>
-<h2 id="implementation-details">Implementation details<a class="headerlink" href="#implementation-details" title="Permanent link">&para;</a></h2>
-<p>Paisa uses
-<a href="https://en.wikipedia.org/wiki/Cryptographic_hash_function">cryptographic hash function</a>
-sha-256 to convert your password to digest before storing it in the
-configuration file. This has few implications. No one can look at the
-configuration file and get the password, this includes you as well. If you
-forget the password, you can remove the user accounts from
-<a href="../config/">configuration</a> file to get back access.</p>
+<h2 id="password-storage">Password storage<a class="headerlink" href="#password-storage" title="Permanent link">&para;</a></h2>
+<p>Passwords created or changed by current versions of Paisa are stored as
+Argon2id hashes, not as plain text. Older configurations that contain a
+<code>sha256:</code> password still work; after a successful login, Paisa upgrades that
+credential to Argon2id automatically.</p>
+<p>No one can read the original password from <code>paisa.yaml</code>. If you forget it, you
+can remove the user account from the <a href="../config/">configuration</a> file and set
+up a new one.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you run paisa on a server and access it over public internet,

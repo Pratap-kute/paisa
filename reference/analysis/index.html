@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="The Analysis page shows you what securities you own along with their amount and percentage. It also categorizes the securities by their industry and rating.">
+        <meta name="description" content="Portfolio Analysis shows your investment holdings and groups them by security, industry, and rating.">
       
       
         <meta name="author" content="Paisa contributors">
@@ -18,7 +18,7 @@
         <link rel="prev" href="../accounts/">
       
       
-        <link rel="next" href="../budget/">
+        <link rel="next" href="../insights/">
       
       
         
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#analysis" class="md-skip">
+        <a href="#portfolio-analysis" class="md-skip">
           Skip to content
         </a>
       
@@ -869,6 +869,8 @@
       
         
       
+        
+      
     
     
     
@@ -990,6 +992,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../insights/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Financial Insights
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../budget/" class="md-nav__link">
         
   
@@ -1045,6 +1075,135 @@
   
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../liabilities/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Liabilities
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2_6" id="__nav_4_2_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Liabilities
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/interest/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interest
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../liabilities/repayment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repayments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../credit-cards/" class="md-nav__link">
         
@@ -1075,6 +1234,14 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
               
                 
   
@@ -1083,6 +1250,8 @@
   
     
     
+      
+        
       
         
       
@@ -1211,6 +1380,34 @@
     
   
     Import statements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../prediction/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Account suggestions
   
 
     
@@ -3038,17 +3235,19 @@
   
 
 
-<h1 id="analysis">Analysis<a class="headerlink" href="#analysis" title="Permanent link">&para;</a></h1>
-<p>Ledger represents everything except currency as commodities. A commodity could
-represent physical object like Gold or certificates like Stock, Bond etc. Some
-commodities like Mutual Fund is a container for Securities. When you own a
-mutual fund unit, you indirectly own these securities.</p>
-<p>The Analysis page unwraps the container and shows you what securities you own
-along with their amount and percentage. It also categorizes the securities by
-their industry and rating.</p>
-<p>!!! example "Experimental" The data that powers this page comes from various
-sources and might not be 100% accurate. Before you make any decision based on
-this information, double check via different source.</p>
+<h1 id="portfolio-analysis">Portfolio Analysis<a class="headerlink" href="#portfolio-analysis" title="Permanent link">&para;</a></h1>
+<p>Ledger represents everything except currency as commodities. A commodity can
+be gold, a share, a bond, or a mutual fund. When you own a mutual fund unit,
+you indirectly own its underlying securities.</p>
+<p>Portfolio Analysis unwraps supported funds and shows the securities you own,
+along with their amount and percentage. It can also group them by industry and
+rating.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Underlying-holding data comes from external sources and may be incomplete
+or out of date. Verify important details before making an investment
+decision.</p>
+</div>
 
 
 
@@ -3106,13 +3305,13 @@ this information, double check via different source.</p>
         
         
           
-          <a href="../budget/" class="md-footer__link md-footer__link--next" aria-label="Next: Budgets">
+          <a href="../insights/" class="md-footer__link md-footer__link--next" aria-label="Next: Financial Insights">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Budgets
+                Financial Insights
               </div>
             </div>
             <div class="md-footer__button md-icon">
