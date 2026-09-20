@@ -1,173 +1,89 @@
+:root {
+  --logo-color: #8c5bd4;
+  --logo-color-dark: #7748bd;
+  --account-color-asset: #007eb8;
+  --account-color-expense: #d90032;
+  --account-color-liability: #b87900;
+  --account-color-equity: #a000bd;
+  --account-color-income: #668c00;
+  --md-text-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --md-code-font: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+[data-md-color-scheme="slate"] {
+  --logo-color: #b388ff;
+  --account-color-asset: #40c4ff;
+  --account-color-expense: #ff5274;
+  --account-color-liability: #ffc44d;
+  --account-color-equity: #e45cff;
+  --account-color-income: #c6ef59;
+}
+
 :root > * {
   --md-code-hl-keyword-color: #8959a8;
   --md-code-hl-number-color: #6c71c4;
-  /* --md-code-hl-special-color: #3e999f; */
   --md-code-hl-function-color: #4271ae;
-  /* --md-code-hl-constant-color */
-  /* --md-code-hl-keyword-color */
   --md-code-hl-string-color: #c82829;
   --md-code-hl-name-color: #3e999f;
   --md-code-hl-operator-color: #f5871f;
-  /* --md-code-hl-punctuation-color */
-  --md-code-hl-comment-color: #7a7a7a;
-  /* --md-code-hl-generic-color */
-  --md-code-hl-variable-color: #718c00;
-}
-
-:root {
-  --logo-color-background: rgb(179, 136, 255, 0.1);
-  --logo-color: #b388ff;
-  --logo-color-dark: #9971e5;
-  --logo-color-darker: #351982;
-  --account-color-asset-background: rgb(0, 176, 255, 0.1);
-  --account-color-asset: #00b0ff;
-  --account-color-expense-background: rgb(255, 23, 68, 0.1);
-  --account-color-expense: #ff1744;
-  --account-color-liability-background: rgb(255, 171, 0, 0.1);
-  --account-color-liability: #ffab00;
-  --account-color-equity-background: rgb(213, 0, 249, 0.1);
-  --account-color-equity: #d500f9;
-  --account-color-income-background: rgb(174, 234, 0, 0.1);
-  --account-color-income: #aeea00;
-}
-
-.highlight .m {
-  font-weight: bold;
-}
-
-.highlight .gh {
-  font-weight: bold;
-  color: rgb(74, 74, 74);
-}
-
-.highlight .kn {
-  color: rgb(74, 74, 74);
-  text-decoration: underline;
-}
-
-[data-md-color-scheme="slate"] .highlight .gh {
-  color: rgb(161, 161, 161);
-}
-
-[data-md-color-scheme="slate"] .highlight .kn {
-  color: rgb(161, 161, 161);
-}
-
-.hero {
-  margin-top: 2rem;
-  margin-bottom: 3rem;
-}
-
-.hero img {
-  height: 90px;
-  margin-top: -60px;
-  margin-bottom: 15px;
-}
-
-.hero h1 {
-  text-align: center;
-  color: inherit;
-  font-weight: 700;
-  color: var(--logo-color);
-  margin-bottom: -7px;
-  margin-top: -30px;
-  font-size: 3rem;
-}
-
-.hero h1 a {
-  display: none !important;
+  --md-code-hl-comment-color: #6d6d6d;
+  --md-code-hl-variable-color: #587000;
 }
 
 .md-header__topic:first-child {
   color: var(--logo-color);
 }
 
-.hero p {
+.hero {
+  margin: 2rem 0 2.5rem;
   text-align: center;
-  max-width: 640px;
-  margin: auto;
-  line-height: 1.28;
+}
+
+.hero img {
+  height: 88px;
+  margin: -3rem auto 0.75rem;
+}
+
+.hero h1 {
+  margin: -0.5rem 0 0;
+  color: var(--logo-color);
+  font-size: clamp(2.4rem, 8vw, 3.2rem);
+  font-weight: 700;
+}
+
+.hero h1 a {
+  display: none !important;
+}
+
+.hero .subtitle {
+  margin: 0 auto;
   color: var(--md-default-fg-color--light);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
-.hero p.subtitle {
-  opacity: 0.7;
-}
-
-.home .tabbed-set {
-  max-width: 510px;
-  margin: 0px auto 3rem auto !important;
-}
-
-.home ul li {
-  list-style: none;
-  margin-left: 0 !important;
-}
-
-.home ul {
-  margin-left: 0 !important;
-}
-
-.home .md-button--primary {
-  background-color: var(--logo-color);
-  border-color: var(--logo-color);
-  color: var(--logo-color-darker);
-  border-radius: 30px;
-  padding: 0.325em 1.5em;
-}
-
-.home .md-button--primary:hover {
-  background-color: var(--logo-color-dark);
-  border-color: var(--logo-color-dark);
-  color: var(--logo-color-darker);
-}
-
-.features-container {
-  display: flex;
-  gap: 20px;
-}
-
-.features {
-  flex-basis: 50%;
-}
-
-.thumbnail-container {
-  flex-basis: 50%;
-  box-shadow:
-    0 50px 100px -20px rgba(50, 50, 93, 0.25),
-    0 30px 60px -30px rgba(0, 0, 0, 0.3);
-}
-
-[data-md-color-scheme="slate"] .thumbnail-container {
-  box-shadow: none;
+.md-content img[src*="images/showcase/"] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
 }
 
 .split-codeview {
-  display: flex;
-  border-right-style: none;
-  overflow-x: scroll;
-}
-
-.split-codeview .sheet {
-  width: 75%;
-}
-
-.split-codeview .sheet-result {
-  width: 25%;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(9rem, 1fr);
+  overflow-x: auto;
 }
 
 .split-codeview .sheet code {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-radius: 0.2rem 0 0 0.2rem;
 }
 
 .split-codeview .sheet-result code {
+  border-left: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0 0.2rem 0.2rem 0;
   font-family: var(--md-text-font-family);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
   text-align: right;
-  border-left: 1px solid hsl(0, 0%, 86%);
 }
 
 .split-codeview .sheet-result-1 code span:nth-child(1),
@@ -179,170 +95,33 @@
 .split-codeview .sheet-result-3 code span:nth-child(20),
 .split-codeview .sheet-result-3 code span:nth-child(23) {
   display: block;
-  text-align: left;
-  font-weight: bold;
   overflow: hidden;
+  font-weight: 700;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-[data-md-color-scheme="slate"] .split-codeview .sheet-result code {
-  border-left: 1px solid hsl(215, 18%, 27%);
-}
-
-.thumbnail {
-  --scale-factor: 0.45;
-  overflow: hidden;
-  width: 100%;
-  height: 500px;
-}
-
-.thumbnail iframe {
-  transform: scale(var(--scale-factor));
-  width: calc(1 / var(--scale-factor) * 100%);
-  max-width: calc(1 / var(--scale-factor) * 100%);
-  height: calc(1 / var(--scale-factor) * 100%);
-  transform-origin: 0 0;
-}
-
-@media screen and (max-width: 1275px) {
-  .features {
-    flex-basis: 100%;
-  }
-
-  .thumbnail-container {
-    display: none;
-  }
-}
-
-.app-frame {
-  --padding-h: 0;
-  --padding-v: 0;
-  --bar-height: 33px;
-  --border-width: 0;
-  --bar-inset: 10px;
-}
-
-.app-frame.win {
-  --button-inset: 12px;
-}
-
-.app-frame::after {
-  font-family: inherit;
-}
-
-.assets-color {
-  color: var(--account-color-asset);
-}
-
-.expenses-color {
-  color: var(--account-color-expense);
-}
-
-.liabilities-color {
-  color: var(--account-color-liability);
-}
-
-.equity-color {
-  color: var(--account-color-equity);
-}
-
-.income-color {
-  color: var(--account-color-income);
-}
-
-.feature-card {
-  display: flex;
-  margin: 3.5rem 0;
-}
-
-.feature-card-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 3.5rem;
-}
-
-.feature-card {
-  flex-basis: 50%;
-}
-
-@media screen and (max-width: 1275px) {
-  .feature-card {
-    flex-basis: 100%;
-  }
-}
-
-.feature-card-left {
-  min-width: 5.5rem;
-}
-
-.feature-card p {
-  max-width: 22rem;
-  text-align: left;
-}
-
-.feature-card-icon {
-  display: flex;
-  align-items: start;
-  justify-content: end;
-}
-
-.feature-card-icon p {
-  margin: 0 2rem 0 0;
-}
-
-.feature-card-icon .twemoji {
-  height: 100%;
-  border-radius: 50%;
-  padding: 0.75rem;
-}
-
-.feature-card-icon svg {
-  --card-icon-size: 2rem;
-  width: var(--card-icon-size) !important;
-  height: var(--card-icon-size) !important;
-  max-height: var(--card-icon-size) !important;
-}
-
-.feature-card-icon-logo .twemoji {
-  background-color: var(--logo-color-background);
-  color: var(--logo-color);
-}
-
-.feature-card-icon-asset .twemoji {
-  background-color: var(--account-color-asset-background);
-  color: var(--account-color-asset);
-}
-
-.feature-card-icon-expense .twemoji {
-  background-color: var(--account-color-expense-background);
-  color: var(--account-color-expense);
-}
-
-.feature-card-icon-liability .twemoji {
-  background-color: var(--account-color-liability-background);
-  color: var(--account-color-liability);
-}
-
-.feature-card-icon-equity .twemoji {
-  background-color: var(--account-color-equity-background);
-  color: var(--account-color-equity);
-}
-
-.feature-card-icon-income .twemoji {
-  background-color: var(--account-color-income-background);
-  color: var(--account-color-income);
-}
+.assets-color { color: var(--account-color-asset); }
+.expenses-color { color: var(--account-color-expense); }
+.liabilities-color { color: var(--account-color-liability); }
+.equity-color { color: var(--account-color-equity); }
+.income-color { color: var(--account-color-income); }
 
 .language-ledger pre code {
   max-height: 500px;
 }
 
-/* Local product captures retain their aspect ratio in both Material palettes. */
-.md-content img[src*="images/showcase/"] {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 0.5rem;
+@media screen and (max-width: 44.9844em) {
+  .hero {
+    margin-top: 1rem;
+  }
+
+  .hero img {
+    margin-top: -1.5rem;
+  }
+
+  .split-codeview {
+    grid-template-columns: minmax(18rem, 3fr) minmax(9rem, 1fr);
+  }
 }
