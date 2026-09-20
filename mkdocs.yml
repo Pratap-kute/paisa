@@ -21,12 +21,13 @@ nav:
       - "Overview": using-paisa/index.md
       - "Everyday finances":
           - "Accounts": reference/accounts.md
-          - "Financial reports": reference/analysis.md
+          - "Financial reports": reference/financial-reports.md
           - "Financial Insights": reference/insights.md
           - "Budgets": reference/budget.md
           - "Recurring transactions": reference/recurring.md
           - "Liabilities":
               - "Overview": reference/liabilities/index.md
+              - "Balances": reference/liabilities/balance.md
               - "Interest": reference/liabilities/interest.md
               - "Repayments": reference/liabilities/repayment.md
               - "Credit cards": reference/credit-cards.md
@@ -37,6 +38,7 @@ nav:
           - "Account suggestions": reference/prediction.md
           - "Bulk edit": reference/bulk-edit.md
       - "Investments":
+          - "Portfolio Analysis": reference/analysis.md
           - "Commodities and prices": reference/commodities.md
           - "Allocation targets": reference/allocation-targets.md
           - "Investment performance": reference/investment-performance.md
@@ -49,6 +51,7 @@ nav:
       - "Tools":
           - "Doctor": reference/doctor.md
           - "Sheets": reference/sheets.md
+          - "Application information and logs": reference/application-information.md
   - "Reference":
       - "Overview": reference/index.md
       - "Configuration": reference/config.md

@@ -15,7 +15,7 @@ The Dashboard brings balances, net worth, income, expenses, cash flow, and
 recent activity together. Open a report when you need to trace a total back to
 its accounts and transactions.
 
-[Learn about accounts](reference/accounts.md) · [Explore financial reports](reference/analysis.md)
+[Learn about accounts](reference/accounts.md) · [Explore financial reports](reference/financial-reports.md)
 
 ## Keep spending on track
 
@@ -44,7 +44,7 @@ Review holdings, allocation, contributions, and investment return. Paisa can
 calculate period return and XIRR when the journal contains enough price and
 cash-flow data.
 
-[Investment performance](reference/investment-performance.md) · [Allocation targets](reference/allocation-targets.md) · [Prices](reference/commodities.md)
+[Portfolio Analysis](reference/analysis.md) · [Investment performance](reference/investment-performance.md) · [Allocation targets](reference/allocation-targets.md) · [Prices](reference/commodities.md)
 
 ## Import a statement
 

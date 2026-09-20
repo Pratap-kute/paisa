@@ -2,18 +2,23 @@
 description: "How to configure recurring transactions in Paisa"
 ---
 
-# Recurring
+# Recurring transactions
 
 Recurring transactions are regular payments such as rent, subscriptions,
 insurance, and loan payments. The Recurring page shows upcoming and recently
 missed payments, along with the dates Paisa expects next.
 
-## Mark a transaction as recurring
+## What you see
+
+Confirmed patterns show recent amounts, the usual amount, expected date
+windows, and warnings for late or possibly stopped payments. The dashboard uses
+the same analysis for its shorter recurring summary.
+
+## Set a schedule manually
 
 Paisa depends on the posting metadata to identify which transactions are
-recurring. This metadata can be added in couple of ways. Let's say you pay rent
-every month and you want to mark it as recurring, a typical journal would like
-below
+recurring. Add `Recurring` metadata to payments that belong to the same series.
+For example, a journal may contain two monthly rent payments:
 
 ```ledger
 2023/07/01 Rent
@@ -39,9 +44,8 @@ You can manually tag a posting by adding `; Recurring: Rent`.
     Assets:Checking
 ```
 
-The first part of the metadata before the colon is called tag name. It should be
-`Recurring`. The second part is the tag value. This value is used to group
-transactions.
+`Recurring` is the tag name. Its value groups related transactions, so use the
+same value for every payment in a series.
 
 Tagging every posting can be tiresome. Ledger has a feature called
 [Automated Transaction](https://ledger-cli.org/doc/ledger3.html#Automated-Transactions)
@@ -52,11 +56,11 @@ which can make this process simpler.
     ; Recurring: Rent
 ```
 
-The first line is the predicate and the line below it will get added to any
-matching posting. By default, it will match the posting account name. But you
-can target other attributes like payee, amount etc. You can find more examples
-below, more info about predicate is available on Ledger
-[docs](https://ledger-cli.org/doc/ledger3.html#Complex-expressions)
+The first line is the predicate. Ledger adds the metadata below it to matching
+postings. The simple form matches an account name; expressions can also match a
+payee, amount, or combination of fields. See Ledger's
+[complex expressions](https://ledger-cli.org/doc/ledger3.html#Complex-expressions)
+for the complete syntax.
 
 ```ledger
 = expr payee=~/^PPF$/
@@ -81,11 +85,10 @@ below, more info about predicate is available on Ledger
     file. Ledger will apply the rules only to transactions that
     follow the automated transactions.
 
-## Period
+## Period syntax
 
-Paisa will try to infer the recurring period of the transactions automatically,
-but this might not be perfect. Recurring period can also be explicitly specified
-via metadata.
+Paisa tries to infer the interval from transaction history. When that interval
+is unusual or the history is still short, specify it with `Period` metadata.
 
 ```ledger
 = expr payee=~/Savings Interest/
@@ -93,10 +96,8 @@ via metadata.
     ; Period: L MAR,JUN,SEP,DEC ?
 ```
 
-Let's say your bank deposits the interest on the last day of the last month of
-the quarter, we can specify like the example above. Paisa editor recognizes
-**period syntax** and shows the upcoming 3 schedules right next to period
-metadata.
+The example describes interest paid on the last day of each quarter. The editor
+validates period syntax and shows the next three dates beside the metadata.
 
 ```
 ┌─────────── day of the month 1-31
@@ -116,16 +117,13 @@ hours.
 | Month        | `1-12` or `JAN-DEC` | `* , -`            |
 | Day of week  | `0-6` or `SUN-SAT`  | `* , - ? L`        |
 
-`*` also known as wildcard represents all valid values. `?` means you want to
-omit the field, usually you use it on the day of month or day of week. `L` means
-last day of the month or week. `,` can be used to specify multiple entries. `-`
-can be used to specify range. `W` means the closest business day to given day of
-month
+`*` matches every valid value. `?` leaves either day-of-month or day-of-week
+unspecified. `L` means the last day of the month or week, `,` lists values, `-`
+defines a range, and `W` means the nearest business day to a day of the month.
 
-Multiple cron expressions can be specified by joining them using `|`. Refer the
-[wikipedia](https://en.wikipedia.org/wiki/Cron) for more information. If you are
-not sure, just type it out and the editor will show you whether it is valid and
-the next 3 schedules if valid.
+Join multiple expressions with `|`. See the
+[cron overview](https://en.wikipedia.org/wiki/Cron) for background. The editor
+shows whether an expression is valid and previews its next three dates.
 
 ### Examples
 
@@ -139,28 +137,24 @@ the next 3 schedules if valid.
 
 !!! warning
 
-    Recurring page will only display a transaction as recurring if there
-    is more than **one transaction** with the same tag name. If you
-    have only one transaction, wait until the next transaction is added
-    to see it on the recurring page.
+    The Recurring page needs at least two transactions with the same recurring
+    tag value. A series with only one recorded transaction does not appear yet.
 
-## Suggested recurring patterns
+## Let Paisa suggest recurring transactions
 
 The recurring page also reviews untagged history for deterministic patterns.
-Suggestions require at least three occurrences with compatible merchant,
-account, direction, and commodity context. Calendar-based matching tolerates
-small posting delays and month-end dates. Suggestions never affect confirmed
-expense totals.
+Suggestions require at least three compatible occurrences. Paisa compares the
+merchant, account, direction, commodity, and timing while allowing for small
+posting delays and month-end dates. Suggestions do not affect confirmed expense
+totals.
+
+## Confirm a suggestion
 
 **Confirm recurring** adds `Recurring` metadata (or Beancount `recurring`
 metadata) to the displayed historical transactions. Paisa preserves the
 remaining source text, validates the edited files, creates its usual backups,
-saves, and synchronizes. If a file changed while being reviewed, reload before
-confirming. Multi-file confirmation checks and validates every source before
-writing, then synchronizes once. A write or synchronization failure restores
-the batch. If restoration fails, the error lists recovery backups; restore those
-files before retrying. This protects against ordinary failures, but is not a
-crash-atomic filesystem transaction.
+saves, and synchronizes. If a file changed while you were reviewing it, reload
+the page before confirming.
 
 Continue applying the same recurring tag to future transactions, manually or
 with an existing ledger automation rule. Confirmation does not create an
@@ -169,7 +163,7 @@ automatic merchant rule or change transaction categories.
 **Not recurring** hides the suggestion for the current page visit. Reloading or
 reopening the page may show it again; durable rejection rules are not stored.
 
-## Confirmed pattern details
+## How estimates are calculated
 
 Confirmed patterns show historical and typical amounts, expected date windows,
 amount changes, and conservative late or possibly-stopped indicators. An
@@ -181,8 +175,7 @@ investments, unconfirmed suggestions, and possibly-stopped sequences do not
 inflate these commitments. Commodities are reported separately. Uncertain timing
 is excluded from annualized estimates and identified in the summary.
 
-The dashboard uses the same recurring analysis for its concise summary. The
-recurring page retains the existing calendar and scheduled-history view in an
+The Recurring page also keeps its calendar and scheduled-history view in an
 expandable section.
 
 Monthly and annual figures measure expenses. Upcoming payment totals and the
@@ -199,3 +192,11 @@ do not produce inferred cadence-change alerts. “New” alone does not require
 attention.
 
 Suggestions render 25 at a time; use **Show more suggestions** to see more.
+
+### Technical notes
+
+When confirmation affects multiple files, Paisa validates every source before
+writing and synchronizes once. A write or synchronization failure restores the
+batch from backups. If restoration also fails, the error lists the recovery
+files to restore before retrying. This protects against ordinary failures, but
+is not a crash-atomic filesystem transaction.

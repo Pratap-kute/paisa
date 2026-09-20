@@ -13,7 +13,7 @@ Choose the area that matches what you want to do.
 
     ---
 
-    Understand [accounts](../reference/accounts.md), review [financial reports](../reference/analysis.md), set [budgets](../reference/budget.md), and track [recurring transactions](../reference/recurring.md).
+    Understand [accounts](../reference/accounts.md), review [financial reports](../reference/financial-reports.md), set [budgets](../reference/budget.md), and track [recurring transactions](../reference/recurring.md).
 
 -   :material-file-import-outline: **Journal and imports**
 
@@ -25,7 +25,7 @@ Choose the area that matches what you want to do.
 
     ---
 
-    Configure [commodities and prices](../reference/commodities.md), compare [allocation targets](../reference/allocation-targets.md), and measure [investment performance](../reference/investment-performance.md).
+    Review [Portfolio Analysis](../reference/analysis.md), configure [commodities and prices](../reference/commodities.md), compare [allocation targets](../reference/allocation-targets.md), and measure [investment performance](../reference/investment-performance.md).
 
 -   :material-map-marker-path: **Planning and checks**
 

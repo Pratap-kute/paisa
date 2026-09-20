@@ -4,21 +4,19 @@ description: "Full list of configuration options supported by Paisa along with t
 
 # Configuration
 
-All the configuration related to paisa is stored in a yaml file named
-`paisa.yaml`. The configuration can be edited via the web interface. The
-sequence in which paisa looks for the file is described below
+Paisa stores its configuration in `paisa.yaml`. You can edit it from the web
+interface or as a text file. Paisa looks for it in this order:
 
-1. `PAISA_CONFIG` environment variable
-1. via `--config` flag
-1. Current working directory
-1. `paisa/paisa.yaml` file inside User Documents folder.
+1. The path in the `PAISA_CONFIG` environment variable.
+2. The path passed with `--config`.
+3. The current working directory.
+4. `paisa/paisa.yaml` inside the user's Documents folder.
 
-If it can't find the configuration file, it will create a default configuration
-file named `paisa/paisa.yaml` inside User Documents folder. The default
-configuration is tuned for Indians, users from other countries would have to
-change the `default_currency` and `locale`.
+If no file exists, Paisa creates `paisa/paisa.yaml` in Documents. The defaults
+use INR and `en-IN`; change the currency, locale, and financial-year start when
+they do not match your location.
 
-## Common settings
+## Basic settings
 
 These are the settings most people change first:
 
@@ -31,21 +29,54 @@ These are the settings most people change first:
 | `journal_path` | Main journal file | `/home/john/Documents/paisa/main.ledger` |
 | `db_path` | SQLite database file | `/home/john/Documents/paisa/paisa.db` |
 
-The web interface can edit the same settings. Use the sections below when you
-need an option that is not shown in this quick list.
+The web interface can edit the same settings.
+
+## Account patterns
+
+Several features accept a list of accounts. Use a full name such as
+`Assets:Equity:APPLE`, `*` to match descendants such as `Assets:Equity:*`, or
+negation such as `!Expenses:Tax`. Do not mix positive and negated patterns in
+the same list.
+
+## Budgets and goals
+
+`budget.rollover` controls whether unused budget carries into the next month.
+The `goals` section defines retirement and savings goals, including their
+accounts, target, date, contribution, and expected return assumptions. See
+[Budgets](budget.md) and [Goals](goals/index.md) before changing these values.
+
+## Investments and tax
+
+Use `commodities` for price providers and tax categories,
+`allocation_targets` for portfolio targets, and `schedule_al` for Schedule AL
+account groups. Related guides cover [commodities and prices](commodities.md),
+[allocation targets](allocation-targets.md), and [Schedule AL](tax/schedule-al.md).
+
+## Import and prediction
+
+`import_templates` stores reusable statement templates. Merchant-to-account
+rules live under `prediction.merchant_rules` and take precedence over general
+prediction history. See [Import statements](import.md) and
+[Account suggestions](prediction.md) for the workflow.
+
+## Authentication
+
+`user_accounts` protects the web interface with usernames and passwords. The UI
+stores new or changed passwords as Argon2id hashes and upgrades legacy
+`sha256:` credentials after a successful login. See
+[Authentication](user-authentication.md) for the security boundaries and HTTPS
+requirements.
+
+## Credit cards
+
+Each `credit_cards` entry connects statement dates, due dates, limits, and card
+details to an existing liability account. See [Credit cards](credit-cards.md)
+for an annotated example.
 
 ## Complete example
 
-### Accounts
-
-In many places, paisa expects you to specify a list of accounts. You can type
-the full account name like `#!ledger
-Account:Equity:APPL`. Paisa also supports
-wildcard `*`, you can use `#!ledger Account:Equity:*` to represent all accounts
-under Equity. It's also possible to use negation. `#!ledger !Expenses:Tax` will
-match all accounts except Tax. If you use negation, then all the accounts should
-be negation. Don't mix negation with others, if done the behavior will be
-undefined.
+The example below collects the available settings in one place. Copy only the
+sections you need and adjust their values for your journal.
 
 ```yaml
 # Path to your journal file. It can be absolute or relative to the

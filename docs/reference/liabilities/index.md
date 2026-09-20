@@ -17,5 +17,6 @@ what it costs, and how quickly it is being repaid.
 Paisa reads these values from your journal. It does not connect to lenders or
 initiate payments.
 
-See [Credit cards](../credit-cards.md), [Interest](interest.md), and
-[Repayments](repayment.md) for the individual views.
+See [Balances](balance.md), [Credit cards](../credit-cards.md),
+[Interest](interest.md), and [Repayments](repayment.md) for the individual
+views.
