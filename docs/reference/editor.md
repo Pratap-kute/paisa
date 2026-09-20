@@ -9,6 +9,8 @@ Paisa uses [codemirror](https://codemirror.net/) that comes with a
 keyboard shortcuts. In addition to that, Paisa has few more shortcuts, which are
 listed below.
 
+![Paisa's journal editor with Ledger syntax highlighting](../images/showcase/ledger-editor.png)
+
 ## Keyboard shortcuts
 
 | Linux            | Mac              | Windows          | Description       |

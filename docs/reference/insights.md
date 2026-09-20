@@ -9,6 +9,12 @@ out changes worth reviewing. It can highlight spending spikes, budget risk,
 changes in savings rate or net worth, recurring-cost changes, cash warnings, and
 positive trends.
 
+![Financial Insights summary showing items that need attention and other observations](../images/showcase/financial-insights.png)
+
+For example, if groceries usually cost ₹8,000–₹10,000 per month and rise to
+₹16,000, Insights may flag the change for you to review. It points out the
+change; you decide whether it is expected or needs a correction.
+
 ## How to use it
 
 1. Open **Insights** and choose a month.

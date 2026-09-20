@@ -7,6 +7,8 @@ description: "Choose the Paisa report that answers your financial question."
 Paisa builds its reports from your journal and the prices available for its
 commodities. Start with the question you want to answer:
 
+![Paisa dashboard summarizing balances, cash flow, expenses, and investments](../images/showcase/dashboard.png)
+
 | Question | Report |
 | --- | --- |
 | What do my asset accounts hold today? | **Assets → Balance** |

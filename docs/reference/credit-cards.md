@@ -8,6 +8,8 @@ Add each card under `credit_cards` and connect it to the liability account you
 already use in your journal. Paisa can then show the balance, statement period,
 payment due date, credit limit, and utilization.
 
+![Credit card summary showing the amount due, balance, limit, and payment status](../images/showcase/credit-cards.png)
+
 ```yaml
 credit_cards:
   - account: Liabilities:CreditCard:Freedom #(1)!

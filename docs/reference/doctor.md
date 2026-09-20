@@ -7,6 +7,12 @@ investment reconciliation, and whether Scenario Planning has enough history.
 Doctor is read-only. It links to records that need attention but never changes
 the journal or creates balancing entries.
 
+![Doctor summary with diagnostic severity and findings that need attention](../images/showcase/doctor.png)
+
+For example, Doctor may report that the latest price for `NIFTY` is 12 days
+old. The finding explains that portfolio and net-worth values may be stale and
+links you to the prices that need attention.
+
 ## Checks
 
 Doctor runs these checks:

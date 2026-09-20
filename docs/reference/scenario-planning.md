@@ -4,6 +4,8 @@ Open **Wealth → Scenarios** to compare a financial change with your existing
 plan. Scenarios are temporary: leaving or reloading the page discards them. They
 do not create postings or change configuration, budgets, goals, or prices.
 
+![Scenario Planning comparing changed assumptions with the baseline projection](../images/showcase/scenario-planning.png)
+
 ## Starting point
 
 Paisa captures today's balances in its configured timezone. Checking cash uses `Assets:Checking` and colon-delimited descendants. Investments use the Investment Performance universe: assets excluding checking. Investment valuation and contributions reuse the same accounting, dividend, split, and internal-transfer handling as Investment Performance. Missing prices retain its valuation fallback and are disclosed as estimates.

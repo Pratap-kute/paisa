@@ -8,6 +8,8 @@ Import converts rows from **CSV**, **TXT**, **XLS**, **XLSX**, or **PDF** files
 into Ledger transactions. The page shows the source data, the generated journal,
 and the template that connects the two.
 
+![Statement import preview with generated Ledger entries and account suggestions](../images/showcase/import.png)
+
 !!! warning "Review PDF imports carefully"
 
     PDF table detection is experimental and may split or misread rows. Always

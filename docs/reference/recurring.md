@@ -8,6 +8,8 @@ Recurring transactions are regular payments such as rent, subscriptions,
 insurance, and loan payments. The Recurring page shows upcoming and recently
 missed payments, along with the dates Paisa expects next.
 
+![Recurring transactions showing a confirmed payment and a suggested pattern to review](../images/showcase/recurring.png)
+
 ## What you see
 
 Confirmed patterns show recent amounts, the usual amount, expected date

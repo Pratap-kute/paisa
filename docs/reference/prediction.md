@@ -8,6 +8,24 @@ When you import a statement, Paisa can suggest an account for each transaction.
 Suggestions help with the first pass; you review them in the preview before
 anything is added to the journal.
 
+![Statement import with high, medium, unknown, and possible-transfer account suggestions](../images/showcase/account-suggestions.png)
+
+## Example
+
+Suppose a statement contains `SWIGGY INSTAMART BANGALORE` for ₹1,248. A saved
+merchant rule or several matching transactions in your journal may produce:
+
+```text
+Suggested account: Expenses:Groceries
+Confidence: High
+Reason: known merchant with matching ledger history
+```
+
+An ambiguous description such as `AMAZON` may have been recorded under
+`Expenses:Shopping` four times and `Expenses:Books` three times. Paisa marks a
+split history like this for review instead of pretending that one answer is
+certain.
+
 ## How a suggestion is made
 
 Paisa first checks saved merchant rules, then compares the transaction with

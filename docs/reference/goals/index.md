@@ -11,6 +11,8 @@ building an emergency fund or planning for retirement.
 
 Paisa currently supports two types of goals:
 
+![Goal progress and recurring investment plan](../../images/showcase/goals-recurring.png)
+
 1. [Retirement](./retirement.md)
 2. [Savings](./savings.md)
 

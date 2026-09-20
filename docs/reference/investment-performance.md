@@ -7,6 +7,8 @@ investments produced. Portfolio Analysis (`/assets/analysis`) describes what you
 Use Investment Performance when you want to separate growth caused by market
 returns from growth caused by new contributions.
 
+![Investment Performance showing period totals, the performance timeline, and return drivers](../images/showcase/investment-performance.png)
+
 Select Current FY, Previous FY, 1 Year, or Since Inception. The URL preserves the
 selection, including when you open an account. Explicit `from` and `to` dates are
 inclusive. Current FY follows your configured financial-year start. One Year ends

@@ -12,6 +12,8 @@ Portfolio Analysis unwraps supported funds and shows the securities you own,
 along with their amount and percentage. It can also group them by industry and
 rating.
 
+![Portfolio Analysis showing the securities held through an investment portfolio](../images/showcase/investments.png)
+
 !!! warning
 
     Underlying-holding data comes from external sources and may be incomplete

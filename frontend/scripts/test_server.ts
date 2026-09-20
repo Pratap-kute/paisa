@@ -84,6 +84,33 @@ try {
     VITE_PAISA_E2E_DEV_UI: "true",
   });
   await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
+  if (Deno.env.get("PAISA_SHOWCASE_CAPTURE") === "true") {
+    const journalPath = join(fixture, "main.ledger");
+    const journal = await Deno.readTextFile(journalPath);
+    await Deno.writeTextFile(
+      journalPath,
+      journal +
+        "\n2021/11/15 Demo streaming\n" +
+        "    Expenses:Entertainment                      499 INR\n" +
+        "    Assets:Checking                           -499 INR\n" +
+        "\n2021/12/15 Demo streaming\n" +
+        "    Expenses:Entertainment                      499 INR\n" +
+        "    Assets:Checking                           -499 INR\n" +
+        "\n2022/01/15 Demo streaming\n" +
+        "    Expenses:Entertainment                      499 INR\n" +
+        "    Assets:Checking                           -499 INR\n",
+    );
+    const configPath = join(fixture, "paisa.yaml");
+    const config = await Deno.readTextFile(configPath);
+    await Deno.writeTextFile(
+      configPath,
+      config +
+        "\nprediction:\n" +
+        "  merchant_rules:\n" +
+        "    - merchant: Demo groceries\n" +
+        "      account: Expenses:Food\n",
+    );
+  }
   await run(binary, [
     "--config",
     join(fixture, "paisa.yaml"),
