@@ -130,7 +130,7 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
           checks: healthyChecks.map((c) =>
             c.code === "exchange_price_coverage"
               ? { ...c, status: "failed", issueCount: 0 }
-              : c,
+              : c
           ),
         }),
       });
@@ -141,8 +141,12 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     await expect(page.getByText("Diagnosis incomplete")).toBeVisible();
     await expect(page.getByText("Incomplete", { exact: true })).toBeVisible();
     await expect(page.getByText(/1 check could not run/i)).toBeVisible();
-    expect(await page.getByText("All Systems Operational").isVisible()).toBe(false);
-    expect(await page.getByText("Healthy", { exact: true }).isVisible()).toBe(false);
+    expect(await page.getByText("All Systems Operational").isVisible()).toBe(
+      false,
+    );
+    expect(await page.getByText("Healthy", { exact: true }).isVisible()).toBe(
+      false,
+    );
   });
 
   test("critical danger state displays attention required banner and issue details", async ({ page }) => {

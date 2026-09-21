@@ -159,9 +159,10 @@ extra_css:
   - stylesheets/extra.css
 
 copyright: |
-  Paisa was originally created by <a href="https://github.com/ananthakumaran">Anantha Kumaran</a>.
-  Maintained by <a href="https://github.com/Pratap-kute/paisa/graphs/contributors">contributors</a>
-  and licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING">AGPL-3.0-or-later</a>.
+  Originally created by <a href="https://github.com/ananthakumaran">Anantha Kumaran</a>.
+  Maintained by <a href="https://github.com/Pratap-kute">Pratap Kute</a> and
+  <a href="https://github.com/Pratap-kute/paisa/graphs/contributors">contributors</a>.
+  Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING">AGPL-3.0-or-later</a>.
 extra:
   social:
     - icon: fontawesome/brands/github
