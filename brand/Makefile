@@ -10,8 +10,8 @@ images:
 	steam-run svgexport logo.svg ../docs/favicon-48x48.png 100% 48:48
 	steam-run svgexport logo.svg ../docs/favicon-64x64.png 100% 64:64
 	steam-run svgexport logo.svg ../docs/favicon-256x256.png 100% 256:256
-	nix-shell -p imagemagick --command 'convert ../docs/favicon-16x16.png ../docs/favicon-32x32.png ../docs/favicon-64x64.png ../docs/favicon.ico'
-	nix-shell -p imagemagick --command 'convert ../docs/favicon-16x16.png ../docs/favicon-32x32.png ../docs/favicon-48x48.png ../docs/favicon-64x64.png ../docs/favicon-256x256.png ../desktop/build/windows/icon.ico'
+	convert ../docs/favicon-16x16.png ../docs/favicon-32x32.png ../docs/favicon-64x64.png ../docs/favicon.ico
+	convert ../docs/favicon-16x16.png ../docs/favicon-32x32.png ../docs/favicon-48x48.png ../docs/favicon-64x64.png ../docs/favicon-256x256.png ../desktop/build/windows/icon.ico
 	rm ../docs/favicon-48x48.png
 	rm ../docs/favicon-64x64.png
 	rm ../docs/favicon-256x256.png

@@ -1,26 +1,51 @@
 name: CI Setup
-description: Install Nix, restore caches, and install Deno dependencies
-
-inputs:
-  save-nix-cache:
-    description: Whether this job should save the Nix store
-    required: false
-    default: "false"
+description: Setup Go, Deno, Python, system tools, and dependencies
 
 runs:
   using: composite
   steps:
-    - name: Install Nix
-      uses: nixbuild/nix-quick-install-action@v30
-
-    - name: Restore or save Nix store
-      uses: nix-community/cache-nix-action@v6
+    - name: Set up Go
+      uses: actions/setup-go@v5
       with:
-        # v2 replaces the old cache, which omitted development-shell packages.
-        primary-key: nix-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/*.nix', '**/flake.lock') }}
-        restore-prefixes-first-match: nix-v2-${{ runner.os }}-${{ runner.arch }}-
-        gc-max-store-size-linux: 2G
-        save: ${{ inputs.save-nix-cache }}
+        go-version: "1.26.5"
+        cache: true
+        cache-dependency-path: backend/go.sum
+
+    - name: Set up Deno
+      uses: denoland/setup-deno@v2
+      with:
+        deno-version: v2.x
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+
+    - name: Install system dependencies & accounting tools
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          sqlite3 \
+          libsqlite3-dev \
+          ledger \
+          python3-beancount \
+          pkg-config \
+          build-essential
+
+        pip install --break-system-packages beancount mkdocs-material
+
+        # Install pinned hledger 1.52.4 static binary
+        if [ ! -f /usr/local/bin/hledger ]; then
+          curl -sSL https://github.com/hledgerorg/hledger/releases/download/1.52.4/hledger-linux-x64.tar.gz | sudo tar -xz -C /usr/local/bin
+        fi
+
+        # Install golangci-lint
+        if ! command -v golangci-lint &>/dev/null; then
+          curl -sSL "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz" | \
+            sudo tar -xz -C /usr/local/bin --strip-components=1 golangci-lint-2.14.0-linux-amd64/golangci-lint
+        fi
 
     - name: Restore Deno cache
       uses: actions/cache@v4
@@ -31,32 +56,8 @@ runs:
         key: deno-${{ runner.os }}-${{ hashFiles('frontend/deno.lock') }}
         restore-keys: deno-${{ runner.os }}-
 
-    - name: Prepare persistent Nix environment and frontend dependencies
-      id: go-cache
+    - name: Install frontend dependencies
       shell: bash
       run: |
-        # Keep the shell closure alive during the cache action's post-job GC.
-        # Reuse this profile in test steps to avoid evaluating the flake again.
-        ci_profile="$RUNNER_TEMP/paisa-ci-profile"
-        nix develop --profile "$ci_profile" --command bash -euc '
-          {
-            echo "modules=$(go env GOMODCACHE)"
-            echo "build=$(go env GOCACHE)"
-            echo "version=$(go env GOVERSION)"
-          } >> "$GITHUB_OUTPUT"
-          cd frontend
-          deno install
-        '
-        echo "PAISA_CI_PROFILE=$ci_profile" >> "$GITHUB_ENV"
-
-    - name: Restore or save Go caches
-      uses: actions/cache@v4
-      with:
-        path: |
-          ${{ steps.go-cache.outputs.modules }}
-          ${{ steps.go-cache.outputs.build }}
-        # Separate writers by job; refresh compiled packages as source changes.
-        key: go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-${{ github.job }}-${{ github.sha }}
-        restore-keys: |
-          go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-${{ github.job }}-
-          go-${{ runner.os }}-${{ runner.arch }}-${{ steps.go-cache.outputs.version }}-${{ hashFiles('**/*.nix', '**/flake.lock', 'backend/go.sum') }}-
+        cd frontend
+        deno install

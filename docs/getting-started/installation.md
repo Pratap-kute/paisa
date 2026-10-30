@@ -119,9 +119,8 @@ image uses Ledger. Release tags can also include `-hledger`, `-beancount`, and
     directory before changing versions and make sure the directory is writable.
     An older Paisa build may not open a database that has already been upgraded.
 
-## Nix and source builds
+## Source builds and Dev Containers
 
-This repository's `flake.nix` provides development environments; it does not
-export an installable Paisa package. Contributors can use the Nix workflow in
+This repository provides Dev Container configurations for contributors in
 the [development guide](../development/index.md). For normal use, choose a
 release binary or Docker image above.

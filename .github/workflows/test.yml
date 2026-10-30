@@ -27,10 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
-        with:
-          save-nix-cache: "true"
       - name: Lint and type-check
-        run: nix develop "$PAISA_CI_PROFILE" --command make lint
+        run: make lint
 
   unit-coverage:
     name: Backend & Frontend Coverage
@@ -41,11 +39,9 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: Backend and frontend coverage
         run: |
-          nix develop "$PAISA_CI_PROFILE" --command bash -c "
-            cd frontend && deno run -A npm:@sveltejs/kit sync
-            cd ..
-            make test-backend test-unit test-coverage
-          "
+          cd frontend && deno run -A npm:@sveltejs/kit sync
+          cd ..
+          make test-backend test-unit test-coverage
       - name: Upload coverage artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -64,11 +60,9 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: API regression tests
         run: |
-          nix develop "$PAISA_CI_PROFILE" --command bash -c "
-            hledger --version
-            cd backend && make build
-            cd ../frontend && TZ=UTC deno task test:integration
-          "
+          hledger --version
+          cd backend && make build
+          cd ../frontend && TZ=UTC deno task test:integration
 
   browser:
     name: Browser E2E Tests
@@ -77,9 +71,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/ci-setup
+      - name: Install Playwright Chromium
+        run: |
+          cd frontend
+          deno task playwright install --with-deps chromium
       - name: Browser E2E tests
-        # The test server builds the frontend with the required E2E flag.
-        run: nix develop "$PAISA_CI_PROFILE" --command make test-e2e
+        run: make test-e2e
       - name: Upload browser test reports on failure
         if: failure()
         uses: actions/upload-artifact@v4

@@ -1,12 +1,4 @@
 {
-  "terminal.integrated.profiles.linux": {
-    "nix-shell": {
-      "path": "nix",
-      "args": [
-        "develop"
-      ]
-    }
-  },
   "go.alternateTools": {
     "go": "go",
     "gopls": "gopls"

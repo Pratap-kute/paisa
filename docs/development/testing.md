@@ -24,11 +24,15 @@ both reports without enforcing the core threshold, which is useful while
 investigating a temporary regression. Reports from different instrumentation
 runners are not concatenated or treated as one coverage measurement.
 
-## Nix and Playwright
+## Playwright and Browser Tests
 
-Enter `nix develop` before running browser tests. The shell supplies the
-Chromium build matching Playwright 1.61.1 through `PLAYWRIGHT_BROWSERS_PATH`;
-browser downloads are not required.
+Install the matching Chromium build before running browser tests:
+
+```bash
+cd frontend && deno task playwright install --with-deps chromium
+```
+
+When using the Dev Container, the required Chromium build and system dependencies are configured automatically.
 
 The browser server copies the browser fixture journal and config into a
 temporary directory, builds `paisa.db` with `paisa update`, seeds portfolio
@@ -49,7 +53,7 @@ re-running the server.
 
 ## Updating visual baselines
 
-Run `deno task test:visual:update` inside the Linux Nix shell, review every
+Run `deno task test:visual:update` inside Linux or the Dev Container, review every
 changed PNG, and commit intentional changes. Do not update screenshots merely to
 make a failing test pass.
 

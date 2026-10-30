@@ -5,7 +5,7 @@ Application base commit: `862476272bf51afe89abcb807755b798df843288`.
 
 ## Reproduce
 
-Use the repository's development environment (`nix develop` where available),
+Use the repository's development environment (such as the Dev Container),
 including Deno, Go, SQLite, and Chromium matching Playwright. In two terminals:
 
 ```sh

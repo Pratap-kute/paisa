@@ -1,0 +1,39 @@
+{
+  "name": "Paisa Development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "denoland.vscode-deno",
+        "svelte.svelte-vscode",
+        "ms-azuretools.vscode-docker",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "go.alternateTools": {
+          "go": "/usr/local/go/bin/go",
+          "gopls": "gopls"
+        },
+        "deno.enable": true,
+        "deno.config": "frontend/deno.json",
+        "deno.importMap": "frontend/deno.json",
+        "deno.enablePaths": [
+          "frontend/scripts",
+          "frontend/playwright.config.ts",
+          "frontend/vitest.config.ts",
+          "frontend/vitest.shared.ts",
+          "frontend/tests/browser"
+        ],
+        "editor.formatOnSave": true,
+        "[svelte]": {
+          "editor.defaultFormatter": "svelte.svelte-vscode"
+        }
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode"
+}
