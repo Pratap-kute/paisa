@@ -303,6 +303,7 @@ class BooleanConditionAST extends AST {
     const cs = childrens(node);
     if (cs.length === 3) {
       this.value = new BooleanBinaryAST(node, state);
+	  return;
     }
 
     if (cs.length === 2) {
