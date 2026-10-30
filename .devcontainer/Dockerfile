@@ -57,8 +57,8 @@ RUN curl -fsSL https://deno.land/install.sh | sh
 # Install pinned hledger 1.52.4 static binary
 RUN curl -sSL https://github.com/hledgerorg/hledger/releases/download/1.52.4/hledger-linux-x64.tar.gz | tar -xz -C /usr/local/bin
 
-# Install Python packages (beancount, mkdocs-material)
-RUN pip install --no-cache-dir --break-system-packages beancount mkdocs-material
+# Install Python packages (beancount <3 for bean-query/bean-report CLI support, mkdocs-material)
+RUN pip install --no-cache-dir --break-system-packages "beancount<3" mkdocs-material
 
 # Environment setup
 ENV GOPATH="/home/vscode/go"

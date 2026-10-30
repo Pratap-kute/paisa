@@ -34,11 +34,11 @@ runs:
           sqlite3 \
           libsqlite3-dev \
           ledger \
-          python3-beancount \
+          beancount \
           pkg-config \
           build-essential
 
-        pip install --break-system-packages beancount mkdocs-material
+        pip install --break-system-packages "beancount<3" mkdocs-material
 
         # Install pinned hledger 1.52.4 static binary
         if [ ! -f /usr/local/bin/hledger ]; then
@@ -50,6 +50,13 @@ runs:
           curl -sSL "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz" | \
             sudo tar -xz -C /usr/local/bin --strip-components=1 golangci-lint-2.14.0-linux-amd64/golangci-lint
         fi
+
+        # Verify accounting tools are in PATH
+        ledger --version
+        hledger --version
+        bean-check --help >/dev/null && echo "bean-check OK"
+        bean-query --help >/dev/null && echo "bean-query OK"
+        bean-report --help >/dev/null && echo "bean-report OK"
 
     - name: Restore Deno cache
       uses: actions/cache@v4
