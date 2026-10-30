@@ -1,6 +1,6 @@
 # CHANGELOG
 
-### Unreleased
+### 0.9.3 (2026-10-30) - [@Pratap-kute](https://github.com/Pratap-kute), [@netmaxt3r](https://github.com/netmaxt3r)
 
 #### Bug Fixes & Reliability
 - Fixed logic flow bug in `BooleanConditionAST` when parsing Binary expressions ([#18](https://github.com/Pratap-kute/paisa/pull/18)) - [@netmaxt3r](https://github.com/netmaxt3r)
