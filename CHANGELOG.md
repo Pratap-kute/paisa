@@ -1,6 +1,21 @@
 # CHANGELOG
 
-### 0.9.2 (2026-09-12)
+### Unreleased
+
+#### Bug Fixes & Reliability
+- Fixed logic flow bug in `BooleanConditionAST` when parsing Binary expressions ([#18](https://github.com/Pratap-kute/paisa/pull/18)) - [@netmaxt3r](https://github.com/netmaxt3r)
+- Pinned `beancount<3` in CI setup and Dev Container to restore missing `bean-query` and `bean-report` CLI binaries - [@Pratap-kute](https://github.com/Pratap-kute)
+
+#### Platform & Developer Experience
+- Completely replaced Nix with lean Ubuntu 24.04 Dev Container configuration (`.devcontainer/Dockerfile`) and standard composite GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)
+- Added Docker-based Alpine static Ledger build pipeline (`packaging/ledger/Dockerfile`) for standalone Linux releases - [@Pratap-kute](https://github.com/Pratap-kute)
+- Configured CGO and SQLite build environments across GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)
+
+#### Documentation & Showcase
+- Reconciled documentation feature coverage and reference guides with current application state - [@Pratap-kute](https://github.com/Pratap-kute)
+- Added reproducible feature showcase screenshots and refreshed discoverability metadata - [@Pratap-kute](https://github.com/Pratap-kute)
+
+### 0.9.2 (2026-09-12) - [@Pratap-kute](https://github.com/Pratap-kute)
 
 #### Reliability and accounting fixes
 
@@ -42,7 +57,7 @@
   the product showcase and documentation.
 
 
-### 0.9.1 (2026-08-27)
+### 0.9.1 (2026-08-27) - [@Pratap-kute](https://github.com/Pratap-kute)
 
 #### Security
 
@@ -121,7 +136,7 @@
 - Fixed Go lint findings in posting stabilization and stabilized Vitest thread
   teardown under Deno-based CI.
 
-### 0.9.0 (2026-08-24)
+### 0.9.0 (2026-08-24) - [@Pratap-kute](https://github.com/Pratap-kute)
 
 - **UI & Design Modernization**: Complete migration to a pure Tailwind CSS design system with curated HSL color tokens, rich glassmorphic styling, enhanced card ergonomics, and zero legacy Bulma/SCSS footprint.
 - **Unified ECharts Architecture**: Standardized, responsive ECharts surface component with declarative data adapters, custom canvas theme integration, and resilient resize observers across all financial dashboards.
@@ -129,7 +144,7 @@
 - **Refined Navigation & Workflows**: Segmented boxed tabs, responsive filter toolbars, unified metric strips, sticky action footers, and full keyboard accessibility.
 - **CI & Stability**: Streamlined GitHub Actions test pipelines, stabilized Playwright E2E browser tests, and upgraded Deno/Go type diagnostics.
 
-### 0.8.1 (2026-08-18)
+### 0.8.1 (2026-08-18) - [@Pratap-kute](https://github.com/Pratap-kute), [@Hasnep](https://github.com/Hasnep)
 
 - **Transaction prediction:** Smart account suggestions in journal templates based on posting history
 - **Frontend modernization:** Svelte 5 runes migration, Bulma 1.x, unified UI component library, improved chart lifecycle and layout
@@ -137,7 +152,7 @@
 - **Backend:** Unified asset performance calculation (checking accounts no longer excluded)
 - **Build:** golangci-lint updated to unstable nix package
 
-### 0.8.0 (2026-08-14)
+### 0.8.0 (2026-08-14) - [@ananthakumaran](https://github.com/ananthakumaran), [@Pratap-kute](https://github.com/Pratap-kute), [@labellson](https://github.com/labellson), [@mbeutelspacher](https://github.com/mbeutelspacher)
 
 - **Monorepo Architecture**: Clean isolation of `frontend/` (SvelteKit/Deno), `backend/` (Go service/CLI), and `desktop/` (Wails application) with top-level workspace coordination
 - **Modernized Toolchain**: Migrated frontend toolchain to native Deno and updated Go workspace to 1.26
@@ -163,7 +178,7 @@
 ### 0.7.0 (2024-08-26)
 
 - Add [docker image variant](https://github.com/ananthakumaran/paisa/pull/274)
-  for hledger and beancount
+  for hledger and beancount - [@azzamsa](https://github.com/azzamsa)
 - Bug fixes
 
 ### 0.6.6 (2024-02-10)

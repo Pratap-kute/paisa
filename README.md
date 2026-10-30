@@ -61,6 +61,14 @@ The [upstream documentation](https://paisa.fyi/) and
 [upstream demo](https://demo.paisa.fyi/) are historical project resources and
 may describe another revision.
 
+## Contributors
+
+Thanks to everyone who has contributed to Paisa!
+
+<a href="https://github.com/Pratap-kute/paisa/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Pratap-kute/paisa" alt="Paisa Contributors" />
+</a>
+
 ## License
 
 Paisa is licensed under the [GNU AGPL version 3 or later](COPYING).
