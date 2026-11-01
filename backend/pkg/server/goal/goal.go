@@ -29,12 +29,15 @@ func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	}
 
 	for _, goal := range goals.Retirement {
-		summaries = append(summaries, getRetirementSummary(db, assetPostings, goal))
+		summary := getRetirementSummary(db, assetPostings, goal)
+		summary.Intelligence = analyze(summary.Type, summary.Current, summary.Target, summary.TargetDate, summary.Rate, summary.PaymentPerPeriod, nil)
+		summaries = append(summaries, summary)
 	}
 
 	for _, goal := range config.GetConfig().Goals.Savings {
 		summary := getSavingsSummary(assetPostings, goal)
 		summary.ContributionHistory = contributionHistory(db, contributionPostings, goal.Accounts)
+		summary.Intelligence = analyze(summary.Type, summary.Current, summary.Target, summary.TargetDate, summary.Rate, summary.PaymentPerPeriod, summary.ContributionHistory)
 		summaries = append(summaries, summary)
 	}
 

@@ -40,6 +40,7 @@ func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
 	savingsWithCapitalGains = service.PopulateMarketPrice(db, savingsWithCapitalGains)
 
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
+	history := contributionHistory(db, savingsWithCapitalGains, conf.Accounts)
 
 	return gin.H{
 		"type":                "savings",
@@ -56,6 +57,7 @@ func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
 		"xirr":                service.XIRR(db, savingsWithCapitalGains),
 		"postings":            savingsWithCapitalGains,
 		"balances":            balances,
-		"contributionHistory": contributionHistory(db, savingsWithCapitalGains, conf.Accounts),
+		"contributionHistory": history,
+		"intelligence":        analyze("savings", savingsTotal, decimal.NewFromFloat(conf.Target), conf.TargetDate, conf.Rate, conf.PaymentPerPeriod, history),
 	}
 }

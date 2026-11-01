@@ -77,6 +77,7 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 	}
 
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
+	target := retirementTarget(yearlyExpenses, conf.SWR)
 
 	return gin.H{
 		"type":                "retirement",
@@ -89,9 +90,10 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 		"swr":                 conf.SWR,
 		"yearlyExpense":       yearlyExpenses,
 		"yearlyExpenseSource": expenseSource(conf),
-		"target":              retirementTarget(yearlyExpenses, conf.SWR),
+		"target":              target,
 		"xirr":                service.XIRR(db, savingsWithCapitalGains),
 		"postings":            savingsWithCapitalGains,
 		"balances":            balances,
+		"intelligence":        analyze("retirement", savingsTotal, target, "", 0, 0, nil),
 	}
 }

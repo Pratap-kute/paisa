@@ -36,7 +36,7 @@ func GetBalance(db *gorm.DB) gin.H {
 }
 
 func doGetBalance(db *gorm.DB, pattern string, rollup bool) gin.H {
-	postings := query.Init(db).Like(pattern, "Income:CapitalGains:%").All()
+	postings := query.Init(db).Like(pattern, "Income:CapitalGains:%").UntilToday().All()
 	postings = service.PopulateMarketPrice(db, postings)
 	breakdowns := ComputeBreakdowns(db, postings, rollup)
 	return gin.H{"asset_breakdowns": breakdowns}
@@ -77,21 +77,14 @@ func ComputeBreakdowns(db *gorm.DB, postings []posting.Posting, rollup bool) map
 	return result
 }
 
+// ComputeBreakdown summarises one account group. Investment, withdrawal, gain
+// and XIRR come from the same event based accounting as the Net Worth and Gain
+// pages (service.ComputeNetworth, service.XIRR), so all of them agree. Cash is
+// not an investment: checking accounts report their balance but no returns, and
+// checking postings never count towards the gain of a parent group. As a result
+// the gain of a group that holds checking is not marketAmount minus net
+// investment; it is the gain of its investment accounts only.
 func ComputeBreakdown(db *gorm.DB, ps []posting.Posting, leaf bool, group string) AssetBreakdown {
-	investmentAmount := lo.Reduce(ps, func(acc decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
-		if utils.IsCheckingAccount(p.Account) || p.Amount.LessThan(decimal.Zero) || service.IsInterest(db, p) || service.IsStockSplit(db, p) || service.IsCapitalGains(p) {
-			return acc
-		} else {
-			return acc.Add(p.Amount)
-		}
-	}, decimal.Zero)
-	withdrawalAmount := lo.Reduce(ps, func(acc decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
-		if !service.IsCapitalGains(p) && (utils.IsCheckingAccount(p.Account) || p.Amount.GreaterThan(decimal.Zero) || service.IsInterest(db, p) || service.IsStockSplit(db, p)) {
-			return acc
-		} else {
-			return acc.Add(p.Amount.Neg())
-		}
-	}, decimal.Zero)
 	psWithoutCapitalGains := lo.Filter(ps, func(p posting.Posting, _ int) bool {
 		return !service.IsCapitalGains(p)
 	})
@@ -106,21 +99,30 @@ func ComputeBreakdown(db *gorm.DB, ps []posting.Posting, leaf bool, group string
 		}, decimal.Zero)
 	}
 
-	xirr := service.XIRR(db, ps)
-	netInvestment := investmentAmount.Sub(withdrawalAmount)
-	gainAmount := marketAmount.Sub(netInvestment)
-	absoluteReturn := decimal.Zero
-	if !investmentAmount.IsZero() {
-		absoluteReturn = marketAmount.Sub(netInvestment).Div(investmentAmount)
+	breakdown := AssetBreakdown{
+		Group:        group,
+		MarketAmount: marketAmount,
+		BalanceUnits: balanceUnits,
 	}
-	return AssetBreakdown{
-		InvestmentAmount: investmentAmount,
-		WithdrawalAmount: withdrawalAmount,
-		MarketAmount:     marketAmount,
-		XIRR:             xirr,
-		Group:            group,
-		BalanceUnits:     balanceUnits,
-		GainAmount:       gainAmount,
-		AbsoluteReturn:   absoluteReturn,
+
+	investmentPostings := lo.Filter(ps, func(p posting.Posting, _ int) bool {
+		account := p.Account
+		if service.IsCapitalGains(p) {
+			account = service.CapitalGainsSourceAccount(p.Account)
+		}
+		return !utils.IsCheckingAccount(account)
+	})
+	if utils.IsCheckingAccount(group) || len(investmentPostings) == 0 {
+		return breakdown
 	}
+
+	networth := service.ComputeNetworth(db, investmentPostings)
+	breakdown.InvestmentAmount = networth.InvestmentAmount
+	breakdown.WithdrawalAmount = networth.WithdrawalAmount
+	breakdown.GainAmount = networth.GainAmount
+	breakdown.XIRR = service.XIRR(db, investmentPostings)
+	if !networth.InvestmentAmount.IsZero() {
+		breakdown.AbsoluteReturn = networth.GainAmount.Div(networth.InvestmentAmount)
+	}
+	return breakdown
 }

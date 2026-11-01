@@ -26,6 +26,11 @@ type PostingResponse struct {
 	TransactionNote      string          `json:"transaction_note"`
 	MarketAmount         decimal.Decimal `json:"market_amount"`
 	Balance              decimal.Decimal `json:"balance"`
+	// Set for open commodity lots only (see service.ComputePostingReturn).
+	UnrealizedGain *decimal.Decimal `json:"unrealized_gain,omitempty"`
+	HoldingDays    *int             `json:"holding_days,omitempty"`
+	// Compound annual rate in percent, omitted for lots held under a year.
+	AnnualizedReturn *decimal.Decimal `json:"annualized_return,omitempty"`
 }
 
 type PostingsResponse struct {
