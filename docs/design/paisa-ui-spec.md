@@ -907,7 +907,7 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 - **Shared** cannot depend on features or routes.
 - **Features** and **generated** output cannot depend on routes.
 - **API** cannot depend on routes or feature implementations.
-- Enforced by `deno task architecture` boundary checks.
+- Enforced by `bun run architecture` boundary checks.
 
 ---
 
@@ -1801,7 +1801,7 @@ The following boundaries are enforced to maintain code quality:
 - **No ECharts Replacement:** ECharts 6 is the chart rendering engine; alternative chart libraries are not introduced.
 - **No CodeMirror Replacement:** CodeMirror 6 remains the editor engine.
 - **No Immediate Tabulator Removal:** Tabulator remains wrapped inside `<Table />`.
-- **Library Boundary Enforcement:** `deno task architecture` enforces the 5-area ownership model (§12.1). Domain cannot depend on UI; shared cannot depend on features.
+- **Library Boundary Enforcement:** `bun run architecture` enforces the 5-area ownership model (§12.1). Domain cannot depend on UI; shared cannot depend on features.
 - **No Bulma/SCSS Regression:** No new Bulma classes, SCSS files, or `@import "bulma"` rules may be added.
 
 ---
@@ -1830,7 +1830,7 @@ The frontend migration is complete. All deliverables have been met:
 - [x] Architectural boundaries and library ownership rules are established and enforced.
 - [x] Bulma fully removed (Bulma = 0), SCSS fully removed (Sass = 0), Tailwind Preflight enabled.
 - [x] D3.js fully replaced by ECharts 6 across all visualization routes.
-- [x] 5-area library architecture (`api/`, `domain/`, `features/`, `shared/`, `generated/`) enforced via `deno task architecture`.
+- [x] 5-area library architecture (`api/`, `domain/`, `features/`, `shared/`, `generated/`) enforced via `bun run architecture`.
 - [x] Command Palette (`Ctrl+K` / `Cmd+K`) implemented.
 - [x] Insights page (`/insights`) added as route #40.
 - [x] Development UI Design Lab (`/dev/ui`) operational.

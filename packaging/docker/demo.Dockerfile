@@ -1,10 +1,9 @@
-FROM --platform=$BUILDPLATFORM denoland/deno:latest AS web
+FROM --platform=$BUILDPLATFORM oven/bun:1.4.4 AS web
 WORKDIR /usr/src/paisa/frontend
-COPY frontend/deno.json frontend/deno.lock* ./
-RUN deno install --allow-scripts
+COPY frontend/package.json frontend/bun.lock ./
+RUN bun install --frozen-lockfile
 COPY frontend ./
-RUN deno install --allow-scripts
-RUN deno task build
+RUN bun run build
 
 FROM golang:1.26-alpine AS go
 WORKDIR /usr/src/paisa/backend

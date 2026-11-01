@@ -15,16 +15,16 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: oven-sh/setup-bun@v2
         with:
-          deno-version: v2.x
+          bun-version: 1.4.4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26.5"
       - uses: vegardit/fast-apt-mirror.sh@v1
       - run: |
           sudo apt-get install -y sqlite3
-          cd frontend && deno install && deno task build && cd ..
+          cd frontend && bun install --frozen-lockfile && bun run build && cd ..
           docker build -t ledger-builder packaging/ledger
           container_id=$(docker create ledger-builder)
           docker cp "$container_id":/ledger backend/pkg/binary/ledger

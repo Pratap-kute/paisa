@@ -7,6 +7,7 @@
 - Pinned `beancount<3` in CI setup and Dev Container to restore missing `bean-query` and `bean-report` CLI binaries - [@Pratap-kute](https://github.com/Pratap-kute)
 
 #### Platform & Developer Experience
+- Migrated the frontend toolchain from Deno to Bun (`package.json`, `bun.lock`, Biome lint), including CI, Docker, Dev Container, and dev scripts
 - Completely replaced Nix with lean Ubuntu 24.04 Dev Container configuration (`.devcontainer/Dockerfile`) and standard composite GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)
 - Added Docker-based Alpine static Ledger build pipeline (`packaging/ledger/Dockerfile`) for standalone Linux releases - [@Pratap-kute](https://github.com/Pratap-kute)
 - Configured CGO and SQLite build environments across GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)

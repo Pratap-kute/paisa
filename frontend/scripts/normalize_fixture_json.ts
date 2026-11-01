@@ -1,17 +1,21 @@
-import { fromFileUrl, join } from "@std/path";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
 import { withoutGeneratedIds } from "../tests/fixture_utils.ts";
 
-const fixtureRoot = fromFileUrl(new URL("../tests/fixture", import.meta.url));
+const fixtureRoot = fileURLToPath(new URL("../tests/fixture", import.meta.url));
 
-for await (const entry of Deno.readDir(fixtureRoot)) {
-  if (!entry.isDirectory) continue;
+const entries = await fs.readdir(fixtureRoot, { withFileTypes: true });
+for (const entry of entries) {
+  if (!entry.isDirectory()) continue;
   const fixtureDir = join(fixtureRoot, entry.name);
-  for await (const file of Deno.readDir(fixtureDir)) {
-    if (!file.isFile || !file.name.endsWith(".json")) continue;
+  const files = await fs.readdir(fixtureDir, { withFileTypes: true });
+  for (const file of files) {
+    if (!file.isFile() || !file.name.endsWith(".json")) continue;
     const path = join(fixtureDir, file.name);
-    const current = JSON.parse(await Deno.readTextFile(path));
+    const current = JSON.parse(await fs.readFile(path, "utf-8"));
     const normalized = withoutGeneratedIds(current);
-    await Deno.writeTextFile(path, JSON.stringify(normalized, null, 2) + "\n");
+    await fs.writeFile(path, JSON.stringify(normalized, null, 2) + "\n");
     console.log(`normalized ${path}`);
   }
 }

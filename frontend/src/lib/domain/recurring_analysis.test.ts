@@ -1,6 +1,7 @@
 import "dayjs/plugin/isSameOrBefore.js";
-import { expect } from "@std/expect";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it, expect } from "bun:test";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
@@ -289,11 +290,14 @@ it("preserves confirmed identities and transaction history from existing recurri
     ]
   ) {
     const input = JSON.parse(
-      Deno.readTextFileSync(
-        new URL(
-          `../../../tests/fixture/${fixture}/recurring.json`,
-          import.meta.url,
+      fs.readFileSync(
+        fileURLToPath(
+          new URL(
+            `../../../tests/fixture/${fixture}/recurring.json`,
+            import.meta.url,
+          ),
         ),
+        "utf-8",
       ),
       (key, value) =>
         key === "date" && typeof value === "string" ? dayjs(value) : value,

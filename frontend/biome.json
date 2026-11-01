@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/.svelte-kit/**",
+      "**/build/**",
+      "**/dist/**",
+      "**/coverage/**",
+      "**/*.svelte",
+      "tests/fixture/**",
+      "tests/fixtures/**",
+      "src/lib/api/generated/**",
+      "src/lib/generated/**",
+      "src/lib/shared/vendor/**",
+      "graphify-out/**"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "recommended": true
+      }
+    }
+  }
+}

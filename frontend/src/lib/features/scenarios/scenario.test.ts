@@ -1,8 +1,8 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 const assertEquals = (a: unknown, b: unknown) => expect(a).toEqual(b);
 import { scenarioSeries } from "./scenario.ts";
 
-Deno.test("scenario privacy strips chart and tooltip amounts", () => {
+test("scenario privacy strips chart and tooltip amounts", () => {
   const result = {
     baseline: { points: [{ month: "2026-10", cash: 12345 }] },
     scenario: { points: [{ month: "2026-10", cash: -54321 }] },

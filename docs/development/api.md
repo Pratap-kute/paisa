@@ -59,12 +59,12 @@ frontend/src/lib/api/client.ts
 
 - **Frontend TypeScript Client Only**:
   ```bash
-  cd frontend && deno task api:generate
+  cd frontend && bun run api:generate
   ```
 
 - **Verify Frontend Generation Drift (CI Check)**:
   ```bash
-  cd frontend && deno task api:check
+  cd frontend && bun run api:check
   ```
 
 ---
@@ -115,4 +115,4 @@ When adding or modifying an HTTP endpoint:
 5. **Regenerate Full Pipeline**: Run `make api`.
 6. **Verify Coverage & Types**:
    - Backend: `cd backend && go test -v ./pkg/server -run "TestSwagger|TestArchitecture"`
-   - Frontend: `cd frontend && deno task check && deno task test`
+   - Frontend: `cd frontend && bun run check && bun test`

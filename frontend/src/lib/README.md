@@ -41,11 +41,11 @@ public boundary genuinely needs one.
 
 ## Enforced dependencies
 
-`deno task architecture` checks `$lib` and relative imports in TypeScript,
+`bun run architecture` checks `$lib` and relative imports in TypeScript,
 JavaScript, and Svelte files. Domain cannot depend on Svelte, routes, features,
 UI, or API transport. Shared cannot depend on features or routes. Features and
 generated output cannot depend on routes, and API cannot depend on routes or
-feature implementations. `deno task check` runs this boundary check first.
+feature implementations. `bun run check` runs this boundary check first.
 
 ## Deferred route candidates
 

@@ -1,5 +1,17 @@
-import { extname, join, normalize, relative, resolve } from "@std/path";
-import { walk } from "@std/fs";
+import { extname, join, normalize, relative, resolve } from "node:path";
+import fs from "node:fs/promises";
+
+async function* walk(dir: string): AsyncGenerator<{ path: string; name: string; isFile: boolean }> {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      yield* walk(fullPath);
+    } else {
+      yield { path: fullPath, name: entry.name, isFile: entry.isFile() };
+    }
+  }
+}
 
 export interface SpecViolation {
   file: string;
@@ -323,7 +335,7 @@ export async function extractDefinedCssVariables(
   for (const relPath of APPROVED_TOKEN_DEFINITION_FILES) {
     const fullPath = join(frontendRoot, relPath);
     try {
-      const content = await Deno.readTextFile(fullPath);
+      const content = await fs.readFile(fullPath, "utf-8");
       for (const match of content.matchAll(/(--paisa-[a-z0-9-]+)\s*:/g)) {
         defined.add(match[1]);
       }
@@ -365,7 +377,7 @@ export function findUndefinedTokenViolations(
 }
 
 export async function checkUiSpec(
-  frontendRoot = Deno.cwd(),
+  frontendRoot = process.cwd(),
 ): Promise<SpecViolation[]> {
   frontendRoot = normalize(resolve(frontendRoot));
   const srcDir = join(frontendRoot, "src");
@@ -395,7 +407,7 @@ export async function checkUiSpec(
     if (!entry.isFile) continue;
 
     if ([".svelte", ".ts", ".js", ".html", ".css"].includes(ext)) {
-      const content = await Deno.readTextFile(entry.path);
+      const content = await fs.readFile(entry.path, "utf-8");
 
       // 2. Raw palette check (for template/code/markup files)
       if (ext !== ".css") {
@@ -440,7 +452,7 @@ if (import.meta.main) {
         `[${violation.rule}] ${violation.file}\n  ${violation.detail}\n`,
       );
     }
-    Deno.exit(1);
+    process.exit(1);
   }
   console.log("UI Specification check passed with 0 violations.");
 }

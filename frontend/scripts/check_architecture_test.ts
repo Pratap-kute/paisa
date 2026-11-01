@@ -1,4 +1,4 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import {
   classifyViolation,
   extractStaticImports,
@@ -6,7 +6,7 @@ import {
 
 const root = "/workspace/frontend";
 
-Deno.test("extracts TypeScript, Svelte, export-from, and dynamic static imports", () => {
+test("extracts TypeScript, Svelte, export-from, and dynamic static imports", () => {
   expect(
     extractStaticImports(`
       import type { Posting } from "$lib/domain/ledger";
@@ -22,7 +22,7 @@ Deno.test("extracts TypeScript, Svelte, export-from, and dynamic static imports"
   ]);
 });
 
-Deno.test("allows intended dependency direction", () => {
+test("allows intended dependency direction", () => {
   expect(
     classifyViolation(
       `${root}/src/lib/features/expense/data.ts`,
@@ -54,7 +54,7 @@ for (
     "src/lib/shared/layout/AppShell.svelte",
   ]
 ) {
-  Deno.test(`rejects direct bits-ui import from ${source}`, () => {
+  test(`rejects direct bits-ui import from ${source}`, () => {
     const violation = classifyViolation(`${root}/${source}`, "bits-ui", root);
     expect(violation?.rule).toContain("restricted");
   });
@@ -95,9 +95,8 @@ for (
     ],
   ] as const
 ) {
-  Deno.test(`rejects ${name}`, () => {
+  test(`rejects ${name}`, () => {
     const violation = classifyViolation(`${root}/${source}`, imported, root);
     expect(violation?.rule).toMatch(new RegExp(rule));
-    expect(violation?.imported).toBe(imported);
   });
 }

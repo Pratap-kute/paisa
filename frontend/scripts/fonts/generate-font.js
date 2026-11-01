@@ -1,5 +1,5 @@
-import { writeFileSync } from "fs";
-import { join } from "path";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { createSVG, createTTF, createWOFF2 } from "svgtofont/lib/utils.js";
 
 let infoData = {};

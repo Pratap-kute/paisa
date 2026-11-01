@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any no-var -- Ambient browser globals and untyped third-party modules require declaration syntax.
 /// <reference types="@sveltejs/kit" />
 /// <reference lib="dom" />
 /// <reference lib="dom.iterable" />

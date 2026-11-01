@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any -- Error hooks normalize values from untyped browser and Svelte boundaries.
 import type { HandleClientError } from "@sveltejs/kit";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";

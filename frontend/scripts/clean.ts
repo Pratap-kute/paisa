@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+
 const targets = [
   ".svelte-kit",
   ".vite",
@@ -10,10 +12,8 @@ const targets = [
 
 for (const target of targets) {
   try {
-    await Deno.remove(target, { recursive: true });
+    await fs.rm(target, { recursive: true, force: true });
   } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error(`Failed to remove ${target}:`, error);
-    }
+    console.error(`Failed to remove ${target}:`, error);
   }
 }

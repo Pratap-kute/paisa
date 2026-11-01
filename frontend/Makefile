@@ -14,22 +14,22 @@ help: ## Display this help message
 
 .PHONY: dev preview
 dev: ## Start Vite development server
-	deno task dev
+	bun run dev
 
 preview: ## Preview production build locally
-	deno task preview
+	bun run preview
 
 ##@ Build
 
 .PHONY: build watch clean
 build: ## Build SvelteKit static site into backend/web/static
-	deno task build
+	bun run build
 
 watch: ## Watch and rebuild frontend assets on change
-	deno task build:watch
+	bun run build:watch
 
 clean: ## Remove frontend build output, caches, and test artifacts
-	deno task clean
+	bun run clean
 
 ##@ Testing
 
@@ -39,57 +39,57 @@ test: test-unit test-core test-component ## Run frontend unit, core, and compone
 test-all: test-unit test-core test-component test-integration test-e2e ## Run full frontend test suite
 
 test-unit: ## Run frontend unit tests
-	deno task test:unit
+	bun run test:unit
 
 test-core: ## Run domain core Vitest tests
-	deno task test:core
+	bun run test:core
 
 test-component: ## Run Svelte component Vitest tests
-	deno task test:component
+	bun run test:component
 
 test-integration: ## Run CLI integration tests
-	unset PAISA_CONFIG && TZ=UTC deno task test:integration
+	unset PAISA_CONFIG && TZ=UTC bun run test:integration
 
 test-e2e: ## Run Playwright browser tests
-	deno task test:e2e
+	bun run test:e2e
 
 test-visual: ## Run Playwright visual snapshot tests
-	deno task test:visual
+	bun run test:visual
 
 test-visual-update: ## Update Playwright visual snapshot baselines
-	deno task test:visual:update
+	bun run test:visual:update
 
 test-coverage: ## Generate frontend test coverage report
-	deno task test:coverage
+	bun run test:coverage
 
 ##@ Code Quality & Security
 
 .PHONY: lint check typecheck format fmt audit vulncheck
-lint: ## Run Deno linter
-	deno task lint
+lint: ## Run Biome linter
+	bun run lint
 
-audit vulncheck: ## Run Deno dependency vulnerability audit
-	deno task audit
+audit vulncheck: ## Run Bun dependency vulnerability audit
+	bun run audit
 
 check typecheck: ## Run TypeScript and Svelte template type checks
-	deno task check
+	bun run check
 
 format fmt: ## Format frontend source files
-	deno task format
+	bun run format
 
 ##@ Code Generation & Tooling
 
 .PHONY: parsers parser generate-fonts normalize-fixtures
 parsers parser: ## Rebuild Lezer sheet and search query grammars
-	deno task parser-build-debug
+	bun run parser-build-debug
 
 generate-fonts: ## Download SVGs and generate custom icon font
-	deno run -A scripts/fonts/download-svgs.js
-	deno run -A scripts/fonts/generate-font.js
+	bun run scripts/fonts/download-svgs.js
+	bun run scripts/fonts/generate-font.js
 
 normalize-fixtures: ## Strip generated ids from committed API fixture JSON baselines
-	deno run -A scripts/normalize_fixture_json.ts
+	bun run scripts/normalize_fixture_json.ts
 
 api: ## Generate TypeScript API client and data contracts from Swagger specification
-	deno task api:generate
+	bun run api:generate
 

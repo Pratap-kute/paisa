@@ -1,16 +1,19 @@
-import { fromFileUrl, join } from "@std/path";
+import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import fs from "node:fs/promises";
+import net from "node:net";
 import { copyFixtureSourceToTemp } from "../tests/fixture_utils.ts";
 
-const root = fromFileUrl(new URL("../", import.meta.url));
+const root = fileURLToPath(new URL("../", import.meta.url));
 const sourceDir = join(root, "tests/fixture/browser");
-const backendPort = Number(Deno.env.get("PAISA_E2E_BACKEND_PORT") ?? 7500);
-const frontendPort = Number(Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173);
+const backendPort = Number(process.env.PAISA_E2E_BACKEND_PORT ?? 7500);
+const frontendPort = Number(process.env.PAISA_E2E_FRONTEND_PORT ?? 5173);
 const fixture = await copyFixtureSourceToTemp(sourceDir);
 const binary = join(
   fixture,
-  Deno.build.os === "windows" ? "paisa.exe" : "paisa",
+  process.platform === "win32" ? "paisa.exe" : "paisa",
 );
-const children: Deno.ChildProcess[] = [];
+const children: ReturnType<typeof Bun.spawn>[] = [];
 let stopping = false;
 
 async function run(
@@ -19,37 +22,38 @@ async function run(
   cwd = root,
   env: Record<string, string> = {},
 ) {
-  const status = await new Deno.Command(command, {
-    args,
+  const proc = Bun.spawn([command, ...args], {
     cwd,
-    env: { ...Deno.env.toObject(), ...env },
-    stdin: "null",
+    env: { ...process.env, ...env },
+    stdin: "ignore",
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn().status;
-  if (!status.success) {
-    throw new Error(`${command} failed with exit code ${status.code}`);
+  });
+  const code = await proc.exited;
+  if (code !== 0) {
+    throw new Error(`${command} failed with exit code ${code}`);
   }
+}
+
+async function checkPort(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host: "127.0.0.1", port });
+    socket.once("connect", () => {
+      socket.end();
+      resolve(true);
+    });
+    socket.once("error", () => {
+      resolve(false);
+    });
+  });
 }
 
 async function waitForPort(port: number, timeout = 30_000) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    try {
-      const connection = await Deno.connect({ hostname: "127.0.0.1", port });
-      connection.close();
-      return;
-    } catch (error) {
-      if (
-        !(error instanceof Deno.errors.ConnectionRefused) &&
-        !(error instanceof Deno.errors.ConnectionReset) &&
-        !(error instanceof Deno.errors.ConnectionAborted) &&
-        !(error instanceof Deno.errors.NotConnected)
-      ) {
-        throw error;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    const ready = await checkPort(port);
+    if (ready) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error(`Timed out waiting for port ${port}`);
 }
@@ -60,34 +64,38 @@ async function stop(code: number) {
   for (const child of children) {
     try {
       child.kill("SIGTERM");
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) throw error;
+    } catch (_error) {
+      // Child might have already exited
     }
   }
-  await Promise.allSettled(children.map((child) => child.status));
-  await Deno.remove(fixture, { recursive: true });
-  Deno.exit(code);
+  await Promise.allSettled(children.map((child) => child.exited));
+  try {
+    await fs.rm(fixture, { recursive: true, force: true });
+  } catch (_error) {
+    // Ignore cleanup error
+  }
+  process.exit(code);
 }
 
-for (
-  const signal of Deno.build.os === "windows"
-    ? ["SIGINT"] as const
-    : ["SIGINT", "SIGTERM"] as const
-) {
-  Deno.addSignalListener(signal, () => void stop(0));
+const signals = process.platform === "win32"
+  ? (["SIGINT"] as const)
+  : (["SIGINT", "SIGTERM"] as const);
+
+for (const signal of signals) {
+  process.on(signal, () => void stop(0));
 }
 
 try {
   // Browser tests must exercise the current working tree, not a static bundle
   // left behind by an earlier run.
-  await run(Deno.execPath(), ["task", "build"], root, {
+  await run("bun", ["run", "build"], root, {
     VITE_PAISA_E2E_DEV_UI: "true",
   });
   await run("go", ["build", "-o", binary, "."], join(root, "../backend"));
-  if (Deno.env.get("PAISA_SHOWCASE_CAPTURE") === "true") {
+  if (process.env.PAISA_SHOWCASE_CAPTURE === "true") {
     const journalPath = join(fixture, "main.ledger");
-    const journal = await Deno.readTextFile(journalPath);
-    await Deno.writeTextFile(
+    const journal = await fs.readFile(journalPath, "utf-8");
+    await fs.writeFile(
       journalPath,
       journal +
         "\n2021/11/15 Demo streaming\n" +
@@ -101,8 +109,8 @@ try {
         "    Assets:Checking                           -499 INR\n",
     );
     const configPath = join(fixture, "paisa.yaml");
-    const config = await Deno.readTextFile(configPath);
-    await Deno.writeTextFile(
+    const config = await fs.readFile(configPath, "utf-8");
+    await fs.writeFile(
       configPath,
       config +
         "\nprediction:\n" +
@@ -121,6 +129,7 @@ try {
     // and local: do not fetch live prices, portfolios, or taxation data.
     "--journal",
   ], fixture);
+
   // Portfolio holdings normally come from an external provider, so journal
   // synchronization cannot recreate them in CI. Seed a small deterministic
   // portfolio to keep the assets-analysis browser fixture self-contained.
@@ -142,52 +151,53 @@ try {
   // bundled Ledger binary. Let editor validation succeed in browser tests,
   // while making synchronization fail before it can replace fixture DB rows.
   const ledgerStub = join(fixture, "ledger");
-  await Deno.writeTextFile(
+  await fs.writeFile(
     ledgerStub,
     '#!/bin/sh\ncase " $* " in *" balance "*) exit 0;; *) exit 1;; esac\n',
     { mode: 0o750 },
   );
 
-  const backend = new Deno.Command(binary, {
-    args: [
-      "--config",
-      join(fixture, "paisa.yaml"),
-      "serve",
-      "--port",
-      String(backendPort),
-      "--now",
-      "2022-02-07",
-    ],
+  const backend = Bun.spawn([
+    binary,
+    "--config",
+    join(fixture, "paisa.yaml"),
+    "serve",
+    "--port",
+    String(backendPort),
+    "--now",
+    "2022-02-07",
+  ], {
     cwd: fixture,
     env: {
+      ...process.env,
       TZ: "UTC",
-      PATH: `${fixture}:${Deno.env.get("PATH") ?? ""}`,
+      PATH: `${fixture}:${process.env.PATH ?? ""}`,
     },
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn();
+  });
   children.push(backend);
   await waitForPort(backendPort);
 
-  const frontend = new Deno.Command(Deno.execPath(), {
-    args: [
-      "task",
-      "preview",
-      "--host",
-      "127.0.0.1",
-      "--port",
-      String(frontendPort),
-      "--strictPort",
-    ],
+  const frontend = Bun.spawn([
+    "bun",
+    "run",
+    "preview",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    String(frontendPort),
+    "--strictPort",
+  ], {
     cwd: root,
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn();
+  });
   children.push(frontend);
   await waitForPort(frontendPort);
 
-  const failed = await Promise.race(children.map((child) => child.status));
-  await stop(failed.code || 1);
+  const failedCode = await Promise.race(children.map((child) => child.exited));
+  await stop(failedCode || 1);
 } catch (error) {
   console.error(error);
   await stop(1);

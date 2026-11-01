@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any -- Handlebars invokes helpers with heterogeneous positional values and option objects.
 import dayjs from "dayjs";
 import { capitalize, isString, round, trim } from "es-toolkit";
 import { predictionSession } from "$lib/features/prediction/session";

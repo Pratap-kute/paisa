@@ -1,12 +1,12 @@
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { describe, test, expect } from "bun:test";
+import fs from "node:fs";
 import { format } from "./journal";
 
 function readFixture(name: string) {
   try {
-    return Deno.readTextFileSync(`../fixture/${name}`);
+    return fs.readFileSync(`../fixture/${name}`, "utf-8");
   } catch (_) {
-    return Deno.readTextFileSync(`fixture/${name}`);
+    return fs.readFileSync(`fixture/${name}`, "utf-8");
   }
 }
 

@@ -1,5 +1,4 @@
-import { expect } from "@std/expect";
-import { describe, it as test } from "@std/testing/bdd";
+import { describe, test, expect } from "bun:test";
 import type { AssetBreakdown } from "$lib/domain/assets";
 import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";

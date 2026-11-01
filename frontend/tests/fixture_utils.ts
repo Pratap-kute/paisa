@@ -1,4 +1,7 @@
-import { basename, join } from "@std/path";
+import { basename, join } from "node:path";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
+import os from "node:os";
 
 const FIXTURE_ROOT = "tests/fixture";
 const BASE_PORT = 5700;
@@ -28,41 +31,41 @@ function shouldCopyFixtureEntry(name: string): boolean {
 }
 
 async function copyFixtureEntry(source: string, target: string) {
-  const info = await Deno.stat(source);
-  if (info.isDirectory) {
-    await Deno.mkdir(target, { recursive: true });
-    for await (const entry of Deno.readDir(source)) {
-      if (!shouldCopyFixtureEntry(entry.name)) continue;
+  const info = await fs.stat(source);
+  if (info.isDirectory()) {
+    await fs.mkdir(target, { recursive: true });
+    const entries = await fs.readdir(source);
+    for (const entry of entries) {
+      if (!shouldCopyFixtureEntry(entry)) continue;
       await copyFixtureEntry(
-        join(source, entry.name),
-        join(target, entry.name),
+        join(source, entry),
+        join(target, entry),
       );
     }
     return;
   }
-  await Deno.copyFile(source, target);
+  await fs.copyFile(source, target);
 }
 
 export async function copyFixtureSourceToTemp(
   sourceDir: string,
 ): Promise<string> {
-  const tempDir = await Deno.makeTempDir({
-    prefix: `paisa-fixture-${basename(sourceDir)}-`,
-  });
-  for await (const entry of Deno.readDir(sourceDir)) {
-    if (!shouldCopyFixtureEntry(entry.name)) continue;
+  const tempDir = await fs.mkdtemp(
+    join(os.tmpdir(), `paisa-fixture-${basename(sourceDir)}-`),
+  );
+  const entries = await fs.readdir(sourceDir);
+  for (const entry of entries) {
+    if (!shouldCopyFixtureEntry(entry)) continue;
     await copyFixtureEntry(
-      join(sourceDir, entry.name),
-      join(tempDir, entry.name),
+      join(sourceDir, entry),
+      join(tempDir, entry),
     );
   }
   return tempDir;
 }
 
 export function fixturePort(name: string): number {
-  const names = Array.from(Deno.readDirSync(FIXTURE_ROOT))
-    .map((entry) => entry.name)
-    .sort();
+  const names = Array.from(fsSync.readdirSync(FIXTURE_ROOT)).sort();
   const index = names.indexOf(name);
   if (index < 0) {
     throw new Error(`Unknown fixture directory: ${name}`);

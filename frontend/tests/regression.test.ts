@@ -1,6 +1,9 @@
-import { fromFileUrl, join } from "@std/path";
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
+import net from "node:net";
+import { describe, test, expect } from "bun:test";
 import {
   copyFixtureSourceToTemp,
   fixturePort,
@@ -33,24 +36,18 @@ async function recordAndVerify(
   const data = await request(route);
 
   const filename = join(baselineDir, name + ".json");
-  const regenerate = Deno.env.get("REGENERATE") === "true";
+  const regenerate = process.env.REGENERATE === "true";
   const normalized = withoutGeneratedIds(data);
 
-  let exists = true;
-  try {
-    Deno.statSync(filename);
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) exists = false;
-    else throw error;
-  }
+  const exists = fsSync.existsSync(filename);
 
   if (exists && !regenerate) {
-    const current = JSON.parse(Deno.readTextFileSync(filename));
+    const current = JSON.parse(fsSync.readFileSync(filename, "utf-8"));
     expect(normalized).toEqual(withoutGeneratedIds(current));
     return;
   }
 
-  Deno.writeTextFileSync(filename, JSON.stringify(normalized, null, 2));
+  fsSync.writeFileSync(filename, JSON.stringify(normalized, null, 2));
 }
 
 async function verifyApi(
@@ -122,40 +119,36 @@ async function verifyApi(
   await recordAndVerify(baselineDir, request, "/api/config", "config");
 }
 
+async function checkPort(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host: "127.0.0.1", port });
+    socket.once("connect", () => {
+      socket.end();
+      resolve(true);
+    });
+    socket.once("error", () => {
+      resolve(false);
+    });
+  });
+}
+
 async function waitForPort(port: number, timeout = 10_000) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    try {
-      const connection = await Deno.connect({
-        hostname: "127.0.0.1",
-        port,
-      });
-      connection.close();
-      return;
-    } catch (error) {
-      if (
-        !(error instanceof Deno.errors.ConnectionRefused) &&
-        !(error instanceof Deno.errors.ConnectionReset) &&
-        !(error instanceof Deno.errors.ConnectionAborted) &&
-        !(error instanceof Deno.errors.NotConnected)
-      ) {
-        throw error;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    const ready = await checkPort(port);
+    if (ready) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error(`Timed out waiting for port ${port}`);
 }
 
 function findPaisaBinary(): string {
-  const frontendDir = fromFileUrl(new URL("../", import.meta.url));
+  const frontendDir = fileURLToPath(new URL("../", import.meta.url));
   const backendBinary = join(frontendDir, "../backend/paisa");
-  try {
-    Deno.statSync(backendBinary);
+  if (fsSync.existsSync(backendBinary)) {
     return backendBinary;
-  } catch (_) {
-    return join(frontendDir, "paisa");
   }
+  return join(frontendDir, "paisa");
 }
 
 async function check(baselineDir: string, fixtureName: string) {
@@ -164,35 +157,43 @@ async function check(baselineDir: string, fixtureName: string) {
   const baseUrl = `http://localhost:${port}`;
   const request = createRequest(baseUrl);
 
-  const command = new Deno.Command(findPaisaBinary(), {
-    args: [
-      "--config",
-      join(workDir, "paisa.yaml"),
-      "--port",
-      port.toString(),
-      "--now",
-      "2022-02-07",
-      "serve",
-    ],
+  const child = Bun.spawn([
+    findPaisaBinary(),
+    "--config",
+    join(workDir, "paisa.yaml"),
+    "--port",
+    port.toString(),
+    "--now",
+    "2022-02-07",
+    "serve",
+  ], {
     cwd: workDir,
-    env: { TZ: "UTC" },
+    env: { ...process.env, TZ: "UTC" },
+    stdout: "ignore",
+    stderr: "ignore",
   });
-  const child = command.spawn();
+
   try {
     await waitForPort(port);
     await verifyApi(baselineDir, request);
   } finally {
-    child.kill("SIGTERM");
-    await child.status;
-    await Deno.remove(workDir, { recursive: true });
+    try {
+      child.kill("SIGTERM");
+    } catch (_error) {
+      // Ignore
+    }
+    await child.exited;
+    await fs.rm(workDir, { recursive: true, force: true });
   }
 }
 
 describe("regression", () => {
-  Array.from(Deno.readDirSync(fixture)).forEach(({ name: dir }) => {
-    test(dir, async () => {
-      const baselineDir = join(fixture, dir);
-      await check(baselineDir, dir);
+  const entries = fsSync.readdirSync(fixture, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    test(entry.name, async () => {
+      const baselineDir = join(fixture, entry.name);
+      await check(baselineDir, entry.name);
     });
-  });
+  }
 });

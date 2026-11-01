@@ -44,7 +44,7 @@ for (const postingCount of [5000, 25000, 50000]) {
     },
   );
   const json = JSON.stringify({ transactions });
-  const before = Deno.memoryUsage().heapUsed;
+  const before = process.memoryUsage().heapUsed;
   const start = performance.now();
   const candidates = discoverRecurringCandidates(
     transactions,
@@ -58,7 +58,7 @@ for (const postingCount of [5000, 25000, 50000]) {
     jsonBytes: new TextEncoder().encode(json).length,
     candidates: candidates.length,
     analysisMs: Math.round(duration),
-    heapUsedMiB: Math.round(Deno.memoryUsage().heapUsed / 1048576),
-    heapGrowthMiB: Math.round((Deno.memoryUsage().heapUsed - before) / 1048576),
+    heapUsedMiB: Math.round(process.memoryUsage().heapUsed / 1048576),
+    heapGrowthMiB: Math.round((process.memoryUsage().heapUsed - before) / 1048576),
   }));
 }

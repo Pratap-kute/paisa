@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any -- CodeMirror syntax-tree nodes expose dynamically shaped parser metadata.
 import type { Posting, Transaction } from "$lib/domain/ledger";
 import {
   autocompletion,

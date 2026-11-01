@@ -1,7 +1,7 @@
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
 /* vim: set ts=2: */
 /*exported XLSX */
-/*global process:false, Buffer:false, ArrayBuffer:false, DataView:false, Deno:false */
+/*global process:false, Buffer:false, ArrayBuffer:false, DataView:false */
 var XLSX = {};
 XLSX.version = '0.20.3';
 var current_codepage = 1200, current_ansi = 1252;
@@ -3298,16 +3298,6 @@ function blobify(data) {
 function write_dl(fname/*:string*/, payload/*:any*/, enc/*:?string*/) {
 	/*global IE_SaveFile, Blob, navigator, saveAs, document, File, chrome */
 	if(typeof _fs !== 'undefined' && _fs.writeFileSync) return enc ? _fs.writeFileSync(fname, payload, enc) : _fs.writeFileSync(fname, payload);
-	if(typeof Deno !== 'undefined') {
-		/* in this spot, it's safe to assume typed arrays and TextEncoder/TextDecoder exist */
-		if(enc && typeof payload == "string") switch(enc) {
-			case "utf8": payload = new TextEncoder(enc).encode(payload); break;
-			case "binary": payload = s2ab(payload); break;
-			/* TODO: binary equivalent */
-			default: throw new Error("Unsupported encoding " + enc);
-		}
-		return Deno.writeFileSync(fname, payload);
-	}
 	var data = (enc == "utf8") ? utf8write(payload) : payload;
 	/*:: declare var IE_SaveFile: any; */
 	if(typeof IE_SaveFile !== 'undefined') return IE_SaveFile(data, fname);
@@ -3351,7 +3341,6 @@ function write_dl(fname/*:string*/, payload/*:any*/, enc/*:?string*/) {
 /* read binary data from file */
 function read_binary(path/*:string*/) {
 	if(typeof _fs !== 'undefined') return _fs.readFileSync(path);
-	if(typeof Deno !== 'undefined') return Deno.readFileSync(path);
 	// $FlowIgnore
 	if(typeof $ !== 'undefined' && typeof File !== 'undefined' && typeof Folder !== 'undefined') try { // extendscript
 		// $FlowIgnore
@@ -27222,7 +27211,7 @@ function readSync(data/*:RawData*/, opts/*:?ParseOpts*/)/*:Workbook*/ {
 	if(typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer) return readSync(new Uint8Array(data), (o = dup(o), o.type = "array", o));
 	/* Javet projects `byte[]` to `Int8Array` */
 	if(typeof Int8Array !== 'undefined' && data instanceof Int8Array) return readSync(new Uint8Array(data.buffer, data.byteOffset, data.length), o);
-	if(typeof Uint8Array !== 'undefined' && data instanceof Uint8Array && !o.type) o.type = typeof Deno !== "undefined" ? "buffer" : "array";
+	if(typeof Uint8Array !== 'undefined' && data instanceof Uint8Array && !o.type) o.type = "array";
 	var d = data, n = [0,0,0,0], str = false;
 	if(o.cellStyles) { o.cellNF = true; o.sheetStubs = true; }
 	_ssfopts = {};
@@ -27320,12 +27309,6 @@ function write_zip_denouement(z/*:any*/, o/*:?WriteOpts*/)/*:any*/ {
 		default: throw new Error("Unrecognized type " + o.type);
 	}
 	var out = z.FullPaths ? CFB.write(z, {fileType:"zip", type: /*::(*/{"nodebuffer": "buffer", "string": "binary"}/*:: :any)*/[oopts.type] || oopts.type, compression: !!o.compression}) : z.generate(oopts);
-	if(typeof Deno !== "undefined") {
-		if(typeof out == "string") {
-			if(o.type == "binary" || o.type == "base64") return out;
-			out = new Uint8Array(s2ab(out));
-		}
-	}
 /*jshint -W083 */
 	if(o.password && typeof encrypt_agile !== 'undefined') return write_cfb_ctr(encrypt_agile(out, o.password), o); // eslint-disable-line no-undef
 /*jshint +W083 */
@@ -28226,5 +28209,3 @@ export default {
 	SSF,
 	CFB
 }
-
-// denoCacheMetadata={"headers":{"access-control-allow-origin":"*","referrer-policy":"strict-origin-when-cross-origin","vary":"accept-encoding","cf-ray":"a2b006b8cf0e0eea-BOM","etag":"W/\"c5db3f6a80df9551d1f731da94ad2a39\"","server":"cloudflare","cf-cache-status":"MISS","cache-control":"public, max-age=0, must-revalidate","date":"Fri, 14 Aug 2026 12:40:07 GMT","nel":"{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}","x-content-type-options":"nosniff","report-to":"{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=JRZ8c5EUHeAwjDyUAR5hyynxEPb4X7IezHMtmKolsjGYCQcg99MPgukmKGAK69Yk4FUxfIylPnKDWudzpzSKDZtycP8poo4VHk4bcDEjeklzRPoAOB%2FIHZRHGnlFPOeQY4A%3D\"}]}","content-encoding":"br","alt-svc":"h3=\":443\"; ma=86400","content-type":"application/javascript"},"url":"https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs","time":1786711207}

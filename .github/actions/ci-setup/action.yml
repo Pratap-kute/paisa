@@ -1,5 +1,5 @@
 name: CI Setup
-description: Setup Go, Deno, Python, system tools, and dependencies
+description: Setup Go, Bun, Python, system tools, and dependencies
 
 runs:
   using: composite
@@ -11,10 +11,10 @@ runs:
         cache: true
         cache-dependency-path: backend/go.sum
 
-    - name: Set up Deno
-      uses: denoland/setup-deno@v2
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@v2
       with:
-        deno-version: v2.x
+        bun-version: 1.4.4
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -58,17 +58,17 @@ runs:
         bean-query --help >/dev/null && echo "bean-query OK"
         bean-report --help >/dev/null && echo "bean-report OK"
 
-    - name: Restore Deno cache
+    - name: Restore Bun cache
       uses: actions/cache@v4
       with:
         path: |
-          ~/.cache/deno
+          ~/.bun/install/cache
           frontend/node_modules
-        key: deno-${{ runner.os }}-${{ hashFiles('frontend/deno.lock') }}
-        restore-keys: deno-${{ runner.os }}-
+        key: bun-${{ runner.os }}-${{ hashFiles('frontend/bun.lock') }}
+        restore-keys: bun-${{ runner.os }}-
 
     - name: Install frontend dependencies
       shell: bash
       run: |
         cd frontend
-        deno install
+        bun install --frozen-lockfile

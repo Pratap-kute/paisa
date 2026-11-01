@@ -1,5 +1,10 @@
-const includeFrontend = Deno.args.includes("--frontend");
-const fixedDate = Deno.args.includes("--now");
+import net from "node:net";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const includeFrontend = process.argv.includes("--frontend");
+const fixedDate = process.argv.includes("--now");
 const ignoredDirectories = new Set([
   ".git",
   ".svelte-kit",
@@ -8,85 +13,93 @@ const ignoredDirectories = new Set([
   "backend/web/static",
 ]);
 
-function ensurePortAvailable(port: number, service: string) {
-  try {
-    const listener = Deno.listen({ hostname: "0.0.0.0", port });
-    listener.close();
-  } catch (error) {
-    if (!(error instanceof Deno.errors.AddrInUse)) throw error;
-    console.error(
-      `${service} port ${port} is already in use. ` +
-        "Stop the existing development server with Ctrl+C, then run make develop again.",
-    );
-    Deno.exit(1);
-  }
+async function ensurePortAvailable(port: number, service: string): Promise<void> {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once("error", (err: NodeJS.ErrnoException) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(
+          `${service} port ${port} is already in use. ` +
+            "Stop the existing development server with Ctrl+C, then run make develop again.",
+        );
+        process.exit(1);
+      }
+      resolve();
+    });
+    server.once("listening", () => {
+      server.close(() => resolve());
+    });
+    server.listen(port, "0.0.0.0");
+  });
 }
 
-ensurePortAvailable(7500, "Backend");
-if (includeFrontend) ensurePortAvailable(5173, "Frontend");
+await ensurePortAvailable(7500, "Backend");
+if (includeFrontend) await ensurePortAvailable(5173, "Frontend");
 
-let backend: Deno.ChildProcess | undefined;
-let frontend: Deno.ChildProcess | undefined;
-const backendBinary = await Deno.makeTempFile({
-  prefix: "paisa-dev-",
-  suffix: Deno.build.os === "windows" ? ".exe" : undefined,
-});
+let backend: ReturnType<typeof Bun.spawn> | undefined;
+let frontend: ReturnType<typeof Bun.spawn> | undefined;
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "paisa-dev-"));
+const backendBinary = path.join(
+  tempDir,
+  process.platform === "win32" ? "backend.exe" : "backend",
+);
 let restartTimer: ReturnType<typeof setTimeout> | undefined;
 let restarting = false;
 let shuttingDown = false;
 
 async function startBackend() {
-  const buildStatus = await new Deno.Command("go", {
-    args: ["build", "-o", backendBinary, "."],
+  const buildProc = Bun.spawn(["go", "build", "-o", backendBinary, "."], {
     cwd: "backend",
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn().status;
-  if (!buildStatus.success) {
-    await shutdown(buildStatus.code || 1);
+  });
+  const buildCode = await buildProc.exited;
+  if (buildCode !== 0) {
+    await shutdown(buildCode);
     return;
   }
 
-  const args = ["serve"];
+  const args = [backendBinary, "serve"];
   if (fixedDate) args.push("--now", "2022-02-07");
 
-  backend = new Deno.Command(backendBinary, {
-    args,
-    env: fixedDate ? { TZ: "UTC" } : undefined,
+  backend = Bun.spawn(args, {
+    env: {
+      ...process.env,
+      ...(fixedDate ? { TZ: "UTC" } : {}),
+    },
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn();
+  });
   const current = backend;
-  current.status.then((status) => {
+  current.exited.then((code) => {
     if (!restarting && !shuttingDown && backend === current) {
-      void shutdown(status.code || 1);
+      void shutdown(code);
     }
   });
 }
 
 function startFrontend() {
-  frontend = new Deno.Command(Deno.execPath(), {
-    args: ["task", "dev"],
+  frontend = Bun.spawn(["bun", "run", "dev"], {
     cwd: "frontend",
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn();
-  frontend.status.then((status) => {
-    if (!shuttingDown) void shutdown(status.code || 1);
+  });
+  frontend.exited.then((code) => {
+    if (!shuttingDown) void shutdown(code);
   });
 }
 
-async function stop(child: Deno.ChildProcess | undefined) {
+async function stop(child: ReturnType<typeof Bun.spawn> | undefined) {
   if (!child) return;
   try {
     child.kill("SIGTERM");
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) throw error;
+  } catch (_error) {
+    // Already terminated
   }
-  await child.status;
+  await child.exited;
 }
 
 async function restartBackend() {
@@ -101,40 +114,43 @@ async function shutdown(code: number) {
   shuttingDown = true;
   if (restartTimer !== undefined) clearTimeout(restartTimer);
   await Promise.allSettled([stop(backend), stop(frontend)]);
-  await Deno.remove(backendBinary).catch((error) => {
-    if (!(error instanceof Deno.errors.NotFound)) throw error;
-  });
-  Deno.exit(code);
+  try {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  } catch (_error) {
+    // Ignore cleanup error
+  }
+  process.exit(code);
 }
 
-function shouldRestart(paths: string[]) {
-  return paths.some((path) => {
-    const normalized = path.replaceAll("\\", "/");
-    if (
-      [...ignoredDirectories].some((dir) =>
-        normalized.includes(`/${dir}/`) || normalized.endsWith(`/${dir}`)
-      )
-    ) return false;
-    return (normalized.includes("/backend/") || normalized.startsWith("backend/")) &&
-      (normalized.endsWith(".go") || normalized.endsWith(".json"));
-  });
+function shouldRestart(filename: string) {
+  const normalized = filename.replaceAll("\\", "/");
+  if (
+    [...ignoredDirectories].some((dir) =>
+      normalized.includes(`/${dir}/`) || normalized.endsWith(`/${dir}`)
+    )
+  ) return false;
+  return (normalized.endsWith(".go") || normalized.endsWith(".json"));
 }
 
-const terminationSignals = Deno.build.os === "windows"
+const terminationSignals = process.platform === "win32"
   ? (["SIGINT"] as const)
   : (["SIGINT", "SIGTERM"] as const);
 for (const signal of terminationSignals) {
-  Deno.addSignalListener(signal, () => void shutdown(0));
+  process.on(signal, () => void shutdown(0));
 }
 
 if (includeFrontend) startFrontend();
 await startBackend();
 
-for await (const event of Deno.watchFs("./backend")) {
-  if (shuttingDown || !shouldRestart(event.paths)) continue;
-  if (restartTimer !== undefined) clearTimeout(restartTimer);
-  restartTimer = setTimeout(() => {
-    restartTimer = undefined;
-    void restartBackend();
-  }, 2_000);
+try {
+  fs.watch("./backend", { recursive: true }, (_eventType, filename) => {
+    if (shuttingDown || !filename || !shouldRestart(filename)) return;
+    if (restartTimer !== undefined) clearTimeout(restartTimer);
+    restartTimer = setTimeout(() => {
+      restartTimer = undefined;
+      void restartBackend();
+    }, 2_000);
+  });
+} catch (error) {
+  console.warn("File watching not supported or failed:", error);
 }

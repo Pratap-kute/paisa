@@ -1,5 +1,4 @@
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { describe, test, expect } from "bun:test";
 import { parseDate } from "./search_query_editor";
 
 function assertRange(text: string, start: string, end: string) {

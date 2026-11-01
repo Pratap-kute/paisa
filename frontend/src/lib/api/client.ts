@@ -67,13 +67,13 @@ export function createApiClient(options: ClientOptions = {}): Api<unknown> {
     (typeof fetch !== "undefined" ? fetch : undefined);
 
   const customFetch = baseFetch
-    ? async (
+    ? ((async (
       input: RequestInfo | URL,
       init?: RequestInit,
     ): Promise<Response> => {
       const res = await baseFetch(input, init);
       return wrapResponse(res);
-    }
+    }) as typeof fetch)
     : undefined;
 
   const httpClient = new HttpClient({

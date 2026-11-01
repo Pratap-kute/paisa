@@ -1,4 +1,4 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { get } from "svelte/store";
 import { persisted } from "./persisted";
 
@@ -24,7 +24,7 @@ class MemoryStorage implements Storage {
   }
 }
 
-Deno.test("persisted serializes values and follows storage events", () => {
+test("persisted serializes values and follows storage events", () => {
   const storage = new MemoryStorage();
   let listener: ((event: StorageEvent) => void) | undefined;
   const store = persisted("theme", "light", {
@@ -52,7 +52,7 @@ Deno.test("persisted serializes values and follows storage events", () => {
   expect(get(store)).toBe("light");
 });
 
-Deno.test("persisted is safe without browser storage", () => {
+test("persisted is safe without browser storage", () => {
   const store = persisted("missing", 1, { storage: null, onStorage: () => {} });
   store.update((value) => value + 1);
   expect(get(store)).toBe(2);

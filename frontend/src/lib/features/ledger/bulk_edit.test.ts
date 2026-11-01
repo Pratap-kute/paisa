@@ -1,40 +1,45 @@
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { describe, test, expect } from "bun:test";
+import fs from "node:fs";
 
 import { applyChanges } from "./bulk_edit";
 import type { LedgerFile, Transaction } from "$lib/domain/ledger";
 import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {
-    Deno.statSync(`../fixture/${path}`);
-    return `../fixture/${path}`;
+    if (fs.existsSync(`../fixture/${path}`)) {
+      return `../fixture/${path}`;
+    }
+    return `fixture/${path}`;
   } catch (_) {
     return `fixture/${path}`;
   }
 }
 
 describe("bulk_editor", () => {
-  const before = Deno.readTextFileSync(fixturePath("main.ledger"));
+  const before = fs.readFileSync(fixturePath("main.ledger"), "utf-8");
   const transactions = JSON.parse(
-    Deno.readTextFileSync(fixturePath("main.transactions.json")),
+    fs.readFileSync(fixturePath("main.transactions.json"), "utf-8"),
   );
-  Array.from(Deno.readDirSync(fixturePath("bulk_edit"))).forEach(
-    ({ name: dir }) => {
+  Array.from(fs.readdirSync(fixturePath("bulk_edit"), { withFileTypes: true })).forEach(
+    (entry) => {
+      const dir = entry.name;
       test(dir, () => {
         const files = Array.from(
-          Deno.readDirSync(fixturePath(`bulk_edit/${dir}`)),
+          fs.readdirSync(fixturePath(`bulk_edit/${dir}`), { withFileTypes: true }),
           ({ name }) => name,
         );
         for (const file of files) {
           const [name, extension] = file.split(".");
           if (extension === "ledger") {
             const args = JSON.parse(
-              Deno.readTextFileSync(
+              fs.readFileSync(
                 fixturePath(`bulk_edit/${dir}/${name}.json`),
+                "utf-8",
               ),
             );
-            const after = Deno.readTextFileSync(
+            const after = fs.readFileSync(
               fixturePath(`bulk_edit/${dir}/${name}.ledger`),
+              "utf-8",
             );
             const ledgerFile: LedgerFile = {
               type: "file",

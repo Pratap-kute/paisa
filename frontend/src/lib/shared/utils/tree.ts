@@ -51,7 +51,6 @@ export function buildTree<I extends object>(
     let current = result;
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      // deno-lint-ignore no-explicit-any -- Generic tree nodes gain a recursive UI-only child collection.
       let found: any = current.find((c) =>
         accountAccessor(c).split(":")[i] === part
       );

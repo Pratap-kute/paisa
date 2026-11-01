@@ -3,16 +3,6 @@
     "go": "go",
     "gopls": "gopls"
   },
-  "deno.enable": true,
-  "deno.config": "frontend/deno.json",
-  "deno.importMap": "frontend/deno.json",
-  "deno.enablePaths": [
-    "frontend/scripts",
-    "frontend/playwright.config.ts",
-    "frontend/vitest.config.ts",
-    "frontend/vitest.shared.ts",
-    "frontend/tests/browser"
-  ],
   "editor.formatOnSave": true,
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"

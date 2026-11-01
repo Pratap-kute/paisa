@@ -1,11 +1,11 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { ensureFileExtension } from "./file";
 
-Deno.test("ensureFileExtension appends a missing extension", () => {
+test("ensureFileExtension appends a missing extension", () => {
   expect(ensureFileExtension("expenses", ".ledger")).toBe("expenses.ledger");
 });
 
-Deno.test("ensureFileExtension preserves an existing extension", () => {
+test("ensureFileExtension preserves an existing extension", () => {
   expect(ensureFileExtension("expenses.ledger", ".ledger")).toBe(
     "expenses.ledger",
   );
@@ -14,7 +14,7 @@ Deno.test("ensureFileExtension preserves an existing extension", () => {
   );
 });
 
-Deno.test("ensureFileExtension trims surrounding whitespace", () => {
+test("ensureFileExtension trims surrounding whitespace", () => {
   expect(ensureFileExtension("  expenses  ", ".ledger")).toBe(
     "expenses.ledger",
   );

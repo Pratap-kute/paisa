@@ -1,5 +1,4 @@
-import { expect } from "@std/expect";
-import { describe, it as test } from "@std/testing/bdd";
+import { describe, test, expect } from "bun:test";
 import { hasIcon, iconGlyphOr } from "./icon.ts";
 
 describe("configured icons", () => {

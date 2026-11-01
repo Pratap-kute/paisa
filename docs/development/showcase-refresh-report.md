@@ -142,11 +142,11 @@ name, logo, philosophy, and history.
 - Local fixture server: frontend production build and Go build passed; journal sync
   and seeded SQLite setup succeeded. `GOCACHE=/tmp/paisa-showcase-go-cache` avoided
   the sandbox's read-only default cache. Local servers required network access.
-- `deno run -A scripts/capture_showcase.ts`: passed for all six screenshots.
-- `deno run -A scripts/encode_showcase.ts`: passed; `ffprobe` verified size, dimensions,
+- `bun run scripts/capture_showcase.ts`: passed for all six screenshots.
+- `bun run scripts/encode_showcase.ts`: passed; `ffprobe` verified size, dimensions,
   frame count, and duration. All six encoded scenes were inspected in a contact
   sheet, as well as reviewing the full-size source screenshots.
-- `deno check scripts/capture_showcase.ts scripts/encode_showcase.ts`: passed.
+- `bun check --no-script scripts/capture_showcase.ts scripts/encode_showcase.ts`: passed.
 - MkDocs initially failed because the system installation lacked `paginate`.
   Nix is unavailable in this environment. A temporary system-site-packages venv
   with `paginate` installed allowed `/tmp/paisa-docs-venv/bin/python -m mkdocs build

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const requestedWorkers = Number(Deno.env.get("PAISA_PLAYWRIGHT_WORKERS") ?? 5);
+const requestedWorkers = Number(process.env.PAISA_PLAYWRIGHT_WORKERS ?? 5);
 const workers = Number.isFinite(requestedWorkers) && requestedWorkers > 0
   ? Math.floor(requestedWorkers)
   : 5;
@@ -20,7 +20,7 @@ export default defineConfig({
   }]],
   use: {
     baseURL: `http://127.0.0.1:${
-      Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173
+      process.env.PAISA_E2E_FRONTEND_PORT ?? 5173
     }`,
     timezoneId: "UTC",
     locale: "en-IN",

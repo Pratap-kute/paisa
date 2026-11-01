@@ -1,7 +1,7 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { responsiveChartOption } from "./responsive";
 
-Deno.test("responsiveChartOption uses root media options without implying a timeline", () => {
+test("responsiveChartOption uses root media options without implying a timeline", () => {
   const desktop = { grid: { left: 24 }, series: [{ type: "line" }] };
   const compact = { grid: { left: 8 } };
 

@@ -18,6 +18,9 @@ const config = {
       out: "../backend/web/static",
       fallback: "index.html",
     }),
+    alias: {
+      xlsx: "src/lib/shared/vendor/xlsx.mjs",
+    },
   },
 };
 

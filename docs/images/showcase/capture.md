@@ -6,22 +6,22 @@ Application base commit: `862476272bf51afe89abcb807755b798df843288`.
 ## Reproduce
 
 Use the repository's development environment (such as the Dev Container),
-including Deno, Go, SQLite, and Chromium matching Playwright. In two terminals:
+including Bun, Go, SQLite, and Chromium matching Playwright. In two terminals:
 
 ```sh
 cd frontend
-PAISA_SHOWCASE_CAPTURE=true deno run -A scripts/test_server.ts
+PAISA_SHOWCASE_CAPTURE=true bun run scripts/test_server.ts
 ```
 
 Once the server reports `http://127.0.0.1:5173/`:
 
 ```sh
 cd frontend
-deno run -A scripts/capture_showcase.ts
+bun run scripts/capture_showcase.ts
 # Optional: recapture selected assets only
-PAISA_SHOWCASE_NAMES=doctor,recurring deno run -A scripts/capture_showcase.ts
+PAISA_SHOWCASE_NAMES=doctor,recurring bun run scripts/capture_showcase.ts
 # Optional; requires ffmpeg:
-deno run -A scripts/encode_showcase.ts
+bun run scripts/encode_showcase.ts
 ```
 
 Stop the server with Ctrl+C to remove its temporary fixture database. If Go's

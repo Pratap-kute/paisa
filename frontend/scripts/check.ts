@@ -1,14 +1,13 @@
-import { expandGlob } from "@std/fs";
+import { glob } from "node:fs/promises";
 
-async function run(args: string[]): Promise<void> {
-  const command = new Deno.Command(Deno.execPath(), {
-    args,
+async function run(cmd: string[]): Promise<void> {
+  const proc = Bun.spawn(cmd, {
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
   });
-  const status = await command.spawn().status;
-  if (!status.success) Deno.exit(status.code);
+  const code = await proc.exited;
+  if (code !== 0) process.exit(code);
 }
 
 async function toolingFiles(): Promise<string[]> {
@@ -20,22 +19,23 @@ async function toolingFiles(): Promise<string[]> {
   const files = new Set<string>();
 
   for (const pattern of patterns) {
-    for await (const entry of expandGlob(pattern, { globstar: false })) {
-      if (entry.isFile) files.add(entry.path);
+    for await (const file of glob(pattern)) {
+      files.add(file);
     }
   }
 
   return [...files].sort();
 }
 
-await run(["check", ...await toolingFiles()]);
+await run(["bun", "x", "svelte-kit", "sync"]);
 
-if (!Deno.args.includes("--tooling")) {
-  await run(["run", "-A", "npm:@sveltejs/kit", "sync"]);
+await run(["bun", "check", "--no-script", ...await toolingFiles()]);
+
+if (!process.argv.includes("--tooling")) {
   await run([
-    "run",
-    "-A",
-    "npm:svelte-check",
+    "bun",
+    "x",
+    "svelte-check",
     "--tsconfig",
     "./tsconfig.json",
   ]);

@@ -5,7 +5,9 @@ import {
   normalize,
   relative,
   resolve,
-} from "@std/path";
+} from "node:path";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
 
 export interface ArchitectureViolation {
   source: string;
@@ -132,9 +134,10 @@ export function classifyViolation(
 }
 
 async function* sourceFiles(root: string): AsyncGenerator<string> {
-  for await (const entry of Deno.readDir(root)) {
+  const entries = await fs.readdir(root, { withFileTypes: true });
+  for (const entry of entries) {
     const path = join(root, entry.name);
-    if (entry.isDirectory) yield* sourceFiles(path);
+    if (entry.isDirectory()) yield* sourceFiles(path);
     else if (SOURCE_EXTENSIONS.includes(extname(entry.name))) yield path;
   }
 }
@@ -161,7 +164,7 @@ function localImportExists(
     ];
   return candidates.some((candidate) => {
     try {
-      return Deno.statSync(candidate).isFile;
+      return fsSync.existsSync(candidate) && fsSync.statSync(candidate).isFile();
     } catch {
       return false;
     }
@@ -169,12 +172,12 @@ function localImportExists(
 }
 
 export async function checkArchitecture(
-  frontendRoot = Deno.cwd(),
+  frontendRoot = process.cwd(),
 ): Promise<ArchitectureViolation[]> {
   frontendRoot = normalize(resolve(frontendRoot));
   const violations: ArchitectureViolation[] = [];
   for await (const source of sourceFiles(join(frontendRoot, "src"))) {
-    const text = await Deno.readTextFile(source);
+    const text = await fs.readFile(source, "utf-8");
     for (const imported of extractStaticImports(text)) {
       if (!localImportExists(source, imported, frontendRoot)) {
         violations.push({
@@ -202,7 +205,7 @@ if (import.meta.main) {
         `- ${violation.source}: ${violation.imported}\n  ${violation.rule}`,
       );
     }
-    Deno.exit(1);
+    process.exit(1);
   }
   console.log("Architecture check passed");
 }
