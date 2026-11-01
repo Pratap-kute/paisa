@@ -206,6 +206,11 @@
   "checkingBalances": {
     "asset_breakdowns": {}
   },
+  "expensePace": {
+    "period": "2022-02",
+    "projectedExpenses": 124000,
+    "overBudget": 93000
+  },
   "expenses": {
     "2022-01": [
       {
@@ -331,7 +336,19 @@
       "priority": 0,
       "swr": 3.3,
       "yearlyExpense": 240000,
-      "yearlyExpenseSource": "configured"
+      "yearlyExpenseSource": "configured",
+      "intelligence": {
+        "progressRatio": 0.0121335110884845,
+        "remainingAmount": 7184483.555720112,
+        "validTarget": true,
+        "contributionMonthsObserved": 0,
+        "activeContributionMonths": 0,
+        "state": "active",
+        "scheduleStatus": "no-deadline",
+        "attention": "none",
+        "deadlineSource": "none",
+        "reasons": []
+      }
     },
     {
       "type": "savings",
@@ -348,7 +365,27 @@
         }
       ],
       "rate": 8,
-      "yearlyExpense": 0
+      "yearlyExpense": 0,
+      "intelligence": {
+        "progressRatio": 0.17648743401432,
+        "remainingAmount": 411756.28299284,
+        "validTarget": true,
+        "requiredMonthlyContribution": 9506.23711745438,
+        "actualMonthlyContribution": 87998.01700716,
+        "contributionMonthsObserved": 1,
+        "activeContributionMonths": 1,
+        "paceCoverage": 9.256871664350454,
+        "paceGap": 0,
+        "state": "active",
+        "scheduleStatus": "insufficient-data",
+        "attention": "none",
+        "deadlineSource": "configured",
+        "targetDate": "2025-02-07",
+        "annualReturn": 8,
+        "reasons": [
+          "More contribution history needed"
+        ]
+      }
     }
   ],
   "investmentPerformance": {

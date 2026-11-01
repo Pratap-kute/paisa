@@ -29,6 +29,7 @@
   "checkingBalances": {
     "asset_breakdowns": {}
   },
+  "expensePace": null,
   "expenses": {
     "2022-01": [
       {
