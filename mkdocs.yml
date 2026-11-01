@@ -79,6 +79,7 @@ nav:
 theme:
   custom_dir: overrides
   name: material
+  variant: classic
   font: false
   favicon: images/favicon.png
   icon:
@@ -175,5 +176,3 @@ extra:
 plugins:
   - search
   - blog
-hooks:
-  - docs/lexer/hook.py

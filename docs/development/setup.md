@@ -6,7 +6,7 @@ description: Install the toolchain, run Paisa from source, and use the Makefile 
 # Contributor setup
 
 Paisa is a monorepo: a Go backend (`backend/`), a SvelteKit frontend
-(`frontend/`), a Wails desktop app (`desktop/`), and these MkDocs docs
+(`frontend/`), a Wails desktop app (`desktop/`), and these docs
 (`docs/`). The root `Makefile` coordinates all of them. Run `make help` to list
 every target.
 
@@ -26,7 +26,7 @@ every target.
 
 Open the repository in VS Code and choose **Reopen in Container**. The
 configuration in `.devcontainer/` installs Go, Bun, hledger, beancount 2.x,
-MkDocs, and the Playwright Chromium build, then runs `bun install` and
+Zensical, and the Playwright Chromium build, then runs `bun install` and
 `svelte-kit sync`. The Dev Container is also the supported place to update
 visual snapshot baselines.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the generated MkDocs site without network-dependent checks."""
+"""Validate the generated Zensical site without network-dependent checks."""
 
 from __future__ import annotations
 
@@ -220,8 +220,12 @@ def main() -> int:
         if expected not in sitemap:
             errors.append(f"sitemap.xml: important URL missing: {SITE_URL}{public_path}")
 
-    search = json.loads((site / "search" / "search_index.json").read_text(encoding="utf-8"))
-    documents = search.get("docs", [])
+    # Zensical writes search.json; MkDocs wrote search/search_index.json.
+    search_file = site / "search.json"
+    if not search_file.exists():
+        search_file = site / "search" / "search_index.json"
+    search = json.loads(search_file.read_text(encoding="utf-8"))
+    documents = search.get("items") or search.get("docs", [])
     searchable = " ".join(
         f"{item.get('title', '')} {item.get('text', '')} {item.get('location', '')}"
         for item in documents

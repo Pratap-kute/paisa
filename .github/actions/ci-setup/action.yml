@@ -38,7 +38,7 @@ runs:
           pkg-config \
           build-essential
 
-        pip install --break-system-packages "beancount<3" mkdocs-material
+        pip install --break-system-packages "beancount<3"
 
         # Install pinned hledger 1.52.4 static binary
         if [ ! -f /usr/local/bin/hledger ]; then

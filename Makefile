@@ -159,10 +159,10 @@ format fmt: ## Format frontend and Go source files
 
 .PHONY: docs docs-build docs-check publish
 docs: ## Serve documentation locally with live-reload (port 8000); needs `pip install -r docs/requirements.txt`
-	mkdocs serve -a 0.0.0.0:8000
+	zensical serve -a 0.0.0.0:8000
 
-docs-build publish: ## Build static documentation site with MkDocs
-	mkdocs build --strict
+docs-build publish: ## Build static documentation site with Zensical
+	zensical build --clean --strict
 	touch site/.nojekyll
 
 docs-check: publish ## Validate generated documentation links, metadata, and search

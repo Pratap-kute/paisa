@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paisa-docs-lexers"
+version = "0.1.0"
+description = "Pygments lexers for Paisa's ledger, query, and sheet syntax used in the docs"
+requires-python = ">=3.9"
+dependencies = ["pygments"]
+
+[project.entry-points."pygments.lexers"]
+ledger = "paisa_lexers.ledger:LedgerLexer"
+query = "paisa_lexers.query:QueryLexer"
+sheet = "paisa_lexers.sheet:SheetLexer"
+
+[tool.setuptools]
+packages = ["paisa_lexers"]

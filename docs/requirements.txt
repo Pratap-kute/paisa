@@ -1,4 +1,5 @@
-# Pinned documentation toolchain. Material for MkDocs reaches end of life on
-# 2027-05-05; plan a move to its successor (Zensical) before then.
-mkdocs==1.6.1
-mkdocs-material==9.8.0
+# Pinned documentation toolchain. Zensical reads mkdocs.yml directly and is the
+# maintained successor to Material for MkDocs (end of life 2027-05-05).
+zensical==0.0.74
+# Pygments lexers for ledger/query/sheet code blocks (run pip from the repo root)
+./tools/docs-lexers

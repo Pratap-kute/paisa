@@ -38,7 +38,7 @@ n = term * 12 r = interest_rate / 12
 
 monthly_payment = r / (1 - (1 + r) ^ (-n)) * finance_amount
 
-````
+```
 </div>
 <div class="sheet-result sheet-result-1" markdown>
 ```text
@@ -53,14 +53,14 @@ monthly_payment = r / (1 - (1 + r) ^ (-n)) * finance_amount
 0
 # EMI
 24832
-````
+```
 
 </div>
 </div>
 
 #### Function
 
-Sheets comes with a set of [built-in functions](#functions). You can also define
+Sheets comes with a set of [built-in functions](#function). You can also define
 your own functions. The example below shows how to define a function
 
 <div class="split-codeview">
@@ -86,7 +86,7 @@ years_to_double(14)
 
 36 18 12 9 7 6 5
 
-````
+```
 </div>
 </div>
 
@@ -125,7 +125,7 @@ liability = cost_basis_negative({account =~ /^Liabilities:Homeloan/})
 
 # Total
 total = immovable + metal + art + vehicle + bank + share + insurance + loan + cash - liability
-````
+```
 
 </div>
 <div class="sheet-result sheet-result-3" markdown>
@@ -150,7 +150,7 @@ total = immovable + metal + art + vehicle + bank + share + insurance + loan + ca
 
 86,98,682
 
-````
+```
 </div>
 </div>
 
@@ -166,7 +166,7 @@ the number by 100. So `8%` is same as `0.08`.
 100.00
 -100
 8%
-````
+```
 
 #### Operators
 
@@ -194,7 +194,7 @@ z = x + y
 
 #### Function
 
-Sheet comes with a set of [built-in functions](#functions). You can also define
+Sheet comes with a set of [built-in functions](#function_1). You can also define
 your own functions. Function definition starts with the function name and then a
 list of arguments. The body of the function is a single expression. To call a
 function, use the function name followed by arguments.
