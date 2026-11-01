@@ -38,6 +38,7 @@ jobs:
         with:
           name: site
           path: site
+          include-hidden-files: true
 
   publish:
     name: Publish to GitHub Pages
@@ -47,6 +48,7 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: site
