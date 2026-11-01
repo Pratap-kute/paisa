@@ -57,8 +57,8 @@ RUN curl -fsSL https://bun.sh/install | bash
 # Install pinned hledger 1.52.4 static binary
 RUN curl -sSL https://github.com/hledgerorg/hledger/releases/download/1.52.4/hledger-linux-x64.tar.gz | tar -xz -C /usr/local/bin
 
-# Install Python packages (beancount <3 for bean-query/bean-report CLI support, mkdocs-material)
-RUN pip install --no-cache-dir --break-system-packages "beancount<3" mkdocs==1.6.1 mkdocs-material==9.8.0
+# Install Python packages (beancount <3 for bean-query/bean-report CLI support, zensical for docs)
+RUN pip install --no-cache-dir --break-system-packages "beancount<3" zensical==0.0.74
 
 # Environment setup
 ENV GOPATH="/home/vscode/go"
