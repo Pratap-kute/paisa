@@ -1,0 +1,4 @@
+# Pinned documentation toolchain. Material for MkDocs reaches end of life on
+# 2027-05-05; plan a move to its successor (Zensical) before then.
+mkdocs==1.6.1
+mkdocs-material==9.8.0

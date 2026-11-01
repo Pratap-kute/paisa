@@ -1,3 +1,7 @@
+---
+description: "See financial-year capital gains tax with buy/sell matching in Paisa."
+---
+
 # Capital Gains
 
 Mutual Funds are considered as capital asset and capital gains tax will be

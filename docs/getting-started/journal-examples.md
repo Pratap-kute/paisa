@@ -1,3 +1,7 @@
+---
+description: "Sample Ledger journal entries for salary, rent, and investments in different currencies."
+---
+
 # Journal examples
 
 These examples illustrate the same salary, rent, and investment entries using different currency conventions. See the [tutorial](tutorial.md), [journal reference](../reference/journal.md), and [commodity configuration](../reference/commodities.md) before adapting them.

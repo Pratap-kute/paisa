@@ -4,29 +4,53 @@ on:
   push:
     branches:
       - master
-    paths:
+    paths: &docs_paths
       - "docs/**"
       - "mkdocs.yml"
       - "overrides/**"
+      - "CHANGELOG.md"
       - ".github/workflows/docs.yml"
       - "Makefile"
       - "scripts/check_docs.py"
+      - "backend/pkg/config/schema.json"
+  pull_request:
+    paths: *docs_paths
   workflow_dispatch:
 
 jobs:
-  publish:
-    permissions:
-      contents: write
+  check:
+    name: Build and validate docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
       - name: Install documentation dependencies
-        run: pip install mkdocs-material
-      - name: Build docs
+        run: pip install -r docs/requirements.txt
+      - name: Build and validate docs
         run: make docs-check
+      - name: Upload site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site
+
+  publish:
+    name: Publish to GitHub Pages
+    needs: check
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.9.0
         with:

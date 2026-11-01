@@ -93,25 +93,13 @@ Docker images are published as
 image uses Ledger. Release tags can also include `-hledger`, `-beancount`, and
 `-all` variants.
 
-=== "Linux"
-
-    ```bash
-    mkdir -p "$HOME/Documents/paisa"
-    docker run --rm -p 127.0.0.1:7500:7500 \
-      -v "$HOME/Documents/paisa:/documents" \
-      -w /documents \
-      pratapkute/paisa:latest paisa serve --host 0.0.0.0
-    ```
-
-=== "macOS"
-
-    ```bash
-    mkdir -p "$HOME/Documents/paisa"
-    docker run --rm -p 127.0.0.1:7500:7500 \
-      -v "$HOME/Documents/paisa:/documents" \
-      -w /documents \
-      pratapkute/paisa:latest paisa serve --host 0.0.0.0
-    ```
+```bash
+mkdir -p "$HOME/Documents/paisa"
+docker run --rm -p 127.0.0.1:7500:7500 \
+  -v "$HOME/Documents/paisa:/documents" \
+  -w /documents \
+  pratapkute/paisa:latest paisa serve --host 0.0.0.0
+```
 
 !!! warning "Back up before upgrading"
 
@@ -119,8 +107,23 @@ image uses Ledger. Release tags can also include `-hledger`, `-beancount`, and
     directory before changing versions and make sure the directory is writable.
     An older Paisa build may not open a database that has already been upgraded.
 
+## Ledger engines
+
+Paisa bundles the `ledger` binary. If you set `ledger_cli` to `hledger` or
+`beancount`, install that tool yourself and make sure it is on your `PATH`.
+
+| Engine | Requirement |
+| --- | --- |
+| ledger | Bundled with Paisa; nothing to install |
+| hledger | A recent hledger release (the project's CI runs 1.52.x) |
+| beancount | beancount **2.x** with `bean-query` and `bean-report`: `pip install "beancount<3"` |
+
+beancount 3 no longer ships `bean-query` and `bean-report`, which Paisa needs.
+The `-hledger`, `-beancount`, and `-all` Docker tags already include compatible
+versions. See [Ledger CLI](../reference/ledger-cli.md) for feature differences.
+
 ## Source builds and Dev Containers
 
-This repository provides Dev Container configurations for contributors in
-the [development guide](../development/index.md). For normal use, choose a
+To build from source or contribute, follow the
+[contributor setup guide](../development/setup.md). For normal use, choose a
 release binary or Docker image above.

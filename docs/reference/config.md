@@ -28,8 +28,16 @@ These are the settings most people change first:
 | `ledger_cli` | Ledger engine used to read journals | `ledger` |
 | `journal_path` | Main journal file | `/home/john/Documents/paisa/main.ledger` |
 | `db_path` | SQLite database file | `/home/john/Documents/paisa/paisa.db` |
+| `readonly` | Block changes made through the web interface | `false` |
 
 The web interface can edit the same settings.
+
+## Readonly mode
+
+Set `readonly: true` to run Paisa as a viewer. API calls that would overwrite
+`paisa.yaml`, generate demo data, or clear cached prices become no-ops. This is
+useful for a shared demo or a server where the configuration is managed outside
+the app. It is hidden from the settings form, so edit it in `paisa.yaml`.
 
 ## Account patterns
 
@@ -205,7 +213,7 @@ goals:
       # Goal target date
       # OPTIONAL (either target_date or payment_per_period can be specified)
       target_date: "2030-01-01"
-      # Expected rate of returns
+      # Amount you plan to save each period
       # OPTIONAL
       payment_per_period: 0
       # Expected rate of returns
@@ -299,6 +307,7 @@ commodities:
 import_templates:
   - name: SBI Account Statement
     # Required
+    # Should be a valid handlebars template
     content: |
       {{#if (isDate ROW.A "D MMM YYYY")}}
         {{date ROW.A "D MMM YYYY"}} {{ROW.C}}
@@ -310,7 +319,6 @@ import_templates:
           {{predictAccount prefix="Income"}}
         {{/if}}
       {{/if}}
-    # Should be a valid handlebar template
 
 ## Prediction
 # OPTIONAL, DEFAULT: empty merchant_rules

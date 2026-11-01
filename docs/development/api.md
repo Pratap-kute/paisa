@@ -1,3 +1,7 @@
+---
+description: "Browse the Swagger API and regenerate the typed TypeScript client."
+---
+
 # Paisa API & Generated Client Documentation
 
 Paisa features interactive API documentation powered by the Go Swaggo ecosystem, Swagger UI, and end-to-end typed TypeScript code generation via `swagger-typescript-api`.

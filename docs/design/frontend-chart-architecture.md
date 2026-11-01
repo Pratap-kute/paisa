@@ -1,4 +1,16 @@
+---
+search:
+  exclude: true
+description: "Internal maintainer reference: how Paisa charts are built on ECharts."
+---
+
 # Frontend Chart Architecture
+
+!!! warning "Internal maintainer reference"
+
+    This page documents implementation decisions for contributors. It is not an
+    end-user guide and may change without notice.
+
 
 This document describes the production chart architecture. Historical migration
 checkpoints are intentionally not part of the maintained documentation.
