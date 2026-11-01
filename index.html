@@ -3044,6 +3044,8 @@
       
         
       
+        
+      
     
     
     
@@ -3096,6 +3098,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3180,17 +3210,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3201,12 +3231,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -3417,8 +3447,9 @@ place while keeping your records in plain-text files.</p>
 portable, and easy to back up even when Paisa is not running. Paisa builds its
 reports from that journal and stores derived data in a local SQLite database.</p>
 <p>You can run Paisa on your own computer or a server you control. Configured price
-providers make requests to external services, and any third-party host can
-access the data stored there.</p>
+providers send commodity codes to external price services such as Yahoo
+Finance or Alpha Vantage. Your journal and database are not uploaded, but if you
+host Paisa on a third-party server, that host can access the data stored there.</p>
 <h2 id="what-can-i-do-with-paisa">What can I do with Paisa?<a class="headerlink" href="#what-can-i-do-with-paisa" title="Permanent link">&para;</a></h2>
 <div class="grid cards">
 <ul>
@@ -3452,9 +3483,10 @@ access the data stored there.</p>
 </ol>
 <div class="admonition note">
 <p class="admonition-title">Which version do these docs describe?</p>
-<p>This site follows the maintained
-<a href="https://github.com/Pratap-kute/paisa"><code>Pratap-kute/paisa</code></a> repository.
-A packaged release can lag behind the documentation. Upstream resources are
+<p>This site tracks the <code>master</code> branch of the maintained
+<a href="https://github.com/Pratap-kute/paisa"><code>Pratap-kute/paisa</code></a> repository, so
+it can describe features newer than your installed release. Check the
+<a href="reference/changelog/">changelog</a> for the version that introduced a feature. Upstream resources are
 listed separately in <a href="project/">Project history and community</a>.</p>
 </div>
 <h2 id="project-history">Project history<a class="headerlink" href="#project-history" title="Permanent link">&para;</a></h2>

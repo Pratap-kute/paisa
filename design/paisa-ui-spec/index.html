@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+        <meta name="description" content="Internal maintainer reference: as-built UI and UX specification for the Paisa frontend.">
       
       
         <meta name="author" content="Paisa contributors">
@@ -68,7 +68,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Paisa">
   <meta property="og:title" content="UI specification – Paisa">
-  <meta property="og:description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+  <meta property="og:description" content="Internal maintainer reference: as-built UI and UX specification for the Paisa frontend.">
   <meta property="og:url" content="https://pratap-kute.github.io/paisa/design/paisa-ui-spec/">
   <meta property="og:image" content="https://pratap-kute.github.io/paisa/images/social-preview.png">
   <meta property="og:image:width" content="1280">
@@ -76,7 +76,7 @@
   <meta property="og:image:alt" content="Paisa dashboard showing balances, cash flow, expenses, and investments">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="UI specification – Paisa">
-  <meta name="twitter:description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+  <meta name="twitter:description" content="Internal maintainer reference: as-built UI and UX specification for the Paisa frontend.">
   <meta name="twitter:image" content="https://pratap-kute.github.io/paisa/images/social-preview.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32x32.png">
@@ -2959,6 +2959,8 @@
       
         
       
+        
+      
     
     
     
@@ -3014,6 +3016,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3103,17 +3133,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3124,12 +3154,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -6395,7 +6425,7 @@
         <a href="../frontend-chart-architecture/" class="md-path__link">
           
   <span class="md-ellipsis">
-    Design
+    Design (internal)
   </span>
 
         </a>
@@ -6431,6 +6461,11 @@
 
 
 <h1 id="paisa-uiux-specification-as-built-reference">Paisa UI/UX Specification — As-Built Reference<a class="headerlink" href="#paisa-uiux-specification-as-built-reference" title="Permanent link">&para;</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Internal maintainer reference</p>
+<p>This page documents implementation decisions for contributors. It is not an
+end-user guide and may change without notice.</p>
+</div>
 <blockquote>
 <p><strong>Document Status:</strong> As-Built Reference Specification (Post-Migration)<br />
 <strong>Current Stack:</strong> Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI + ECharts 6<br />
@@ -8547,6 +8582,9 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 
 
 
+
+  
+  
 
 
 

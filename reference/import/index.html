@@ -1772,10 +1772,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#textrangefromcolumn-string-tocolumn-string-separator-number-string" class="md-nav__link">
+  <a href="#textrangefromcolumn-string-tocolumn-string-separator-string-string" class="md-nav__link">
     <span class="md-ellipsis">
       
-        textRange(fromColumn: string, toColumn: string, {separator?: number}): string
+        textRange(fromColumn: string, toColumn: string, {separator?: string}): string
       
     </span>
   </a>
@@ -3386,6 +3386,8 @@
       
         
       
+        
+      
     
     
     
@@ -3438,6 +3440,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3522,17 +3552,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3543,12 +3573,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -3950,10 +3980,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#textrangefromcolumn-string-tocolumn-string-separator-number-string" class="md-nav__link">
+  <a href="#textrangefromcolumn-string-tocolumn-string-separator-string-string" class="md-nav__link">
     <span class="md-ellipsis">
       
-        textRange(fromColumn: string, toColumn: string, {separator?: number}): string
+        textRange(fromColumn: string, toColumn: string, {separator?: string}): string
       
     </span>
   </a>
@@ -4125,7 +4155,7 @@ compare the preview with the original statement before saving.</p>
 <li>Review every entry in <strong>Ledger Preview</strong>, especially <code>Unknown</code> accounts.</li>
 <li>Save only after the preview matches the statement.</li>
 </ol>
-<p>Each row in the CSV file is converted to a transaction in the ledger. This
+<p>Each row of the statement (a CSV line, spreadsheet row, or detected PDF table row) is converted to a transaction in the ledger. This
 conversion is controlled by the template.</p>
 <div class="language-handlebars highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">{{</span><span class="m m-Attribute">#if</span> <span class="nv">(and</span> <span class="nv">(isDate</span> <span class="nv">ROW.A</span> <span class="s2">"DD/MM/YYYY"</span><span class="nv">)</span> <span class="nv">(isBlank</span> <span class="nv">ROW.G))</span><span class="cp">}}</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="x"> </span><span class="cp">{{</span><span class="nv">date</span> <span class="nv">ROW.A</span> <span class="s2">"DD/MM/YYYY"</span><span class="cp">}}</span><span class="x"> </span><span class="cp">{{</span><span class="nv">ROW.C</span><span class="cp">}}</span>
@@ -4133,11 +4163,11 @@ conversion is controlled by the template.</p>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="x">    Assets:Checking</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="cp">{{</span><span class="m m-Attribute">/if</span><span class="cp">}}</span>
 </span></code></pre></div>
-<p>Let's break this down. The first line is a conditional statement. It checks if
+<p>The first line is a conditional statement. It checks if
 the row has a date in the first column. You can refer any column using their
 alphabets. The second line constructs the transaction header. The third line
 constructs the first posting. The fourth line constructs the second posting.</p>
-<p>Effectively a single row in the CSV file is converted to a single transaction
+<p>Effectively a single row is converted to a single transaction
 like this.</p>
 <div class="language-ledger highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="na">2023/03/28</span> <span class="gh">AMAZON HTTP://WWW.AM IN</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="s">    Expenses:Shopping</span><span class="err">       </span><span class="m">249.00</span><span class="err"> </span><span class="k">INR</span>
@@ -4146,7 +4176,11 @@ like this.</p>
 <p>The template is written in <a href="https://handlebarsjs.com/">Handlebars</a>. Paisa
 provides a few helper functions to make it easier to write the template.</p>
 <h2 id="manage-templates">Manage templates<a class="headerlink" href="#manage-templates" title="Permanent link">&para;</a></h2>
-<p>Paisa ships with a few built-in templates. You can also create your own. To
+<p>Paisa ships with built-in templates for common Indian statements: Annual Income
+Tax Statement 26AS, Consolidated Account Statement, HDFC Account Statement (CSV
+and XLS), ICICI Credit Card Statement, IDFC First Credit Card (PDF), Kuvera
+Transactions, Mint, National Pension Scheme, Paytm, SBI Account Statement, SBI
+Credit Card Statement, Value Research, and Zerodha. You can also create your own. To
 create a new template, edit the template and click on the <code>Save As</code> button. User
 defined custom templates are stored in the configuration file.</p>
 <div class="admonition tip">
@@ -4342,7 +4376,7 @@ becomes a single space.</p>
   Equity</code>, you can use
 <code class="language-handlebars highlight"><span class="cp">{{</span><span class="nv">regexpMatch</span> <span class="nv">ROW.C</span> <span class="s2">"(.*) Growth Direct Plan"</span> <span class="na">group</span><span class="o">=</span><span class="m">1</span><span class="cp">}}</span></code> assuming
 the string is in the column <code>C</code>. <code>group</code> is optional and defaults to <code>0</code>.</p>
-<h4 id="textrangefromcolumn-string-tocolumn-string-separator-number-string"><code class="language-typescript highlight"><span class="nx">textRange</span><span class="p">(</span><span class="nx">fromColumn</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">toColumn</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">separator?</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span></code><a class="headerlink" href="#textrangefromcolumn-string-tocolumn-string-separator-number-string" title="Permanent link">&para;</a></h4>
+<h4 id="textrangefromcolumn-string-tocolumn-string-separator-string-string"><code class="language-typescript highlight"><span class="nx">textRange</span><span class="p">(</span><span class="nx">fromColumn</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">toColumn</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">separator?</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">})</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span></code><a class="headerlink" href="#textrangefromcolumn-string-tocolumn-string-separator-string-string" title="Permanent link">&para;</a></h4>
 <p>Extracts text from the given range of columns. The <code>separator</code> is optional and
 defaults to <code>" "</code>.</p>
 <div class="language-handlebars highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="cp">{{</span><span class="nv">textRange</span> <span class="nv">A</span> <span class="nv">C</span> <span class="na">separator</span><span class="o">=</span><span class="s2">" "</span><span class="cp">}}</span>

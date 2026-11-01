@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+        <meta name="description" content="Run the Go backend, frontend unit, component, integration, browser, and visual test suites.">
       
       
         <meta name="author" content="Paisa contributors">
@@ -70,7 +70,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Paisa">
   <meta property="og:title" content="Testing – Paisa">
-  <meta property="og:description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+  <meta property="og:description" content="Run the Go backend, frontend unit, component, integration, browser, and visual test suites.">
   <meta property="og:url" content="https://pratap-kute.github.io/paisa/development/testing/">
   <meta property="og:image" content="https://pratap-kute.github.io/paisa/images/social-preview.png">
   <meta property="og:image:width" content="1280">
@@ -78,7 +78,7 @@
   <meta property="og:image:alt" content="Paisa dashboard showing balances, cash flow, expenses, and investments">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Testing – Paisa">
-  <meta name="twitter:description" content="Open-source, self-hosted personal finance manager for plain-text accounting with budgets, investments, imports, goals, and financial insights.">
+  <meta name="twitter:description" content="Run the Go backend, frontend unit, component, integration, browser, and visual test suites.">
   <meta name="twitter:image" content="https://pratap-kute.github.io/paisa/images/social-preview.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32x32.png">
@@ -104,7 +104,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#frontend-testing" class="md-skip">
+        <a href="#testing" class="md-skip">
           Skip to content
         </a>
       
@@ -2961,6 +2961,8 @@
       
         
       
+        
+      
     
     
     
@@ -3016,6 +3018,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3113,10 +3143,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#go-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#playwright-and-browser-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Playwright and Browser Tests
+        Playwright and browser tests
       
     </span>
   </a>
@@ -3183,17 +3235,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3204,12 +3256,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -3313,10 +3365,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#go-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#playwright-and-browser-tests" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Playwright and Browser Tests
+        Playwright and browser tests
       
     </span>
   </a>
@@ -3426,7 +3500,18 @@
   
 
 
-<h1 id="frontend-testing">Frontend testing<a class="headerlink" href="#frontend-testing" title="Permanent link">&para;</a></h1>
+<h1 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h1>
+<p>Run everything that CI runs for unit-level checks with <code>make test</code>, and add
+integration and browser tests with <code>make test-all</code>. Install the prerequisites in
+<a href="../setup/">Contributor setup</a> first; the integration and browser suites need
+<code>ledger</code>, <code>hledger</code>, <code>beancount</code> 2.x, and <code>sqlite3</code> on your <code>PATH</code>.</p>
+<h2 id="go-backend">Go backend<a class="headerlink" href="#go-backend" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>test-backend<span class="w">          </span><span class="c1"># alias: make test-go</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>backend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>go<span class="w"> </span><span class="nb">test</span><span class="w"> </span>./...<span class="w">   </span><span class="c1"># same suites, run directly</span>
+</span></code></pre></div>
+<p>Backend packages carry their own unit tests. The API regression suite below
+exercises them end to end against committed JSON baselines.</p>
+<h2 id="frontend">Frontend<a class="headerlink" href="#frontend" title="Permanent link">&para;</a></h2>
 <p>The frontend test stack has five layers:</p>
 <ul>
 <li><code>bun run test:unit</code> runs Bun business-logic and fixture tests.</li>
@@ -3449,9 +3534,9 @@ are written to <code>coverage/component</code>. <code>bun run test:coverage:repo
 both reports without enforcing the core threshold, which is useful while
 investigating a temporary regression. Reports from different instrumentation
 runners are not concatenated or treated as one coverage measurement.</p>
-<h2 id="playwright-and-browser-tests">Playwright and Browser Tests<a class="headerlink" href="#playwright-and-browser-tests" title="Permanent link">&para;</a></h2>
+<h2 id="playwright-and-browser-tests">Playwright and browser tests<a class="headerlink" href="#playwright-and-browser-tests" title="Permanent link">&para;</a></h2>
 <p>Install the matching Chromium build before running browser tests:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span>--with-deps<span class="w"> </span>chromium
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span>--with-deps<span class="w"> </span>chromium
 </span></code></pre></div>
 <p>When using the Dev Container, the required Chromium build and system dependencies are configured automatically.</p>
 <p>The browser server copies the browser fixture journal and config into a
@@ -3463,10 +3548,11 @@ database after the run.</p>
 baselines plus journal/config source files. <code>paisa.db</code> files are not versioned;
 each test run copies source files to a temporary directory and rebuilds the
 database from the journal during sync.</p>
+<p>Run the suite with <code>make test-integration</code> (it builds the binary first).</p>
 <p><code>make regen-fixtures</code> rewrites JSON baselines when API output changes. Regen
 writes id-stripped JSON, so diffs show only meaningful schema or value changes.
-<code>make normalize-fixtures</code> can strip generated ids from existing baselines without
-re-running the server.</p>
+Review the diff before committing. <code>make normalize-fixtures</code> can strip generated
+ids from existing baselines without re-running the server.</p>
 <h2 id="updating-visual-baselines">Updating visual baselines<a class="headerlink" href="#updating-visual-baselines" title="Permanent link">&para;</a></h2>
 <p>Run <code>bun run test:visual:update</code> inside Linux or the Dev Container, review every
 changed PNG, and commit intentional changes. Do not update screenshots merely to
@@ -3479,6 +3565,9 @@ artifacts so differences can be inspected from the workflow summary.</p>
 
 
 
+
+  
+  
 
 
 

@@ -3053,6 +3053,8 @@
       
         
       
+        
+      
     
     
     
@@ -3105,6 +3107,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3189,17 +3219,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3210,12 +3240,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -3448,7 +3478,8 @@ By default paisa will try to use <strong>ledger</strong>, if you prefer to use <
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">ledger_cli</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hledger</span>
 </span></code></pre></div>
 <p>Paisa ships with ledger binary. If you use hledger or beancount, make sure that
-the binaries are installed.</p>
+the binaries are installed. beancount must be version 2.x (<code>pip install
+"beancount&lt;3"</code>) because Paisa relies on <code>bean-query</code> and <code>bean-report</code>.</p>
 <h2 id="unavailable-features">Unavailable Features<a class="headerlink" href="#unavailable-features" title="Permanent link">&para;</a></h2>
 <p>Some of the features that are available in Paisa are not supported by
 <strong>hledger</strong> and <strong>beancount</strong></p>

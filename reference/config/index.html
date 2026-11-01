@@ -2224,6 +2224,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#readonly-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readonly mode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#account-patterns" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3102,6 +3113,8 @@
       
         
       
+        
+      
     
     
     
@@ -3154,6 +3167,34 @@
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributor setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -3238,17 +3279,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_5" >
         
           
-          <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8_5" id="__nav_8_5_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Design
+    Design (internal)
   
 
     
@@ -3259,12 +3300,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_5">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Design
+    Design (internal)
   
 
           </label>
@@ -3372,6 +3413,17 @@
     <span class="md-ellipsis">
       
         Basic settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#readonly-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Readonly mode
       
     </span>
   </a>
@@ -3589,9 +3641,19 @@ they do not match your location.</p>
 <td>SQLite database file</td>
 <td><code>/home/john/Documents/paisa/paisa.db</code></td>
 </tr>
+<tr>
+<td><code>readonly</code></td>
+<td>Block changes made through the web interface</td>
+<td><code>false</code></td>
+</tr>
 </tbody>
 </table>
 <p>The web interface can edit the same settings.</p>
+<h2 id="readonly-mode">Readonly mode<a class="headerlink" href="#readonly-mode" title="Permanent link">&para;</a></h2>
+<p>Set <code>readonly: true</code> to run Paisa as a viewer. API calls that would overwrite
+<code>paisa.yaml</code>, generate demo data, or clear cached prices become no-ops. This is
+useful for a shared demo or a server where the configuration is managed outside
+the app. It is hidden from the settings form, so edit it in <code>paisa.yaml</code>.</p>
 <h2 id="account-patterns">Account patterns<a class="headerlink" href="#account-patterns" title="Permanent link">&para;</a></h2>
 <p>Several features accept a list of accounts. Use a full name such as
 <code>Assets:Equity:APPLE</code>, <code>*</code> to match descendants such as <code>Assets:Equity:*</code>, or
@@ -3751,7 +3813,7 @@ sections you need and adjust their values for your journal.</p>
 </span><span id="__span-0-124"><a id="__codelineno-0-124" name="__codelineno-0-124" href="#__codelineno-0-124"></a><span class="w">      </span><span class="c1"># Goal target date</span>
 </span><span id="__span-0-125"><a id="__codelineno-0-125" name="__codelineno-0-125" href="#__codelineno-0-125"></a><span class="w">      </span><span class="c1"># OPTIONAL (either target_date or payment_per_period can be specified)</span>
 </span><span id="__span-0-126"><a id="__codelineno-0-126" name="__codelineno-0-126" href="#__codelineno-0-126"></a><span class="w">      </span><span class="nt">target_date</span><span class="p">:</span><span class="w"> </span><span class="s">"2030-01-01"</span>
-</span><span id="__span-0-127"><a id="__codelineno-0-127" name="__codelineno-0-127" href="#__codelineno-0-127"></a><span class="w">      </span><span class="c1"># Expected rate of returns</span>
+</span><span id="__span-0-127"><a id="__codelineno-0-127" name="__codelineno-0-127" href="#__codelineno-0-127"></a><span class="w">      </span><span class="c1"># Amount you plan to save each period</span>
 </span><span id="__span-0-128"><a id="__codelineno-0-128" name="__codelineno-0-128" href="#__codelineno-0-128"></a><span class="w">      </span><span class="c1"># OPTIONAL</span>
 </span><span id="__span-0-129"><a id="__codelineno-0-129" name="__codelineno-0-129" href="#__codelineno-0-129"></a><span class="w">      </span><span class="nt">payment_per_period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
 </span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130" href="#__codelineno-0-130"></a><span class="w">      </span><span class="c1"># Expected rate of returns</span>
@@ -3845,18 +3907,18 @@ sections you need and adjust their values for your journal.</p>
 </span><span id="__span-0-218"><a id="__codelineno-0-218" name="__codelineno-0-218" href="#__codelineno-0-218"></a><span class="nt">import_templates</span><span class="p">:</span>
 </span><span id="__span-0-219"><a id="__codelineno-0-219" name="__codelineno-0-219" href="#__codelineno-0-219"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SBI Account Statement</span>
 </span><span id="__span-0-220"><a id="__codelineno-0-220" name="__codelineno-0-220" href="#__codelineno-0-220"></a><span class="w">    </span><span class="c1"># Required</span>
-</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221" href="#__codelineno-0-221"></a><span class="w">    </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222" href="#__codelineno-0-222"></a><span class="w">      </span><span class="no">{{#if (isDate ROW.A "D MMM YYYY")}}</span>
-</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223" href="#__codelineno-0-223"></a><span class="w">        </span><span class="no">{{date ROW.A "D MMM YYYY"}} {{ROW.C}}</span>
-</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224" href="#__codelineno-0-224"></a><span class="w">        </span><span class="no">{{#if (isBlank ROW.F)}}</span>
-</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225" href="#__codelineno-0-225"></a><span class="w">          </span><span class="no">{{predictAccount prefix="Expenses"}}      {{amount ROW.E}} INR</span>
-</span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226" href="#__codelineno-0-226"></a><span class="w">          </span><span class="no">Assets:Checking:SBI</span>
-</span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227" href="#__codelineno-0-227"></a><span class="w">        </span><span class="no">{{else}}</span>
-</span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228" href="#__codelineno-0-228"></a><span class="w">          </span><span class="no">Assets:Checking:SBI                       {{amount ROW.F}} INR</span>
-</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229" href="#__codelineno-0-229"></a><span class="w">          </span><span class="no">{{predictAccount prefix="Income"}}</span>
-</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230" href="#__codelineno-0-230"></a><span class="w">        </span><span class="no">{{/if}}</span>
-</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231" href="#__codelineno-0-231"></a><span class="w">      </span><span class="no">{{/if}}</span>
-</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232" href="#__codelineno-0-232"></a><span class="w">    </span><span class="c1"># Should be a valid handlebar template</span>
+</span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221" href="#__codelineno-0-221"></a><span class="w">    </span><span class="c1"># Should be a valid handlebars template</span>
+</span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222" href="#__codelineno-0-222"></a><span class="w">    </span><span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+</span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223" href="#__codelineno-0-223"></a><span class="w">      </span><span class="no">{{#if (isDate ROW.A "D MMM YYYY")}}</span>
+</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224" href="#__codelineno-0-224"></a><span class="w">        </span><span class="no">{{date ROW.A "D MMM YYYY"}} {{ROW.C}}</span>
+</span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225" href="#__codelineno-0-225"></a><span class="w">        </span><span class="no">{{#if (isBlank ROW.F)}}</span>
+</span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226" href="#__codelineno-0-226"></a><span class="w">          </span><span class="no">{{predictAccount prefix="Expenses"}}      {{amount ROW.E}} INR</span>
+</span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227" href="#__codelineno-0-227"></a><span class="w">          </span><span class="no">Assets:Checking:SBI</span>
+</span><span id="__span-0-228"><a id="__codelineno-0-228" name="__codelineno-0-228" href="#__codelineno-0-228"></a><span class="w">        </span><span class="no">{{else}}</span>
+</span><span id="__span-0-229"><a id="__codelineno-0-229" name="__codelineno-0-229" href="#__codelineno-0-229"></a><span class="w">          </span><span class="no">Assets:Checking:SBI                       {{amount ROW.F}} INR</span>
+</span><span id="__span-0-230"><a id="__codelineno-0-230" name="__codelineno-0-230" href="#__codelineno-0-230"></a><span class="w">          </span><span class="no">{{predictAccount prefix="Income"}}</span>
+</span><span id="__span-0-231"><a id="__codelineno-0-231" name="__codelineno-0-231" href="#__codelineno-0-231"></a><span class="w">        </span><span class="no">{{/if}}</span>
+</span><span id="__span-0-232"><a id="__codelineno-0-232" name="__codelineno-0-232" href="#__codelineno-0-232"></a><span class="w">      </span><span class="no">{{/if}}</span>
 </span><span id="__span-0-233"><a id="__codelineno-0-233" name="__codelineno-0-233" href="#__codelineno-0-233"></a>
 </span><span id="__span-0-234"><a id="__codelineno-0-234" name="__codelineno-0-234" href="#__codelineno-0-234"></a><span class="c1">## Prediction</span>
 </span><span id="__span-0-235"><a id="__codelineno-0-235" name="__codelineno-0-235" href="#__codelineno-0-235"></a><span class="c1"># OPTIONAL, DEFAULT: empty merchant_rules</span>
