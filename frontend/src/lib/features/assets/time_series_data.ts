@@ -102,7 +102,7 @@ export function buildNetworthSeries(points: Networth[]): PeriodSeriesChartData {
         tooltipRows: [
           ["Net Worth", networth],
           ["Net Investment", investment],
-          ["Gain / Loss", point.gainAmount],
+          ["Growth beyond contributions", point.gainAmount],
         ],
       };
     }),

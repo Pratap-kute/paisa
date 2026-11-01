@@ -6,6 +6,10 @@ import PredictionDetail from "./PredictionDetail.svelte";
 import { emptyBreakdown } from "$lib/features/prediction/score";
 import type { PredictionResult } from "$lib/features/prediction/types";
 
+// A browser collapses the whitespace between markup lines; textContent does not.
+const rendered = (node: Element | null | undefined) =>
+  (node?.textContent ?? "").replace(/\s+/g, " ").trim();
+
 test("renders a quiet high badge and a louder review badge", () => {
   const high = render(PredictionRowBadge, { confidence: "HIGH" });
   expect(high.container.querySelector(".paisa-prediction-badge")).toHaveClass(
@@ -17,7 +21,7 @@ test("renders a quiet high badge and a louder review badge", () => {
     confidence: "NEEDS_REVIEW",
     possibleTransfer: true,
   });
-  expect(review.container.textContent).toContain("Transfer");
+  expect(rendered(review.container)).toContain("Transfer");
   expect(
     review.container.querySelector(".paisa-prediction-badge"),
   ).not.toHaveClass("is-quiet");
@@ -30,8 +34,8 @@ test("filters counts from the review bar", () => {
     filter: null,
     onFilter,
   });
-  expect(container.textContent).toContain("High 2");
-  expect(container.textContent).toContain("Unknown 4");
+  expect(rendered(container)).toContain("High 2");
+  expect(rendered(container)).toContain("Unknown 4");
   const buttons = container.querySelectorAll("button.paisa-review-chip");
   (buttons[0] as HTMLButtonElement).click();
   expect(onFilter).toHaveBeenCalledWith("HIGH");
@@ -69,10 +73,8 @@ test("shows override actions for a selected prediction", () => {
     onApplySimilar: vi.fn(),
     onAlwaysUse: vi.fn(),
   });
-  expect(container.textContent).toContain("Exact merchant match");
-  expect(container.textContent).toContain(
-    "Apply to similar rows in this import",
-  );
+  expect(rendered(container)).toContain("Exact merchant match");
+  expect(rendered(container)).toContain("Apply to similar rows in this import");
   const alternative = [...container.querySelectorAll("button")].find((button) =>
     button.textContent?.includes("Expenses:Groceries"),
   );
@@ -106,7 +108,7 @@ test("renders progress and handles Review Next in review bar", () => {
     onReviewNext,
   });
 
-  expect(container.textContent).toContain("1/3 reviewed");
+  expect(rendered(container)).toContain("1/3 reviewed");
   const nextBtn = container.querySelector(
     '[data-testid="review-next-btn"]',
   ) as HTMLButtonElement;
@@ -128,7 +130,7 @@ test("renders all reviewed badge when no remaining items", () => {
     onFilter: vi.fn(),
   });
 
-  expect(container.textContent).toContain("All reviewed");
+  expect(rendered(container)).toContain("All reviewed");
   expect(
     container.querySelector('[data-testid="all-reviewed-badge"]'),
   ).not.toBeNull();
@@ -188,16 +190,16 @@ test("renders queue badge, source card, multi-tabs, and handles action clicks in
   });
 
   // Queue badge and review status
-  expect(container.textContent).toContain("Review 2 of 5");
-  expect(container.textContent).toContain("Corrected");
+  expect(rendered(container)).toContain("Review 2 of 5");
+  expect(rendered(container)).toContain("Corrected");
 
   // Source transaction card
   const sourceCard = container.querySelector('[data-testid="source-card"]');
   expect(sourceCard).not.toBeNull();
-  expect(sourceCard?.textContent).toContain("2026-03-01");
-  expect(sourceCard?.textContent).toContain("UBER TRIP HELP");
-  expect(sourceCard?.textContent).toContain("Assets:Checking");
-  expect(sourceCard?.textContent).toContain("-25.5 USD");
+  expect(rendered(sourceCard)).toContain("2026-03-01");
+  expect(rendered(sourceCard)).toContain("UBER TRIP HELP");
+  expect(rendered(sourceCard)).toContain("Assets:Checking");
+  expect(rendered(sourceCard)).toContain("-25.5 USD");
 
   // Multi-prediction switcher tabs
   const tabs = container.querySelectorAll(".paisa-switcher-tab");
@@ -210,7 +212,7 @@ test("renders queue badge, source card, multi-tabs, and handles action clicks in
   const applyBtn = container.querySelector(
     '[data-testid="apply-similar-btn"]',
   ) as HTMLButtonElement;
-  expect(applyBtn.textContent).toContain(
+  expect(rendered(applyBtn)).toContain(
     "Apply to 3 similar rows in this import",
   );
   expect(applyBtn.disabled).toBe(false);
@@ -260,5 +262,5 @@ test("disables apply similar button when similarCount is 0", () => {
     '[data-testid="apply-similar-btn"]',
   ) as HTMLButtonElement;
   expect(applyBtn.disabled).toBe(true);
-  expect(applyBtn.textContent).toContain("0 found");
+  expect(rendered(applyBtn)).toContain("0 found");
 });

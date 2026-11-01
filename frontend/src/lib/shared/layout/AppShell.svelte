@@ -16,7 +16,11 @@
     dateRangeOption,
     month,
     year,
+    refreshNeedsConfirmation,
+    confirmRefresh,
+    cancelRefresh,
   } from "../../../store";
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
   import {
     cashflowExpenseDepth,
     cashflowExpenseDepthAllowed,
@@ -723,3 +727,14 @@
 </div>
 
 <CommandPalette bind:open={commandPaletteOpen} />
+
+<ConfirmDialog
+  open={$refreshNeedsConfirmation}
+  title="Discard unsaved changes?"
+  description="You have unsaved changes. Refreshing will discard them."
+  confirmLabel="Discard"
+  cancelLabel="Keep editing"
+  variant="danger"
+  onconfirm={confirmRefresh}
+  oncancel={cancelRefresh}
+/>

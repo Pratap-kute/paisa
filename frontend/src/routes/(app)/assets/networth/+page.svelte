@@ -130,7 +130,7 @@
       loading={isLoading}
     />
     <Metric
-      label="Gain / Loss"
+      label="Growth beyond contributions"
       secondary="After interest paid on loans"
       value={formatCurrency(gain)}
       status={gain >= 0 ? "positive" : "negative"}
@@ -140,6 +140,7 @@
       <Metric
         label="XIRR"
         value={formatReturnPercent(xirr)}
+        secondary="Assets and loans together"
         loading={isLoading}
       />
     {/if}
