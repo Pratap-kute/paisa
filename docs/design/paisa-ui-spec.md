@@ -1,4 +1,16 @@
+---
+search:
+  exclude: true
+description: "Internal maintainer reference: as-built UI and UX specification for the Paisa frontend."
+---
+
 # Paisa UI/UX Specification — As-Built Reference
+
+!!! warning "Internal maintainer reference"
+
+    This page documents implementation decisions for contributors. It is not an
+    end-user guide and may change without notice.
+
 
 > **Document Status:** As-Built Reference Specification (Post-Migration)  
 > **Current Stack:** Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI + ECharts 6  

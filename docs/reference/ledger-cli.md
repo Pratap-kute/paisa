@@ -16,7 +16,8 @@ ledger_cli: hledger
 ```
 
 Paisa ships with ledger binary. If you use hledger or beancount, make sure that
-the binaries are installed.
+the binaries are installed. beancount must be version 2.x (`pip install
+"beancount<3"`) because Paisa relies on `bean-query` and `bean-report`.
 
 ## Unavailable Features
 

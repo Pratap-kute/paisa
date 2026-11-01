@@ -28,8 +28,9 @@ portable, and easy to back up even when Paisa is not running. Paisa builds its
 reports from that journal and stores derived data in a local SQLite database.
 
 You can run Paisa on your own computer or a server you control. Configured price
-providers make requests to external services, and any third-party host can
-access the data stored there.
+providers send commodity codes to external price services such as Yahoo
+Finance or Alpha Vantage. Your journal and database are not uploaded, but if you
+host Paisa on a third-party server, that host can access the data stored there.
 
 ## What can I do with Paisa?
 
@@ -69,9 +70,10 @@ access the data stored there.
 
 !!! note "Which version do these docs describe?"
 
-    This site follows the maintained
-    [`Pratap-kute/paisa`](https://github.com/Pratap-kute/paisa) repository.
-    A packaged release can lag behind the documentation. Upstream resources are
+    This site tracks the `master` branch of the maintained
+    [`Pratap-kute/paisa`](https://github.com/Pratap-kute/paisa) repository, so
+    it can describe features newer than your installed release. Check the
+    [changelog](reference/changelog.md) for the version that introduced a feature. Upstream resources are
     listed separately in [Project history and community](project/index.md).
 
 ## Project history

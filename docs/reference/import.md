@@ -22,7 +22,7 @@ and the template that connects the two.
 3. Review every entry in **Ledger Preview**, especially `Unknown` accounts.
 4. Save only after the preview matches the statement.
 
-Each row in the CSV file is converted to a transaction in the ledger. This
+Each row of the statement (a CSV line, spreadsheet row, or detected PDF table row) is converted to a transaction in the ledger. This
 conversion is controlled by the template.
 
 ```handlebars
@@ -33,12 +33,12 @@ conversion is controlled by the template.
 {{/if}}
 ```
 
-Let's break this down. The first line is a conditional statement. It checks if
+The first line is a conditional statement. It checks if
 the row has a date in the first column. You can refer any column using their
 alphabets. The second line constructs the transaction header. The third line
 constructs the first posting. The fourth line constructs the second posting.
 
-Effectively a single row in the CSV file is converted to a single transaction
+Effectively a single row is converted to a single transaction
 like this.
 
 ```ledger
@@ -52,7 +52,11 @@ provides a few helper functions to make it easier to write the template.
 
 ## Manage templates
 
-Paisa ships with a few built-in templates. You can also create your own. To
+Paisa ships with built-in templates for common Indian statements: Annual Income
+Tax Statement 26AS, Consolidated Account Statement, HDFC Account Statement (CSV
+and XLS), ICICI Credit Card Statement, IDFC First Credit Card (PDF), Kuvera
+Transactions, Mint, National Pension Scheme, Paytm, SBI Account Statement, SBI
+Credit Card Statement, Value Research, and Zerodha. You can also create your own. To
 create a new template, edit the template and click on the `Save As` button. User
 defined custom templates are stored in the configuration file.
 
@@ -308,7 +312,7 @@ Extract part of a string. Let's say you have
 `#!handlebars {{regexpMatch ROW.C "(.*) Growth Direct Plan" group=1}}` assuming
 the string is in the column `C`. `group` is optional and defaults to `0`.
 
-#### `#!typescript textRange(fromColumn: string, toColumn: string, {separator?: number}): string`
+#### `#!typescript textRange(fromColumn: string, toColumn: string, {separator?: string}): string`
 
 Extracts text from the given range of columns. The `separator` is optional and
 defaults to `" "`.

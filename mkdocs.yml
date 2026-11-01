@@ -67,12 +67,13 @@ nav:
   - "Project":
       - "History and community": project/index.md
       - "Manifesto": manifesto.md
-      - "Blog": blog/index.md
+      - "Blog archive": blog/index.md
   - "Development":
       - "Overview": development/index.md
+      - "Contributor setup": development/setup.md
       - "API": development/api.md
       - "Testing": development/testing.md
-      - "Design":
+      - "Design (internal)":
           - "Chart architecture": design/frontend-chart-architecture.md
           - "UI specification": design/paisa-ui-spec.md
 theme:

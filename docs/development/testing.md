@@ -1,4 +1,26 @@
-# Frontend testing
+---
+title: Testing
+description: Run the Go backend, frontend unit, component, integration, browser, and visual test suites.
+---
+
+# Testing
+
+Run everything that CI runs for unit-level checks with `make test`, and add
+integration and browser tests with `make test-all`. Install the prerequisites in
+[Contributor setup](setup.md) first; the integration and browser suites need
+`ledger`, `hledger`, `beancount` 2.x, and `sqlite3` on your `PATH`.
+
+## Go backend
+
+```bash
+make test-backend          # alias: make test-go
+cd backend && go test ./...   # same suites, run directly
+```
+
+Backend packages carry their own unit tests. The API regression suite below
+exercises them end to end against committed JSON baselines.
+
+## Frontend
 
 The frontend test stack has five layers:
 
@@ -24,7 +46,7 @@ both reports without enforcing the core threshold, which is useful while
 investigating a temporary regression. Reports from different instrumentation
 runners are not concatenated or treated as one coverage measurement.
 
-## Playwright and Browser Tests
+## Playwright and browser tests
 
 Install the matching Chromium build before running browser tests:
 
@@ -46,10 +68,12 @@ baselines plus journal/config source files. `paisa.db` files are not versioned;
 each test run copies source files to a temporary directory and rebuilds the
 database from the journal during sync.
 
+Run the suite with `make test-integration` (it builds the binary first).
+
 `make regen-fixtures` rewrites JSON baselines when API output changes. Regen
 writes id-stripped JSON, so diffs show only meaningful schema or value changes.
-`make normalize-fixtures` can strip generated ids from existing baselines without
-re-running the server.
+Review the diff before committing. `make normalize-fixtures` can strip generated
+ids from existing baselines without re-running the server.
 
 ## Updating visual baselines
 

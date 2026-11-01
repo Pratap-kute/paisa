@@ -104,6 +104,41 @@ def output_path(site: Path, page: Path, target: str) -> tuple[Path, str]:
     return candidate.resolve(), parsed.fragment
 
 
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def check_config_reference() -> list[str]:
+    """Every top-level key in the config schema must appear in the config docs."""
+    schema = json.loads((ROOT / "backend/pkg/config/schema.json").read_text(encoding="utf-8"))
+    properties = schema.get("properties")
+    if properties is None:
+        ref = schema.get("$ref", "").rsplit("/", 1)[-1]
+        properties = schema.get("$defs", {}).get(ref, {}).get("properties", {})
+    reference = (ROOT / "docs/reference/config.md").read_text(encoding="utf-8")
+    return [
+        f"docs/reference/config.md: schema key {key!r} is not documented"
+        for key in properties
+        if key not in reference
+    ]
+
+
+def check_front_matter() -> list[str]:
+    """Every published page needs a description for search snippets and metadata."""
+    excluded = {
+        "development/showcase-refresh-report.md",
+        "images/showcase/capture.md",
+    }
+    errors = []
+    for path in sorted((ROOT / "docs").rglob("*.md")):
+        relative = path.relative_to(ROOT / "docs").as_posix()
+        if relative in excluded:
+            continue
+        head = path.read_text(encoding="utf-8").split("\n---\n", 1)[0]
+        if not head.startswith("---") or "\ndescription:" not in head:
+            errors.append(f"docs/{relative}: missing front matter description")
+    return errors
+
+
 def main() -> int:
     site = Path(sys.argv[1] if len(sys.argv) > 1 else "site").resolve()
     errors: list[str] = []
@@ -168,6 +203,9 @@ def main() -> int:
                 if target_parser and unquote(fragment) not in target_parser.anchors:
                     errors.append(f"{page}: missing anchor in {target}: {fragment}")
 
+    errors.extend(check_config_reference())
+    errors.extend(check_front_matter())
+
     robots = (site / "robots.txt").read_text(encoding="utf-8")
     if "User-agent: *" not in robots or "Allow: /" not in robots:
         errors.append("robots.txt: normal crawling is not explicitly allowed")
@@ -191,7 +229,12 @@ def main() -> int:
     for term in SEARCH_TERMS:
         if term not in searchable:
             errors.append(f"search index: no useful result text for {term!r}")
-    for internal in ("showcase refresh audit", "showcase capture"):
+    for internal in (
+        "showcase refresh audit",
+        "showcase capture",
+        "paisa ui/ux specification",
+        "frontend chart architecture",
+    ):
         if internal in searchable:
             errors.append(f"search index: internal page is exposed: {internal!r}")
 

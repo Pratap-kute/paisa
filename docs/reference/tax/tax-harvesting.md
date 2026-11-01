@@ -1,3 +1,7 @@
+---
+description: "Configure tax harvesting so Paisa shows when a commodity is eligible to sell."
+---
+
 # Tax Harvesting
 
 Gains from asset types like Mutual Fund, Stock are subject to capital gains tax.

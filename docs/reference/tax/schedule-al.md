@@ -1,3 +1,7 @@
+---
+description: "Compute the Indian Schedule AL assets and liabilities report from your journal."
+---
+
 # Schedule AL
 
 As per the Indian Income tax law, citizens are obligated to report their entire
