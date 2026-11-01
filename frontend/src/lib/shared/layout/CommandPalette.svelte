@@ -411,6 +411,8 @@ function handleKeyDown(e: KeyboardEvent) {
 
 function scrollToActive() {
   setTimeout(() => {
+    // The timer can fire after the DOM is torn down (e.g. test environment exit).
+    if (typeof document === "undefined") return;
     const activeEl = document.querySelector('[data-command-active="true"]');
     activeEl?.scrollIntoView({ block: "nearest" });
   }, 10);
@@ -421,6 +423,7 @@ $effect(() => {
     query = "";
     selectedIndex = 0;
     setTimeout(() => {
+      if (typeof document === "undefined") return;
       const input = document.getElementById("paisa-command-palette-input");
       input?.focus();
     }, 50);
