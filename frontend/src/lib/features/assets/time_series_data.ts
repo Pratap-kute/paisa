@@ -87,8 +87,9 @@ export function buildNetworthSeries(points: Networth[]): PeriodSeriesChartData {
       })),
     series,
     points: points.map((point) => {
-      const investment = point.investmentAmount - point.withdrawalAmount;
-      const networth = investment + point.gainAmount;
+      // The backend supplies both figures; nothing is re-derived here.
+      const investment = point.netInvestmentAmount;
+      const networth = point.balanceAmount;
       return {
         period: point.date.format("DD MMM YYYY"),
         timestamp: point.date.valueOf(),

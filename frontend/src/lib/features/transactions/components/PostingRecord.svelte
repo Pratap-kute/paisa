@@ -3,7 +3,11 @@
   import { firstName } from "$lib/domain/account";
   import { change } from "$lib/domain/posting";
   import { postingUrl } from "$lib/shared/browser/navigation";
-  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+  import {
+    formatCurrency,
+    formatFloat,
+    formatReturnPercent,
+  } from "$lib/shared/formatters/currency";
   import { accountColorStyle } from "$lib/shared/theme/colors";
   import { iconText } from "$lib/shared/ui/icon";
   import PostingNote from "./PostingNote.svelte";
@@ -43,7 +47,10 @@
   <div
     class="flex items-baseline justify-between gap-3 text-[0.8125rem] text-muted-foreground"
   >
-    <span class="custom-icon min-w-0 truncate text-foreground" title={p.account}>
+    <span
+      class="custom-icon min-w-0 truncate text-foreground"
+      title={p.account}
+    >
       <span class="mr-1" style={accountColorStyle(firstName(p.account))}
         >{iconText(p.account)}</span
       >{p.account}
@@ -64,7 +71,11 @@
       {#if c.days > 0 && c.value !== 0}
         <span class="shrink-0">
           {formatCurrency(p.market_amount)}
-          <span class={c.class}>({formatFloat(c.percentage)}%)</span>
+          <span class={c.class}>
+            ({c.annualizedReturn === undefined
+              ? formatCurrency(c.value)
+              : formatReturnPercent(c.annualizedReturn)})
+          </span>
         </span>
       {/if}
     </div>

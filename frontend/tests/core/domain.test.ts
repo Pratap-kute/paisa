@@ -95,13 +95,25 @@ describe("posting and recurring transactions", () => {
     ...overrides,
   });
 
-  test("annualizes gains and losses", () => {
-    expect(change(posting() as never).class).toBe("paisa-text-success");
-    expect(change(posting({ market_amount: 80 }) as never).class).toBe(
-      "paisa-text-danger",
+  test("reads the lot return computed by the backend", () => {
+    const gain = change(
+      posting({
+        unrealized_gain: 20,
+        holding_days: 400,
+        annualized_return: 17.5,
+      }) as never,
     );
-    expect(change(posting({ commodity: "INR" }) as never).value).toBe(0);
-    expect(change(posting({ quantity: 0 }) as never).percentage).toBe(0);
+    expect(gain.class).toBe("paisa-text-success");
+    expect(gain.value).toBe(20);
+    expect(gain.annualizedReturn).toBe(17.5);
+    expect(gain.days).toBe(400);
+    expect(
+      change(posting({ unrealized_gain: -20, holding_days: 40 }) as never)
+        .class,
+    ).toBe("paisa-text-danger");
+    const none = change(posting() as never);
+    expect(none.value).toBe(0);
+    expect(none.annualizedReturn).toBeUndefined();
   });
 
   test.each([

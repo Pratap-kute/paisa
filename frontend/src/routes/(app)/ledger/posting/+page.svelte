@@ -1,7 +1,12 @@
 <script lang="ts">
+  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
   import { api } from "$lib/api";
   import { postingUrl } from "$lib/shared/browser/navigation";
-  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+  import {
+    formatCurrency,
+    formatFloat,
+    formatReturnPercent,
+  } from "$lib/shared/formatters/currency";
   import { firstName } from "$lib/domain/account";
   import { asTransaction } from "$lib/domain/transactions";
   import type { LedgerFile, Posting } from "$lib/domain/ledger";
@@ -154,20 +159,20 @@
         <div class="paisa-posting-table-container">
           <div class="paisa-posting-table" class:is-compact={compact}>
             {#if !compact}
-            <div
-              class="posting-row items-baseline gap-1 px-3 pb-2 pt-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
-            >
-              <div>Date</div>
-              <div>Description</div>
-              <div>Account</div>
-              <div class="text-right">Amount</div>
-              <div class="text-right">Balance</div>
-              <div class="text-right">Units</div>
-              <div class="text-right">Unit Price</div>
-              <div class="text-right">Market Value</div>
-              <div class="text-right">Change</div>
-              <div class="text-right">CAGR</div>
-            </div>
+              <div
+                class="posting-row items-baseline gap-1 px-3 pb-2 pt-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
+              >
+                <div>Date</div>
+                <div>Description</div>
+                <div>Account</div>
+                <div class="text-right">Amount</div>
+                <div class="text-right">Balance</div>
+                <div class="text-right">Units</div>
+                <div class="text-right">Unit Price</div>
+                <div class="text-right">Market Value</div>
+                <div class="text-right">Change</div>
+                <div class="text-right">Annualized</div>
+              </div>
             {/if}
 
             {#if filteredPostings.length > 0}
@@ -243,7 +248,9 @@
                         <div
                           class="text-right text-[0.8125rem] tabular-nums {c.class}"
                         >
-                          {unlessZero(c.percentage, formatFloat(c.percentage))}
+                          {c.annualizedReturn === undefined
+                            ? ""
+                            : formatReturnPercent(c.annualizedReturn)}
                         </div>
                       </div>
                     {/if}
@@ -275,12 +282,9 @@
       </div>
     {:else}
       <div
-        class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground"
+        class="rounded-[var(--paisa-radius-lg)] border border-border bg-surface"
       >
-        <div
-          class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"
-        ></div>
-        <span>Loading postings...</span>
+        <LoadingState message="Loading postings..." />
       </div>
     {/if}
   </div>

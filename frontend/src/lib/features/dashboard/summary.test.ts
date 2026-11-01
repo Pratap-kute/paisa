@@ -4,6 +4,10 @@ import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
 import type { Insight } from "$lib/domain/insights";
 import type { GoalSummary } from "$lib/domain/goals_models";
 import {
+  goal as baseGoal,
+  type GoalScenario,
+} from "$lib/domain/testing/goal_fixtures";
+import {
   analyzeRecurring,
   type RecurringAnalysis,
 } from "$lib/domain/recurring_analysis";
@@ -31,7 +35,7 @@ globalThis.USER_CONFIG = {
 const {
   buildExpenseTrend,
   buildDashboardAttention,
-  buildExpensePace,
+  expensePaceFor,
   buildNetWorthTrend,
   periodUrl,
   summarizeBudget,
@@ -134,10 +138,14 @@ function recurring(
   return item;
 }
 
-function goal(overrides: Partial<GoalSummary> = {}): GoalSummary {
+// Goal analysis comes from the backend; scenarios are generated fixtures.
+function goal(
+  scenario: GoalScenario = "overdue",
+  overrides: Partial<GoalSummary> = {},
+): GoalSummary {
   return {
+    ...baseGoal(scenario),
     id: "goal",
-    type: "savings",
     name: "Emergency Fund",
     icon: "fa-solid fa-piggy-bank",
     current: 72_000,
@@ -258,30 +266,25 @@ describe("dashboard summaries", () => {
     );
   });
 
-  test("projects current-month expenses after the first two days", () => {
-    expect(
-      buildExpensePace(1_000, "2026-08", dayjs("2026-08-02")),
-    ).toBeUndefined();
-    expect(buildExpensePace(0, "2026-08", dayjs("2026-08-10"))).toBeUndefined();
-    expect(
-      buildExpensePace(1_000, "2026-07", dayjs("2026-08-10")),
-    ).toBeUndefined();
-    expect(
-      buildExpensePace(10_000, "2026-08", dayjs("2026-08-10")),
-    ).toMatchObject({ projectedExpenses: 31_000, status: "neutral" });
-    expect(
-      buildExpensePace(2_800, "2026-02", dayjs("2026-02-28")),
-    ).toMatchObject({ projectedExpenses: 2_800 });
+  test("shows the backend expense pace only for the current month", () => {
+    const pace = { period: "2026-08", projectedExpenses: 31_000 };
+    expect(expensePaceFor(pace, "2026-08")).toEqual({
+      projectedExpenses: 31_000,
+      overBudget: undefined,
+      status: "neutral",
+    });
+    expect(expensePaceFor(pace, "2026-07")).toBeUndefined();
+    expect(expensePaceFor(undefined, "2026-08")).toBeUndefined();
+    expect(expensePaceFor(null, "2026-08")).toBeUndefined();
   });
 
-  test("marks a deterministic projection above the configured budget", () => {
+  test("marks a projection above the budget as a warning", () => {
     expect(
-      buildExpensePace(10_000, "2026-08", dayjs("2026-08-10"), 25_000),
-    ).toMatchObject({
-      projectedExpenses: 31_000,
-      overBudget: 6_000,
-      status: "warning",
-    });
+      expensePaceFor(
+        { period: "2026-08", projectedExpenses: 31_000, overBudget: 6_000 },
+        "2026-08",
+      ),
+    ).toMatchObject({ overBudget: 6_000, status: "warning" });
   });
 
   test("summarizes outgoing recurring obligations within an inclusive 14-day horizon", () => {
@@ -425,10 +428,10 @@ describe("dashboard summaries", () => {
       insights: undefined,
       recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
       goals: [
-        goal({ id: "complete", current: 100_000 }),
-        goal({ id: "future", targetDate: "2026-09-01" }),
-        goal({ id: "invalid", targetDate: "" }),
-        goal({ id: "overdue", name: "Fourth Goal" }),
+        goal("completedExact", { id: "complete", current: 100_000 }),
+        goal("onTrack", { id: "future", targetDate: "2026-09-01" }),
+        goal("noDeadlineNoPay", { id: "invalid", targetDate: "" }),
+        goal("overdue", { id: "overdue", name: "Fourth Goal" }),
       ],
       asOf: dayjs("2026-08-10"),
     });
@@ -454,31 +457,24 @@ describe("dashboard summaries", () => {
 
 test("goal attention uses shared pace thresholds, respects priority and promotes only one goal", () => {
   const asOf = dayjs("2026-08-10");
-  const history = ["2026-05", "2026-06", "2026-07"].map((month) => ({
-    month,
-    amount: 1000,
-  }));
   const candidates = [
-    goal({
+    goal("atRisk", {
       id: "low",
       name: "Low",
       targetDate: "2027-02-28",
       priority: 1,
-      contributionHistory: history,
     }),
-    goal({
+    goal("atRisk", {
       id: "high",
       name: "High",
       targetDate: "2027-02-28",
       priority: 10,
-      contributionHistory: history,
     }),
-    goal({
+    goal("retirementActive", {
       id: "retirement",
       type: "retirement",
       targetDate: "2020-01-01",
       priority: 100,
-      contributionHistory: history,
     }),
   ];
   const items = buildDashboardAttention(
@@ -498,22 +494,15 @@ test("goal attention uses shared pace thresholds, respects priority and promotes
 
 test("preserves goal severity and ranks critical goals above ordinary warnings", () => {
   const asOf = dayjs("2026-08-10");
-  for (const [amount, date, status, priority] of [
-    [1000, "2026-08-01", "negative", 550],
-    [1000, "2027-02-28", "negative", 550],
-    [3800, "2027-02-28", "warning", 200],
+  for (const [scenario, date, status, priority] of [
+    ["overdue", "2026-08-01", "negative", 550],
+    ["atRisk", "2027-02-28", "negative", 550],
+    ["behind", "2027-02-28", "warning", 200],
   ] as const) {
     const items = buildDashboardAttention({
       insights: [insight({ id: "ordinary", severity: "warning" })],
       recurring: summarizeUpcomingRecurring([], asOf),
-      goals: [
-        goal({
-          targetDate: date,
-          contributionHistory: ["2026-05", "2026-06", "2026-07"].map(
-            (month) => ({ month, amount }),
-          ),
-        }),
-      ],
+      goals: [goal(scenario, { targetDate: date })],
       asOf,
     });
     const goalItem = items.find((item) => item.kind === "goal");

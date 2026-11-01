@@ -17,6 +17,12 @@ export interface Posting {
 
   market_amount: number;
   balance: number;
+
+  // Open commodity lots only; computed by the backend.
+  unrealized_gain?: number;
+  holding_days?: number;
+  // Compound annual rate in percent, absent for lots held under a year.
+  annualized_return?: number;
 }
 
 export interface Transaction {
