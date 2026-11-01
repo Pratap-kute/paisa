@@ -313,6 +313,15 @@
   );
   let showYearlyDepth = $derived(pathname === "/cash_flow/yearly");
 
+  // The year store starts empty, so default to the latest financial year or the
+  // picker renders blank on pages opened directly.
+  $effect(() => {
+    if (showFinancialYearPicker && !$year) {
+      const latest = forEachFinancialYear($dateMin, $dateMax).at(-1);
+      if (latest) year.set(financialYear(latest));
+    }
+  });
+
   const navLinkClass =
     "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-surface-hover";
   const navLinkActiveClass = "bg-primary-subtle font-semibold text-primary";

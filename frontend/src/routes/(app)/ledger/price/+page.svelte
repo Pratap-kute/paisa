@@ -229,7 +229,7 @@
 </script>
 
 <svelte:head>
-  <title>Commodity Prices — Paisa</title>
+  <title>Commodity Prices - Paisa</title>
 </svelte:head>
 
 <div class="flex w-full min-w-0 max-w-full flex-col gap-5">

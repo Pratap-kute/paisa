@@ -22,9 +22,11 @@
 
   interface Props {
     postings: Posting[];
+    // Show magnitudes when the column itself says debit or credit.
+    absolute?: boolean;
   }
 
-  let { postings }: Props = $props();
+  let { postings, absolute = false }: Props = $props();
 </script>
 
 <div class="paisa-postings-list">
@@ -32,7 +34,7 @@
     <div class="paisa-posting-row">
       <div class="paisa-posting-account" title={p.account}>
         <span
-          class="paisa-account-icon"
+          class="paisa-account-icon custom-icon"
           style={accountColorStyle(firstName(p.account))}
         >
           {iconText(p.account)}
@@ -45,7 +47,7 @@
         </div>
       {/if}
       <div class="paisa-posting-amount {p.amount < 0 ? 'is-negative' : ''}">
-        {formatCurrency(p.amount, 2)}
+        {formatCurrency(absolute ? Math.abs(p.amount) : p.amount, 2)}
       </div>
     </div>
   {/each}

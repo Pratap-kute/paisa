@@ -22,6 +22,9 @@
   let amountsById = $derived(
     new Map(item.occurrences.map((o) => [o.transaction.id, o.amount])),
   );
+  // The history can run to hundreds of rows per item, so only render it once
+  // the details element is opened.
+  let historyOpen = $state(false);
   function money(value: number | undefined) {
     return formatCommodityAmount(value, item.commodity, $obscure);
   }
@@ -91,7 +94,10 @@
   {#if item.scheduleError}<p class="mt-1 text-sm text-warning">
       {item.scheduleError}
     </p>{/if}
-  <details class="mt-2 text-sm">
+  <details
+    class="mt-2 text-sm"
+    ontoggle={(e) => (historyOpen = e.currentTarget.open)}
+  >
     <summary class="cursor-pointer text-primary"
       >View history and pattern details</summary
     >
@@ -104,6 +110,7 @@
     {#if !item.confirmed}<p class="text-xs text-muted-foreground">
         {item.reasons.join(" · ")}
       </p>{/if}
+    {#if historyOpen}
     <ul class="mt-2 space-y-1">
       {#each item.transactions as transaction (transaction.id)}
         <li class="flex flex-wrap justify-between gap-2">
@@ -118,6 +125,7 @@
         </li>
       {/each}
     </ul>
+    {/if}
   </details>
   {#if !item.confirmed}
     <div class="mt-3 flex flex-wrap gap-2">

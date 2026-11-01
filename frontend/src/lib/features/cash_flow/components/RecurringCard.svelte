@@ -1,5 +1,6 @@
 <script lang="ts">
   import { now } from "$lib/domain/time";
+  import { recurringLabel } from "$lib/domain/recurring_analysis";
   import type { TransactionSchedule } from "$lib/domain/recurring";
   import type { TransactionSequence } from "$lib/domain/recurring";
   import {
@@ -47,7 +48,7 @@
 {:else}
   <div class="rounded-lg border border-border-subtle bg-surface p-4">
     <div class="mb-3 text-base font-semibold text-muted-foreground">
-      {ts.key}
+      {recurringLabel(ts.key)}
     </div>
     <RecurringSchedule {schedule} amount={dueAmount} />
     <div

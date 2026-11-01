@@ -139,7 +139,7 @@
 </script>
 
 <svelte:head>
-  <title>Transactions — Paisa</title>
+  <title>Transactions - Paisa</title>
 </svelte:head>
 
 <DiffViewModal

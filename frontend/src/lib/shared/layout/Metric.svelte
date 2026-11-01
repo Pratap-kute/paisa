@@ -24,6 +24,10 @@
     loading = false,
     class: className = "",
   }: Props = $props();
+
+  // Words such as "Not configured" wrap instead of being cut off by the ellipsis
+  // that keeps long numbers on one line.
+  let isText = $derived(/[a-z]{3,}/.test(value));
 </script>
 
 <div class="paisa4-metric {className}">
@@ -31,7 +35,13 @@
   {#if loading}
     <Skeleton width="9rem" height="2rem" />
   {:else}
-    <div class="paisa4-metric-value paisa4-metric-{status}">{value}</div>
+    <div
+      class="paisa4-metric-value paisa4-metric-{status}"
+      class:paisa4-metric-text={isText}
+      title={value}
+    >
+      {value}
+    </div>
   {/if}
   {#if secondary || trend}
     <div class="paisa4-metric-meta">

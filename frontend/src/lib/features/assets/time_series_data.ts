@@ -46,18 +46,7 @@ function postingRows(postings: Posting[], sign = 1): Array<[string, number]> {
 
 export function buildNetworthSeries(points: Networth[]): PeriodSeriesChartData {
   const series: PeriodSeriesDefinition[] = [
-    {
-      key: "networth",
-      label: "Net Worth",
-      intent: "line",
-      color: COLORS.primary,
-    },
-    {
-      key: "investment",
-      label: "Net Investment",
-      intent: "line",
-      color: COLORS.secondary,
-    },
+    // Areas first so the net worth and investment lines stay on top.
     {
       key: "gain",
       label: "Gain",
@@ -72,16 +61,30 @@ export function buildNetworthSeries(points: Networth[]): PeriodSeriesChartData {
       color: COLORS.loss,
       areaOpacity: 0.16,
     },
+    {
+      key: "networth",
+      label: "Net Worth",
+      intent: "line",
+      color: COLORS.primary,
+    },
+    {
+      key: "investment",
+      label: "Net Investment",
+      intent: "line",
+      color: COLORS.secondary,
+    },
   ];
   return {
     axis: "time",
     granularity: "day",
     valueFormat: "currency",
-    legends: series.map((s) => ({
-      label: s.label,
-      color: s.color ?? "",
-      shape: "square",
-    })),
+    legends: ["networth", "investment", "gain", "loss"]
+      .map((key) => series.find((s) => s.key === key)!)
+      .map((s) => ({
+        label: s.label,
+        color: s.color ?? "",
+        shape: "square",
+      })),
     series,
     points: points.map((point) => {
       const investment = point.investmentAmount - point.withdrawalAmount;

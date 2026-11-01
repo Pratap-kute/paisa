@@ -1,5 +1,6 @@
 <script lang="ts">
   import { now } from "$lib/domain/time";
+  import { recurringLabel } from "$lib/domain/recurring_analysis";
   import type { TransactionSequence } from "$lib/domain/recurring";
   import {
     intervalText,
@@ -26,7 +27,7 @@
 {#if schedule && n}
   <div class="mb-0 text-center">
     <div class="truncate text-xs font-medium text-foreground">
-      {transactionSequece.key}
+      {recurringLabel(transactionSequece.key)}
     </div>
     <div class="my-1">
       <Badge variant="neutral" size="sm" rounded

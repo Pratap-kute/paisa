@@ -88,7 +88,6 @@
 <style>
   .legend-label {
     color: var(--paisa-chart-text);
-    font-family: var(--paisa-font-sans);
     font-size: var(--paisa-font-size-sm);
     text-transform: capitalize;
     text-align: center;

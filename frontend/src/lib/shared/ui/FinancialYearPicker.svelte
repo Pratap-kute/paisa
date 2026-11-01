@@ -16,13 +16,25 @@
     dateMax,
     class: className = "",
   }: Props = $props();
+
+  let years = $derived(
+    forEachFinancialYear(dateMin, dateMax).reverse().map(financialYear),
+  );
+
+  // The shared year store starts empty, so pages opened directly would
+  // otherwise render a blank selection.
+  $effect(() => {
+    if (!value && years.length > 0) {
+      value = years[0];
+    }
+  });
 </script>
 
 <select
   bind:value
   class="px-2 py-1 text-xs rounded border border-border-subtle bg-surface text-foreground {className}"
 >
-  {#each forEachFinancialYear(dateMin, dateMax).reverse() as fy}
-    <option>{financialYear(fy)}</option>
+  {#each years as fy}
+    <option>{fy}</option>
   {/each}
 </select>

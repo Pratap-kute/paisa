@@ -31,7 +31,7 @@
 </script>
 
 <svelte:head>
-  <title>Schedule AL — Paisa</title>
+  <title>Schedule AL - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">

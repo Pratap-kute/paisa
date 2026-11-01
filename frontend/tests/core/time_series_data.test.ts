@@ -73,11 +73,18 @@ describe("time-series ECharts adapters", () => {
       }),
     ]);
 
+    // Areas come first so the lines are drawn on top of them.
     expect(data.series.map((series) => series.key)).toEqual([
-      "networth",
-      "investment",
       "gain",
       "loss",
+      "networth",
+      "investment",
+    ]);
+    expect(data.legends?.map((legend) => legend.label)).toEqual([
+      "Net Worth",
+      "Net Investment",
+      "Gain",
+      "Loss",
     ]);
     expect(data.points.map((point) => point.values.networth)).toEqual([
       160, 90,

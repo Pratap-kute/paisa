@@ -507,6 +507,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.paisa4-metric-text {
+  white-space: normal;
+  font-size: 1.375rem;
+  line-height: 28px;
+}
+
 .paisa4-metric-meta {
   display: flex;
   gap: 8px;

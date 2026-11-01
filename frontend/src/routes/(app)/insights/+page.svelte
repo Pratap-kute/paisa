@@ -132,6 +132,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Insights - Paisa</title>
+</svelte:head>
+
 <Page width="analysis">
   <div class="w-full flex flex-col space-y-6">
     <PageHeader

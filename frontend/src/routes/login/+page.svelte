@@ -32,7 +32,7 @@
 </script>
 
 <svelte:head>
-  <title>Login — Paisa</title>
+  <title>Login - Paisa</title>
 </svelte:head>
 
 <main

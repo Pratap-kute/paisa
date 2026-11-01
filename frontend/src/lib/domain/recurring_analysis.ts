@@ -101,6 +101,12 @@ export interface RecurringAnalysis {
   scheduleError?: string;
 }
 
+// Auto-detected sequences are keyed "<name> [<12 hex chars>]"; the suffix only
+// disambiguates the key and is noise for readers.
+export function recurringLabel(key: string): string {
+  return key.replace(/ \[[0-9a-f]{12}\]$/, "");
+}
+
 export function median(values: number[]): number {
   const sorted = [...values].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
@@ -375,7 +381,7 @@ export function analyzeRecurring(
   );
   return {
     key,
-    displayName: confirmed ? key : last.payee,
+    displayName: confirmed ? recurringLabel(key) : last.payee,
     confirmed,
     occurrences,
     rhythm,

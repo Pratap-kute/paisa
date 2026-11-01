@@ -311,6 +311,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{selectedFile?.name || "Editor"} - Paisa</title>
+</svelte:head>
+
 <FileModal
   bind:open={modalOpen}
   on:save={(e) => createFile(e.detail)}

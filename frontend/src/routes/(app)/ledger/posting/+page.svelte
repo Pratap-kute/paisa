@@ -95,7 +95,7 @@
 </script>
 
 <svelte:head>
-  <title>Postings — Paisa</title>
+  <title>Postings - Paisa</title>
 </svelte:head>
 
 <div class="flex w-full min-w-0 max-w-full flex-col gap-5">
@@ -267,7 +267,7 @@
 <style>
   .paisa-posting-table {
     width: 100%;
-    min-width: 1480px;
+    min-width: 1120px;
   }
 
   .posting-row {
@@ -275,7 +275,7 @@
     display: grid;
     grid-template-columns:
       110px minmax(160px, 1.25fr) minmax(200px, 1.5fr)
-      repeat(7, minmax(92px, 0.75fr));
+      repeat(7, minmax(84px, 0.75fr));
     width: 100%;
     overflow: hidden;
   }

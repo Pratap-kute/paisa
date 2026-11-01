@@ -213,6 +213,10 @@
   ] as const;
 </script>
 
+<svelte:head>
+  <title>What-if Scenarios - Paisa</title>
+</svelte:head>
+
 <Page width="analysis">
   <PageHeader
     title="What-if Scenarios"
