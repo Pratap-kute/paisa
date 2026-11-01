@@ -3553,12 +3553,12 @@
 </li>
 <li>
 <p><strong>Frontend TypeScript Client Only</strong>:
-  <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>deno<span class="w"> </span>task<span class="w"> </span>api:generate
+  <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>api:generate
 </span></code></pre></div></p>
 </li>
 <li>
 <p><strong>Verify Frontend Generation Drift (CI Check)</strong>:
-  <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>deno<span class="w"> </span>task<span class="w"> </span>api:check
+  <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>api:check
 </span></code></pre></div></p>
 </li>
 </ul>
@@ -3610,7 +3610,7 @@
 <li><strong>Regenerate Full Pipeline</strong>: Run <code>make api</code>.</li>
 <li><strong>Verify Coverage &amp; Types</strong>:</li>
 <li>Backend: <code>cd backend &amp;&amp; go test -v ./pkg/server -run "TestSwagger|TestArchitecture"</code></li>
-<li>Frontend: <code>cd frontend &amp;&amp; deno task check &amp;&amp; deno task test</code></li>
+<li>Frontend: <code>cd frontend &amp;&amp; bun run check &amp;&amp; bun test</code></li>
 </ol>
 
 

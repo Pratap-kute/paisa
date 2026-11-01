@@ -3429,15 +3429,15 @@
 <h1 id="frontend-testing">Frontend testing<a class="headerlink" href="#frontend-testing" title="Permanent link">&para;</a></h1>
 <p>The frontend test stack has five layers:</p>
 <ul>
-<li><code>deno task test:unit</code> runs Deno business-logic and fixture tests.</li>
-<li><code>deno task test:core</code> runs the focused Vitest core-logic suite.</li>
-<li><code>deno task test:component</code> runs Svelte component tests in <code>happy-dom</code>.</li>
-<li><code>deno task test:e2e</code> runs Chromium against an isolated real backend and Vite
+<li><code>bun run test:unit</code> runs Bun business-logic and fixture tests.</li>
+<li><code>bun run test:core</code> runs the focused Vitest core-logic suite.</li>
+<li><code>bun run test:component</code> runs Svelte component tests in <code>happy-dom</code>.</li>
+<li><code>bun run test:e2e</code> runs Chromium against an isolated real backend and Vite
   frontend.</li>
-<li><code>deno task test:visual</code> compares the Linux Chromium visual baselines.</li>
+<li><code>bun run test:visual</code> compares the Linux Chromium visual baselines.</li>
 </ul>
-<p>Run all frontend checks with <code>deno task test:frontend</code>.
-<code>deno task test:coverage</code> enforces a 60% minimum for statements, branches,
+<p>Run all frontend checks with <code>bun run test:frontend</code>.
+<code>bun run test:coverage</code> enforces a 60% minimum for statements, branches,
 functions, and lines across maintainable core logic in
 <code>src/lib/{domain,features,shared}</code>. The exact includes and exclusions are
 defined in <code>frontend/vitest.config.ts</code>; generated parsers and selected browser-only
@@ -3445,13 +3445,13 @@ modules are outside the core coverage surface. The core HTML and LCOV reports ar
 to <code>coverage/core</code>.</p>
 <p>Component coverage remains informational because route, chart, and Svelte
 rendering code has a different testing cost profile. Its HTML and LCOV reports
-are written to <code>coverage/component</code>. <code>deno task test:coverage:report</code> generates
+are written to <code>coverage/component</code>. <code>bun run test:coverage:report</code> generates
 both reports without enforcing the core threshold, which is useful while
 investigating a temporary regression. Reports from different instrumentation
 runners are not concatenated or treated as one coverage measurement.</p>
 <h2 id="playwright-and-browser-tests">Playwright and Browser Tests<a class="headerlink" href="#playwright-and-browser-tests" title="Permanent link">&para;</a></h2>
 <p>Install the matching Chromium build before running browser tests:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>deno<span class="w"> </span>task<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span>--with-deps<span class="w"> </span>chromium
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>frontend<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>bun<span class="w"> </span>run<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span>--with-deps<span class="w"> </span>chromium
 </span></code></pre></div>
 <p>When using the Dev Container, the required Chromium build and system dependencies are configured automatically.</p>
 <p>The browser server copies the browser fixture journal and config into a
@@ -3468,15 +3468,11 @@ writes id-stripped JSON, so diffs show only meaningful schema or value changes.
 <code>make normalize-fixtures</code> can strip generated ids from existing baselines without
 re-running the server.</p>
 <h2 id="updating-visual-baselines">Updating visual baselines<a class="headerlink" href="#updating-visual-baselines" title="Permanent link">&para;</a></h2>
-<p>Run <code>deno task test:visual:update</code> inside Linux or the Dev Container, review every
+<p>Run <code>bun run test:visual:update</code> inside Linux or the Dev Container, review every
 changed PNG, and commit intentional changes. Do not update screenshots merely to
 make a failing test pass.</p>
 <p>Failed CI runs upload <code>coverage</code>, <code>playwright-report</code>, and <code>test-results</code>
-artifacts for seven days. Pull requests run the frontend suite, while direct
-pushes run it only on <code>master</code>; stale runs are cancelled when a newer commit is
-pushed. Documentation-only changes are skipped. The cross-platform packaged
-desktop launch smoke runs weekly on Sunday and can be dispatched manually from
-GitHub Actions.</p>
+artifacts so differences can be inspected from the workflow summary.</p>
 
 
 

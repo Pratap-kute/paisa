@@ -7343,7 +7343,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 <li><strong>Shared</strong> cannot depend on features or routes.</li>
 <li><strong>Features</strong> and <strong>generated</strong> output cannot depend on routes.</li>
 <li><strong>API</strong> cannot depend on routes or feature implementations.</li>
-<li>Enforced by <code>deno task architecture</code> boundary checks.</li>
+<li>Enforced by <code>bun run architecture</code> boundary checks.</li>
 </ul>
 <hr />
 <h2 id="13-data-display-tables-forms-and-chart-rules">13. Data Display, Tables, Forms, and Chart Rules<a class="headerlink" href="#13-data-display-tables-forms-and-chart-rules" title="Permanent link">&para;</a></h2>
@@ -8499,7 +8499,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 <li><strong>No ECharts Replacement:</strong> ECharts 6 is the chart rendering engine; alternative chart libraries are not introduced.</li>
 <li><strong>No CodeMirror Replacement:</strong> CodeMirror 6 remains the editor engine.</li>
 <li><strong>No Immediate Tabulator Removal:</strong> Tabulator remains wrapped inside <code>&lt;Table /&gt;</code>.</li>
-<li><strong>Library Boundary Enforcement:</strong> <code>deno task architecture</code> enforces the 5-area ownership model (§12.1). Domain cannot depend on UI; shared cannot depend on features.</li>
+<li><strong>Library Boundary Enforcement:</strong> <code>bun run architecture</code> enforces the 5-area ownership model (§12.1). Domain cannot depend on UI; shared cannot depend on features.</li>
 <li><strong>No Bulma/SCSS Regression:</strong> No new Bulma classes, SCSS files, or <code>@import "bulma"</code> rules may be added.</li>
 </ul>
 <hr />
@@ -8524,7 +8524,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Architectural boundaries and library ownership rules are established and enforced.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Bulma fully removed (Bulma = 0), SCSS fully removed (Sass = 0), Tailwind Preflight enabled.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D3.js fully replaced by ECharts 6 across all visualization routes.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 5-area library architecture (<code>api/</code>, <code>domain/</code>, <code>features/</code>, <code>shared/</code>, <code>generated/</code>) enforced via <code>deno task architecture</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> 5-area library architecture (<code>api/</code>, <code>domain/</code>, <code>features/</code>, <code>shared/</code>, <code>generated/</code>) enforced via <code>bun run architecture</code>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Command Palette (<code>Ctrl+K</code> / <code>Cmd+K</code>) implemented.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Insights page (<code>/insights</code>) added as route #40.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Development UI Design Lab (<code>/dev/ui</code>) operational.</li>
