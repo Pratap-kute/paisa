@@ -31,12 +31,12 @@ func getSavingsSummary(ps []posting.Posting, conf config.SavingsGoal) GoalSummar
 }
 
 func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
-	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").All(), conf.Accounts)
+	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").UntilToday().All(), conf.Accounts)
 	savings = service.PopulateMarketPrice(db, savings)
 	savingsTotal := accounting.CurrentBalance(savings)
 	investmentTotal := accounting.CostBalance(savings)
 
-	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All(), conf.Accounts)
+	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").UntilToday().All(), conf.Accounts)
 	savingsWithCapitalGains = service.PopulateMarketPrice(db, savingsWithCapitalGains)
 
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)

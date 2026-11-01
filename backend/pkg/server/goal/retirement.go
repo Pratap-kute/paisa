@@ -63,9 +63,9 @@ func calculateAverageExpense(db *gorm.DB, conf config.RetirementGoal) decimal.De
 }
 
 func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
-	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").All(), conf.Savings)
+	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").UntilToday().All(), conf.Savings)
 	savings = service.PopulateMarketPrice(db, savings)
-	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All(), conf.Savings)
+	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").UntilToday().All(), conf.Savings)
 	savingsWithCapitalGains = service.PopulateMarketPrice(db, savingsWithCapitalGains)
 	savingsTotal := accounting.CurrentBalance(savings)
 	investmentTotal := accounting.CostBalance(savings)

@@ -18,19 +18,18 @@
   let years: string[] = $state([]);
   let selectedYear: string = $state("");
   let capitalGains: CapitalGain[] = $state([]);
+  // Each year summed across accounts by the backend. Losses net off gains and a
+  // net loss owes no tax, so these are not the sum of the per-account rows.
+  let fyTotals: Record<string, FYCapitalGain> = $state({});
   let isLoading = $state(true);
 
   let hasYears = $derived(years.length > 0);
 
-  // Active gains for the selected year
+  // Totals for the selected year, or every year
   let activeFyGains = $derived.by((): FYCapitalGain[] => {
     if (!selectedYear) return [];
-    if (selectedYear === "all") {
-      return capitalGains.flatMap((cg) => Object.values(cg.fy));
-    }
-    return capitalGains.flatMap((cg) =>
-      cg.fy[selectedYear] ? [cg.fy[selectedYear]] : [],
-    );
+    if (selectedYear === "all") return Object.values(fyTotals);
+    return fyTotals[selectedYear] ? [fyTotals[selectedYear]] : [];
   });
 
   // KPIs for the selected view
@@ -59,18 +58,17 @@
   // Yearly summary rows for the "All Years" comparison table
   let yearlySummaries = $derived.by(() => {
     return years.map((yr) => {
-      const yrGains = capitalGains.flatMap((cg) =>
-        cg.fy[yr] ? [cg.fy[yr]] : [],
-      );
-      const sold = sumBy(yrGains, (fy) => fy.sell_price);
-      const gain = sumBy(yrGains, (fy) => fy.tax.gain);
-      const taxable = sumBy(yrGains, (fy) => fy.tax.taxable);
-      const stcg = sumBy(yrGains, (fy) => fy.tax.short_term);
-      const ltcg = sumBy(yrGains, (fy) => fy.tax.long_term);
-      const slab = sumBy(yrGains, (fy) => fy.tax.slab);
+      const total = fyTotals[yr];
+      const assetCount = capitalGains.filter((cg) => cg.fy[yr]).length;
+      const sold = total?.sell_price ?? 0;
+      const gain = total?.tax.gain ?? 0;
+      const taxable = total?.tax.taxable ?? 0;
+      const stcg = total?.tax.short_term ?? 0;
+      const ltcg = total?.tax.long_term ?? 0;
+      const slab = total?.tax.slab ?? 0;
       return {
         year: yr,
-        assetCount: yrGains.length,
+        assetCount,
         sold,
         gain,
         taxable,
@@ -96,10 +94,12 @@
 
   onMount(async () => {
     try {
-      const { capital_gains } =
+      const { capital_gains, fy_totals } =
         (await api.capitalGains.getCapitalGains()) as unknown as {
           capital_gains: Record<string, CapitalGain>;
+          fy_totals: Record<string, FYCapitalGain>;
         };
+      fyTotals = fy_totals ?? {};
 
       years = uniq(
         Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),

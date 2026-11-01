@@ -2464,6 +2464,13 @@ const docTemplate = `{
                     "additionalProperties": {
                         "$ref": "#/definitions/dto.CapitalGainResponse"
                     }
+                },
+                "fy_totals": {
+                    "description": "FYTotals sums each financial year across accounts. A net loss owes no\ntax, so the short and long term tax are never negative.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.FYCapitalGainResponse"
+                    }
                 }
             }
         },

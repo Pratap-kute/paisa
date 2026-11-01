@@ -135,6 +135,11 @@ export interface DtoCapitalGainResponse {
 
 export interface DtoCapitalGainsResponse {
   capital_gains?: Record<string, DtoCapitalGainResponse>;
+  /**
+   * FYTotals sums each financial year across accounts. A net loss owes no
+   * tax, so the short and long term tax are never negative.
+   */
+  fy_totals?: Record<string, DtoFYCapitalGainResponse>;
 }
 
 export interface DtoCashFlowResponse {

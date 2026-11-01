@@ -108,7 +108,8 @@ func TestCalculateEquity(t *testing.T) {
 		sellPrice := decimal.NewFromInt(200)
 
 		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
-		assert.True(t, decimal.NewFromInt(150).Equal(tax.ShortTerm), "held <= 1 calendar year should be short term")
+		// sold after 23 Jul 2024: 20% of 1000
+		assert.True(t, decimal.NewFromInt(200).Equal(tax.ShortTerm), "held <= 1 calendar year should be short term, got %s", tax.ShortTerm)
 		assert.True(t, tax.LongTerm.IsZero())
 	})
 
@@ -120,42 +121,84 @@ func TestCalculateEquity(t *testing.T) {
 		sellPrice := decimal.NewFromInt(200)
 
 		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
-		assert.True(t, decimal.NewFromInt(100).Equal(tax.LongTerm), "held > 1 calendar year should be long term")
+		// sold after 23 Jul 2024: 12.5% of 1000
+		assert.True(t, decimal.NewFromInt(125).Equal(tax.LongTerm), "held > 1 calendar year should be long term, got %s", tax.LongTerm)
 		assert.True(t, tax.ShortTerm.IsZero())
 	})
 
-	t.Run("sold before grandfather date is tax exempt", func(t *testing.T) {
-		purchaseDate := parseDate("2017-01-01")
-		sellDate := parseDate("2018-01-15") // before 2018-02-01
+	t.Run("long term gain sold before the long term tax began is exempt", func(t *testing.T) {
+		purchaseDate := parseDate("2016-01-01")
+		sellDate := parseDate("2018-03-15") // held over a year, before 2018-04-01
 		qty := decimal.NewFromInt(10)
-		buyPrice := decimal.NewFromInt(100)
-		sellPrice := decimal.NewFromInt(200)
 
-		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
+		tax := Calculate(db, qty, commodity, decimal.NewFromInt(100), purchaseDate, decimal.NewFromInt(200), sellDate)
 		assert.Equal(t, "1000", tax.Gain.String())
 		assert.True(t, tax.Taxable.IsZero())
 		assert.True(t, tax.LongTerm.IsZero())
 		assert.True(t, tax.ShortTerm.IsZero())
 	})
 
-	t.Run("purchased before grandfather date steps up purchase price", func(t *testing.T) {
-		// Seed price on 2018-02-01
-		require.NoError(t, db.Create(&price.Price{
-			CommodityName: "NIFTY50",
-			Date:          EquityGrandfatherDate,
-			Value:         decimal.NewFromInt(150),
-		}).Error)
+	t.Run("short term gain before 2018 is still taxed", func(t *testing.T) {
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(100), parseDate("2017-12-01"), decimal.NewFromInt(200), parseDate("2018-01-15"))
+		assert.Equal(t, "1000", tax.Taxable.String())
+		assert.True(t, decimal.NewFromInt(150).Equal(tax.ShortTerm), "15%% of 1000, got %s", tax.ShortTerm)
+	})
 
-		purchaseDate := parseDate("2017-01-01")
-		sellDate := parseDate("2020-01-01")
-		qty := decimal.NewFromInt(10)
-		buyPrice := decimal.NewFromInt(100) // original buy price was 100
-		sellPrice := decimal.NewFromInt(250)
+	// 31 Jan 2018 value used by the grandfathering rule.
+	fmvDate := EquityGrandfatherDate.AddDate(0, 0, -1)
+	seedFMV := func(t *testing.T, value int64) {
+		t.Helper()
+		db.Where("commodity_name = ?", "NIFTY50").Delete(&price.Price{})
+		service.ClearPriceCache()
+		require.NoError(t, db.Create(&price.Price{CommodityName: "NIFTY50", Date: fmvDate, Value: decimal.NewFromInt(value)}).Error)
+	}
 
-		tax := Calculate(db, qty, commodity, buyPrice, purchaseDate, sellPrice, sellDate)
-		assert.Equal(t, "1500", tax.Gain.String())                                                                   // (250 - 100) * 10
-		assert.Equal(t, "1000", tax.Taxable.String())                                                                // (250 - 150) * 10
-		assert.True(t, decimal.NewFromInt(100).Equal(tax.LongTerm), "long term should be 100, got %s", tax.LongTerm) // 10% of 1000
+	t.Run("grandfathering steps the cost up to the 31 Jan 2018 value", func(t *testing.T) {
+		seedFMV(t, 150)
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(100), parseDate("2017-01-01"), decimal.NewFromInt(250), parseDate("2020-01-01"))
+		assert.Equal(t, "1500", tax.Gain.String())    // (250 - 100) * 10
+		assert.Equal(t, "1000", tax.Taxable.String()) // (250 - 150) * 10
+		assert.True(t, decimal.NewFromInt(100).Equal(tax.LongTerm), "10%% of 1000, got %s", tax.LongTerm)
+	})
+
+	t.Run("grandfathering is capped at the sale price and cannot create a loss", func(t *testing.T) {
+		seedFMV(t, 300) // value on 31 Jan 2018 is above what it later sold for
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(100), parseDate("2017-01-01"), decimal.NewFromInt(250), parseDate("2020-01-01"))
+		assert.True(t, tax.Taxable.IsZero(), "taxable should be 0, got %s", tax.Taxable)
+		assert.True(t, tax.LongTerm.IsZero())
+	})
+
+	t.Run("grandfathering never lowers a higher actual cost", func(t *testing.T) {
+		seedFMV(t, 150)
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(200), parseDate("2017-01-01"), decimal.NewFromInt(250), parseDate("2020-01-01"))
+		assert.Equal(t, "500", tax.Taxable.String()) // (250 - 200) * 10, not (250 - 150) * 10
+	})
+
+	t.Run("a real loss is not inflated by the step up", func(t *testing.T) {
+		seedFMV(t, 150)
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(120), parseDate("2017-01-01"), decimal.NewFromInt(100), parseDate("2020-01-01"))
+		assert.Equal(t, "-200", tax.Gain.String())
+		assert.Equal(t, "-200", tax.Taxable.String()) // deemed cost = min(150, 100) < 120 actual
+	})
+
+	t.Run("a missing 31 Jan 2018 price keeps the actual cost", func(t *testing.T) {
+		db.Where("commodity_name = ?", "NIFTY50").Delete(&price.Price{})
+		service.ClearPriceCache()
+		tax := Calculate(db, decimal.NewFromInt(10), commodity, decimal.NewFromInt(100), parseDate("2017-01-01"), decimal.NewFromInt(250), parseDate("2020-01-01"))
+		assert.Equal(t, "1500", tax.Taxable.String())
+	})
+
+	t.Run("rates follow the sale date: Budget 2024 raised them on 23 Jul 2024", func(t *testing.T) {
+		qty, buy, sell := decimal.NewFromInt(10), decimal.NewFromInt(100), decimal.NewFromInt(200)
+		longBefore := Calculate(db, qty, commodity, buy, parseDate("2022-01-01"), sell, parseDate("2024-07-22"))
+		longAfter := Calculate(db, qty, commodity, buy, parseDate("2022-01-01"), sell, parseDate("2024-07-23"))
+		assert.True(t, decimal.NewFromInt(100).Equal(longBefore.LongTerm), "10%% of 1000, got %s", longBefore.LongTerm)
+		assert.True(t, decimal.NewFromInt(125).Equal(longAfter.LongTerm), "12.5%% of 1000, got %s", longAfter.LongTerm)
+
+		shortBefore := Calculate(db, qty, commodity, buy, parseDate("2024-06-01"), sell, parseDate("2024-07-22"))
+		shortAfter := Calculate(db, qty, commodity, buy, parseDate("2024-06-01"), sell, parseDate("2024-07-23"))
+		assert.True(t, decimal.NewFromInt(150).Equal(shortBefore.ShortTerm), "15%% of 1000, got %s", shortBefore.ShortTerm)
+		assert.True(t, decimal.NewFromInt(200).Equal(shortAfter.ShortTerm), "20%% of 1000, got %s", shortAfter.ShortTerm)
 	})
 }
 
@@ -201,6 +244,18 @@ func TestCalculateDebt(t *testing.T) {
 		assert.True(t, tax.LongTerm.GreaterThan(decimal.Zero), "Long term tax should be non-zero")
 		assert.Equal(t, decimal.Zero, tax.Slab)
 	})
+
+	t.Run("units bought on or after 1 Apr 2023 get no indexation and are taxed at slab", func(t *testing.T) {
+		purchaseDate := parseDate("2023-05-01")
+		sellDate := parseDate("2026-06-01") // held over 3 years
+		qty := decimal.NewFromInt(100)
+
+		tax := Calculate(db, qty, commodity, decimal.NewFromInt(100), purchaseDate, decimal.NewFromInt(150), sellDate)
+		assert.Equal(t, decimal.NewFromInt(5000), tax.Gain)
+		assert.Equal(t, decimal.NewFromInt(5000), tax.Taxable, "the whole gain is taxable, nothing is indexed")
+		assert.Equal(t, decimal.NewFromInt(5000), tax.Slab)
+		assert.Equal(t, decimal.Zero, tax.LongTerm)
+	})
 }
 
 func TestGetScheduleAL(t *testing.T) {
@@ -214,4 +269,35 @@ func TestGetScheduleAL(t *testing.T) {
 
 	scheduleALs := GetScheduleAL(db)
 	assert.NotEmpty(t, scheduleALs)
+}
+
+func TestCapitalGainTotals(t *testing.T) {
+	d := decimal.NewFromInt
+	gains := map[string]CapitalGain{
+		"Assets:Equity:A": {FY: map[string]FYCapitalGain{
+			"2024-25": {Units: d(10), SellPrice: d(1000), PurchasePrice: d(400), Tax: Tax{Gain: d(600), Taxable: d(600), LongTerm: d(60)}},
+			"2025-26": {Units: d(5), SellPrice: d(300), PurchasePrice: d(500), Tax: Tax{Gain: d(-200), Taxable: d(-200), LongTerm: d(-20)}},
+		}},
+		"Assets:Equity:B": {FY: map[string]FYCapitalGain{
+			"2024-25": {Units: d(2), SellPrice: d(100), PurchasePrice: d(300), Tax: Tax{Gain: d(-200), Taxable: d(-200), LongTerm: d(-20)}},
+		}},
+	}
+
+	totals := CapitalGainTotals(gains)
+
+	t.Run("losses in one account offset gains in another", func(t *testing.T) {
+		fy := totals["2024-25"]
+		assert.Equal(t, "400", fy.Tax.Taxable.String())
+		assert.Equal(t, "40", fy.Tax.LongTerm.String())
+		assert.Equal(t, "12", fy.Units.String())
+		assert.Equal(t, "1100", fy.SellPrice.String())
+	})
+
+	t.Run("a net loss owes no tax but is still reported", func(t *testing.T) {
+		fy := totals["2025-26"]
+		assert.Equal(t, "-200", fy.Tax.Taxable.String())
+		assert.Equal(t, "-200", fy.Tax.Gain.String())
+		assert.True(t, fy.Tax.LongTerm.IsZero(), "tax is never negative, got %s", fy.Tax.LongTerm)
+		assert.True(t, fy.Tax.ShortTerm.IsZero())
+	})
 }
