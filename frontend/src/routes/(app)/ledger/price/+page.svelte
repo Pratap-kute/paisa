@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
   import { api } from "$lib/api";
   import Table from "$lib/shared/ui/Table.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
@@ -313,12 +314,9 @@
       {/if}
     {:else}
       <div
-        class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground"
+        class="rounded-[var(--paisa-radius-lg)] border border-border bg-surface"
       >
-        <div
-          class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"
-        ></div>
-        <span>Loading prices...</span>
+        <LoadingState message="Loading prices..." />
       </div>
     {/if}
   </div>

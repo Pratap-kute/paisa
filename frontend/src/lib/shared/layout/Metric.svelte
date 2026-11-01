@@ -6,6 +6,8 @@
   interface Props {
     label: string;
     value?: string;
+    // Shown as the tooltip when value is abbreviated (for example 2.03Cr).
+    fullValue?: string;
     secondary?: string;
     trend?: string;
     status?: Status;
@@ -17,6 +19,7 @@
   let {
     label,
     value = "",
+    fullValue,
     secondary,
     trend,
     status = "neutral",
@@ -38,7 +41,7 @@
     <div
       class="paisa4-metric-value paisa4-metric-{status}"
       class:paisa4-metric-text={isText}
-      title={value}
+      title={fullValue ?? value}
     >
       {value}
     </div>

@@ -36,6 +36,7 @@
   import Switch from "$lib/shared/ui/Switch.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
   import FormField from "$lib/shared/layout/FormField.svelte";
   import Input from "$lib/shared/ui/Input.svelte";
   import IconButton from "$lib/shared/ui/IconButton.svelte";
@@ -244,14 +245,15 @@
     return "";
   }
 
-  async function handleDeleteTemplate(templateToDelete: ImportTemplate) {
+  // The template waiting for the user to confirm its deletion.
+  let templatePendingDelete: ImportTemplate | null = $state(null);
+
+  async function handleDeleteTemplate(template: ImportTemplate) {
+    templatePendingDelete = template;
+  }
+
+  async function deleteTemplate(templateToDelete: ImportTemplate) {
     const oldName = templateToDelete.name;
-    const confirmed = confirm(
-      `Are you sure you want to delete ${oldName} template?`,
-    );
-    if (!confirmed) {
-      return;
-    }
     const { success, message } = await api.templates.deleteTemplate({
       name: templateToDelete.name,
     });
@@ -1538,6 +1540,22 @@
   columns={fileColumns}
   onsave={handleSaveTemplate}
   ondelete={handleDeleteTemplate}
+/>
+
+<ConfirmDialog
+  open={templatePendingDelete !== null}
+  title="Delete template?"
+  description={templatePendingDelete
+    ? `The ${templatePendingDelete.name} template will be removed. This cannot be undone.`
+    : undefined}
+  confirmLabel="Delete"
+  variant="danger"
+  onconfirm={() => {
+    const template = templatePendingDelete;
+    templatePendingDelete = null;
+    if (template) void deleteTemplate(template);
+  }}
+  oncancel={() => (templatePendingDelete = null)}
 />
 
 <!-- FILE SAVE MODAL -->

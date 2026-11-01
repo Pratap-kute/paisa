@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatShare } from "$lib/shared/formatters/currency";
   import type { Legend } from "$lib/shared/charts/types";
   import type { Posting } from "$lib/domain/ledger";
   import { onMount } from "svelte";
@@ -142,17 +142,17 @@
         taxRate =
           grossIncome === 0
             ? ""
-            : formatPercentage(sum(taxes) / grossIncome) + " on income";
+            : formatShare(sum(taxes) / grossIncome) + " on income";
         expenseRateValue =
           netIncomeAmount === 0
             ? ""
-            : formatPercentage(sum(yearExpenses) / netIncomeAmount);
+            : formatShare(sum(yearExpenses) / netIncomeAmount);
         expenseRate =
           netIncomeAmount === 0 ? "" : expenseRateValue + " of net income";
         savingRate =
           netIncomeAmount === 0
             ? ""
-            : formatPercentage(sum(investments) / netIncomeAmount) +
+            : formatShare(sum(investments) / netIncomeAmount) +
               " of net income";
       }
     }

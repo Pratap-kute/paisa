@@ -1,8 +1,9 @@
 <script lang="ts">
   import Card from "$lib/shared/ui/Card.svelte";
   import {
+    formatCurrency,
     formatCurrencyCrude,
-    formatPercentage,
+    formatShare,
   } from "$lib/shared/formatters/currency";
   import type { GoalSummary } from "$lib/domain/goals_models";
   import { iconGlyph } from "$lib/shared/ui/icon";
@@ -31,9 +32,12 @@
       return `0.0% ${goal.type === "retirement" ? "funded" : "complete"}`;
     }
     if (health.progressRatio >= 1 || health.state === "completed") {
-      return goal.type === "retirement" ? "100%+ funded" : "Target funded";
+      // Retirement shows the real figure (162.6% funded), as the dashboard does.
+      return goal.type === "retirement"
+        ? `${formatShare(health.progressRatio)} funded`
+        : "Target funded";
     }
-    const pct = formatPercentage(health.progressRatio, 1);
+    const pct = formatShare(health.progressRatio);
     return `${pct} ${goal.type === "retirement" ? "funded" : "complete"}`;
   });
 
@@ -83,11 +87,13 @@
       <Metric
         label="Current"
         value={formatCurrencyCrude($obscure ? 0 : goal.current)}
+        fullValue={formatCurrency($obscure ? 0 : goal.current)}
         status="neutral"
       />
       <Metric
         label="Target"
         value={formatCurrencyCrude($obscure ? 0 : goal.target)}
+        fullValue={formatCurrency($obscure ? 0 : goal.target)}
         status="neutral"
       />
     </div>

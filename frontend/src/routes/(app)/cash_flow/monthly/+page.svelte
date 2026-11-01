@@ -16,7 +16,7 @@
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
   import { filter, map, some } from "$lib/shared/utils/collection";
 
@@ -64,7 +64,7 @@
 
 <Page width="analysis">
   <PageHeader
-    title="Cash Flow"
+    title="Monthly Cash Flow"
     description="Monthly cash movement and checking balance"
   >
     {#snippet actions()}
@@ -83,11 +83,12 @@
     subtitle="Income, expenses, investment, tax, and checking balance"
   >
     {#if !isLoading && !hasFilteredCashFlows}
-      <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          No cash-flow activity in this period.
-        </p>
-      </ZeroState>
+      <EmptyState
+        item={[]}
+        icon="fa-chart-line"
+        title="No cash flow in this period"
+        description="Income and expenses for the selected period will appear here."
+      />
     {:else}
       {#if !isLoading && hasFilteredCashFlows}
         <LegendCard

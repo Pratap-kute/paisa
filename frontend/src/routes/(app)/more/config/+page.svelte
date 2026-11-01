@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
   import { configUpdated } from "$lib/shared/browser/config";
   import { api, clearAuthToken, getAuthToken, setAuthToken } from "$lib/api";
   import { authTokenAfterAccountSave } from "$lib/shared/browser/auth";
@@ -183,14 +184,9 @@
     }),
   );
 
+  let resetConfirmOpen = $state(false);
+
   async function resetToDefault() {
-    if (
-      !confirm(
-        "Are you sure you want to reset the config to defaults? This action is not reversible.",
-      )
-    ) {
-      return;
-    }
     if (lastConfig) {
       save({
         journal_path: lastConfig.journal_path,
@@ -266,6 +262,15 @@
     }
   }
 </script>
+
+<ConfirmDialog
+  bind:open={resetConfirmOpen}
+  title="Reset configuration?"
+  description="The configuration will be reset to defaults. This action is not reversible."
+  confirmLabel="Reset"
+  variant="danger"
+  onconfirm={resetToDefault}
+/>
 
 <svelte:window onkeydown={handleKeydown} />
 
@@ -378,7 +383,7 @@
                       variant="ghost"
                       size="sm"
                       class="max-lg:w-full max-lg:justify-center text-xs"
-                      onclick={() => resetToDefault()}
+                      onclick={() => (resetConfirmOpen = true)}
                     >
                       <i class="fas fa-arrow-rotate-left mr-1"></i>
                       Reset to defaults

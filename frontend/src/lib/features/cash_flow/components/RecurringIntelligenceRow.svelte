@@ -111,20 +111,20 @@
         {item.reasons.join(" · ")}
       </p>{/if}
     {#if historyOpen}
-    <ul class="mt-2 space-y-1">
-      {#each item.transactions as transaction (transaction.id)}
-        <li class="flex flex-wrap justify-between gap-2">
-          <a
-            class="break-words text-primary hover:underline"
-            href={postingUrl(transaction.postings[0])}
-            >{transaction.date.format("D MMM YYYY")} · {transaction.payee}</a
-          >
-          <span class="tabular-nums"
-            >{money(amountsById.get(transaction.id))}</span
-          >
-        </li>
-      {/each}
-    </ul>
+      <ul class="mt-2 space-y-1">
+        {#each item.transactions as transaction (transaction.id)}
+          <li class="flex flex-wrap justify-between gap-2">
+            <a
+              class="break-words text-primary hover:underline"
+              href={postingUrl(transaction.postings[0])}
+              >{transaction.date.format("D MMM YYYY")} · {transaction.payee}</a
+            >
+            <span class="tabular-nums"
+              >{money(amountsById.get(transaction.id))}</span
+            >
+          </li>
+        {/each}
+      </ul>
     {/if}
   </details>
   {#if !item.confirmed}

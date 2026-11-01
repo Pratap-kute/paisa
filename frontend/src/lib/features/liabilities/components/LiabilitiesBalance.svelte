@@ -6,7 +6,7 @@
   import {
     indendedLiabilityAccountName,
     nonZeroCurrency,
-    nonZeroFloatChange,
+    nonZeroReturnChange,
   } from "$lib/shared/tables/formatters";
 
   interface Props {
@@ -73,7 +73,7 @@
       title: "APR",
       field: "apr",
       hozAlign: "right",
-      formatter: nonZeroFloatChange,
+      formatter: nonZeroReturnChange,
       cssClass: "paisa-tabular-nums",
       visible: !compact,
     },

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
   import { postingUrl } from "$lib/shared/browser/navigation";
   import { tooltip } from "$lib/shared/charts/tooltip";
   import type { TransactionSchedule } from "$lib/domain/recurring";
@@ -42,7 +41,7 @@
     ),
   );
 
-  let displayAmount = $derived(amount ?? formatCurrencyCrude(schedule.amount));
+  let displayAmount = $derived(amount ?? formatCurrency(schedule.amount));
 </script>
 
 <Tooltip content={tooltipHtml}>

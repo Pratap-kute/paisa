@@ -9,7 +9,7 @@
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
   import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import RepaymentTimelineChart from "$lib/features/liabilities/components/RepaymentTimelineChart.svelte";
   import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
 
@@ -56,11 +56,12 @@
         <div class="h-8 w-8 animate-pulse rounded-full bg-surface-hover"></div>
       </div>
     {:else if isEmpty}
-      <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          You haven't repaid any liabilities.
-        </p>
-      </ZeroState>
+      <EmptyState
+        item={[]}
+        icon="fa-clock-rotate-left"
+        title="No repayments yet"
+        description="Repayments of loans and credit cards will appear here once recorded."
+      />
     {:else}
       <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />
       <ChartFrame height="tall">

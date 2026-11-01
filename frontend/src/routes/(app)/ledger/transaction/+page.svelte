@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
   import type { LedgerFile, Transaction as T } from "$lib/domain/ledger";
   import { api } from "$lib/api";
   import { debounce } from "es-toolkit";
@@ -271,12 +272,9 @@
       </div>
     {:else}
       <div
-        class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground"
+        class="rounded-[var(--paisa-radius-lg)] border border-border bg-surface"
       >
-        <div
-          class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"
-        ></div>
-        <span>Loading transactions...</span>
+        <LoadingState message="Loading transactions..." />
       </div>
     {/if}
   </div>

@@ -14,7 +14,7 @@
   import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";
   import RecurringCard from "$lib/features/cash_flow/components/RecurringCard.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import type { Dayjs } from "dayjs";
   import RecurringDay from "$lib/features/cash_flow/components/RecurringDay.svelte";
@@ -141,12 +141,18 @@
       title="Recurring Schedules"
       subtitle="Next unpaid occurrence for each recurring item"
     >
-      <ZeroState item={!isEmpty}>
-        <strong>Oops!</strong> You haven't configured any recurring transactions
-        yet. Checkout the
-        <a href={helpUrl("recurring")} class="text-primary underline">docs</a> page
-        to get started.
-      </ZeroState>
+      <EmptyState
+        item={!isEmpty}
+        icon="fa-rotate"
+        title="No recurring transactions configured"
+        description="Tag transactions as recurring to track scheduled payments and bills."
+      >
+        {#snippet actions()}
+          <a href={helpUrl("recurring")} class="text-primary underline"
+            >Read the guide</a
+          >
+        {/snippet}
+      </EmptyState>
 
       {#if isLoading && !isEmpty}
         <div class="flex flex-col gap-3" aria-hidden="true">

@@ -46,8 +46,8 @@
         <tr
           class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground"
         >
-          <th class="w-10 px-3 py-2.5 text-center"></th>
-          <th class="px-3 py-2.5">Asset Account</th>
+          <th class="paisa-sticky-col left-0 w-10 px-3 py-2.5 text-center"></th>
+          <th class="paisa-sticky-col left-10 px-3 py-2.5">Asset Account</th>
           <th class="px-3 py-2.5">Tax Category</th>
           <th class="px-3 py-2.5 text-right">Units Sold</th>
           <th class="px-3 py-2.5 text-right">Purchase Cost</th>
@@ -70,7 +70,7 @@
                   : ''}"
                 onclick={(e) => onclick(e)}
               >
-                <td class="px-3 py-2.5 text-center">
+                <td class="paisa-sticky-col left-0 px-3 py-2.5 text-center">
                   <span
                     class="inline-flex h-5 w-5 items-center justify-center rounded text-primary transition-transform"
                   >
@@ -82,7 +82,9 @@
                     ></i>
                   </span>
                 </td>
-                <td class="px-3 py-2.5 font-medium text-foreground">
+                <td
+                  class="paisa-sticky-col left-10 px-3 py-2.5 font-medium text-foreground"
+                >
                   {cg.account}
                 </td>
                 <td class="px-3 py-2.5">

@@ -247,7 +247,7 @@ Paisa standardizes on **Inter** for all UI copy, navigation, forms, and financia
 
 | Role | Font Size | Line Height | Weight | Letter Spacing | Numeric Setting |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Page Title** | 24px (`1.5rem`) | 30px | 600 (Semibold) | `-0.02em` | Normal |
+| **Page Title** | 20px (`1.25rem`) | 25px (tight, `1.25`) | 700 (Bold) | `0` | Normal |
 | **Primary Financial KPI** | 28px–32px (`1.75–2.0rem`) | 36px | 600 (Semibold) | `-0.02em` | `tabular-nums` |
 | **Section Heading** | 16px (`1.0rem`) | 24px | 600 (Semibold) | `-0.01em` | Normal |
 | **Subsection / Card Title** | 14px (`0.875rem`) | 20px | 600 (Semibold) | `0` | Normal |
@@ -890,9 +890,9 @@ Every data region, table, chart frame, and section in Paisa must explicitly hand
 
 ### 11.1 The Six Data States
 
-1. **`loading`:** Render geometry-preserving skeletons. Skeletons must match final geometry; layout collapse is forbidden.
+1. **`loading`:** Regions with a known shape (metrics, cards, rows) render geometry-preserving skeletons that match final geometry. Page-level data regions whose shape is unknown (a table or list still being fetched) use the shared `<LoadingState message="Loading postings..." />`, which announces itself with `role="status"`. Hand-rolled spinners are not used. Layout collapse is forbidden.
 2. **`loaded`:** Full data presentation with complete interaction support.
-3. **`empty`:** Informative zero-state with an explicit explanation of *why* it is empty and a clear call to action or status feedback. Compliance is semantic: use shared `<ZeroState />` when a page-level actionable onboarding or empty status is appropriate; use local `<ChartFrame empty={...}>`, Tabulator empty alerts, or search-specific empty states when localized component handling is contextually superior.
+3. **`empty`:** Informative zero-state with an explicit explanation of *why* it is empty and a clear call to action or status feedback. Page-level empty states use the shared `<EmptyState item={...} icon title description>` (with an `actions` snippet for a documentation link or next step): a short title stating what is missing, one line saying what will appear or how to add it, and a neutral tone (no "Hurray!" or "Oops!"). Use local `<ChartFrame empty={...}>`, Tabulator empty alerts, or search-specific empty states when localized component handling is contextually superior.
 4. **`partial`:** Gracefully display available portions while rendering subtle warnings for missing slices.
 5. **`error`:** Section-localized error message with retry CTA.
 6. **`stale`:** Visible when a background sync or price update is running.
@@ -916,7 +916,8 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 │ 3. Shared Presentation ($lib/shared/)                       │
 │    ├── layout/: AppShell, Page, PageHeader, MetricStrip,    │
 │    │   Section, CommandPalette, ResponsiveGrid, Stack       │
-│    ├── ui/: Button, Input, Select, Dialog, Drawer, Badge,   │
+│    ├── ui/: Button, Input, Select, Dialog, ConfirmDialog,   │
+│    │   Drawer, Badge, LoadingState, EmptyState,             │
 │    │   Table, Tabs, Card, ChartFrame, ZeroState, Tooltip    │
 │    ├── charts/: EChartSurface, TimeSeriesChart,             │
 │    │   ComparisonBarChart, FinancialHierarchyChart           │
@@ -943,6 +944,12 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 - **API** cannot depend on routes or feature implementations.
 - Enforced by `bun run architecture` boundary checks.
 
+### 12.2 Calculation Ownership
+
+The backend owns financial semantics: returns (XIRR, annualized return, unrealized gain), gain and net investment, cash-versus-investment classification, goal projections and schedule status, and spending projections. The frontend fetches, filters, sums rows it already holds, formats, and chooses colours and wording. It does not re-derive a figure the backend reports, and it does not use the browser clock for a financial calculation. Interactive what-if tools that recompute locally on every input change (the goal planner) may keep their own arithmetic.
+
+Practical consequences: cash accounts report no XIRR or gain; the per-posting annualized return is compound and absent for lots held under a year; the Balance, Gain and Net Worth pages share one event-based definition of investment, withdrawal and gain (`service.ComputeNetworth`).
+
 ---
 
 ## 13. Data Display, Tables, Forms, and Chart Rules
@@ -955,7 +962,7 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 4. **Header Sticky Behavior:** Table headers remain sticky during vertical scrolling.
 5. **Mobile Transformation:** How a table adapts below $768\text{px}$ depends on how it is read, not on a blanket rule:
    - **Record tables** (read one entry at a time, e.g. Postings, Transactions) become stacked records: key facts on the first lines (date and amount, payee, account and balance) and secondary facts (units, price, market value) only when they apply. Virtualized lists use a fixed height per record variant so scrolling stays stable. Record rows use hairline dividers rather than boxed cards.
-   - **Comparison tables** (read across columns, e.g. Capital Gains, Tax Harvesting, Balances, Prices) stay tables and scroll horizontally inside their container with the identifying first column sticky. Turning them into cards would remove the ability to compare. *(Planned: the sticky first column is not implemented yet; today these tables scroll horizontally without it.)*
+   - **Comparison tables** (read across columns, e.g. Capital Gains, Tax Harvesting, Balances, Prices) stay tables and scroll horizontally inside their container with the identifying first column sticky. Turning them into cards would remove the ability to compare. Plain tables apply the shared `paisa-sticky-col` class with a `left-*` utility to the identifying column; Tabulator tables use `frozen: true` on it.
 6. **Debit and Credit Columns:** Where a table labels columns as Debits and Credits, a positive posting is a debit, a negative posting is a credit, and both columns show unsigned magnitudes. Tables with a single Amount column keep signed values.
 
 ### 13.2 Form Rules
@@ -977,11 +984,16 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 ### 13.4 Financial Data Conventions
 
 1. **Digit grouping follows the user's locale** (for example `1,72,320.00` for INR) and is identical everywhere an amount appears.
-2. **Dates** are written unambiguously as `DD MMM YYYY`.
-3. **Commodity quantities** are written as `quantity @ unit price` (for example `413.2717 @ 169.3801`).
-4. **Neutral facts stay neutral:** expense totals, balances and statement amounts use foreground colour. Positive, negative and warning colours express outcomes (section 7), and never carry meaning alone (section 15).
-5. **Signs:** a single Amount column shows signed values; Debit and Credit columns show magnitudes (13.1.6).
-6. **Totals and KPIs** show one value per metric. Text values such as "Not configured" wrap instead of truncating, and every metric exposes its full value as a tooltip.
+2. **Full amounts, compact only in KPI tiles.** Tables, lists and detail pages show the full grouped amount. Abbreviated notation (`2.03Cr`) is allowed only in a KPI tile, and the tile exposes the full amount as its tooltip (`Metric`'s `fullValue`).
+3. **No currency suffix.** The default currency is implied; the commodity is written only when it is not the default (`formatCommodityAmount`).
+4. **Returns are percentages.** XIRR, APR and annualized returns are reported by the backend in percent and shown as `6.00%` with two decimals (`formatReturnPercent`). A return that does not apply (a cash account, a lot held under a year) is blank or "—", never extrapolated.
+5. **Shares, progress and utilisation** of a total use one decimal (`formatShare`, for example `65.6%`). The same goal progress reads the same on every page (`162.6% funded`).
+6. **Dates** are written as `DD MMM YYYY`. Financial years are written `2026 - 27`, the same form the backend uses as a key, in pickers, titles and cards.
+7. **Commodity quantities** are written as `quantity @ unit price` (for example `413.2717 @ 169.3801`).
+8. **Neutral facts stay neutral:** expense totals, balances and statement amounts use foreground colour. Positive, negative and warning colours express outcomes (section 7), and never carry meaning alone (section 15).
+9. **Signs:** a single Amount column shows signed values; Debit and Credit columns show magnitudes (13.1.6).
+10. **Totals and KPIs** show one value per metric. Text values such as "Not configured" wrap instead of truncating, and every metric exposes its full value as a tooltip.
+11. **Labelled scope.** Two pages may legitimately report different gains for the same assets. The Balance, Gain and Investment pages report investment returns of investment accounts only. Net Worth reports the gain of everything, net of interest paid on loans, and says so ("After interest paid on loans").
 
 ---
 
@@ -1012,6 +1024,7 @@ The following sensitive routes must pass automated overflow tests without horizo
 - **Visible Focus Ring:** 2px offset brand ring (`focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`).
 - **Color Independence:** Financial status must include textual labels, icons, or badges.
 - **Screen Reader Labels:** All icon-only buttons declare explicit `aria-label` or `title`. Tooltip-only triggers (such as note icons) use the tooltip text as their `aria-label`.
+- **Confirmations:** Destructive actions and unsaved-changes prompts use the in-app `<ConfirmDialog>` (`danger` variant for destructive ones), never the browser's `confirm()`. Leaving a page with unsaved changes uses `createLeaveGuard`, which cancels the navigation, asks, and repeats it on confirm. Closing the tab can only use the browser's own prompt.
 - **Motion Standards:** Transitions 150–200ms. Under `prefers-reduced-motion: reduce`, `foundation.css` sets the transition tokens to `0ms` and disables CSS animation globally without `!important`. Svelte JS transitions (`transition:slide`) are not affected by CSS and must be skipped explicitly where used.
 
 ---

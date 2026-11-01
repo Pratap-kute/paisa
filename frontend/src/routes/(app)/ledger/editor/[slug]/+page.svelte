@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
+  import { createLeaveGuard } from "$lib/shared/browser/unsaved_changes.svelte";
   import type { LedgerFile } from "$lib/domain/ledger";
   import {
     createEditor,
@@ -17,7 +19,7 @@
   import { format } from "$lib/features/ledger/journal";
   import { isNumber, last } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
-  import { beforeNavigate, goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import FileTree from "$lib/features/ledger/components/FileTree.svelte";
   import FileModal from "$lib/features/ledger/components/FileModal.svelte";
@@ -82,27 +84,16 @@
     },
   ];
 
-  let cancelled = false;
-  beforeNavigate(async ({ cancel }) => {
-    if ($editorState.hasUnsavedChanges) {
-      const confirmed = confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
-      );
-      if (!confirmed) {
-        cancel();
-        cancelled = true;
-      } else {
-        $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
-      }
-    }
-  });
+  const leaveGuard = createLeaveGuard(
+    () => $editorState.hasUnsavedChanges,
+    () => {
+      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+    },
+  );
 
   async function navigate(url: string) {
+    if (!(await leaveGuard.ask())) return false;
     await goto(url, { noScroll: true });
-    if (cancelled) {
-      cancelled = false;
-      return false;
-    }
     return true;
   }
 
@@ -310,6 +301,17 @@
     return "grid-cols-1";
   });
 </script>
+
+<ConfirmDialog
+  open={leaveGuard.open}
+  title="Leave this page?"
+  description="You have unsaved changes that will be lost."
+  confirmLabel="Leave"
+  cancelLabel="Stay"
+  variant="danger"
+  onconfirm={leaveGuard.leave}
+  oncancel={leaveGuard.stay}
+/>
 
 <svelte:head>
   <title>{selectedFile?.name || "Editor"} - Paisa</title>

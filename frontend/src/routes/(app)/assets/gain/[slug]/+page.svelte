@@ -3,7 +3,10 @@
   import { page } from "$app/state";
   import COLORS from "$lib/shared/theme/colors";
   import type { Networth } from "$lib/domain/assets";
-  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+  import {
+    formatCurrency,
+    formatReturnPercent,
+  } from "$lib/shared/formatters/currency";
   import { formatPercentage } from "$lib/shared/formatters/currency";
   import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
   import { firstName, restName } from "$lib/domain/account";
@@ -189,7 +192,7 @@
         />
         <Metric
           label="XIRR"
-          value={formatFloat(gain?.xirr ?? 0)}
+          value={formatReturnPercent(gain?.xirr ?? 0)}
           secondary={assetBreakdown
             ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
             : undefined}

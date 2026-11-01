@@ -4,7 +4,7 @@
   import { flip } from "svelte/animate";
   import GoalSummaryCard from "$lib/features/goals/components/GoalSummaryCard.svelte";
   import GoalHealthSummary from "$lib/features/goals/components/GoalHealthSummary.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import { helpUrl } from "$lib/shared/browser/navigation";
   import { api } from "$lib/api";
   import { cloneDeep } from "es-toolkit";
@@ -140,14 +140,18 @@
   <GoalHealthSummary {goals} />
   <Section title={goals.length ? "All Goals" : undefined}>
     {#if isEmpty}
-      <ZeroState item={false}>
-        <p class="text-sm text-muted-foreground">
-          <strong class="text-foreground">Oops!</strong> You haven't configured
-          any goals yet. Checkout the
-          <a href={helpUrl("goals")} class="text-primary underline">docs</a> page
-          to get started.
-        </p>
-      </ZeroState>
+      <EmptyState
+        item={false}
+        icon="fa-bullseye"
+        title="No goals configured"
+        description="Add retirement or savings goals to track your progress."
+      >
+        {#snippet actions()}
+          <a href={helpUrl("goals")} class="text-primary underline"
+            >Read the guide</a
+          >
+        {/snippet}
+      </EmptyState>
     {:else}
       <div
         class={goals.length === 1

@@ -240,7 +240,7 @@
           <tr
             class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground"
           >
-            <th class="px-3.5 py-2.5">Purchase Date</th>
+            <th class="paisa-sticky-col left-0 px-3.5 py-2.5">Purchase Date</th>
             <th class="px-3.5 py-2.5 text-right">Units</th>
             <th class="px-3.5 py-2.5 text-right">Purchase Cost</th>
             <th class="px-3.5 py-2.5 text-right">Current Value</th>
@@ -255,7 +255,7 @@
           {#each harvestable.harvest_breakdown as breakdown, index (`${breakdown.purchase_date}-${index}`)}
             <tr class="transition-colors hover:bg-surface-hover">
               <td
-                class="whitespace-nowrap px-3.5 py-2.5 font-medium text-foreground"
+                class="paisa-sticky-col left-0 whitespace-nowrap px-3.5 py-2.5 font-medium text-foreground"
               >
                 {dayjs(breakdown.purchase_date).format("DD MMM YYYY")}
               </td>

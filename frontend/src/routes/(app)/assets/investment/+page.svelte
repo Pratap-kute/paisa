@@ -7,6 +7,7 @@
     buildYearlyInvestmentSeries,
   } from "$lib/features/assets/time_series_data";
   import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { financialYear } from "$lib/domain/time";
   import { api } from "$lib/api";
   import { orderBy, sumBy } from "es-toolkit";
   import { onMount } from "svelte";
@@ -71,9 +72,7 @@
       const latest = sortedYearlyCards[0];
       if (latest) {
         latestFyInvestment = formatCurrency(latest.net_investment);
-        latestFyLabel = `${latest.start_date.format("YYYY")}-${latest.end_date.format(
-          "YY",
-        )}`;
+        latestFyLabel = financialYear(latest.start_date);
       }
 
       isLoading = false;

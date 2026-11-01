@@ -7,7 +7,7 @@
     intervalText,
     totalRecurring,
   } from "$lib/domain/transaction_sequence";
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import RecurringSchedule from "./RecurringSchedule.svelte";
 
@@ -22,7 +22,7 @@
   let isPastDue = $derived(
     schedule?.scheduled ? schedule.scheduled.isBefore(now(), "day") : false,
   );
-  let dueAmount = $derived(formatCurrencyCrude(totalRecurring(ts)));
+  let dueAmount = $derived(formatCurrency(totalRecurring(ts)));
 </script>
 
 {#if compact}

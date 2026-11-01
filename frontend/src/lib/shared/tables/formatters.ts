@@ -1,4 +1,7 @@
-import { formatFloat } from "$lib/shared/formatters/currency";
+import {
+  formatFloat,
+  formatReturnPercent,
+} from "$lib/shared/formatters/currency";
 import { formatPercentage } from "$lib/shared/formatters/currency";
 import { isZero } from "$lib/shared/utils/number";
 import { lastName } from "$lib/domain/account";
@@ -68,6 +71,16 @@ export function nonZeroFloatChange(cell: CellComponent) {
   return isZero(value)
     ? ""
     : `<span class="${calculateChangeClass(value)}">${formatFloat(
+        value,
+      )}</span>`;
+}
+
+// For returns the backend reports in percent (XIRR, APR): 6 means 6%.
+export function nonZeroReturnChange(cell: CellComponent) {
+  const value = cell.getValue();
+  return isZero(value)
+    ? ""
+    : `<span class="${calculateChangeClass(value)}">${formatReturnPercent(
         value,
       )}</span>`;
 }

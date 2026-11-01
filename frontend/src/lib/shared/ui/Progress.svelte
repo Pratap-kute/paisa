@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatShare } from "$lib/shared/formatters/currency";
   import { dropRight, range } from "es-toolkit";
   import { floor } from "$lib/shared/utils/collection";
   interface Props {
@@ -47,7 +47,7 @@
         <span
           class="rounded-full bg-positive-subtle px-2 py-0.5 text-xs font-semibold tabular-nums text-positive"
         >
-          {formatPercentage(progressPercent / 100, 2)}
+          {formatShare(progressPercent / 100)}
         </span>
       </div>
     {/if}
@@ -58,7 +58,7 @@
     ></progress>
     {#if small && showPercent}
       <span class="text-sm font-semibold text-foreground"
-        >{formatPercentage(progressPercent / 100, 2)}</span
+        >{formatShare(progressPercent / 100)}</span
       >
     {/if}
   </div>

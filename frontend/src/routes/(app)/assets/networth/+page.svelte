@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatFloat } from "$lib/shared/formatters/currency";
+  import { formatReturnPercent } from "$lib/shared/formatters/currency";
   import type { Legend } from "$lib/shared/charts/types";
   import type { Networth } from "$lib/domain/assets";
   import { formatCurrency } from "$lib/shared/formatters/currency";
@@ -131,12 +131,17 @@
     />
     <Metric
       label="Gain / Loss"
+      secondary="After interest paid on loans"
       value={formatCurrency(gain)}
       status={gain >= 0 ? "positive" : "negative"}
       loading={isLoading}
     />
     {#if !selectedPeriod}
-      <Metric label="XIRR" value={formatFloat(xirr)} loading={isLoading} />
+      <Metric
+        label="XIRR"
+        value={formatReturnPercent(xirr)}
+        loading={isLoading}
+      />
     {/if}
   </MetricStrip>
 

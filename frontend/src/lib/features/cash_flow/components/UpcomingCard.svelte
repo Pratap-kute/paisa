@@ -8,7 +8,7 @@
     totalRecurring,
   } from "$lib/domain/transaction_sequence";
   import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {
@@ -59,7 +59,7 @@
           </span>
         </div>
         <span class="font-bold"
-          >{formatCurrencyCrude(totalRecurring(transactionSequece))}</span
+          >{formatCurrency(totalRecurring(transactionSequece))}</span
         >
         <span class="text-xs"
           >{n.isBefore(now()) ? "past due" : `due ${n.fromNow()}`}</span
