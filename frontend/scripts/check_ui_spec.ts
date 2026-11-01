@@ -1,7 +1,9 @@
 import { extname, join, normalize, relative, resolve } from "node:path";
 import fs from "node:fs/promises";
 
-async function* walk(dir: string): AsyncGenerator<{ path: string; name: string; isFile: boolean }> {
+async function* walk(
+  dir: string,
+): AsyncGenerator<{ path: string; name: string; isFile: boolean }> {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
@@ -62,9 +64,9 @@ const PALETTE_PREFIXES = [
 ];
 
 const RAW_PALETTE_REGEX = new RegExp(
-  `\\b(?:[a-z0-9_-]+:)*(?:${PALETTE_PREFIXES.join("|")})-(?:${
-    PALETTE_COLORS.join("|")
-  })-(?:50|100|200|300|400|500|600|700|800|900|950)(?:/\\d+)?\\b`,
+  `\\b(?:[a-z0-9_-]+:)*(?:${PALETTE_PREFIXES.join("|")})-(?:${PALETTE_COLORS.join(
+    "|",
+  )})-(?:50|100|200|300|400|500|600|700|800|900|950)(?:/\\d+)?\\b`,
   "g",
 );
 
@@ -212,8 +214,7 @@ export function findBulmaClassViolations(
     violations.push({
       file: filePath,
       rule: "no-bulma-compat-classes",
-      detail:
-        `Found removed Bulma compatibility class '${className}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
+      detail: `Found removed Bulma compatibility class '${className}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
     });
   };
   const reportCombination = (classes: ReadonlySet<string>) => {
@@ -225,8 +226,7 @@ export function findBulmaClassViolations(
       violations.push({
         file: filePath,
         rule: "no-bulma-compat-classes",
-        detail:
-          `Found removed Bulma compatibility class combination '${label}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
+        detail: `Found removed Bulma compatibility class combination '${label}' in application markup. Use Tailwind utilities or a shared Paisa primitive instead.`,
       });
     }
   };
@@ -236,8 +236,8 @@ export function findBulmaClassViolations(
     for (const selectorBlock of withoutComments.matchAll(/([^{}]+)\{/g)) {
       for (const selector of selectorBlock[1].split(",")) {
         const classes = new Set(
-          [...selector.matchAll(/\.([a-z][a-z0-9-]*)/g)].map((match) =>
-            match[1]
+          [...selector.matchAll(/\.([a-z][a-z0-9-]*)/g)].map(
+            (match) => match[1],
           ),
         );
         for (const className of classes) report(className);
@@ -319,8 +319,7 @@ export function findForbiddenTokenViolations(
       violations.push({
         file: filePath,
         rule: "no-forbidden-paisa-tokens",
-        detail:
-          `Found removed token '${token}'. Use canonical Paisa semantic tokens instead.`,
+        detail: `Found removed token '${token}'. Use canonical Paisa semantic tokens instead.`,
       });
     }
   }
@@ -361,15 +360,14 @@ export function findUndefinedTokenViolations(
     const token = match[0];
     const isDefined = definedTokens.has(token);
     const isAllowlisted = DYNAMIC_TOKEN_PREFIX_ALLOWLIST.some((prefix) =>
-      token.startsWith(prefix)
+      token.startsWith(prefix),
     );
 
     if (!isDefined && !isAllowlisted) {
       violations.push({
         file: filePath,
         rule: "no-undefined-paisa-tokens",
-        detail:
-          `Undefined CSS variable '${token}'. Tokens must be registered in tokens.css or foundation.css.`,
+        detail: `Undefined CSS variable '${token}'. Tokens must be registered in tokens.css or foundation.css.`,
       });
     }
   }
@@ -398,8 +396,7 @@ export async function checkUiSpec(
       violations.push({
         file: relPath,
         rule: "no-scss-or-sass",
-        detail:
-          `Found '${entry.name}'. SCSS/SASS is forbidden; Paisa uses Tailwind v4 & Vanilla CSS.`,
+        detail: `Found '${entry.name}'. SCSS/SASS is forbidden; Paisa uses Tailwind v4 & Vanilla CSS.`,
       });
       continue;
     }

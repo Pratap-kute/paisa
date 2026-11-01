@@ -47,9 +47,8 @@ export function buildMonthlyExpenseHeatmapData(
   groups: string[] = [],
 ): ExpenseHeatmapData {
   const filtered = selected(postings, groups);
-  const byDay = grouped(
-    filtered,
-    (posting) => posting.date.format("YYYY-MM-DD"),
+  const byDay = grouped(filtered, (posting) =>
+    posting.date.format("YYYY-MM-DD"),
   );
   const start = dayjs(`${month}-01`);
   const points = Array.from({ length: start.daysInMonth() }, (_, index) => {
@@ -87,9 +86,8 @@ export function buildYearlyExpenseHeatmapData(
   startingMonth = USER_CONFIG.financial_year_starting_month,
 ): ExpenseHeatmapData {
   const filtered = selected(postings, groups);
-  const byMonth = grouped(
-    filtered,
-    (posting) => posting.date.format("YYYY-MM"),
+  const byMonth = grouped(filtered, (posting) =>
+    posting.date.format("YYYY-MM"),
   );
   const firstYear = Number(financialYearLabel.split("-")[0]);
   const start = dayjs(

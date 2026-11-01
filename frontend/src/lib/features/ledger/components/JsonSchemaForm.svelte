@@ -1,144 +1,151 @@
 <script lang="ts">
-import JsonSchemaForm from "./JsonSchemaForm.svelte";
-import { sha256Hex } from "$lib/shared/utils/crypto";
-import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
-import Select from "svelte-select";
-import { cloneDeep, isEqual, startCase } from "es-toolkit";
-import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
-import { iconGlyph, iconsList } from "$lib/shared/ui/icon";
-import AccountSelect from "./AccountsSelect.svelte";
-import { untrack } from "svelte";
-import FormField from "$lib/shared/layout/FormField.svelte";
-import Input from "$lib/shared/ui/Input.svelte";
-import UiSelect from "$lib/shared/ui/Select.svelte";
-import IconButton from "$lib/shared/ui/IconButton.svelte";
-import { sortBy } from "$lib/shared/utils/collection";
+  import JsonSchemaForm from "./JsonSchemaForm.svelte";
+  import { sha256Hex } from "$lib/shared/utils/crypto";
+  import type { JSONSchema7, JSONSchema7Definition } from "json-schema";
+  import Select from "svelte-select";
+  import { cloneDeep, isEqual, startCase } from "es-toolkit";
+  import PriceCodeSearchModal from "./PriceCodeSearchModal.svelte";
+  import { iconGlyph, iconsList } from "$lib/shared/ui/icon";
+  import AccountSelect from "./AccountsSelect.svelte";
+  import { untrack } from "svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import UiSelect from "$lib/shared/ui/Select.svelte";
+  import IconButton from "$lib/shared/ui/IconButton.svelte";
+  import { sortBy } from "$lib/shared/utils/collection";
 
-interface Schema extends JSONSchema7 {
-  "ui:header"?: string;
-  "ui:widget"?: string;
-  "ui:order"?: number;
-}
-
-interface Props {
-  key: string;
-  value: any;
-  rawValue?: string;
-  schema: Schema;
-  depth?: number;
-  required?: boolean;
-  deletable?: (() => void) | null;
-  disabled?: boolean;
-  allAccounts?: string[];
-  modalOpen?: boolean;
-  variant?: "default" | "panel" | "item";
-}
-
-const ICON_MAX_RESULTS = 200;
-
-let {
-  key,
-  value = $bindable(),
-  rawValue = $bindable(""),
-  schema,
-  depth = 0,
-  required = false,
-  deletable = null,
-  disabled = false,
-  allAccounts = [],
-  modalOpen = $bindable(false),
-  variant = "default",
-}: Props = $props();
-
-const radioInstanceId = crypto.randomUUID();
-let radioName = $derived(`${key || "field"}-${radioInstanceId}`);
-let fieldId = $derived(`${key || "field"}-${radioInstanceId}`);
-let open = $state(untrack(() => variant === "panel" || variant === "item"));
-let title = $derived(startCase(key));
-let itemTitle = $derived(
-  schema["ui:header"] && value && value[schema["ui:header"]]
-    ? String(value[schema["ui:header"]])
-    : title || "Item",
-);
-
-function newItem(listSchema: any) {
-  if (listSchema.default?.[0] != null) {
-    return cloneDeep(listSchema.default[0]);
+  interface Schema extends JSONSchema7 {
+    "ui:header"?: string;
+    "ui:widget"?: string;
+    "ui:order"?: number;
   }
-  return {};
-}
 
-function isSchema(definition: JSONSchema7Definition): definition is Schema {
-  return definition !== false;
-}
-
-function isCompoundSchema(subSchema: Schema) {
-  return subSchema.type === "object" || subSchema.type === "array";
-}
-
-function sortedProperties(schema: Schema): [string, Schema][] {
-  const entries = Object.entries(schema.properties || {})
-    .filter((entry): entry is [string, Schema] => isSchema(entry[1]));
-  return sortBy(entries, ([key, subSchema]) => {
-    return [
-      subSchema["ui:order"] || 999,
-      (schema.required || []).includes(key) ? 0 : 1,
-      subSchema.type == "object" ? 2 : subSchema.type == "array" ? 3 : 1,
-      key,
-    ];
-  });
-}
-
-function defaultValueForSchema(s: Schema) {
-  if (s.default !== undefined) {
-    return cloneDeep(s.default);
+  interface Props {
+    key: string;
+    value: any;
+    rawValue?: string;
+    schema: Schema;
+    depth?: number;
+    required?: boolean;
+    deletable?: (() => void) | null;
+    disabled?: boolean;
+    allAccounts?: string[];
+    modalOpen?: boolean;
+    variant?: "default" | "panel" | "item";
   }
-  if (s.type === "array") {
-    return [];
-  }
-  if (s.type === "object" || s["ui:widget"] === "price") {
+
+  const ICON_MAX_RESULTS = 200;
+
+  let {
+    key,
+    value = $bindable(),
+    rawValue = $bindable(""),
+    schema,
+    depth = 0,
+    required = false,
+    deletable = null,
+    disabled = false,
+    allAccounts = [],
+    modalOpen = $bindable(false),
+    variant = "default",
+  }: Props = $props();
+
+  const radioInstanceId = crypto.randomUUID();
+  let radioName = $derived(`${key || "field"}-${radioInstanceId}`);
+  let fieldId = $derived(`${key || "field"}-${radioInstanceId}`);
+  let open = $state(untrack(() => variant === "panel" || variant === "item"));
+  let title = $derived(startCase(key));
+  let itemTitle = $derived(
+    schema["ui:header"] && value && value[schema["ui:header"]]
+      ? String(value[schema["ui:header"]])
+      : title || "Item",
+  );
+
+  function newItem(listSchema: any) {
+    if (listSchema.default?.[0] != null) {
+      return cloneDeep(listSchema.default[0]);
+    }
     return {};
   }
-  return undefined;
-}
 
-$effect.pre(() => {
-  if (schema.type === "object" || schema["ui:widget"] === "price") {
-    if (value == null) {
-      value = defaultValueForSchema(schema) ?? {};
-    }
-  } else if (schema.type === "array") {
-    if (!Array.isArray(value)) {
-      value = defaultValueForSchema(schema) ?? [];
-    }
+  function isSchema(definition: JSONSchema7Definition): definition is Schema {
+    return definition !== false;
   }
-});
 
-async function searchIcons(text: string) {
-  text = text.toLowerCase().trim();
-  if (!text) {
-    return iconsList.slice(0, ICON_MAX_RESULTS);
+  function isCompoundSchema(subSchema: Schema) {
+    return subSchema.type === "object" || subSchema.type === "array";
   }
-  return iconsList.filter((icon) => icon.includes(text)).slice(
-    0,
-    ICON_MAX_RESULTS,
-  );
-}
+
+  function sortedProperties(schema: Schema): [string, Schema][] {
+    const entries = Object.entries(schema.properties || {}).filter(
+      (entry): entry is [string, Schema] => isSchema(entry[1]),
+    );
+    return sortBy(entries, ([key, subSchema]) => {
+      return [
+        subSchema["ui:order"] || 999,
+        (schema.required || []).includes(key) ? 0 : 1,
+        subSchema.type == "object" ? 2 : subSchema.type == "array" ? 3 : 1,
+        key,
+      ];
+    });
+  }
+
+  function defaultValueForSchema(s: Schema) {
+    if (s.default !== undefined) {
+      return cloneDeep(s.default);
+    }
+    if (s.type === "array") {
+      return [];
+    }
+    if (s.type === "object" || s["ui:widget"] === "price") {
+      return {};
+    }
+    return undefined;
+  }
+
+  $effect.pre(() => {
+    if (schema.type === "object" || schema["ui:widget"] === "price") {
+      if (value == null) {
+        value = defaultValueForSchema(schema) ?? {};
+      }
+    } else if (schema.type === "array") {
+      if (!Array.isArray(value)) {
+        value = defaultValueForSchema(schema) ?? [];
+      }
+    }
+  });
+
+  async function searchIcons(text: string) {
+    text = text.toLowerCase().trim();
+    if (!text) {
+      return iconsList.slice(0, ICON_MAX_RESULTS);
+    }
+    return iconsList
+      .filter((icon) => icon.includes(text))
+      .slice(0, ICON_MAX_RESULTS);
+  }
 </script>
 
 {#if deletable}
-  <IconButton ariaLabel="Delete entry" variant="danger"
-  onclick={() => deletable?.()}>
-  <i class="fas fa-circle-minus"></i>
-</IconButton>
+  <IconButton
+    ariaLabel="Delete entry"
+    variant="danger"
+    onclick={() => deletable?.()}
+  >
+    <i class="fas fa-circle-minus"></i>
+  </IconButton>
 {/if}
 
 {#if schema["ui:widget"] == "hidden"}
   <div></div>
 {:else if schema["ui:widget"] == "password"}
   <div class="col-span-full min-w-0">
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         <Input
           id={fieldId}
@@ -156,11 +163,15 @@ async function searchIcons(text: string) {
         />
       {/snippet}
     </FormField>
-</div>
+  </div>
 {:else if schema["ui:widget"] == "icon"}
   <div class="min-w-0">
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         <Select
           bind:justValue={value}
@@ -180,31 +191,53 @@ async function searchIcons(text: string) {
         </Select>
       {/snippet}
     </FormField>
-</div>
+  </div>
 {:else if schema["ui:widget"] == "boolean"}
   <div class="min-w-0">
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         <div class="flex flex-wrap gap-4">
           <label class="inline-flex items-center gap-2 text-sm text-foreground">
-            <input value="yes" bind:group={value} type="radio" name={radioName} {disabled} />
+            <input
+              value="yes"
+              bind:group={value}
+              type="radio"
+              name={radioName}
+              {disabled}
+            />
             Yes
           </label>
           <label class="inline-flex items-center gap-2 text-sm text-foreground">
-            <input value="no" bind:group={value} type="radio" name={radioName} {disabled} />
+            <input
+              value="no"
+              bind:group={value}
+              type="radio"
+              name={radioName}
+              {disabled}
+            />
             No
           </label>
         </div>
       {/snippet}
     </FormField>
-</div>
-{:else if schema.type === "string" || isEqual(schema.type, ["string", "integer"])}
+  </div>
+{:else if schema.type === "string" || isEqual( schema.type, ["string", "integer"] )}
   <div
-  class="min-w-0 {schema.enum && schema['ui:widget'] !== 'textarea' ? '' : 'col-span-full'}"
->
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    class="min-w-0 {schema.enum && schema['ui:widget'] !== 'textarea'
+      ? ''
+      : 'col-span-full'}"
+  >
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         {#if schema.enum}
           <UiSelect bind:value {disabled} {required} fullwidth>
@@ -221,8 +254,7 @@ async function searchIcons(text: string) {
             {required}
             class="paisa4-control paisa4-textarea"
             spellcheck="false"
-            data-enable-grammarly="false"
-          ></textarea>
+            data-enable-grammarly="false"></textarea>
         {:else}
           <input
             id={fieldId}
@@ -236,11 +268,15 @@ async function searchIcons(text: string) {
         {/if}
       {/snippet}
     </FormField>
-</div>
+  </div>
 {:else if schema.type === "integer" || schema.type === "number"}
   <div class="min-w-0">
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         <input
           id={fieldId}
@@ -254,36 +290,43 @@ async function searchIcons(text: string) {
         />
       {/snippet}
     </FormField>
-</div>
+  </div>
 {:else if schema["ui:widget"] == "accounts"}
   <div class="col-span-full min-w-0">
-  <FormField id={fieldId} label={title} description={schema.description}
-    {required}>
+    <FormField
+      id={fieldId}
+      label={title}
+      description={schema.description}
+      {required}
+    >
       {#snippet children()}
         <AccountSelect {allAccounts} bind:accounts={value} />
       {/snippet}
     </FormField>
-</div>
+  </div>
 {:else if schema["ui:widget"] == "price"}
   <div class="col-span-full flex min-w-0 flex-col gap-[var(--paisa-space-3)]">
-  <div
-    class="flex items-center justify-between text-sm font-medium text-muted-foreground"
-  >
-    <span>{title}</span>
-    <IconButton ariaLabel="Edit price code" onclick={() => (modalOpen = true)}>
-      <i class="fas fa-pen-to-square"></i>
-    </IconButton>
-  </div>
-  <PriceCodeSearchModal
-    bind:open={modalOpen}
-    on:select={(e) => {
+    <div
+      class="flex items-center justify-between text-sm font-medium text-muted-foreground"
+    >
+      <span>{title}</span>
+      <IconButton
+        ariaLabel="Edit price code"
+        onclick={() => (modalOpen = true)}
+      >
+        <i class="fas fa-pen-to-square"></i>
+      </IconButton>
+    </div>
+    <PriceCodeSearchModal
+      bind:open={modalOpen}
+      on:select={(e) => {
         value["code"] = e.detail.code;
         value["provider"] = e.detail.provider;
       }}
-  />
-  <div
-    class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] md:grid-cols-2"
-  >
+    />
+    <div
+      class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] md:grid-cols-2"
+    >
       {#each sortedProperties(schema) as [childKey, subSchema]}
         <JsonSchemaForm
           {allAccounts}
@@ -297,12 +340,12 @@ async function searchIcons(text: string) {
         />
       {/each}
     </div>
-</div>
+  </div>
 {:else if schema.type == "object"}
   {#if variant === "panel" || variant === "item"}
     <div
-  class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] md:grid-cols-2"
->
+      class="grid grid-cols-1 gap-x-[var(--paisa-space-5)] gap-y-[var(--paisa-space-4)] md:grid-cols-2"
+    >
       {#each sortedProperties(schema) as [childKey, subSchema]}
         {#if subSchema["ui:widget"] !== "hidden"}
           <JsonSchemaForm
@@ -319,8 +362,8 @@ async function searchIcons(text: string) {
     </div>
   {:else}
     <div
-  class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-border-subtle"
->
+      class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-border-subtle"
+    >
       <div class="flex items-center">
         <button
           type="button"
@@ -329,7 +372,10 @@ async function searchIcons(text: string) {
           aria-expanded={open}
         >
           <span>{itemTitle}</span>
-          <i class="fas {open ? 'fa-angle-up' : 'fa-angle-down'} text-xs" aria-hidden="true"></i>
+          <i
+            class="fas {open ? 'fa-angle-up' : 'fa-angle-down'} text-xs"
+            aria-hidden="true"
+          ></i>
         </button>
       </div>
       {#if open}
@@ -355,7 +401,9 @@ async function searchIcons(text: string) {
   <div class="col-span-full flex min-w-0 flex-col gap-[var(--paisa-space-3)]">
     <div class="flex items-center gap-[var(--paisa-space-2)]">
       {#if title && !(variant === "panel" && depth === 0)}
-        <span class="mr-auto text-sm font-semibold text-foreground">{title}</span>
+        <span class="mr-auto text-sm font-semibold text-foreground"
+          >{title}</span
+        >
       {/if}
       <span class="ml-auto text-xs text-muted-foreground">
         {items.length}

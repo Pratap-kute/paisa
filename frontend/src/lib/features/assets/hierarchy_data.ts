@@ -28,16 +28,16 @@ export function buildAllocationHierarchy(
       categoryKey: aggregate.account.split(":")[1] ?? aggregate.account,
       metadata: { account: aggregate.account },
       children: [],
-    })
+    }),
   );
   const roots: FinancialHierarchyNode[] = [];
-  [...nodes.values()].sort((a, b) => a.id.localeCompare(b.id)).forEach(
-    (node) => {
+  [...nodes.values()]
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .forEach((node) => {
       const parent = nodes.get(parentAccount(node.id) ?? "");
       if (parent) parent.children!.push(node);
       else roots.push(node);
-    },
-  );
+    });
   const total = (node: FinancialHierarchyNode): number => {
     const childTotal = sumBy(node.children ?? [], total);
     node.value = node.value !== 0 ? node.value : childTotal;
@@ -64,9 +64,8 @@ export function filterCommodityBreakdowns(
       .map((breakdown) => ({ ...breakdown }));
     return breakdowns.length ? [{ ...aggregate, breakdowns }] : [];
   });
-  const total = sumBy(
-    filtered,
-    (aggregate) => sumBy(aggregate.breakdowns, (b) => b.amount),
+  const total = sumBy(filtered, (aggregate) =>
+    sumBy(aggregate.breakdowns, (b) => b.amount),
   );
   return sortBy(
     filtered.map((aggregate) => {
@@ -74,9 +73,10 @@ export function filterCommodityBreakdowns(
       aggregate.percentage = total === 0 ? 0 : (aggregate.amount / total) * 100;
       aggregate.breakdowns = aggregate.breakdowns.map((breakdown) => ({
         ...breakdown,
-        percentage: aggregate.amount === 0
-          ? 0
-          : (breakdown.amount / aggregate.amount) * 100,
+        percentage:
+          aggregate.amount === 0
+            ? 0
+            : (breakdown.amount / aggregate.amount) * 100,
       }));
       return aggregate;
     }),
@@ -121,8 +121,7 @@ export function buildPortfolioHierarchy(
     categoryKey: aggregate.group,
     metadata: { group: aggregate.group, subGroup: aggregate.sub_group },
     children: aggregate.breakdowns.map((breakdown) => ({
-      id:
-        `${aggregate.id}:${breakdown.security_id}:${breakdown.commodity_name}`,
+      id: `${aggregate.id}:${breakdown.security_id}:${breakdown.commodity_name}`,
       label: breakdown.security_name || breakdown.commodity_name,
       value: breakdown.amount,
       percentage: breakdown.percentage,
@@ -148,12 +147,15 @@ export interface PortfolioHoldingRow {
 export function buildFlattenedHoldings(
   aggregates: PortfolioAggregate[],
 ): PortfolioHoldingRow[] {
-  const map = new Map<string, {
-    security_name: string;
-    security_type: string;
-    commodities: Set<string>;
-    amount: number;
-  }>();
+  const map = new Map<
+    string,
+    {
+      security_name: string;
+      security_type: string;
+      commodities: Set<string>;
+      amount: number;
+    }
+  >();
 
   for (const agg of aggregates) {
     for (const b of agg.breakdowns) {

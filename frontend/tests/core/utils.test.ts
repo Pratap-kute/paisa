@@ -79,27 +79,20 @@ describe("core utilities", () => {
 
   test("iterates calendar periods", () => {
     const months: string[] = [];
-    forEachMonth(
-      dayjs("2023-01-15"),
-      dayjs("2023-03-01"),
-      (d) => months.push(d.format("YYYY-MM")),
+    forEachMonth(dayjs("2023-01-15"), dayjs("2023-03-01"), (d) =>
+      months.push(d.format("YYYY-MM")),
     );
     expect(months).toEqual(["2023-01", "2023-02", "2023-03"]);
     const years: number[] = [];
-    forEachYear(
-      dayjs("2021-06-01"),
-      dayjs("2023-01-01"),
-      (d) => years.push(d.year()),
+    forEachYear(dayjs("2021-06-01"), dayjs("2023-01-01"), (d) =>
+      years.push(d.year()),
     );
     expect(years).toEqual([2021, 2022, 2023]);
     expect(
-      forEachFinancialYear(dayjs("2023-01-01"), dayjs("2025-01-01"))
-        .map((d) => d.format("YYYY-MM")),
-    ).toEqual([
-      "2022-04",
-      "2023-04",
-      "2024-04",
-    ]);
+      forEachFinancialYear(dayjs("2023-01-01"), dayjs("2025-01-01")).map((d) =>
+        d.format("YYYY-MM"),
+      ),
+    ).toEqual(["2022-04", "2023-04", "2024-04"]);
   });
 
   test("handles account names and URLs", () => {
@@ -113,11 +106,11 @@ describe("core utilities", () => {
     expect(depth(account)).toBe(3);
     expect(helpUrl("goals")).toBe("https://paisa.fyi/reference/goals");
     expect(
-      postingUrl(
-        { file_name: "main file.ledger", transaction_begin_line: 8 } as never,
-      ),
-    )
-      .toBe("/ledger/editor/main%20file.ledger#8");
+      postingUrl({
+        file_name: "main file.ledger",
+        transaction_begin_line: 8,
+      } as never),
+    ).toBe("/ledger/editor/main%20file.ledger#8");
   });
 
   test("builds directory and account trees", () => {
@@ -129,10 +122,13 @@ describe("core utilities", () => {
     expect(tree[0].name).toBe("accounts");
     expect(tree[1].name).toBe("z.ledger");
     const accounts = buildTree(
-      [{ account: "Assets:Cash", value: 1 }, {
-        account: "Assets:Bank",
-        value: 2,
-      }],
+      [
+        { account: "Assets:Cash", value: 1 },
+        {
+          account: "Assets:Bank",
+          value: 2,
+        },
+      ],
       (item) => item.account,
     ) as Array<{ account: string; _children: unknown[] }>;
     expect(accounts).toHaveLength(1);
@@ -195,11 +191,10 @@ describe("core utilities", () => {
       "Income:CapitalGains:Equity": -5,
     });
     expect(
-      transactionTotal(
-        { postings: [{ amount: -10 }, { amount: 25 }] } as never,
-      ),
-    )
-      .toBe(25);
+      transactionTotal({
+        postings: [{ amount: -10 }, { amount: 25 }],
+      } as never),
+    ).toBe(25);
     expect(
       asTransaction({
         ...postings[0],
@@ -226,10 +221,12 @@ describe("core utilities", () => {
     expect(dueDateIcon(dayjs("2024-02-01"), null).color).toBe(
       "paisa-text-muted",
     );
-    expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-01")).color)
-      .toBe("paisa-text-success");
-    expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-02")).color)
-      .toBe("paisa-text-warning");
+    expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-01")).color).toBe(
+      "paisa-text-success",
+    );
+    expect(dueDateIcon(dayjs("2024-01-01"), dayjs("2024-01-02")).color).toBe(
+      "paisa-text-warning",
+    );
   });
 
   test("tracks authentication token state", () => {

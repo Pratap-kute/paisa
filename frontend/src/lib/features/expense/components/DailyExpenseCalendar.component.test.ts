@@ -9,9 +9,10 @@ test("renders aligned dates, category rings, amounts, and hover details", async 
     value: index === 2 ? 100 : 0,
     hasActivity: index === 2,
     segments: index === 2 ? [{ key: "Rent", value: 100 }] : [],
-    tooltipRows: index === 2
-      ? [{ label: "Rent", detail: "Expenses:Rent", value: 100 }]
-      : [],
+    tooltipRows:
+      index === 2
+        ? [{ label: "Rent", detail: "Expenses:Rent", value: 100 }]
+        : [],
   }));
   const { getAllByRole, getByRole, findByRole } = render(DailyExpenseCalendar, {
     data: {
@@ -32,8 +33,10 @@ test("renders aligned dates, category rings, amounts, and hover details", async 
   expect(days[2]).not.toHaveAttribute("title");
   expect(days[2].getAttribute("aria-label")).toContain("Rent (Expenses:Rent)");
   expect(days[2].getAttribute("aria-label")).toContain("Total");
-  expect(getByRole("grid", { name: "February expenses" }))
-    .toHaveAttribute("data-chart-ready", "true");
+  expect(getByRole("grid", { name: "February expenses" })).toHaveAttribute(
+    "data-chart-ready",
+    "true",
+  );
   await fireEvent.pointerEnter(days[2]);
   const tooltip = await findByRole("tooltip");
   await waitFor(() => expect(tooltip).toHaveTextContent("Total"));

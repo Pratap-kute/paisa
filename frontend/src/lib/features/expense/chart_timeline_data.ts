@@ -10,12 +10,12 @@ import { expenseGroup } from "$lib/features/expense/expense";
 import { maxBy, minBy } from "$lib/shared/utils/collection";
 
 export function expenseGroupsByContribution(postings: Posting[]) {
-  const totals = mapValues(
-    groupBy(postings, expenseGroup),
-    (items) => sumBy(items, (item) => item.amount),
+  const totals = mapValues(groupBy(postings, expenseGroup), (items) =>
+    sumBy(items, (item) => item.amount),
   );
-  return Object.keys(totals).sort((left, right) =>
-    (totals[right] ?? 0) - (totals[left] ?? 0) || left.localeCompare(right)
+  return Object.keys(totals).sort(
+    (left, right) =>
+      (totals[right] ?? 0) - (totals[left] ?? 0) || left.localeCompare(right),
   );
 }
 
@@ -29,32 +29,34 @@ export function buildMonthlyExpenseTimelineSeries(
   const start = minBy(postings, (posting) => posting.date.valueOf())?.date;
   const end = maxBy(postings, (posting) => posting.date.valueOf())?.date;
   const points: PeriodSeriesChartData["points"] = [];
-  const groupedByYear = groupBy(
-    postings,
-    (posting) => posting.date.format("YYYY"),
+  const groupedByYear = groupBy(postings, (posting) =>
+    posting.date.format("YYYY"),
   );
   const yearlyAverage = mapValues(groupedByYear, (yearPostings, year) => {
     const activeStart = start?.format("YYYY") === year ? start.month() : 0;
     const activeEnd = end?.format("YYYY") === year ? end.month() : 11;
     const months = Math.max(1, activeEnd - activeStart + 1);
-    return sumBy(
-      yearPostings.filter((posting) =>
-        selected.includes(expenseGroup(posting))
-      ),
-      (posting) => posting.amount,
-    ) / months;
+    return (
+      sumBy(
+        yearPostings.filter((posting) =>
+          selected.includes(expenseGroup(posting)),
+        ),
+        (posting) => posting.amount,
+      ) / months
+    );
   });
   if (start && end) {
     forEachMonth(start, end, (month) => {
       if (
-        month.isBefore(range.from, "month") || month.isAfter(range.to, "month")
-      ) return;
+        month.isBefore(range.from, "month") ||
+        month.isAfter(range.to, "month")
+      )
+        return;
       const bucket = postings.filter((posting) =>
-        posting.date.isSame(month, "month")
+        posting.date.isSame(month, "month"),
       );
-      const values = mapValues(
-        groupBy(bucket, expenseGroup),
-        (items) => sumBy(items, (item) => item.amount),
+      const values = mapValues(groupBy(bucket, expenseGroup), (items) =>
+        sumBy(items, (item) => item.amount),
       );
       const average = yearlyAverage[month.format("YYYY")] ?? 0;
       points.push({
@@ -62,9 +64,9 @@ export function buildMonthlyExpenseTimelineSeries(
         timestamp: month.valueOf(),
         values: { ...values, yearlyAverage: average },
         tooltipRows: [
-          ...selected.filter((group) => (values[group] ?? 0) !== 0).map((
-            group,
-          ) => [group, values[group] ?? 0] as [string, number]),
+          ...selected
+            .filter((group) => (values[group] ?? 0) !== 0)
+            .map((group) => [group, values[group] ?? 0] as [string, number]),
           ["Calendar-year monthly average", average],
         ],
       });
@@ -106,20 +108,19 @@ export function buildYearlyExpenseTimelineSeries(
   if (start) {
     forEachFinancialYear(start, end, (year) => {
       const key = financialYear(year);
-      const bucket = postings.filter((posting) =>
-        financialYear(posting.date) === key
+      const bucket = postings.filter(
+        (posting) => financialYear(posting.date) === key,
       );
-      const values = mapValues(
-        groupBy(bucket, expenseGroup),
-        (items) => sumBy(items, (item) => item.amount),
+      const values = mapValues(groupBy(bucket, expenseGroup), (items) =>
+        sumBy(items, (item) => item.amount),
       );
       points.push({
         period: key,
         timestamp: year.valueOf(),
         values,
-        tooltipRows: selected.filter((group) => (values[group] ?? 0) !== 0).map(
-          (group) => [group, values[group] ?? 0] as [string, number],
-        ),
+        tooltipRows: selected
+          .filter((group) => (values[group] ?? 0) !== 0)
+          .map((group) => [group, values[group] ?? 0] as [string, number]),
       });
     });
   }

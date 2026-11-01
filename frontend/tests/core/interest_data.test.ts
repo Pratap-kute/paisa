@@ -41,11 +41,13 @@ describe("interest chart adapters", () => {
   });
 
   it("tolerates an empty overview timeline", () => {
-    expect(interestSummary({
-      account: "Liabilities:Loan:Empty",
-      overview_timeline: [],
-      apr: 0,
-    })).toMatchObject({
+    expect(
+      interestSummary({
+        account: "Liabilities:Loan:Empty",
+        overview_timeline: [],
+        apr: 0,
+      }),
+    ).toMatchObject({
       label: "Loan:Empty",
       drawn: 0,
       repaid: 0,

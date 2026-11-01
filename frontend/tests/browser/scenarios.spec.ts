@@ -29,12 +29,15 @@ const projection = {
   minimumCashBalance: 50000,
   openingCashNegative: false,
   firstNegativeCashMonth: null,
-  points: [{
-    month: "2026-10",
-    cash: 80000,
-    investment: 300000,
-    netWorth: 230000,
-  }, { month: "2026-11", cash: 50000, investment: 1000000, netWorth: 900000 }],
+  points: [
+    {
+      month: "2026-10",
+      cash: 80000,
+      investment: 300000,
+      netWorth: 230000,
+    },
+    { month: "2026-11", cash: 50000, investment: 1000000, netWorth: 900000 },
+  ],
 };
 const result = {
   available: true,
@@ -47,12 +50,15 @@ const result = {
     endingInvestment: 1075000,
     minimumCashBalance: -25000,
     firstNegativeCashMonth: "2026-11",
-    points: [projection.points[0], {
-      month: "2026-11",
-      cash: -25000,
-      investment: 1075000,
-      netWorth: 900000,
-    }],
+    points: [
+      projection.points[0],
+      {
+        month: "2026-11",
+        cash: -25000,
+        investment: 1075000,
+        netWorth: 900000,
+      },
+    ],
   },
   impact: {
     endingCashDelta: -75000,
@@ -64,20 +70,19 @@ const result = {
 };
 
 test.beforeEach(async ({ page }) => {
-  await page.route(
-    "**/api/scenario/baseline*",
-    (route) => route.fulfill({ json: snapshot }),
+  await page.route("**/api/scenario/baseline*", (route) =>
+    route.fulfill({ json: snapshot }),
   );
-  await page.route(
-    "**/api/scenario/evaluate",
-    (route) => route.fulfill({ json: result }),
+  await page.route("**/api/scenario/evaluate", (route) =>
+    route.fulfill({ json: result }),
   );
 });
 
 test("scenario controls, events, reset and cash risk", async ({ page }) => {
   await page.goto("/more/scenarios");
-  await expect(page.getByRole("heading", { name: "What-if Scenarios" }))
-    .toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "What-if Scenarios" }),
+  ).toBeVisible();
   await expect(
     page.locator(
       '[data-testid="scenario-projection"][data-chart-ready="true"]',
@@ -87,27 +92,30 @@ test("scenario controls, events, reset and cash risk", async ({ page }) => {
     page.getByText("Cash turns negative in 2026-11.", { exact: false }),
   ).toBeVisible();
   await page.getByLabel("Monthly Income", { exact: true }).fill("170000");
-  await expect(page.getByText("1,50,000 → 1,70,000", { exact: false }))
-    .toBeVisible();
-  const evaluated = page.waitForRequest((r) =>
-    r.url().endsWith("/scenario/evaluate") &&
-    r.postDataJSON().horizonMonths === 12
+  await expect(
+    page.getByText("1,50,000 → 1,70,000", { exact: false }),
+  ).toBeVisible();
+  const evaluated = page.waitForRequest(
+    (r) =>
+      r.url().endsWith("/scenario/evaluate") &&
+      r.postDataJSON().horizonMonths === 12,
   );
   await page.getByRole("button", { name: "1Y", exact: true }).click();
   await evaluated;
   await page.getByLabel("Expected Annual Return (%)").fill("8");
   await page.getByLabel("Use separate scenario return rate").check();
-  await page.getByLabel("Scenario Annual Return (%)", { exact: true }).fill(
-    "-10",
-  );
+  await page
+    .getByLabel("Scenario Annual Return (%)", { exact: true })
+    .fill("-10");
   await page.getByRole("button", { name: "+ Add Event" }).click();
   await page.getByLabel("Amount", { exact: true }).fill("500000");
-  await page.getByLabel("Description").fill(
-    "A long bonus description for an illustrative one-time cash event",
-  );
-  const request = page.waitForRequest((r) =>
-    r.url().endsWith("/scenario/evaluate") &&
-    r.postDataJSON().oneTimeEvents?.[0]?.amount === 500000
+  await page
+    .getByLabel("Description")
+    .fill("A long bonus description for an illustrative one-time cash event");
+  const request = page.waitForRequest(
+    (r) =>
+      r.url().endsWith("/scenario/evaluate") &&
+      r.postDataJSON().oneTimeEvents?.[0]?.amount === 500000,
   );
   await request;
   await page.getByRole("button", { name: "Remove", exact: true }).click();
@@ -115,48 +123,49 @@ test("scenario controls, events, reset and cash risk", async ({ page }) => {
   await expect(page.getByLabel("Monthly Income", { exact: true })).toHaveValue(
     "150000",
   );
-  await expect(page.getByLabel("Expected Annual Return (%)"))
-    .toHaveValue("0");
-  await expect(page.getByLabel("Use separate scenario return rate")).not
-    .toBeChecked();
-  await expect(page.getByRole("button", { name: "Reset", exact: true }))
-    .toBeDisabled();
+  await expect(page.getByLabel("Expected Annual Return (%)")).toHaveValue("0");
+  await expect(
+    page.getByLabel("Use separate scenario return rate"),
+  ).not.toBeChecked();
+  await expect(
+    page.getByRole("button", { name: "Reset", exact: true }),
+  ).toBeDisabled();
 });
 
-test("missing baseline is unavailable and manual values are retained", async ({ page }) => {
-  await page.route(
-    "**/api/scenario/baseline*",
-    (route) =>
-      route.fulfill({
-        json: {
-          ...snapshot,
-          monthlyIncome: assumption(null, 0),
-          quality: {
-            status: "unavailable",
-            reasons: [{ code: "insufficient_income_history", field: "income" }],
-          },
+test("missing baseline is unavailable and manual values are retained", async ({
+  page,
+}) => {
+  await page.route("**/api/scenario/baseline*", (route) =>
+    route.fulfill({
+      json: {
+        ...snapshot,
+        monthlyIncome: assumption(null, 0),
+        quality: {
+          status: "unavailable",
+          reasons: [{ code: "insufficient_income_history", field: "income" }],
         },
-      }),
+      },
+    }),
   );
-  await page.route(
-    "**/api/scenario/evaluate",
-    (route) =>
-      route.fulfill({
-        json: {
-          ...result,
-          available: false,
-          baseline: null,
-          scenario: null,
-          impact: null,
-        },
-      }),
+  await page.route("**/api/scenario/evaluate", (route) =>
+    route.fulfill({
+      json: {
+        ...result,
+        available: false,
+        baseline: null,
+        scenario: null,
+        impact: null,
+      },
+    }),
   );
   await page.goto("/more/scenarios");
-  await expect(page.getByText("Comparison unavailable.", { exact: false }))
-    .toBeVisible();
+  await expect(
+    page.getByText("Comparison unavailable.", { exact: false }),
+  ).toBeVisible();
   await page.getByLabel("Monthly Income", { exact: true }).fill("150000");
-  await expect(page.getByText("Comparison unavailable.", { exact: false }))
-    .toBeVisible();
+  await expect(
+    page.getByText("Comparison unavailable.", { exact: false }),
+  ).toBeVisible();
   await expect(page.getByLabel("Monthly Income", { exact: true })).toHaveValue(
     "150000",
   );
@@ -167,36 +176,37 @@ test("missing baseline is unavailable and manual values are retained", async ({ 
 
 test("validation error and retry", async ({ page }) => {
   let status = 400;
-  await page.route(
-    "**/api/scenario/evaluate",
-    (route) =>
-      status === 400
-        ? route.fulfill({
+  await page.route("**/api/scenario/evaluate", (route) =>
+    status === 400
+      ? route.fulfill({
           status: 400,
           json: { code: "scenario_insufficient_investment_balance" },
         })
-        : status === 500
+      : status === 500
         ? route.fulfill({
-          status: 500,
-          json: { code: "scenario_calculation_failed" },
-        })
+            status: 500,
+            json: { code: "scenario_calculation_failed" },
+          })
         : route.fulfill({ json: result }),
   );
   await page.goto("/more/scenarios");
   await expect(page.getByRole("alert")).toContainText("withdrawal exceeds");
-  await expect(page.getByRole("button", { name: "Retry", exact: true }))
-    .toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Retry", exact: true }),
+  ).toHaveCount(0);
 
   status = 500;
   await page.getByLabel("Monthly Income", { exact: true }).fill("160000");
   await expect(page.getByRole("alert")).toContainText("Unable to calculate");
-  await expect(page.getByRole("button", { name: "Retry", exact: true }))
-    .toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Retry", exact: true }),
+  ).toBeVisible();
 
   status = 200;
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await expect(page.locator('[data-testid="scenario-projection"]'))
-    .toBeVisible();
+  await expect(
+    page.locator('[data-testid="scenario-projection"]'),
+  ).toBeVisible();
 });
 
 test("stale evaluation cannot replace newer inputs", async ({ page }) => {
@@ -216,22 +226,27 @@ test("stale evaluation cannot replace newer inputs", async ({ page }) => {
     });
   });
   await page.goto("/more/scenarios");
-  await expect(page.locator('[data-testid="scenario-projection"]'))
-    .toBeVisible();
-  const old = page.waitForRequest((r) =>
-    r.url().endsWith("/scenario/evaluate") &&
-    r.postDataJSON().monthlyIncome === 160000
+  await expect(
+    page.locator('[data-testid="scenario-projection"]'),
+  ).toBeVisible();
+  const old = page.waitForRequest(
+    (r) =>
+      r.url().endsWith("/scenario/evaluate") &&
+      r.postDataJSON().monthlyIncome === 160000,
   );
   await page.getByLabel("Monthly Income", { exact: true }).fill("160000");
   await old;
   await page.getByLabel("Monthly Income", { exact: true }).fill("170000");
-  await expect(page.locator('[data-testid="scenario-projection"]'))
-    .toBeVisible();
+  await expect(
+    page.locator('[data-testid="scenario-projection"]'),
+  ).toBeVisible();
   await page.waitForTimeout(1100);
-  await expect(page.locator('[data-testid="scenario-projection"]'))
-    .toBeVisible();
-  await expect(page.getByText("Comparison unavailable.", { exact: false }))
-    .toHaveCount(0);
+  await expect(
+    page.locator('[data-testid="scenario-projection"]'),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Comparison unavailable.", { exact: false }),
+  ).toHaveCount(0);
 });
 
 for (const width of [390, 768, 1440, 1728]) {
@@ -251,17 +266,19 @@ for (const width of [390, 768, 1440, 1728]) {
       ).toBeVisible();
       await page.getByRole("button", { name: "+ Add Event" }).click();
       await page.getByLabel("Amount", { exact: true }).fill("50000000");
-      await page.getByLabel("Description").fill(
-        "A long description of a future bonus or withdrawal to verify responsive controls",
-      );
+      await page
+        .getByLabel("Description")
+        .fill(
+          "A long description of a future bonus or withdrawal to verify responsive controls",
+        );
       await expect(
         page.locator(
           '[data-testid="scenario-projection"][data-chart-ready="true"]',
         ),
       ).toBeVisible();
       expect(
-        await page.evaluate(() =>
-          document.documentElement.scrollWidth <= innerWidth
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
       await page.evaluate(() => {
@@ -275,7 +292,9 @@ for (const width of [390, 768, 1440, 1728]) {
   }
 }
 
-test("privacy masks scenario inputs, metrics and chart tooltips", async ({ page }) => {
+test("privacy masks scenario inputs, metrics and chart tooltips", async ({
+  page,
+}) => {
   await page.addInitScript(() => localStorage.setItem("obscure", "true"));
   await page.goto("/more/scenarios");
   await expect(
@@ -286,20 +305,26 @@ test("privacy masks scenario inputs, metrics and chart tooltips", async ({ page 
   await expect(page.getByLabel("Monthly Income", { exact: true })).toHaveValue(
     "••••",
   );
-  await expect(page.getByLabel("Monthly Income", { exact: true }))
-    .toBeDisabled();
+  await expect(
+    page.getByLabel("Monthly Income", { exact: true }),
+  ).toBeDisabled();
   await page.getByRole("button", { name: "+ Add Event" }).click();
   await expect(page.getByLabel("Amount", { exact: true })).toHaveValue("••••");
   await expect(page.locator("body")).not.toContainText("1,50,000");
   await expect(page.locator("body")).not.toContainText("10,75,000");
-  await expect(page.locator('[data-testid="scenario-projection"]'))
-    .toBeVisible();
-  await page.locator('[data-testid="scenario-projection"] canvas').first()
+  await expect(
+    page.locator('[data-testid="scenario-projection"]'),
+  ).toBeVisible();
+  await page
+    .locator('[data-testid="scenario-projection"] canvas')
+    .first()
     .hover();
   await expect(page.locator("body")).not.toContainText("10,75,000");
 });
 
-test("baseline loading and retry do not fabricate zero values", async ({ page }) => {
+test("baseline loading and retry do not fabricate zero values", async ({
+  page,
+}) => {
   let fail = true;
   await page.route("**/api/scenario/baseline*", async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 400));
@@ -310,8 +335,9 @@ test("baseline loading and retry do not fabricate zero values", async ({ page })
     );
   });
   await page.goto("/more/scenarios");
-  await expect(page.getByText("Loading baseline…", { exact: true }))
-    .toBeVisible();
+  await expect(
+    page.getByText("Loading baseline…", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("alert")).toContainText(
     "Unable to load baseline",
   );
@@ -326,16 +352,14 @@ test("baseline loading and retry do not fabricate zero values", async ({ page })
 
 test("large comparison values remain readable on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.route(
-    "**/api/scenario/evaluate",
-    (route) =>
-      route.fulfill({
-        json: {
-          ...result,
-          baseline: { ...projection, endingNetWorth: 123456789000 },
-          scenario: { ...projection, endingNetWorth: -123456789000 },
-        },
-      }),
+  await page.route("**/api/scenario/evaluate", (route) =>
+    route.fulfill({
+      json: {
+        ...result,
+        baseline: { ...projection, endingNetWorth: 123456789000 },
+        scenario: { ...projection, endingNetWorth: -123456789000 },
+      },
+    }),
   );
   await page.goto("/more/scenarios");
   await expect(
@@ -344,12 +368,13 @@ test("large comparison values remain readable on mobile", async ({ page }) => {
     ),
   ).toBeVisible();
   expect(
-    await page.evaluate(() =>
-      document.documentElement.scrollWidth <= innerWidth
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
   for (const metric of await page.locator(".paisa4-metric-value").all()) {
-    expect(await metric.evaluate((el) => el.scrollWidth <= el.clientWidth))
-      .toBe(true);
+    expect(
+      await metric.evaluate((el) => el.scrollWidth <= el.clientWidth),
+    ).toBe(true);
   }
 });

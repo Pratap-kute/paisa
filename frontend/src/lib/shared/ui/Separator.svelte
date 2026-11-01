@@ -1,15 +1,15 @@
 <script lang="ts">
-interface Props {
-  orientation?: "horizontal" | "vertical";
-  decorative?: boolean;
-  class?: string;
-}
+  interface Props {
+    orientation?: "horizontal" | "vertical";
+    decorative?: boolean;
+    class?: string;
+  }
 
-let {
-  orientation = "horizontal",
-  decorative = true,
-  class: className = "",
-}: Props = $props();
+  let {
+    orientation = "horizontal",
+    decorative = true,
+    class: className = "",
+  }: Props = $props();
 </script>
 
 <div

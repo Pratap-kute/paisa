@@ -1,124 +1,126 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
-import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
-import type { GoalSummary } from "$lib/domain/goals_models";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { obscure } from "$lib/shared/state/persisted";
-import { formatFloat } from "$lib/shared/formatters/currency";
-import type { AssetBreakdown } from "$lib/domain/assets";
-import type {
-  Forecast,
-  Point,
-  RetirementGoalProgress,
-} from "$lib/domain/goals_models";
-import type { Posting } from "$lib/domain/ledger";
-import { onMount } from "svelte";
-import ARIMAPromise from "arima/async";
-import { findBreakPoints, forecast } from "$lib/domain/goals";
-import type { PageData } from "./$types";
-import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
-import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
-import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
-import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
-import { sortBy } from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
+  import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { obscure } from "$lib/shared/state/persisted";
+  import { formatFloat } from "$lib/shared/formatters/currency";
+  import type { AssetBreakdown } from "$lib/domain/assets";
+  import type {
+    Forecast,
+    Point,
+    RetirementGoalProgress,
+  } from "$lib/domain/goals_models";
+  import type { Posting } from "$lib/domain/ledger";
+  import { onMount } from "svelte";
+  import ARIMAPromise from "arima/async";
+  import { findBreakPoints, forecast } from "$lib/domain/goals";
+  import type { PageData } from "./$types";
+  import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
+  import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
+  import { sortBy } from "$lib/shared/utils/collection";
 
-interface Props {
-  data: PageData;
-}
+  interface Props {
+    data: PageData;
+  }
 
-let { data }: Props = $props();
+  let { data }: Props = $props();
 
-let savingsTotal = $state(0),
-  investmentTotal = $state(0),
-  gainTotal = $state(0),
-  icon = $state(""),
-  name = $state(""),
-  targetSavings = $state(0),
-  swr = $state(0),
-  xirr = $state(0),
-  yearlyExpense = $state(0),
-  progressPercent = $state(0),
-  savingsX = $state(0),
-  targetX = $state(0),
-  breakPoints: Point[] = $state([]),
-  savingsTimeline: Point[] = $state([]),
-  postings: Posting[] = $state([]),
-  latestPostings: Posting[] = $state([]),
-  balances: Record<string, AssetBreakdown> = $state({}),
-  predictionsTimeline: Forecast[] = $state([]);
+  let savingsTotal = $state(0),
+    investmentTotal = $state(0),
+    gainTotal = $state(0),
+    icon = $state(""),
+    name = $state(""),
+    targetSavings = $state(0),
+    swr = $state(0),
+    xirr = $state(0),
+    yearlyExpense = $state(0),
+    progressPercent = $state(0),
+    savingsX = $state(0),
+    targetX = $state(0),
+    breakPoints: Point[] = $state([]),
+    savingsTimeline: Point[] = $state([]),
+    postings: Posting[] = $state([]),
+    latestPostings: Posting[] = $state([]),
+    balances: Record<string, AssetBreakdown> = $state({}),
+    predictionsTimeline: Forecast[] = $state([]);
 
-let goal: GoalSummary | undefined = $state();
+  let goal: GoalSummary | undefined = $state();
 
-onMount(async () => {
-  const detail = await api.goals.getGoalDetails(
-    "retirement",
-    data.name,
-  ) as unknown as RetirementGoalProgress;
-  ({
-    savingsTotal,
-    investmentTotal,
-    gainTotal,
-    savingsTimeline,
-    yearlyExpense,
-    swr,
-    xirr,
-    icon,
-    name,
-    postings,
-    balances,
-  } = detail);
-  savingsTimeline = savingsTimeline || [];
-  postings = postings || [];
-  balances = balances || {};
-  targetSavings = detail.target ??
-    (swr > 0 && Number.isFinite(swr) ? yearlyExpense * (100 / swr) : 0);
-  if (!Number.isFinite(targetSavings)) targetSavings = 0;
-  goal = {
-    ...detail,
-    current: savingsTotal,
-    target: targetSavings,
-    id: `retirement-${name}`,
-    priority: 0,
-    targetDate: "",
-  };
+  onMount(async () => {
+    const detail = (await api.goals.getGoalDetails(
+      "retirement",
+      data.name,
+    )) as unknown as RetirementGoalProgress;
+    ({
+      savingsTotal,
+      investmentTotal,
+      gainTotal,
+      savingsTimeline,
+      yearlyExpense,
+      swr,
+      xirr,
+      icon,
+      name,
+      postings,
+      balances,
+    } = detail);
+    savingsTimeline = savingsTimeline || [];
+    postings = postings || [];
+    balances = balances || {};
+    targetSavings =
+      detail.target ??
+      (swr > 0 && Number.isFinite(swr) ? yearlyExpense * (100 / swr) : 0);
+    if (!Number.isFinite(targetSavings)) targetSavings = 0;
+    goal = {
+      ...detail,
+      current: savingsTotal,
+      target: targetSavings,
+      id: `retirement-${name}`,
+      priority: 0,
+      targetDate: "",
+    };
 
-  latestPostings = sortBy(postings, (p: Posting) => p.date)
-    .reverse()
-    .slice(0, 12);
+    latestPostings = sortBy(postings, (p: Posting) => p.date)
+      .reverse()
+      .slice(0, 12);
 
-  if (yearlyExpense > 0) {
-    progressPercent = Math.max(
-      0,
-      Math.min(
-        100,
-        calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
-      ),
+    if (yearlyExpense > 0) {
+      progressPercent = Math.max(
+        0,
+        Math.min(
+          100,
+          calculateGoalProgress(savingsTotal, targetSavings).progressRatio *
+            100,
+        ),
+      );
+      savingsX = savingsTotal / yearlyExpense;
+      targetX = targetSavings / yearlyExpense;
+    }
+
+    if (targetX <= 0 || savingsX <= 0 || yearlyExpense <= 0) {
+      return;
+    }
+
+    const ARIMA = await ARIMAPromise;
+    const nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
+    const nextBreakPoints = findBreakPoints(
+      savingsTimeline.concat(nextPredictions),
+      targetSavings,
     );
-    savingsX = savingsTotal / yearlyExpense;
-    targetX = targetSavings / yearlyExpense;
-  }
-
-  if (targetX <= 0 || savingsX <= 0 || yearlyExpense <= 0) {
-    return;
-  }
-
-  const ARIMA = await ARIMAPromise;
-  const nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
-  const nextBreakPoints = findBreakPoints(
-    savingsTimeline.concat(nextPredictions),
-    targetSavings,
-  );
-  predictionsTimeline = nextPredictions;
-  breakPoints = nextBreakPoints;
-});
+    predictionsTimeline = nextPredictions;
+    breakPoints = nextBreakPoints;
+  });
 </script>
 
 <svelte:head>
@@ -163,12 +165,16 @@ onMount(async () => {
     <Metric
       label="Target Savings"
       value={formatCurrency($obscure ? 0 : targetSavings)}
-      secondary="{formatFloat(targetX, 0)}x times Yearly Expenses (SWR {formatFloat(swr)})"
+      secondary="{formatFloat(
+        targetX,
+        0,
+      )}x times Yearly Expenses (SWR {formatFloat(swr)})"
       status="primary"
     />
   </MetricStrip>
 
-  {#if goal}<Section title="Funding progress"><GoalHealth {goal} /></Section>{/if}
+  {#if goal}<Section title="Funding progress"><GoalHealth {goal} /></Section
+    >{/if}
 
   <Section>
     <ProgressWithBreakpoints {progressPercent} {breakPoints} />
@@ -209,8 +215,10 @@ onMount(async () => {
     </div>
 
     <div class="paisa-goal-detail-side min-w-0 lg:sticky lg:top-20">
-      <GoalRecentPostings postings={latestPostings}
-        totalCount={postings.length} />
+      <GoalRecentPostings
+        postings={latestPostings}
+        totalCount={postings.length}
+      />
     </div>
   </div>
 </Page>

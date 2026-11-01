@@ -1,77 +1,82 @@
 <script lang="ts">
-import Select from "svelte-select";
-import type {
-  PredictionInput,
-  PredictionResult,
-  PredictionReviewStatus,
-} from "$lib/features/prediction/types";
-import {
-  confidenceLabel,
-  shortReasons,
-} from "$lib/features/prediction/explain";
-import { accountMatchesPrefix } from "$lib/features/prediction/score";
-import PredictionRowBadge from "./PredictionRowBadge.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
+  import Select from "svelte-select";
+  import type {
+    PredictionInput,
+    PredictionResult,
+    PredictionReviewStatus,
+  } from "$lib/features/prediction/types";
+  import {
+    confidenceLabel,
+    shortReasons,
+  } from "$lib/features/prediction/explain";
+  import { accountMatchesPrefix } from "$lib/features/prediction/score";
+  import PredictionRowBadge from "./PredictionRowBadge.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
 
-interface Props {
-  result?: PredictionResult | null;
-  input?: PredictionInput | null;
-  accounts?: string[];
-  queueIndex?: number | null;
-  queueTotal?: number | null;
-  similarCount?: number;
-  rowPredictions?: PredictionResult[];
-  onSelectPrediction?: (result: PredictionResult) => void;
-  reviewStatus?: PredictionReviewStatus | null;
-  onOverride?: (account: string) => void;
-  onApplySimilar?: (account: string) => void;
-  onAlwaysUse?: (account: string) => void;
-  onConfirmNext?: () => void;
-  onClose?: () => void;
-}
+  interface Props {
+    result?: PredictionResult | null;
+    input?: PredictionInput | null;
+    accounts?: string[];
+    queueIndex?: number | null;
+    queueTotal?: number | null;
+    similarCount?: number;
+    rowPredictions?: PredictionResult[];
+    onSelectPrediction?: (result: PredictionResult) => void;
+    reviewStatus?: PredictionReviewStatus | null;
+    onOverride?: (account: string) => void;
+    onApplySimilar?: (account: string) => void;
+    onAlwaysUse?: (account: string) => void;
+    onConfirmNext?: () => void;
+    onClose?: () => void;
+  }
 
-let {
-  result = null,
-  input = null,
-  accounts = [],
-  queueIndex = null,
-  queueTotal = null,
-  similarCount = undefined,
-  rowPredictions = [],
-  onSelectPrediction,
-  reviewStatus = null,
-  onOverride,
-  onApplySimilar,
-  onAlwaysUse,
-  onConfirmNext,
-  onClose,
-}: Props = $props();
+  let {
+    result = null,
+    input = null,
+    accounts = [],
+    queueIndex = null,
+    queueTotal = null,
+    similarCount = undefined,
+    rowPredictions = [],
+    onSelectPrediction,
+    reviewStatus = null,
+    onOverride,
+    onApplySimilar,
+    onAlwaysUse,
+    onConfirmNext,
+    onClose,
+  }: Props = $props();
 
-let selectedAccount = $derived(result?.account || "");
+  let selectedAccount = $derived(result?.account || "");
 
-const items = $derived(
-  [
-    ...new Set([
-      ...(result?.account ? [result.account] : []),
-      ...accounts.filter((account) =>
-        !result?.prefix || accountMatchesPrefix(account, result.prefix)
-      ),
-      ...(result?.alternatives || [])
-        .filter((item) =>
-          !result?.prefix || accountMatchesPrefix(item.account, result.prefix)
-        )
-        .map((item) => item.account),
-    ]),
-  ].filter(Boolean).map((account) => ({ value: account, label: account })),
-);
+  const items = $derived(
+    [
+      ...new Set([
+        ...(result?.account ? [result.account] : []),
+        ...accounts.filter(
+          (account) =>
+            !result?.prefix || accountMatchesPrefix(account, result.prefix),
+        ),
+        ...(result?.alternatives || [])
+          .filter(
+            (item) =>
+              !result?.prefix ||
+              accountMatchesPrefix(item.account, result.prefix),
+          )
+          .map((item) => item.account),
+      ]),
+    ]
+      .filter(Boolean)
+      .map((account) => ({ value: account, label: account })),
+  );
 
-const confidenceScore = $derived(
-  result?.score ? Math.min(100, Math.max(0, Math.round(result.score))) : null,
-);
+  const confidenceScore = $derived(
+    result?.score ? Math.min(100, Math.max(0, Math.round(result.score))) : null,
+  );
 
-const isResolved = $derived(
-  reviewStatus === "ACCEPTED" || reviewStatus === "CORRECTED",
-);
+  const isResolved = $derived(
+    reviewStatus === "ACCEPTED" || reviewStatus === "CORRECTED",
+  );
 </script>
 
 {#if result}
@@ -132,12 +137,15 @@ const isResolved = $derived(
             type="button"
             role="tab"
             class="paisa-switcher-tab"
-            class:is-active={pred.helperInvocationIndex === result.helperInvocationIndex}
+            class:is-active={pred.helperInvocationIndex ===
+              result.helperInvocationIndex}
             onclick={() => onSelectPrediction?.(pred)}
           >
             <span>Account {idx + 1} ({pred.prefix})</span>
             {#if pred.account}
-              <span class="paisa-switcher-tab-account">&bull; {pred.account}</span>
+              <span class="paisa-switcher-tab-account"
+                >&bull; {pred.account}</span
+              >
             {/if}
           </button>
         {/each}
@@ -153,7 +161,8 @@ const isResolved = $derived(
           {/if}
           {#if input.sourceAccount}
             <span class="paisa-source-account" title="Source Account">
-              <i class="fas fa-wallet text-[10px] mr-1 text-muted-foreground"></i>
+              <i class="fas fa-wallet text-[10px] mr-1 text-muted-foreground"
+              ></i>
               {input.sourceAccount}
             </span>
           {/if}
@@ -167,7 +176,8 @@ const isResolved = $derived(
               class="paisa-source-amount"
               class:is-debit={input.direction === "DEBIT" || input.amount < 0}
             >
-              {input.amount} {input.commodity || ""}
+              {input.amount}
+              {input.commodity || ""}
             </span>
           {/if}
         </div>
@@ -181,13 +191,15 @@ const isResolved = $derived(
 
     <!-- SUGGESTED ACCOUNT FIELD -->
     <div class="paisa-detail-field">
-      <label class="paisa-detail-label" for="predict-account-select">Suggested Account</label>
+      <label class="paisa-detail-label" for="predict-account-select"
+        >Suggested Account</label
+      >
       <div class="paisa-select-container" id="predict-account-select">
         <Select
           --list-z-index="50"
           --list-max-height="240px"
           listAutoWidth={false}
-          items={items}
+          {items}
           value={{ value: selectedAccount, label: selectedAccount }}
           showChevron={true}
           searchable={true}
@@ -238,10 +250,14 @@ const isResolved = $derived(
           data-testid="apply-similar-btn"
           onclick={() => onApplySimilar?.(selectedAccount)}
         >
-          <span class="inline-flex items-center text-xs"><i class="fas fa-layer-group"></i></span>
+          <span class="inline-flex items-center text-xs"
+            ><i class="fas fa-layer-group"></i></span
+          >
           <span>
             {#if similarCount != null && similarCount > 0}
-              Apply to {similarCount} similar {similarCount === 1 ? 'row' : 'rows'} in this import
+              Apply to {similarCount} similar {similarCount === 1
+                ? "row"
+                : "rows"} in this import
             {:else if similarCount === 0}
               Apply to similar rows in this import (0 found)
             {:else}
@@ -256,7 +272,9 @@ const isResolved = $derived(
           data-testid="always-use-merchant-btn"
           onclick={() => onAlwaysUse?.(selectedAccount)}
         >
-          <span class="inline-flex items-center text-xs"><i class="fas fa-bookmark"></i></span>
+          <span class="inline-flex items-center text-xs"
+            ><i class="fas fa-bookmark"></i></span
+          >
           <span>Always use this account for this merchant</span>
         </button>
       </div>
@@ -269,7 +287,9 @@ const isResolved = $derived(
           onclick={() => onConfirmNext?.()}
         >
           <span>{isResolved ? "Next Review" : "Confirm & Next Review"}</span>
-          <span class="inline-flex items-center text-xs"><i class="fas fa-arrow-right"></i></span>
+          <span class="inline-flex items-center text-xs"
+            ><i class="fas fa-arrow-right"></i></span
+          >
         </button>
       {/if}
     </div>
@@ -277,308 +297,308 @@ const isResolved = $derived(
 {/if}
 
 <style>
-.paisa-prediction-detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--paisa-space-2, 0.5rem);
-  padding: var(--paisa-space-3, 0.75rem);
-  border-top: 1px solid var(--paisa-border, #e2e8f0);
-  background-color: var(--paisa-surface, #ffffff);
-}
-
-.paisa-prediction-detail-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--paisa-space-2, 0.5rem);
-}
-
-.paisa-detail-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--paisa-foreground, #0f172a);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.paisa-queue-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--paisa-primary-subtle, rgba(59, 130, 246, 0.1));
-  color: var(--paisa-primary, #3b82f6);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 0.125rem 0.45rem;
-  border-radius: var(--paisa-radius-full, 9999px);
-  letter-spacing: 0.03em;
-}
-
-.paisa-detail-merchant {
-  color: var(--paisa-muted-foreground, #64748b);
-  text-transform: none;
-  font-weight: normal;
-}
-
-.paisa-detail-header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.paisa-confidence-pct {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--paisa-muted-foreground, #64748b);
-}
-
-.paisa-inspector-close-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  background: transparent;
-  color: var(--paisa-muted-foreground, #94a3b8);
-  cursor: pointer;
-  font-size: 0.75rem;
-  transition: all 0.12s ease;
-
-  &:hover {
-    background-color: var(--paisa-surface-raised, #f1f5f9);
-    color: var(--paisa-foreground, #0f172a);
-  }
-}
-
-.paisa-prediction-switcher {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  background-color: var(--paisa-surface-raised, #f8fafc);
-  border: 1px solid var(--paisa-border-subtle, #e2e8f0);
-}
-
-.paisa-switcher-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  border: none;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  background: transparent;
-  color: var(--paisa-muted-foreground, #64748b);
-  cursor: pointer;
-  transition: all 0.12s ease;
-
-  &:hover {
-    color: var(--paisa-foreground, #0f172a);
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-
-  &.is-active {
+  .paisa-prediction-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--paisa-space-2, 0.5rem);
+    padding: var(--paisa-space-3, 0.75rem);
+    border-top: 1px solid var(--paisa-border, #e2e8f0);
     background-color: var(--paisa-surface, #ffffff);
-    color: var(--paisa-primary, #3b82f6);
+  }
+
+  .paisa-prediction-detail-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--paisa-space-2, 0.5rem);
+  }
+
+  .paisa-detail-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    color: var(--paisa-foreground, #0f172a);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
   }
-}
 
-.paisa-switcher-tab-account {
-  color: var(--paisa-muted-foreground, #94a3b8);
-  font-weight: normal;
-}
-
-.paisa-source-card {
-  padding: 0.4rem 0.55rem;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  background-color: var(--paisa-surface-raised, #f8fafc);
-  border: 1px solid var(--paisa-border-subtle, #e2e8f0);
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.paisa-source-meta-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: 0.6875rem;
-  color: var(--paisa-muted-foreground, #64748b);
-}
-
-.paisa-source-date {
-  font-weight: 600;
-  color: var(--paisa-foreground, #0f172a);
-}
-
-.paisa-source-account,
-.paisa-source-prefix {
-  color: var(--paisa-muted-foreground, #64748b);
-}
-
-.paisa-source-amount {
-  margin-left: auto;
-  font-weight: 600;
-  font-family: var(--paisa-font-mono, monospace);
-
-  &.is-debit {
-    color: var(--paisa-negative, #ef4444);
+  .paisa-queue-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--paisa-primary-subtle, rgba(59, 130, 246, 0.1));
+    color: var(--paisa-primary, #3b82f6);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.125rem 0.45rem;
+    border-radius: var(--paisa-radius-full, 9999px);
+    letter-spacing: 0.03em;
   }
-}
 
-.paisa-source-desc {
-  font-size: 0.75rem;
-  color: var(--paisa-foreground, #0f172a);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.paisa-detail-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.paisa-detail-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--paisa-muted-foreground, #64748b);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.paisa-select-container {
-  width: 100%;
-
-  :global(.svelte-select) {
-    border: 1px solid var(--paisa-border, #cbd5e1);
-    background-color: var(--paisa-canvas, #f8fafc);
-    border-radius: var(--paisa-radius-sm, 0.375rem);
-    font-size: 0.8125rem;
-    min-height: 36px;
+  .paisa-detail-merchant {
+    color: var(--paisa-muted-foreground, #64748b);
+    text-transform: none;
+    font-weight: normal;
   }
-}
 
-.paisa-prediction-reasons {
-  margin: 0;
-  padding-left: 1.1rem;
-  font-size: 0.75rem;
-  color: var(--paisa-muted-foreground, #64748b);
-  line-height: 1.4;
-}
+  .paisa-detail-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
 
-.paisa-detail-alternatives {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
+  .paisa-confidence-pct {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--paisa-muted-foreground, #64748b);
+  }
 
-.paisa-detail-sublabel {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--paisa-muted-foreground, #94a3b8);
-}
+  .paisa-inspector-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    background: transparent;
+    color: var(--paisa-muted-foreground, #94a3b8);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.12s ease;
 
-.paisa-alt-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
+    &:hover {
+      background-color: var(--paisa-surface-raised, #f1f5f9);
+      color: var(--paisa-foreground, #0f172a);
+    }
+  }
 
-.paisa-alt-btn {
-  font-size: 0.6875rem;
-  padding: 0.1875rem 0.5rem;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  border: 1px solid var(--paisa-border-subtle, #e2e8f0);
-  background-color: var(--paisa-surface-raised, #f1f5f9);
-  color: var(--paisa-muted-foreground, #475569);
-  cursor: pointer;
-  transition: all 0.15s ease;
+  .paisa-prediction-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    background-color: var(--paisa-surface-raised, #f8fafc);
+    border: 1px solid var(--paisa-border-subtle, #e2e8f0);
+  }
 
-  &:hover {
-    background-color: var(--paisa-surface-hover, #e2e8f0);
+  .paisa-switcher-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    background: transparent;
+    color: var(--paisa-muted-foreground, #64748b);
+    cursor: pointer;
+    transition: all 0.12s ease;
+
+    &:hover {
+      color: var(--paisa-foreground, #0f172a);
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    &.is-active {
+      background-color: var(--paisa-surface, #ffffff);
+      color: var(--paisa-primary, #3b82f6);
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  .paisa-switcher-tab-account {
+    color: var(--paisa-muted-foreground, #94a3b8);
+    font-weight: normal;
+  }
+
+  .paisa-source-card {
+    padding: 0.4rem 0.55rem;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    background-color: var(--paisa-surface-raised, #f8fafc);
+    border: 1px solid var(--paisa-border-subtle, #e2e8f0);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .paisa-source-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--paisa-muted-foreground, #64748b);
+  }
+
+  .paisa-source-date {
+    font-weight: 600;
     color: var(--paisa-foreground, #0f172a);
   }
-}
 
-.paisa-prediction-detail-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  margin-top: auto;
-  position: sticky;
-  bottom: 0;
-  background-color: var(--paisa-surface, #ffffff);
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--paisa-border-subtle, #f1f5f9);
-  z-index: 20;
-}
+  .paisa-source-account,
+  .paisa-source-prefix {
+    color: var(--paisa-muted-foreground, #64748b);
+  }
 
-.paisa-action-group-secondary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
+  .paisa-source-amount {
+    margin-left: auto;
+    font-weight: 600;
+    font-family: var(--paisa-font-mono, monospace);
 
-.paisa-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: var(--paisa-radius-sm, 0.25rem);
-  border: 1px solid var(--paisa-border, #cbd5e1);
-  background-color: var(--paisa-surface, #ffffff);
-  color: var(--paisa-foreground, #0f172a);
-  cursor: pointer;
-  transition: all 0.15s ease;
+    &.is-debit {
+      color: var(--paisa-negative, #ef4444);
+    }
+  }
 
-  &:hover:not(:disabled) {
-    background-color: var(--paisa-surface-hover, #f8fafc);
+  .paisa-source-desc {
+    font-size: 0.75rem;
+    color: var(--paisa-foreground, #0f172a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .paisa-detail-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .paisa-detail-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--paisa-muted-foreground, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+
+  .paisa-select-container {
+    width: 100%;
+
+    :global(.svelte-select) {
+      border: 1px solid var(--paisa-border, #cbd5e1);
+      background-color: var(--paisa-canvas, #f8fafc);
+      border-radius: var(--paisa-radius-sm, 0.375rem);
+      font-size: 0.8125rem;
+      min-height: 36px;
+    }
+  }
+
+  .paisa-prediction-reasons {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.75rem;
+    color: var(--paisa-muted-foreground, #64748b);
+    line-height: 1.4;
+  }
+
+  .paisa-detail-alternatives {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .paisa-detail-sublabel {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--paisa-muted-foreground, #94a3b8);
+  }
+
+  .paisa-alt-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .paisa-alt-btn {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    border: 1px solid var(--paisa-border-subtle, #e2e8f0);
+    background-color: var(--paisa-surface-raised, #f1f5f9);
+    color: var(--paisa-muted-foreground, #475569);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background-color: var(--paisa-surface-hover, #e2e8f0);
+      color: var(--paisa-foreground, #0f172a);
+    }
+  }
+
+  .paisa-prediction-detail-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--paisa-surface, #ffffff);
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--paisa-border-subtle, #f1f5f9);
+    z-index: 20;
+  }
+
+  .paisa-action-group-secondary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .paisa-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--paisa-radius-sm, 0.25rem);
+    border: 1px solid var(--paisa-border, #cbd5e1);
+    background-color: var(--paisa-surface, #ffffff);
+    color: var(--paisa-foreground, #0f172a);
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--paisa-surface-hover, #f8fafc);
+      border-color: var(--paisa-primary, #3b82f6);
+    }
+
+    &.is-disabled,
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  .paisa-action-btn-subtle {
+    border: none;
+    background: transparent;
+    color: var(--paisa-muted-foreground, #64748b);
+    justify-content: flex-start;
+    padding: 0.25rem 0;
+  }
+
+  .paisa-action-btn-subtle:hover {
+    background: transparent;
+    color: var(--paisa-foreground, #0f172a);
+  }
+
+  .paisa-action-btn-primary {
+    background-color: var(--paisa-primary, #3b82f6);
     border-color: var(--paisa-primary, #3b82f6);
+    color: #ffffff;
+    font-weight: 600;
   }
 
-  &.is-disabled,
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
+  .paisa-action-btn-primary:hover {
+    filter: brightness(1.08);
   }
-}
-
-.paisa-action-btn-subtle {
-  border: none;
-  background: transparent;
-  color: var(--paisa-muted-foreground, #64748b);
-  justify-content: flex-start;
-  padding: 0.25rem 0;
-}
-
-.paisa-action-btn-subtle:hover {
-  background: transparent;
-  color: var(--paisa-foreground, #0f172a);
-}
-
-.paisa-action-btn-primary {
-  background-color: var(--paisa-primary, #3b82f6);
-  border-color: var(--paisa-primary, #3b82f6);
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.paisa-action-btn-primary:hover {
-  filter: brightness(1.08);
-}
 </style>

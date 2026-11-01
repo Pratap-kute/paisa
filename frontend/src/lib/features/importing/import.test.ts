@@ -63,7 +63,9 @@ function templatePath(path: string): string {
       return `../backend/pkg/model/template/templates/${path}`;
     }
     try {
-      if (fs.existsSync(`../backend/internal/model/template/templates/${path}`)) {
+      if (
+        fs.existsSync(`../backend/internal/model/template/templates/${path}`)
+      ) {
         return `../backend/internal/model/template/templates/${path}`;
       }
       return `pkg/model/template/templates/${path}`;
@@ -76,48 +78,45 @@ function templatePath(path: string): string {
 }
 
 describe("import", () => {
-  Array.from(fs.readdirSync(fixturePath("import"), { withFileTypes: true })).forEach(
-    (entry) => {
-      const dir = entry.name;
-      test(dir, async () => {
-        const files = Array.from(
-          fs.readdirSync(fixturePath(`import/${dir}`), { withFileTypes: true }),
-          ({ name }) => name,
-        );
-        for (const file of files) {
-          const [name, extension] = file.split(".");
-          if (extension === "ledger") {
-            const inputFile = find(
-              files,
-              (f) => f != file && f.startsWith(name),
-            );
-            if (!inputFile || inputFile.endsWith(".pdf")) {
-              break;
-            }
-            const input = fs.readFileSync(
-              fixturePath(`import/${dir}/${inputFile}`),
-            );
-            const output = fs.readFileSync(
-              fixturePath(`import/${dir}/${file}`),
-              "utf-8",
-            );
-            const template = fs.readFileSync(
-              templatePath(`${dir}.handlebars`),
-              "utf-8",
-            );
-
-            const compiled = Handlebars.compile(template);
-            const result = await parse(new File([input as any], inputFile));
-            const rows = asRows(result);
-
-            const actual = render(rows, compiled, { trim: true });
-
-            expect(actual).toBe(trim(output));
+  Array.from(
+    fs.readdirSync(fixturePath("import"), { withFileTypes: true }),
+  ).forEach((entry) => {
+    const dir = entry.name;
+    test(dir, async () => {
+      const files = Array.from(
+        fs.readdirSync(fixturePath(`import/${dir}`), { withFileTypes: true }),
+        ({ name }) => name,
+      );
+      for (const file of files) {
+        const [name, extension] = file.split(".");
+        if (extension === "ledger") {
+          const inputFile = find(files, (f) => f != file && f.startsWith(name));
+          if (!inputFile || inputFile.endsWith(".pdf")) {
+            break;
           }
+          const input = fs.readFileSync(
+            fixturePath(`import/${dir}/${inputFile}`),
+          );
+          const output = fs.readFileSync(
+            fixturePath(`import/${dir}/${file}`),
+            "utf-8",
+          );
+          const template = fs.readFileSync(
+            templatePath(`${dir}.handlebars`),
+            "utf-8",
+          );
+
+          const compiled = Handlebars.compile(template);
+          const result = await parse(new File([input as any], inputFile));
+          const rows = asRows(result);
+
+          const actual = render(rows, compiled, { trim: true });
+
+          expect(actual).toBe(trim(output));
         }
-      });
-    },
-  );
+      }
+    });
+  });
 });
 
 describe("template helpers", () => {
@@ -191,10 +190,12 @@ describe("spreadsheet render metadata", () => {
       trim: true,
     });
 
-    expect(metadata.content).toBe(render(rows, template, {
-      reverse: true,
-      trim: true,
-    }));
+    expect(metadata.content).toBe(
+      render(rows, template, {
+        reverse: true,
+        trim: true,
+      }),
+    );
     expect(metadata.rows.map((row) => row.sourceRowIndex)).toEqual([1, 0]);
   });
 
@@ -210,9 +211,11 @@ describe("spreadsheet render metadata", () => {
     const metadata = renderWithMetadata(rows, template, { trim: true });
 
     expect(metadata.generatedCount).toBe(2);
-    expect(metadata.errors).toEqual([{
-      sourceRowIndex: 1,
-      message: "bad row",
-    }]);
+    expect(metadata.errors).toEqual([
+      {
+        sourceRowIndex: 1,
+        message: "bad row",
+      },
+    ]);
   });
 });

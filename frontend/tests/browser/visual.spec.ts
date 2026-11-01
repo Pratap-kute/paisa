@@ -96,12 +96,13 @@ async function expectStableChartSurfaces(page: Page) {
         height: rect.height,
         parentWidth: parent?.width ?? 0,
       };
-    })
+    }),
   );
-  await page.evaluate(() =>
-    new Promise<void>((resolve) =>
-      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-    )
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      ),
   );
   const second = await charts.evaluateAll((elements) =>
     elements.map((element) => {
@@ -112,7 +113,7 @@ async function expectStableChartSurfaces(page: Page) {
         height: rect.height,
         parentWidth: parent?.width ?? 0,
       };
-    })
+    }),
   );
 
   expect(second).toHaveLength(first.length);
@@ -183,7 +184,8 @@ for (const route of visualRoutes) {
             status: 200,
             contentType: "application/json",
             body: JSON.stringify(mockLogs),
-          }));
+          }),
+        );
       }
       if (route.name === "ledger-price") {
         await page.route("**/api/price", async (apiRoute) => {
@@ -219,13 +221,16 @@ for (const route of visualRoutes) {
         await expect(
           page.locator("[data-testid='dashboard-kpis'] .paisa4-metric-label"),
         ).toHaveText(["Net Worth", "Cash Balance", "Expenses", "Budget"]);
-        await expect(page.getByText("Net Investment", { exact: true }))
-          .toHaveCount(0);
-        await expect(page.getByText("Gain / Loss", { exact: true }))
-          .toHaveCount(0);
+        await expect(
+          page.getByText("Net Investment", { exact: true }),
+        ).toHaveCount(0);
+        await expect(
+          page.getByText("Gain / Loss", { exact: true }),
+        ).toHaveCount(0);
         await expect(page.getByText("XIRR", { exact: true })).toHaveCount(0);
         expect(
-          await page.locator("[data-testid='dashboard-attention-item']")
+          await page
+            .locator("[data-testid='dashboard-attention-item']")
             .count(),
         ).toBeLessThanOrEqual(3);
         expect(
@@ -241,7 +246,8 @@ for (const route of visualRoutes) {
           await page.locator("[data-testid='dashboard-goal-item']").count(),
         ).toBeLessThanOrEqual(3);
         expect(
-          await page.locator("[data-testid='dashboard-recurring-item']")
+          await page
+            .locator("[data-testid='dashboard-recurring-item']")
             .count(),
         ).toBeLessThanOrEqual(5);
       }
@@ -251,18 +257,15 @@ for (const route of visualRoutes) {
           page.locator(
             `[data-testid='${prefix}-goal-progress-echart'][data-chart-ready='true']`,
           ),
-        )
-          .toBeVisible({ timeout: 15_000 });
+        ).toBeVisible({ timeout: 15_000 });
         await expect(
           page.locator(
             `[data-testid='${prefix}-goal-investment-echart'][data-chart-ready='true']`,
           ),
-        )
-          .toBeVisible({ timeout: 15_000 });
+        ).toBeVisible({ timeout: 15_000 });
         await expect(
           page.locator(".paisa-goal-detail-side .paisa-posting-row").first(),
-        )
-          .toBeVisible();
+        ).toBeVisible();
       }
       await page.evaluate("document.fonts.ready");
       await waitForStableLayout(page);
@@ -271,7 +274,8 @@ for (const route of visualRoutes) {
         await expectDarkSelectTheme(page);
         await page.locator(".svelte-select").click();
         await expect(page.locator(".svelte-select-list")).toBeVisible();
-        const listBackground = await page.locator(".svelte-select-list")
+        const listBackground = await page
+          .locator(".svelte-select-list")
           .evaluate((element) => getComputedStyle(element).backgroundColor);
         expect(["rgb(30, 41, 59)", "rgb(31, 41, 55)"]).toContain(
           listBackground,
@@ -289,10 +293,9 @@ for (const route of visualRoutes) {
         await page.evaluate("document.fonts.ready");
         await waitForStableLayout(page);
       }
-      await expect(page).toHaveScreenshot(
-        `${route.name}-${variant.name}.png`,
-        { fullPage: true },
-      );
+      await expect(page).toHaveScreenshot(`${route.name}-${variant.name}.png`, {
+        fullPage: true,
+      });
     });
   }
 }
@@ -309,8 +312,9 @@ for (const chart of chartSnapshots) {
         });
       }
       if ("readyText" in chart && typeof chart.readyText === "string") {
-        await expect(page.getByText(chart.readyText, { exact: true }))
-          .toBeVisible();
+        await expect(
+          page.getByText(chart.readyText, { exact: true }),
+        ).toBeVisible();
       }
       const chartLocator = page.locator(
         `${chart.locator}[data-chart-ready='true']`,

@@ -1,0 +1,4 @@
+src/lib/shared/vendor/
+src/lib/api/generated/
+src/lib/generated/
+tests/fixture/

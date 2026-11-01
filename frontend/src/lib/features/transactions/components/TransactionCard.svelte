@@ -1,22 +1,22 @@
 <script lang="ts">
-import { postingUrl } from "$lib/shared/browser/navigation";
-import { firstName, restName } from "$lib/domain/account";
-import type { Posting } from "$lib/domain/ledger";
-import type { Transaction } from "$lib/domain/ledger";
-import { accountColorStyle } from "$lib/shared/theme/colors";
-import { iconText } from "$lib/shared/ui/icon";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import PostingStatus from "./PostingStatus.svelte";
-import TransactionNote from "./TransactionNote.svelte";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+  import { firstName, restName } from "$lib/domain/account";
+  import type { Posting } from "$lib/domain/ledger";
+  import type { Transaction } from "$lib/domain/ledger";
+  import { accountColorStyle } from "$lib/shared/theme/colors";
+  import { iconText } from "$lib/shared/ui/icon";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import PostingStatus from "./PostingStatus.svelte";
+  import TransactionNote from "./TransactionNote.svelte";
 
-import Card from "$lib/shared/ui/Card.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
 
-interface Props {
-  t: Transaction;
-}
+  interface Props {
+    t: Transaction;
+  }
 
-let { t }: Props = $props();
-let posting: Posting = $derived(t.postings[0]);
+  let { t }: Props = $props();
+  let posting: Posting = $derived(t.postings[0]);
 </script>
 
 <Card padding="xs" interactive>
@@ -26,7 +26,8 @@ let posting: Posting = $derived(t.postings[0]);
       <TransactionNote transaction={t} />
       <a
         class="font-medium text-primary hover:underline"
-        href={postingUrl(posting)}>{posting.payee}</a>
+        href={postingUrl(posting)}>{posting.payee}</a
+      >
     </div>
     <div class="min-w-[110px] text-right text-xs text-muted-foreground">
       <span class="text-muted-foreground">

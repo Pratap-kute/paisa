@@ -1,144 +1,146 @@
 <script lang="ts">
-import InvestmentPerformance from "$lib/features/assets/components/InvestmentPerformance.svelte";
-import { page } from "$app/state";
-import COLORS from "$lib/shared/theme/colors";
-import type { Networth } from "$lib/domain/assets";
-import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
-import { firstName, restName } from "$lib/domain/account";
-import { postingUrl } from "$lib/shared/browser/navigation";
-import type { AccountGain, PortfolioAggregate } from "$lib/domain/assets";
-import type { AssetBreakdown } from "$lib/domain/assets";
-import { buildLegends } from "$lib/features/assets/gain";
-import {
-  buildPortfolioComparison,
-  filterCommodityBreakdowns,
-} from "$lib/features/assets/hierarchy_data";
-import type { Posting } from "$lib/domain/ledger";
-import { api } from "$lib/api";
-import { last } from "es-toolkit";
-import Button from "$lib/shared/ui/Button.svelte";
-import type { PageData } from "./$types";
+  import InvestmentPerformance from "$lib/features/assets/components/InvestmentPerformance.svelte";
+  import { page } from "$app/state";
+  import COLORS from "$lib/shared/theme/colors";
+  import type { Networth } from "$lib/domain/assets";
+  import { formatCurrency, formatFloat } from "$lib/shared/formatters/currency";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+  import { firstName, restName } from "$lib/domain/account";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+  import type { AccountGain, PortfolioAggregate } from "$lib/domain/assets";
+  import type { AssetBreakdown } from "$lib/domain/assets";
+  import { buildLegends } from "$lib/features/assets/gain";
+  import {
+    buildPortfolioComparison,
+    filterCommodityBreakdowns,
+  } from "$lib/features/assets/hierarchy_data";
+  import type { Posting } from "$lib/domain/ledger";
+  import { api } from "$lib/api";
+  import { last } from "es-toolkit";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import type { PageData } from "./$types";
 
-import { iconify } from "$lib/shared/ui/icon";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
-import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import { iconify } from "$lib/shared/ui/icon";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
 
-let commodities: string[] = [];
-let selectedCommodities: string[] = $state([]);
-let security_type: PortfolioAggregate[] = $state([]);
-let name_and_security_type: PortfolioAggregate[] = $state([]);
-let rating: PortfolioAggregate[] = $state([]);
-let industry: PortfolioAggregate[] = $state([]);
-let securityTypeData = $derived(
-  buildPortfolioComparison(
-    filterCommodityBreakdowns(security_type, selectedCommodities),
-  ),
-);
-let ratingData = $derived(
-  buildPortfolioComparison(
-    filterCommodityBreakdowns(rating, selectedCommodities),
-  ),
-);
-let industryData = $derived(
-  buildPortfolioComparison(
-    filterCommodityBreakdowns(industry, selectedCommodities),
-  ),
-);
-let portfolioData = $derived(
-  buildPortfolioComparison(
-    filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
-  ),
-);
+  let commodities: string[] = [];
+  let selectedCommodities: string[] = $state([]);
+  let security_type: PortfolioAggregate[] = $state([]);
+  let name_and_security_type: PortfolioAggregate[] = $state([]);
+  let rating: PortfolioAggregate[] = $state([]);
+  let industry: PortfolioAggregate[] = $state([]);
+  let securityTypeData = $derived(
+    buildPortfolioComparison(
+      filterCommodityBreakdowns(security_type, selectedCommodities),
+    ),
+  );
+  let ratingData = $derived(
+    buildPortfolioComparison(
+      filterCommodityBreakdowns(rating, selectedCommodities),
+    ),
+  );
+  let industryData = $derived(
+    buildPortfolioComparison(
+      filterCommodityBreakdowns(industry, selectedCommodities),
+    ),
+  );
+  let portfolioData = $derived(
+    buildPortfolioComparison(
+      filterCommodityBreakdowns(name_and_security_type, selectedCommodities),
+    ),
+  );
 
-let securityTypeEmpty: boolean = $state(false);
-let nameAndSecurityTypeEmpty: boolean = $state(false);
-let ratingEmpty: boolean = $state(false);
-let industryEmpty: boolean = $state(false);
+  let securityTypeEmpty: boolean = $state(false);
+  let nameAndSecurityTypeEmpty: boolean = $state(false);
+  let ratingEmpty: boolean = $state(false);
+  let industryEmpty: boolean = $state(false);
 
-interface Props {
-  data: PageData;
-}
+  interface Props {
+    data: PageData;
+  }
 
-let { data }: Props = $props();
-let gain: AccountGain | undefined = $state();
-let overview: Networth | undefined = $state();
-let assetBreakdown: AssetBreakdown | undefined = $state();
-let legends = buildLegends();
+  let { data }: Props = $props();
+  let gain: AccountGain | undefined = $state();
+  let overview: Networth | undefined = $state();
+  let assetBreakdown: AssetBreakdown | undefined = $state();
+  let legends = buildLegends();
 
-let postings: Posting[] = $state([]);
+  let postings: Posting[] = $state([]);
 
-let legacyFailed = $state(false);
-let legacyRetry = $state(0);
-$effect(() => {
-  const account = data.name;
-  legacyRetry;
-  const controller = new AbortController();
-  gain = undefined;
-  overview = undefined;
-  postings = [];
-  legacyFailed = false;
-  securityTypeEmpty =
-    nameAndSecurityTypeEmpty =
-    ratingEmpty =
-    industryEmpty =
-      true;
-  void (async () => {
-    try {
-      const res = await api.gain.getAccountGain(account, {
-        signal: controller.signal,
-      });
-      if (controller.signal.aborted) return;
-      gain = res.gain_timeline_breakdown as unknown as AccountGain;
-      assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
-      name_and_security_type = (res.portfolio_allocation
-        ?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
-      security_type = (res.portfolio_allocation
-        ?.security_type as unknown as PortfolioAggregate[]) || [];
-      rating =
-        (res.portfolio_allocation?.rating as unknown as PortfolioAggregate[]) ||
-        [];
-      industry = (res.portfolio_allocation
-        ?.industry as unknown as PortfolioAggregate[]) ||
-        [];
-      commodities = (res.portfolio_allocation?.commodities as unknown as any) ||
-        [];
+  let legacyFailed = $state(false);
+  let legacyRetry = $state(0);
+  $effect(() => {
+    const account = data.name;
+    legacyRetry;
+    const controller = new AbortController();
+    gain = undefined;
+    overview = undefined;
+    postings = [];
+    legacyFailed = false;
+    securityTypeEmpty =
+      nameAndSecurityTypeEmpty =
+      ratingEmpty =
+      industryEmpty =
+        true;
+    void (async () => {
+      try {
+        const res = await api.gain.getAccountGain(account, {
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
+        gain = res.gain_timeline_breakdown as unknown as AccountGain;
+        assetBreakdown = res.asset_breakdown as unknown as AssetBreakdown;
+        name_and_security_type =
+          (res.portfolio_allocation
+            ?.name_and_security_type as unknown as PortfolioAggregate[]) || [];
+        security_type =
+          (res.portfolio_allocation
+            ?.security_type as unknown as PortfolioAggregate[]) || [];
+        rating =
+          (res.portfolio_allocation
+            ?.rating as unknown as PortfolioAggregate[]) || [];
+        industry =
+          (res.portfolio_allocation
+            ?.industry as unknown as PortfolioAggregate[]) || [];
+        commodities =
+          (res.portfolio_allocation?.commodities as unknown as any) || [];
 
-      overview = last(gain.networthTimeline as any);
-      postings = [...(gain.postings || [])]
-        .sort((a, b) => {
-          const da = a.date
-            ? (typeof a.date === "string"
-              ? new Date(a.date).getTime()
-              : (a.date as any).valueOf())
-            : 0;
-          const db = b.date
-            ? (typeof b.date === "string"
-              ? new Date(b.date).getTime()
-              : (b.date as any).valueOf())
-            : 0;
-          return db - da;
-        })
-        .slice(0, 100) as unknown as Posting[];
-      selectedCommodities = [...commodities];
-      securityTypeEmpty = security_type.length === 0;
-      nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
-      ratingEmpty = rating.length === 0;
-      industryEmpty = industry.length === 0;
-    } catch {
-      if (!controller.signal.aborted) legacyFailed = true;
-    }
-  })();
-  return () => controller.abort();
-});
+        overview = last(gain.networthTimeline as any);
+        postings = [...(gain.postings || [])]
+          .sort((a, b) => {
+            const da = a.date
+              ? typeof a.date === "string"
+                ? new Date(a.date).getTime()
+                : (a.date as any).valueOf()
+              : 0;
+            const db = b.date
+              ? typeof b.date === "string"
+                ? new Date(b.date).getTime()
+                : (b.date as any).valueOf()
+              : 0;
+            return db - da;
+          })
+          .slice(0, 100) as unknown as Posting[];
+        selectedCommodities = [...commodities];
+        securityTypeEmpty = security_type.length === 0;
+        nameAndSecurityTypeEmpty = name_and_security_type.length === 0;
+        ratingEmpty = rating.length === 0;
+        industryEmpty = industry.length === 0;
+      } catch {
+        if (!controller.signal.aborted) legacyFailed = true;
+      }
+    })();
+    return () => controller.abort();
+  });
 </script>
 
 <svelte:head>
@@ -171,29 +173,34 @@ $effect(() => {
 
   {#if overview}
     <Section title="Lifetime Investment Context">
-    <MetricStrip cols={4}>
-      <Metric label="Balance" value={formatCurrency(overview.balanceAmount)} />
-      <Metric
-        label="Net Investment"
-        value={formatCurrency(overview.netInvestmentAmount)}
-      />
-      <Metric
-        label="Gain / Loss"
-        value={formatCurrency(overview.gainAmount)}
-        status={overview.gainAmount >= 0 ? "positive" : "negative"}
-      />
-      <Metric
-        label="XIRR"
-        value={formatFloat(gain?.xirr ?? 0)}
-        secondary={assetBreakdown
-          ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
-          : undefined}
-      />
-    </MetricStrip>
+      <MetricStrip cols={4}>
+        <Metric
+          label="Balance"
+          value={formatCurrency(overview.balanceAmount)}
+        />
+        <Metric
+          label="Net Investment"
+          value={formatCurrency(overview.netInvestmentAmount)}
+        />
+        <Metric
+          label="Gain / Loss"
+          value={formatCurrency(overview.gainAmount)}
+          status={overview.gainAmount >= 0 ? "positive" : "negative"}
+        />
+        <Metric
+          label="XIRR"
+          value={formatFloat(gain?.xirr ?? 0)}
+          secondary={assetBreakdown
+            ? `${formatPercentage(assetBreakdown.absoluteReturn, 2)} absolute return`
+            : undefined}
+        />
+      </MetricStrip>
     </Section>
   {/if}
 
-  <div class="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+  <div
+    class="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]"
+  >
     <div class="flex min-w-0 flex-col gap-4">
       <Section title="Postings">
         <div
@@ -216,8 +223,7 @@ $effect(() => {
                   class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground"
                   >{posting.payee}</span
                 >
-                <span
-                  class="shrink-0 text-xs text-muted-foreground"
+                <span class="shrink-0 text-xs text-muted-foreground"
                   >{posting.date.format("DD MMM YYYY")}</span
                 >
               </span>
@@ -248,26 +254,20 @@ $effect(() => {
           >
             <span class="custom-icon text-xl">{iconify(data.name)}</span>
             <div class="flex items-baseline gap-2">
-              <span class="text-xs text-muted-foreground"
-                >Investment</span
-              >
+              <span class="text-xs text-muted-foreground">Investment</span>
               <span class="font-semibold tabular-nums text-foreground"
                 >{formatCurrency(overview.investmentAmount)}</span
               >
             </div>
             <div class="flex items-baseline gap-2">
-              <span class="text-xs text-muted-foreground"
-                >Withdrawal</span
-              >
+              <span class="text-xs text-muted-foreground">Withdrawal</span>
               <span class="font-semibold tabular-nums text-foreground"
                 >{formatCurrency(overview.withdrawalAmount)}</span
               >
             </div>
             {#if overview.balanceUnits > 0}
               <div class="flex items-baseline gap-2">
-                <span class="text-xs text-muted-foreground"
-                  >Balance Units</span
-                >
+                <span class="text-xs text-muted-foreground">Balance Units</span>
                 <span class="font-semibold tabular-nums text-foreground"
                   >{formatFloatUptoPrecision(overview.balanceUnits, 4)}</span
                 >
@@ -290,24 +290,45 @@ $effect(() => {
         <div class="flex min-w-0 flex-col gap-4">
           {#if !securityTypeEmpty}
             <Section title="Security Type">
-              <ChartFrame height="compact" rows={Math.max(4, securityTypeData.points.length)}>
-                <ComparisonBarChart data={securityTypeData} ariaLabel="Asset security type breakdown" testId="gain-security-type-echart" />
+              <ChartFrame
+                height="compact"
+                rows={Math.max(4, securityTypeData.points.length)}
+              >
+                <ComparisonBarChart
+                  data={securityTypeData}
+                  ariaLabel="Asset security type breakdown"
+                  testId="gain-security-type-echart"
+                />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !ratingEmpty}
             <Section title="Security Rating">
-              <ChartFrame height="compact" rows={Math.max(4, ratingData.points.length)}>
-                <ComparisonBarChart data={ratingData} ariaLabel="Asset security rating breakdown" testId="gain-security-rating-echart" />
+              <ChartFrame
+                height="compact"
+                rows={Math.max(4, ratingData.points.length)}
+              >
+                <ComparisonBarChart
+                  data={ratingData}
+                  ariaLabel="Asset security rating breakdown"
+                  testId="gain-security-rating-echart"
+                />
               </ChartFrame>
             </Section>
           {/if}
 
           {#if !industryEmpty}
             <Section title="Industry">
-              <ChartFrame height="compact" rows={Math.max(4, industryData.points.length)}>
-                <ComparisonBarChart data={industryData} ariaLabel="Asset industry breakdown" testId="gain-industry-echart" />
+              <ChartFrame
+                height="compact"
+                rows={Math.max(4, industryData.points.length)}
+              >
+                <ComparisonBarChart
+                  data={industryData}
+                  ariaLabel="Asset industry breakdown"
+                  testId="gain-industry-echart"
+                />
               </ChartFrame>
             </Section>
           {/if}
@@ -316,8 +337,15 @@ $effect(() => {
         {#if !nameAndSecurityTypeEmpty}
           <div class="min-w-0">
             <Section title="Security">
-              <ChartFrame height="compact" rows={Math.max(4, portfolioData.points.length)}>
-                <ComparisonBarChart data={portfolioData} ariaLabel="Asset security breakdown" testId="gain-security-echart" />
+              <ChartFrame
+                height="compact"
+                rows={Math.max(4, portfolioData.points.length)}
+              >
+                <ComparisonBarChart
+                  data={portfolioData}
+                  ariaLabel="Asset security breakdown"
+                  testId="gain-security-echart"
+                />
               </ChartFrame>
             </Section>
           </div>

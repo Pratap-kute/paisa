@@ -67,25 +67,26 @@ export function nonZeroFloatChange(cell: CellComponent) {
   const value = cell.getValue();
   return isZero(value)
     ? ""
-    : `<span class="${calculateChangeClass(value)}">${
-      formatFloat(value)
-    }</span>`;
+    : `<span class="${calculateChangeClass(value)}">${formatFloat(
+        value,
+      )}</span>`;
 }
 
 export function nonZeroPercentageChange(cell: CellComponent) {
   const value = cell.getValue();
   return isZero(value)
     ? ""
-    : `<span class="${calculateChangeClass(value)}">${
-      formatPercentage(value, 2)
-    }</span>`;
+    : `<span class="${calculateChangeClass(value)}">${formatPercentage(
+        value,
+        2,
+      )}</span>`;
 }
 
 export function formatCurrencyChange(cell: CellComponent) {
   const value = cell.getValue();
   return isZero(value)
     ? ""
-    : `<span class="${calculateChangeClass(value)}">${
-      formatCurrency(value)
-    }</span>`;
+    : `<span class="${calculateChangeClass(value)}">${formatCurrency(
+        value,
+      )}</span>`;
 }

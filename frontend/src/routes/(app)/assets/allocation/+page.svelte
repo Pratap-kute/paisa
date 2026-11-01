@@ -1,133 +1,136 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import type { Aggregate } from "$lib/domain/assets";
-import type { AllocationTarget } from "$lib/domain/assets";
-import type { Legend } from "$lib/shared/charts/types";
-import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
-import {
-  buildAllocationCategoryComparison,
-  buildAllocationHierarchy,
-} from "$lib/features/assets/hierarchy_data";
-import { buildAllocationTargetComparison } from "$lib/features/assets/chart_comparison_data";
-import COLORS from "$lib/shared/theme/colors";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import Table from "$lib/shared/ui/Table.svelte";
-import { accountName, nonZeroCurrency } from "$lib/shared/tables/formatters";
-import { last, sumBy } from "es-toolkit";
-import { onMount, tick } from "svelte";
-import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-import {
-  filter,
-  isEmpty,
-  map,
-  max as arrayMax,
-  values,
-} from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import type { Aggregate } from "$lib/domain/assets";
+  import type { AllocationTarget } from "$lib/domain/assets";
+  import type { Legend } from "$lib/shared/charts/types";
+  import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
+  import {
+    buildAllocationCategoryComparison,
+    buildAllocationHierarchy,
+  } from "$lib/features/assets/hierarchy_data";
+  import { buildAllocationTargetComparison } from "$lib/features/assets/chart_comparison_data";
+  import COLORS from "$lib/shared/theme/colors";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Table from "$lib/shared/ui/Table.svelte";
+  import { accountName, nonZeroCurrency } from "$lib/shared/tables/formatters";
+  import { last, sumBy } from "es-toolkit";
+  import { onMount, tick } from "svelte";
+  import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  import {
+    filter,
+    isEmpty,
+    map,
+    max as arrayMax,
+    values,
+  } from "$lib/shared/utils/collection";
 
-let allocationTargets: AllocationTarget[] = $state([]);
-let aggregates: Record<string, Aggregate> = $state({});
-let allocationTimeline: { [key: string]: Aggregate }[] = $state([]);
-let allocationTimelineLegends: Legend[] = $state([]);
-let aggregateLeafNodes: Aggregate[] = $state([]);
-let isLoading = $state(true);
+  let allocationTargets: AllocationTarget[] = $state([]);
+  let aggregates: Record<string, Aggregate> = $state({});
+  let allocationTimeline: { [key: string]: Aggregate }[] = $state([]);
+  let allocationTimelineLegends: Legend[] = $state([]);
+  let aggregateLeafNodes: Aggregate[] = $state([]);
+  let isLoading = $state(true);
 
-let hasTargets = $derived(!isEmpty(allocationTargets));
-let hasAllocationData = $derived(!isEmpty(aggregates));
-let allocationTargetData = $derived(
-  buildAllocationTargetComparison(allocationTargets),
-);
-let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
-let allocationCategoryData = $derived(
-  buildAllocationCategoryComparison(allocationHierarchy),
-);
-let allocationTimelineData = $derived(
-  buildAllocationTimelineSeries(allocationTimeline),
-);
+  let hasTargets = $derived(!isEmpty(allocationTargets));
+  let hasAllocationData = $derived(!isEmpty(aggregates));
+  let allocationTargetData = $derived(
+    buildAllocationTargetComparison(allocationTargets),
+  );
+  let allocationHierarchy = $derived(buildAllocationHierarchy(aggregates));
+  let allocationCategoryData = $derived(
+    buildAllocationCategoryComparison(allocationHierarchy),
+  );
+  let allocationTimelineData = $derived(
+    buildAllocationTimelineSeries(allocationTimeline),
+  );
 
-const columns: ColumnDefinition[] = [
-  {
-    title: "Account",
-    field: "account",
-    formatter: accountName,
-    minWidth: 240,
-    widthGrow: 1,
-    headerHozAlign: "left",
-  },
-  {
-    title: "Market Value",
-    field: "market_amount",
-    width: 140,
-    minWidth: 130,
-    maxWidth: 160,
-    hozAlign: "right",
-    headerHozAlign: "right",
-    formatter: nonZeroCurrency,
-  },
-  {
-    title: "Percent",
-    field: "percent",
-    width: 96,
-    minWidth: 88,
-    maxWidth: 110,
-    hozAlign: "right",
-    headerHozAlign: "right",
-    formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
-  },
-  {
-    title: "Share",
-    field: "percent",
-    minWidth: 180,
-    widthGrow: 2,
-    hozAlign: "left",
-    headerHozAlign: "left",
-    headerSort: false,
-    formatter: "progress",
-    formatterParams: {
-      color: COLORS.assets,
-      min: 0,
+  const columns: ColumnDefinition[] = [
+    {
+      title: "Account",
+      field: "account",
+      formatter: accountName,
+      minWidth: 240,
+      widthGrow: 1,
+      headerHozAlign: "left",
     },
-  },
-];
+    {
+      title: "Market Value",
+      field: "market_amount",
+      width: 140,
+      minWidth: 130,
+      maxWidth: 160,
+      hozAlign: "right",
+      headerHozAlign: "right",
+      formatter: nonZeroCurrency,
+    },
+    {
+      title: "Percent",
+      field: "percent",
+      width: 96,
+      minWidth: 88,
+      maxWidth: 110,
+      hozAlign: "right",
+      headerHozAlign: "right",
+      formatter: (cell) => formatPercentage(cell.getValue() / 100, 2),
+    },
+    {
+      title: "Share",
+      field: "percent",
+      minWidth: 180,
+      widthGrow: 2,
+      hozAlign: "left",
+      headerHozAlign: "left",
+      headerSort: false,
+      formatter: "progress",
+      formatterParams: {
+        color: COLORS.assets,
+        min: 0,
+      },
+    },
+  ];
 
-onMount(async () => {
-  try {
-    const {
-      aggregates: fetchedAggregates,
-      aggregates_timeline: aggregatesTimeline,
-      allocation_targets: fetchedTargets,
-    } = await api.allocation.getAllocation() as unknown as {
-      aggregates: Record<string, Aggregate>;
-      aggregates_timeline: Record<string, Aggregate>[];
-      allocation_targets: AllocationTarget[];
-    };
+  onMount(async () => {
+    try {
+      const {
+        aggregates: fetchedAggregates,
+        aggregates_timeline: aggregatesTimeline,
+        allocation_targets: fetchedTargets,
+      } = (await api.allocation.getAllocation()) as unknown as {
+        aggregates: Record<string, Aggregate>;
+        aggregates_timeline: Record<string, Aggregate>[];
+        allocation_targets: AllocationTarget[];
+      };
 
-    aggregates = fetchedAggregates;
-    allocationTargets = fetchedTargets || [];
-    allocationTimeline = aggregatesTimeline;
+      aggregates = fetchedAggregates;
+      allocationTargets = fetchedTargets || [];
+      allocationTimeline = aggregatesTimeline;
 
-    aggregateLeafNodes = filter(values(aggregates), (a) => a.market_amount > 0);
-    const total = sumBy(aggregateLeafNodes, (a) => a.market_amount);
-    aggregateLeafNodes = map(aggregateLeafNodes, (a) => {
-      a.percent = total > 0 ? (a.market_amount / total) * 100 : 0;
-      return a;
-    });
-    const max = arrayMax(map(aggregateLeafNodes, (a) => a.percent)) || 100;
-    (last(columns).formatterParams as ProgressBarParams).max = max;
-    isLoading = false;
-    await tick();
-    allocationTimelineLegends = allocationTimelineData.legends ?? [];
-  } catch {
-    isLoading = false;
-  }
-});
+      aggregateLeafNodes = filter(
+        values(aggregates),
+        (a) => a.market_amount > 0,
+      );
+      const total = sumBy(aggregateLeafNodes, (a) => a.market_amount);
+      aggregateLeafNodes = map(aggregateLeafNodes, (a) => {
+        a.percent = total > 0 ? (a.market_amount / total) * 100 : 0;
+        return a;
+      });
+      const max = arrayMax(map(aggregateLeafNodes, (a) => a.percent)) || 100;
+      (last(columns).formatterParams as ProgressBarParams).max = max;
+      isLoading = false;
+      await tick();
+      allocationTimelineLegends = allocationTimelineData.legends ?? [];
+    } catch {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -145,9 +148,15 @@ onMount(async () => {
       <ChartFrame height="content" />
     </Section>
   {:else}
-    <Section title="Allocation Targets" subtitle="Current vs configured target weights">
+    <Section
+      title="Allocation Targets"
+      subtitle="Current vs configured target weights"
+    >
       {#if hasTargets}
-        <ChartFrame height="compact" rows={Math.max(4, allocationTargetData.points.length)}>
+        <ChartFrame
+          height="compact"
+          rows={Math.max(4, allocationTargetData.points.length)}
+        >
           <ComparisonBarChart
             data={allocationTargetData}
             ariaLabel="Allocation target versus current weights"
@@ -168,8 +177,14 @@ onMount(async () => {
     </Section>
 
     {#if hasAllocationData}
-      <Section title="Allocation by Category" subtitle="Asset class distribution">
-        <ChartFrame height="compact" rows={Math.max(4, allocationCategoryData.points.length)}>
+      <Section
+        title="Allocation by Category"
+        subtitle="Asset class distribution"
+      >
+        <ChartFrame
+          height="compact"
+          rows={Math.max(4, allocationCategoryData.points.length)}
+        >
           <ComparisonBarChart
             data={allocationCategoryData}
             ariaLabel="Asset allocation by category"
@@ -178,8 +193,14 @@ onMount(async () => {
         </ChartFrame>
       </Section>
 
-      <Section title="Allocation Timeline" subtitle="Historical allocation by asset class">
-        <LegendCard legends={allocationTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+      <Section
+        title="Allocation Timeline"
+        subtitle="Historical allocation by asset class"
+      >
+        <LegendCard
+          legends={allocationTimelineLegends}
+          clazz="mb-3 paisa-overflow-x-auto"
+        />
         <ChartFrame height="tall">
           <TimeSeriesChart
             data={allocationTimelineData}
@@ -189,9 +210,18 @@ onMount(async () => {
         </ChartFrame>
       </Section>
 
-      <Section title="Allocation Table" subtitle="Leaf accounts with share of portfolio">
-        <div class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle">
-          <Table data={aggregateLeafNodes} {columns} options={{ layout: "fitDataFill" }} />
+      <Section
+        title="Allocation Table"
+        subtitle="Leaf accounts with share of portfolio"
+      >
+        <div
+          class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle"
+        >
+          <Table
+            data={aggregateLeafNodes}
+            {columns}
+            options={{ layout: "fitDataFill" }}
+          />
         </div>
       </Section>
     {:else}

@@ -7,13 +7,18 @@ import path from "node:path";
 const images = fileURLToPath(
   new URL("../../docs/images/showcase/", import.meta.url),
 );
-const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "paisa-showcase-gif-"));
+const temporary = await fs.mkdtemp(
+  path.join(os.tmpdir(), "paisa-showcase-gif-"),
+);
 
 async function ffmpeg(args: string[]) {
-  const proc = Bun.spawn(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", ...args], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+  const proc = Bun.spawn(
+    ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", ...args],
+    {
+      stdout: "pipe",
+      stderr: "pipe",
+    },
+  );
   const stderr = await new Response(proc.stderr).text();
   const code = await proc.exited;
   if (code !== 0) throw new Error(stderr);

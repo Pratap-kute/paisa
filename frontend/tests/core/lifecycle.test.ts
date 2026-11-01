@@ -4,11 +4,11 @@ import { ApiError } from "$lib/api/errors";
 
 describe("Request Lifecycle & AsyncState", () => {
   it("transitions loading -> success", async () => {
-    const fetcher = vi.fn().mockImplementation(
-      (id: string, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((id: string, _signal: AbortSignal) => {
         return Promise.resolve({ id, name: "Item " + id });
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, null);
     expect(state.loading).toBe(false);
@@ -25,11 +25,11 @@ describe("Request Lifecycle & AsyncState", () => {
   });
 
   it("transitions loading -> error on failure", async () => {
-    const fetcher = vi.fn().mockImplementation(
-      (_args: void, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((_args: void, _signal: AbortSignal) => {
         return Promise.reject(new ApiError(500, "Internal Error"));
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, null);
     await expect(state.run()).rejects.toMatchObject({
@@ -48,8 +48,9 @@ describe("Request Lifecycle & AsyncState", () => {
   it("passes AbortSignal to fetcher and aborts on cancel()", async () => {
     let capturedSignal: AbortSignal | undefined;
 
-    const fetcher = vi.fn().mockImplementation(
-      (_args: void, signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((_args: void, signal: AbortSignal) => {
         capturedSignal = signal;
         return new Promise((_resolve, reject) => {
           signal.addEventListener("abort", () => {
@@ -58,8 +59,7 @@ describe("Request Lifecycle & AsyncState", () => {
             );
           });
         });
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, null);
     const runPromise = state.run();
@@ -81,8 +81,9 @@ describe("Request Lifecycle & AsyncState", () => {
     let resolveFirst!: (val: string) => void;
     let resolveSecond!: (val: string) => void;
 
-    const fetcher = vi.fn().mockImplementation(
-      (query: string, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((query: string, _signal: AbortSignal) => {
         if (query === "first") {
           return new Promise<string>((resolve) => {
             resolveFirst = resolve;
@@ -92,8 +93,7 @@ describe("Request Lifecycle & AsyncState", () => {
             resolveSecond = resolve;
           });
         }
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, "");
 
@@ -119,8 +119,9 @@ describe("Request Lifecycle & AsyncState", () => {
     let rejectFirst!: (err: Error) => void;
     let resolveSecond!: (val: string) => void;
 
-    const fetcher = vi.fn().mockImplementation(
-      (query: string, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((query: string, _signal: AbortSignal) => {
         if (query === "first") {
           return new Promise<string>((_res, rej) => {
             rejectFirst = rej;
@@ -130,8 +131,7 @@ describe("Request Lifecycle & AsyncState", () => {
             resolveSecond = res;
           });
         }
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, "");
 
@@ -153,14 +153,14 @@ describe("Request Lifecycle & AsyncState", () => {
 
   it("retains existing data on refresh failure", async () => {
     let shouldFail = false;
-    const fetcher = vi.fn().mockImplementation(
-      (_args: void, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((_args: void, _signal: AbortSignal) => {
         if (shouldFail) {
           return Promise.reject(new ApiError(503, "Service Unavailable"));
         }
         return Promise.resolve(["Initial Data"]);
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, [] as string[]);
     await state.run();
@@ -177,11 +177,11 @@ describe("Request Lifecycle & AsyncState", () => {
   });
 
   it("cancel followed immediately by run works cleanly", async () => {
-    const fetcher = vi.fn().mockImplementation(
-      (val: number, _signal: AbortSignal) => {
+    const fetcher = vi
+      .fn()
+      .mockImplementation((val: number, _signal: AbortSignal) => {
         return Promise.resolve(val * 2);
-      },
-    );
+      });
 
     const state = createAsyncState(fetcher, 0);
     state.run(5);
@@ -208,16 +208,16 @@ describe("MutationState Lifecycle", () => {
       message: string;
     }
 
-    const mutator = vi.fn().mockImplementation(
-      (payload: SavePayload): Promise<SaveResult> => {
+    const mutator = vi
+      .fn()
+      .mockImplementation((payload: SavePayload): Promise<SaveResult> => {
         return Promise.resolve({
           saved: true,
           synced: false,
           errors: ["Sync skipped"],
           message: `Saved ${payload.name}`,
         });
-      },
-    );
+      });
 
     const mutation = createMutation(mutator);
     expect(mutation.saving).toBe(false);

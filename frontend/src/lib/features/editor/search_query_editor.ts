@@ -194,8 +194,7 @@ class ConditionAST extends AST {
         from: this.node.from,
         to: this.node.to,
         severity: "error",
-        message:
-          `${this.property.value} cannot be used with ${this.operator.value} and ${this.value.value.type}`,
+        message: `${this.property.value} cannot be used with ${this.operator.value} and ${this.value.value.type}`,
       });
     }
 
@@ -205,11 +204,7 @@ class ConditionAST extends AST {
   evaluate(): TransactionPredicate {
     const value = this.value.value.value;
     if (value === null) throw new Error("Cannot evaluate an invalid value");
-    return conditionFilter(
-      this.property.childId,
-      this.operator.value,
-      value,
-    );
+    return conditionFilter(this.property.childId, this.operator.value, value);
   }
 }
 
@@ -302,7 +297,7 @@ class BooleanConditionAST extends AST {
     const cs = childrens(node);
     if (cs.length === 3) {
       this.value = new BooleanBinaryAST(node, state);
-	  return;
+      return;
     }
 
     if (cs.length === 2) {
@@ -462,7 +457,7 @@ function lint(editor: EditorView): Diagnostic[] {
 
     if (diagnostics.length === 0) {
       editorState.update((current) =>
-        assign({}, current, { predicate: ast.evaluate() })
+        assign({}, current, { predicate: ast.evaluate() }),
       );
     }
   }
@@ -501,9 +496,8 @@ function conditionFilter(
 ) {
   return (transaction: Transaction) => {
     const operatorFn = getOperator(operator);
-    return some(
-      getProperty(transaction, property),
-      (actual) => operatorFn(actual, expected),
+    return some(getProperty(transaction, property), (actual) =>
+      operatorFn(actual, expected),
     );
   };
 }
@@ -585,9 +579,8 @@ function getProperty(
       return transaction.postings.map((posting) => posting.amount);
     case Terms.Total:
       return [
-        sumBy(
-          transaction.postings,
-          (posting: Posting) => (posting.amount > 0 ? posting.amount : 0),
+        sumBy(transaction.postings, (posting: Posting) =>
+          posting.amount > 0 ? posting.amount : 0,
         ),
       ];
     case Terms.Filename:
@@ -618,10 +611,7 @@ export function parseDate(
 
   if (/^[0-9]{4}[/-][0-9]{1,2}$/.test(trimmed)) {
     const parts = trimmed.split(/[/-]/);
-    const date = dayjs(
-      `${parts[0]}-${parts[1].padStart(2, "0")}`,
-      "YYYY-MM",
-    );
+    const date = dayjs(`${parts[0]}-${parts[1].padStart(2, "0")}`, "YYYY-MM");
     return {
       start: date.startOf("month"),
       end: date.endOf("month"),
@@ -676,7 +666,8 @@ export function parseDate(
       };
   }
 
-  const monthMatch = trimmed.match(/^([a-z]+)\s+([0-9]{4})$/) ||
+  const monthMatch =
+    trimmed.match(/^([a-z]+)\s+([0-9]{4})$/) ||
     trimmed.match(/^([0-9]{4})\s+([a-z]+)$/);
   if (monthMatch) {
     const mStr = isNaN(Number(monthMatch[1])) ? monthMatch[1] : monthMatch[2];
@@ -778,9 +769,8 @@ export function createEditor(
 
             return null;
           },
-          ...map(
-            autocompletions,
-            (options, node) => ifIn([node], completeFromList(options)),
+          ...map(autocompletions, (options, node) =>
+            ifIn([node], completeFromList(options)),
           ),
         ],
       }),

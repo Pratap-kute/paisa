@@ -14,8 +14,7 @@ describe("buildInsightActionHref", () => {
         account: "Expenses:Health",
         href: "/expense/monthly",
       }),
-    )
-      .toBe("/expense/monthly?period=2026-04&account=Expenses%3AHealth");
+    ).toBe("/expense/monthly?period=2026-04&account=Expenses%3AHealth");
   });
   test("preserves recurring key", () => {
     expect(
@@ -29,8 +28,7 @@ describe("buildInsightActionHref", () => {
         account: "OpenAI ChatGPT",
         href: "/cash_flow/recurring",
       }),
-    )
-      .toBe("/cash_flow/recurring?period=2026-04&key=OpenAI+ChatGPT");
+    ).toBe("/cash_flow/recurring?period=2026-04&key=OpenAI+ChatGPT");
   });
   test("ignores an invalid period", () => {
     expect(

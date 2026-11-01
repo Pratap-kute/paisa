@@ -374,7 +374,7 @@ class FunctionDefinitionAST extends AST {
     super(node);
     this.identifier = state.sliceDoc(node.firstChild.from, node.firstChild.to);
     this.parameters = childrens(node.firstChild.nextSibling).map((node) =>
-      state.sliceDoc(node.from, node.to)
+      state.sliceDoc(node.from, node.to),
     );
     this.body = new ExpressionAST(node.lastChild, state);
   }
@@ -399,10 +399,7 @@ class LineAST extends AST {
   readonly lineNumber: number;
   readonly valueId: number;
   readonly value:
-    | ExpressionAST
-    | AssignmentAST
-    | FunctionDefinitionAST
-    | HeaderAST;
+    ExpressionAST | AssignmentAST | FunctionDefinitionAST | HeaderAST;
   constructor(node: SyntaxNode, state: EditorState) {
     super(node);
     this.lineNumber = state.doc.lineAt(node.from).number;
@@ -474,13 +471,11 @@ class SheetAST extends AST {
       }
       try {
         const resultObject = line.evaluate(env);
-        results.push(
-          {
-            line: line.lineNumber,
-            error: false,
-            ...resultObject,
-          } as SheetLineResult,
-        );
+        results.push({
+          line: line.lineNumber,
+          error: false,
+          ...resultObject,
+        } as SheetLineResult);
         lastLineNumber++;
       } catch (e) {
         results.push({ line: line.lineNumber, error: true, result: e.message });

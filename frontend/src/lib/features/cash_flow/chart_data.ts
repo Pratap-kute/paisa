@@ -14,9 +14,7 @@ export function buildCashFlowSeries(
     ["investment-use", "Investment", "use"],
     ["liability-use", "Liabilities repaid", "use"],
   ] as const;
-  const legendColor = categoryColorResolver(
-    definitions.map(([key]) => key),
-  );
+  const legendColor = categoryColorResolver(definitions.map(([key]) => key));
   return {
     axis: "category",
     granularity: "month",
@@ -26,7 +24,7 @@ export function buildCashFlowSeries(
         label,
         color: legendColor(key),
         shape: "square" as const,
-        symbol: key === "tax" ? "diagonal-stripe" as const : undefined,
+        symbol: key === "tax" ? ("diagonal-stripe" as const) : undefined,
       })),
       {
         label: "Checking Balance",

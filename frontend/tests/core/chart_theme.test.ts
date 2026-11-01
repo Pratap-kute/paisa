@@ -77,7 +77,7 @@ describe("chart theme and formatter helpers", () => {
     expect(
       new Set(
         ["Housing", "Food", "Travel", "Utilities"].map((key) =>
-          categorySeriesColor(key, colors)
+          categorySeriesColor(key, colors),
         ),
       ).size,
     ).toBeGreaterThan(1);

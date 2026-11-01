@@ -25,8 +25,8 @@ export function authTokenAfterAccountSave(
   if (nextAccounts.length === 0) return null;
 
   const currentUsername = currentToken?.split(":", 1)[0];
-  const currentAccount = nextAccounts.find((account) =>
-    account.username === currentUsername
+  const currentAccount = nextAccounts.find(
+    (account) => account.username === currentUsername,
   );
   if (currentAccount?.username && currentAccount.password) {
     return `${currentAccount.username}:${currentAccount.password}`;
@@ -38,8 +38,8 @@ export function authTokenAfterAccountSave(
     return undefined;
   }
 
-  const configuredAccount = nextAccounts.find((account) =>
-    account.username && account.password
+  const configuredAccount = nextAccounts.find(
+    (account) => account.username && account.password,
   );
   if (configuredAccount?.username && configuredAccount.password) {
     return `${configuredAccount.username}:${configuredAccount.password}`;
@@ -51,15 +51,16 @@ export function authTokenAfterAccountSave(
 export async function login(username: string, password: string) {
   setAuthToken(`${username}:${await sha256Hex(password)}`);
   try {
-    return await api.ping.getPing() as LoginResult;
+    return (await api.ping.getPing()) as LoginResult;
   } catch (error) {
     clearAuthToken();
     const normalized = normalizeApiError(error);
     return {
       success: false,
-      error: normalized.status === 401
-        ? "Invalid username or password"
-        : normalized.message,
+      error:
+        normalized.status === 401
+          ? "Invalid username or password"
+          : normalized.message,
     };
   }
 }

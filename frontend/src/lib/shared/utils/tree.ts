@@ -51,8 +51,8 @@ export function buildTree<I extends object>(
     let current = result;
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      let found: any = current.find((c) =>
-        accountAccessor(c).split(":")[i] === part
+      let found: any = current.find(
+        (c) => accountAccessor(c).split(":")[i] === part,
       );
       if (!found) {
         found = { ...item };

@@ -38,12 +38,11 @@ afterEach(() => {
   cleanup();
   obscure.set(false);
 });
-for (
-  const [amount, label] of [[60000, "On track"], [48000, "Behind plan"], [
-    10000,
-    "At risk",
-  ]] as const
-) {
+for (const [amount, label] of [
+  [60000, "On track"],
+  [48000, "Behind plan"],
+  [10000, "At risk"],
+] as const) {
   test(`card renders ${label} and monthly pace`, () => {
     const view = render(GoalSummaryCard, {
       goal: goal({
@@ -71,8 +70,9 @@ test("short history displays required pace without a warning", () => {
   const view = render(GoalSummaryCard, {
     goal: goal({ contributionHistory: [{ month: "2026-08", amount: 900000 }] }),
   });
-  expect(view.getByText("More contribution history needed"))
-    .toBeInTheDocument();
+  expect(
+    view.getByText("More contribution history needed"),
+  ).toBeInTheDocument();
   expect(view.queryByText("On track")).toBeNull();
   expect(view.queryByText("At risk")).toBeNull();
 });
@@ -97,8 +97,7 @@ test("retirement renders funding and expense basis without schedule claims", () 
   });
   expect(view.getByText("Tracking")).toBeInTheDocument();
   expect(view.getByText(/40.0% funded/)).toBeInTheDocument();
-  expect(view.getByText("Based on historical expenses"))
-    .toBeInTheDocument();
+  expect(view.getByText("Based on historical expenses")).toBeInTheDocument();
   expect(view.queryByText("Target date has passed")).toBeNull();
 });
 test("retirement target funded and configured expense source", () => {
@@ -113,8 +112,9 @@ test("retirement target funded and configured expense source", () => {
   });
   expect(view.getByText("100%+ funded")).toBeInTheDocument();
   expect(view.getByText("Target funded")).toBeInTheDocument();
-  expect(view.getByText("Using configured yearly expenses"))
-    .toBeInTheDocument();
+  expect(
+    view.getByText("Using configured yearly expenses"),
+  ).toBeInTheDocument();
 });
 test("no deadline remains explicit with a payment projection", () => {
   const view = render(GoalSummaryCard, {
@@ -125,8 +125,7 @@ test("no deadline remains explicit with a payment projection", () => {
     }),
   });
   expect(view.getByText("No deadline configured")).toBeInTheDocument();
-  expect(view.getByText("At 15K/mo configured payment"))
-    .toBeInTheDocument();
+  expect(view.getByText("At 15K/mo configured payment")).toBeInTheDocument();
 });
 test("empty overview has no invented metrics or warnings", () => {
   const view = render(GoalHealthSummary, { goals: [] });
@@ -159,8 +158,7 @@ test("card renders compact primary metrics and accessible drag handle", () => {
 test("long goal name wraps/truncates safely without crashing", () => {
   const view = render(GoalSummaryCard, {
     goal: goal({
-      name:
-        "A very long descriptive name for a home down payment and family emergency fund",
+      name: "A very long descriptive name for a home down payment and family emergency fund",
     }),
   });
   expect(
@@ -188,18 +186,17 @@ test("privacy masks current, target, required pace, recent pace and remaining on
   obscure.set(true);
   await waitFor(() => {
     for (const view of [card, detail, summary]) {
-      for (
-        const amount of [
-          "2,40,000",
-          "6,00,000",
-          "60,000",
-          "48,000",
-          "3,60,000",
-          "12,000",
-          "2,10,000",
-          "30,000",
-        ]
-      ) expect(view.container.textContent).not.toContain(amount);
+      for (const amount of [
+        "2,40,000",
+        "6,00,000",
+        "60,000",
+        "48,000",
+        "3,60,000",
+        "12,000",
+        "2,10,000",
+        "30,000",
+      ])
+        expect(view.container.textContent).not.toContain(amount);
     }
   });
   expect(detail.container.textContent).toContain("0.00");

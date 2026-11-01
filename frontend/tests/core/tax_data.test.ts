@@ -50,11 +50,10 @@ describe("Tax Harvest calculations", () => {
     });
     const last = harvestable({ account: "Last" });
     expect(
-      filterHarvestables([first, unavailable, last]).map((item) =>
-        item.account
+      filterHarvestables([first, unavailable, last]).map(
+        (item) => item.account,
       ),
-    )
-      .toEqual(["First", "Last"]);
+    ).toEqual(["First", "Last"]);
   });
 
   it("calculates units and amount from taxable gain without mutating breakdowns", () => {
@@ -66,9 +65,7 @@ describe("Tax Harvest calculations", () => {
 
   it("calculates units and taxable gain from redemption amount", () => {
     expect(unitsRequiredFromAmount(harvestable(), 1250)).toEqual([
-      12.5,
-      1250,
-      225,
+      12.5, 1250, 225,
     ]);
     expect(unitsRequiredFromAmount(harvestable(), 0)).toEqual([0, 0, 0]);
   });

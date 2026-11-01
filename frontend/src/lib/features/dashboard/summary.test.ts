@@ -105,7 +105,7 @@ function recurring(
   account = "Expenses:Bills",
 ): RecurringAnalysis {
   const dates = (Array.isArray(scheduled) ? scheduled : [scheduled]).map((d) =>
-    dayjs(d)
+    dayjs(d),
   );
   const transaction = {
     id: key,
@@ -125,11 +125,11 @@ function recurring(
     ] as Posting[],
   } as Transaction;
   const item = analyzeRecurring(key, [transaction], true, dayjs("2026-08-10"))!;
-  item.upcomingDates = dates.filter((d) =>
-    !d.isBefore(dayjs("2026-08-10"), "day")
+  item.upcomingDates = dates.filter(
+    (d) => !d.isBefore(dayjs("2026-08-10"), "day"),
   );
   item.flags.laterThanUsual = dates.some((d) =>
-    d.isBefore(dayjs("2026-08-10"), "day")
+    d.isBefore(dayjs("2026-08-10"), "day"),
   );
   return item;
 }
@@ -192,20 +192,26 @@ describe("dashboard summaries", () => {
   test("builds trends only when the matching insights exist", () => {
     const networth = { balanceAmount: 100 } as never;
     expect(buildNetWorthTrend(networth, [])).toBeUndefined();
-    expect(buildNetWorthTrend(networth, [insight({
-      type: "networth_change",
-      change: -20,
-      value: 100,
-      previousValue: 120,
-    })])).toMatchObject({ status: "negative" });
+    expect(
+      buildNetWorthTrend(networth, [
+        insight({
+          type: "networth_change",
+          change: -20,
+          value: 100,
+          previousValue: 120,
+        }),
+      ]),
+    ).toMatchObject({ status: "negative" });
     expect(buildExpenseTrend([])).toBeUndefined();
     expect(
-      buildExpenseTrend([insight({
-        change: -30,
-        changePercent: -30,
-        value: 70,
-        previousValue: 100,
-      })])?.status,
+      buildExpenseTrend([
+        insight({
+          change: -30,
+          changePercent: -30,
+          value: 70,
+          previousValue: 100,
+        }),
+      ])?.status,
     ).toBe("positive");
   });
 
@@ -233,7 +239,7 @@ describe("dashboard summaries", () => {
         category: "budget",
         severity: "warning",
         account: `Expenses:${name}`,
-      })
+      }),
     );
     const result = summarizeBudget(configured, alerts, true);
     expect(result.actual).toBe(77);
@@ -253,25 +259,29 @@ describe("dashboard summaries", () => {
   });
 
   test("projects current-month expenses after the first two days", () => {
-    expect(buildExpensePace(1_000, "2026-08", dayjs("2026-08-02")))
-      .toBeUndefined();
-    expect(buildExpensePace(0, "2026-08", dayjs("2026-08-10")))
-      .toBeUndefined();
-    expect(buildExpensePace(1_000, "2026-07", dayjs("2026-08-10")))
-      .toBeUndefined();
-    expect(buildExpensePace(10_000, "2026-08", dayjs("2026-08-10")))
-      .toMatchObject({ projectedExpenses: 31_000, status: "neutral" });
-    expect(buildExpensePace(2_800, "2026-02", dayjs("2026-02-28")))
-      .toMatchObject({ projectedExpenses: 2_800 });
+    expect(
+      buildExpensePace(1_000, "2026-08", dayjs("2026-08-02")),
+    ).toBeUndefined();
+    expect(buildExpensePace(0, "2026-08", dayjs("2026-08-10"))).toBeUndefined();
+    expect(
+      buildExpensePace(1_000, "2026-07", dayjs("2026-08-10")),
+    ).toBeUndefined();
+    expect(
+      buildExpensePace(10_000, "2026-08", dayjs("2026-08-10")),
+    ).toMatchObject({ projectedExpenses: 31_000, status: "neutral" });
+    expect(
+      buildExpensePace(2_800, "2026-02", dayjs("2026-02-28")),
+    ).toMatchObject({ projectedExpenses: 2_800 });
   });
 
   test("marks a deterministic projection above the configured budget", () => {
-    expect(buildExpensePace(10_000, "2026-08", dayjs("2026-08-10"), 25_000))
-      .toMatchObject({
-        projectedExpenses: 31_000,
-        overBudget: 6_000,
-        status: "warning",
-      });
+    expect(
+      buildExpensePace(10_000, "2026-08", dayjs("2026-08-10"), 25_000),
+    ).toMatchObject({
+      projectedExpenses: 31_000,
+      overBudget: 6_000,
+      status: "warning",
+    });
   });
 
   test("summarizes outgoing recurring obligations within an inclusive 14-day horizon", () => {
@@ -305,16 +315,20 @@ describe("dashboard summaries", () => {
     );
     expect(withoutCash.upcomingAmount).toBe(8_000);
     expect(withoutCash.cashAfterUpcoming).toBeUndefined();
-    expect(summarizeUpcomingRecurring(sequences, dayjs("2026-08-10"), 5_000))
-      .toMatchObject({ cashAfterUpcoming: -3_000 });
-    expect(summarizeUpcomingRecurring([], dayjs("2026-08-10")))
-      .toMatchObject({ upcomingCount: 0, pastDueCount: 0 });
+    expect(
+      summarizeUpcomingRecurring(sequences, dayjs("2026-08-10"), 5_000),
+    ).toMatchObject({ cashAfterUpcoming: -3_000 });
+    expect(summarizeUpcomingRecurring([], dayjs("2026-08-10"))).toMatchObject({
+      upcomingCount: 0,
+      pastDueCount: 0,
+    });
   });
 
   test("counts every weekly occurrence inside the recurring horizon", () => {
-    const result = summarizeUpcomingRecurring([
-      recurring("weekly", ["2026-08-12", "2026-08-19"], 1_000),
-    ], dayjs("2026-08-10"));
+    const result = summarizeUpcomingRecurring(
+      [recurring("weekly", ["2026-08-12", "2026-08-19"], 1_000)],
+      dayjs("2026-08-10"),
+    );
     expect(result).toMatchObject({
       upcomingCount: 2,
       upcomingAmount: 2_000,
@@ -323,9 +337,10 @@ describe("dashboard summaries", () => {
   });
 
   test("counts a delayed sequence once alongside its future occurrences", () => {
-    const result = summarizeUpcomingRecurring([
-      recurring("weekly", ["2026-08-01", "2026-08-08", "2026-08-15"], 750),
-    ], dayjs("2026-08-10"));
+    const result = summarizeUpcomingRecurring(
+      [recurring("weekly", ["2026-08-01", "2026-08-08", "2026-08-15"], 750)],
+      dayjs("2026-08-10"),
+    );
     expect(result).toMatchObject({
       pastDueCount: 1,
       pastDueAmount: 750,
@@ -396,11 +411,13 @@ describe("dashboard summaries", () => {
   });
 
   test("does not use informational insights to fill attention slots", () => {
-    expect(buildDashboardAttention({
-      insights: [insight({ id: "context", severity: "info", score: 100 })],
-      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
-      asOf: dayjs("2026-08-10"),
-    })).toEqual([]);
+    expect(
+      buildDashboardAttention({
+        insights: [insight({ id: "context", severity: "info", score: 100 })],
+        recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+        asOf: dayjs("2026-08-10"),
+      }),
+    ).toEqual([]);
   });
 
   test("adds only overdue incomplete goals and inspects every supplied goal", () => {
@@ -424,12 +441,14 @@ describe("dashboard summaries", () => {
   });
 
   test("does not manufacture positive attention when insights are missing", () => {
-    expect(buildDashboardAttention({
-      insights: null,
-      recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
-      goals: [],
-      asOf: dayjs("2026-08-10"),
-    })).toEqual([]);
+    expect(
+      buildDashboardAttention({
+        insights: null,
+        recurring: summarizeUpcomingRecurring([], dayjs("2026-08-10")),
+        goals: [],
+        asOf: dayjs("2026-08-10"),
+      }),
+    ).toEqual([]);
   });
 });
 
@@ -462,12 +481,15 @@ test("goal attention uses shared pace thresholds, respects priority and promotes
       contributionHistory: history,
     }),
   ];
-  const items = buildDashboardAttention({
-    insights: [],
-    recurring: summarizeUpcomingRecurring([], asOf),
-    goals: candidates,
-    asOf,
-  }, 10);
+  const items = buildDashboardAttention(
+    {
+      insights: [],
+      recurring: summarizeUpcomingRecurring([], asOf),
+      goals: candidates,
+      asOf,
+    },
+    10,
+  );
   expect(items).toHaveLength(1);
   expect(items[0].id).toBe("goal:at-risk:high");
   expect(items[0].title).toBe("High: At risk");
@@ -476,13 +498,11 @@ test("goal attention uses shared pace thresholds, respects priority and promotes
 
 test("preserves goal severity and ranks critical goals above ordinary warnings", () => {
   const asOf = dayjs("2026-08-10");
-  for (
-    const [amount, date, status, priority] of [
-      [1000, "2026-08-01", "negative", 550],
-      [1000, "2027-02-28", "negative", 550],
-      [3800, "2027-02-28", "warning", 200],
-    ] as const
-  ) {
+  for (const [amount, date, status, priority] of [
+    [1000, "2026-08-01", "negative", 550],
+    [1000, "2027-02-28", "negative", 550],
+    [3800, "2027-02-28", "warning", 200],
+  ] as const) {
     const items = buildDashboardAttention({
       insights: [insight({ id: "ordinary", severity: "warning" })],
       recurring: summarizeUpcomingRecurring([], asOf),

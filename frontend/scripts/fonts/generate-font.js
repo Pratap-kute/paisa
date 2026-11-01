@@ -60,9 +60,9 @@ async function createFont(font) {
   font-style: normal;
   font-weight: 900;
   src: url("./${font}.woff2") format("woff2");
-  unicode-range: U+${min.toString(16).toUpperCase()}-${
-      max.toString(16).toUpperCase()
-    };
+  unicode-range: U+${min.toString(16).toUpperCase()}-${max
+    .toString(16)
+    .toUpperCase()};
   font-display: block;
 }
 `;

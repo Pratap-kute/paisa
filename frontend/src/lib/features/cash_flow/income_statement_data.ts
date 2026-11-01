@@ -23,14 +23,16 @@ export function buildIncomeStatementWaterfall(
     ["expenses", "Expenses", statement.expenses, -1],
   ];
   let current = statement.startingBalance;
-  const steps: WaterfallStep[] = [{
-    id: "start",
-    label: "Starting balance",
-    start: 0,
-    delta: statement.startingBalance,
-    end: statement.startingBalance,
-    breakdown: [],
-  }];
+  const steps: WaterfallStep[] = [
+    {
+      id: "start",
+      label: "Starting balance",
+      start: 0,
+      delta: statement.startingBalance,
+      end: statement.startingBalance,
+      breakdown: [],
+    },
+  ];
   for (const [id, label, values, multiplier] of definitions) {
     const delta = sum(values) * multiplier;
     const start = current;
@@ -41,7 +43,8 @@ export function buildIncomeStatementWaterfall(
       start,
       delta,
       end: current,
-      breakdown: Object.entries(values).sort(([a], [b]) => a.localeCompare(b))
+      breakdown: Object.entries(values)
+        .sort(([a], [b]) => a.localeCompare(b))
         .map(([account, value]) => ({ account, value: value * multiplier })),
     });
   }

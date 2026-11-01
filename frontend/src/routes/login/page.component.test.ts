@@ -5,7 +5,8 @@ import { sha256Hex } from "$lib/shared/utils/crypto";
 import LoginPage from "./+page.svelte";
 
 test("submits the values visible in password-manager-populated inputs", async () => {
-  const pingSpy = vi.spyOn(api.ping, "getPing")
+  const pingSpy = vi
+    .spyOn(api.ping, "getPing")
     .mockResolvedValue({ success: false });
   const { container, getByLabelText, unmount } = render(LoginPage);
   const username = getByLabelText("Username") as HTMLInputElement;

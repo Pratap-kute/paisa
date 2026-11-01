@@ -30,8 +30,9 @@ describe("sheet interpreter", () => {
       { line: 2, error: false, result: "150.00" },
       { line: 3, error: false, result: "−1,000.00" },
     ]);
-    expect(evaluate("+2\n2 ^ 3\n8 / 2\n8 - 2").map((line) => line.result))
-      .toEqual(["2.00", "8.00", "4.00", "6.00"]);
+    expect(
+      evaluate("+2\n2 ^ 3\n8 / 2\n8 - 2").map((line) => line.result),
+    ).toEqual(["2.00", "8.00", "4.00", "6.00"]);
   });
 
   test("evaluates functions, definitions, headers, and blank lines", () => {

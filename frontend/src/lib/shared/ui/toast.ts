@@ -39,6 +39,6 @@ export function dismissToast(id: number) {
 export function toast(options: ToastOptions) {
   if (!options.message) throw new Error("message is required");
   const item = { ...defaults, ...options, id: nextId++ };
-  toasts.update((items) => options.single ? [item] : [...items, item]);
+  toasts.update((items) => (options.single ? [item] : [...items, item]));
   return item.id;
 }

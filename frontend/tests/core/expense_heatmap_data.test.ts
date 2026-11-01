@@ -17,11 +17,15 @@ function posting(
 
 describe("expense heatmap adapters", () => {
   it("preserves daily totals, detail rows, filters, and missing days", () => {
-    const data = buildMonthlyExpenseHeatmapData("2024-02", [
-      posting("2024-02-01", "Expenses:Food:Groceries", 100, "Market"),
-      posting("2024-02-01", "Expenses:Travel:Taxi", 50, "Cab"),
-      posting("2024-02-02", "Expenses:Food:Dining", 0, "Voucher"),
-    ], ["Food"]);
+    const data = buildMonthlyExpenseHeatmapData(
+      "2024-02",
+      [
+        posting("2024-02-01", "Expenses:Food:Groceries", 100, "Market"),
+        posting("2024-02-01", "Expenses:Travel:Taxi", 50, "Cab"),
+        posting("2024-02-02", "Expenses:Food:Dining", 0, "Voucher"),
+      ],
+      ["Food"],
+    );
     expect(data.points).toHaveLength(29);
     expect(data.points[0]).toMatchObject({
       key: "2024-02-01",
@@ -78,11 +82,12 @@ describe("expense heatmap adapters", () => {
     expect(data.points).toHaveLength(12);
     expect(data.points[0]).toMatchObject({ key: "2023-04", value: 150 });
     expect(data.points.at(-1)).toMatchObject({ key: "2024-03", value: 25 });
-    expect(data.points[0].tooltipRows.map((row) => [row.label, row.value]))
-      .toEqual([
-        ["Food", 100],
-        ["Travel", 50],
-      ]);
+    expect(
+      data.points[0].tooltipRows.map((row) => [row.label, row.value]),
+    ).toEqual([
+      ["Food", 100],
+      ["Travel", 50],
+    ]);
     expect(data.points[0].segments).toEqual([
       { key: "Food", value: 100 },
       { key: "Travel", value: 50 },

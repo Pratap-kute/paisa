@@ -4,9 +4,8 @@
 /// <reference lib="esnext" />
 
 declare type Item = import("svelte-dnd-action").Item;
-declare type DndEvent<ItemType = Item> = import("svelte-dnd-action").DndEvent<
-  ItemType
->;
+declare type DndEvent<ItemType = Item> =
+  import("svelte-dnd-action").DndEvent<ItemType>;
 declare namespace svelteHTML {
   interface HTMLAttributes<T> {
     "on:consider"?: (

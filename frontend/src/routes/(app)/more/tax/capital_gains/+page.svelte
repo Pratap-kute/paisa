@@ -1,118 +1,120 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import type { CapitalGain } from "$lib/domain/tax";
-import type { FYCapitalGain } from "$lib/domain/tax";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
-import Card from "$lib/shared/ui/Card.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import { sumBy, uniq } from "es-toolkit";
-import { onMount } from "svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import { values } from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import type { CapitalGain } from "$lib/domain/tax";
+  import type { FYCapitalGain } from "$lib/domain/tax";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import { sumBy, uniq } from "es-toolkit";
+  import { onMount } from "svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import { values } from "$lib/shared/utils/collection";
 
-let years: string[] = $state([]);
-let selectedYear: string = $state("");
-let capitalGains: CapitalGain[] = $state([]);
-let isLoading = $state(true);
+  let years: string[] = $state([]);
+  let selectedYear: string = $state("");
+  let capitalGains: CapitalGain[] = $state([]);
+  let isLoading = $state(true);
 
-let hasYears = $derived(years.length > 0);
+  let hasYears = $derived(years.length > 0);
 
-// Active gains for the selected year
-let activeFyGains = $derived.by((): FYCapitalGain[] => {
-  if (!selectedYear) return [];
-  if (selectedYear === "all") {
-    return capitalGains.flatMap((cg) => Object.values(cg.fy));
-  }
-  return capitalGains.flatMap((cg) =>
-    cg.fy[selectedYear] ? [cg.fy[selectedYear]] : []
-  );
-});
+  // Active gains for the selected year
+  let activeFyGains = $derived.by((): FYCapitalGain[] => {
+    if (!selectedYear) return [];
+    if (selectedYear === "all") {
+      return capitalGains.flatMap((cg) => Object.values(cg.fy));
+    }
+    return capitalGains.flatMap((cg) =>
+      cg.fy[selectedYear] ? [cg.fy[selectedYear]] : [],
+    );
+  });
 
-// KPIs for the selected view
-let metrics = $derived.by(() => {
-  const withdrawn = sumBy(activeFyGains, (fy) => fy.sell_price);
-  const purchase = sumBy(activeFyGains, (fy) => fy.purchase_price);
-  const gain = sumBy(activeFyGains, (fy) => fy.tax.gain);
-  const taxableGain = sumBy(activeFyGains, (fy) => fy.tax.taxable);
-  const shortTermTax = sumBy(activeFyGains, (fy) => fy.tax.short_term);
-  const longTermTax = sumBy(activeFyGains, (fy) => fy.tax.long_term);
-  const slabTax = sumBy(activeFyGains, (fy) => fy.tax.slab);
-  const totalTax = shortTermTax + longTermTax + slabTax;
+  // KPIs for the selected view
+  let metrics = $derived.by(() => {
+    const withdrawn = sumBy(activeFyGains, (fy) => fy.sell_price);
+    const purchase = sumBy(activeFyGains, (fy) => fy.purchase_price);
+    const gain = sumBy(activeFyGains, (fy) => fy.tax.gain);
+    const taxableGain = sumBy(activeFyGains, (fy) => fy.tax.taxable);
+    const shortTermTax = sumBy(activeFyGains, (fy) => fy.tax.short_term);
+    const longTermTax = sumBy(activeFyGains, (fy) => fy.tax.long_term);
+    const slabTax = sumBy(activeFyGains, (fy) => fy.tax.slab);
+    const totalTax = shortTermTax + longTermTax + slabTax;
 
-  return {
-    withdrawn,
-    purchase,
-    gain,
-    taxableGain,
-    shortTermTax,
-    longTermTax,
-    slabTax,
-    totalTax,
-  };
-});
-
-// Yearly summary rows for the "All Years" comparison table
-let yearlySummaries = $derived.by(() => {
-  return years.map((yr) => {
-    const yrGains = capitalGains.flatMap((cg) => cg.fy[yr] ? [cg.fy[yr]] : []);
-    const sold = sumBy(yrGains, (fy) => fy.sell_price);
-    const gain = sumBy(yrGains, (fy) => fy.tax.gain);
-    const taxable = sumBy(yrGains, (fy) => fy.tax.taxable);
-    const stcg = sumBy(yrGains, (fy) => fy.tax.short_term);
-    const ltcg = sumBy(yrGains, (fy) => fy.tax.long_term);
-    const slab = sumBy(yrGains, (fy) => fy.tax.slab);
     return {
-      year: yr,
-      assetCount: yrGains.length,
-      sold,
+      withdrawn,
+      purchase,
       gain,
-      taxable,
-      stcg,
-      ltcg,
-      slab,
-      totalTax: stcg + ltcg + slab,
+      taxableGain,
+      shortTermTax,
+      longTermTax,
+      slabTax,
+      totalTax,
     };
   });
-});
 
-function gainStatus(value: number): "positive" | "negative" | "neutral" {
-  if (value > 0) return "positive";
-  if (value < 0) return "negative";
-  return "neutral";
-}
-
-function gainClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-  return "text-muted-foreground";
-}
-
-onMount(async () => {
-  try {
-    const { capital_gains } = await api.capitalGains
-      .getCapitalGains() as unknown as {
-        capital_gains: Record<string, CapitalGain>;
+  // Yearly summary rows for the "All Years" comparison table
+  let yearlySummaries = $derived.by(() => {
+    return years.map((yr) => {
+      const yrGains = capitalGains.flatMap((cg) =>
+        cg.fy[yr] ? [cg.fy[yr]] : [],
+      );
+      const sold = sumBy(yrGains, (fy) => fy.sell_price);
+      const gain = sumBy(yrGains, (fy) => fy.tax.gain);
+      const taxable = sumBy(yrGains, (fy) => fy.tax.taxable);
+      const stcg = sumBy(yrGains, (fy) => fy.tax.short_term);
+      const ltcg = sumBy(yrGains, (fy) => fy.tax.long_term);
+      const slab = sumBy(yrGains, (fy) => fy.tax.slab);
+      return {
+        year: yr,
+        assetCount: yrGains.length,
+        sold,
+        gain,
+        taxable,
+        stcg,
+        ltcg,
+        slab,
+        totalTax: stcg + ltcg + slab,
       };
+    });
+  });
 
-    years = uniq(
-      Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),
-    )
-      .sort()
-      .reverse();
-
-    capitalGains = values(capital_gains);
-    if (years.length > 0) {
-      selectedYear = years[0];
-    }
-  } finally {
-    isLoading = false;
+  function gainStatus(value: number): "positive" | "negative" | "neutral" {
+    if (value > 0) return "positive";
+    if (value < 0) return "negative";
+    return "neutral";
   }
-});
+
+  function gainClass(value: number) {
+    if (value > 0) return "text-positive";
+    if (value < 0) return "text-negative";
+    return "text-muted-foreground";
+  }
+
+  onMount(async () => {
+    try {
+      const { capital_gains } =
+        (await api.capitalGains.getCapitalGains()) as unknown as {
+          capital_gains: Record<string, CapitalGain>;
+        };
+
+      years = uniq(
+        Object.values(capital_gains).flatMap((c: any) => Object.keys(c.fy)),
+      )
+        .sort()
+        .reverse();
+
+      capitalGains = values(capital_gains);
+      if (years.length > 0) {
+        selectedYear = years[0];
+      }
+    } finally {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -127,7 +129,10 @@ onMount(async () => {
     {#snippet actions()}
       {#if hasYears}
         <div class="flex items-center gap-2">
-          <label for="fy-select" class="text-xs font-medium text-muted-foreground">
+          <label
+            for="fy-select"
+            class="text-xs font-medium text-muted-foreground"
+          >
             Period:
           </label>
           <select
@@ -147,22 +152,21 @@ onMount(async () => {
 
   <Section>
     {#if isLoading}
-      <div
-        class="flex flex-col gap-[var(--paisa-space-4)]"
-        aria-hidden="true"
-      >
+      <div class="flex flex-col gap-[var(--paisa-space-4)]" aria-hidden="true">
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {#each Array(4) as _}
-            <div class="h-20 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"></div>
+            <div
+              class="h-20 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"
+            ></div>
           {/each}
         </div>
-        <div class="h-64 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"></div>
+        <div
+          class="h-64 animate-pulse rounded-[var(--paisa-radius-md)] bg-surface-hover"
+        ></div>
       </div>
     {:else if !hasYears}
       <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          No capital gains recorded.
-        </p>
+        <p class="text-sm text-muted-foreground">No capital gains recorded.</p>
       </ZeroState>
     {:else}
       <!-- Top High-Level Metric Strip -->
@@ -213,7 +217,9 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground">
+                  <tr
+                    class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground"
+                  >
                     <th class="px-3 py-2.5">Financial Year</th>
                     <th class="px-3 py-2.5 text-right">Sold Amount</th>
                     <th class="px-3 py-2.5 text-right">Realized Gain</th>
@@ -229,28 +235,49 @@ onMount(async () => {
                       class="cursor-pointer transition-colors hover:bg-surface-hover"
                       onclick={() => (selectedYear = summary.year)}
                     >
-                      <td class="whitespace-nowrap px-3 py-2.5 font-semibold text-primary">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 font-semibold text-primary"
+                      >
                         {summary.year}
-                        <span class="ml-1 text-xs font-normal text-muted-foreground">
-                          ({summary.assetCount} {summary.assetCount === 1 ? "asset" : "assets"})
+                        <span
+                          class="ml-1 text-xs font-normal text-muted-foreground"
+                        >
+                          ({summary.assetCount}
+                          {summary.assetCount === 1 ? "asset" : "assets"})
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-foreground"
+                      >
                         {formatCurrency(summary.sold)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(summary.gain)}">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(
+                          summary.gain,
+                        )}"
+                      >
                         {formatCurrency(summary.gain)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(summary.taxable)}">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums {gainClass(
+                          summary.taxable,
+                        )}"
+                      >
                         {formatCurrency(summary.taxable)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground"
+                      >
                         {formatCurrency(summary.stcg)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-muted-foreground"
+                      >
                         {formatCurrency(summary.ltcg)}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                      <td
+                        class="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-foreground"
+                      >
                         {formatCurrency(summary.totalTax)}
                       </td>
                     </tr>
@@ -261,7 +288,9 @@ onMount(async () => {
           </Card>
 
           <div class="flex flex-col gap-[var(--paisa-space-4)]">
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3
+              class="text-sm font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               All Financial Year Realizations
             </h3>
             {#each years as yr}

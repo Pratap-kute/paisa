@@ -20,22 +20,26 @@ for (const variant of variants) {
 
     await page.goto("/dev/ui");
     await page.waitForLoadState("networkidle");
-    await expect(page.getByRole("heading", { name: "Paisa UI Lab" }))
-      .toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Paisa UI Lab" }),
+    ).toBeVisible();
     await expect(page.getByText("₹1,85,42,000.00").first()).toBeVisible();
 
-    const overflow = await page.evaluate(() =>
-      document.documentElement.scrollWidth >
-        document.documentElement.clientWidth
+    const overflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
     );
     expect(overflow).toBe(false);
 
     await page.getByRole("button", { name: "Open dialog" }).click();
-    await expect(page.getByRole("dialog", { name: "Reconcile transaction" }))
-      .toBeVisible();
+    await expect(
+      page.getByRole("dialog", { name: "Reconcile transaction" }),
+    ).toBeVisible();
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog", { name: "Reconcile transaction" }))
-      .toBeHidden();
+    await expect(
+      page.getByRole("dialog", { name: "Reconcile transaction" }),
+    ).toBeHidden();
 
     await page.getByRole("button", { name: "Open drawer" }).click();
     await expect(page.getByRole("dialog", { name: "Filters" })).toBeVisible();

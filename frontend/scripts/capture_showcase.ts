@@ -74,14 +74,18 @@ try {
       .map((name) => name.trim())
       .filter(Boolean),
   );
-  const selectedScreens = selectedNames.size === 0
-    ? screens
-    : screens.filter(([name]) => selectedNames.has(name));
+  const selectedScreens =
+    selectedNames.size === 0
+      ? screens
+      : screens.filter(([name]) => selectedNames.has(name));
   for (const [name, route, ready] of selectedScreens) {
     await page.goto(baseURL + route);
-    await page.locator(ready).first().waitFor({
-      state: name === "import" ? "attached" : "visible",
-    });
+    await page
+      .locator(ready)
+      .first()
+      .waitFor({
+        state: name === "import" ? "attached" : "visible",
+      });
     if (name === "import" || name === "account-suggestions") {
       // Entirely invented statement: no bank identifiers or personal records.
       const csv =
@@ -97,9 +101,12 @@ try {
       });
       await page.locator(".svelte-select").first().click();
       await page.getByText("Paytm", { exact: true }).click();
-      await page.locator(".preview-editor .cm-content").filter({
-        hasText: "2022",
-      }).waitFor();
+      await page
+        .locator(".preview-editor .cm-content")
+        .filter({
+          hasText: "2022",
+        })
+        .waitFor();
       await page.locator("[data-testid='prediction-review-bar']").waitFor();
       if (name === "account-suggestions") {
         await page.getByTitle("Brand New Merchant").click();

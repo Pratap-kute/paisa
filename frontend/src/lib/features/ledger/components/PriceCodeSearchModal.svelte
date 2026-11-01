@@ -1,118 +1,126 @@
 <script lang="ts">
-import Select from "svelte-select";
-import Dialog from "$lib/shared/ui/Dialog.svelte";
-import FormField from "$lib/shared/layout/FormField.svelte";
-import Button from "$lib/shared/ui/Button.svelte";
-import Input from "$lib/shared/ui/Input.svelte";
-import SelectField from "$lib/shared/ui/Select.svelte";
-import type { PriceProvider } from "$lib/features/ledger/types";
-import { createEventDispatcher, onMount } from "svelte";
-import type { AutoCompleteItem } from "$lib/features/ledger/types";
-import { api } from "$lib/api";
+  import Select from "svelte-select";
+  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
+  import SelectField from "$lib/shared/ui/Select.svelte";
+  import type { PriceProvider } from "$lib/features/ledger/types";
+  import { createEventDispatcher, onMount } from "svelte";
+  import type { AutoCompleteItem } from "$lib/features/ledger/types";
+  import { api } from "$lib/api";
 
-let label = "Choose Price Provider";
-interface Props {
-  open?: boolean;
-}
-
-let { open = $bindable(false) }: Props = $props();
-let code = $state("");
-
-let providers: PriceProvider[] = $state([]);
-let selectedProvider: PriceProvider | undefined = $state();
-
-let filters: Record<string, AutoCompleteItem | string | null> = $state({});
-
-onMount(async () => {
-  try {
-    const res = await api.price.getPriceProviders();
-    providers = (res.providers as unknown as PriceProvider[]) || [];
-    selectedProvider = providers[0];
-  } catch {
-    providers = [];
+  let label = "Choose Price Provider";
+  interface Props {
+    open?: boolean;
   }
-});
 
-let isLoading = $state(false);
-async function clearProviderCache() {
-  isLoading = true;
-  try {
-    if (selectedProvider?.code) {
-      await api.price.clearPriceProviderCache(selectedProvider.code);
+  let { open = $bindable(false) }: Props = $props();
+  let code = $state("");
+
+  let providers: PriceProvider[] = $state([]);
+  let selectedProvider: PriceProvider | undefined = $state();
+
+  let filters: Record<string, AutoCompleteItem | string | null> = $state({});
+
+  onMount(async () => {
+    try {
+      const res = await api.price.getPriceProviders();
+      providers = (res.providers as unknown as PriceProvider[]) || [];
+      selectedProvider = providers[0];
+    } catch {
+      providers = [];
     }
-  } finally {
-    isLoading = false;
-    reset();
-  }
-}
+  });
 
-let autocompleteCache: number[] = $state([]);
-function clearCache(i: number) {
-  autocompleteCache[i] = (autocompleteCache[i] || 0) + 1;
-}
-
-function reset() {
-  code = "";
-  filters = {};
-  const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
-  for (let i = 0; i < maxLen; i++) {
-    clearCache(i);
-  }
-}
-
-function makeAutoComplete(
-  field: string,
-  filters: Record<string, AutoCompleteItem | string | null>,
-  i: number,
-  provider: PriceProvider,
-) {
-  return async function autocomplete(
-    filterText: string,
-  ): Promise<AutoCompleteItem[]> {
-    for (let j = 0; j < i; j++) {
-      if (!filters[provider.fields[j].id]) {
-        return [];
+  let isLoading = $state(false);
+  async function clearProviderCache() {
+    isLoading = true;
+    try {
+      if (selectedProvider?.code) {
+        await api.price.clearPriceProviderCache(selectedProvider.code);
       }
+    } finally {
+      isLoading = false;
+      reset();
     }
-
-    const queryFilters = Object.fromEntries(
-      Object.entries(filters).map((
-        [k, v],
-      ) => [k, typeof v === "string" ? v : v?.id]),
-    );
-    if (!selectedProvider) return [];
-    queryFilters[field] = filterText;
-    const res = await api.price.getPriceAutoCompletions({
-      field,
-      provider: selectedProvider.code,
-      filters: queryFilters,
-    });
-    return (res.completions as unknown as AutoCompleteItem[]) || [];
-  };
-}
-
-const dispatch = createEventDispatcher();
-
-let providerOptions = $derived(
-  providers.map((p) => ({ value: p.code, label: p.label })),
-);
-
-let selectedProviderCode = $derived(selectedProvider?.code ?? "");
-
-function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
-  const provider = providers.find((p) => p.code === e.currentTarget.value);
-  if (provider) {
-    selectedProvider = provider;
-    reset();
   }
-}
+
+  let autocompleteCache: number[] = $state([]);
+  function clearCache(i: number) {
+    autocompleteCache[i] = (autocompleteCache[i] || 0) + 1;
+  }
+
+  function reset() {
+    code = "";
+    filters = {};
+    const maxLen = Math.max(...providers.map((p) => p.fields.length), 0);
+    for (let i = 0; i < maxLen; i++) {
+      clearCache(i);
+    }
+  }
+
+  function makeAutoComplete(
+    field: string,
+    filters: Record<string, AutoCompleteItem | string | null>,
+    i: number,
+    provider: PriceProvider,
+  ) {
+    return async function autocomplete(
+      filterText: string,
+    ): Promise<AutoCompleteItem[]> {
+      for (let j = 0; j < i; j++) {
+        if (!filters[provider.fields[j].id]) {
+          return [];
+        }
+      }
+
+      const queryFilters = Object.fromEntries(
+        Object.entries(filters).map(([k, v]) => [
+          k,
+          typeof v === "string" ? v : v?.id,
+        ]),
+      );
+      if (!selectedProvider) return [];
+      queryFilters[field] = filterText;
+      const res = await api.price.getPriceAutoCompletions({
+        field,
+        provider: selectedProvider.code,
+        filters: queryFilters,
+      });
+      return (res.completions as unknown as AutoCompleteItem[]) || [];
+    };
+  }
+
+  const dispatch = createEventDispatcher();
+
+  let providerOptions = $derived(
+    providers.map((p) => ({ value: p.code, label: p.label })),
+  );
+
+  let selectedProviderCode = $derived(selectedProvider?.code ?? "");
+
+  function handleProviderChange(
+    e: Event & { currentTarget: HTMLSelectElement },
+  ) {
+    const provider = providers.find((p) => p.code === e.currentTarget.value);
+    if (provider) {
+      selectedProvider = provider;
+      reset();
+    }
+  }
 </script>
 
 <Dialog bind:open footerClass="flex justify-between items-center gap-2">
   {#snippet header({ close })}
     <div class="paisa4-dialog-header w-full">
       <p class="paisa4-dialog-title">{label}</p>
-      <button type="button" class="paisa4-icon-action" aria-label="Close dialog" onclick={() => close()}>×</button>
+      <button
+        type="button"
+        class="paisa4-icon-action"
+        aria-label="Close dialog"
+        onclick={() => close()}>×</button
+      >
     </div>
   {/snippet}
   {#snippet children()}
@@ -128,7 +136,9 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
               onchange={handleProviderChange}
             />
             {#if selectedProvider.description}
-              <p class="mt-1 text-xs text-muted-foreground">{@html selectedProvider.description}</p>
+              <p class="mt-1 text-xs text-muted-foreground">
+                {@html selectedProvider.description}
+              </p>
             {/if}
           {/snippet}
         </FormField>
@@ -156,7 +166,12 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
                       bind:value={filters[field.id]}
                       --list-z-index="5"
                       showChevron={true}
-                      loadOptions={makeAutoComplete(field.id, filters, i, selectedProvider)}
+                      loadOptions={makeAutoComplete(
+                        field.id,
+                        filters,
+                        i,
+                        selectedProvider,
+                      )}
                       label="label"
                       itemId="id"
                       debounceWait={500}
@@ -172,7 +187,8 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
 
                         if (i === selectedProvider.fields.length - 1) {
                           const item = filters[field.id];
-                          code = typeof item === "object" && item ? item.id : "";
+                          code =
+                            typeof item === "object" && item ? item.id : "";
                         } else {
                           code = "";
                         }
@@ -181,7 +197,9 @@ function handleProviderChange(e: Event & { currentTarget: HTMLSelectElement }) {
                   {/key}
                 {/if}
                 {#if field.help}
-                  <p class="mt-1 text-xs text-muted-foreground">{@html field.help}</p>
+                  <p class="mt-1 text-xs text-muted-foreground">
+                    {@html field.help}
+                  </p>
                 {/if}
               {/snippet}
             </FormField>

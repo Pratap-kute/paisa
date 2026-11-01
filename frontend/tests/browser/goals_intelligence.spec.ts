@@ -18,18 +18,20 @@ const savings = {
 };
 for (const width of [390, 768, 1440]) {
   for (const theme of ["light", "dark"]) {
-    test(`goal intelligence is readable at ${width}px ${theme}`, async ({ page }) => {
+    test(`goal intelligence is readable at ${width}px ${theme}`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript(
         (theme) => localStorage.setItem("theme-preference", theme),
         theme,
       );
-      await page.route(
-        "**/api/goals",
-        (route) =>
-          route.fulfill({
-            json: {
-              goals: [savings, {
+      await page.route("**/api/goals", (route) =>
+        route.fulfill({
+          json: {
+            goals: [
+              savings,
+              {
                 ...savings,
                 type: "retirement",
                 id: "retirement-test",
@@ -37,20 +39,23 @@ for (const width of [390, 768, 1440]) {
                 swr: 4,
                 yearlyExpense: 24000,
                 yearlyExpenseSource: "configured",
-              }],
-            },
-          }),
+              },
+            ],
+          },
+        }),
       );
       await page.goto("/more/goals");
-      await expect(page.getByText("Needs Attention", { exact: true }))
-        .toBeVisible();
-      await expect(page.getByText("Behind plan", { exact: true }).first())
-        .toBeVisible();
+      await expect(
+        page.getByText("Needs Attention", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Behind plan", { exact: true }).first(),
+      ).toBeVisible();
       await expect(page.getByText("Tracking", { exact: true })).toBeVisible();
       await expect(page.getByText("All Goals", { exact: true })).toBeVisible();
       expect(
-        await page.evaluate(() =>
-          document.documentElement.scrollWidth <= innerWidth
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
       const link = page.getByRole("link", { name: savings.name }).last();
@@ -64,9 +69,8 @@ for (const width of [390, 768, 1440]) {
 }
 
 test("goals overview handles no configured goals", async ({ page }) => {
-  await page.route(
-    "**/api/goals",
-    (route) => route.fulfill({ json: { goals: [] } }),
+  await page.route("**/api/goals", (route) =>
+    route.fulfill({ json: { goals: [] } }),
   );
   await page.goto("/more/goals");
   await expect(page.getByText(/haven't configured any goals/)).toBeVisible();
@@ -75,18 +79,18 @@ test("goals overview handles no configured goals", async ({ page }) => {
   );
 });
 
-test("details retain charts alongside plan, actual and outlook", async ({ page }) => {
+test("details retain charts alongside plan, actual and outlook", async ({
+  page,
+}) => {
   await page.goto("/more/goals/savings/House");
-  for (
-    const heading of [
-      "Plan",
-      "Actual",
-      "Outlook",
-      "Historical XIRR",
-      "Current Balance",
-      "Monthly Investment",
-    ]
-  ) {
+  for (const heading of [
+    "Plan",
+    "Actual",
+    "Outlook",
+    "Historical XIRR",
+    "Current Balance",
+    "Monthly Investment",
+  ]) {
     await expect(page.getByText(heading, { exact: true })).toBeVisible();
   }
   await expect(
@@ -95,16 +99,17 @@ test("details retain charts alongside plan, actual and outlook", async ({ page }
     ),
   ).toBeVisible();
   expect(
-    await page.evaluate(() =>
-      document.documentElement.scrollWidth <= innerWidth
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
 });
 
-test("drag handle keeps priority changes under user control", async ({ page }) => {
+test("drag handle keeps priority changes under user control", async ({
+  page,
+}) => {
   let saved:
-    | { goals?: { savings?: { name: string; priority: number }[] } }
-    | undefined;
+    { goals?: { savings?: { name: string; priority: number }[] } } | undefined;
   await page.route("**/api/config", async (route) => {
     if (route.request().method() === "POST") {
       saved = route.request().postDataJSON();
@@ -131,55 +136,63 @@ test("drag handle keeps priority changes under user control", async ({ page }) =
   });
   await page.waitForTimeout(400);
   await page.mouse.up();
-  await expect.poll(() =>
-    saved?.goals?.savings?.find((goal) => goal.name === "House")?.priority
-  ).toBe(2);
+  await expect
+    .poll(
+      () =>
+        saved?.goals?.savings?.find((goal) => goal.name === "House")?.priority,
+    )
+    .toBe(2);
 });
 
-test(
-  "dated Savings chart draws the required path label",
-  async ({ page }, testInfo) => {
-    await page.addInitScript(() => {
-      const original = CanvasRenderingContext2D.prototype.fillText;
-      const labels: string[] = [];
-      Object.assign(globalThis, { goalChartLabels: labels });
-      CanvasRenderingContext2D.prototype.fillText = function (
-        ...args: Parameters<typeof original>
-      ) {
-        labels.push(args[0]);
-        return original.apply(this, args);
-      };
-    });
-    await page.goto("/more/goals/savings/House");
-    const chart = page.locator(
-      "[data-testid='savings-goal-progress-echart'][data-chart-ready='true']",
-    );
-    await expect(chart).toBeVisible();
-    await expect.poll(() =>
+test("dated Savings chart draws the required path label", async ({
+  page,
+}, testInfo) => {
+  await page.addInitScript(() => {
+    const original = CanvasRenderingContext2D.prototype.fillText;
+    const labels: string[] = [];
+    Object.assign(globalThis, { goalChartLabels: labels });
+    CanvasRenderingContext2D.prototype.fillText = function (
+      ...args: Parameters<typeof original>
+    ) {
+      labels.push(args[0]);
+      return original.apply(this, args);
+    };
+  });
+  await page.goto("/more/goals/savings/House");
+  const chart = page.locator(
+    "[data-testid='savings-goal-progress-echart'][data-chart-ready='true']",
+  );
+  await expect(chart).toBeVisible();
+  await expect
+    .poll(() =>
       page.evaluate(() =>
-        (globalThis as unknown as { goalChartLabels: string[] }).goalChartLabels
-          .includes("Required path")
-      )
-    ).toBe(true);
-    await chart.screenshot({ path: testInfo.outputPath("required-path.png") });
-  },
-);
+        (
+          globalThis as unknown as { goalChartLabels: string[] }
+        ).goalChartLabels.includes("Required path"),
+      ),
+    )
+    .toBe(true);
+  await chart.screenshot({ path: testInfo.outputPath("required-path.png") });
+});
 
-test("two-goal grid is bounded and left-aligned with page margin on ultra-wide viewports", async ({ page }) => {
+test("two-goal grid is bounded and left-aligned with page margin on ultra-wide viewports", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.route(
-    "**/api/goals",
-    (route) =>
-      route.fulfill({
-        json: {
-          goals: [savings, {
+  await page.route("**/api/goals", (route) =>
+    route.fulfill({
+      json: {
+        goals: [
+          savings,
+          {
             ...savings,
             type: "retirement",
             id: "retirement-test",
             name: "Retirement",
-          }],
-        },
-      }),
+          },
+        ],
+      },
+    }),
   );
   await page.goto("/more/goals");
   const grid = page.locator(".max-w-5xl");

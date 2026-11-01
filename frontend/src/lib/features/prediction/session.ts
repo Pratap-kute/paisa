@@ -21,12 +21,7 @@ import type {
 } from "./types";
 
 export type ConfidenceFilter =
-  | "HIGH"
-  | "MEDIUM"
-  | "NEEDS_REVIEW"
-  | "UNKNOWN"
-  | "TRANSFER"
-  | null;
+  "HIGH" | "MEDIUM" | "NEEDS_REVIEW" | "UNKNOWN" | "TRANSFER" | null;
 
 export interface PredictionFilterCounts {
   all: number;
@@ -42,9 +37,9 @@ function predictionKey(
   helperInvocationIndex: number,
   prefix: string,
 ): string {
-  return `${rowIndex ?? "na"}\t${helperInvocationIndex}\t${
-    normalizePrefix(prefix)
-  }`;
+  return `${rowIndex ?? "na"}\t${helperInvocationIndex}\t${normalizePrefix(
+    prefix,
+  )}`;
 }
 
 function merchantOverrideKey(merchantKey: string, prefix: string): string {
@@ -55,8 +50,8 @@ export function computeInputFingerprint(
   input: PredictionInput,
   merchantKey?: string,
 ): string {
-  const normMerchant = merchantKey ||
-    normalizeDescription(input.description || "").merchantKey;
+  const normMerchant =
+    merchantKey || normalizeDescription(input.description || "").merchantKey;
   const amountStr = input.amount != null ? String(input.amount) : "";
   const commodityStr = input.commodity || "";
   const src = input.sourceAccount || "";
@@ -66,13 +61,15 @@ export function computeInputFingerprint(
 
 function merchantRulesFromConfig(): PredictionOptions["merchantRules"] {
   try {
-    const config = (globalThis as {
-      USER_CONFIG?: {
-        prediction?: {
-          merchant_rules?: MerchantRule[];
+    const config = (
+      globalThis as {
+        USER_CONFIG?: {
+          prediction?: {
+            merchant_rules?: MerchantRule[];
+          };
         };
-      };
-    }).USER_CONFIG;
+      }
+    ).USER_CONFIG;
     return config?.prediction?.merchant_rules || [];
   } catch (_error) {
     return [];
@@ -206,7 +203,8 @@ export class PredictionSession {
     );
     const merchantAccount = this.merchantOverrides.get(merchantKey);
     if (
-      merchantAccount && accountMatchesPrefix(merchantAccount, keyed.prefix)
+      merchantAccount &&
+      accountMatchesPrefix(merchantAccount, keyed.prefix)
     ) {
       const result = userResult(keyed, merchantAccount, normalized.merchantKey);
       this.results.set(key, result);
@@ -218,10 +216,7 @@ export class PredictionSession {
       merchantRules: merchantRulesFromConfig(),
     };
     let result = predict(keyed, options, index, this.currentImport);
-    if (
-      result.confidence === "UNKNOWN" ||
-      result.source === "UNKNOWN"
-    ) {
+    if (result.confidence === "UNKNOWN" || result.source === "UNKNOWN") {
       const fallback = tfidfFallback(keyed);
       if (fallback && fallback.confidence !== "UNKNOWN") {
         fallback.possibleTransfer = result.possibleTransfer;
@@ -292,17 +287,14 @@ export class PredictionSession {
     helperInvocationIndex = 0,
   ) {
     const key = predictionKey(rowIndex, helperInvocationIndex, prefix);
-    this.overrides.set(
-      key,
-      { account, source: "USER" },
-    );
+    this.overrides.set(key, { account, source: "USER" });
     const existing = this.reviewStates.get(key);
     const input = this.inputs.get(key);
     const fingerprint = input
       ? computeInputFingerprint(
-        input,
-        normalizeDescription(input.description || "").merchantKey,
-      )
+          input,
+          normalizeDescription(input.description || "").merchantKey,
+        )
       : existing?.inputFingerprint || "";
 
     this.reviewStates.set(key, {
@@ -338,9 +330,9 @@ export class PredictionSession {
     const input = this.inputs.get(key);
     const fingerprint = input
       ? computeInputFingerprint(
-        input,
-        normalizeDescription(input.description || "").merchantKey,
-      )
+          input,
+          normalizeDescription(input.description || "").merchantKey,
+        )
       : existing?.inputFingerprint || "";
 
     if (isCorrected) {
@@ -349,14 +341,16 @@ export class PredictionSession {
 
     this.reviewStates.set(key, {
       status,
-      initialAccount: existing?.initialAccount || current?.account ||
-        targetAccount,
+      initialAccount:
+        existing?.initialAccount || current?.account || targetAccount,
       currentAccount: targetAccount,
-      initialConfidence: existing?.initialConfidence || current?.confidence ||
-        "UNKNOWN",
+      initialConfidence:
+        existing?.initialConfidence || current?.confidence || "UNKNOWN",
       wasReviewRequired: existing
         ? existing.wasReviewRequired
-        : (current ? this.requiresReview(current) : true),
+        : current
+          ? this.requiresReview(current)
+          : true,
       inputFingerprint: fingerprint,
       reviewedAt: Date.now(),
     });
@@ -465,8 +459,9 @@ export class PredictionSession {
     const reviewState = this.reviewStates.get(key);
     if (reviewState) {
       if (!reviewState.wasReviewRequired) return true;
-      return reviewState.status === "ACCEPTED" ||
-        reviewState.status === "CORRECTED";
+      return (
+        reviewState.status === "ACCEPTED" || reviewState.status === "CORRECTED"
+      );
     }
     return !this.requiresReview(result);
   }
@@ -507,8 +502,8 @@ export class PredictionSession {
       if (!needed) continue;
 
       const resolved = reviewState
-        ? (reviewState.status === "ACCEPTED" ||
-          reviewState.status === "CORRECTED")
+        ? reviewState.status === "ACCEPTED" ||
+          reviewState.status === "CORRECTED"
         : false;
       if (!resolved) {
         unresolved.push(result);
@@ -572,9 +567,10 @@ export class PredictionSession {
     const reviewRequiredRows = reviewRequiredRowIndices.size;
     const reviewedRows = reviewedCount;
     const unresolvedRows = Math.max(0, reviewRequiredRows - reviewedRows);
-    const percent = reviewRequiredRows === 0
-      ? 100
-      : Math.round((reviewedRows / reviewRequiredRows) * 100);
+    const percent =
+      reviewRequiredRows === 0
+        ? 100
+        : Math.round((reviewedRows / reviewRequiredRows) * 100);
 
     return {
       totalRows: allRowIndices.size,
@@ -655,8 +651,8 @@ export class PredictionSession {
   }
 
   resultsForRow(rowIndex: number): PredictionResult[] {
-    return [...this.results.values()].filter((result) =>
-      result.rowIndex === rowIndex
+    return [...this.results.values()].filter(
+      (result) => result.rowIndex === rowIndex,
     );
   }
 
@@ -673,7 +669,7 @@ function worstConfidence(values: Confidence[]): Confidence {
     UNKNOWN: 3,
   };
   return values.reduce(
-    (worst, value) => rank[value] > rank[worst] ? value : worst,
+    (worst, value) => (rank[value] > rank[worst] ? value : worst),
     "HIGH",
   );
 }

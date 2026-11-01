@@ -1,11 +1,11 @@
 <script lang="ts">
-import Tooltip from "./Tooltip.svelte";
-import TooltipProvider from "./TooltipProvider.svelte";
+  import Tooltip from "./Tooltip.svelte";
+  import TooltipProvider from "./TooltipProvider.svelte";
 
-interface Props {
-  content?: string | null;
-}
-let { content }: Props = $props();
+  interface Props {
+    content?: string | null;
+  }
+  let { content }: Props = $props();
 </script>
 
 <TooltipProvider>

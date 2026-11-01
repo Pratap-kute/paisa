@@ -15,9 +15,10 @@ for (const postingCount of [5000, 25000, 50000]) {
   const transactions: Transaction[] = Array.from(
     { length: postingCount / 2 },
     (_, i) => {
-      const merchant = String(Math.floor(i / 6)).split("").map((d) =>
-        String.fromCharCode(97 + Number(d))
-      ).join("");
+      const merchant = String(Math.floor(i / 6))
+        .split("")
+        .map((d) => String.fromCharCode(97 + Number(d)))
+        .join("");
       const date = dayjs("2026-04-08").add(i % 6, "month");
       return {
         id: String(i),
@@ -52,13 +53,17 @@ for (const postingCount of [5000, 25000, 50000]) {
     dayjs("2026-09-10"),
   );
   const duration = performance.now() - start;
-  console.log(JSON.stringify({
-    postings: postingCount,
-    transactions: transactions.length,
-    jsonBytes: new TextEncoder().encode(json).length,
-    candidates: candidates.length,
-    analysisMs: Math.round(duration),
-    heapUsedMiB: Math.round(process.memoryUsage().heapUsed / 1048576),
-    heapGrowthMiB: Math.round((process.memoryUsage().heapUsed - before) / 1048576),
-  }));
+  console.log(
+    JSON.stringify({
+      postings: postingCount,
+      transactions: transactions.length,
+      jsonBytes: new TextEncoder().encode(json).length,
+      candidates: candidates.length,
+      analysisMs: Math.round(duration),
+      heapUsedMiB: Math.round(process.memoryUsage().heapUsed / 1048576),
+      heapGrowthMiB: Math.round(
+        (process.memoryUsage().heapUsed - before) / 1048576,
+      ),
+    }),
+  );
 }

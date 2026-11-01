@@ -7,8 +7,9 @@ test("renders command palette when open", () => {
     props: { open: true },
   });
 
-  expect(screen.getByRole("dialog", { name: "Command Palette" }))
-    .toBeInTheDocument();
+  expect(
+    screen.getByRole("dialog", { name: "Command Palette" }),
+  ).toBeInTheDocument();
   expect(
     screen.getByPlaceholderText("Search pages, accounts, or type a command..."),
   ).toBeInTheDocument();

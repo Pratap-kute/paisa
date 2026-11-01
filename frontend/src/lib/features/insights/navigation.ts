@@ -8,7 +8,8 @@ export function buildInsightActionHref(insight: Insight): string {
   if (
     insight.account &&
     ["category_spike", "budget_overspent", "budget_risk"].includes(insight.type)
-  ) url.searchParams.set("account", insight.account);
+  )
+    url.searchParams.set("account", insight.account);
   if (insight.account && insight.type === "recurring_increase") {
     url.searchParams.set("key", insight.account);
   }

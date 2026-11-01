@@ -32,15 +32,12 @@ export function rgbToLab(
   const y = (0.2126729 * lr + 0.7151522 * lg + 0.072175 * lb) / YN;
   const z = (0.0193339 * lr + 0.119192 * lg + 0.9503041 * lb) / ZN;
 
-  const fx = x > Math.pow(DELTA, 3)
-    ? Math.cbrt(x)
-    : x / (3 * DELTA * DELTA) + 4 / 29;
-  const fy = y > Math.pow(DELTA, 3)
-    ? Math.cbrt(y)
-    : y / (3 * DELTA * DELTA) + 4 / 29;
-  const fz = z > Math.pow(DELTA, 3)
-    ? Math.cbrt(z)
-    : z / (3 * DELTA * DELTA) + 4 / 29;
+  const fx =
+    x > Math.pow(DELTA, 3) ? Math.cbrt(x) : x / (3 * DELTA * DELTA) + 4 / 29;
+  const fy =
+    y > Math.pow(DELTA, 3) ? Math.cbrt(y) : y / (3 * DELTA * DELTA) + 4 / 29;
+  const fz =
+    z > Math.pow(DELTA, 3) ? Math.cbrt(z) : z / (3 * DELTA * DELTA) + 4 / 29;
 
   const l = 116 * fy - 16;
   const a = 500 * (fx - fy);
@@ -57,12 +54,12 @@ export function labToRgb(
   const fx = a / 500 + fy;
   const fz = fy - bVal / 200;
 
-  const x = (fx > DELTA ? Math.pow(fx, 3) : 3 * DELTA * DELTA * (fx - 4 / 29)) *
-    XN;
-  const y = (fy > DELTA ? Math.pow(fy, 3) : 3 * DELTA * DELTA * (fy - 4 / 29)) *
-    YN;
-  const z = (fz > DELTA ? Math.pow(fz, 3) : 3 * DELTA * DELTA * (fz - 4 / 29)) *
-    ZN;
+  const x =
+    (fx > DELTA ? Math.pow(fx, 3) : 3 * DELTA * DELTA * (fx - 4 / 29)) * XN;
+  const y =
+    (fy > DELTA ? Math.pow(fy, 3) : 3 * DELTA * DELTA * (fy - 4 / 29)) * YN;
+  const z =
+    (fz > DELTA ? Math.pow(fz, 3) : 3 * DELTA * DELTA * (fz - 4 / 29)) * ZN;
 
   const lr = 3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
   const lg = -0.969266 * x + 1.8760108 * y + 0.041556 * z;
@@ -72,8 +69,7 @@ export function labToRgb(
 }
 
 export function rgbToHex(r: number, g: number, b: number): string {
-  return "#" +
-    [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
+  return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
 }
 
 export function parseColorToRgb(color: string): [number, number, number] {
@@ -129,9 +125,8 @@ export function darkenOrLighten(
   // http://www.w3.org/TR/AERT#color-contrast
   const brightness = (red * 299 + green * 587 + blue) / 1000;
   const [l, a, bVal] = rgbToLab(red, green, blue);
-  const newL = brightness > 125
-    ? l - LAB_KN * intensity
-    : l + LAB_KN * intensity;
+  const newL =
+    brightness > 125 ? l - LAB_KN * intensity : l + LAB_KN * intensity;
   const [r, g, b] = labToRgb(newL, a, bVal);
   return rgbToHex(r, g, b);
 }

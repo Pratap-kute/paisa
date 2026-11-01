@@ -58,9 +58,12 @@ describe("predictAccount adapter", () => {
   });
 
   it("joins wrapped spreadsheet narration into one description", () => {
-    const input = adaptPredictAccountArgs([
-      "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*AC\nME VENDOR*BAT   0099509044300 AT 01307",
-    ], { hash: { prefix: "Income" } });
+    const input = adaptPredictAccountArgs(
+      [
+        "DEP TFR   NEFT*HDFC0000240*HDFCH00902314455*AC\nME VENDOR*BAT   0099509044300 AT 01307",
+      ],
+      { hash: { prefix: "Income" } },
+    );
     expect(input.description).toContain("ACME VENDOR");
     expect(input.description).not.toContain("AC ME");
     expect(input.description).not.toContain("\n");

@@ -33,15 +33,12 @@ export function createValidateFileState() {
   return createAsyncState<
     DtoLedgerFileRequest,
     DtoEditorValidateResponse | null
-  >(
-    async (fileQuery, signal) => {
-      const response = await api.editor.validateEditorFile(fileQuery, {
-        signal,
-      });
-      return response;
-    },
-    null,
-  );
+  >(async (fileQuery, signal) => {
+    const response = await api.editor.validateEditorFile(fileQuery, {
+      signal,
+    });
+    return response;
+  }, null);
 }
 
 export function createSaveFileMutation() {

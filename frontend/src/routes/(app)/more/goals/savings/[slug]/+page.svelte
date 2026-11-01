@@ -1,142 +1,141 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import SavingsGoalIntelligence from "$lib/features/goals/components/SavingsGoalIntelligence.svelte";
-import type { GoalSummary } from "$lib/domain/goals_models";
-import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
-import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
-import type { Point } from "$lib/domain/goals_models";
-import type { Posting } from "$lib/domain/ledger";
-import type { AssetBreakdown } from "$lib/domain/assets";
-import { onMount } from "svelte";
-import ARIMAPromise from "arima/async";
-import {
-  findBreakPoints,
-  forecast,
-  project,
-  solvePMTOrNper,
-} from "$lib/domain/goals";
-import type { PageData } from "./$types";
-import dayjs from "dayjs";
-import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
-import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
-import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
-import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
-import { isEmpty, sortBy } from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import SavingsGoalIntelligence from "$lib/features/goals/components/SavingsGoalIntelligence.svelte";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+  import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
+  import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
+  import type { Point } from "$lib/domain/goals_models";
+  import type { Posting } from "$lib/domain/ledger";
+  import type { AssetBreakdown } from "$lib/domain/assets";
+  import { onMount } from "svelte";
+  import ARIMAPromise from "arima/async";
+  import {
+    findBreakPoints,
+    forecast,
+    project,
+    solvePMTOrNper,
+  } from "$lib/domain/goals";
+  import type { PageData } from "./$types";
+  import dayjs from "dayjs";
+  import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
+  import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
+  import { isEmpty, sortBy } from "$lib/shared/utils/collection";
 
-interface Props {
-  data: PageData;
-}
-
-let { data }: Props = $props();
-
-let projectionKind:
-  import("$lib/features/goals/time_series_data").GoalProjectionKind = $state(
-    "forecast",
-  );
-let targetDateObject: dayjs.Dayjs | undefined = $state();
-let savingsTotal = $state(0),
-  investmentTotal = $state(0),
-  gainTotal = $state(0),
-  targetSavings = $state(0),
-  pmt = $state(0),
-  xirr = $state(0),
-  rate = $state(0),
-  paymentPerPeriod = 0,
-  targetDate = "",
-  name = $state(""),
-  icon = $state(""),
-  progressPercent = $state(0),
-  breakPoints: Point[] = $state([]),
-  savingsTimeline: Point[] = $state([]),
-  postings: Posting[] = $state([]),
-  latestPostings: Posting[] = $state([]),
-  balances: Record<string, AssetBreakdown> = $state({}),
-  predictionsTimeline: Forecast[] = $state([]);
-
-let goal: GoalSummary | undefined = $state();
-
-onMount(async () => {
-  const detail = await api.goals.getGoalDetails(
-    "savings",
-    data.name,
-  ) as unknown as SavingsGoalProgress;
-  ({
-    savingsTotal,
-    investmentTotal,
-    gainTotal,
-    savingsTimeline,
-    target: targetSavings,
-    rate,
-    targetDate,
-    postings,
-    icon,
-    name,
-    xirr,
-    paymentPerPeriod,
-    balances,
-  } = detail);
-  goal = {
-    ...detail,
-    current: savingsTotal,
-    id: `savings-${name}`,
-    priority: 0,
-  };
-
-  savingsTimeline = savingsTimeline || [];
-  postings = postings || [];
-  balances = balances || {};
-
-  latestPostings = sortBy(postings, (p: Posting) => p.date)
-    .reverse()
-    .slice(0, 12);
-
-  progressPercent = Math.max(
-    0,
-    Math.min(
-      100,
-      calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
-    ),
-  );
-
-  ({ pmt, targetDate } = solvePMTOrNper(
-    targetSavings,
-    rate,
-    savingsTotal,
-    paymentPerPeriod,
-    targetDate,
-  ));
-
-  let nextPredictions: Forecast[] = [];
-  targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
-  if (targetDateObject.isValid()) {
-    projectionKind =
-      dayjs(goal?.targetDate, "YYYY-MM-DD", true).isValid() && goal?.targetDate
-        ? "required-path"
-        : "configured-payment";
-    nextPredictions = project(
-      targetSavings,
-      rate,
-      targetDateObject,
-      pmt,
-      savingsTotal,
-    );
-  } else if (savingsTotal < targetSavings && !isEmpty(savingsTimeline)) {
-    const ARIMA = await ARIMAPromise;
-    nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
+  interface Props {
+    data: PageData;
   }
 
-  const nextBreakPoints = findBreakPoints(
-    savingsTimeline.concat(nextPredictions),
-    targetSavings,
-  );
-  predictionsTimeline = nextPredictions;
-  breakPoints = nextBreakPoints;
-});
+  let { data }: Props = $props();
+
+  let projectionKind: import("$lib/features/goals/time_series_data").GoalProjectionKind =
+    $state("forecast");
+  let targetDateObject: dayjs.Dayjs | undefined = $state();
+  let savingsTotal = $state(0),
+    investmentTotal = $state(0),
+    gainTotal = $state(0),
+    targetSavings = $state(0),
+    pmt = $state(0),
+    xirr = $state(0),
+    rate = $state(0),
+    paymentPerPeriod = 0,
+    targetDate = "",
+    name = $state(""),
+    icon = $state(""),
+    progressPercent = $state(0),
+    breakPoints: Point[] = $state([]),
+    savingsTimeline: Point[] = $state([]),
+    postings: Posting[] = $state([]),
+    latestPostings: Posting[] = $state([]),
+    balances: Record<string, AssetBreakdown> = $state({}),
+    predictionsTimeline: Forecast[] = $state([]);
+
+  let goal: GoalSummary | undefined = $state();
+
+  onMount(async () => {
+    const detail = (await api.goals.getGoalDetails(
+      "savings",
+      data.name,
+    )) as unknown as SavingsGoalProgress;
+    ({
+      savingsTotal,
+      investmentTotal,
+      gainTotal,
+      savingsTimeline,
+      target: targetSavings,
+      rate,
+      targetDate,
+      postings,
+      icon,
+      name,
+      xirr,
+      paymentPerPeriod,
+      balances,
+    } = detail);
+    goal = {
+      ...detail,
+      current: savingsTotal,
+      id: `savings-${name}`,
+      priority: 0,
+    };
+
+    savingsTimeline = savingsTimeline || [];
+    postings = postings || [];
+    balances = balances || {};
+
+    latestPostings = sortBy(postings, (p: Posting) => p.date)
+      .reverse()
+      .slice(0, 12);
+
+    progressPercent = Math.max(
+      0,
+      Math.min(
+        100,
+        calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
+      ),
+    );
+
+    ({ pmt, targetDate } = solvePMTOrNper(
+      targetSavings,
+      rate,
+      savingsTotal,
+      paymentPerPeriod,
+      targetDate,
+    ));
+
+    let nextPredictions: Forecast[] = [];
+    targetDateObject = dayjs(targetDate, "YYYY-MM-DD", true);
+    if (targetDateObject.isValid()) {
+      projectionKind =
+        dayjs(goal?.targetDate, "YYYY-MM-DD", true).isValid() &&
+        goal?.targetDate
+          ? "required-path"
+          : "configured-payment";
+      nextPredictions = project(
+        targetSavings,
+        rate,
+        targetDateObject,
+        pmt,
+        savingsTotal,
+      );
+    } else if (savingsTotal < targetSavings && !isEmpty(savingsTimeline)) {
+      const ARIMA = await ARIMAPromise;
+      nextPredictions = forecast(savingsTimeline, targetSavings, ARIMA);
+    }
+
+    const nextBreakPoints = findBreakPoints(
+      savingsTimeline.concat(nextPredictions),
+      targetSavings,
+    );
+    predictionsTimeline = nextPredictions;
+    breakPoints = nextBreakPoints;
+  });
 </script>
 
 <svelte:head>
@@ -172,7 +171,11 @@ onMount(async () => {
     class="paisa-goal-detail-layout grid w-full grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] xl:grid-cols-[minmax(0,5fr)_minmax(20rem,2fr)]"
   >
     <div class="paisa-goal-detail-main flex min-w-0 flex-col gap-4">
-      <Section title="{name} Progress" titleIcon={icon} subtitle="Chart projections are illustrative and do not determine schedule health.">
+      <Section
+        title="{name} Progress"
+        titleIcon={icon}
+        subtitle="Chart projections are illustrative and do not determine schedule health."
+      >
         <ChartFrame height="tall">
           <GoalProgressChart
             {projectionKind}
@@ -204,7 +207,10 @@ onMount(async () => {
     </div>
 
     <div class="paisa-goal-detail-side min-w-0 lg:sticky lg:top-20">
-      <GoalRecentPostings postings={latestPostings} totalCount={postings.length} />
+      <GoalRecentPostings
+        postings={latestPostings}
+        totalCount={postings.length}
+      />
     </div>
   </div>
 </Page>

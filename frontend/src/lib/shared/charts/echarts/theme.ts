@@ -96,8 +96,10 @@ export function categoryColorAssignments(
   fallback = "currentColor",
 ): Map<string, string> {
   const normalized = [...new Set(keys.map(normalizeCategoryKey))].sort();
-  return new Map(normalized.map((key, index) => [
-    key,
-    colors[index % colors.length] ?? fallback,
-  ]));
+  return new Map(
+    normalized.map((key, index) => [
+      key,
+      colors[index % colors.length] ?? fallback,
+    ]),
+  );
 }

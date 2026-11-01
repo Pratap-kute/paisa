@@ -29,11 +29,14 @@ export function isAbortError(err: unknown): boolean {
   if (
     err instanceof Error &&
     (err.name === "AbortError" || err.message?.includes("aborted"))
-  ) return true;
+  )
+    return true;
   if (
-    typeof err === "object" && "name" in err &&
+    typeof err === "object" &&
+    "name" in err &&
     (err as { name?: string }).name === "AbortError"
-  ) return true;
+  )
+    return true;
   return false;
 }
 
@@ -61,10 +64,10 @@ export function normalizeApiError(err: unknown): AppApiError {
 
   if (typeof err === "object" && err !== null) {
     const errorObj = err as Record<string, unknown>;
-    const nestedError = typeof errorObj.error === "object" &&
-        errorObj.error !== null
-      ? errorObj.error as Record<string, unknown>
-      : undefined;
+    const nestedError =
+      typeof errorObj.error === "object" && errorObj.error !== null
+        ? (errorObj.error as Record<string, unknown>)
+        : undefined;
     const message =
       (typeof errorObj.error === "string" ? errorObj.error : undefined) ||
       (typeof errorObj.message === "string" ? errorObj.message : undefined) ||
@@ -75,14 +78,14 @@ export function normalizeApiError(err: unknown): AppApiError {
         ? nestedError.error
         : undefined) ||
       "An unexpected error occurred";
-    const status = typeof errorObj.status === "number"
-      ? errorObj.status
-      : undefined;
-    const code = typeof errorObj.code === "string"
-      ? errorObj.code
-      : typeof nestedError?.code === "string"
-      ? nestedError.code
-      : undefined;
+    const status =
+      typeof errorObj.status === "number" ? errorObj.status : undefined;
+    const code =
+      typeof errorObj.code === "string"
+        ? errorObj.code
+        : typeof nestedError?.code === "string"
+          ? nestedError.code
+          : undefined;
     return { status, code, message };
   }
 

@@ -42,7 +42,7 @@ async function lint(editor: EditorView): Promise<Diagnostic[]> {
     assign({}, current, {
       errors: response.errors || [],
       output: response.output,
-    })
+    }),
   );
 
   return map(response.errors || [], (error) => {
@@ -118,10 +118,8 @@ export function createEditor(
             }
             return null;
           },
-          ...map(
-            opts.autocompletions || [],
-            (options: string[], node) =>
-              ifIn([node], completeFromList(options)),
+          ...map(opts.autocompletions || [], (options: string[], node) =>
+            ifIn([node], completeFromList(options)),
           ),
         ],
       }),
@@ -129,11 +127,11 @@ export function createEditor(
       EditorView.updateListener.of((viewUpdate) => {
         editorState.update((current) =>
           assign({}, current, {
-            hasUnsavedChanges: current.hasUnsavedChanges ||
-              viewUpdate.docChanged,
+            hasUnsavedChanges:
+              current.hasUnsavedChanges || viewUpdate.docChanged,
             undoDepth: undoDepth(viewUpdate.state),
             redoDepth: redoDepth(viewUpdate.state),
-          })
+          }),
         );
       }),
       schedulePlugin,

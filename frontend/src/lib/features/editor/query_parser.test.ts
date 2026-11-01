@@ -12,12 +12,10 @@ for (const { name: file } of fs.readdirSync(caseDir, { withFileTypes: true })) {
 
   const name = file.split(".", 1)[0];
   describe(name, () => {
-    for (
-      const { name, run } of fileTests(
-        fs.readFileSync(join(caseDir, file), "utf-8"),
-        file,
-      )
-    ) {
+    for (const { name, run } of fileTests(
+      fs.readFileSync(join(caseDir, file), "utf-8"),
+      file,
+    )) {
       test(name, () => run(queryLanguage.parser));
     }
   });

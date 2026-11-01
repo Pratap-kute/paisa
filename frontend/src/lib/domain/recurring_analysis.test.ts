@@ -26,11 +26,14 @@ function tx(
   commodity = "INR",
   source = "Assets:Bank",
 ): Transaction {
-  const postings = [{ account, quantity: amount, commodity }, {
-    account: source,
-    quantity: -amount,
-    commodity,
-  }].map((p) => ({ ...p, amount: p.quantity, tag_recurring: "" } as Posting));
+  const postings = [
+    { account, quantity: amount, commodity },
+    {
+      account: source,
+      quantity: -amount,
+      commodity,
+    },
+  ].map((p) => ({ ...p, amount: p.quantity, tag_recurring: "" }) as Posting);
   return {
     id: `${date}:${payee}:${source}:${commodity}`,
     date: dayjs(date),
@@ -43,7 +46,7 @@ function tx(
 }
 function monthly(amounts = [499, 499, 499]) {
   return amounts.map((amount, i) =>
-    tx(`2026-${String(i + 6).padStart(2, "0")}-08`, amount)
+    tx(`2026-${String(i + 6).padStart(2, "0")}-08`, amount),
   );
 }
 function analysis(ts = monthly(), date = asOf, confirmed = true) {
@@ -72,19 +75,21 @@ describe("recurring cadence and prediction", () => {
     const rhythm = inferCadence(
       ["2023-11-30", "2023-12-31", "2024-01-31"].map((d) => dayjs(d)),
     );
-    expect(advanceOccurrence(dayjs("2024-01-31"), rhythm).format("YYYY-MM-DD"))
-      .toBe("2024-02-29");
-    expect(advanceOccurrence(dayjs("2024-02-29"), rhythm).format("YYYY-MM-DD"))
-      .toBe("2024-03-31");
+    expect(
+      advanceOccurrence(dayjs("2024-01-31"), rhythm).format("YYYY-MM-DD"),
+    ).toBe("2024-02-29");
+    expect(
+      advanceOccurrence(dayjs("2024-02-29"), rhythm).format("YYYY-MM-DD"),
+    ).toBe("2024-03-31");
   });
   it("does not suggest short or irregular histories", () => {
-    for (
-      const ts of [[], monthly().slice(0, 1), monthly().slice(0, 2), [
-        tx("2026-01-01"),
-        tx("2026-01-03"),
-        tx("2026-03-15"),
-      ]]
-    ) expect(discoverRecurringCandidates(ts, [], asOf)).toHaveLength(0);
+    for (const ts of [
+      [],
+      monthly().slice(0, 1),
+      monthly().slice(0, 2),
+      [tx("2026-01-01"), tx("2026-01-03"), tx("2026-03-15")],
+    ])
+      expect(discoverRecurringCandidates(ts, [], asOf)).toHaveLength(0);
   });
   it("preserves manual tags with insufficient or irregular evidence", () => {
     const item = analysis([tx("2026-08-01")]);
@@ -138,17 +143,19 @@ describe("merchant and financial semantics", () => {
           "Netflix",
           "USD",
           "Liabilities:Card",
-        )
+        ),
       ),
     ];
     expect(discoverRecurringCandidates(all, [], asOf)).toHaveLength(2);
   });
   it("excludes existing recurring identities from suggestions", () => {
     const ts = monthly();
-    const sequences = [{
-      key: "Netflix",
-      transactions: ts,
-    }] as TransactionSequence[];
+    const sequences = [
+      {
+        key: "Netflix",
+        transactions: ts,
+      },
+    ] as TransactionSequence[];
     expect(discoverRecurringCandidates(ts, sequences, asOf)).toHaveLength(0);
     ts[0].tag_recurring = "Netflix";
     expect(discoverRecurringCandidates(ts, [], asOf)).toHaveLength(0);
@@ -162,7 +169,7 @@ describe("merchant and financial semantics", () => {
     ];
     const items = kinds.map(([account, amount, kind]) => {
       const ts = monthly().map((t) =>
-        tx(t.date.format("YYYY-MM-DD"), amount, account)
+        tx(t.date.format("YYYY-MM-DD"), amount, account),
       );
       const item = analysis(ts);
       expect(item.kind).toBe(kind);
@@ -173,8 +180,9 @@ describe("merchant and financial semantics", () => {
       annual: 0,
       upcoming30: 10000,
     });
-    expect(summarizeRecurring([...items, analysis()], asOf).totals[0].monthly)
-      .toBe(499);
+    expect(
+      summarizeRecurring([...items, analysis()], asOf).totals[0].monthly,
+    ).toBe(499);
     expect(economicOccurrence(tx("2026-08-01", -10))).toBeUndefined();
   });
 });
@@ -223,22 +231,25 @@ describe("amounts, lifecycle and summary", () => {
           "Expenses:Entertainment",
           "Netflix",
           "USD",
-        )
+        ),
       ),
     );
-    const summary = summarizeRecurring([
-      analysis(),
-      usd,
-      analysis(monthly(), asOf, false),
-      analysis(monthly(), dayjs("2026-10-12")),
-    ], asOf);
+    const summary = summarizeRecurring(
+      [
+        analysis(),
+        usd,
+        analysis(monthly(), asOf, false),
+        analysis(monthly(), dayjs("2026-10-12")),
+      ],
+      asOf,
+    );
     expect(summary.totals).toHaveLength(2);
     expect(summary.totals[0].annual).toBe(5988);
     expect(summary.totals[0].upcoming30).toBe(499);
   });
   it("counts every weekly occurrence inside the horizon", () => {
     const ts = ["2026-07-27", "2026-08-03", "2026-08-10"].map((date) =>
-      tx(date, 100)
+      tx(date, 100),
     );
     const item = analysis(ts, asOf);
     const totals = summarizeRecurring([item], asOf).totals[0];
@@ -279,16 +290,14 @@ it("annualizes biweekly, quarterly and yearly commitments correctly", () => {
 
 it("preserves confirmed identities and transaction history from existing recurring fixtures", async () => {
   const { analyzeConfirmedRecurring } = await import("./recurring_analysis");
-  for (
-    const fixture of [
-      "browser",
-      "inr",
-      "eur",
-      "inr-hledger",
-      "eur-hledger",
-      "inr-beancount",
-    ]
-  ) {
+  for (const fixture of [
+    "browser",
+    "inr",
+    "eur",
+    "inr-hledger",
+    "eur-hledger",
+    "inr-beancount",
+  ]) {
     const input = JSON.parse(
       fs.readFileSync(
         fileURLToPath(
@@ -311,8 +320,8 @@ it("preserves confirmed identities and transaction history from existing recurri
       input.transaction_sequences.map((item) => item.key),
     );
     for (const item of items) {
-      const source = input.transaction_sequences.find((sequence) =>
-        sequence.key === item.key
+      const source = input.transaction_sequences.find(
+        (sequence) => sequence.key === item.key,
       )!;
       expect(item.transactions.map((t) => t.id).sort()).toEqual(
         source.transactions.map((t) => t.id).sort(),
@@ -327,8 +336,9 @@ it("handles zero amounts and invalid numeric data without non-finite output", ()
   expect(item.amountChange?.percentage).toBeUndefined();
   expect(JSON.stringify(item)).not.toContain("Infinity");
   expect(economicOccurrence(tx("2026-08-08", Number.NaN))).toBeUndefined();
-  expect(economicOccurrence(tx("2026-08-08", Number.POSITIVE_INFINITY)))
-    .toBeUndefined();
+  expect(
+    economicOccurrence(tx("2026-08-08", Number.POSITIVE_INFINITY)),
+  ).toBeUndefined();
 });
 
 it("separates loan expense from full cash obligation and card repayment", () => {
@@ -343,8 +353,9 @@ it("separates loan expense from full cash obligation and card repayment", () => 
   const loan = analysis(ts, dayjs("2026-09-05"));
   expect(loan.expectedExpenseAmount).toBe(2000);
   expect(loan.expectedCashOutflowAmount).toBe(10000);
-  expect(summarizeRecurring([loan], dayjs("2026-09-05")).totals[0])
-    .toMatchObject({ monthly: 2000, upcoming7: 10000 });
+  expect(
+    summarizeRecurring([loan], dayjs("2026-09-05")).totals[0],
+  ).toMatchObject({ monthly: 2000, upcoming7: 10000 });
   const card = analysis(
     ts.map((t) => ({
       ...t,
@@ -360,22 +371,21 @@ it("separates loan expense from full cash obligation and card repayment", () => 
     dayjs("2026-09-05"),
   );
   expect(card.expectedExpenseAmount).toBe(0);
-  expect(summarizeRecurring([loan, card], dayjs("2026-09-05")).totals[0])
-    .toMatchObject({ monthly: 2000, upcoming7: 20000 });
+  expect(
+    summarizeRecurring([loan, card], dayjs("2026-09-05")).totals[0],
+  ).toMatchObject({ monthly: 2000, upcoming7: 20000 });
 });
 
 it("applies explicit commodity materiality without suppressing small dollar changes", () => {
-  for (
-    const [commodity, previous, latest, changed] of [
-      ["USD", 9.99, 12.99, true],
-      ["EUR", 9.99, 12.99, true],
-      ["INR", 100, 110, true],
-      ["INR", 10, 15, false],
-      ["JPY", 1000, 1200, true],
-      ["JPY", 100, 120, false],
-      ["USD", 9.99, 10, false],
-    ] as const
-  ) {
+  for (const [commodity, previous, latest, changed] of [
+    ["USD", 9.99, 12.99, true],
+    ["EUR", 9.99, 12.99, true],
+    ["INR", 100, 110, true],
+    ["INR", 10, 15, false],
+    ["JPY", 1000, 1200, true],
+    ["JPY", 100, 120, false],
+    ["USD", 9.99, 10, false],
+  ] as const) {
     const item = analysis(
       monthly([previous, previous, latest]).map((t) => ({
         ...t,

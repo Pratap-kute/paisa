@@ -3,9 +3,7 @@ import { expect, test } from "vitest";
 import PostingNoteVirtualList from "./PostingNoteVirtualList.test-harness.svelte";
 
 test("renders a tooltip inside the virtual postings list", async () => {
-  const { container, getByRole, findByRole } = render(
-    PostingNoteVirtualList,
-  );
+  const { container, getByRole, findByRole } = render(PostingNoteVirtualList);
   expect(container.querySelectorAll("[data-tooltip-trigger]")).toHaveLength(2);
 
   await fireEvent.click(getByRole("button", { name: "Filter postings" }));

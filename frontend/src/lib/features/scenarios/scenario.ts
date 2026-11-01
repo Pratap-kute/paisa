@@ -34,30 +34,36 @@ export function scenarioSeries(
     ],
     points: [
       ...(result.snapshot?.asOfDate
-        ? [{
-          period: "Opening",
-          values: {
-            baseline: hidden ? 0 : result.baseline?.[openingKey(metric)] ?? 0,
-            scenario: hidden ? 0 : result.scenario?.[openingKey(metric)] ?? 0,
-          },
-          tooltipRows: [
-            [
-              "Baseline",
-              hidden ? 0 : result.baseline?.[openingKey(metric)] ?? 0,
-            ],
-            [
-              "Scenario",
-              hidden ? 0 : result.scenario?.[openingKey(metric)] ?? 0,
-            ],
-            ["Difference", 0],
-          ] as [string, number][],
-        }]
+        ? [
+            {
+              period: "Opening",
+              values: {
+                baseline: hidden
+                  ? 0
+                  : (result.baseline?.[openingKey(metric)] ?? 0),
+                scenario: hidden
+                  ? 0
+                  : (result.scenario?.[openingKey(metric)] ?? 0),
+              },
+              tooltipRows: [
+                [
+                  "Baseline",
+                  hidden ? 0 : (result.baseline?.[openingKey(metric)] ?? 0),
+                ],
+                [
+                  "Scenario",
+                  hidden ? 0 : (result.scenario?.[openingKey(metric)] ?? 0),
+                ],
+                ["Difference", 0],
+              ] as [string, number][],
+            },
+          ]
         : []),
       ...(result.baseline?.points ?? []).map((point, i) => {
-        const baseline = hidden ? 0 : point[metric] ?? 0;
+        const baseline = hidden ? 0 : (point[metric] ?? 0);
         const scenario = hidden
           ? 0
-          : result.scenario?.points?.[i]?.[metric] ?? 0;
+          : (result.scenario?.points?.[i]?.[metric] ?? 0);
         return {
           period: point.month ?? "",
           values: { baseline, scenario },
@@ -114,8 +120,8 @@ function openingKey(
   return metric === "cash"
     ? "openingCash"
     : metric === "investment"
-    ? "openingInvestment"
-    : "openingNetWorth";
+      ? "openingInvestment"
+      : "openingNetWorth";
 }
 export function scenarioInput(
   value: number | null | undefined,
@@ -145,7 +151,7 @@ export function scenarioQuality(reasons: DtoScenarioReason[] = []): string[] {
       reasons.map((reason) =>
         reason.code === "estimated_investment_value" && reason.field
           ? `${reason.field} — investment value uses an estimated price or cost fallback.`
-          : qualityMessage(reason.code)
+          : qualityMessage(reason.code),
       ),
     ),
   ];

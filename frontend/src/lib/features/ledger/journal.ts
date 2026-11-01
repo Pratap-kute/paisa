@@ -46,13 +46,16 @@ function formatLine(line: string, state: State) {
     const { account, prefix, amount, suffix } = fullMatch.groups;
     if (
       account.length + prefix.length + amount.length <=
-        amountAlignmentColumn - 6
+      amountAlignmentColumn - 6
     ) {
       return (
         space(4) +
         account +
         space(
-          amountAlignmentColumn - 4 - account.length - prefix.length -
+          amountAlignmentColumn -
+            4 -
+            account.length -
+            prefix.length -
             amount.length,
         ) +
         prefix +

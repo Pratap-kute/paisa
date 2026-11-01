@@ -30,11 +30,5 @@
     "Multi Currency Debit",
     "Interest"
   ],
-  "commodities": [
-    "AAPL",
-    "ABNB",
-    "INR",
-    "NIFTY",
-    "USD"
-  ]
+  "commodities": ["AAPL", "ABNB", "INR", "NIFTY", "USD"]
 }

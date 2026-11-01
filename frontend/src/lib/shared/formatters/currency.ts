@@ -13,17 +13,16 @@ export function normalize(value: number): number {
     return 0;
   }
   if (
-    Object.is(value, -0) || Math.abs(value) < 1e-9 || !Number.isFinite(value)
+    Object.is(value, -0) ||
+    Math.abs(value) < 1e-9 ||
+    !Number.isFinite(value)
   ) {
     return 0;
   }
   return value;
 }
 
-export function formatCurrency(
-  value: number,
-  precision?: number,
-): string {
+export function formatCurrency(value: number, precision?: number): string {
   value = normalize(value);
   const resolvedPrecision = precision ?? USER_CONFIG.display_precision;
 

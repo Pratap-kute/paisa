@@ -17,10 +17,12 @@ test("renders renderer-neutral line, square, and hatch symbols", () => {
 
   const { container, getByText, unmount } = render(LegendCard, { legends });
 
-  expect(container.querySelectorAll("[data-testid='legend-symbol']"))
-    .toHaveLength(3);
-  expect(container.querySelector(".legend-pattern-diagonal"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelectorAll("[data-testid='legend-symbol']"),
+  ).toHaveLength(3);
+  expect(
+    container.querySelector(".legend-pattern-diagonal"),
+  ).toBeInTheDocument();
   expect(container.querySelector("svg")).not.toBeInTheDocument();
   expect(getByText("INR 1,000")).toBeInTheDocument();
   unmount();

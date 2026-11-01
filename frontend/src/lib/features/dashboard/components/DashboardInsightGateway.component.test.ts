@@ -7,9 +7,10 @@ function item(index: number): DashboardAttentionItem {
   return {
     id: `item-${index}`,
     kind: "insight",
-    title: index === 1
-      ? "A deliberately long attention title that must remain readable on narrow dashboard layouts"
-      : `Attention ${index}`,
+    title:
+      index === 1
+        ? "A deliberately long attention title that must remain readable on narrow dashboard layouts"
+        : `Attention ${index}`,
     detail: `Supporting detail ${index}`,
     icon: "fa-solid fa-triangle-exclamation",
     status: "warning",
@@ -26,8 +27,9 @@ test("renders an honest empty attention state and period-aware insights link", (
   expect(container.textContent).toContain(
     "No material issues detected this month",
   );
-  expect(container.querySelector("a")?.getAttribute("href"))
-    .toBe("/insights?period=2026-08");
+  expect(container.querySelector("a")?.getAttribute("href")).toBe(
+    "/insights?period=2026-08",
+  );
 });
 
 test("renders one keyboard-accessible attention link", () => {

@@ -80,8 +80,7 @@ describe("time-series ECharts adapters", () => {
       "loss",
     ]);
     expect(data.points.map((point) => point.values.networth)).toEqual([
-      160,
-      90,
+      160, 90,
     ]);
     expect(data.points[0].values.investment).toBe(100);
     expect(data.points[1].values.loss).toBe(90);
@@ -161,16 +160,18 @@ describe("time-series ECharts adapters", () => {
     expect(yearly.points[0].values.Interest).toBe(100);
     expect(net.points[0].values.net_income).toBe(900);
 
-    const comparison = buildYearlyIncomeComparisonSeries([{
-      start_date: dayjs("2021-04-01"),
-      end_date: dayjs("2022-03-31"),
-      postings: [
-        posting("Income:Salary:Acme", -1200),
-        posting("Income:Interest:Bank", -100),
-      ],
-      net_income: 900,
-      net_tax: 400,
-    } as IncomeYearlyCard]);
+    const comparison = buildYearlyIncomeComparisonSeries([
+      {
+        start_date: dayjs("2021-04-01"),
+        end_date: dayjs("2022-03-31"),
+        postings: [
+          posting("Income:Salary:Acme", -1200),
+          posting("Income:Interest:Bank", -100),
+        ],
+        net_income: 900,
+        net_tax: 400,
+      } as IncomeYearlyCard,
+    ]);
     expect(comparison.series.map((series) => series.key)).toEqual([
       "Interest",
       "Salary",
@@ -196,20 +197,21 @@ describe("time-series ECharts adapters", () => {
   });
 
   it("preserves goal actual, forecast, milestone, and monthly investment values", () => {
-    const points: Point[] = [
-      { date: dayjs("2022-01-01"), value: 100 },
-    ];
+    const points: Point[] = [{ date: dayjs("2022-01-01"), value: 100 }];
     const forecasts: Forecast[] = [
       { date: dayjs("2022-02-01"), value: 150, error: 10 },
     ];
     const progress = buildGoalProgressSeries(points, forecasts, forecasts, 200);
-    const investment = buildGoalInvestmentSeries([
-      posting(
-        "Assets:Equity:Brokerage",
-        80,
-        dayjs().subtract(1, "month").format("YYYY-MM-DD"),
-      ),
-    ], 75);
+    const investment = buildGoalInvestmentSeries(
+      [
+        posting(
+          "Assets:Equity:Brokerage",
+          80,
+          dayjs().subtract(1, "month").format("YYYY-MM-DD"),
+        ),
+      ],
+      75,
+    );
 
     expect(progress.points.map((point) => point.values.actual)).toContain(100);
     expect(progress.points.map((point) => point.values.forecast)).toContain(
@@ -243,24 +245,25 @@ describe("time-series ECharts adapters", () => {
 
 describe("goal projection semantics", () => {
   it("labels plan lines and tooltips without a forecast uncertainty band", () => {
-    const predictions = [{
-      date: dayjs("2027-03-01"),
-      value: 600000,
-      error: 0,
-    }];
-    for (
-      const [kind, label] of [["required-path", "Required path"], [
-        "configured-payment",
-        "Configured payment path",
-      ]] as const
-    ) {
+    const predictions = [
+      {
+        date: dayjs("2027-03-01"),
+        value: 600000,
+        error: 0,
+      },
+    ];
+    for (const [kind, label] of [
+      ["required-path", "Required path"],
+      ["configured-payment", "Configured payment path"],
+    ] as const) {
       const result = buildGoalProgressSeries([], predictions, [], 600000, kind);
       expect(result.legends?.map((item) => item.label)).toContain(label);
       expect(result.series.find((item) => item.key === "forecast")?.label).toBe(
         label,
       );
-      expect(result.series.find((item) => item.key === "forecastBandHigh"))
-        .toBeUndefined();
+      expect(
+        result.series.find((item) => item.key === "forecastBandHigh"),
+      ).toBeUndefined();
       expect(result.points[0].tooltipRows).toContainEqual([label, 600000]);
       expect(result.points[0].values.forecast).toBe(600000);
     }
@@ -275,7 +278,8 @@ describe("goal projection semantics", () => {
     expect(result.series.find((item) => item.key === "forecast")?.label).toBe(
       "Forecast",
     );
-    expect(result.series.find((item) => item.key === "forecastBandHigh"))
-      .toBeDefined();
+    expect(
+      result.series.find((item) => item.key === "forecastBandHigh"),
+    ).toBeDefined();
   });
 });

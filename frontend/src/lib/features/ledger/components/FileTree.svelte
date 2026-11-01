@@ -1,46 +1,46 @@
 <script lang="ts">
-import FileTree from "./FileTree.svelte";
+  import FileTree from "./FileTree.svelte";
 
-import type { Directory, LedgerFile } from "$lib/domain/ledger";
-import { createEventDispatcher } from "svelte";
+  import type { Directory, LedgerFile } from "$lib/domain/ledger";
+  import { createEventDispatcher } from "svelte";
 
-interface Props {
-  files: Array<Directory | LedgerFile>;
-  path: string;
-  selectedFileName: string;
-  hasUnsavedChanges: boolean;
-  root?: boolean;
-  onselect?: (file: LedgerFile | Directory) => void;
-}
+  interface Props {
+    files: Array<Directory | LedgerFile>;
+    path: string;
+    selectedFileName: string;
+    hasUnsavedChanges: boolean;
+    root?: boolean;
+    onselect?: (file: LedgerFile | Directory) => void;
+  }
 
-let {
-  files,
-  path,
-  selectedFileName,
-  hasUnsavedChanges,
-  root = true,
-  onselect,
-}: Props = $props();
+  let {
+    files,
+    path,
+    selectedFileName,
+    hasUnsavedChanges,
+    root = true,
+    onselect,
+  }: Props = $props();
 
-const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
-function handleSelect(file: LedgerFile | Directory) {
-  onselect?.(file);
-  dispatch("select", file);
-}
+  function handleSelect(file: LedgerFile | Directory) {
+    onselect?.(file);
+    dispatch("select", file);
+  }
 
-function fileName(path: string) {
-  return path.split("/").at(-1) ?? "";
-}
+  function fileName(path: string) {
+    return path.split("/").at(-1) ?? "";
+  }
 
-function join(paths: string[]) {
-  return paths.filter(Boolean).join("/");
-}
+  function join(paths: string[]) {
+    return paths.filter(Boolean).join("/");
+  }
 
-function isOpen(file: Directory | LedgerFile) {
-  const fullPath = join([path, file.name]);
-  return selectedFileName?.startsWith(fullPath);
-}
+  function isOpen(file: Directory | LedgerFile) {
+    const fullPath = join([path, file.name]);
+    return selectedFileName?.startsWith(fullPath);
+  }
 </script>
 
 <ul class="ledger-file-tree" class:is-root={root}>
@@ -81,10 +81,7 @@ function isOpen(file: Directory | LedgerFile) {
             handleSelect(file);
           }}
         >
-          <span
-            class="file-name"
-            title={fileName(file.name)}
-          >
+          <span class="file-name" title={fileName(file.name)}>
             {fileName(file.name)}
           </span>
 
@@ -102,102 +99,102 @@ function isOpen(file: Directory | LedgerFile) {
 </ul>
 
 <style>
-ul.ledger-file-tree {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  ul.ledger-file-tree {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 
-  &:not(.is-root) {
-    margin-left: 0.8rem;
-  }
-}
-
-.folder-item,
-.file-item {
-  margin: 0;
-  padding: 0;
-}
-
-.folder-summary,
-.ledger-file-link {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 30px;
-  border-radius: var(--paisa-radius-sm);
-
-  color: var(--paisa-muted-foreground);
-  font-size: var(--paisa-font-size-xs);
-
-  transition:
-    background-color var(--paisa-transition-fast),
-    color var(--paisa-transition-fast);
-}
-
-.folder-summary {
-  gap: 0.35rem;
-  padding: 0.3rem 0.5rem;
-
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-
-  &::-webkit-details-marker {
-    display: none;
-  }
-
-  &::marker {
-    content: "";
-  }
-
-  &:hover {
-    background-color: var(--paisa-surface-hover);
-    color: var(--paisa-foreground);
-
-    .chevron {
-      color: var(--paisa-foreground);
+    &:not(.is-root) {
+      margin-left: 0.8rem;
     }
   }
-}
 
-.chevron {
-  display: inline-flex;
-  width: 0.6rem;
-  height: 0.8rem;
-  flex: 0 0 0.6rem;
+  .folder-item,
+  .file-item {
+    margin: 0;
+    padding: 0;
+  }
 
-  align-items: center;
-  justify-content: center;
+  .folder-summary,
+  .ledger-file-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 30px;
+    border-radius: var(--paisa-radius-sm);
 
-  color: var(--paisa-muted-foreground);
-  font-size: 0.5rem;
-  line-height: 1;
+    color: var(--paisa-muted-foreground);
+    font-size: var(--paisa-font-size-xs);
 
-  transition:
-    transform var(--paisa-transition-fast),
-    color var(--paisa-transition-fast);
-}
+    transition:
+      background-color var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
+  }
 
-.folder-details[open] > .folder-summary .chevron {
-  transform: rotate(90deg);
-}
+  .folder-summary {
+    gap: 0.35rem;
+    padding: 0.3rem 0.5rem;
 
-.folder-name {
-  min-width: 0;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    &::-webkit-details-marker {
+      display: none;
+    }
 
-  font-family: var(--paisa-font-sans);
-  font-weight: var(--paisa-font-weight-medium);
-}
+    &::marker {
+      content: "";
+    }
 
-.folder-content {
-  margin: 1px 0;
-}
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+      color: var(--paisa-foreground);
 
-/*
+      .chevron {
+        color: var(--paisa-foreground);
+      }
+    }
+  }
+
+  .chevron {
+    display: inline-flex;
+    width: 0.6rem;
+    height: 0.8rem;
+    flex: 0 0 0.6rem;
+
+    align-items: center;
+    justify-content: center;
+
+    color: var(--paisa-muted-foreground);
+    font-size: 0.5rem;
+    line-height: 1;
+
+    transition:
+      transform var(--paisa-transition-fast),
+      color var(--paisa-transition-fast);
+  }
+
+  .folder-details[open] > .folder-summary .chevron {
+    transform: rotate(90deg);
+  }
+
+  .folder-name {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-family: var(--paisa-font-sans);
+    font-weight: var(--paisa-font-weight-medium);
+  }
+
+  .folder-content {
+    margin: 1px 0;
+  }
+
+  /*
  * Files intentionally have no icon.
  *
  * Their left padding roughly aligns filenames with folder labels
@@ -206,44 +203,44 @@ ul.ledger-file-tree {
  * Important: do not use the class name ".file" here because Bulma
  * already owns that class for its file-upload component.
  */
-.ledger-file-link {
-  gap: 0.35rem;
-  padding: 0.3rem 0.5rem 0.3rem 1.45rem;
+  .ledger-file-link {
+    gap: 0.35rem;
+    padding: 0.3rem 0.5rem 0.3rem 1.45rem;
 
-  text-decoration: none;
+    text-decoration: none;
 
-  &:hover {
-    background-color: var(--paisa-surface-hover);
-    color: var(--paisa-foreground);
+    &:hover {
+      background-color: var(--paisa-surface-hover);
+      color: var(--paisa-foreground);
+    }
+
+    &.is-active {
+      background-color: var(--paisa-primary-subtle);
+      color: var(--paisa-primary);
+      font-weight: var(--paisa-font-weight-medium);
+
+      box-shadow: inset 2px 0 0 var(--paisa-primary);
+    }
   }
 
-  &.is-active {
-    background-color: var(--paisa-primary-subtle);
-    color: var(--paisa-primary);
-    font-weight: var(--paisa-font-weight-medium);
+  .file-name {
+    min-width: 0;
+    flex: 1;
 
-    box-shadow: inset 2px 0 0 var(--paisa-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-family: var(--paisa-font-mono);
+    font-size: 0.7rem;
   }
-}
 
-.file-name {
-  min-width: 0;
-  flex: 1;
+  .unsaved-dot {
+    width: 6px;
+    height: 6px;
+    flex: 0 0 6px;
 
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  font-family: var(--paisa-font-mono);
-  font-size: 0.7rem;
-}
-
-.unsaved-dot {
-  width: 6px;
-  height: 6px;
-  flex: 0 0 6px;
-
-  border-radius: 50%;
-  background-color: var(--paisa-warning);
-}
+    border-radius: 50%;
+    background-color: var(--paisa-warning);
+  }
 </style>

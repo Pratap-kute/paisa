@@ -95,7 +95,7 @@ export function findDirectedCycles(graph: Graph): number[][] {
 function canonicalCycleKey(cycle: number[]): string {
   const openCycle = cycle.slice(0, -1);
   const minIndex = openCycle.reduce(
-    (best, id, index) => id < openCycle[best] ? index : best,
+    (best, id, index) => (id < openCycle[best] ? index : best),
     0,
   );
   const rotated = [
@@ -106,8 +106,9 @@ function canonicalCycleKey(cycle: number[]): string {
 }
 
 export function buildCashFlowSankeyData(graph: Graph): CashFlowSankeyData {
-  const accounts = [...new Set(graph.nodes.map((node) => firstName(node.name)))]
-    .sort();
+  const accounts = [
+    ...new Set(graph.nodes.map((node) => firstName(node.name))),
+  ].sort();
   const color = generateColorScheme(accounts);
   const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
   const incoming = new Map<number, number>();
@@ -147,26 +148,27 @@ export function buildCashFlowSankeyData(graph: Graph): CashFlowSankeyData {
     const target = nodeById.get(link.target);
     if (!source || !target) return [];
 
-    return [{
-      source: link.source,
-      target: link.target,
-      sourceName: source.name,
-      targetName: target.name,
-      value: link.value,
-      cycle: cycleEdges.has(`${link.source}:${link.target}`),
-    }];
+    return [
+      {
+        source: link.source,
+        target: link.target,
+        sourceName: source.name,
+        targetName: target.name,
+        value: link.value,
+        cycle: cycleEdges.has(`${link.source}:${link.target}`),
+      },
+    ];
   });
 
-  const linkByEdge = new Map(links.map((link) => [
-    `${link.source}:${link.target}`,
-    link,
-  ]));
+  const linkByEdge = new Map(
+    links.map((link) => [`${link.source}:${link.target}`, link]),
+  );
   const cycles = cycleIds.map((cycle) =>
     cycle.slice(0, -1).flatMap((source, index) => {
       const target = cycle[index + 1];
       const link = linkByEdge.get(`${source}:${target}`);
       return link ? [link] : [];
-    })
+    }),
   );
   const circularLinks = links.filter((link) => link.cycle);
   const legends: Legend[] = accounts.map((account) => ({
@@ -205,9 +207,10 @@ function buildCashFlowSankeyLayout(
     textStyle: {
       color: options.theme?.tooltipTextColor ?? textColor,
     },
-    formatter: (
-      params: { dataType?: string; data?: Record<string, unknown> },
-    ) => {
+    formatter: (params: {
+      dataType?: string;
+      data?: Record<string, unknown>;
+    }) => {
       const item = params.data ?? {};
       if (params.dataType === "edge") {
         return [
@@ -231,54 +234,56 @@ function buildCashFlowSankeyLayout(
       animation: false,
       color: options.theme?.seriesColors,
       tooltip,
-      series: [{
-        type: "graph",
-        name: "Cash Flow",
-        layout: "circular",
-        circular: { rotateLabel: !mobile },
-        left: mobile ? 12 : 48,
-        right: mobile ? 12 : 48,
-        top: mobile ? 12 : 24,
-        bottom: mobile ? 12 : 24,
-        roam: true,
-        symbolSize: (value: number) =>
-          12 + 28 * Math.sqrt(Math.max(value, 0) / maxValue),
-        edgeSymbol: ["none", "arrow"],
-        edgeSymbolSize: [0, mobile ? 7 : 9],
-        emphasis: { focus: "adjacency" },
-        label: {
-          show: !mobile,
-          color: textColor,
-          fontSize: mobile ? 10 : 12,
-          overflow: "truncate",
-          width: mobile ? 76 : 150,
-        },
-        lineStyle: {
-          color: "target",
-          opacity: options.darkMode ? 0.5 : 0.4,
-          curveness: 0.12,
-        },
-        data: data.nodes.map((node) => ({
-          id: String(node.id),
-          name: node.label,
-          nodeId: node.id,
-          tooltipName: node.label,
-          value: node.value,
-          itemStyle: { color: node.color, borderColor, borderWidth: 1 },
-        })),
-        links: data.links.map((link) => ({
-          source: link.sourceName,
-          target: link.targetName,
-          sourceId: link.source,
-          targetId: link.target,
-          sourceName: link.sourceName,
-          targetName: link.targetName,
-          value: link.value,
-          lineStyle: {
-            color: data.nodes.find((node) => node.id === link.target)?.color,
+      series: [
+        {
+          type: "graph",
+          name: "Cash Flow",
+          layout: "circular",
+          circular: { rotateLabel: !mobile },
+          left: mobile ? 12 : 48,
+          right: mobile ? 12 : 48,
+          top: mobile ? 12 : 24,
+          bottom: mobile ? 12 : 24,
+          roam: true,
+          symbolSize: (value: number) =>
+            12 + 28 * Math.sqrt(Math.max(value, 0) / maxValue),
+          edgeSymbol: ["none", "arrow"],
+          edgeSymbolSize: [0, mobile ? 7 : 9],
+          emphasis: { focus: "adjacency" },
+          label: {
+            show: !mobile,
+            color: textColor,
+            fontSize: mobile ? 10 : 12,
+            overflow: "truncate",
+            width: mobile ? 76 : 150,
           },
-        })),
-      }],
+          lineStyle: {
+            color: "target",
+            opacity: options.darkMode ? 0.5 : 0.4,
+            curveness: 0.12,
+          },
+          data: data.nodes.map((node) => ({
+            id: String(node.id),
+            name: node.label,
+            nodeId: node.id,
+            tooltipName: node.label,
+            value: node.value,
+            itemStyle: { color: node.color, borderColor, borderWidth: 1 },
+          })),
+          links: data.links.map((link) => ({
+            source: link.sourceName,
+            target: link.targetName,
+            sourceId: link.source,
+            targetId: link.target,
+            sourceName: link.sourceName,
+            targetName: link.targetName,
+            value: link.value,
+            lineStyle: {
+              color: data.nodes.find((node) => node.id === link.target)?.color,
+            },
+          })),
+        },
+      ],
       textStyle: {
         color: mutedColor,
         fontFamily: options.theme?.fontFamily,
@@ -310,14 +315,14 @@ function buildCashFlowSankeyLayout(
           fontSize: mobile ? 10 : 12,
           overflow: "truncate",
           width: mobile ? 84 : 160,
-          formatter: (
-            params: { data?: { label?: string; value?: number } },
-          ) => {
+          formatter: (params: {
+            data?: { label?: string; value?: number };
+          }) => {
             const label = params.data?.label ?? "";
             if (mobile) return label;
-            return `${label} ${
-              chartFormatters.currency(Number(params.data?.value ?? 0))
-            }`;
+            return `${label} ${chartFormatters.currency(
+              Number(params.data?.value ?? 0),
+            )}`;
           },
         },
         lineStyle: {

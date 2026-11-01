@@ -65,10 +65,10 @@ export function createEChartSurfaceController(options: {
   let isReady = false;
   let dimensions: Dimensions | undefined;
   let readyFrame: number | undefined;
-  const requestFrame: RequestFrame = options.requestFrame ??
-    globalThis.requestAnimationFrame.bind(globalThis);
-  const cancelFrame: CancelFrame = options.cancelFrame ??
-    globalThis.cancelAnimationFrame.bind(globalThis);
+  const requestFrame: RequestFrame =
+    options.requestFrame ?? globalThis.requestAnimationFrame.bind(globalThis);
+  const cancelFrame: CancelFrame =
+    options.cancelFrame ?? globalThis.cancelAnimationFrame.bind(globalThis);
 
   function attachHandlers() {
     if (!chart) return;
@@ -104,9 +104,11 @@ export function createEChartSurfaceController(options: {
     if (!chart || !dimensions) return;
     if (isReady) return;
     isReady = true;
-    (options.element as HTMLDivElement & {
-      __paisa_chart__?: EChartSurfaceEngine;
-    }).__paisa_chart__ = chart;
+    (
+      options.element as HTMLDivElement & {
+        __paisa_chart__?: EChartSurfaceEngine;
+      }
+    ).__paisa_chart__ = chart;
     options.element.dataset.chartReady = "true";
     options.onreadinesschange?.(true);
     options.onready?.();
@@ -139,7 +141,8 @@ export function createEChartSurfaceController(options: {
     },
     resize(nextDimensions) {
       if (nextDimensions.width <= 0 || nextDimensions.height <= 0) return;
-      const changed = dimensions?.width !== nextDimensions.width ||
+      const changed =
+        dimensions?.width !== nextDimensions.width ||
         dimensions?.height !== nextDimensions.height;
       if (!changed) return;
       dimensions = nextDimensions;
@@ -165,9 +168,11 @@ export function createEChartSurfaceController(options: {
       isReady = false;
       options.onreadinesschange?.(false);
       delete options.element.dataset.chartReady;
-      delete (options.element as HTMLDivElement & {
-        __paisa_chart__?: EChartSurfaceEngine;
-      }).__paisa_chart__;
+      delete (
+        options.element as HTMLDivElement & {
+          __paisa_chart__?: EChartSurfaceEngine;
+        }
+      ).__paisa_chart__;
     },
     chart() {
       return chart;

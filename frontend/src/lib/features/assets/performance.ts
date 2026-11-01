@@ -80,18 +80,18 @@ export function performanceSeries(
       },
     ],
     points: (result.timeline ?? []).map((point) => {
-      const value = hidden ? 0 : point.value ?? 0;
-      const baseline = hidden ? 0 : point.contributionBaseline ?? 0;
+      const value = hidden ? 0 : (point.value ?? 0);
+      const baseline = hidden ? 0 : (point.contributionBaseline ?? 0);
       return {
         period: `${point.date}${
           point.quality?.status === "partial" ? " (estimated)" : ""
         }`,
         timestamp: new Date(`${point.date}T00:00:00`).valueOf(),
         values: { value, baseline },
-        tooltipRows: [["Market Value", value], [
-          "Opening Value + Cumulative Net Contribution",
-          baseline,
-        ]],
+        tooltipRows: [
+          ["Market Value", value],
+          ["Opening Value + Cumulative Net Contribution", baseline],
+        ],
       };
     }),
   };

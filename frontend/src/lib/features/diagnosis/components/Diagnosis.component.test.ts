@@ -137,8 +137,9 @@ test("QualityIssueRow renders issue details, entity, action, and maps machine af
   expect(view.getByText("Valuation")).toBeTruthy();
   expect(view.getByText("Warning")).toBeTruthy();
   expect(view.getByText("NIFTYBEES")).toBeTruthy();
-  expect(view.getByText(/Paisa could not obtain a market valuation/i))
-    .toBeTruthy();
+  expect(
+    view.getByText(/Paisa could not obtain a market valuation/i),
+  ).toBeTruthy();
   expect(view.getByText("Investment Performance")).toBeTruthy();
   expect(view.getByText("Net Worth")).toBeTruthy();
 

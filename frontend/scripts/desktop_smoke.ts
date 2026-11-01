@@ -38,7 +38,7 @@ try {
   const result = await Promise.race([
     child.exited.then((code) => ({ exited: true, code })),
     new Promise<{ exited: false }>((resolve) =>
-      setTimeout(() => resolve({ exited: false }), 10_000)
+      setTimeout(() => resolve({ exited: false }), 10_000),
     ),
   ]);
   if (result.exited) {
@@ -50,14 +50,12 @@ try {
   try {
     await fs.stat(database);
   } catch (_error) {
-    throw new Error(
-      `Desktop app stayed alive but did not create ${database}`,
-    );
+    throw new Error(`Desktop app stayed alive but did not create ${database}`);
   }
   console.log(
-    `Desktop smoke passed for ${basename(dirname(executable))}/${
-      basename(executable)
-    }`,
+    `Desktop smoke passed for ${basename(dirname(executable))}/${basename(
+      executable,
+    )}`,
   );
 } finally {
   try {

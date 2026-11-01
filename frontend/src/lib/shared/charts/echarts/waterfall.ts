@@ -7,7 +7,7 @@ export function incomeStatementAxisRange(data: IncomeStatementWaterfallData) {
   const values = data.steps.flatMap((step) =>
     step.id === "start" || step.id === "end"
       ? [step.end]
-      : [step.start, step.end]
+      : [step.start, step.end],
   );
   if (values.length === 0) return { min: 0, max: 1 };
   const minimum = Math.min(...values);
@@ -30,8 +30,8 @@ function buildIncomeStatementWaterfallLayout(
   const axisRange = incomeStatementAxisRange(data);
   const colorFor = (delta: number) =>
     delta >= 0
-      ? theme?.positiveColor ?? "#16a34a"
-      : theme?.negativeColor ?? "#dc2626";
+      ? (theme?.positiveColor ?? "#16a34a")
+      : (theme?.negativeColor ?? "#dc2626");
   const baseOption = {
     animation: false,
     textStyle: { fontFamily: theme?.fontFamily, color: theme?.mutedColor },
@@ -68,8 +68,8 @@ function buildIncomeStatementWaterfallLayout(
           lines.push(
             "<hr style='border: 0; border-top: 1px solid rgba(148, 163, 184, 0.2); margin: 6px 0;'/>",
           );
-          const sorted = [...step.breakdown].sort((a, b) =>
-            Math.abs(b.value) - Math.abs(a.value)
+          const sorted = [...step.breakdown].sort(
+            (a, b) => Math.abs(b.value) - Math.abs(a.value),
           );
           const maxVisible = 6;
           const visible = sorted.slice(0, maxVisible);
@@ -77,18 +77,18 @@ function buildIncomeStatementWaterfallLayout(
 
           for (const row of visible) {
             lines.push(
-              `${row.account}: <strong>${
-                chartFormatters.currency(row.value)
-              }</strong>`,
+              `${row.account}: <strong>${chartFormatters.currency(
+                row.value,
+              )}</strong>`,
             );
           }
 
           if (remaining.length > 0) {
             const remainingSum = remaining.reduce((s, r) => s + r.value, 0);
             lines.push(
-              `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} more accounts: <strong>${
-                chartFormatters.currency(remainingSum)
-              }</strong></span>`,
+              `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} more accounts: <strong>${chartFormatters.currency(
+                remainingSum,
+              )}</strong></span>`,
             );
           }
         }
@@ -110,8 +110,8 @@ function buildIncomeStatementWaterfallLayout(
           ({
             "Starting balance": "Start",
             "Gain / Loss": "P/L",
-            "Liabilities": "Liab.",
-            "Expenses": "Expense",
+            Liabilities: "Liab.",
+            Expenses: "Expense",
             "Ending balance": "End",
           })[label] ?? label,
       },
@@ -143,7 +143,7 @@ function buildIncomeStatementWaterfallLayout(
         data: data.steps.map((step) =>
           step.id === "start" || step.id === "end"
             ? 0
-            : Math.min(step.start, step.end)
+            : Math.min(step.start, step.end),
         ),
       },
       {
@@ -152,20 +152,23 @@ function buildIncomeStatementWaterfallLayout(
         stack: "waterfall",
         barMaxWidth: mobile ? 28 : 52,
         data: data.steps.map((step) => ({
-          value: step.id === "start" || step.id === "end"
-            ? step.end
-            : Math.abs(step.delta),
+          value:
+            step.id === "start" || step.id === "end"
+              ? step.end
+              : Math.abs(step.delta),
           itemStyle: { color: colorFor(step.delta), opacity: 0.82 },
           label: {
-            show: !mobile &&
+            show:
+              !mobile &&
               (step.id === "start" || step.id === "end" || step.delta !== 0),
             position: step.delta < 0 ? "bottom" : "top",
             color: theme?.textColor,
-            formatter: step.id === "start" || step.id === "end"
-              ? chartFormatters.compactCurrency(step.end)
-              : `${step.delta > 0 ? "+" : ""}${
-                chartFormatters.compactCurrency(step.delta)
-              }`,
+            formatter:
+              step.id === "start" || step.id === "end"
+                ? chartFormatters.compactCurrency(step.end)
+                : `${step.delta > 0 ? "+" : ""}${chartFormatters.compactCurrency(
+                    step.delta,
+                  )}`,
           },
         })),
         label: {

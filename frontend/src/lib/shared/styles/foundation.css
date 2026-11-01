@@ -48,8 +48,10 @@
   --paisa-prediction-transfer: #8b5cf6;
 
   --paisa-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --paisa-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --paisa-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --paisa-shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --paisa-shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 
   --paisa-radius-sm: 4px;
   --paisa-radius-md: 6px;
@@ -59,9 +61,14 @@
   --paisa-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --paisa-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  --paisa-font-ui: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --paisa-font-code: "JetBrains Mono Variable", "JetBrains Mono", "Fira Code", monospace;
-  --paisa-font-icon: "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", var(--paisa-font-ui);
+  --paisa-font-ui:
+    "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --paisa-font-code:
+    "JetBrains Mono Variable", "JetBrains Mono", "Fira Code", monospace;
+  --paisa-font-icon:
+    "fa6-solid", "fa6-regular", "fa6-brands", "arcticons",
+    "fluent-emoji-high-contrast", "mdi", var(--paisa-font-ui);
   --paisa-font-sans: var(--paisa-font-ui);
   --paisa-font-mono: var(--paisa-font-code);
   --paisa-font-size-xs: 0.75rem;
@@ -244,8 +251,10 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 20px;
-  transition: background-color var(--paisa-transition-fast), border-color
-    var(--paisa-transition-fast), color var(--paisa-transition-fast);
+  transition:
+    background-color var(--paisa-transition-fast),
+    border-color var(--paisa-transition-fast),
+    color var(--paisa-transition-fast);
 }
 
 .paisa4-button:hover:not(:disabled) {
@@ -358,8 +367,12 @@
   content: "";
   transform: translateX(-100%);
   animation: paisa4-shimmer 1.4s infinite;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb,
-    var(--paisa-foreground) 8%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--paisa-foreground) 8%, transparent),
+    transparent
+  );
 }
 
 .paisa4-radius-sm {

@@ -37,7 +37,9 @@ for (const route of routes) {
   });
 }
 
-test("/dev/ui is not available in preview production mode", async ({ page }) => {
+test("/dev/ui is not available in preview production mode", async ({
+  page,
+}) => {
   test.skip(
     process.env.PAISA_E2E_DEV_UI === "1",
     "E2E preview builds enable /dev/ui for component smoke tests",

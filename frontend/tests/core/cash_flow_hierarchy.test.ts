@@ -4,9 +4,7 @@ import {
   buildCashFlowHierarchyData,
 } from "$lib/features/cash_flow/cash_flow_hierarchy";
 import type { Graph } from "$lib/shared/charts/types";
-import browserExpense from "../fixture/browser/expense.json" with {
-  type: "json",
-};
+import browserExpense from "../fixture/browser/expense.json" with { type: "json" };
 
 const graph: Graph = {
   nodes: [
@@ -41,8 +39,8 @@ describe("Cash Flow Hierarchy & Treemap transformer", () => {
     expect(expenses).toBeDefined();
     expect(expenses?.value).toBe(70_000); // 20k + 10k + 40k
 
-    const foodCategory = expenses?.children?.find((c) =>
-      c.id === "Expenses:Food"
+    const foodCategory = expenses?.children?.find(
+      (c) => c.id === "Expenses:Food",
     );
     expect(foodCategory).toBeDefined();
     expect(foodCategory?.value).toBe(30_000); // 20k + 10k
@@ -80,8 +78,9 @@ describe("Cash Flow Hierarchy & Treemap transformer", () => {
     const treemapData = buildCashFlowHierarchyData(cycleGraph);
     expect(treemapData.mode).toBe("treemap");
     expect(treemapData.roots.length).toBeGreaterThan(0);
-    expect(treemapData.roots.find((r) => r.id === "Assets")?.value)
-      .toBeGreaterThan(0);
+    expect(
+      treemapData.roots.find((r) => r.id === "Assets")?.value,
+    ).toBeGreaterThan(0);
   });
 
   it("builds hierarchy from real browser expense fixture", () => {

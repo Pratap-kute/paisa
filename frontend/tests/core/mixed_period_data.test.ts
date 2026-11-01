@@ -58,8 +58,7 @@ describe("mixed-period chart adapters", () => {
     );
     expect(data.points.map((point) => point.values.Food)).toEqual([100, 50]);
     expect(data.points.map((point) => point.values.yearlyAverage)).toEqual([
-      75,
-      75,
+      75, 75,
     ]);
     expect(data.series.map((series) => series.key)).toEqual([
       "Food",
@@ -73,31 +72,38 @@ describe("mixed-period chart adapters", () => {
   });
 
   it("orders expense categories by contribution with stable ties", () => {
-    expect(expenseGroupsByContribution([
-      posting("2024-01-05", "Expenses:Food", 100),
-      posting("2024-01-06", "Expenses:Rent", 250),
-      posting("2024-01-07", "Expenses:Books", 100),
-    ])).toEqual(["Rent", "Books", "Food"]);
+    expect(
+      expenseGroupsByContribution([
+        posting("2024-01-05", "Expenses:Food", 100),
+        posting("2024-01-06", "Expenses:Rent", 250),
+        posting("2024-01-07", "Expenses:Books", 100),
+      ]),
+    ).toEqual(["Rent", "Books", "Food"]);
   });
 
   it("keeps financial-year ordering and category totals", () => {
-    const data = buildYearlyExpenseTimelineSeries([
-      posting("2023-05-01", "Expenses:Food", 20),
-      posting("2024-05-01", "Expenses:Food", 30),
-    ], ["Food"]);
+    const data = buildYearlyExpenseTimelineSeries(
+      [
+        posting("2023-05-01", "Expenses:Food", 20),
+        posting("2024-05-01", "Expenses:Food", 30),
+      ],
+      ["Food"],
+    );
     expect(
-      data.points.filter((point) => point.values.Food).map((point) =>
-        point.values.Food
-      ),
+      data.points
+        .filter((point) => point.values.Food)
+        .map((point) => point.values.Food),
     ).toEqual([20, 30]);
   });
 
   it("computes allocation percentages from unchanged market amounts", () => {
     const date = dayjs("2024-01-01");
-    const data = buildAllocationTimelineSeries([{
-      a: { account: "Assets:Equity:A", market_amount: 75, date } as Aggregate,
-      b: { account: "Assets:Debt:B", market_amount: 25, date } as Aggregate,
-    }]);
+    const data = buildAllocationTimelineSeries([
+      {
+        a: { account: "Assets:Equity:A", market_amount: 75, date } as Aggregate,
+        b: { account: "Assets:Debt:B", market_amount: 25, date } as Aggregate,
+      },
+    ]);
     expect(data.points[0].values).toMatchObject({ Equity: 0.75, Debt: 0.25 });
     expect(data.series.map((series) => series.key)).toEqual(["Debt", "Equity"]);
   });

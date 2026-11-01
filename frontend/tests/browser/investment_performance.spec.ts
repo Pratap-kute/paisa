@@ -55,9 +55,8 @@ for (const width of [390, 768, 1440, 1728]) {
         (theme) => localStorage.setItem("theme-preference", theme),
         theme,
       );
-      await page.route(
-        "**/api/investment/performance**",
-        (route) => route.fulfill({ json: result }),
+      await page.route("**/api/investment/performance**", (route) =>
+        route.fulfill({ json: result }),
       );
       await page.goto("/assets/gain");
       await expect(
@@ -66,23 +65,25 @@ for (const width of [390, 768, 1440, 1728]) {
           exact: true,
         }),
       ).toBeVisible();
-      await expect(page.getByText("Period Return", { exact: true }))
-        .toBeVisible();
-      await expect(page.getByText("Performance Decomposition", { exact: true }))
-        .toBeVisible();
+      await expect(
+        page.getByText("Period Return", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Performance Decomposition", { exact: true }),
+      ).toBeVisible();
       await expect(
         page.locator(
           "[data-testid='investment-performance-timeline'][data-chart-ready='true']",
         ),
       ).toBeVisible();
       expect(
-        await page.evaluate(() =>
-          document.documentElement.scrollWidth <= innerWidth
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      await page.getByLabel("Period", { exact: true }).selectOption(
-        "previous_fy",
-      );
+      await page
+        .getByLabel("Period", { exact: true })
+        .selectOption("previous_fy");
       await expect(page).toHaveURL(/preset=previous_fy/);
       const driver = page.getByRole("link", {
         name: "Assets:Equity",
@@ -104,17 +105,17 @@ for (const width of [390, 768, 1440, 1728]) {
   }
 }
 
-test("performance error is retryable and missing return is not zero", async ({ page }) => {
+test("performance error is retryable and missing return is not zero", async ({
+  page,
+}) => {
   let fail = true;
-  await page.route(
-    "**/api/investment/performance**",
-    (route) =>
-      fail
-        ? route.fulfill({
+  await page.route("**/api/investment/performance**", (route) =>
+    fail
+      ? route.fulfill({
           status: 500,
           json: { code: "investment_performance_failed" },
         })
-        : route.fulfill({
+      : route.fulfill({
           json: {
             ...result,
             periodReturn: null,
@@ -131,28 +132,30 @@ test("performance error is retryable and missing return is not zero", async ({ p
 
 test("performance amount privacy", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("obscure", "true"));
-  await page.route(
-    "**/api/investment/performance**",
-    (route) => route.fulfill({ json: result }),
+  await page.route("**/api/investment/performance**", (route) =>
+    route.fulfill({ json: result }),
   );
   await page.goto("/assets/gain");
-  await expect(page.getByText("Performance Decomposition", { exact: true }))
-    .toBeVisible();
+  await expect(
+    page.getByText("Performance Decomposition", { exact: true }),
+  ).toBeVisible();
   await expect(page.locator("body")).not.toContainText("14,00,000");
   await expect(page.locator("body")).not.toContainText(
     "50,000 investment return",
   );
 });
 
-test("lifetime chart navigation preserves preset and custom date query params", async ({ page }) => {
-  await page.route(
-    "**/api/investment/performance**",
-    (route) => route.fulfill({ json: result }),
+test("lifetime chart navigation preserves preset and custom date query params", async ({
+  page,
+}) => {
+  await page.route("**/api/investment/performance**", (route) =>
+    route.fulfill({ json: result }),
   );
 
   // 1. Preset query param preservation
   await page.goto("/assets/gain?preset=previous_fy");
-  await page.locator("summary", { hasText: "Lifetime investment context" })
+  await page
+    .locator("summary", { hasText: "Lifetime investment context" })
     .click();
   const chartPreset = page.locator(
     "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
@@ -163,10 +166,10 @@ test("lifetime chart navigation preserves preset and custom date query params", 
       "[data-testid='asset-gain-overview-echart']",
     ) as
       | (Element & {
-        __paisa_chart__?: {
-          trigger: (event: string, payload: unknown) => void;
-        };
-      })
+          __paisa_chart__?: {
+            trigger: (event: string, payload: unknown) => void;
+          };
+        })
       | null;
     el?.__paisa_chart__?.trigger("click", {
       targetType: "series.bar",
@@ -178,7 +181,8 @@ test("lifetime chart navigation preserves preset and custom date query params", 
 
   // 2. Custom date query params preservation
   await page.goto("/assets/gain?from=2026-04-01&to=2026-09-06");
-  await page.locator("summary", { hasText: "Lifetime investment context" })
+  await page
+    .locator("summary", { hasText: "Lifetime investment context" })
     .click();
   const chartCustom = page.locator(
     "[data-testid='asset-gain-overview-echart'][data-chart-ready='true']",
@@ -189,10 +193,10 @@ test("lifetime chart navigation preserves preset and custom date query params", 
       "[data-testid='asset-gain-overview-echart']",
     ) as
       | (Element & {
-        __paisa_chart__?: {
-          trigger: (event: string, payload: unknown) => void;
-        };
-      })
+          __paisa_chart__?: {
+            trigger: (event: string, payload: unknown) => void;
+          };
+        })
       | null;
     el?.__paisa_chart__?.trigger("click", {
       targetType: "series.bar",

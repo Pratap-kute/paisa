@@ -17,7 +17,8 @@ function hist(
     absoluteAmount: extras.absoluteAmount ?? Math.abs(amount),
     date: extras.date ?? "2024-01-01",
     commodity: extras.commodity ?? "INR",
-    transactionId: extras.transactionId ??
+    transactionId:
+      extras.transactionId ??
       `${payee}-${account}-${extras.date ?? "2024-01-01"}`,
     sourceAccount: extras.sourceAccount,
     direction: extras.direction,
@@ -44,12 +45,10 @@ function input(
 describe("account scoring", () => {
   it("predicts HIGH for a majority merchant", () => {
     const index = buildIndex(
-      Array.from(
-        { length: 6 },
-        (_, i) =>
-          hist("Starbucks Coffee", "Expenses:Food", {
-            date: `2024-01-0${i + 1}`,
-          }),
+      Array.from({ length: 6 }, (_, i) =>
+        hist("Starbucks Coffee", "Expenses:Food", {
+          date: `2024-01-0${i + 1}`,
+        }),
       ),
     );
     const result = predict(input("STARBUCKS COFFEE"), {}, index);
@@ -60,19 +59,15 @@ describe("account scoring", () => {
 
   it("does not assign HIGH when history is 8 vs 7", () => {
     const history = [
-      ...Array.from(
-        { length: 8 },
-        (_, i) =>
-          hist("Local Store", "Expenses:Food", {
-            date: `2024-01-${String(i + 1).padStart(2, "0")}`,
-          }),
+      ...Array.from({ length: 8 }, (_, i) =>
+        hist("Local Store", "Expenses:Food", {
+          date: `2024-01-${String(i + 1).padStart(2, "0")}`,
+        }),
       ),
-      ...Array.from(
-        { length: 7 },
-        (_, i) =>
-          hist("Local Store", "Expenses:Groceries", {
-            date: `2024-02-${String(i + 1).padStart(2, "0")}`,
-          }),
+      ...Array.from({ length: 7 }, (_, i) =>
+        hist("Local Store", "Expenses:Groceries", {
+          date: `2024-02-${String(i + 1).padStart(2, "0")}`,
+        }),
       ),
     ];
     const result = predict(input("Local Store"), {}, buildIndex(history));
@@ -115,12 +110,10 @@ describe("account scoring", () => {
     expect(expenses.account).toBe("Expenses:Payroll");
     expect(assets.account).toBe("Assets:Unknown");
     expect(
-      predict(input("Acme Payroll", { prefix: "Expenses" }), {}, index)
-        .account,
+      predict(input("Acme Payroll", { prefix: "Expenses" }), {}, index).account,
     ).not.toBe("Expenses2:Other");
     expect(
-      predict(input("Acme Payroll", { prefix: "Expenses" }), {}, index)
-        .account,
+      predict(input("Acme Payroll", { prefix: "Expenses" }), {}, index).account,
     ).not.toBe("ExpensesArchive:Old");
   });
 
@@ -164,11 +157,7 @@ describe("account scoring", () => {
     ]);
     const same = predict(input("Uber", { commodity: "USD" }), {}, index);
     const mismatch = predict(input("Uber", { commodity: "INR" }), {}, index);
-    const missing = predict(
-      input("Uber", { commodity: undefined }),
-      {},
-      index,
-    );
+    const missing = predict(input("Uber", { commodity: undefined }), {}, index);
     expect(same.score).toBeGreaterThan(mismatch.score);
     expect(mismatch.breakdown.currency).toBeLessThan(0);
     expect(missing.breakdown.currency).toBe(0);
@@ -218,9 +207,7 @@ describe("self-reinforcement and overrides", () => {
   });
 
   it("does not let preview Food boost a later row", () => {
-    predictionSession.loadHistory([
-      hist("UniqueCafe", "Expenses:Food"),
-    ]);
+    predictionSession.loadHistory([hist("UniqueCafe", "Expenses:Food")]);
     const first = predictionSession.predictInput(
       input("UniqueCafe", { rowIndex: 0 }),
     );
@@ -274,10 +261,12 @@ describe("self-reinforcement and overrides", () => {
     const matched = predict(
       input("Swiggy Instamart"),
       {
-        merchantRules: [{
-          merchant: "swiggy instamart",
-          account: "Expenses:Groceries",
-        }],
+        merchantRules: [
+          {
+            merchant: "swiggy instamart",
+            account: "Expenses:Groceries",
+          },
+        ],
       },
       index,
     );
@@ -286,10 +275,12 @@ describe("self-reinforcement and overrides", () => {
     const skipped = predict(
       input("Swiggy Instamart", { prefix: "Income" }),
       {
-        merchantRules: [{
-          merchant: "swiggy instamart",
-          account: "Expenses:Groceries",
-        }],
+        merchantRules: [
+          {
+            merchant: "swiggy instamart",
+            account: "Expenses:Groceries",
+          },
+        ],
       },
       index,
     );
@@ -310,35 +301,27 @@ describe("self-reinforcement and overrides", () => {
       },
       {
         account: "Expenses:Groceries:Vegetable",
-        merchants: [
-          "green farm market",
-          "city produce",
-          "fresh vegetables",
-        ],
+        merchants: ["green farm market", "city produce", "fresh vegetables"],
       },
     ];
 
-    for (
-      const merchant of [
-        "supermarket central",
-        "FRESH MART",
-        "Corner Grocery",
-        "quick commerce",
-      ]
-    ) {
+    for (const merchant of [
+      "supermarket central",
+      "FRESH MART",
+      "Corner Grocery",
+      "quick commerce",
+    ]) {
       const res = predict(input(merchant), { merchantRules: rules }, index);
       expect(res.account).toBe("Expenses:Groceries");
       expect(res.source).toBe("RULE");
       expect(res.confidence).toBe("HIGH");
     }
 
-    for (
-      const merchant of [
-        "green farm market",
-        "City Produce",
-        "Fresh Vegetables",
-      ]
-    ) {
+    for (const merchant of [
+      "green farm market",
+      "City Produce",
+      "Fresh Vegetables",
+    ]) {
       const res = predict(input(merchant), { merchantRules: rules }, index);
       expect(res.account).toBe("Expenses:Groceries:Vegetable");
       expect(res.source).toBe("RULE");
@@ -359,15 +342,23 @@ describe("self-reinforcement and overrides", () => {
       },
     ];
 
-    const uberRes = predict(input("UPI/TRANSIT EXPRESS/123456"), {
-      merchantRules: rules,
-    }, index);
+    const uberRes = predict(
+      input("UPI/TRANSIT EXPRESS/123456"),
+      {
+        merchantRules: rules,
+      },
+      index,
+    );
     expect(uberRes.account).toBe("Expenses:Transport");
     expect(uberRes.source).toBe("RULE");
 
-    const blinkitRes = predict(input("Supermarket Central"), {
-      merchantRules: rules,
-    }, index);
+    const blinkitRes = predict(
+      input("Supermarket Central"),
+      {
+        merchantRules: rules,
+      },
+      index,
+    );
     expect(blinkitRes.account).toBe("Expenses:Groceries");
     expect(blinkitRes.source).toBe("RULE");
 
@@ -421,12 +412,10 @@ describe("self-reinforcement and overrides", () => {
 
   it("falls back to history / prediction index when merchant does not match any rule", () => {
     const index = buildIndex(
-      Array.from(
-        { length: 6 },
-        (_, i) =>
-          hist("Coffee Roasters", "Expenses:Dining", {
-            date: `2024-01-0${i + 1}`,
-          }),
+      Array.from({ length: 6 }, (_, i) =>
+        hist("Coffee Roasters", "Expenses:Dining", {
+          date: `2024-01-0${i + 1}`,
+        }),
       ),
     );
     const rules = [

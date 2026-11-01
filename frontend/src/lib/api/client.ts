@@ -26,10 +26,9 @@ export function parseJsonWithDates(text: string): unknown {
     if (
       isString(value) &&
       /Date|date|time|now/.test(key) &&
-      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/
-        .test(
-          value,
-        )
+      /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$/.test(
+        value,
+      )
     ) {
       return dayjs(value.substring(0, 19));
     }
@@ -63,17 +62,17 @@ export interface ClientOptions {
 }
 
 export function createApiClient(options: ClientOptions = {}): Api<unknown> {
-  const baseFetch = options.customFetch ??
-    (typeof fetch !== "undefined" ? fetch : undefined);
+  const baseFetch =
+    options.customFetch ?? (typeof fetch !== "undefined" ? fetch : undefined);
 
   const customFetch = baseFetch
     ? ((async (
-      input: RequestInfo | URL,
-      init?: RequestInit,
-    ): Promise<Response> => {
-      const res = await baseFetch(input, init);
-      return wrapResponse(res);
-    }) as typeof fetch)
+        input: RequestInfo | URL,
+        init?: RequestInit,
+      ): Promise<Response> => {
+        const res = await baseFetch(input, init);
+        return wrapResponse(res);
+      }) as typeof fetch)
     : undefined;
 
   const httpClient = new HttpClient({

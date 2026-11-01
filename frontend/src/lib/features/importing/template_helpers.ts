@@ -144,11 +144,9 @@ export default {
     }
   },
   match(str: string, options: any) {
-    for (
-      const [value, regexp] of Object.entries(
-        options.hash as Record<string, string>,
-      )
-    ) {
+    for (const [value, regexp] of Object.entries(
+      options.hash as Record<string, string>,
+    )) {
       if (new RegExp(regexp).test(str)) {
         return value;
       }

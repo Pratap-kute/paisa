@@ -71,23 +71,17 @@
               "type": "string"
             }
           },
-          "required": [
-            "name"
-          ],
+          "required": ["name"],
           "type": "object",
           "ui:header": "name"
         },
-        "itemsUniqueProperties": [
-          "name"
-        ],
+        "itemsUniqueProperties": ["name"],
         "type": "array"
       },
       "allocation_targets": {
         "default": [
           {
-            "accounts": [
-              "Assets:Debt:*"
-            ],
+            "accounts": ["Assets:Debt:*"],
             "name": "Debt",
             "target": 20
           }
@@ -96,9 +90,7 @@
           "additionalProperties": false,
           "properties": {
             "accounts": {
-              "default": [
-                "Assets:Debt:*"
-              ],
+              "default": ["Assets:Debt:*"],
               "description": "List of accounts to consider for this target",
               "items": {
                 "type": "string"
@@ -116,17 +108,11 @@
               "type": "integer"
             }
           },
-          "required": [
-            "name",
-            "target",
-            "accounts"
-          ],
+          "required": ["name", "target", "accounts"],
           "type": "object",
           "ui:header": "name"
         },
-        "itemsUniqueProperties": [
-          "name"
-        ],
+        "itemsUniqueProperties": ["name"],
         "type": "array"
       },
       "amount_alignment_column": {
@@ -141,11 +127,7 @@
         "properties": {
           "rollover": {
             "description": "Rollover unspent money to next month",
-            "enum": [
-              "",
-              "yes",
-              "no"
-            ],
+            "enum": ["", "yes", "no"],
             "type": "string",
             "ui:widget": "boolean"
           }
@@ -176,10 +158,7 @@
             "price": {
               "properties": {
                 "code": {
-                  "type": [
-                    "string",
-                    "integer"
-                  ]
+                  "type": ["string", "integer"]
                 },
                 "provider": {
                   "enum": [
@@ -192,10 +171,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "provider",
-                "code"
-              ],
+              "required": ["provider", "code"],
               "type": "object",
               "ui:widget": "price"
             },
@@ -211,27 +187,15 @@
               "type": "string"
             },
             "type": {
-              "enum": [
-                "mutualfund",
-                "stock",
-                "nps",
-                "metal",
-                "unknown"
-              ],
+              "enum": ["mutualfund", "stock", "nps", "metal", "unknown"],
               "type": "string"
             }
           },
-          "required": [
-            "name",
-            "type",
-            "price"
-          ],
+          "required": ["name", "type", "price"],
           "type": "object",
           "ui:header": "name"
         },
-        "itemsUniqueProperties": [
-          "name"
-        ],
+        "itemsUniqueProperties": ["name"],
         "type": "array"
       },
       "credit_cards": {
@@ -305,9 +269,7 @@
           "type": "object",
           "ui:header": "account"
         },
-        "itemsUniqueProperties": [
-          "account"
-        ],
+        "itemsUniqueProperties": ["account"],
         "type": "array"
       },
       "db_path": {
@@ -336,13 +298,9 @@
           "retirement": {
             "default": [
               {
-                "expenses": [
-                  "Expenses:*"
-                ],
+                "expenses": ["Expenses:*"],
                 "name": "Retirement",
-                "savings": [
-                  "Assets:*"
-                ],
+                "savings": ["Assets:*"],
                 "swr": 4,
                 "yearly_expenses": 0
               }
@@ -352,9 +310,7 @@
               "description": "Retirement Goal configuration",
               "properties": {
                 "expenses": {
-                  "default": [
-                    "Expenses:Utilities"
-                  ],
+                  "default": ["Expenses:Utilities"],
                   "description": "List of expense accounts",
                   "items": {
                     "type": "string"
@@ -377,9 +333,7 @@
                   "type": "integer"
                 },
                 "savings": {
-                  "default": [
-                    "Assets:Equity"
-                  ],
+                  "default": ["Assets:Equity"],
                   "description": "List of accounts where you keep retirement savings",
                   "items": {
                     "type": "string"
@@ -399,26 +353,17 @@
                   "type": "integer"
                 }
               },
-              "required": [
-                "name",
-                "icon",
-                "swr",
-                "savings"
-              ],
+              "required": ["name", "icon", "swr", "savings"],
               "type": "object",
               "ui:header": "name"
             },
-            "itemsUniqueProperties": [
-              "name"
-            ],
+            "itemsUniqueProperties": ["name"],
             "type": "array"
           },
           "savings": {
             "default": [
               {
-                "accounts": [
-                  "Assets:*"
-                ],
+                "accounts": ["Assets:*"],
                 "name": "Emergency Fund",
                 "target": 1000000
               }
@@ -426,16 +371,12 @@
             "items": {
               "additionalProperties": false,
               "dependentRequired": {
-                "target_date": [
-                  "rate"
-                ]
+                "target_date": ["rate"]
               },
               "description": "Savings Goal configuration",
               "properties": {
                 "accounts": {
-                  "default": [
-                    "Assets:Equity"
-                  ],
+                  "default": ["Assets:Equity"],
                   "description": "List of savings accounts",
                   "items": {
                     "type": "string"
@@ -478,27 +419,18 @@
                       "format": "date"
                     },
                     {
-                      "enum": [
-                        ""
-                      ],
+                      "enum": [""],
                       "type": "string"
                     }
                   ],
                   "type": "string"
                 }
               },
-              "required": [
-                "name",
-                "icon",
-                "target",
-                "accounts"
-              ],
+              "required": ["name", "icon", "target", "accounts"],
               "type": "object",
               "ui:header": "name"
             },
-            "itemsUniqueProperties": [
-              "name"
-            ],
+            "itemsUniqueProperties": ["name"],
             "type": "array"
           }
         },
@@ -524,15 +456,11 @@
               "type": "string"
             }
           },
-          "required": [
-            "name"
-          ],
+          "required": ["name"],
           "type": "object",
           "ui:header": "name"
         },
-        "itemsUniqueProperties": [
-          "name"
-        ],
+        "itemsUniqueProperties": ["name"],
         "type": "array"
       },
       "journal_path": {
@@ -541,12 +469,7 @@
       },
       "ledger_cli": {
         "description": "The ledger client to use",
-        "enum": [
-          "",
-          "ledger",
-          "hledger",
-          "beancount"
-        ],
+        "enum": ["", "ledger", "hledger", "beancount"],
         "type": "string"
       },
       "locale": {
@@ -565,14 +488,10 @@
               "additionalProperties": false,
               "oneOf": [
                 {
-                  "required": [
-                    "merchant"
-                  ]
+                  "required": ["merchant"]
                 },
                 {
-                  "required": [
-                    "merchants"
-                  ]
+                  "required": ["merchants"]
                 }
               ],
               "properties": {
@@ -597,9 +516,7 @@
                   "uniqueItems": true
                 }
               },
-              "required": [
-                "account"
-              ],
+              "required": ["account"],
               "type": "object"
             },
             "type": "array"
@@ -619,9 +536,7 @@
       "schedule_al": {
         "default": [
           {
-            "accounts": [
-              "Assets:Checking"
-            ],
+            "accounts": ["Assets:Checking"],
             "code": "bank"
           }
         ],
@@ -630,9 +545,7 @@
           "additionalProperties": false,
           "properties": {
             "accounts": {
-              "default": [
-                "Assets:Checking"
-              ],
+              "default": ["Assets:Checking"],
               "items": {
                 "type": "string"
               },
@@ -656,16 +569,11 @@
               "type": "string"
             }
           },
-          "required": [
-            "code",
-            "accounts"
-          ],
+          "required": ["code", "accounts"],
           "type": "object",
           "ui:header": "code"
         },
-        "itemsUniqueProperties": [
-          "code"
-        ],
+        "itemsUniqueProperties": ["code"],
         "type": "array"
       },
       "sheets_directory": {
@@ -674,11 +582,7 @@
       },
       "strict": {
         "description": "When strict mode is enabled, all the accounts and commodities should be defined before use.",
-        "enum": [
-          "",
-          "yes",
-          "no"
-        ],
+        "enum": ["", "yes", "no"],
         "type": "string",
         "ui:widget": "boolean"
       },
@@ -1323,15 +1227,11 @@
               "ui:order": 1
             }
           },
-          "required": [
-            "username"
-          ],
+          "required": ["username"],
           "type": "object",
           "ui:header": "username"
         },
-        "itemsUniqueProperties": [
-          "username"
-        ],
+        "itemsUniqueProperties": ["username"],
         "type": "array"
       },
       "week_starting_day": {
@@ -1341,10 +1241,7 @@
         "type": "integer"
       }
     },
-    "required": [
-      "journal_path",
-      "db_path"
-    ],
+    "required": ["journal_path", "db_path"],
     "title": "Paisa",
     "type": "object"
   }

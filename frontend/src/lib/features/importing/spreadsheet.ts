@@ -60,10 +60,7 @@ export function columnIndexToLetter(index: number): string {
 export function asRows(result: Result): SpreadsheetRow[] {
   return map(result.data, (row, i) => {
     return Object.fromEntries([
-      ...Array.from(
-        row,
-        (cell, j) => [columnIndexToLetter(j), cell] as const,
-      ),
+      ...Array.from(row, (cell, j) => [columnIndexToLetter(j), cell] as const),
       ["index", i],
     ]);
   });
@@ -193,7 +190,7 @@ function parseCSV(file: File): Promise<Result> {
 
 async function parseXLSX(file: File): Promise<Result> {
   const buffer = await readFile(file);
-  const XLSX = await import("xlsx") as typeof XLSXTypes;
+  const XLSX = (await import("xlsx")) as typeof XLSXTypes;
   try {
     const sheet = XLSX.read(buffer, { type: "binary" });
     const json = XLSX.utils.sheet_to_json<string[]>(
@@ -218,9 +215,8 @@ async function parseXLSX(file: File): Promise<Result> {
         // Load the browser bundle only for password-protected workbooks. The
         // default entry imports Node modules and this fallback is relatively
         // large, so it should not be part of the normal import route.
-        const XlsxPopulate = await import(
-          "xlsx-populate/browser/xlsx-populate.js"
-        );
+        const XlsxPopulate =
+          await import("xlsx-populate/browser/xlsx-populate.js");
         const workbook = await XlsxPopulate.fromDataAsync(buffer, { password });
         const sheet = workbook.sheet(0);
         if (sheet) {

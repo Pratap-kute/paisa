@@ -32,14 +32,15 @@ export function tagRecurringContent(
     }
     const header = lines[index];
     const date = t.date.format("YYYY-MM-DD");
-    const payeeMatches = cli === "beancount"
-      ? (header.match(/"(?:\\.|[^"\\])*"/g) ?? []).map((value) =>
-        JSON.parse(value) as string
-      ).filter(Boolean).join(" | ") === t.payee
-      : header.includes(t.payee);
-    if (
-      !header.replaceAll("/", "-").startsWith(date) || !payeeMatches
-    ) throw new Error("Transaction source changed. Reload ledger history.");
+    const payeeMatches =
+      cli === "beancount"
+        ? (header.match(/"(?:\\.|[^"\\])*"/g) ?? [])
+            .map((value) => JSON.parse(value) as string)
+            .filter(Boolean)
+            .join(" | ") === t.payee
+        : header.includes(t.payee);
+    if (!header.replaceAll("/", "-").startsWith(date) || !payeeMatches)
+      throw new Error("Transaction source changed. Reload ledger history.");
     const block = lines.slice(index, t.endLine);
     if (block.some((line) => /(?:Recurring\s*:|recurring\s*:)/.test(line))) {
       throw new Error(
@@ -48,7 +49,8 @@ export function tagRecurringContent(
     }
     if (
       !t.postings.every((p) => block.some((line) => line.includes(p.account)))
-    ) throw new Error("Transaction postings changed. Reload ledger history.");
+    )
+      throw new Error("Transaction postings changed. Reload ledger history.");
     positions.add(index);
     lines.splice(
       index + 1,
@@ -79,8 +81,9 @@ export async function prepareRecurringConfirmation(
   }
   const response = await api.editor.getEditorFiles();
   const edits = [...files].map(([name, transactions]) => {
-    const original = response.files?.find((file) => file.name === name)
-      ?.content;
+    const original = response.files?.find(
+      (file) => file.name === name,
+    )?.content;
     if (typeof original !== "string") throw new Error(`Could not read ${name}`);
     return {
       name,
@@ -96,9 +99,9 @@ export async function saveRecurringConfirmation(
 ): Promise<void> {
   const response = await api.editor.saveEditorFiles({ files: edits });
   if (!response.saved || !response.synced) {
-    const recovery = Object.entries(response.recovery_files ?? {}).map((
-      [name, backup],
-    ) => `${name}: ${backup}`).join("; ");
+    const recovery = Object.entries(response.recovery_files ?? {})
+      .map(([name, backup]) => `${name}: ${backup}`)
+      .join("; ");
     throw new Error(
       `${response.message || "Batch save failed"}${
         recovery ? ` Recovery backups: ${recovery}` : ""

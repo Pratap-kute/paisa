@@ -175,8 +175,8 @@ describe("ECharts surface lifecycle controller", () => {
     const frames = createFrameScheduler();
     const element = document.createElement("div");
     const rect = { width: 640, height: 360 };
-    vi.spyOn(element, "getBoundingClientRect").mockImplementation(() =>
-      rect as DOMRect
+    vi.spyOn(element, "getBoundingClientRect").mockImplementation(
+      () => rect as DOMRect,
     );
     const controller = createEChartSurfaceController({
       element,

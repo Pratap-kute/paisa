@@ -80,15 +80,16 @@ export function classifyViolation(
   }
 
   if (
-    inDomain && (
-      imported === "svelte" || imported.startsWith("svelte/") ||
-      imported.startsWith("$app/") || target.endsWith(".svelte") ||
+    inDomain &&
+    (imported === "svelte" ||
+      imported.startsWith("svelte/") ||
+      imported.startsWith("$app/") ||
+      target.endsWith(".svelte") ||
       target.startsWith("src/routes/") ||
       target.startsWith("src/lib/features/") ||
       target.startsWith("src/lib/api/") ||
       target.startsWith("src/lib/shared/ui/") ||
-      target.startsWith("src/lib/shared/layout/")
-    )
+      target.startsWith("src/lib/shared/layout/"))
   ) {
     return {
       source,
@@ -126,8 +127,7 @@ export function classifyViolation(
     return {
       source,
       imported,
-      rule:
-        "generated output must not depend on application features or routes",
+      rule: "generated output must not depend on application features or routes",
     };
   }
   return null;
@@ -156,15 +156,17 @@ function localImportExists(
   const candidates = extname(target)
     ? [target, target + ".ts", target + ".js"]
     : [
-      target,
-      ...SOURCE_EXTENSIONS.map((extension) => target + extension),
-      ...SOURCE_EXTENSIONS.map((extension) =>
-        join(target, "index" + extension)
-      ),
-    ];
+        target,
+        ...SOURCE_EXTENSIONS.map((extension) => target + extension),
+        ...SOURCE_EXTENSIONS.map((extension) =>
+          join(target, "index" + extension),
+        ),
+      ];
   return candidates.some((candidate) => {
     try {
-      return fsSync.existsSync(candidate) && fsSync.statSync(candidate).isFile();
+      return (
+        fsSync.existsSync(candidate) && fsSync.statSync(candidate).isFile()
+      );
     } catch {
       return false;
     }

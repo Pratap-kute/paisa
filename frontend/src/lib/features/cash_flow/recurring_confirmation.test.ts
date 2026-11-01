@@ -13,9 +13,12 @@ function transaction(beginLine = 1, endLine = 3): Transaction {
     beginLine,
     endLine,
     fileName: "main.ledger",
-    postings: [{ account: "Expenses:Entertainment" }, {
-      account: "Assets:Bank",
-    }],
+    postings: [
+      { account: "Expenses:Entertainment" },
+      {
+        account: "Assets:Bank",
+      },
+    ],
   } as Transaction;
 }
 describe("recurring ledger metadata edits", () => {
@@ -54,7 +57,7 @@ describe("recurring ledger metadata edits", () => {
         [transaction()],
         "Netflix",
         "ledger",
-      )
+      ),
     ).toThrow();
     expect(() =>
       tagRecurringContent(
@@ -62,7 +65,7 @@ describe("recurring ledger metadata edits", () => {
         [transaction()],
         "Netflix",
         "ledger",
-      )
+      ),
     ).toThrow();
     const tagged = tagRecurringContent(
       content,
@@ -71,19 +74,18 @@ describe("recurring ledger metadata edits", () => {
       "ledger",
     );
     expect(() =>
-      tagRecurringContent(tagged, [transaction(1, 4)], "Netflix", "ledger")
+      tagRecurringContent(tagged, [transaction(1, 4)], "Netflix", "ledger"),
     ).toThrow();
     expect(() =>
-      tagRecurringContent(content, [transaction()], "bad\nidentity", "ledger")
+      tagRecurringContent(content, [transaction()], "bad\nidentity", "ledger"),
     ).toThrow();
   });
 });
 
 it("sends one batch and reports rollback or recovery without claiming success", async () => {
   const { api } = await import("$lib/api");
-  const { saveRecurringConfirmation } = await import(
-    "./recurring_confirmation"
-  );
+  const { saveRecurringConfirmation } =
+    await import("./recurring_confirmation");
   const original = api.editor.saveEditorFiles;
   const edits = ["one.ledger", "two.ledger"].map((name) => ({
     name,
@@ -122,10 +124,9 @@ it("sends one batch and reports rollback or recovery without claiming success", 
 it("matches Beancount's combined payee and narration representation", () => {
   const t = transaction();
   t.payee = "Netflix | Subscription";
-  const bean = content.replaceAll("/", "-").replaceAll(
-    " Netflix",
-    ' * "Netflix" "Subscription"',
-  );
+  const bean = content
+    .replaceAll("/", "-")
+    .replaceAll(" Netflix", ' * "Netflix" "Subscription"');
   expect(tagRecurringContent(bean, [t], "Netflix", "beancount")).toContain(
     '  recurring: "Netflix"',
   );

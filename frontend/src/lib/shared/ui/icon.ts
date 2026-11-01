@@ -1,18 +1,8 @@
-import arcticons from "../../../../fonts/arcticons-info.json" with {
-  type: "json",
-};
-import fa6brands from "../../../../fonts/fa6-brands-info.json" with {
-  type: "json",
-};
-import fa6regular from "../../../../fonts/fa6-regular-info.json" with {
-  type: "json",
-};
-import fa6solid from "../../../../fonts/fa6-solid-info.json" with {
-  type: "json",
-};
-import fluentemoji from "../../../../fonts/fluent-emoji-high-contrast-info.json" with {
-  type: "json",
-};
+import arcticons from "../../../../fonts/arcticons-info.json" with { type: "json" };
+import fa6brands from "../../../../fonts/fa6-brands-info.json" with { type: "json" };
+import fa6regular from "../../../../fonts/fa6-regular-info.json" with { type: "json" };
+import fa6solid from "../../../../fonts/fa6-solid-info.json" with { type: "json" };
+import fluentemoji from "../../../../fonts/fluent-emoji-high-contrast-info.json" with { type: "json" };
 import mdi from "../../../../fonts/mdi-info.json" with { type: "json" };
 import { stemmer } from "$lib/shared/utils/stemmer";
 
@@ -59,7 +49,7 @@ export function iconGlyphOr(
 }
 
 export const iconsList = Object.entries(icons).flatMap(([font, glyph]) =>
-  Object.keys(glyph).map((name) => `${font}:${name}`)
+  Object.keys(glyph).map((name) => `${font}:${name}`),
 );
 
 interface IconLookup {
@@ -98,7 +88,7 @@ const ICON_LOOKUP: IconLookup[] = [
 
 const ICONS: Record<string, string> = Object.fromEntries(
   ICON_LOOKUP.flatMap((icon) =>
-    icon.words.map((word) => [word, iconGlyph(icon.symbol)])
+    icon.words.map((word) => [word, iconGlyph(icon.symbol)]),
   ),
 );
 
@@ -107,8 +97,8 @@ export function iconText(account: string): string {
     return "";
   }
 
-  const accountConfig = (USER_CONFIG.accounts || []).find((a) =>
-    a.name == account
+  const accountConfig = (USER_CONFIG.accounts || []).find(
+    (a) => a.name == account,
   );
   if (accountConfig?.icon) {
     return iconGlyph(accountConfig.icon);

@@ -2,9 +2,7 @@ import dayjs from "dayjs";
 import type { Gain } from "$lib/domain/assets";
 import type { Posting } from "$lib/domain/ledger";
 import { describe, expect, it } from "vitest";
-import {
-  buildExpenseBreakdownComparison,
-} from "$lib/features/expense/chart_comparison_data";
+import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
 import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
 import {
   buildAllocationTargetComparison,
@@ -62,9 +60,7 @@ describe("bar/comparison ECharts adapters", () => {
       series: Array<{ data: Array<{ itemStyle: { color: string } }> }>;
     };
 
-    expect(option.series[0].data[0].itemStyle.color).toBe(
-      "semantic-override",
-    );
+    expect(option.series[0].data[0].itemStyle.color).toBe("semantic-override");
     expect(theme.seriesColors).toContain(
       option.series[0].data[1].itemStyle.color,
     );
@@ -78,8 +74,9 @@ describe("bar/comparison ECharts adapters", () => {
 
     expect(data.points.map((point) => point.key)).toEqual(["2021", "2022"]);
     expect(data.points[1].value).toBe(150);
-    expect(data.points[1].tooltipRows?.map((row) => [row.label, row.value]))
-      .toContainEqual(["Jan", 100]);
+    expect(
+      data.points[1].tooltipRows?.map((row) => [row.label, row.value]),
+    ).toContainEqual(["Jan", 100]);
   });
 
   it("preserves allocation target, current, and diff values", () => {
@@ -111,13 +108,14 @@ describe("bar/comparison ECharts adapters", () => {
     expect(data.points[0].key).toBe("Assets:Equity:Brokerage");
     expect(data.points[0].value).toBe(1150);
     expect(data.points[0].secondaryValue).toBe(12.5);
-    expect(data.points[0].tooltipRows?.map((row) => [row.label, row.value]))
-      .toEqual([
-        ["Investment", 1000],
-        ["Withdrawal", 100],
-        ["Gain", 250],
-        ["Balance", 1150],
-        ["XIRR", 12.5],
-      ]);
+    expect(
+      data.points[0].tooltipRows?.map((row) => [row.label, row.value]),
+    ).toEqual([
+      ["Investment", 1000],
+      ["Withdrawal", 100],
+      ["Gain", 250],
+      ["Balance", 1150],
+      ["XIRR", 12.5],
+    ]);
   });
 });

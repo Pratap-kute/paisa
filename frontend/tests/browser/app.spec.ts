@@ -22,13 +22,17 @@ test("application starts without fatal browser errors", async ({ page }) => {
 
 test("dashboard renders synchronized fixture data", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByText("Net Worth", { exact: true }).first())
-    .toBeVisible();
-  await expect(page.getByRole("link", { name: "Transactions" }).first())
-    .toBeVisible();
+  await expect(
+    page.getByText("Net Worth", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Transactions" }).first(),
+  ).toBeVisible();
 });
 
-test("monthly expenses preserves calendar details and category icons", async ({ page }) => {
+test("monthly expenses preserves calendar details and category icons", async ({
+  page,
+}) => {
   await page.goto("/expense/monthly");
   const calendar = page.locator(
     "[data-testid='monthly-expense-calendar'][data-chart-ready='true']",
@@ -39,43 +43,47 @@ test("monthly expenses preserves calendar details and category icons", async ({ 
   await activeDay.hover();
   await expect(page.getByRole("tooltip")).toContainText("Total");
 
-  const recentIcon = page.locator("section", { hasText: "Recent Expenses" })
-    .locator(".custom-icon").first();
+  const recentIcon = page
+    .locator("section", { hasText: "Recent Expenses" })
+    .locator(".custom-icon")
+    .first();
   await expect(recentIcon).toBeVisible();
   expect(
-    await recentIcon.evaluate((element) =>
-      getComputedStyle(element).fontFamily
+    await recentIcon.evaluate(
+      (element) => getComputedStyle(element).fontFamily,
     ),
-  )
-    .toContain("fa6-solid");
+  ).toContain("fa6-solid");
   await expect(recentIcon).not.toContainText("�");
 });
 
-test("yearly expenses preserves monthly composition and hover breakdown", async ({ page }) => {
+test("yearly expenses preserves monthly composition and hover breakdown", async ({
+  page,
+}) => {
   await page.goto("/expense/yearly");
   const calendar = page.locator(
     "[data-testid='yearly-expense-calendar'][data-chart-ready='true']",
   );
   await expect(calendar).toBeVisible();
 
-  const activeMonth = calendar.locator(".paisa-yearly-expense-month-active")
+  const activeMonth = calendar
+    .locator(".paisa-yearly-expense-month-active")
     .first();
-  await expect(activeMonth.locator(".paisa-yearly-expense-ring"))
-    .toHaveCSS("background-image", /conic-gradient/);
+  await expect(activeMonth.locator(".paisa-yearly-expense-ring")).toHaveCSS(
+    "background-image",
+    /conic-gradient/,
+  );
   await activeMonth.hover();
   await expect(page.getByRole("tooltip")).toContainText("Total");
 });
 
 test("major pages are routable", async ({ page }) => {
-  for (
-    const path of [
-      "/ledger/transaction",
-      "/ledger/editor",
-      "/ledger/import",
-      "/assets/networth",
-      "/cash_flow/monthly",
-    ]
-  ) {
+  for (const path of [
+    "/ledger/transaction",
+    "/ledger/editor",
+    "/ledger/import",
+    "/assets/networth",
+    "/cash_flow/monthly",
+  ]) {
     await page.goto(path);
     await expect(page.locator("body")).not.toBeEmpty();
     await assertNavigationVisible(page);
@@ -85,7 +93,7 @@ test("major pages are routable", async ({ page }) => {
 test("transaction search filters fixture transactions", async ({ page }) => {
   await Promise.all([
     page.waitForResponse((response) =>
-      response.url().endsWith("/api/transaction")
+      response.url().endsWith("/api/transaction"),
     ),
     page.goto("/ledger/transaction"),
   ]);
@@ -108,9 +116,10 @@ test("journal editor saves and reloads changes", async ({ page }) => {
   await editor.press("Control+End");
   await editor.pressSequentially("\n; browser smoke marker");
   const [saveResponse] = await Promise.all([
-    page.waitForResponse((response) =>
-      new URL(response.url()).pathname === "/api/editor/save" &&
-      response.request().method() === "POST"
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/editor/save" &&
+        response.request().method() === "POST",
     ),
     page.getByRole("button", { name: "Save" }).click(),
   ]);
@@ -132,8 +141,9 @@ test("import produces a preview without saving", async ({ page }) => {
   await expect(page.getByText("75 rows", { exact: true }).first()).toBeVisible({
     timeout: 15000,
   });
-  await expect(page.getByRole("list", { name: "Transaction Review List" }))
-    .toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Transaction Review List" }),
+  ).toBeVisible();
 });
 
 test("networth chart renders on analytics page", async ({ page }) => {
@@ -155,7 +165,9 @@ test("cash flow monthly chart renders", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("bulk edit form opens and displays account selection", async ({ page }) => {
+test("bulk edit form opens and displays account selection", async ({
+  page,
+}) => {
   await page.goto("/ledger/transaction");
   await expect(page.getByText(/\d+ transaction\(s\)/)).toBeVisible();
 
@@ -163,17 +175,18 @@ test("bulk edit form opens and displays account selection", async ({ page }) => 
   await expect(bulkEditButton).toBeVisible();
   await bulkEditButton.click();
 
-  await expect(
-    page.getByText(/rename account/i).first(),
-  ).toBeVisible();
+  await expect(page.getByText(/rename account/i).first()).toBeVisible();
 });
 
-test("credit card statement cycle switcher updates bill details", async ({ page }) => {
+test("credit card statement cycle switcher updates bill details", async ({
+  page,
+}) => {
   await page.goto(
     "/liabilities/credit_cards/Liabilities%3ACreditCard%3AFreedom",
   );
-  await expect(page.getByText("Freedom", { exact: false }).first())
-    .toBeVisible();
+  await expect(
+    page.getByText("Freedom", { exact: false }).first(),
+  ).toBeVisible();
 
   const select = page.locator("select");
   await expect(select).toBeVisible();
@@ -195,7 +208,9 @@ test("interactive sheets editor loads calculations", async ({ page }) => {
   await expect(page.locator("body")).not.toBeEmpty();
 });
 
-test("theme toggle switches document theme between light and dark", async ({ page }) => {
+test("theme toggle switches document theme between light and dark", async ({
+  page,
+}) => {
   await page.goto("/");
   const toggle = page.getByRole("button", { name: "auto" });
   await expect(toggle).toBeVisible();
@@ -222,7 +237,9 @@ test("doctor diagnostics page reports system status", async ({ page }) => {
   await assertNavigationVisible(page);
 });
 
-test("tax harvest calculator updates through semantic inputs", async ({ page }) => {
+test("tax harvest calculator updates through semantic inputs", async ({
+  page,
+}) => {
   await page.goto("/more/tax/harvest");
   const card = page.getByTestId("harvest-card").first();
   await expect(card).toBeVisible();
@@ -233,15 +250,15 @@ test("tax harvest calculator updates through semantic inputs", async ({ page }) 
   await expect(taxableGain).not.toHaveValue(initialGain);
 });
 
-test("an API failure leaves a visible error instead of a blank page", async ({ page }) => {
-  await page.route(
-    "**/api/dashboard",
-    (route) =>
-      route.fulfill({
-        status: 500,
-        contentType: "application/json",
-        body: '{"error":"test failure"}',
-      }),
+test("an API failure leaves a visible error instead of a blank page", async ({
+  page,
+}) => {
+  await page.route("**/api/dashboard", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "application/json",
+      body: '{"error":"test failure"}',
+    }),
   );
   await page.goto("/");
   await expect(page.locator("body")).toContainText(
@@ -284,15 +301,17 @@ test("config page saves changes", async ({ page }) => {
   const saveButton = page.getByRole("button", { name: "Save" });
   await expect(saveButton).toBeEnabled();
   const [saveResponse] = await Promise.all([
-    page.waitForResponse((response) =>
-      new URL(response.url()).pathname === "/api/config" &&
-      response.request().method() === "POST"
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/config" &&
+        response.request().method() === "POST",
     ),
     saveButton.click(),
   ]);
   expect(saveResponse.ok()).toBe(true);
-  await expect(page.getByRole("status").filter({ hasText: "Saved config" }))
-    .toBeVisible();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Saved config" }),
+  ).toBeVisible();
 });
 
 test("posting search filters fixture postings", async ({ page }) => {
@@ -308,20 +327,20 @@ test("posting search filters fixture postings", async ({ page }) => {
     elements.slice(0, 2).map((element) => {
       const row = element.getBoundingClientRect();
       const cells = [...element.children].map((cell) =>
-        cell.getBoundingClientRect()
+        cell.getBoundingClientRect(),
       );
       return {
         top: row.top,
         bottom: row.bottom,
         cellLefts: cells.map((cell) => cell.left),
       };
-    })
+    }),
   );
   expect(geometry).toHaveLength(2);
   expect(geometry[1].top).toBeGreaterThanOrEqual(geometry[0].bottom);
   expect(
-    geometry[0].cellLefts.every((left, index, values) =>
-      index === 0 || left > values[index - 1]
+    geometry[0].cellLefts.every(
+      (left, index, values) => index === 0 || left > values[index - 1],
     ),
   ).toBe(true);
   const search = page.locator(".search-query-editor .cm-content");
@@ -369,7 +388,8 @@ test("large price histories load collapsed", async ({ page }) => {
 
   const expansionStarted = Date.now();
   await page.locator(".paisa-tabulator-tree-toggle").first().click();
-  await expect.poll(() => page.locator(".tabulator-row").count())
+  await expect
+    .poll(() => page.locator(".tabulator-row").count())
     .toBeGreaterThan(8);
   expect(Date.now() - expansionStarted).toBeLessThan(2_000);
   expect(await page.locator(".tabulator-row").count()).toBeLessThan(100);
@@ -394,7 +414,8 @@ test("price cache clear shows success feedback", async ({ page }) => {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ success: true }),
-    }));
+    }),
+  );
   await page.getByRole("button", { name: "Clear Price Cache" }).click();
   await expect(
     page.locator(".paisa-toast-container").filter({

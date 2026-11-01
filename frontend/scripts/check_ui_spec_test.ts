@@ -94,16 +94,16 @@ test("findBulmaClassViolations catches removed classes in class attributes and d
     expect.stringContaining("has-text-right"),
   ]);
   expect(
-    violations.every((violation) =>
-      violation.rule === "no-bulma-compat-classes"
+    violations.every(
+      (violation) => violation.rule === "no-bulma-compat-classes",
     ),
   ).toBe(true);
 });
 
 test("findBulmaClassViolations covers every removed compatibility class", () => {
-  const content = `<div class="${
-    [...FORBIDDEN_BULMA_CLASSES].join(" ")
-  }"></div>`;
+  const content = `<div class="${[...FORBIDDEN_BULMA_CLASSES].join(
+    " ",
+  )}"></div>`;
   const violations = findBulmaClassViolations(
     "src/lib/features/sample/Legacy.svelte",
     content,
@@ -121,8 +121,8 @@ test("findBulmaClassViolations requires context for generic Bulma class names", 
     findBulmaClassViolations("src/routes/sample.svelte", legitimate),
   ).toEqual([]);
 
-  const combinations = FORBIDDEN_BULMA_CLASS_COMBINATIONS.map((classes) =>
-    `<div class="${classes.join(" ")}"></div>`
+  const combinations = FORBIDDEN_BULMA_CLASS_COMBINATIONS.map(
+    (classes) => `<div class="${classes.join(" ")}"></div>`,
   ).join("\n");
   expect(
     findBulmaClassViolations("src/routes/sample.svelte", combinations).length,
@@ -145,8 +145,8 @@ test("findBulmaClassViolations rejects removed Bulma CSS selectors", () => {
   );
   expect(violations.length).toBe(3);
   expect(
-    violations.every((violation) =>
-      violation.rule === "no-bulma-compat-selectors"
+    violations.every(
+      (violation) => violation.rule === "no-bulma-compat-selectors",
     ),
   ).toBe(true);
 });
@@ -159,9 +159,9 @@ test("findBulmaClassViolations avoids prose, selectors, and partial-name false p
     .has-text-info { color: red; }
     <div class="paisa-table is-smallish has-text-greyish"></div>
   `;
-  expect(
-    findBulmaClassViolations("src/routes/sample.svelte", sample),
-  ).toEqual([]);
+  expect(findBulmaClassViolations("src/routes/sample.svelte", sample)).toEqual(
+    [],
+  );
   expect(
     findBulmaClassViolations(
       "src/lib/shared/styles/example.css",

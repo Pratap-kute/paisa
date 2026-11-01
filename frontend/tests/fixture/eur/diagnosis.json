@@ -20,10 +20,7 @@
         "type": "commodity",
         "label": "AAPL"
       },
-      "affectedFeatures": [
-        "net_worth",
-        "scenarios"
-      ],
+      "affectedFeatures": ["net_worth", "scenarios"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -45,9 +42,7 @@
         "type": "commodity",
         "label": "AAPL"
       },
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -66,9 +61,7 @@
       "details": "Scenario Planning requires historical expense postings to compute baseline assumptions.",
       "code": "insufficient_expense_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"
@@ -84,9 +77,7 @@
       "details": "Sample count: 1 of recommended 6 completed months.",
       "code": "insufficient_contribution_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"
@@ -102,9 +93,7 @@
       "details": "Sample count: 1 of recommended 6 completed months.",
       "code": "insufficient_income_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"

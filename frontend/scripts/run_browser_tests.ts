@@ -48,12 +48,15 @@ try {
   const port = Number(process.env.PAISA_E2E_FRONTEND_PORT ?? 5173);
   await waitForPort(port, server);
   const userArgs = process.argv.slice(2);
-  const status = await Bun.spawn(["bun", "x", "playwright", "test", ...userArgs], {
-    stdin: "inherit",
-    stdout: "inherit",
-    stderr: "inherit",
-    env: { ...process.env, PAISA_E2E_DEV_UI: "1" },
-  }).exited;
+  const status = await Bun.spawn(
+    ["bun", "x", "playwright", "test", ...userArgs],
+    {
+      stdin: "inherit",
+      stdout: "inherit",
+      stderr: "inherit",
+      env: { ...process.env, PAISA_E2E_DEV_UI: "1" },
+    },
+  ).exited;
   process.exitCode = status;
 } finally {
   try {

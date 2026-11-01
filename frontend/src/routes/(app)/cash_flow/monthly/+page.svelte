@@ -1,58 +1,61 @@
 <script lang="ts">
-import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-import type { CashFlow } from "$lib/domain/cash_flow";
-import { api } from "$lib/api";
-import { onMount } from "svelte";
-import {
-  dateMax,
-  dateMin,
-  dateRange,
-  dateRangeOption,
-  setAllowedDateRange,
-} from "../../../../store";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import DateRange from "$lib/shared/ui/DateRange.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-import { filter, map, some } from "$lib/shared/utils/collection";
+  import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
+  import type { CashFlow } from "$lib/domain/cash_flow";
+  import { api } from "$lib/api";
+  import { onMount } from "svelte";
+  import {
+    dateMax,
+    dateMin,
+    dateRange,
+    dateRangeOption,
+    setAllowedDateRange,
+  } from "../../../../store";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import DateRange from "$lib/shared/ui/DateRange.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  import { filter, map, some } from "$lib/shared/utils/collection";
 
-let cashFlows: CashFlow[] = $state([]);
-let isLoading = $state(true);
+  let cashFlows: CashFlow[] = $state([]);
+  let isLoading = $state(true);
 
-let filteredCashFlows = $derived(
-  filter(
-    cashFlows,
-    (c) =>
-      c.date.isSameOrBefore($dateRange.to) &&
-      c.date.isSameOrAfter($dateRange.from),
-  ),
-);
-let hasFilteredCashFlows = $derived(
-  some(filteredCashFlows, (c) =>
-    c.income !== 0 ||
-    c.expenses !== 0 ||
-    c.liabilities !== 0 ||
-    c.tax !== 0 ||
-    c.investment !== 0 ||
-    c.checking !== 0 ||
-    c.balance !== 0),
-);
-let cashFlowData = $derived(buildCashFlowSeries(filteredCashFlows));
+  let filteredCashFlows = $derived(
+    filter(
+      cashFlows,
+      (c) =>
+        c.date.isSameOrBefore($dateRange.to) &&
+        c.date.isSameOrAfter($dateRange.from),
+    ),
+  );
+  let hasFilteredCashFlows = $derived(
+    some(
+      filteredCashFlows,
+      (c) =>
+        c.income !== 0 ||
+        c.expenses !== 0 ||
+        c.liabilities !== 0 ||
+        c.tax !== 0 ||
+        c.investment !== 0 ||
+        c.checking !== 0 ||
+        c.balance !== 0,
+    ),
+  );
+  let cashFlowData = $derived(buildCashFlowSeries(filteredCashFlows));
 
-onMount(async () => {
-  try {
-    const res = await api.cashFlow.getCashFlow();
-    cashFlows = (res.cash_flows as unknown as CashFlow[]) || [];
-    setAllowedDateRange(map(cashFlows, (c) => c.date));
-    isLoading = false;
-  } catch {
-    isLoading = false;
-  }
-});
+  onMount(async () => {
+    try {
+      const res = await api.cashFlow.getCashFlow();
+      cashFlows = (res.cash_flows as unknown as CashFlow[]) || [];
+      setAllowedDateRange(map(cashFlows, (c) => c.date));
+      isLoading = false;
+    } catch {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -66,7 +69,11 @@ onMount(async () => {
   >
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
-        <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
+        <DateRange
+          bind:value={$dateRangeOption}
+          dateMin={$dateMin}
+          dateMax={$dateMax}
+        />
       </div>
     {/snippet}
   </PageHeader>
@@ -83,11 +90,12 @@ onMount(async () => {
       </ZeroState>
     {:else}
       {#if !isLoading && hasFilteredCashFlows}
-        <LegendCard legends={cashFlowData.legends ?? []} clazz="mb-3 paisa-overflow-x-auto" />
+        <LegendCard
+          legends={cashFlowData.legends ?? []}
+          clazz="mb-3 paisa-overflow-x-auto"
+        />
       {/if}
-      <ChartFrame
-        height="tall"
-      >
+      <ChartFrame height="tall">
         <TimeSeriesChart
           data={cashFlowData}
           ariaLabel="Monthly cash flow and checking balance"

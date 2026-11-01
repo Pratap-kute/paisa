@@ -6,10 +6,12 @@ export const categoryColor = (key: string) =>
 
 export function categoryColorResolver(keys: string[]) {
   const colors = new Map(
-    [...new Set(keys)].sort().map((key, index) => [
-      key,
-      `var(--paisa-chart-series-${index % 12 + 1})`,
-    ]),
+    [...new Set(keys)]
+      .sort()
+      .map((key, index) => [
+        key,
+        `var(--paisa-chart-series-${(index % 12) + 1})`,
+      ]),
   );
   return (key: string) => colors.get(key) ?? categoryColor(key);
 }

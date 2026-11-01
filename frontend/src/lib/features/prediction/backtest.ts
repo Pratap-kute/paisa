@@ -14,7 +14,7 @@ export function backtest(
   options: PredictionOptions = {},
 ): BacktestResult {
   const ordered = [...history].sort((left, right) =>
-    left.date.localeCompare(right.date)
+    left.date.localeCompare(right.date),
   );
   const byConfidence: Record<string, number> = {
     HIGH: 0,
@@ -46,8 +46,8 @@ export function backtest(
       index,
     );
     total += 1;
-    byConfidence[result.confidence] = (byConfidence[result.confidence] || 0) +
-      1;
+    byConfidence[result.confidence] =
+      (byConfidence[result.confidence] || 0) + 1;
     if (result.account === current.categoryAccount) correct += 1;
   }
 

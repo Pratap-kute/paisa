@@ -60,8 +60,10 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: conic-gradient(currentColor calc(var(--value) * 1%), transparent
-    0);
+  background: conic-gradient(
+    currentColor calc(var(--value) * 1%),
+    transparent 0
+  );
   content: "";
   mask: radial-gradient(
     farthest-side,

@@ -14,9 +14,7 @@ import type {
 import { sortBy } from "$lib/shared/utils/collection";
 
 export type GoalProjectionKind =
-  | "required-path"
-  | "configured-payment"
-  | "forecast";
+  "required-path" | "configured-payment" | "forecast";
 
 export function buildGoalProgressSeries(
   points: Point[],
@@ -61,16 +59,17 @@ export function buildGoalProgressSeries(
       },
       ...(projectionKind === "forecast"
         ? [
-          {
-            key: "forecastBandHigh",
-            label: projectionKind === "forecast"
-              ? "Forecast Range"
-              : projectionLabel,
-            intent: "area",
-            color: COLORS.primary,
-            areaOpacity: 0.12,
-          } as const,
-        ]
+            {
+              key: "forecastBandHigh",
+              label:
+                projectionKind === "forecast"
+                  ? "Forecast Range"
+                  : projectionLabel,
+              intent: "area",
+              color: COLORS.primary,
+              areaOpacity: 0.12,
+            } as const,
+          ]
         : []),
       {
         key: "milestone",
@@ -95,7 +94,8 @@ export function buildGoalProgressSeries(
           timestamp: point.date.valueOf(),
           values: {
             forecast: point.value,
-            forecastBandHigh: point.value +
+            forecastBandHigh:
+              point.value +
               (typeof (point as Forecast).error === "number"
                 ? (point as Forecast).error / 2
                 : 0),
@@ -137,9 +137,9 @@ export function buildGoalInvestmentSeries(
       period: month,
       values: { total },
       tooltipRows: sortBy(
-        Object.entries(groupSumBy(bucket, (p) => p.account)).map((
-          [account, amount],
-        ) => [iconify(account), amount] as [string, number]),
+        Object.entries(groupSumBy(bucket, (p) => p.account)).map(
+          ([account, amount]) => [iconify(account), amount] as [string, number],
+        ),
         (row) => row[0],
       ),
     });
@@ -149,21 +149,24 @@ export function buildGoalInvestmentSeries(
     axis: "category",
     granularity: "month",
     valueFormat: "currency",
-    legends: [{
-      label: "Investment",
-      color: COLORS.secondary,
-      shape: "square",
-    }],
-    series: [{
-      key: "total",
-      label: "Investment",
-      intent: "bar",
-      positiveColor: COLORS.secondary,
-      negativeColor: COLORS.tertiary,
-      markLine: pmt > 0
-        ? { value: pmt, label: formatCurrency(pmt) }
-        : undefined,
-    }],
+    legends: [
+      {
+        label: "Investment",
+        color: COLORS.secondary,
+        shape: "square",
+      },
+    ],
+    series: [
+      {
+        key: "total",
+        label: "Investment",
+        intent: "bar",
+        positiveColor: COLORS.secondary,
+        negativeColor: COLORS.tertiary,
+        markLine:
+          pmt > 0 ? { value: pmt, label: formatCurrency(pmt) } : undefined,
+      },
+    ],
     points,
   };
 }

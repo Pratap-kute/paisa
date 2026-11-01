@@ -64,9 +64,7 @@ toast.setDefaults({
 
 globalThis.USER_CONFIG = {} as any;
 
-export const handleError: HandleClientError = (
-  { error, status, message },
-) => {
+export const handleError: HandleClientError = ({ error, status, message }) => {
   let stack: string | undefined = undefined;
   if (error instanceof Error) {
     stack = error.stack;
@@ -105,9 +103,8 @@ const footer = `
 
 function isIgnoredClientError(error: any): boolean {
   if (!error) return true;
-  const msg = typeof error === "string"
-    ? error
-    : error?.message || String(error);
+  const msg =
+    typeof error === "string" ? error : error?.message || String(error);
   if (
     typeof msg === "string" &&
     (msg.includes(
@@ -126,8 +123,7 @@ function displayError(error: any) {
   console.error("Client Error Caught:", error);
   const message = formatError(error);
   toast.toast({
-    message:
-      `<div class="message invertable is-danger"><div class="message-header">Something Went Wrong</div><div class="message-body">${message}${footer}</div></div>`,
+    message: `<div class="message invertable is-danger"><div class="message-header">Something Went Wrong</div><div class="message-body">${message}${footer}</div></div>`,
     type: "is-danger",
     dismissible: true,
     pauseOnHover: true,

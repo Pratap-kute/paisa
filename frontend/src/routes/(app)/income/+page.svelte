@@ -1,63 +1,64 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import type { Income } from "$lib/domain/cash_flow";
-import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
-import type { Tax } from "$lib/domain/tax";
-import type { Legend } from "$lib/shared/charts/types";
-import {
-  buildMonthlyIncomeSeries,
-  buildYearlyIncomeComparisonSeries,
-} from "$lib/features/income/time_series_data";
-import { sumBy } from "es-toolkit";
-import { onMount } from "svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import MonthlyIncomeChart from "$lib/features/income/components/MonthlyIncomeChart.svelte";
-import YearlyIncomeChart from "$lib/features/income/components/YearlyIncomeChart.svelte";
-import { isEmpty } from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import type { Income } from "$lib/domain/cash_flow";
+  import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
+  import type { Tax } from "$lib/domain/tax";
+  import type { Legend } from "$lib/shared/charts/types";
+  import {
+    buildMonthlyIncomeSeries,
+    buildYearlyIncomeComparisonSeries,
+  } from "$lib/features/income/time_series_data";
+  import { sumBy } from "es-toolkit";
+  import { onMount } from "svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import MonthlyIncomeChart from "$lib/features/income/components/MonthlyIncomeChart.svelte";
+  import YearlyIncomeChart from "$lib/features/income/components/YearlyIncomeChart.svelte";
+  import { isEmpty } from "$lib/shared/utils/collection";
 
-let grossIncome = $state(0);
-let netTax = $state(0);
-let isLoading = $state(true);
-let hasIncomeData = $state(false);
+  let grossIncome = $state(0);
+  let netTax = $state(0);
+  let isLoading = $state(true);
+  let hasIncomeData = $state(false);
 
-let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
-let yearlyIncomeTimelineLegends: Legend[] = $state([]);
-let incomes: Income[] = $state([]);
-let yearlyCards: IncomeYearlyCard[] = $state([]);
+  let monthlyInvestmentTimelineLegends: Legend[] = $state([]);
+  let yearlyIncomeTimelineLegends: Legend[] = $state([]);
+  let incomes: Income[] = $state([]);
+  let yearlyCards: IncomeYearlyCard[] = $state([]);
 
-onMount(async () => {
-  try {
-    const {
-      income_timeline: fetchedIncomes,
-      tax_timeline: taxes,
-      yearly_cards: fetchedYearlyCards,
-    } = await api.income.getIncome() as unknown as {
-      income_timeline: Income[];
-      tax_timeline: Tax[];
-      yearly_cards: IncomeYearlyCard[];
-    };
+  onMount(async () => {
+    try {
+      const {
+        income_timeline: fetchedIncomes,
+        tax_timeline: taxes,
+        yearly_cards: fetchedYearlyCards,
+      } = (await api.income.getIncome()) as unknown as {
+        income_timeline: Income[];
+        tax_timeline: Tax[];
+        yearly_cards: IncomeYearlyCard[];
+      };
 
-    incomes = fetchedIncomes ?? [];
-    yearlyCards = fetchedYearlyCards ?? [];
-    grossIncome = sumBy(incomes, (i) => sumBy(i.postings, (p) => -p.amount));
-    netTax = sumBy(taxes, (t) => sumBy(t.postings, (p) => p.amount));
-    hasIncomeData = grossIncome !== 0 || netTax !== 0 || !isEmpty(yearlyCards);
-    monthlyInvestmentTimelineLegends =
-      buildMonthlyIncomeSeries(incomes).legends ?? [];
-    yearlyIncomeTimelineLegends =
-      buildYearlyIncomeComparisonSeries(yearlyCards).legends ?? [];
-  } finally {
-    isLoading = false;
-  }
-});
+      incomes = fetchedIncomes ?? [];
+      yearlyCards = fetchedYearlyCards ?? [];
+      grossIncome = sumBy(incomes, (i) => sumBy(i.postings, (p) => -p.amount));
+      netTax = sumBy(taxes, (t) => sumBy(t.postings, (p) => p.amount));
+      hasIncomeData =
+        grossIncome !== 0 || netTax !== 0 || !isEmpty(yearlyCards);
+      monthlyInvestmentTimelineLegends =
+        buildMonthlyIncomeSeries(incomes).legends ?? [];
+      yearlyIncomeTimelineLegends =
+        buildYearlyIncomeComparisonSeries(yearlyCards).legends ?? [];
+    } finally {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -87,16 +88,17 @@ onMount(async () => {
 
   {#if !isLoading && !hasIncomeData}
     <ZeroState item={[]}>
-      <p class="text-sm text-muted-foreground">
-        No income postings found.
-      </p>
+      <p class="text-sm text-muted-foreground">No income postings found.</p>
     </ZeroState>
   {:else}
     <Section
       title="Monthly Income Timeline"
       subtitle="Income and investment activity by month"
     >
-      <LegendCard legends={monthlyInvestmentTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+      <LegendCard
+        legends={monthlyInvestmentTimelineLegends}
+        clazz="mb-3 paisa-overflow-x-auto"
+      />
       <ChartFrame height="tall">
         <MonthlyIncomeChart {incomes} />
       </ChartFrame>
@@ -106,7 +108,10 @@ onMount(async () => {
       title="Financial Year Income"
       subtitle="Yearly gross income, net income, and tax comparison"
     >
-      <LegendCard legends={yearlyIncomeTimelineLegends} clazz="mb-3 paisa-overflow-x-auto" />
+      <LegendCard
+        legends={yearlyIncomeTimelineLegends}
+        clazz="mb-3 paisa-overflow-x-auto"
+      />
       <ChartFrame height="tall">
         <YearlyIncomeChart {yearlyCards} />
       </ChartFrame>

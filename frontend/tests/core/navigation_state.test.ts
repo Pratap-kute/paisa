@@ -57,10 +57,9 @@ describe("NavigationState", () => {
   });
 
   test("isGroupActive detects if any child link is currently active", () => {
-    expect(nav.isGroupActive(liabilitiesGroup, "/liabilities/credit_cards"))
-      .toBe(
-        true,
-      );
+    expect(
+      nav.isGroupActive(liabilitiesGroup, "/liabilities/credit_cards"),
+    ).toBe(true);
     expect(nav.isGroupActive(liabilitiesGroup, "/assets/balance")).toBe(false);
   });
 
@@ -105,18 +104,16 @@ describe("NavigationState", () => {
   test("onNavigate clears stale collapse override when entering the active group", () => {
     // User collapsed liabilities previously
     nav.toggleGroup(liabilitiesGroup, "/liabilities/credit_cards");
-    expect(nav.isGroupExpanded(liabilitiesGroup, "/liabilities/credit_cards"))
-      .toBe(
-        false,
-      );
+    expect(
+      nav.isGroupExpanded(liabilitiesGroup, "/liabilities/credit_cards"),
+    ).toBe(false);
 
     // User navigates into liabilities
     nav.onNavigate(liabilitiesGroup);
 
     // Stale collapse is reset, so active group expands for the user
-    expect(nav.isGroupExpanded(liabilitiesGroup, "/liabilities/credit_cards"))
-      .toBe(
-        true,
-      );
+    expect(
+      nav.isGroupExpanded(liabilitiesGroup, "/liabilities/credit_cards"),
+    ).toBe(true);
   });
 });

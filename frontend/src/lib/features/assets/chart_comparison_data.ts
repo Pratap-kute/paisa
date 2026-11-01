@@ -13,26 +13,26 @@ export function buildAllocationTargetComparison(
     valueLabel: "Current",
     targetLabel: "Target",
     sort: "input",
-    points: sortBy(allocationTargets, (target) => target.name).map((
-      target,
-    ) => ({
-      key: target.name,
-      label: target.name,
-      value: target.current,
-      target: target.target,
-      secondaryValue: target.current - target.target,
-      secondaryLabel: "Diff",
-      color: COLORS.secondary,
-      tooltipRows: [
-        { label: "Target", value: target.target, format: "number" },
-        { label: "Current", value: target.current, format: "number" },
-        {
-          label: "Diff",
-          value: target.current - target.target,
-          format: "number",
-        },
-      ],
-    })),
+    points: sortBy(allocationTargets, (target) => target.name).map(
+      (target) => ({
+        key: target.name,
+        label: target.name,
+        value: target.current,
+        target: target.target,
+        secondaryValue: target.current - target.target,
+        secondaryLabel: "Diff",
+        color: COLORS.secondary,
+        tooltipRows: [
+          { label: "Target", value: target.target, format: "number" },
+          { label: "Current", value: target.current, format: "number" },
+          {
+            label: "Diff",
+            value: target.current - target.target,
+            format: "number",
+          },
+        ],
+      }),
+    ),
   };
 }
 

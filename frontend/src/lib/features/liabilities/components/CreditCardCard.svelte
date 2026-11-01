@@ -1,28 +1,28 @@
 <script lang="ts">
-import Card from "$lib/shared/ui/Card.svelte";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import { restName } from "$lib/domain/account";
-import { now } from "$lib/domain/time";
-import type { CreditCardSummary } from "$lib/domain/liabilities";
-import type { CreditCardBill } from "$lib/domain/liabilities";
-import { iconText } from "$lib/shared/ui/icon";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import CreditCardNetwork from "./CreditCardNetwork.svelte";
-import DueDate from "./DueDate.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { restName } from "$lib/domain/account";
+  import { now } from "$lib/domain/time";
+  import type { CreditCardSummary } from "$lib/domain/liabilities";
+  import type { CreditCardBill } from "$lib/domain/liabilities";
+  import { iconText } from "$lib/shared/ui/icon";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import CreditCardNetwork from "./CreditCardNetwork.svelte";
+  import DueDate from "./DueDate.svelte";
 
-interface Props {
-  creditCard: CreditCardSummary;
-}
+  interface Props {
+    creditCard: CreditCardSummary;
+  }
 
-let { creditCard }: Props = $props();
+  let { creditCard }: Props = $props();
 
-function lastBill(creditCard: CreditCardSummary): CreditCardBill | undefined {
-  return creditCard.bills.findLast((b) =>
-    b.statementEndDate.isSameOrBefore(now())
-  );
-}
+  function lastBill(creditCard: CreditCardSummary): CreditCardBill | undefined {
+    return creditCard.bills.findLast((b) =>
+      b.statementEndDate.isSameOrBefore(now()),
+    );
+  }
 
-let bill = $derived(lastBill(creditCard));
+  let bill = $derived(lastBill(creditCard));
 </script>
 
 <Card
@@ -99,9 +99,10 @@ let bill = $derived(lastBill(creditCard));
       </div>
       <div class="flex flex-col">
         <span class="text-2xl text-foreground"
-        >{formatCurrency(creditCard.balance)}</span>
+          >{formatCurrency(creditCard.balance)}</span
+        >
         <span class="text-xs text-muted-foreground"
-        >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
+          >{formatPercentage(creditCard.balance / creditCard.creditLimit)} of {formatCurrency(
             creditCard.creditLimit,
           )}
         </span>
@@ -115,8 +116,9 @@ let bill = $derived(lastBill(creditCard));
         <span>THRU</span>
       </span>
       <span class="opacity-30"
-      >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * *
-        * &nbsp; {creditCard.number}</span>
+        >{creditCard.expirationDate.format("MM / YY")} &nbsp; &nbsp; &nbsp; * * *
+        * &nbsp; {creditCard.number}</span
+      >
     </div>
     <div class="opacity-15">
       <CreditCardNetwork size={48} name={creditCard.network} />
@@ -125,42 +127,42 @@ let bill = $derived(lastBill(creditCard));
 </Card>
 
 <style>
-:global(.paisa-card.credit-card) {
-  aspect-ratio: 3.375 / 2.125;
-  max-width: 25rem;
-  min-width: 19rem;
-  width: 100%;
-  flex: 1;
-  border-radius: var(--paisa-radius-lg, 0.7rem);
-  border: 1px solid var(--paisa-border-subtle);
-  box-shadow: var(--paisa-shadow-md);
-  background: linear-gradient(
-    345deg,
-    var(--paisa-surface) 0%,
-    var(--paisa-surface) 60%,
-    var(--paisa-surface-hover) calc(60% + 1px),
-    var(--paisa-surface-hover) 85%,
-    var(--paisa-surface-hover) calc(85% + 1px),
-    var(--paisa-surface-hover) 95%,
-    var(--paisa-border-strong) calc(95% + 1px),
-    var(--paisa-border-strong) 100%
-  );
-}
+  :global(.paisa-card.credit-card) {
+    aspect-ratio: 3.375 / 2.125;
+    max-width: 25rem;
+    min-width: 19rem;
+    width: 100%;
+    flex: 1;
+    border-radius: var(--paisa-radius-lg, 0.7rem);
+    border: 1px solid var(--paisa-border-subtle);
+    box-shadow: var(--paisa-shadow-md);
+    background: linear-gradient(
+      345deg,
+      var(--paisa-surface) 0%,
+      var(--paisa-surface) 60%,
+      var(--paisa-surface-hover) calc(60% + 1px),
+      var(--paisa-surface-hover) 85%,
+      var(--paisa-surface-hover) calc(85% + 1px),
+      var(--paisa-surface-hover) 95%,
+      var(--paisa-border-strong) calc(95% + 1px),
+      var(--paisa-border-strong) 100%
+    );
+  }
 
-.credit-card-chip {
-  margin: 2.25rem 0 0 1rem;
-}
+  .credit-card-chip {
+    margin: 2.25rem 0 0 1rem;
+  }
 
-.credit-card-valid-thru {
-  font-size: 0.5rem;
-  line-height: 1;
-}
+  .credit-card-valid-thru {
+    font-size: 0.5rem;
+    line-height: 1;
+  }
 
-.chip {
-  color: var(--paisa-warning);
-}
+  .chip {
+    color: var(--paisa-warning);
+  }
 
-.nfc {
-  color: var(--paisa-foreground);
-}
+  .nfc {
+    color: var(--paisa-foreground);
+  }
 </style>

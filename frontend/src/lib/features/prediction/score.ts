@@ -69,11 +69,12 @@ export function applyMerchantRule(
   for (const rule of rules) {
     if (!rule.account) continue;
     if (!accountMatchesPrefix(rule.account, input.prefix)) continue;
-    const merchantNames = rule.merchants && rule.merchants.length > 0
-      ? rule.merchants
-      : rule.merchant
-      ? [rule.merchant]
-      : [];
+    const merchantNames =
+      rule.merchants && rule.merchants.length > 0
+        ? rule.merchants
+        : rule.merchant
+          ? [rule.merchant]
+          : [];
     for (const merchant of merchantNames) {
       const ruleNorm = normalizeDescription(merchant);
       if (!ruleNorm.merchantKey) continue;
@@ -123,7 +124,7 @@ export function scoreAccounts(
 
   for (const [account, group] of grouped) {
     const identity = group.reduce((best, item) =>
-      item.identity > best.identity ? item : best
+      item.identity > best.identity ? item : best,
     );
     const support = group.length;
     const ratio = matchedCount > 0 ? support / matchedCount : 0;
@@ -171,17 +172,18 @@ export function scoreAccounts(
     }
 
     let amount = 0;
-    const inputAbs = input.amount != null && Number.isFinite(input.amount)
-      ? Math.abs(input.amount)
-      : undefined;
+    const inputAbs =
+      input.amount != null && Number.isFinite(input.amount)
+        ? Math.abs(input.amount)
+        : undefined;
     if (inputAbs != null && inputAbs !== 0) {
       let best = 0;
       for (const item of group) {
-        const postingAbs = item.posting.absoluteAmount ||
-          Math.abs(item.posting.amount);
+        const postingAbs =
+          item.posting.absoluteAmount || Math.abs(item.posting.amount);
         if (postingAbs === 0) continue;
-        const rel = Math.abs(postingAbs - inputAbs) /
-          Math.max(postingAbs, inputAbs);
+        const rel =
+          Math.abs(postingAbs - inputAbs) / Math.max(postingAbs, inputAbs);
         best = Math.max(
           best,
           1 - Math.min(1, rel / MATCH.AMOUNT_RELATIVE_SCALE),
@@ -207,7 +209,8 @@ export function scoreAccounts(
             recency = 0;
           } else {
             const span = MATCH.RECENCY_ZERO_DAYS - MATCH.RECENCY_FULL_DAYS;
-            recency = CONTEXT.RECENCY_MAX *
+            recency =
+              CONTEXT.RECENCY_MAX *
               (1 - (newest - MATCH.RECENCY_FULL_DAYS) / span);
           }
         }
@@ -217,14 +220,23 @@ export function scoreAccounts(
     const genericPenalty = isGenericMerchant(normalized.merchantKey)
       ? PENALTY.GENERIC_MERCHANT
       : 0;
-    const weakFuzzyPenalty = identity.kind === "SIMILARITY" &&
-        identity.similarity < MATCH.WEAK_FUZZY_BELOW &&
-        support === 1
-      ? PENALTY.WEAK_FUZZY
-      : 0;
+    const weakFuzzyPenalty =
+      identity.kind === "SIMILARITY" &&
+      identity.similarity < MATCH.WEAK_FUZZY_BELOW &&
+      support === 1
+        ? PENALTY.WEAK_FUZZY
+        : 0;
 
-    const total = identity.identity + history + supportBonus +
-      source + direction + currency + amount + recency + genericPenalty +
+    const total =
+      identity.identity +
+      history +
+      supportBonus +
+      source +
+      direction +
+      currency +
+      amount +
+      recency +
+      genericPenalty +
       weakFuzzyPenalty;
 
     const reasons: ReasonCode[] = [identity.kind];

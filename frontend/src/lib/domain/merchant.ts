@@ -142,8 +142,8 @@ export function aliasKey(tokens: string[]): string {
   if (ALIASES[aliasedJoined]) {
     return ALIASES[aliasedJoined];
   }
-  const withoutSuffix = aliased.filter((token, index) =>
-    index === 0 || !GENERIC_MERCHANT_SUFFIXES.has(token)
+  const withoutSuffix = aliased.filter(
+    (token, index) => index === 0 || !GENERIC_MERCHANT_SUFFIXES.has(token),
   );
   const key = withoutSuffix.join(" ").trim();
   return ALIASES[key] || key;
@@ -167,7 +167,9 @@ export function extractUpiMerchant(raw: string): string | undefined {
 
 export function extractNeftMerchant(raw: string): string | undefined {
   if (!/neft/i.test(raw)) return undefined;
-  const parts = collapseWrappedText(raw).split("*").map((part) => part.trim())
+  const parts = collapseWrappedText(raw)
+    .split("*")
+    .map((part) => part.trim())
     .filter(Boolean);
   for (const part of parts) {
     const compact = part.replace(/\s/g, "");

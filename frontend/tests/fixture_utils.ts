@@ -17,7 +17,8 @@ export function withoutGeneratedIds(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(withoutGeneratedIds);
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).filter(([key]) => !GENERATED_ID_KEYS.includes(key))
+      Object.entries(value)
+        .filter(([key]) => !GENERATED_ID_KEYS.includes(key))
         .map(([key, item]) => [key, withoutGeneratedIds(item)]),
     );
   }
@@ -37,10 +38,7 @@ async function copyFixtureEntry(source: string, target: string) {
     const entries = await fs.readdir(source);
     for (const entry of entries) {
       if (!shouldCopyFixtureEntry(entry)) continue;
-      await copyFixtureEntry(
-        join(source, entry),
-        join(target, entry),
-      );
+      await copyFixtureEntry(join(source, entry), join(target, entry));
     }
     return;
   }
@@ -56,10 +54,7 @@ export async function copyFixtureSourceToTemp(
   const entries = await fs.readdir(sourceDir);
   for (const entry of entries) {
     if (!shouldCopyFixtureEntry(entry)) continue;
-    await copyFixtureEntry(
-      join(sourceDir, entry),
-      join(tempDir, entry),
-    );
+    await copyFixtureEntry(join(sourceDir, entry), join(tempDir, entry));
   }
   return tempDir;
 }

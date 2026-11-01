@@ -157,21 +157,24 @@ async function check(baselineDir: string, fixtureName: string) {
   const baseUrl = `http://localhost:${port}`;
   const request = createRequest(baseUrl);
 
-  const child = Bun.spawn([
-    findPaisaBinary(),
-    "--config",
-    join(workDir, "paisa.yaml"),
-    "--port",
-    port.toString(),
-    "--now",
-    "2022-02-07",
-    "serve",
-  ], {
-    cwd: workDir,
-    env: { ...process.env, TZ: "UTC" },
-    stdout: "ignore",
-    stderr: "ignore",
-  });
+  const child = Bun.spawn(
+    [
+      findPaisaBinary(),
+      "--config",
+      join(workDir, "paisa.yaml"),
+      "--port",
+      port.toString(),
+      "--now",
+      "2022-02-07",
+      "serve",
+    ],
+    {
+      cwd: workDir,
+      env: { ...process.env, TZ: "UTC" },
+      stdout: "ignore",
+      stderr: "ignore",
+    },
+  );
 
   try {
     await waitForPort(port);

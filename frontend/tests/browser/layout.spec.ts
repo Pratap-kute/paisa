@@ -15,7 +15,7 @@ async function assertNoPageOverflow(page: Page) {
   const metrics = await page.evaluate((selectors) => {
     const root = document.documentElement;
     const known = selectors.flatMap((selector) =>
-      Array.from(document.querySelectorAll(selector))
+      Array.from(document.querySelectorAll(selector)),
     );
     return {
       scrollWidth: root.scrollWidth,
@@ -57,11 +57,14 @@ test.describe("layout invariants", () => {
   });
 
   for (const width of [390, 768, 1024, 1440]) {
-    const routes = width <= 768
-      ? overflowRoutes.filter((route) => route.name !== "transactions")
-      : overflowRoutes;
+    const routes =
+      width <= 768
+        ? overflowRoutes.filter((route) => route.name !== "transactions")
+        : overflowRoutes;
     for (const route of routes) {
-      test(`${route.name} does not overflow at ${width}px`, async ({ page }) => {
+      test(`${route.name} does not overflow at ${width}px`, async ({
+        page,
+      }) => {
         await page.setViewportSize({ width, height: 900 });
         if (route.path === "/ledger/price") {
           await page.route("**/api/price", async (apiRoute) => {
@@ -76,8 +79,9 @@ test.describe("layout invariants", () => {
             await apiRoute.continue();
           });
           await page.goto(route.path);
-          await expect(page.getByRole("heading", { name: "Commodity Prices" }))
-            .toBeVisible();
+          await expect(
+            page.getByRole("heading", { name: "Commodity Prices" }),
+          ).toBeVisible();
           await expect(page.getByText(/commodity\(ies\)/)).toBeVisible();
         } else {
           await page.goto(route.path);
@@ -89,11 +93,15 @@ test.describe("layout invariants", () => {
   }
 
   for (const width of [1024, 1280]) {
-    test(`sidebar expandable groups reveal children at ${width}px`, async ({ page }) => {
+    test(`sidebar expandable groups reveal children at ${width}px`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
       await assertNavigationVisible(page);
-      await page.locator("aside").getByRole("button", { name: "Cash Flow" })
+      await page
+        .locator("aside")
+        .getByRole("button", { name: "Cash Flow" })
         .click();
       await expect(
         page.locator("aside").getByRole("link", { name: "Monthly" }).first(),
@@ -101,7 +109,9 @@ test.describe("layout invariants", () => {
     });
   }
 
-  test("dashboard shows a not-configured Budget state when Budget is absent", async ({ page }) => {
+  test("dashboard shows a not-configured Budget state when Budget is absent", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/dashboard", async (route) => {
       const response = await route.fetch();
@@ -119,40 +129,53 @@ test.describe("layout invariants", () => {
     });
     await expect(row).toBeVisible();
     await expect(row.locator(":scope > *")).toHaveCount(2);
-    await expect(row.getByText("Not configured", { exact: true }))
-      .toBeVisible();
+    await expect(
+      row.getByText("Not configured", { exact: true }),
+    ).toBeVisible();
   });
 
-  test("dashboard keeps insights failure distinct from a healthy empty state", async ({ page }) => {
+  test("dashboard keeps insights failure distinct from a healthy empty state", async ({
+    page,
+  }) => {
     await page.route("**/api/insights**", (route) =>
       route.fulfill({
         status: 503,
         contentType: "application/json",
         body: JSON.stringify({ message: "unavailable" }),
-      }));
+      }),
+    );
     await page.goto("/");
     const gateway = page.locator("[data-testid='dashboard-insights']");
-    await expect(gateway.getByText("Insights unavailable", { exact: true }))
-      .toBeVisible();
-    await expect(gateway.getByText("No material issues detected this month"))
-      .toHaveCount(0);
+    await expect(
+      gateway.getByText("Insights unavailable", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      gateway.getByText("No material issues detected this month"),
+    ).toHaveCount(0);
   });
 
-  test("dashboard reports a dashboard API failure without showing onboarding", async ({ page }) => {
+  test("dashboard reports a dashboard API failure without showing onboarding", async ({
+    page,
+  }) => {
     await page.route("**/api/dashboard", (route) =>
       route.fulfill({
         status: 503,
         contentType: "application/json",
         body: JSON.stringify({ message: "unavailable" }),
-      }));
+      }),
+    );
     await page.goto("/");
-    await expect(page.locator("[data-testid='dashboard-unavailable']"))
-      .toBeVisible();
-    await expect(page.getByText("I want to get started", { exact: true }))
-      .toHaveCount(0);
+    await expect(
+      page.locator("[data-testid='dashboard-unavailable']"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("I want to get started", { exact: true }),
+    ).toHaveCount(0);
   });
 
-  test("surviving dashboard section spans the row when Goals are absent", async ({ page }) => {
+  test("surviving dashboard section spans the row when Goals are absent", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.route("**/api/dashboard", async (route) => {
       const response = await route.fetch();
@@ -178,7 +201,8 @@ test.describe("layout invariants", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ networthTimeline: [], xirr: 0 }),
-      }));
+      }),
+    );
     await page.goto("/assets/networth");
     await expect(page.locator(".paisa-chart-frame-empty")).toHaveCount(1);
     await expect(page.locator(".paisa-chart-frame-empty")).toBeVisible();

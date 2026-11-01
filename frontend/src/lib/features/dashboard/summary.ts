@@ -18,11 +18,7 @@ import { iconGlyphOr } from "$lib/shared/ui/icon";
 import type { Dayjs } from "dayjs";
 
 export type MetricStatus =
-  | "neutral"
-  | "positive"
-  | "negative"
-  | "warning"
-  | "primary";
+  "neutral" | "positive" | "negative" | "warning" | "primary";
 
 export interface DashboardTrend {
   text: string;
@@ -105,10 +101,13 @@ function insightKey(insight: Insight): string {
 }
 
 function sortInsights(insights: Insight[]): Insight[] {
-  return insights.slice().sort((left, right) =>
-    (right.score ?? 0) - (left.score ?? 0) ||
-    insightKey(left).localeCompare(insightKey(right))
-  );
+  return insights
+    .slice()
+    .sort(
+      (left, right) =>
+        (right.score ?? 0) - (left.score ?? 0) ||
+        insightKey(left).localeCompare(insightKey(right)),
+    );
 }
 
 export function buildExpensePace(
@@ -122,7 +121,8 @@ export function buildExpensePace(
     period !== currentDate.format("YYYY-MM") ||
     !Number.isFinite(currentMonthExpenses) ||
     currentMonthExpenses <= 0
-  ) return undefined;
+  )
+    return undefined;
 
   const elapsedDays = currentDate.date();
   const daysInMonth = currentDate.daysInMonth();
@@ -130,15 +130,17 @@ export function buildExpensePace(
     elapsedDays < MIN_EXPENSE_PROJECTION_DAYS ||
     elapsedDays > daysInMonth ||
     daysInMonth <= 0
-  ) return undefined;
+  )
+    return undefined;
 
-  const projectedExpenses = currentMonthExpenses / elapsedDays * daysInMonth;
+  const projectedExpenses = (currentMonthExpenses / elapsedDays) * daysInMonth;
   if (!Number.isFinite(projectedExpenses)) return undefined;
-  const validBudget = Number.isFinite(plannedBudget) &&
-    (plannedBudget ?? 0) > 0;
-  const overBudget = validBudget && projectedExpenses > plannedBudget!
-    ? projectedExpenses - plannedBudget!
-    : undefined;
+  const validBudget =
+    Number.isFinite(plannedBudget) && (plannedBudget ?? 0) > 0;
+  const overBudget =
+    validBudget && projectedExpenses > plannedBudget!
+      ? projectedExpenses - plannedBudget!
+      : undefined;
   return {
     projectedExpenses,
     overBudget,
@@ -176,11 +178,12 @@ export function buildDashboardAttention(
         title: presentation.title,
         detail: presentation.description || undefined,
         icon: presentation.icon,
-        status: insight.severity === "critical"
-          ? "negative"
-          : insight.severity === "warning"
-          ? "warning"
-          : toneToMetricStatus(presentation.tone),
+        status:
+          insight.severity === "critical"
+            ? "negative"
+            : insight.severity === "warning"
+              ? "warning"
+              : toneToMetricStatus(presentation.tone),
         href: presentation.href || "/insights",
         priority,
       });
@@ -199,11 +202,12 @@ export function buildDashboardAttention(
       title: `${count} recurring ${
         count === 1 ? "payment is" : "payments are"
       } later than usual`,
-      detail: input.recurring.pastDueAmount > 0
-        ? `${
-          formatCurrency(input.recurring.pastDueAmount)
-        } expected; no payment found`
-        : undefined,
+      detail:
+        input.recurring.pastDueAmount > 0
+          ? `${formatCurrency(
+              input.recurring.pastDueAmount,
+            )} expected; no payment found`
+          : undefined,
       icon: "fa-solid fa-clock-rotate-left",
       status: "negative",
       href: "/cash_flow/recurring",
@@ -211,14 +215,16 @@ export function buildDashboardAttention(
     });
   }
   addInsights(
-    allInsights.filter((insight) =>
-      insight.severity === "warning" && !budgetTypes.has(insight.type)
+    allInsights.filter(
+      (insight) =>
+        insight.severity === "warning" && !budgetTypes.has(insight.type),
     ),
     500,
   );
   addInsights(
-    allInsights.filter((insight) =>
-      insight.severity === "warning" && budgetTypes.has(insight.type)
+    allInsights.filter(
+      (insight) =>
+        insight.severity === "warning" && budgetTypes.has(insight.type),
     ),
     400,
   );
@@ -231,11 +237,11 @@ export function buildDashboardAttention(
       id: "cash:recurring-shortfall",
       kind: "cash",
       title: "Upcoming payments exceed available cash",
-      detail: `${
-        formatCurrency(input.recurring.upcomingAmount)
-      } due in the next ${input.recurring.horizonDays} days · ${
-        formatCurrency(Math.abs(input.recurring.cashAfterUpcoming))
-      } short`,
+      detail: `${formatCurrency(
+        input.recurring.upcomingAmount,
+      )} due in the next ${input.recurring.horizonDays} days · ${formatCurrency(
+        Math.abs(input.recurring.cashAfterUpcoming),
+      )} short`,
       icon: "fa-solid fa-wallet",
       status: "negative",
       href: "/cash_flow/recurring",
@@ -243,8 +249,10 @@ export function buildDashboardAttention(
     });
   }
 
-  const goalAttention = summarizeGoalHealth(input.goals ?? [], input.asOf)
-    .attention.slice(0, 1);
+  const goalAttention = summarizeGoalHealth(
+    input.goals ?? [],
+    input.asOf,
+  ).attention.slice(0, 1);
   for (const { goal, analysis } of goalAttention) {
     result.push({
       id: `goal:${
@@ -252,13 +260,14 @@ export function buildDashboardAttention(
       }:${goal.id || `${goal.type}:${goal.name}`}`,
       kind: "goal",
       title: `${goal.name}: ${goalStatusLabel(goal, analysis)}`,
-      detail: analysis.state === "overdue"
-        ? `${formatCurrency(analysis.remainingAmount)} remaining`
-        : `${
-          formatCurrency(analysis.actualMonthlyContribution ?? 0)
-        }/month recent pace · ${
-          formatCurrency(analysis.requiredMonthlyContribution ?? 0)
-        }/month required`,
+      detail:
+        analysis.state === "overdue"
+          ? `${formatCurrency(analysis.remainingAmount)} remaining`
+          : `${formatCurrency(
+              analysis.actualMonthlyContribution ?? 0,
+            )}/month recent pace · ${formatCurrency(
+              analysis.requiredMonthlyContribution ?? 0,
+            )}/month required`,
       icon: iconGlyphOr(goal.icon),
       iconIsGlyph: true,
       status: analysis.attention === "critical" ? "negative" : "warning",
@@ -266,10 +275,9 @@ export function buildDashboardAttention(
       priority: analysis.attention === "critical" ? 550 : 200,
     });
   }
-  return result.sort((a, b) => b.priority - a.priority).slice(
-    0,
-    Math.max(0, limit),
-  );
+  return result
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, Math.max(0, limit));
 }
 
 export function periodUrl(path: string, period: string): string {
@@ -280,9 +288,10 @@ export function summarizeCash(
   balances: Record<string, AssetBreakdown> | null | undefined,
   limit = 3,
 ): CashSummary {
-  const accounts = Object.values(balances ?? {}).sort((left, right) =>
-    right.marketAmount - left.marketAmount ||
-    left.group.localeCompare(right.group)
+  const accounts = Object.values(balances ?? {}).sort(
+    (left, right) =>
+      right.marketAmount - left.marketAmount ||
+      left.group.localeCompare(right.group),
   );
   const total = accounts.reduce(
     (sum, account) => sum + account.marketAmount,
@@ -321,9 +330,9 @@ export function buildNetWorthTrend(
   const presentation = presentInsight(insight);
   return presentation.heroMetric
     ? {
-      text: `${presentation.heroMetric} this month`,
-      status: Number(insight.change ?? 0) < 0 ? "negative" : "positive",
-    }
+        text: `${presentation.heroMetric} this month`,
+        status: Number(insight.change ?? 0) < 0 ? "negative" : "positive",
+      }
     : undefined;
 }
 
@@ -347,7 +356,7 @@ export function summarizeInsights(
 ): DashboardInsightsSummary {
   const all = insights ?? [];
   const attention = all.filter((insight) =>
-    attentionSeverities.has(insight.severity)
+    attentionSeverities.has(insight.severity),
   );
   return {
     attentionCount: attention.length,
@@ -383,7 +392,8 @@ export function summarizeBudget(
   let statusLabel = "No categories need attention";
 
   if (outlook) {
-    attentionCount = (outlook.overspentCount ?? 0) +
+    attentionCount =
+      (outlook.overspentCount ?? 0) +
       (outlook.likelyOverCount ?? 0) +
       (outlook.atRiskCount ?? 0);
     if (attentionCount > 0) {
@@ -399,17 +409,19 @@ export function summarizeBudget(
     statusLabel = "Status unavailable";
     status = "neutral";
   } else {
-    const budgetInsights = (insights ?? []).filter((insight) =>
-      budgetInsightTypes.has(insight.type) &&
-      attentionSeverities.has(insight.severity)
+    const budgetInsights = (insights ?? []).filter(
+      (insight) =>
+        budgetInsightTypes.has(insight.type) &&
+        attentionSeverities.has(insight.severity),
     );
     attentionCount = budgetInsights.length;
     status = attentionCount > 0 ? "warning" : "positive";
-    statusLabel = attentionCount > 0
-      ? `${attentionCount} ${
-        attentionCount === 1 ? "category needs" : "categories need"
-      } attention`
-      : "No categories need attention";
+    statusLabel =
+      attentionCount > 0
+        ? `${attentionCount} ${
+            attentionCount === 1 ? "category needs" : "categories need"
+          } attention`
+        : "No categories need attention";
   }
 
   const attentionAccounts: Array<{ budget: AccountBudget; insight?: Insight }> =
@@ -424,7 +436,7 @@ export function summarizeBudget(
   }
 
   const severityRank: Record<string, number> = {
-    "overspent": 3,
+    overspent: 3,
     "likely-over": 2,
     "at-risk": 1,
   };
@@ -432,8 +444,11 @@ export function summarizeBudget(
   const candidateAccounts = budget.accounts
     .filter((acc) => {
       const projStatus = acc.projection?.status;
-      return projStatus === "overspent" || projStatus === "likely-over" ||
-        projStatus === "at-risk";
+      return (
+        projStatus === "overspent" ||
+        projStatus === "likely-over" ||
+        projStatus === "at-risk"
+      );
     })
     .sort((a, b) => {
       const rankA = severityRank[a.projection?.status ?? ""] ?? 0;
@@ -457,9 +472,11 @@ export function summarizeBudget(
   if (attentionAccounts.length === 0 && insights) {
     for (const ins of insights) {
       if (
-        !ins.account || seenAccounts.has(ins.account) ||
+        !ins.account ||
+        seenAccounts.has(ins.account) ||
         !budgetInsightTypes.has(ins.type)
-      ) continue;
+      )
+        continue;
       const acc = accountsByName.get(ins.account);
       if (!acc) continue;
       seenAccounts.add(ins.account);
@@ -504,8 +521,11 @@ export function summarizeAnalyzedRecurring(
   if (!asOf.isValid() || horizonDays < 0) return summary;
   for (const item of items) {
     if (
-      !item.confirmed || !item.cashObligation || item.cashCommodity !== currency
-    ) continue;
+      !item.confirmed ||
+      !item.cashObligation ||
+      item.cashCommodity !== currency
+    )
+      continue;
     if (item.flags.laterThanUsual) {
       summary.pastDueCount++;
       summary.pastDueAmount += item.expectedCashOutflowAmount ?? 0;

@@ -18,8 +18,9 @@ test("renders a quiet high badge and a louder review badge", () => {
     possibleTransfer: true,
   });
   expect(review.container.textContent).toContain("Transfer");
-  expect(review.container.querySelector(".paisa-prediction-badge"))
-    .not.toHaveClass("is-quiet");
+  expect(
+    review.container.querySelector(".paisa-prediction-badge"),
+  ).not.toHaveClass("is-quiet");
 });
 
 test("filters counts from the review bar", () => {
@@ -44,12 +45,14 @@ test("shows override actions for a selected prediction", () => {
     support: 2,
     margin: 10,
     reasons: ["EXACT_MERCHANT", "HISTORY"],
-    alternatives: [{
-      account: "Expenses:Groceries",
-      score: 40,
-      support: 1,
-      reasons: ["SIMILARITY"],
-    }],
+    alternatives: [
+      {
+        account: "Expenses:Groceries",
+        score: 40,
+        support: 1,
+        reasons: ["SIMILARITY"],
+      },
+    ],
     possibleTransfer: false,
     merchantKey: "starbucks",
     source: "HISTORY",
@@ -71,7 +74,7 @@ test("shows override actions for a selected prediction", () => {
     "Apply to similar rows in this import",
   );
   const alternative = [...container.querySelectorAll("button")].find((button) =>
-    button.textContent?.includes("Expenses:Groceries")
+    button.textContent?.includes("Expenses:Groceries"),
   );
   alternative?.click();
   expect(onOverride).toHaveBeenCalledWith("Expenses:Groceries");
@@ -126,8 +129,9 @@ test("renders all reviewed badge when no remaining items", () => {
   });
 
   expect(container.textContent).toContain("All reviewed");
-  expect(container.querySelector('[data-testid="all-reviewed-badge"]')).not
-    .toBeNull();
+  expect(
+    container.querySelector('[data-testid="all-reviewed-badge"]'),
+  ).not.toBeNull();
   expect(container.querySelector('[data-testid="review-next-btn"]')).toBeNull();
 });
 

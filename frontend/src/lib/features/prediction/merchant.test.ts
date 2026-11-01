@@ -34,8 +34,8 @@ describe("merchant matching", () => {
     expect(index.byMerchant.get("swiggy instamart")?.length).toBe(1);
     const query = normalizeDescription("SWIGGY INSTAMART");
     const food = index.postings.find((row) => row.account === "Expenses:Food")!;
-    const groceries = index.postings.find((row) =>
-      row.account === "Expenses:Groceries"
+    const groceries = index.postings.find(
+      (row) => row.account === "Expenses:Groceries",
     )!;
     expect(matchPosting(query, groceries)?.kind).toBe("EXACT_MERCHANT");
     expect(matchPosting(query, food)?.kind).toBe("SIMILARITY");
@@ -43,9 +43,7 @@ describe("merchant matching", () => {
   });
 
   it("does not turn a single fuzzy match into a persistent alias", () => {
-    const index = buildIndex([
-      posting("SWIGGY", "Expenses:Food"),
-    ]);
+    const index = buildIndex([posting("SWIGGY", "Expenses:Food")]);
     const query = normalizeDescription("SWIGGY INSTAMART");
     expect(matchPosting(query, index.postings[0])?.kind).toBe("SIMILARITY");
     expect(

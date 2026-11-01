@@ -31,8 +31,10 @@ beforeEach(() => {
 
 describe("goals", () => {
   test("solves monthly savings or target date", () => {
-    expect(solvePMTOrNper(100_000, 8, 10_000, 0, "2023-01-01"))
-      .toEqual({ pmt: 0, targetDate: "" });
+    expect(solvePMTOrNper(100_000, 8, 10_000, 0, "2023-01-01")).toEqual({
+      pmt: 0,
+      targetDate: "",
+    });
     const byDate = solvePMTOrNper(100_000, 8, 10_000, 0, "2025-01-01");
     expect(byDate.pmt).toBeGreaterThan(0);
     expect(byDate.targetDate).toBe("2025-01-01");
@@ -53,13 +55,15 @@ describe("goals", () => {
       date: dayjs("2024-01-01").add(i, "day"),
       value,
     }));
-    expect(findBreakPoints([...points], 100).map((p) => p.value))
-      .toEqual([25, 50, 75, 100]);
+    expect(findBreakPoints([...points], 100).map((p) => p.value)).toEqual([
+      25, 50, 75, 100,
+    ]);
     expect(findBreakPoints([], 100)).toEqual([]);
   });
 
   test("falls back between forecast configurations", () => {
-    const predict = vi.fn()
+    const predict = vi
+      .fn()
       .mockReturnValueOnce([[], []])
       .mockReturnValueOnce([[120], [4]]);
     class FakeArima {
@@ -93,8 +97,9 @@ describe("posting and recurring transactions", () => {
 
   test("annualizes gains and losses", () => {
     expect(change(posting() as never).class).toBe("paisa-text-success");
-    expect(change(posting({ market_amount: 80 }) as never).class)
-      .toBe("paisa-text-danger");
+    expect(change(posting({ market_amount: 80 }) as never).class).toBe(
+      "paisa-text-danger",
+    );
     expect(change(posting({ commodity: "INR" }) as never).value).toBe(0);
     expect(change(posting({ quantity: 0 }) as never).percentage).toBe(0);
   });
@@ -118,25 +123,22 @@ describe("posting and recurring transactions", () => {
       actual: dayjs("2024-02-01"),
     };
     expect(
-      nextUnpaidSchedule(
-        { pastSchedules: [unpaid], futureSchedules: [] } as never,
-      ),
-    )
-      .toBe(unpaid);
+      nextUnpaidSchedule({
+        pastSchedules: [unpaid],
+        futureSchedules: [],
+      } as never),
+    ).toBe(unpaid);
     expect(
-      nextUnpaidSchedule(
-        { pastSchedules: [paid], futureSchedules: [paid, unpaid] } as never,
-      ),
-    )
-      .toBe(unpaid);
+      nextUnpaidSchedule({
+        pastSchedules: [paid],
+        futureSchedules: [paid, unpaid],
+      } as never),
+    ).toBe(unpaid);
     expect(
-      totalRecurring(
-        {
-          transactions: [{ postings: [{ amount: -2 }, { amount: 8 }] }],
-        } as never,
-      ),
-    )
-      .toBe(8);
+      totalRecurring({
+        transactions: [{ postings: [{ amount: -2 }, { amount: 8 }] }],
+      } as never),
+    ).toBe(8);
     expect(scheduleIcon(unpaid as never).color).toBe("paisa-text-danger");
   });
 

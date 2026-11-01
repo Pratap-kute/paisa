@@ -52,7 +52,7 @@ export class NavigationState {
 
   isGroupActive(group: NavGroup, currentPath: string): boolean {
     return this.groupChildHrefs(group).some((href) =>
-      this.isPathActive(href, currentPath)
+      this.isPathActive(href, currentPath),
     );
   }
 

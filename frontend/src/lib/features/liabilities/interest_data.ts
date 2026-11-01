@@ -125,8 +125,8 @@ export function buildInterestTimelineSeries(
       },
     ],
     points: interest.overview_timeline.map((point) => {
-      const balance = point.drawn_amount + point.interest_amount -
-        point.repaid_amount;
+      const balance =
+        point.drawn_amount + point.interest_amount - point.repaid_amount;
       return {
         period: point.date.format("DD MMM YYYY"),
         timestamp: point.date.valueOf(),
@@ -134,12 +134,10 @@ export function buildInterestTimelineSeries(
           drawn: point.drawn_amount,
           repaid: point.repaid_amount,
           balance,
-          interestGain: point.interest_amount < 0
-            ? Math.abs(point.interest_amount)
-            : null,
-          interestLoss: point.interest_amount > 0
-            ? point.interest_amount
-            : null,
+          interestGain:
+            point.interest_amount < 0 ? Math.abs(point.interest_amount) : null,
+          interestLoss:
+            point.interest_amount > 0 ? point.interest_amount : null,
         },
         tooltipRows: [
           ["Drawn", point.drawn_amount],

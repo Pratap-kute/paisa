@@ -25,8 +25,9 @@ test("renders empty state message when empty prop is true", () => {
     emptyMessage: "No data available",
   });
 
-  expect(container.querySelector(".paisa-chart-frame-empty"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelector(".paisa-chart-frame-empty"),
+  ).toBeInTheDocument();
   expect(container).toHaveTextContent("No data available");
   unmount();
 });
@@ -49,8 +50,9 @@ test("renders loading state when loading prop is true", () => {
     loading: true,
   });
 
-  expect(container.querySelector(".paisa-chart-frame-loading"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelector(".paisa-chart-frame-loading"),
+  ).toBeInTheDocument();
   unmount();
 });
 
@@ -61,8 +63,9 @@ test("renders error state when error prop is true", () => {
     errorMessage: "Could not draw chart",
   });
 
-  expect(container.querySelector(".paisa-chart-frame-error"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelector(".paisa-chart-frame-error"),
+  ).toBeInTheDocument();
   expect(container).toHaveTextContent("Chart failed");
   expect(container).toHaveTextContent("Could not draw chart");
   unmount();
@@ -75,8 +78,9 @@ test("renders chart children in ready state", () => {
     })),
   });
 
-  expect(container.querySelector("svg[data-testid='chart']"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelector("svg[data-testid='chart']"),
+  ).toBeInTheDocument();
   unmount();
 });
 
@@ -89,9 +93,11 @@ test("can preserve chart children behind an empty state", () => {
     })),
   });
 
-  expect(container.querySelector(".paisa-chart-frame-empty"))
-    .toBeInTheDocument();
-  expect(container.querySelector(".paisa-chart-frame-preserved svg"))
-    .toBeInTheDocument();
+  expect(
+    container.querySelector(".paisa-chart-frame-empty"),
+  ).toBeInTheDocument();
+  expect(
+    container.querySelector(".paisa-chart-frame-preserved svg"),
+  ).toBeInTheDocument();
   unmount();
 });

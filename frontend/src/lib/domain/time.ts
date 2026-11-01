@@ -18,17 +18,16 @@ export function financialYear(date: dayjs.Dayjs) {
   }
 
   if (date.month() < USER_CONFIG.financial_year_starting_month - 1) {
-    return `${date.year() - 1} - ${
-      (date.year() % 100).toLocaleString("en-US", {
-        minimumIntegerDigits: 2,
-      })
-    }`;
+    return `${date.year() - 1} - ${(date.year() % 100).toLocaleString("en-US", {
+      minimumIntegerDigits: 2,
+    })}`;
   } else {
-    return `${date.year()} - ${
-      ((date.year() + 1) % 100).toLocaleString("en-US", {
+    return `${date.year()} - ${((date.year() + 1) % 100).toLocaleString(
+      "en-US",
+      {
         minimumIntegerDigits: 2,
-      })
-    }`;
+      },
+    )}`;
   }
 }
 

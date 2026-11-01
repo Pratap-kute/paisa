@@ -1,255 +1,292 @@
 <script lang="ts">
-import { obscure } from "$lib/shared/state/persisted";
-import { formatCommodityAmount } from "$lib/shared/formatters/currency";
-import RecurringSummary from "$lib/features/cash_flow/components/RecurringSummary.svelte";
-import { analyzeConfirmedRecurring } from "$lib/domain/recurring_analysis";
-import { onMount } from "svelte";
-import dayjs from "dayjs";
-import { sumBy, take } from "es-toolkit";
-import { api } from "$lib/api";
-import type { AssetBreakdown, Networth } from "$lib/domain/assets";
-import type { Budget, CashFlow } from "$lib/domain/cash_flow";
-import type { GoalSummary } from "$lib/domain/goals_models";
-import { analyzeGoal } from "$lib/domain/goal_intelligence";
-import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
-import type { InsightsResult } from "$lib/domain/insights";
-import type { Posting, Transaction } from "$lib/domain/ledger";
-import type { TransactionSequence } from "$lib/domain/recurring";
-import { restName } from "$lib/domain/account";
-import { now } from "$lib/domain/time";
-import {
-  enrichTrantionSequence,
-  sortTrantionSequence,
-} from "$lib/domain/transaction_sequence";
-import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
-import {
-  buildDashboardAttention,
-  buildExpensePace,
-  buildExpenseTrend,
-  buildNetWorthTrend,
-  currentExpenses,
-  summarizeAnalyzedRecurring,
-  summarizeBudget,
-  summarizeCash,
-} from "$lib/features/dashboard/summary";
-import DashboardInvestmentPerformance from "$lib/features/dashboard/components/DashboardInvestmentPerformance.svelte";
-import type { DtoInvestmentPerformance } from "$lib/api";
-let investmentPerformance: DtoInvestmentPerformance | null | undefined =
-  $state();
-let investmentPerformanceError: string | null | undefined = $state();
-import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
-import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
-import DashboardBudgetHealth from "$lib/features/dashboard/components/DashboardBudgetHealth.svelte";
-import DashboardCashAccounts from "$lib/features/dashboard/components/DashboardCashAccounts.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
-import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-import Button from "$lib/shared/ui/Button.svelte";
-import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-import {
-  formatCurrency,
-  formatPercentage,
-} from "$lib/shared/formatters/currency";
-import { postingUrl } from "$lib/shared/browser/navigation";
-import { some, sortBy } from "$lib/shared/utils/collection";
-import { refresh } from "../../store";
+  import { obscure } from "$lib/shared/state/persisted";
+  import { formatCommodityAmount } from "$lib/shared/formatters/currency";
+  import RecurringSummary from "$lib/features/cash_flow/components/RecurringSummary.svelte";
+  import { analyzeConfirmedRecurring } from "$lib/domain/recurring_analysis";
+  import { onMount } from "svelte";
+  import dayjs from "dayjs";
+  import { sumBy, take } from "es-toolkit";
+  import { api } from "$lib/api";
+  import type { AssetBreakdown, Networth } from "$lib/domain/assets";
+  import type { Budget, CashFlow } from "$lib/domain/cash_flow";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+  import { analyzeGoal } from "$lib/domain/goal_intelligence";
+  import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
+  import type { InsightsResult } from "$lib/domain/insights";
+  import type { Posting, Transaction } from "$lib/domain/ledger";
+  import type { TransactionSequence } from "$lib/domain/recurring";
+  import { restName } from "$lib/domain/account";
+  import { now } from "$lib/domain/time";
+  import {
+    enrichTrantionSequence,
+    sortTrantionSequence,
+  } from "$lib/domain/transaction_sequence";
+  import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
+  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
+  import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
+  import {
+    buildDashboardAttention,
+    buildExpensePace,
+    buildExpenseTrend,
+    buildNetWorthTrend,
+    currentExpenses,
+    summarizeAnalyzedRecurring,
+    summarizeBudget,
+    summarizeCash,
+  } from "$lib/features/dashboard/summary";
+  import DashboardInvestmentPerformance from "$lib/features/dashboard/components/DashboardInvestmentPerformance.svelte";
+  import type { DtoInvestmentPerformance } from "$lib/api";
+  let investmentPerformance: DtoInvestmentPerformance | null | undefined =
+    $state();
+  let investmentPerformanceError: string | null | undefined = $state();
+  import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
+  import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
+  import DashboardBudgetHealth from "$lib/features/dashboard/components/DashboardBudgetHealth.svelte";
+  import DashboardCashAccounts from "$lib/features/dashboard/components/DashboardCashAccounts.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
+  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  import {
+    formatCurrency,
+    formatPercentage,
+  } from "$lib/shared/formatters/currency";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+  import { some, sortBy } from "$lib/shared/utils/collection";
+  import { refresh } from "../../store";
 
-const period = now().format("YYYY-MM");
-let expenseMonth = $state(period);
-let allGoalSummaries: GoalSummary[] = $state([]);
-let allTransactionSequences: TransactionSequence[] = $state([]);
-let cashFlows: CashFlow[] = $state([]);
-let expenses: Record<string, Posting[]> = $state({});
-let networth: Networth | undefined = $state();
-let transactions: Transaction[] = $state([]);
-let budgetsByMonth: Record<string, Budget> = $state({});
-let checkingBalances: Record<string, AssetBreakdown> = $state({});
-let isEmpty = $state(false);
-let dashboardLoading = $state(true);
-let dashboardFailed = $state(false);
-let insightsLoading = $state(true);
-let insightsFailed = $state(false);
-let insightsResponse: InsightsResult | null = $state(null);
+  const period = now().format("YYYY-MM");
+  let expenseMonth = $state(period);
+  let allGoalSummaries: GoalSummary[] = $state([]);
+  let allTransactionSequences: TransactionSequence[] = $state([]);
+  let cashFlows: CashFlow[] = $state([]);
+  let expenses: Record<string, Posting[]> = $state({});
+  let networth: Networth | undefined = $state();
+  let transactions: Transaction[] = $state([]);
+  let budgetsByMonth: Record<string, Budget> = $state({});
+  let checkingBalances: Record<string, AssetBreakdown> = $state({});
+  let isEmpty = $state(false);
+  let dashboardLoading = $state(true);
+  let dashboardFailed = $state(false);
+  let insightsLoading = $state(true);
+  let insightsFailed = $state(false);
+  let insightsResponse: InsightsResult | null = $state(null);
 
-let currentPeriodExpenses = $derived(currentExpenses(expenses, period));
-let currentPeriodExpenseTotal = $derived(
-  sumBy(currentPeriodExpenses, (posting) => posting.amount),
-);
-let selectedExpenses = $derived(currentExpenses(expenses, expenseMonth));
-let selectedExpenseTotal = $derived(
-  sumBy(selectedExpenses, (posting) => posting.amount),
-);
-let expenseBreakdown = $derived(
-  buildExpenseBreakdownComparison(selectedExpenses),
-);
-let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
-let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
-let cashSummary = $derived(summarizeCash(checkingBalances));
-let insightsAvailable = $derived(
-  !insightsLoading && !insightsFailed && insightsResponse !== null,
-);
-let budgetSummary = $derived(
-  summarizeBudget(
-    budgetsByMonth[period],
-    insightsResponse?.insights,
-    insightsAvailable,
-  ),
-);
-let netWorthTrend = $derived(
-  buildNetWorthTrend(networth, insightsResponse?.insights),
-);
-let expenseTrend = $derived(
-  buildExpenseTrend(
-    insightsResponse?.insights,
-    insightsResponse?.isPartial,
-    insightsResponse?.comparisonPeriod,
-  ),
-);
-let dashboardAsOf = $derived(
-  insightsResponse?.period === period && insightsResponse.asOf.isValid()
-    ? insightsResponse.asOf
-    : now(),
-);
-let visibleGoalSummaries = $derived(
-  take(
-    sortBy(allGoalSummaries, (goal) => -goal.priority),
-    3,
-  ),
-);
-let recurringAnalysis = $derived(
-  analyzeConfirmedRecurring(allTransactionSequences, dashboardAsOf),
-);
-let visibleRecurring = $derived(
-  recurringAnalysis.filter((s) => s.upcomingDates.length > 0).sort((a, b) =>
-    a.upcomingDates[0].valueOf() - b.upcomingDates[0].valueOf()
-  ).slice(0, 5),
-);
-let recurringSummary = $derived(
-  summarizeAnalyzedRecurring(
-    recurringAnalysis,
-    dashboardAsOf,
-    USER_CONFIG.default_currency,
-    cashSummary.available ? cashSummary.total : undefined,
-  ),
-);
-let expensePace = $derived(
-  buildExpensePace(
-    currentPeriodExpenseTotal,
-    period,
-    dashboardAsOf,
-    budgetSummary.configured ? budgetSummary.planned : undefined,
-  ),
-);
-let attentionItems = $derived(
-  buildDashboardAttention({
-    insights: insightsResponse?.insights,
-    recurring: recurringSummary,
-    goals: allGoalSummaries,
-    asOf: dashboardAsOf,
-    isPartial: insightsResponse?.isPartial,
-    comparisonPeriod: insightsResponse?.comparisonPeriod,
-  }),
-);
-let periodContext = $derived(
-  insightsResponse?.period === period && insightsResponse.asOf.isValid()
-    ? `${
-      dayjs(`${period}-01`).format("MMM YYYY").toUpperCase()
-    } · MTD · As of ${insightsResponse.asOf.format("D MMM")}`
-    : `${dayjs(`${period}-01`).format("MMM YYYY").toUpperCase()} · MTD`,
-);
-
-function hasCashFlowActivity(flows: CashFlow[]) {
-  return some(
-    flows,
-    (flow) =>
-      flow.income !== 0 || flow.expenses !== 0 || flow.liabilities !== 0 ||
-      flow.tax !== 0 || flow.investment !== 0 || flow.checking !== 0 ||
-      flow.balance !== 0,
+  let currentPeriodExpenses = $derived(currentExpenses(expenses, period));
+  let currentPeriodExpenseTotal = $derived(
+    sumBy(currentPeriodExpenses, (posting) => posting.amount),
   );
-}
+  let selectedExpenses = $derived(currentExpenses(expenses, expenseMonth));
+  let selectedExpenseTotal = $derived(
+    sumBy(selectedExpenses, (posting) => posting.amount),
+  );
+  let expenseBreakdown = $derived(
+    buildExpenseBreakdownComparison(selectedExpenses),
+  );
+  let cashFlowData = $derived(buildCashFlowSeries(cashFlows));
+  let hasCashFlowData = $derived(hasCashFlowActivity(cashFlows));
+  let cashSummary = $derived(summarizeCash(checkingBalances));
+  let insightsAvailable = $derived(
+    !insightsLoading && !insightsFailed && insightsResponse !== null,
+  );
+  let budgetSummary = $derived(
+    summarizeBudget(
+      budgetsByMonth[period],
+      insightsResponse?.insights,
+      insightsAvailable,
+    ),
+  );
+  let netWorthTrend = $derived(
+    buildNetWorthTrend(networth, insightsResponse?.insights),
+  );
+  let expenseTrend = $derived(
+    buildExpenseTrend(
+      insightsResponse?.insights,
+      insightsResponse?.isPartial,
+      insightsResponse?.comparisonPeriod,
+    ),
+  );
+  let dashboardAsOf = $derived(
+    insightsResponse?.period === period && insightsResponse.asOf.isValid()
+      ? insightsResponse.asOf
+      : now(),
+  );
+  let visibleGoalSummaries = $derived(
+    take(
+      sortBy(allGoalSummaries, (goal) => -goal.priority),
+      3,
+    ),
+  );
+  let recurringAnalysis = $derived(
+    analyzeConfirmedRecurring(allTransactionSequences, dashboardAsOf),
+  );
+  let visibleRecurring = $derived(
+    recurringAnalysis
+      .filter((s) => s.upcomingDates.length > 0)
+      .sort(
+        (a, b) => a.upcomingDates[0].valueOf() - b.upcomingDates[0].valueOf(),
+      )
+      .slice(0, 5),
+  );
+  let recurringSummary = $derived(
+    summarizeAnalyzedRecurring(
+      recurringAnalysis,
+      dashboardAsOf,
+      USER_CONFIG.default_currency,
+      cashSummary.available ? cashSummary.total : undefined,
+    ),
+  );
+  let expensePace = $derived(
+    buildExpensePace(
+      currentPeriodExpenseTotal,
+      period,
+      dashboardAsOf,
+      budgetSummary.configured ? budgetSummary.planned : undefined,
+    ),
+  );
+  let attentionItems = $derived(
+    buildDashboardAttention({
+      insights: insightsResponse?.insights,
+      recurring: recurringSummary,
+      goals: allGoalSummaries,
+      asOf: dashboardAsOf,
+      isPartial: insightsResponse?.isPartial,
+      comparisonPeriod: insightsResponse?.comparisonPeriod,
+    }),
+  );
+  let periodContext = $derived(
+    insightsResponse?.period === period && insightsResponse.asOf.isValid()
+      ? `${dayjs(`${period}-01`)
+          .format("MMM YYYY")
+          .toUpperCase()} · MTD · As of ${insightsResponse.asOf.format("D MMM")}`
+      : `${dayjs(`${period}-01`).format("MMM YYYY").toUpperCase()} · MTD`,
+  );
 
-async function loadDashboard() {
-  try {
-    const res = await api.dashboard.getDashboard();
-    expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
-    cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
-    investmentPerformance = res.investmentPerformance;
-    investmentPerformanceError = res.investmentPerformanceError;
-    allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
-    budgetsByMonth =
-      (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
-    allTransactionSequences = sortTrantionSequence(
-      enrichTrantionSequence(
-        (res.transactionSequences as unknown as TransactionSequence[]) || [],
-      ),
+  function hasCashFlowActivity(flows: CashFlow[]) {
+    return some(
+      flows,
+      (flow) =>
+        flow.income !== 0 ||
+        flow.expenses !== 0 ||
+        flow.liabilities !== 0 ||
+        flow.tax !== 0 ||
+        flow.investment !== 0 ||
+        flow.checking !== 0 ||
+        flow.balance !== 0,
     );
-    networth = (res.networth?.networth as unknown as Networth) || undefined;
-    checkingBalances =
-      (res.checkingBalances?.asset_breakdowns as unknown as Record<
-        string,
-        AssetBreakdown
-      >) || {};
-    transactions = (res.transactions as unknown as Transaction[]) || [];
-    isEmpty = transactions.length === 0;
-  } catch {
-    dashboardFailed = true;
-  } finally {
-    dashboardLoading = false;
   }
-}
 
-async function loadInsights() {
-  try {
-    insightsResponse = mapInsightsResponseToDomain(
-      await api.insights.getInsights(),
-    );
-  } catch {
-    insightsFailed = true;
-  } finally {
-    insightsLoading = false;
+  async function loadDashboard() {
+    try {
+      const res = await api.dashboard.getDashboard();
+      expenses = (res.expenses as unknown as Record<string, Posting[]>) || {};
+      cashFlows = (res.cashFlows as unknown as CashFlow[]) || [];
+      investmentPerformance = res.investmentPerformance;
+      investmentPerformanceError = res.investmentPerformanceError;
+      allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
+      budgetsByMonth =
+        (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
+      allTransactionSequences = sortTrantionSequence(
+        enrichTrantionSequence(
+          (res.transactionSequences as unknown as TransactionSequence[]) || [],
+        ),
+      );
+      networth = (res.networth?.networth as unknown as Networth) || undefined;
+      checkingBalances =
+        (res.checkingBalances?.asset_breakdowns as unknown as Record<
+          string,
+          AssetBreakdown
+        >) || {};
+      transactions = (res.transactions as unknown as Transaction[]) || [];
+      isEmpty = transactions.length === 0;
+    } catch {
+      dashboardFailed = true;
+    } finally {
+      dashboardLoading = false;
+    }
   }
-}
 
-async function initDemo() {
-  await api.init.initDemoData();
-  refresh();
-}
+  async function loadInsights() {
+    try {
+      insightsResponse = mapInsightsResponseToDomain(
+        await api.insights.getInsights(),
+      );
+    } catch {
+      insightsFailed = true;
+    } finally {
+      insightsLoading = false;
+    }
+  }
 
-onMount(() => {
-  void loadDashboard();
-  void loadInsights();
-});
+  async function initDemo() {
+    await api.init.initDemoData();
+    refresh();
+  }
+
+  onMount(() => {
+    void loadDashboard();
+    void loadInsights();
+  });
 </script>
 
 <Page width="analysis">
   {#if dashboardFailed && !dashboardLoading}
-    <div class="rounded-xl p-6 bg-surface border border-border-subtle shadow-xs" data-testid="dashboard-unavailable">
-      <h2 class="text-base font-semibold text-foreground">Dashboard unavailable</h2>
-      <p class="mt-1 text-sm text-muted-foreground">Your dashboard data could not be loaded. Please try again.</p>
+    <div
+      class="rounded-xl p-6 bg-surface border border-border-subtle shadow-xs"
+      data-testid="dashboard-unavailable"
+    >
+      <h2 class="text-base font-semibold text-foreground">
+        Dashboard unavailable
+      </h2>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Your dashboard data could not be loaded. Please try again.
+      </p>
     </div>
   {:else if isEmpty && !dashboardLoading}
     <div class="max-w-3xl mx-auto py-8">
-      <div class="p-6 sm:p-8 rounded-xl bg-surface border border-border-subtle shadow-xs">
+      <div
+        class="p-6 sm:p-8 rounded-xl bg-surface border border-border-subtle shadow-xs"
+      >
         <ZeroState item={false}>
           <div class="text-left space-y-4">
-            <p class="text-sm text-muted-foreground">Looks like you are new here, you can either get started or look at a demo setup</p>
+            <p class="text-sm text-muted-foreground">
+              Looks like you are new here, you can either get started or look at
+              a demo setup
+            </p>
             <div>
-              <h2 class="text-base font-semibold text-foreground mb-2">I want to get started</h2>
-              <ol class="list-decimal list-inside text-sm text-foreground space-y-1 ml-2">
-                <li>Go to <a href="/more/config" class="text-primary underline">configuration</a> and set your default currency and locale.</li>
-                <li>Go to <a href="/ledger/editor" class="text-primary underline">editor</a> and start adding transactions.</li>
+              <h2 class="text-base font-semibold text-foreground mb-2">
+                I want to get started
+              </h2>
+              <ol
+                class="list-decimal list-inside text-sm text-foreground space-y-1 ml-2"
+              >
+                <li>
+                  Go to <a href="/more/config" class="text-primary underline"
+                    >configuration</a
+                  > and set your default currency and locale.
+                </li>
+                <li>
+                  Go to <a href="/ledger/editor" class="text-primary underline"
+                    >editor</a
+                  > and start adding transactions.
+                </li>
               </ol>
             </div>
             <div>
-              <h2 class="text-base font-semibold text-foreground mb-2">I want to view a Demo</h2>
-              <p class="text-sm text-foreground mb-4">Load a demo journal with relevant configuration.</p>
-              <Button variant="primary" size="md" onclick={initDemo}>Setup Demo</Button>
+              <h2 class="text-base font-semibold text-foreground mb-2">
+                I want to view a Demo
+              </h2>
+              <p class="text-sm text-foreground mb-4">
+                Load a demo journal with relevant configuration.
+              </p>
+              <Button variant="primary" size="md" onclick={initDemo}
+                >Setup Demo</Button
+              >
             </div>
           </div>
         </ZeroState>
@@ -257,8 +294,15 @@ onMount(() => {
     </div>
   {:else}
     <div class="w-full flex flex-col space-y-6 min-w-0">
-      <PageHeader title="Dashboard" description="Your financial position at a glance">
-        <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{periodContext}</p>
+      <PageHeader
+        title="Dashboard"
+        description="Your financial position at a glance"
+      >
+        <p
+          class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+        >
+          {periodContext}
+        </p>
       </PageHeader>
 
       <DashboardKpiStrip
@@ -274,7 +318,11 @@ onMount(() => {
         loading={dashboardLoading}
       />
 
-      <DashboardInvestmentPerformance summary={investmentPerformance} error={investmentPerformanceError} loading={dashboardLoading} />
+      <DashboardInvestmentPerformance
+        summary={investmentPerformance}
+        error={investmentPerformanceError}
+        loading={dashboardLoading}
+      />
 
       <DashboardInsightGateway
         items={attentionItems}
@@ -283,52 +331,123 @@ onMount(() => {
         failed={insightsFailed}
       />
 
-      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0">
-        <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0">
+      <div
+        class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] [&>*]:mb-0 [&>*]:min-w-0"
+      >
+        <section
+          class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0"
+        >
           <div class="flex items-center justify-between mb-3">
-            <a href="/cash_flow/monthly" class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Cash Flow</a>
+            <a
+              href="/cash_flow/monthly"
+              class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary"
+              >Cash Flow</a
+            >
             <span class="text-xs text-muted-foreground">Last 3 months</span>
           </div>
-          {#if hasCashFlowData}<LegendCard legends={cashFlowData.legends ?? []} clazz="mb-2 paisa-overflow-x-auto" />{/if}
-          <ChartFrame height="compact" empty={!hasCashFlowData} emptyMessage="No cash-flow activity in this period">
-            <TimeSeriesChart data={cashFlowData} ariaLabel="Current cash flow and checking balance" testId="dashboard-cash-flow-echart" />
+          {#if hasCashFlowData}<LegendCard
+              legends={cashFlowData.legends ?? []}
+              clazz="mb-2 paisa-overflow-x-auto"
+            />{/if}
+          <ChartFrame
+            height="compact"
+            empty={!hasCashFlowData}
+            emptyMessage="No cash-flow activity in this period"
+          >
+            <TimeSeriesChart
+              data={cashFlowData}
+              ariaLabel="Current cash flow and checking balance"
+              testId="dashboard-cash-flow-echart"
+            />
           </ChartFrame>
         </section>
 
-        <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0">
+        <section
+          class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0"
+        >
           <div class="flex items-center justify-between mb-3 gap-2">
-            <a href={`/expense/monthly?period=${expenseMonth}`} class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Expenses</a>
+            <a
+              href={`/expense/monthly?period=${expenseMonth}`}
+              class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary"
+              >Expenses</a
+            >
             <LastNMonths n={3} bind:value={expenseMonth} />
           </div>
           <div class="mb-3 flex items-baseline gap-2">
             <span class="text-xs text-muted-foreground">Total:</span>
-            <span class="text-base font-semibold text-foreground tabular-nums">{formatCurrency(selectedExpenseTotal)}</span>
-            <span class="text-xs text-muted-foreground">{expenseMonth === period ? "Month to date" : "Monthly total"}</span>
+            <span class="text-base font-semibold text-foreground tabular-nums"
+              >{formatCurrency(selectedExpenseTotal)}</span
+            >
+            <span class="text-xs text-muted-foreground"
+              >{expenseMonth === period
+                ? "Month to date"
+                : "Monthly total"}</span
+            >
           </div>
-          <ChartFrame height="compact" rows={Math.min(8, selectedExpenses.length || 4)} empty={selectedExpenses.length === 0} emptyMessage="No expenses this month">
-            <ComparisonBarChart data={expenseBreakdown} ariaLabel={`Dashboard ${dayjs(`${expenseMonth}-01`).format("MMMM YYYY")} expense breakdown`} testId="dashboard-expense-breakdown-echart" />
+          <ChartFrame
+            height="compact"
+            rows={Math.min(8, selectedExpenses.length || 4)}
+            empty={selectedExpenses.length === 0}
+            emptyMessage="No expenses this month"
+          >
+            <ComparisonBarChart
+              data={expenseBreakdown}
+              ariaLabel={`Dashboard ${dayjs(`${expenseMonth}-01`).format("MMMM YYYY")} expense breakdown`}
+              testId="dashboard-expense-breakdown-echart"
+            />
           </ChartFrame>
         </section>
       </div>
 
-      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] [&>*]:min-w-0">
-        <DashboardBudgetHealth summary={budgetSummary} {period} isPartial={insightsResponse?.isPartial} comparisonPeriod={insightsResponse?.comparisonPeriod} />
+      <div
+        class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] [&>*]:min-w-0"
+      >
+        <DashboardBudgetHealth
+          summary={budgetSummary}
+          {period}
+          isPartial={insightsResponse?.isPartial}
+          comparisonPeriod={insightsResponse?.comparisonPeriod}
+        />
 
-        <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0">
+        <section
+          class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0"
+        >
           <div class="flex items-center justify-between mb-3">
-            <a href="/ledger/transaction" class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Recent Activity</a>
-            <a href="/ledger/transaction" class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline">View All</a>
+            <a
+              href="/ledger/transaction"
+              class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary"
+              >Recent Activity</a
+            >
+            <a
+              href="/ledger/transaction"
+              class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline"
+              >View All</a
+            >
           </div>
           {#if transactions.length > 0}
             <div class="divide-y divide-[var(--paisa-border-subtle)]">
               {#each take(transactions, 5) as transaction}
                 {@const posting = transaction.postings[0]}
-                <div class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0" data-testid="dashboard-recent-item">
+                <div
+                  class="flex items-center justify-between py-2.5 first:pt-0 last:pb-0 gap-3 min-w-0"
+                  data-testid="dashboard-recent-item"
+                >
                   <div class="min-w-0 flex-1">
-                    <a href={postingUrl(posting)} class="text-sm font-medium text-foreground hover:text-primary truncate block">{posting.payee || "Unknown"}</a>
-                    <p class="text-xs text-muted-foreground truncate">{restName(posting.account)} · {posting.date.format("DD MMM YYYY")}</p>
+                    <a
+                      href={postingUrl(posting)}
+                      class="text-sm font-medium text-foreground hover:text-primary truncate block"
+                      >{posting.payee || "Unknown"}</a
+                    >
+                    <p class="text-xs text-muted-foreground truncate">
+                      {restName(posting.account)} · {posting.date.format(
+                        "DD MMM YYYY",
+                      )}
+                    </p>
                   </div>
-                  <span class="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(posting.amount)}</span>
+                  <span
+                    class="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap"
+                    >{formatCurrency(posting.amount)}</span
+                  >
                 </div>
               {/each}
             </div>
@@ -340,22 +459,61 @@ onMount(() => {
 
       <DashboardCashAccounts accounts={cashSummary.accounts} />
 
-      <div class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:min-w-0">
+      <div
+        class="grid w-full grid-cols-1 gap-[var(--paisa-space-5)] lg:grid-cols-2 [&>*]:min-w-0"
+      >
         {#if visibleGoalSummaries.length > 0}
-          <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs min-w-0">
+          <section
+            class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs min-w-0"
+          >
             <div class="flex items-center justify-between mb-3">
-              <span class="text-sm font-semibold uppercase tracking-wider text-foreground">Goals</span>
-              <a href="/more/goals" class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline">View All</a>
+              <span
+                class="text-sm font-semibold uppercase tracking-wider text-foreground"
+                >Goals</span
+              >
+              <a
+                href="/more/goals"
+                class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline"
+                >View All</a
+              >
             </div>
             <div class="space-y-3">
               {#each visibleGoalSummaries as goal (goal.name)}
                 {@const completed = analyzeGoal(goal).progressRatio}
-                <a href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`} class="group block p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle hover:border-border transition-all duration-150 min-w-0" data-testid="dashboard-goal-item">
-                  <div class="flex items-center justify-between gap-3"><span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">{goal.name}</span><span class="text-xs font-semibold tabular-nums whitespace-nowrap">{formatPercentage(completed, 1)}</span></div>
-                  <div class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] my-1.5"><div class="h-full rounded-full bg-primary" style={`width: ${Math.min(100, Math.max(0, completed * 100))}%`}></div></div>
-                  <div class="flex items-center justify-between gap-3 text-xs text-muted-foreground tabular-nums">
-                    <span class="truncate">{formatCurrency($obscure ? 0 : goal.current)} of {formatCurrency($obscure ? 0 : goal.target)}</span>
-                    {#if goal.targetDate && dayjs(goal.targetDate).isValid()}<span class="whitespace-nowrap">{dayjs(goal.targetDate).fromNow()}</span>{/if}
+                <a
+                  href={`/more/goals/${goal.type}/${encodeURIComponent(goal.name)}`}
+                  class="group block p-3 rounded-lg bg-surface-raised hover:bg-surface-hover border border-border-subtle hover:border-border transition-all duration-150 min-w-0"
+                  data-testid="dashboard-goal-item"
+                >
+                  <div class="flex items-center justify-between gap-3">
+                    <span
+                      class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate"
+                      >{goal.name}</span
+                    ><span
+                      class="text-xs font-semibold tabular-nums whitespace-nowrap"
+                      >{formatPercentage(completed, 1)}</span
+                    >
+                  </div>
+                  <div
+                    class="h-1.5 w-full overflow-hidden rounded-full bg-[var(--paisa-border-subtle)] my-1.5"
+                  >
+                    <div
+                      class="h-full rounded-full bg-primary"
+                      style={`width: ${Math.min(100, Math.max(0, completed * 100))}%`}
+                    ></div>
+                  </div>
+                  <div
+                    class="flex items-center justify-between gap-3 text-xs text-muted-foreground tabular-nums"
+                  >
+                    <span class="truncate"
+                      >{formatCurrency($obscure ? 0 : goal.current)} of {formatCurrency(
+                        $obscure ? 0 : goal.target,
+                      )}</span
+                    >
+                    {#if goal.targetDate && dayjs(goal.targetDate).isValid()}<span
+                        class="whitespace-nowrap"
+                        >{dayjs(goal.targetDate).fromNow()}</span
+                      >{/if}
                   </div>
                   <GoalHealth {goal} compact />
                 </a>
@@ -365,17 +523,49 @@ onMount(() => {
         {/if}
 
         {#if recurringAnalysis.length > 0}
-          <section class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs min-w-0">
+          <section
+            class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs min-w-0"
+          >
             <div class="flex items-center justify-between mb-3">
-              <a href="/cash_flow/recurring" class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Upcoming / Recurring</a>
-              <a href="/cash_flow/recurring" class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline">View All</a>
+              <a
+                href="/cash_flow/recurring"
+                class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary"
+                >Upcoming / Recurring</a
+              >
+              <a
+                href="/cash_flow/recurring"
+                class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline"
+                >View All</a
+              >
             </div>
-            <RecurringSummary items={recurringAnalysis} asOf={dashboardAsOf} compact />
+            <RecurringSummary
+              items={recurringAnalysis}
+              asOf={dashboardAsOf}
+              compact
+            />
             <div class="divide-y divide-[var(--paisa-border-subtle)]">
               {#each visibleRecurring as item (item.key)}
-                <div class="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm" data-testid="dashboard-recurring-item">
-                  <div class="min-w-0"><span class="break-words font-medium">{item.displayName}</span><p class="text-xs text-muted-foreground">{item.effectiveCadence} · Expected around {item.upcomingDates[0].format("D MMM")} · {item.kind ?? "Mixed"}</p></div>
-                  <span class="font-semibold tabular-nums">~{formatCommodityAmount(item.expectedCashOutflowAmount ?? item.expectedAmount, item.cashCommodity ?? item.commodity, $obscure)}</span>
+                <div
+                  class="flex flex-wrap items-center justify-between gap-3 py-2.5 text-sm"
+                  data-testid="dashboard-recurring-item"
+                >
+                  <div class="min-w-0">
+                    <span class="break-words font-medium"
+                      >{item.displayName}</span
+                    >
+                    <p class="text-xs text-muted-foreground">
+                      {item.effectiveCadence} · Expected around {item.upcomingDates[0].format(
+                        "D MMM",
+                      )} · {item.kind ?? "Mixed"}
+                    </p>
+                  </div>
+                  <span class="font-semibold tabular-nums"
+                    >~{formatCommodityAmount(
+                      item.expectedCashOutflowAmount ?? item.expectedAmount,
+                      item.cashCommodity ?? item.commodity,
+                      $obscure,
+                    )}</span
+                  >
                 </div>
               {/each}
             </div>

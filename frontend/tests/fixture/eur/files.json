@@ -7,17 +7,7 @@
       "operation": ""
     }
   ],
-  "accounts": [
-    "Assets:Checking",
-    "Assets:Equity:AAPL",
-    "Income:Salary:Acme"
-  ],
-  "payees": [
-    "Salary",
-    "Buy stock"
-  ],
-  "commodities": [
-    "AAPL",
-    "EUR"
-  ]
+  "accounts": ["Assets:Checking", "Assets:Equity:AAPL", "Income:Salary:Acme"],
+  "payees": ["Salary", "Buy stock"],
+  "commodities": ["AAPL", "EUR"]
 }

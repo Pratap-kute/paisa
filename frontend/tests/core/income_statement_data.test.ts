@@ -35,10 +35,12 @@ describe("income statement waterfall adapter", () => {
     ]);
     expect(data.steps[1]).toMatchObject({ start: 100, delta: 200, end: 300 });
     expect(data.steps[2]).toMatchObject({ start: 300, delta: -30, end: 270 });
-    expect(data.steps[1].breakdown).toEqual([{
-      account: "Income:Salary",
-      value: 200,
-    }]);
+    expect(data.steps[1].breakdown).toEqual([
+      {
+        account: "Income:Salary",
+        value: 200,
+      },
+    ]);
     expect(data.steps.at(-1)?.end).toBe(statement.endingBalance);
   });
 

@@ -16,11 +16,7 @@ export const GOAL_POLICY = {
 
 export type GoalState = "active" | "completed" | "overdue";
 export type GoalScheduleStatus =
-  | "on-track"
-  | "behind"
-  | "at-risk"
-  | "insufficient-data"
-  | "no-deadline";
+  "on-track" | "behind" | "at-risk" | "insufficient-data" | "no-deadline";
 export type GoalAttention = "none" | "warning" | "critical";
 export interface GoalIntelligence {
   progressRatio: number;
@@ -53,13 +49,13 @@ export function goalDate(value: string | undefined): Dayjs | undefined {
 }
 
 export function calculateGoalProgress(current: number, target: number) {
-  const validTarget = Number.isFinite(target) && target > 0 &&
-    Number.isFinite(current);
+  const validTarget =
+    Number.isFinite(target) && target > 0 && Number.isFinite(current);
   const ratio = validTarget ? current / target : 0;
   const remaining = validTarget ? Math.max(target - current, 0) : 0;
   return {
-    validTarget: validTarget && Number.isFinite(ratio) &&
-      Number.isFinite(remaining),
+    validTarget:
+      validTarget && Number.isFinite(ratio) && Number.isFinite(remaining),
     progressRatio: Number.isFinite(ratio) ? ratio : 0,
     remainingAmount: Number.isFinite(remaining) ? remaining : 0,
   };
@@ -77,14 +73,16 @@ export function contributionPace(
   for (const item of history) {
     const month = goalDate(`${item.month}-01`);
     if (
-      month && !month.isBefore(start) && month.isBefore(end) &&
+      month &&
+      !month.isBefore(start) &&
+      month.isBefore(end) &&
       Number.isFinite(item.amount)
     ) {
       months.set(item.month, item);
     }
   }
   const series = [...months.values()].sort((a, b) =>
-    a.month.localeCompare(b.month)
+    a.month.localeCompare(b.month),
   );
   const average = series.length
     ? series.reduce((sum, item) => sum + item.amount / series.length, 0)
@@ -136,9 +134,11 @@ export function projectedCompletion(
     PaymentDueTime.Begin,
   );
   if (
-    !Number.isFinite(months) || months <= 0 ||
+    !Number.isFinite(months) ||
+    months <= 0 ||
     months > GOAL_POLICY.maximumProjectionMonths
-  ) return undefined;
+  )
+    return undefined;
   const date = asOf.startOf("month").add(Math.ceil(months), "month");
   return date.isValid() ? date : undefined;
 }
@@ -157,16 +157,17 @@ export function analyzeGoal(goal: GoalSummary, asOf = now()): GoalIntelligence {
   const result: GoalIntelligence = {
     ...progress,
     ...contributionPace(retirement ? [] : goal.contributionHistory, asOf),
-    state: progress.validTarget && goal.current >= goal.target
-      ? "completed"
-      : "active",
+    state:
+      progress.validTarget && goal.current >= goal.target
+        ? "completed"
+        : "active",
     scheduleStatus: deadline ? "insufficient-data" : "no-deadline",
     attention: "none",
     deadlineSource: deadline
       ? "configured"
       : !retirement && (goal.paymentPerPeriod ?? 0) > 0
-      ? "derived-from-payment"
-      : "none",
+        ? "derived-from-payment"
+        : "none",
     targetDate: deadline,
     assumptions: {},
     reasons: [],
@@ -196,8 +197,10 @@ export function analyzeGoal(goal: GoalSummary, asOf = now()): GoalIntelligence {
   }
   const configuredPayment = goal.paymentPerPeriod;
   if (
-    !deadline && configuredPayment !== undefined &&
-    Number.isFinite(configuredPayment) && configuredPayment > 0
+    !deadline &&
+    configuredPayment !== undefined &&
+    Number.isFinite(configuredPayment) &&
+    configuredPayment > 0
   ) {
     result.configuredCompletionDate = projectedCompletion(
       goal.current,
@@ -240,8 +243,8 @@ export function analyzeGoal(goal: GoalSummary, asOf = now()): GoalIntelligence {
   const payment = reliable
     ? actual
     : !deadline
-    ? goal.paymentPerPeriod
-    : undefined;
+      ? goal.paymentPerPeriod
+      : undefined;
   if (payment !== undefined && Number.isFinite(payment)) {
     result.projectedCompletionDate = projectedCompletion(
       goal.current,
@@ -264,10 +267,9 @@ export function analyzeGoal(goal: GoalSummary, asOf = now()): GoalIntelligence {
   if (deadline && result.projectedCompletionDate) {
     result.delayMonths = Math.max(
       0,
-      result.projectedCompletionDate.startOf("month").diff(
-        deadline.startOf("month"),
-        "month",
-      ),
+      result.projectedCompletionDate
+        .startOf("month")
+        .diff(deadline.startOf("month"), "month"),
     );
   }
   return result;
@@ -314,33 +316,36 @@ export function summarizeGoalHealth(goals: GoalSummary[], asOf = now()) {
     analysis.state === "overdue"
       ? 3
       : analysis.scheduleStatus === "at-risk"
-      ? 2
-      : 1;
-  const attention = analyzed.filter(({ goal, analysis }) =>
-    goal.type === "savings" && analysis.attention !== "none"
-  )
-    .sort((a, b) =>
-      severity(b.analysis) - severity(a.analysis) ||
-      b.goal.priority - a.goal.priority ||
-      a.goal.name.localeCompare(b.goal.name)
+        ? 2
+        : 1;
+  const attention = analyzed
+    .filter(
+      ({ goal, analysis }) =>
+        goal.type === "savings" && analysis.attention !== "none",
+    )
+    .sort(
+      (a, b) =>
+        severity(b.analysis) - severity(a.analysis) ||
+        b.goal.priority - a.goal.priority ||
+        a.goal.name.localeCompare(b.goal.name),
     );
   const total = analyzed.reduce(
     (sum, { analysis }) =>
       sum +
       (analysis.state === "active"
-        ? analysis.requiredMonthlyContribution ?? 0
+        ? (analysis.requiredMonthlyContribution ?? 0)
         : 0),
     0,
   );
   return {
     analyzed,
     attention,
-    active:
-      analyzed.filter(({ analysis }) => analysis.state !== "completed").length,
-    onTrack:
-      analyzed.filter(({ analysis }) =>
-        analysis.state === "active" && analysis.scheduleStatus === "on-track"
-      ).length,
+    active: analyzed.filter(({ analysis }) => analysis.state !== "completed")
+      .length,
+    onTrack: analyzed.filter(
+      ({ analysis }) =>
+        analysis.state === "active" && analysis.scheduleStatus === "on-track",
+    ).length,
     requiredMonthlyContribution: Number.isFinite(total) ? total : undefined,
   };
 }

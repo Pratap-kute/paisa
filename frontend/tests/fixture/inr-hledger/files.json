@@ -11,13 +11,7 @@
     "Income:Interest:Checking",
     "Income:Salary:Acme"
   ],
-  "commodities": [
-    "AAPL",
-    "ABNB",
-    "INR",
-    "NIFTY",
-    "USD"
-  ],
+  "commodities": ["AAPL", "ABNB", "INR", "NIFTY", "USD"],
   "files": [
     {
       "name": "main.ledger",

@@ -7,14 +7,13 @@ import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
 import type dayjs from "dayjs";
 import { generateColorScheme } from "$lib/shared/theme/colors";
 import { financialColors } from "$lib/shared/theme/chartPalette";
-import type {
-  PeriodSeriesChartData,
-} from "$lib/shared/charts/echarts/period_series";
+import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
 import { sortBy } from "$lib/shared/utils/collection";
 
-function financialYear(
-  card: { start_date: dayjs.Dayjs; end_date: dayjs.Dayjs },
-) {
+function financialYear(card: {
+  start_date: dayjs.Dayjs;
+  end_date: dayjs.Dayjs;
+}) {
   return `${card.start_date.format("YYYY")} - ${card.end_date.format("YY")}`;
 }
 
@@ -32,11 +31,9 @@ function initialValues(keys: string[]) {
 
 function postingRows(postings: Posting[], sign = 1): Array<[string, number]> {
   return sortBy(
-    postings.map((posting) =>
-      [
-        restName(posting.account),
-        posting.amount * sign,
-      ] as [string, number]
+    postings.map(
+      (posting) =>
+        [restName(posting.account), posting.amount * sign] as [string, number],
     ),
     (row) => row[0],
   );
@@ -91,9 +88,9 @@ export function buildYearlyIncomeSeries(
   yearlyCards: IncomeYearlyCard[],
 ): PeriodSeriesChartData {
   const groups = uniq(
-    yearlyCards.flatMap((card) => card.postings).map((p) =>
-      secondName(p.account)
-    ),
+    yearlyCards
+      .flatMap((card) => card.postings)
+      .map((p) => secondName(p.account)),
   ).sort();
   const color = generateColorScheme(groups);
   return {
@@ -118,7 +115,7 @@ export function buildYearlyIncomeSeries(
         period: financialYear(card),
         values: { ...initialValues(groups), ...values },
         tooltipRows: groups.flatMap((key) =>
-          values[key] ? [[key, values[key]] as [string, number]] : []
+          values[key] ? [[key, values[key]] as [string, number]] : [],
         ),
       };
     }),

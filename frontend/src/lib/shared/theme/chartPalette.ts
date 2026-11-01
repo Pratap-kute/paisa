@@ -388,88 +388,97 @@ export function generateColorScheme(domain: string[]): CategoryColorResolver {
     );
   } else {
     if (n <= 12) {
-      colors = ({
-        1: ["#7570b3"],
-        2: ["#7fc97f", "#fdc086"],
-        3: ["#66c2a5", "#fc8d62", "#8da0cb"],
-        4: ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3"],
-        5: ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854"],
-        6: ["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949"],
-        7: [
-          "#4e79a7",
-          "#f28e2c",
-          "#e15759",
-          "#76b7b2",
-          "#59a14f",
-          "#edc949",
-          "#af7aa1",
-        ],
-        8: [
-          "#4e79a7",
-          "#f28e2c",
-          "#e15759",
-          "#76b7b2",
-          "#59a14f",
-          "#edc949",
-          "#af7aa1",
-          "#ff9da7",
-        ],
-        9: [
-          "#4e79a7",
-          "#f28e2c",
-          "#e15759",
-          "#76b7b2",
-          "#59a14f",
-          "#edc949",
-          "#af7aa1",
-          "#ff9da7",
-          "#9c755f",
-        ],
-        10: [
-          "#4e79a7",
-          "#f28e2c",
-          "#e15759",
-          "#76b7b2",
-          "#59a14f",
-          "#edc949",
-          "#af7aa1",
-          "#ff9da7",
-          "#9c755f",
-          "#bab0ab",
-        ],
-        11: [
-          "#8dd3c7",
-          "#ffed6f",
-          "#bebada",
-          "#fb8072",
-          "#80b1d3",
-          "#fdb462",
-          "#b3de69",
-          "#fccde5",
-          "#d9d9d9",
-          "#bc80bd",
-          "#ccebc5",
-        ],
-        12: [
-          "#8dd3c7",
-          "#e5c494",
-          "#bebada",
-          "#fb8072",
-          "#80b1d3",
-          "#fdb462",
-          "#b3de69",
-          "#fccde5",
-          "#d9d9d9",
-          "#bc80bd",
-          "#ccebc5",
-          "#ffed6f",
-        ],
-      } as Record<number, string[]>)[n] ?? [];
+      colors =
+        (
+          {
+            1: ["#7570b3"],
+            2: ["#7fc97f", "#fdc086"],
+            3: ["#66c2a5", "#fc8d62", "#8da0cb"],
+            4: ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3"],
+            5: ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854"],
+            6: [
+              "#4e79a7",
+              "#f28e2c",
+              "#e15759",
+              "#76b7b2",
+              "#59a14f",
+              "#edc949",
+            ],
+            7: [
+              "#4e79a7",
+              "#f28e2c",
+              "#e15759",
+              "#76b7b2",
+              "#59a14f",
+              "#edc949",
+              "#af7aa1",
+            ],
+            8: [
+              "#4e79a7",
+              "#f28e2c",
+              "#e15759",
+              "#76b7b2",
+              "#59a14f",
+              "#edc949",
+              "#af7aa1",
+              "#ff9da7",
+            ],
+            9: [
+              "#4e79a7",
+              "#f28e2c",
+              "#e15759",
+              "#76b7b2",
+              "#59a14f",
+              "#edc949",
+              "#af7aa1",
+              "#ff9da7",
+              "#9c755f",
+            ],
+            10: [
+              "#4e79a7",
+              "#f28e2c",
+              "#e15759",
+              "#76b7b2",
+              "#59a14f",
+              "#edc949",
+              "#af7aa1",
+              "#ff9da7",
+              "#9c755f",
+              "#bab0ab",
+            ],
+            11: [
+              "#8dd3c7",
+              "#ffed6f",
+              "#bebada",
+              "#fb8072",
+              "#80b1d3",
+              "#fdb462",
+              "#b3de69",
+              "#fccde5",
+              "#d9d9d9",
+              "#bc80bd",
+              "#ccebc5",
+            ],
+            12: [
+              "#8dd3c7",
+              "#e5c494",
+              "#bebada",
+              "#fb8072",
+              "#80b1d3",
+              "#fdb462",
+              "#b3de69",
+              "#fccde5",
+              "#d9d9d9",
+              "#bc80bd",
+              "#ccebc5",
+              "#ffed6f",
+            ],
+          } as Record<number, string[]>
+        )[n] ?? [];
     } else {
       const normalize = 1 / (n - 1);
-      colors = Array.from(
-        { length: n },
-        (_, index) => sinebowColor(index * normalize),
+      colors = Array.from({ length: n }, (_, index) =>
+        sinebowColor(index * normalize),
       );
     }
   }
@@ -481,8 +490,8 @@ export function generateColorScheme(domain: string[]): CategoryColorResolver {
 
   return (key: string) =>
     byKey.get(key) ??
-      colors[stableColorIndex(key, colors.length)] ??
-      chartColors.neutral;
+    colors[stableColorIndex(key, colors.length)] ??
+    chartColors.neutral;
 }
 
 export function genericBarColor() {

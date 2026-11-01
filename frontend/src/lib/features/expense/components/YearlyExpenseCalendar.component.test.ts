@@ -7,18 +7,26 @@ afterEach(cleanup);
 describe("YearlyExpenseCalendar", () => {
   it("renders month composition, totals, empty months, and rich detail", async () => {
     const colorFor = vi.fn((key: string) =>
-      key === "Food" ? "#00aa00" : "#0000aa"
+      key === "Food" ? "#00aa00" : "#0000aa",
     );
     const points = Array.from({ length: 12 }, (_, index) => ({
       key: `2024-${String(index + 1).padStart(2, "0")}`,
       label: `${index === 0 ? "Jan" : "Feb"} 2024`,
       value: index === 0 ? 150 : 0,
-      tooltipRows: index === 0
-        ? [{ label: "Food", value: 100 }, { label: "Travel", value: 50 }]
-        : [],
-      segments: index === 0
-        ? [{ key: "Food", value: 100 }, { key: "Travel", value: 50 }]
-        : [],
+      tooltipRows:
+        index === 0
+          ? [
+              { label: "Food", value: 100 },
+              { label: "Travel", value: 50 },
+            ]
+          : [],
+      segments:
+        index === 0
+          ? [
+              { key: "Food", value: 100 },
+              { key: "Travel", value: 50 },
+            ]
+          : [],
       hasActivity: index === 0,
     }));
 

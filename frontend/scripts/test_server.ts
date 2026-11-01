@@ -77,9 +77,10 @@ async function stop(code: number) {
   process.exit(code);
 }
 
-const signals = process.platform === "win32"
-  ? (["SIGINT"] as const)
-  : (["SIGINT", "SIGTERM"] as const);
+const signals =
+  process.platform === "win32"
+    ? (["SIGINT"] as const)
+    : (["SIGINT", "SIGTERM"] as const);
 
 for (const signal of signals) {
   process.on(signal, () => void stop(0));
@@ -119,16 +120,20 @@ try {
         "      account: Expenses:Food\n",
     );
   }
-  await run(binary, [
-    "--config",
-    join(fixture, "paisa.yaml"),
-    "--now",
-    "2022-02-07",
-    "update",
-    // Browser fixtures contain their own prices. Keep this setup deterministic
-    // and local: do not fetch live prices, portfolios, or taxation data.
-    "--journal",
-  ], fixture);
+  await run(
+    binary,
+    [
+      "--config",
+      join(fixture, "paisa.yaml"),
+      "--now",
+      "2022-02-07",
+      "update",
+      // Browser fixtures contain their own prices. Keep this setup deterministic
+      // and local: do not fetch live prices, portfolios, or taxation data.
+      "--journal",
+    ],
+    fixture,
+  );
 
   // Portfolio holdings normally come from an external provider, so journal
   // synchronization cannot recreate them in CI. Seed a small deterministic
@@ -157,42 +162,48 @@ try {
     { mode: 0o750 },
   );
 
-  const backend = Bun.spawn([
-    binary,
-    "--config",
-    join(fixture, "paisa.yaml"),
-    "serve",
-    "--port",
-    String(backendPort),
-    "--now",
-    "2022-02-07",
-  ], {
-    cwd: fixture,
-    env: {
-      ...process.env,
-      TZ: "UTC",
-      PATH: `${fixture}:${process.env.PATH ?? ""}`,
+  const backend = Bun.spawn(
+    [
+      binary,
+      "--config",
+      join(fixture, "paisa.yaml"),
+      "serve",
+      "--port",
+      String(backendPort),
+      "--now",
+      "2022-02-07",
+    ],
+    {
+      cwd: fixture,
+      env: {
+        ...process.env,
+        TZ: "UTC",
+        PATH: `${fixture}:${process.env.PATH ?? ""}`,
+      },
+      stdout: "inherit",
+      stderr: "inherit",
     },
-    stdout: "inherit",
-    stderr: "inherit",
-  });
+  );
   children.push(backend);
   await waitForPort(backendPort);
 
-  const frontend = Bun.spawn([
-    "bun",
-    "run",
-    "preview",
-    "--host",
-    "127.0.0.1",
-    "--port",
-    String(frontendPort),
-    "--strictPort",
-  ], {
-    cwd: root,
-    stdout: "inherit",
-    stderr: "inherit",
-  });
+  const frontend = Bun.spawn(
+    [
+      "bun",
+      "run",
+      "preview",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      String(frontendPort),
+      "--strictPort",
+    ],
+    {
+      cwd: root,
+      stdout: "inherit",
+      stderr: "inherit",
+    },
+  );
   children.push(frontend);
   await waitForPort(frontendPort);
 

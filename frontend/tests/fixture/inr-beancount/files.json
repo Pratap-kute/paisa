@@ -13,14 +13,7 @@
     "Income:Interest:Checking",
     "Income:Salary:Acme"
   ],
-  "commodities": [
-    "AAPL",
-    "ABNB",
-    "BTC",
-    "INR",
-    "NIFTY",
-    "USD"
-  ],
+  "commodities": ["AAPL", "ABNB", "BTC", "INR", "NIFTY", "USD"],
   "files": [
     {
       "name": "main.beancount",

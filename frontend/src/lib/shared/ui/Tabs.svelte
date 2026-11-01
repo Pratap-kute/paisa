@@ -1,36 +1,36 @@
 <script lang="ts">
-import { Tabs as BitsTabs } from "bits-ui";
-import type { Snippet } from "svelte";
+  import { Tabs as BitsTabs } from "bits-ui";
+  import type { Snippet } from "svelte";
 
-export interface TabOption {
-  label: string;
-  value: string;
-  icon?: string;
-  badge?: string | number;
-  disabled?: boolean;
-}
+  export interface TabOption {
+    label: string;
+    value: string;
+    icon?: string;
+    badge?: string | number;
+    disabled?: boolean;
+  }
 
-interface Props {
-  options: TabOption[];
-  value: string;
-  variant?: "boxed" | "line" | "pills";
-  size?: "sm" | "md";
-  class?: string;
-  ariaLabel?: string;
-  onchange?: (value: string) => void;
-  panel?: Snippet<[TabOption]>;
-}
+  interface Props {
+    options: TabOption[];
+    value: string;
+    variant?: "boxed" | "line" | "pills";
+    size?: "sm" | "md";
+    class?: string;
+    ariaLabel?: string;
+    onchange?: (value: string) => void;
+    panel?: Snippet<[TabOption]>;
+  }
 
-let {
-  options,
-  value = $bindable(),
-  variant = "boxed",
-  size = "sm",
-  class: className = "",
-  ariaLabel = "Sections",
-  onchange,
-  panel,
-}: Props = $props();
+  let {
+    options,
+    value = $bindable(),
+    variant = "boxed",
+    size = "sm",
+    class: className = "",
+    ariaLabel = "Sections",
+    onchange,
+    panel,
+  }: Props = $props();
 </script>
 
 <BitsTabs.Root bind:value onValueChange={onchange}>
@@ -53,7 +53,10 @@ let {
         {/if}
         <span>{option.label}</span>
         {#if option.badge}
-          <span class="ml-1 rounded-full bg-surface-hover px-1.5 py-0.5 text-[0.625rem] font-semibold">{option.badge}</span>
+          <span
+            class="ml-1 rounded-full bg-surface-hover px-1.5 py-0.5 text-[0.625rem] font-semibold"
+            >{option.badge}</span
+          >
         {/if}
       </BitsTabs.Trigger>
     {/each}

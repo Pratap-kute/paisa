@@ -1,49 +1,51 @@
 <script lang="ts">
-import Card from "$lib/shared/ui/Card.svelte";
-import {
-  formatCurrencyCrude,
-  formatPercentage,
-} from "$lib/shared/formatters/currency";
-import type { GoalSummary } from "$lib/domain/goals_models";
-import { iconGlyph } from "$lib/shared/ui/icon";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import Progress from "$lib/shared/ui/Progress.svelte";
-import type { Action } from "svelte/action";
-import { analyzeGoal } from "$lib/domain/goal_intelligence";
-import GoalHealth from "./GoalHealth.svelte";
-import { obscure } from "$lib/shared/state/persisted";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import {
+    formatCurrencyCrude,
+    formatPercentage,
+  } from "$lib/shared/formatters/currency";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+  import { iconGlyph } from "$lib/shared/ui/icon";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import Progress from "$lib/shared/ui/Progress.svelte";
+  import type { Action } from "svelte/action";
+  import { analyzeGoal } from "$lib/domain/goal_intelligence";
+  import GoalHealth from "./GoalHealth.svelte";
+  import { obscure } from "$lib/shared/state/persisted";
 
-interface Props {
-  goal: GoalSummary;
-  small?: boolean;
-  action?: Action;
-}
-
-let { goal, small = false, action = null }: Props = $props();
-
-let health = $derived(analyzeGoal(goal));
-let completed = $derived(
-  Math.max(0, Math.min(100, health.progressRatio * 100)),
-);
-
-let progressLabel = $derived.by(() => {
-  if ($obscure) {
-    return `0.0% ${goal.type === "retirement" ? "funded" : "complete"}`;
+  interface Props {
+    goal: GoalSummary;
+    small?: boolean;
+    action?: Action;
   }
-  if (health.progressRatio >= 1 || health.state === "completed") {
-    return goal.type === "retirement" ? "100%+ funded" : "Target funded";
-  }
-  const pct = formatPercentage(health.progressRatio, 1);
-  return `${pct} ${goal.type === "retirement" ? "funded" : "complete"}`;
-});
 
-let targetDateText = $derived(
-  health.targetDate ? `Target ${health.targetDate.format("MMM YYYY")}` : "",
-);
+  let { goal, small = false, action = null }: Props = $props();
+
+  let health = $derived(analyzeGoal(goal));
+  let completed = $derived(
+    Math.max(0, Math.min(100, health.progressRatio * 100)),
+  );
+
+  let progressLabel = $derived.by(() => {
+    if ($obscure) {
+      return `0.0% ${goal.type === "retirement" ? "funded" : "complete"}`;
+    }
+    if (health.progressRatio >= 1 || health.state === "completed") {
+      return goal.type === "retirement" ? "100%+ funded" : "Target funded";
+    }
+    const pct = formatPercentage(health.progressRatio, 1);
+    return `${pct} ${goal.type === "retirement" ? "funded" : "complete"}`;
+  });
+
+  let targetDateText = $derived(
+    health.targetDate ? `Target ${health.targetDate.format("MMM YYYY")}` : "",
+  );
 </script>
 
-<Card padding="md"
-  class="{small ? 'mb-3' : 'h-full'} flex flex-col justify-between group">
+<Card
+  padding="md"
+  class="{small ? 'mb-3' : 'h-full'} flex flex-col justify-between group"
+>
   <div>
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center min-w-0">
@@ -62,12 +64,16 @@ let targetDateText = $derived(
           class="secondary-link min-w-0"
           href="/more/goals/{goal.type}/{encodeURIComponent(goal.name)}"
         >
-          <h4 class="text-lg font-semibold text-foreground truncate">{goal.name}</h4>
+          <h4 class="text-lg font-semibold text-foreground truncate">
+            {goal.name}
+          </h4>
         </a>
       </div>
       {#if goal.icon}
         <span
-          class="{small ? 'text-2xl' : 'text-3xl'} custom-icon inline-flex items-center shrink-0 ml-2"
+          class="{small
+            ? 'text-2xl'
+            : 'text-3xl'} custom-icon inline-flex items-center shrink-0 ml-2"
           >{iconGlyph(goal.icon)}</span
         >
       {/if}
@@ -94,7 +100,8 @@ let targetDateText = $derived(
   </div>
 
   <div
-    class="flex-1 flex flex-col justify-end mt-3 pt-3 border-t border-border-subtle">
+    class="flex-1 flex flex-col justify-end mt-3 pt-3 border-t border-border-subtle"
+  >
     <GoalHealth {goal} compact />
   </div>
 </Card>

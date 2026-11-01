@@ -81,7 +81,9 @@ const healthyChecks = [
 ];
 
 test.describe("Doctor Data Quality & Reconciliation", () => {
-  test("healthy state displays all systems operational and healthy checks", async ({ page }) => {
+  test("healthy state displays all systems operational and healthy checks", async ({
+    page,
+  }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({
         status: 200,
@@ -111,7 +113,9 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     ).toBeVisible();
   });
 
-  test("failed diagnostic check displays Diagnosis incomplete and does not claim Healthy", async ({ page }) => {
+  test("failed diagnostic check displays Diagnosis incomplete and does not claim Healthy", async ({
+    page,
+  }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({
         status: 200,
@@ -130,7 +134,7 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
           checks: healthyChecks.map((c) =>
             c.code === "exchange_price_coverage"
               ? { ...c, status: "failed", issueCount: 0 }
-              : c
+              : c,
           ),
         }),
       });
@@ -149,7 +153,9 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     );
   });
 
-  test("critical danger state displays attention required banner and issue details", async ({ page }) => {
+  test("critical danger state displays attention required banner and issue details", async ({
+    page,
+  }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({
         status: 200,
@@ -187,7 +193,7 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
           checks: healthyChecks.map((c) =>
             c.code === "asset_balance_integrity"
               ? { ...c, status: "issues", issueCount: 1, maxSeverity: "danger" }
-              : c
+              : c,
           ),
         }),
       });
@@ -196,15 +202,15 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     await page.goto("/more/doctor");
 
     await expect(page.getByText("Attention Required")).toBeVisible();
-    await expect(
-      page.getByTestId("diagnosis-attention-section"),
-    ).toBeVisible();
+    await expect(page.getByTestId("diagnosis-attention-section")).toBeVisible();
     await expect(page.getByText("Negative Asset Balance")).toBeVisible();
     await expect(page.getByText("Assets:Checking").first()).toBeVisible();
     await expect(page.getByText("View Account")).toBeVisible();
   });
 
-  test("warning only state displays needs review and no blocking issues", async ({ page }) => {
+  test("warning only state displays needs review and no blocking issues", async ({
+    page,
+  }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({
         status: 200,
@@ -243,12 +249,12 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
           checks: healthyChecks.map((c) =>
             c.code === "current_fy_valuation_quality"
               ? {
-                ...c,
-                status: "issues",
-                issueCount: 1,
-                maxSeverity: "warning",
-              }
-              : c
+                  ...c,
+                  status: "issues",
+                  issueCount: 1,
+                  maxSeverity: "warning",
+                }
+              : c,
           ),
         }),
       });
@@ -262,7 +268,9 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     await expect(page.getByText("Review Prices")).toBeVisible();
   });
 
-  test("info only state displays operational and does not trigger critical alarm", async ({ page }) => {
+  test("info only state displays operational and does not trigger critical alarm", async ({
+    page,
+  }) => {
     await page.route("**/api/diagnosis", async (route) => {
       await route.fulfill({
         status: 200,
@@ -304,7 +312,9 @@ test.describe("Doctor Data Quality & Reconciliation", () => {
     ).toBeVisible();
   });
 
-  test("API failure displays clean error state with retry button", async ({ page }) => {
+  test("API failure displays clean error state with retry button", async ({
+    page,
+  }) => {
     let callCount = 0;
     await page.route("**/api/diagnosis", async (route) => {
       callCount++;

@@ -180,9 +180,8 @@ export function createEditor(
 
             return null;
           },
-          ...map(
-            autocompletions,
-            (options, node) => ifIn([node], completeFromList(options)),
+          ...map(autocompletions, (options, node) =>
+            ifIn([node], completeFromList(options)),
           ),
         ],
       }),
@@ -202,8 +201,8 @@ export function createEditor(
             pendingEval,
             doc,
             currentLine: currentLine.number,
-            hasUnsavedChanges: current.hasUnsavedChanges ||
-              viewUpdate.docChanged,
+            hasUnsavedChanges:
+              current.hasUnsavedChanges || viewUpdate.docChanged,
             undoDepth: undoDepth(viewUpdate.state),
             redoDepth: redoDepth(viewUpdate.state),
           });

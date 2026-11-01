@@ -17,11 +17,9 @@ function initialValues(keys: string[]) {
 
 function postingRows(postings: Posting[], sign = 1): Array<[string, number]> {
   return sortBy(
-    postings.map((posting) =>
-      [
-        restName(posting.account),
-        posting.amount * sign,
-      ] as [string, number]
+    postings.map(
+      (posting) =>
+        [restName(posting.account), posting.amount * sign] as [string, number],
     ),
     (row) => row[0],
   );
@@ -34,7 +32,10 @@ export function buildRepaymentSeries(
   const groups = uniq(postings.map((p) => restName(p.account))).sort();
   const color = generateColorScheme(groups);
   const groupedPostings = groupBy(postings, (p) => p.date.format(timeFormat));
-  const start = minBy(postings.map((p) => p.date), (d) => d.valueOf());
+  const start = minBy(
+    postings.map((p) => p.date),
+    (d) => d.valueOf(),
+  );
   const end = now().startOf("month");
   const points: PeriodSeriesPoint[] = [];
 

@@ -14,7 +14,7 @@ function flattenTerms(args: unknown[]): string {
     if (typeof arg === "object") {
       parts.push(
         ...Object.values(arg as Record<string, unknown>).map((value) =>
-          value == null ? "" : String(value)
+          value == null ? "" : String(value),
         ),
       );
     } else {
@@ -27,10 +27,10 @@ function flattenTerms(args: unknown[]): string {
 function parseAmount(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "string") return undefined;
-  const amount = value.trim().replace(/\((.+)\)/, "-$1").replace(
-    /[^0-9.-]/g,
-    "",
-  );
+  const amount = value
+    .trim()
+    .replace(/\((.+)\)/, "-$1")
+    .replace(/[^0-9.-]/g, "");
   if (amount === "" || Number.isNaN(Number(amount))) return undefined;
   return parseFloat(amount);
 }
@@ -87,12 +87,10 @@ export function adaptPredictAccountArgs(
   );
 
   const prefix = typeof hash.prefix === "string" ? hash.prefix : "";
-  const sourceAccount = typeof hash.source === "string"
-    ? hash.source
-    : undefined;
-  const commodity = typeof hash.commodity === "string"
-    ? hash.commodity
-    : undefined;
+  const sourceAccount =
+    typeof hash.source === "string" ? hash.source : undefined;
+  const commodity =
+    typeof hash.commodity === "string" ? hash.commodity : undefined;
   const date = typeof hash.date === "string" ? hash.date : undefined;
   const amount = parseAmount(hash.amount);
   let direction = parseDirection(hash.direction);

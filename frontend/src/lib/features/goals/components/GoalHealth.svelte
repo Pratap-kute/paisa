@@ -1,47 +1,47 @@
 <script lang="ts">
-import type { GoalSummary } from "$lib/domain/goals_models";
-import {
-  analyzeGoal,
-  type GoalIntelligence,
-  goalStatusLabel,
-} from "$lib/domain/goal_intelligence";
-import {
-  formatCurrency,
-  formatCurrencyCrude,
-  formatFloat,
-} from "$lib/shared/formatters/currency";
-import { obscure } from "$lib/shared/state/persisted";
+  import type { GoalSummary } from "$lib/domain/goals_models";
+  import {
+    analyzeGoal,
+    type GoalIntelligence,
+    goalStatusLabel,
+  } from "$lib/domain/goal_intelligence";
+  import {
+    formatCurrency,
+    formatCurrencyCrude,
+    formatFloat,
+  } from "$lib/shared/formatters/currency";
+  import { obscure } from "$lib/shared/state/persisted";
 
-let { goal, compact = false }: { goal: GoalSummary; compact?: boolean } =
-  $props();
-const health = $derived(analyzeGoal(goal));
-const money = (value: number) => formatCurrency($obscure ? 0 : value);
-const compactMoney = (value: number) =>
-  formatCurrencyCrude($obscure ? 0 : value);
+  let { goal, compact = false }: { goal: GoalSummary; compact?: boolean } =
+    $props();
+  const health = $derived(analyzeGoal(goal));
+  const money = (value: number) => formatCurrency($obscure ? 0 : value);
+  const compactMoney = (value: number) =>
+    formatCurrencyCrude($obscure ? 0 : value);
 
-function statusClass(analysis: GoalIntelligence): string {
-  if (analysis.attention === "critical") return "text-negative";
-  if (analysis.attention === "warning") return "text-warning";
-  if (
-    analysis.scheduleStatus === "on-track" ||
-    analysis.state === "completed"
-  ) {
-    return "text-positive";
+  function statusClass(analysis: GoalIntelligence): string {
+    if (analysis.attention === "critical") return "text-negative";
+    if (analysis.attention === "warning") return "text-warning";
+    if (
+      analysis.scheduleStatus === "on-track" ||
+      analysis.state === "completed"
+    ) {
+      return "text-positive";
+    }
+    return "text-muted-foreground";
   }
-  return "text-muted-foreground";
-}
 
-function statusIcon(analysis: GoalIntelligence): string {
-  if (analysis.attention === "critical") return "fas fa-circle-exclamation";
-  if (analysis.attention === "warning") return "fas fa-triangle-exclamation";
-  if (
-    analysis.scheduleStatus === "on-track" ||
-    analysis.state === "completed"
-  ) {
-    return "fas fa-check-circle";
+  function statusIcon(analysis: GoalIntelligence): string {
+    if (analysis.attention === "critical") return "fas fa-circle-exclamation";
+    if (analysis.attention === "warning") return "fas fa-triangle-exclamation";
+    if (
+      analysis.scheduleStatus === "on-track" ||
+      analysis.state === "completed"
+    ) {
+      return "fas fa-check-circle";
+    }
+    return "";
   }
-  return "";
-}
 </script>
 
 <div class="min-w-0 space-y-1.5 text-sm">
@@ -55,7 +55,9 @@ function statusIcon(analysis: GoalIntelligence): string {
   {#if goal.type === "retirement"}
     {#if health.validTarget}
       <p class="text-muted-foreground">
-        {compact ? compactMoney(health.remainingAmount) : money(health.remainingAmount)} remaining
+        {compact
+          ? compactMoney(health.remainingAmount)
+          : money(health.remainingAmount)} remaining
       </p>
     {/if}
     {#if goal.swr !== undefined}
@@ -113,7 +115,9 @@ function statusIcon(analysis: GoalIntelligence): string {
       </div>
       {#if health.projectionSource === "configured-payment"}
         <p class="text-muted-foreground text-xs">
-          At {compact ? `${compactMoney(goal.paymentPerPeriod ?? 0)}/mo` : `${money(goal.paymentPerPeriod ?? 0)}/month`} configured payment
+          At {compact
+            ? `${compactMoney(goal.paymentPerPeriod ?? 0)}/mo`
+            : `${money(goal.paymentPerPeriod ?? 0)}/month`} configured payment
         </p>
       {:else if !compact}
         <p class="text-muted-foreground text-xs">
@@ -130,7 +134,8 @@ function statusIcon(analysis: GoalIntelligence): string {
     {/if}
     {#if health.assumptions.annualReturn !== undefined}
       <p class="text-muted-foreground text-xs">
-        Assuming {formatFloat(health.assumptions.annualReturn, 0)}% annual return
+        Assuming {formatFloat(health.assumptions.annualReturn, 0)}% annual
+        return
       </p>
     {/if}
     {#if !compact}

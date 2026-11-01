@@ -75,15 +75,15 @@ function renameAccount(
   }
 
   const regex = new RegExp(
-    `^((?:\t|\\s{2})\\s*(?:[*!]\\s+)?)(${
-      escapeRegExp(args.oldAccountName)
-    })((?:\t|\\s{2}).*|\\s*)$`,
+    `^((?:\t|\\s{2})\\s*(?:[*!]\\s+)?)(${escapeRegExp(
+      args.oldAccountName,
+    )})((?:\t|\\s{2}).*|\\s*)$`,
   );
   const lines = text.split("\n");
   const content = format(
-    lines.map((line) => line.replace(regex, `$1${args.newAccountName}$3`)).join(
-      "\n",
-    ),
+    lines
+      .map((line) => line.replace(regex, `$1${args.newAccountName}$3`))
+      .join("\n"),
   );
 
   return { updated: true, content };

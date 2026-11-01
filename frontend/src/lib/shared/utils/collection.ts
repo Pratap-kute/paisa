@@ -18,12 +18,7 @@ export function assign<
   U extends object,
   V extends object,
   W extends object,
->(
-  target: T,
-  source1: U,
-  source2: V,
-  source3: W,
-): T & U & V & W;
+>(target: T, source1: U, source2: V, source3: W): T & U & V & W;
 export function assign(target: object, ...sources: object[]) {
   return Object.assign(target, ...sources);
 }
@@ -66,9 +61,9 @@ export function find<T>(
     return items.find(predicate);
   }
   return items.find((item) =>
-    Object.entries(predicate).every(([key, value]) =>
-      (item as Record<string, unknown>)[key] === value
-    )
+    Object.entries(predicate).every(
+      ([key, value]) => (item as Record<string, unknown>)[key] === value,
+    ),
   );
 }
 
@@ -129,7 +124,7 @@ export function map(
 ): any[] {
   if (Array.isArray(items)) return items.map(iteratee);
   return Object.entries(items ?? {}).map(([key, value]) =>
-    iteratee(value, key)
+    iteratee(value, key),
   );
 }
 
@@ -169,10 +164,9 @@ export function sortBy<T>(items: T[], iteratee?: (value: T) => unknown): T[] {
   if (!iteratee) {
     return [...items].sort((a, b) => String(a).localeCompare(String(b)));
   }
-  return toolkitSortBy(
-    items as object[],
-    [iteratee as (value: object) => unknown],
-  ) as T[];
+  return toolkitSortBy(items as object[], [
+    iteratee as (value: object) => unknown,
+  ]) as T[];
 }
 
 export function toNumber(value: unknown): number {

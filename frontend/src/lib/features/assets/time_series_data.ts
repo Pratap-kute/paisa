@@ -15,9 +15,10 @@ import type {
 } from "$lib/shared/charts/echarts/period_series";
 import { minBy, sortBy } from "$lib/shared/utils/collection";
 
-function financialYear(
-  card: { start_date: dayjs.Dayjs; end_date: dayjs.Dayjs },
-) {
+function financialYear(card: {
+  start_date: dayjs.Dayjs;
+  end_date: dayjs.Dayjs;
+}) {
   return `${card.start_date.format("YYYY")} - ${card.end_date.format("YY")}`;
 }
 
@@ -35,11 +36,9 @@ function initialValues(keys: string[]) {
 
 function postingRows(postings: Posting[], sign = 1): Array<[string, number]> {
   return sortBy(
-    postings.map((posting) =>
-      [
-        restName(posting.account),
-        posting.amount * sign,
-      ] as [string, number]
+    postings.map(
+      (posting) =>
+        [restName(posting.account), posting.amount * sign] as [string, number],
     ),
     (row) => row[0],
   );
@@ -117,16 +116,18 @@ export function buildMonthlyInvestmentSeries(
   ]);
   const color = generateColorScheme(groups);
   const groupedPostings = groupBy(postings, (p) => p.date.format(timeFormat));
-  const start = minBy(postings.map((p) => p.date), (d) => d.valueOf());
+  const start = minBy(
+    postings.map((p) => p.date),
+    (d) => d.valueOf(),
+  );
   const end = now().startOf("month");
   const points: PeriodSeriesPoint[] = [];
 
   if (start) {
     forEachMonth(start, end, (month) => {
       const bucket = groupedPostings[month.format(timeFormat)] ?? [];
-      const bySecondName = groupBy(
-        bucket,
-        (posting) => secondName(posting.account),
+      const bySecondName = groupBy(bucket, (posting) =>
+        secondName(posting.account),
       );
       const values = initialValues(groupKeys);
       for (const [key, pList] of Object.entries(bySecondName)) {
@@ -169,9 +170,9 @@ export function buildYearlyInvestmentSeries(
   yearlyCards: InvestmentYearlyCard[],
 ): PeriodSeriesChartData {
   const groups = uniq(
-    yearlyCards.flatMap((card) => card.postings).map((p) =>
-      secondName(p.account)
-    ),
+    yearlyCards
+      .flatMap((card) => card.postings)
+      .map((p) => secondName(p.account)),
   ).sort();
   const groupKeys = groups.flatMap((group) => [
     `${group}-credit`,
@@ -179,9 +180,8 @@ export function buildYearlyInvestmentSeries(
   ]);
   const color = generateColorScheme(groups);
   const points = yearlyCards.map((card) => {
-    const bySecondName = groupBy(
-      card.postings,
-      (posting) => secondName(posting.account),
+    const bySecondName = groupBy(card.postings, (posting) =>
+      secondName(posting.account),
     );
     const values = initialValues(groupKeys);
     for (const [key, pList] of Object.entries(bySecondName)) {
@@ -198,12 +198,12 @@ export function buildYearlyInvestmentSeries(
       tooltipRows: groupKeys.flatMap((key) =>
         values[key]
           ? [
-            [key.replace("-credit", "").replace("-debit", ""), values[key]] as [
-              string,
-              number,
-            ],
-          ]
-          : []
+              [
+                key.replace("-credit", "").replace("-debit", ""),
+                values[key],
+              ] as [string, number],
+            ]
+          : [],
       ),
     };
   });
@@ -275,12 +275,14 @@ export function buildGainAccountSeries(
       values: {
         balance: point.balanceAmount,
         investment: point.netInvestmentAmount,
-        gain: point.gainAmount > 0
-          ? point.balanceAmount
-          : point.netInvestmentAmount,
-        loss: point.gainAmount < 0
-          ? point.balanceAmount
-          : point.netInvestmentAmount,
+        gain:
+          point.gainAmount > 0
+            ? point.balanceAmount
+            : point.netInvestmentAmount,
+        loss:
+          point.gainAmount < 0
+            ? point.balanceAmount
+            : point.netInvestmentAmount,
       },
       tooltipRows: [
         ["Balance", point.balanceAmount],

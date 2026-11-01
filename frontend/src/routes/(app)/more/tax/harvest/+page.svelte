@@ -1,88 +1,87 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { formatFloat } from "$lib/shared/formatters/currency";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import { restName } from "$lib/domain/account";
-import type { Harvestable } from "$lib/domain/tax";
-import {
-  filterHarvestables,
-  harvestablePercentage,
-} from "$lib/features/tax/harvest_data";
-import { sumBy } from "es-toolkit";
-import { onMount } from "svelte";
-import Card from "$lib/shared/ui/Card.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import HarvestCard from "$lib/features/tax/components/HarvestCard.svelte";
+  import { api } from "$lib/api";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { formatFloat } from "$lib/shared/formatters/currency";
+  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { restName } from "$lib/domain/account";
+  import type { Harvestable } from "$lib/domain/tax";
+  import {
+    filterHarvestables,
+    harvestablePercentage,
+  } from "$lib/features/tax/harvest_data";
+  import { sumBy } from "es-toolkit";
+  import { onMount } from "svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import HarvestCard from "$lib/features/tax/components/HarvestCard.svelte";
 
-let isLoading = $state(true);
-let harvestables: Harvestable[] = $state([]);
-let selectedAccount: string = $state("");
-const isEmpty = $derived(!isLoading && harvestables.length === 0);
+  let isLoading = $state(true);
+  let harvestables: Harvestable[] = $state([]);
+  let selectedAccount: string = $state("");
+  const isEmpty = $derived(!isLoading && harvestables.length === 0);
 
-let selectedHarvestable = $derived(
-  harvestables.find((h) => h.account === selectedAccount) || harvestables[0],
-);
-
-// High-level portfolio metrics across all harvestable holdings
-let portfolioMetrics = $derived.by(() => {
-  const totalHarvestableValue = sumBy(
-    harvestables,
-    (h) => h.harvestable_units * h.current_unit_price,
+  let selectedHarvestable = $derived(
+    harvestables.find((h) => h.account === selectedAccount) || harvestables[0],
   );
-  const totalUnrealizedGain = sumBy(
-    harvestables,
-    (h) => h.unrealized_gain,
-  );
-  const totalTaxableGain = sumBy(
-    harvestables,
-    (h) => h.taxable_unrealized_gain,
-  );
-  const totalUnits = sumBy(harvestables, (h) => h.total_units);
-  const totalHarvestableUnits = sumBy(harvestables, (h) => h.harvestable_units);
-  const overallRatio = totalUnits > 0
-    ? (totalHarvestableUnits / totalUnits) * 100
-    : 0;
 
-  return {
-    totalHarvestableValue,
-    totalUnrealizedGain,
-    totalTaxableGain,
-    eligibleHoldingsCount: harvestables.length,
-    overallRatio,
-  };
-});
+  // High-level portfolio metrics across all harvestable holdings
+  let portfolioMetrics = $derived.by(() => {
+    const totalHarvestableValue = sumBy(
+      harvestables,
+      (h) => h.harvestable_units * h.current_unit_price,
+    );
+    const totalUnrealizedGain = sumBy(harvestables, (h) => h.unrealized_gain);
+    const totalTaxableGain = sumBy(
+      harvestables,
+      (h) => h.taxable_unrealized_gain,
+    );
+    const totalUnits = sumBy(harvestables, (h) => h.total_units);
+    const totalHarvestableUnits = sumBy(
+      harvestables,
+      (h) => h.harvestable_units,
+    );
+    const overallRatio =
+      totalUnits > 0 ? (totalHarvestableUnits / totalUnits) * 100 : 0;
 
-function gainStatus(value: number): "positive" | "negative" | "neutral" {
-  if (value > 0) return "positive";
-  if (value < 0) return "negative";
-  return "neutral";
-}
-
-function gainClass(value: number) {
-  if (value > 0) return "text-positive";
-  if (value < 0) return "text-negative";
-  return "text-muted-foreground";
-}
-
-onMount(async () => {
-  try {
-    const response = await api.harvest.getHarvest() as unknown as {
-      harvestables: Record<string, Harvestable>;
+    return {
+      totalHarvestableValue,
+      totalUnrealizedGain,
+      totalTaxableGain,
+      eligibleHoldingsCount: harvestables.length,
+      overallRatio,
     };
-    harvestables = filterHarvestables(Object.values(response.harvestables));
-    if (harvestables.length > 0) {
-      selectedAccount = harvestables[0].account;
-    }
-  } finally {
-    isLoading = false;
+  });
+
+  function gainStatus(value: number): "positive" | "negative" | "neutral" {
+    if (value > 0) return "positive";
+    if (value < 0) return "negative";
+    return "neutral";
   }
-});
+
+  function gainClass(value: number) {
+    if (value > 0) return "text-positive";
+    if (value < 0) return "text-negative";
+    return "text-muted-foreground";
+  }
+
+  onMount(async () => {
+    try {
+      const response = (await api.harvest.getHarvest()) as unknown as {
+        harvestables: Record<string, Harvestable>;
+      };
+      harvestables = filterHarvestables(Object.values(response.harvestables));
+      if (harvestables.length > 0) {
+        selectedAccount = harvestables[0].account;
+      }
+    } finally {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -97,7 +96,10 @@ onMount(async () => {
     {#snippet actions()}
       {#if !isEmpty && harvestables.length > 0}
         <div class="flex items-center gap-2">
-          <label for="holding-select" class="text-xs font-medium text-muted-foreground">
+          <label
+            for="holding-select"
+            class="text-xs font-medium text-muted-foreground"
+          >
             Holding:
           </label>
           <select
@@ -156,7 +158,10 @@ onMount(async () => {
         </div>
       {:else}
         <!-- Multi-Holding Summary Comparison Table -->
-        <div class="mt-4 flex flex-col gap-[var(--paisa-space-6)]" data-testid="harvestables">
+        <div
+          class="mt-4 flex flex-col gap-[var(--paisa-space-6)]"
+          data-testid="harvestables"
+        >
           <Card padding="none" class="w-full overflow-hidden">
             {#snippet header()}
               <div class="flex items-center justify-between">
@@ -172,7 +177,9 @@ onMount(async () => {
             <div class="w-full overflow-x-auto">
               <table class="w-full min-w-[760px] border-collapse text-sm">
                 <thead>
-                  <tr class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground">
+                  <tr
+                    class="border-b border-border-subtle bg-surface-raised text-left text-xs font-medium text-muted-foreground"
+                  >
                     <th class="px-3.5 py-2.5">Holding Account</th>
                     <th class="px-3.5 py-2.5">Tax Category</th>
                     <th class="px-3.5 py-2.5 text-right">Harvestable Units</th>
@@ -190,30 +197,48 @@ onMount(async () => {
                       class="cursor-pointer transition-colors hover:bg-surface-hover"
                       onclick={() => (selectedAccount = h.account)}
                     >
-                      <td class="whitespace-nowrap px-3.5 py-2.5 font-semibold text-primary">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 font-semibold text-primary"
+                      >
                         {restName(h.account)}
                       </td>
                       <td class="whitespace-nowrap px-3.5 py-2.5">
-                        <span class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-xs font-mono text-muted-foreground">
+                        <span
+                          class="inline-flex items-center rounded-[var(--paisa-radius-sm)] border border-border-subtle bg-surface-raised px-2 py-0.5 text-xs font-mono text-muted-foreground"
+                        >
                           {h.tax_category}
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-foreground">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-foreground"
+                      >
                         {formatFloat(h.harvestable_units)}
-                        <span class="ml-1 text-[0.6875rem] text-muted-foreground">
+                        <span
+                          class="ml-1 text-[0.6875rem] text-muted-foreground"
+                        >
                           / {formatFloat(h.total_units)}
                         </span>
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-muted-foreground">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-muted-foreground"
+                      >
                         {formatCurrency(h.current_unit_price, 2)}
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums text-foreground">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums text-foreground"
+                      >
                         {formatCurrency(val)}
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums {gainClass(h.unrealized_gain)}">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 text-right font-semibold tabular-nums {gainClass(
+                          h.unrealized_gain,
+                        )}"
+                      >
                         {formatCurrency(h.unrealized_gain)}
                       </td>
-                      <td class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-positive">
+                      <td
+                        class="whitespace-nowrap px-3.5 py-2.5 text-right tabular-nums text-positive"
+                      >
                         {formatFloat(pct)}%
                       </td>
                     </tr>
@@ -224,7 +249,9 @@ onMount(async () => {
           </Card>
 
           <div class="flex flex-col gap-[var(--paisa-space-4)]">
-            <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <h3
+              class="text-sm font-semibold uppercase tracking-wider text-muted-foreground"
+            >
               All Holding Details & Simulators
             </h3>
             {#each harvestables as h (h.account)}

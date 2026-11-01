@@ -1,40 +1,35 @@
 <script lang="ts">
-import type { Snippet } from "svelte";
-import { helpUrl } from "$lib/shared/browser/navigation";
-import Badge from "$lib/shared/ui/Badge.svelte";
-import { iconGlyphOr } from "$lib/shared/ui/icon";
+  import type { Snippet } from "svelte";
+  import { helpUrl } from "$lib/shared/browser/navigation";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import { iconGlyphOr } from "$lib/shared/ui/icon";
 
-interface Props {
-  title: string;
-  titleIcon?: string;
-  description?: string;
-  help?: string;
-  tag?: string;
-  badgeVariant?:
-    | "primary"
-    | "success"
-    | "warning"
-    | "danger"
-    | "info"
-    | "neutral";
-  class?: string;
-  actions?: Snippet;
-  leading?: Snippet;
-  children?: Snippet;
-}
+  interface Props {
+    title: string;
+    titleIcon?: string;
+    description?: string;
+    help?: string;
+    tag?: string;
+    badgeVariant?:
+      "primary" | "success" | "warning" | "danger" | "info" | "neutral";
+    class?: string;
+    actions?: Snippet;
+    leading?: Snippet;
+    children?: Snippet;
+  }
 
-let {
-  title,
-  titleIcon,
-  description,
-  help,
-  tag,
-  badgeVariant = "warning",
-  class: className = "",
-  actions,
-  leading,
-  children,
-}: Props = $props();
+  let {
+    title,
+    titleIcon,
+    description,
+    help,
+    tag,
+    badgeVariant = "warning",
+    class: className = "",
+    actions,
+    leading,
+    children,
+  }: Props = $props();
 </script>
 
 <div class="paisa-page-header {className}">
@@ -48,7 +43,9 @@ let {
       <div>
         <div class="paisa-page-header-title-row">
           <h1 class="paisa-page-title">
-            {#if titleIcon}<span class="custom-icon" aria-hidden="true">{iconGlyphOr(titleIcon)}</span>{/if}
+            {#if titleIcon}<span class="custom-icon" aria-hidden="true"
+                >{iconGlyphOr(titleIcon)}</span
+              >{/if}
             <span>{title}</span>
           </h1>
           {#if help}
@@ -89,74 +86,74 @@ let {
 </div>
 
 <style>
-.paisa-page-header {
-  width: 100%;
-  margin-bottom: var(--paisa-space-5);
-}
+  .paisa-page-header {
+    width: 100%;
+    margin-bottom: var(--paisa-space-5);
+  }
 
-.paisa-page-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: var(--paisa-space-3);
-}
+  .paisa-page-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--paisa-space-3);
+  }
 
-.paisa-page-header-main {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--paisa-space-3);
-  min-width: 0;
-}
+  .paisa-page-header-main {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--paisa-space-3);
+    min-width: 0;
+  }
 
-.paisa-page-header-leading {
-  margin-top: 0.125rem;
-}
+  .paisa-page-header-leading {
+    margin-top: 0.125rem;
+  }
 
-.paisa-page-header-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--paisa-space-2);
-  flex-wrap: wrap;
-}
+  .paisa-page-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+    flex-wrap: wrap;
+  }
 
-.paisa-page-title {
-  margin: 0;
-  font-size: var(--paisa-font-size-xl);
-  font-weight: var(--paisa-font-weight-bold);
-  color: var(--paisa-foreground);
-  line-height: var(--paisa-line-height-tight);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--paisa-space-2);
-}
+  .paisa-page-title {
+    margin: 0;
+    font-size: var(--paisa-font-size-xl);
+    font-weight: var(--paisa-font-weight-bold);
+    color: var(--paisa-foreground);
+    line-height: var(--paisa-line-height-tight);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+  }
 
-.paisa-help-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--paisa-muted-foreground, var(--paisa-muted-foreground));
-  transition: color var(--paisa-transition-fast);
-}
+  .paisa-help-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paisa-muted-foreground, var(--paisa-muted-foreground));
+    transition: color var(--paisa-transition-fast);
+  }
 
-.paisa-help-link:hover {
-  color: var(--paisa-primary, var(--paisa-primary));
-}
+  .paisa-help-link:hover {
+    color: var(--paisa-primary, var(--paisa-primary));
+  }
 
-.paisa-page-description {
-  font-size: var(--paisa-font-size-sm);
-  color: var(--paisa-muted-foreground);
-  margin-top: var(--paisa-space-1);
-  margin-bottom: 0;
-}
+  .paisa-page-description {
+    font-size: var(--paisa-font-size-sm);
+    color: var(--paisa-muted-foreground);
+    margin-top: var(--paisa-space-1);
+    margin-bottom: 0;
+  }
 
-.paisa-page-header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--paisa-space-2);
-}
+  .paisa-page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--paisa-space-2);
+  }
 
-.paisa-page-header-children {
-  margin-top: var(--paisa-space-3);
-}
+  .paisa-page-header-children {
+    margin-top: var(--paisa-space-3);
+  }
 </style>

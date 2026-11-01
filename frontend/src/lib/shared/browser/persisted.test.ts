@@ -29,26 +29,22 @@ test("persisted serializes values and follows storage events", () => {
   let listener: ((event: StorageEvent) => void) | undefined;
   const store = persisted("theme", "light", {
     storage,
-    onStorage: (next) => listener = next,
+    onStorage: (next) => (listener = next),
   });
 
   store.set("dark");
   expect(storage.getItem("theme")).toBe('"dark"');
-  listener?.(
-    {
-      storageArea: storage,
-      key: "theme",
-      newValue: '"system"',
-    } as unknown as StorageEvent,
-  );
+  listener?.({
+    storageArea: storage,
+    key: "theme",
+    newValue: '"system"',
+  } as unknown as StorageEvent);
   expect(get(store)).toBe("system");
-  listener?.(
-    {
-      storageArea: storage,
-      key: "theme",
-      newValue: null,
-    } as unknown as StorageEvent,
-  );
+  listener?.({
+    storageArea: storage,
+    key: "theme",
+    newValue: null,
+  } as unknown as StorageEvent);
   expect(get(store)).toBe("light");
 });
 

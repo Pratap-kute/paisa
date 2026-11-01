@@ -4,11 +4,9 @@ import { includes, keys } from "$lib/shared/utils/collection";
 
 const KEYWORDS = /^(?:[#/](?:if|with|true|false|unless|each)|(?:else if|else))/;
 const HELPERS = new RegExp(
-  `^(?:(?:${
-    keys(helpers)
-      .sort((a, b) => b.length - a.length)
-      .join("|")
-  }))`,
+  `^(?:(?:${keys(helpers)
+    .sort((a, b) => b.length - a.length)
+    .join("|")}))`,
 ); //;
 const NAMES = /^(?:ROW|SHEET)/;
 const COLUMN = /^(?:\.[A-Z]|[A-Z] |\.[0-9]+)/;

@@ -1,19 +1,19 @@
 <script lang="ts">
-import COLORS from "$lib/shared/theme/colors";
-import { firstName, restName } from "$lib/domain/account";
-import type { Posting } from "$lib/domain/ledger";
-import { postingUrl } from "$lib/shared/browser/navigation";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { iconify } from "$lib/shared/ui/icon";
-import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
+  import COLORS from "$lib/shared/theme/colors";
+  import { firstName, restName } from "$lib/domain/account";
+  import type { Posting } from "$lib/domain/ledger";
+  import { postingUrl } from "$lib/shared/browser/navigation";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { iconify } from "$lib/shared/ui/icon";
+  import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
 
-interface Props {
-  postings: Posting[];
-  totalCount: number;
-}
+  interface Props {
+    postings: Posting[];
+    totalCount: number;
+  }
 
-let { postings, totalCount }: Props = $props();
+  let { postings, totalCount }: Props = $props();
 </script>
 
 <Section
@@ -26,7 +26,8 @@ let { postings, totalCount }: Props = $props();
     <a
       href="/ledger/posting"
       class="text-xs font-semibold uppercase tracking-wider text-primary hover:underline"
-    >View ledger</a>
+      >View ledger</a
+    >
   {/snippet}
 
   {#if postings.length > 0}
@@ -46,14 +47,25 @@ let { postings, totalCount }: Props = $props();
                   : COLORS.tertiary}"
             >
               <span class="flex min-w-0 items-center justify-between gap-2">
-                <span class="min-w-0 truncate text-xs text-muted-foreground">{posting.payee}</span>
-                <span class="shrink-0 text-xs text-muted-foreground">{posting.date.format("DD MMM YYYY")}</span>
+                <span class="min-w-0 truncate text-xs text-muted-foreground"
+                  >{posting.payee}</span
+                >
+                <span class="shrink-0 text-xs text-muted-foreground"
+                  >{posting.date.format("DD MMM YYYY")}</span
+                >
               </span>
               <span class="flex min-w-0 items-center justify-between gap-2">
-                <span class="custom-icon min-w-0 flex-1 truncate text-xs text-muted-foreground">
-                  {iconify(restName(posting.account), { group: firstName(posting.account) })}
+                <span
+                  class="custom-icon min-w-0 flex-1 truncate text-xs text-muted-foreground"
+                >
+                  {iconify(restName(posting.account), {
+                    group: firstName(posting.account),
+                  })}
                 </span>
-                <span class="shrink-0 font-semibold tabular-nums text-foreground">{formatCurrency(posting.amount)}</span>
+                <span
+                  class="shrink-0 font-semibold tabular-nums text-foreground"
+                  >{formatCurrency(posting.amount)}</span
+                >
               </span>
             </a>
           {/each}
@@ -61,6 +73,8 @@ let { postings, totalCount }: Props = $props();
       {/snippet}
     </PostingGroup>
   {:else}
-    <p class="text-sm text-muted-foreground">No postings recorded for this goal.</p>
+    <p class="text-sm text-muted-foreground">
+      No postings recorded for this goal.
+    </p>
   {/if}
 </Section>

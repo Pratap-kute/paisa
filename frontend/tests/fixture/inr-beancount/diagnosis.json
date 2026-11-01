@@ -20,10 +20,7 @@
         "type": "commodity",
         "label": "ABNB"
       },
-      "affectedFeatures": [
-        "net_worth",
-        "scenarios"
-      ],
+      "affectedFeatures": ["net_worth", "scenarios"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -45,9 +42,7 @@
         "type": "commodity",
         "label": "ABNB"
       },
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -70,10 +65,7 @@
         "type": "commodity",
         "label": "BTC"
       },
-      "affectedFeatures": [
-        "net_worth",
-        "scenarios"
-      ],
+      "affectedFeatures": ["net_worth", "scenarios"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -95,9 +87,7 @@
         "type": "commodity",
         "label": "BTC"
       },
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -120,10 +110,7 @@
         "type": "commodity",
         "label": "NIFTY"
       },
-      "affectedFeatures": [
-        "net_worth",
-        "scenarios"
-      ],
+      "affectedFeatures": ["net_worth", "scenarios"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -145,9 +132,7 @@
         "type": "commodity",
         "label": "NIFTY"
       },
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -170,10 +155,7 @@
         "type": "commodity",
         "label": "USD"
       },
-      "affectedFeatures": [
-        "net_worth",
-        "scenarios"
-      ],
+      "affectedFeatures": ["net_worth", "scenarios"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -195,9 +177,7 @@
         "type": "commodity",
         "label": "USD"
       },
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Prices",
         "href": "/ledger/price"
@@ -216,9 +196,7 @@
       "details": "Investment income on 2022-01-31 is not attributed to an investment commodity or account.",
       "code": "unattributed_investment_income",
       "category": "investments",
-      "affectedFeatures": [
-        "investment_performance"
-      ],
+      "affectedFeatures": ["investment_performance"],
       "action": {
         "label": "Review Performance",
         "href": "/assets/gain"
@@ -234,9 +212,7 @@
       "details": "Sample count: 1 of recommended 6 completed months.",
       "code": "insufficient_contribution_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"
@@ -252,9 +228,7 @@
       "details": "Sample count: 1 of recommended 6 completed months.",
       "code": "insufficient_expense_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"
@@ -270,9 +244,7 @@
       "details": "Sample count: 1 of recommended 6 completed months.",
       "code": "insufficient_income_history",
       "category": "history",
-      "affectedFeatures": [
-        "scenarios"
-      ],
+      "affectedFeatures": ["scenarios"],
       "action": {
         "label": "Review Scenarios",
         "href": "/more/scenarios"

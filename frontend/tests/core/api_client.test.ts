@@ -11,8 +11,9 @@ describe("API Client Runtime", () => {
   it("injects X-Auth header when token is stored", async () => {
     let capturedHeaders: Record<string, string> | undefined;
 
-    const mockFetch = vi.fn().mockImplementation(
-      (_url: string, init?: RequestInit) => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
         capturedHeaders = (init?.headers as Record<string, string>) || {};
         return Promise.resolve(
           new Response(JSON.stringify({ success: true }), {
@@ -20,8 +21,7 @@ describe("API Client Runtime", () => {
             headers: { "Content-Type": "application/json" },
           }),
         );
-      },
-    );
+      });
 
     const storage: Record<string, string> = {};
     vi.stubGlobal("localStorage", {
@@ -51,8 +51,9 @@ describe("API Client Runtime", () => {
   it("does not inject X-Auth header when token is absent", async () => {
     let capturedHeaders: Record<string, string> | undefined;
 
-    const mockFetch = vi.fn().mockImplementation(
-      (_url: string, init?: RequestInit) => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
         capturedHeaders = (init?.headers as Record<string, string>) || {};
         return Promise.resolve(
           new Response(JSON.stringify({ success: true }), {
@@ -60,8 +61,7 @@ describe("API Client Runtime", () => {
             headers: { "Content-Type": "application/json" },
           }),
         );
-      },
-    );
+      });
 
     vi.stubGlobal("localStorage", {
       getItem: () => null,
@@ -82,8 +82,9 @@ describe("API Client Runtime", () => {
     let calledUrl = "";
     let calledMethod = "";
 
-    const mockFetch = vi.fn().mockImplementation(
-      (url: string, init?: RequestInit) => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation((url: string, init?: RequestInit) => {
         calledUrl = url;
         calledMethod = init?.method || "GET";
         return Promise.resolve(
@@ -92,8 +93,7 @@ describe("API Client Runtime", () => {
             headers: { "Content-Type": "application/json" },
           }),
         );
-      },
-    );
+      });
 
     const client = createApiClient({
       baseUrl: "/api",
@@ -108,8 +108,9 @@ describe("API Client Runtime", () => {
   it("serializes JSON request body for mutations", async () => {
     let sentBody = "";
 
-    const mockFetch = vi.fn().mockImplementation(
-      (_url: string, init?: RequestInit) => {
+    const mockFetch = vi
+      .fn()
+      .mockImplementation((_url: string, init?: RequestInit) => {
         sentBody = (init?.body as string) || "";
         return Promise.resolve(
           new Response(JSON.stringify({ saved: true }), {
@@ -117,8 +118,7 @@ describe("API Client Runtime", () => {
             headers: { "Content-Type": "application/json" },
           }),
         );
-      },
-    );
+      });
 
     const client = createApiClient({
       customFetch: mockFetch as unknown as typeof fetch,

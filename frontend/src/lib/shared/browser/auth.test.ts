@@ -23,9 +23,11 @@ test("account save preserves a token for an unchanged account", () => {
 
 test("account save authenticates the first newly configured account", () => {
   expect(
-    authTokenAfterAccountSave(null, [], [
-      { username: "testuser", password: "new-token" },
-    ]),
+    authTokenAfterAccountSave(
+      null,
+      [],
+      [{ username: "testuser", password: "new-token" }],
+    ),
   ).toBe("testuser:new-token");
 });
 

@@ -8,8 +8,9 @@ describe("explain and confidence", () => {
   it("returns short copy without percents", () => {
     expect(confidenceLabel("HIGH")).toBe("High");
     expect(reasonLabel("EXACT_MERCHANT")).toBe("Exact merchant match");
-    expect(shortReasons(["HISTORY", "HISTORY", "AMOUNT"]).join(" ")).not
-      .toContain("%");
+    expect(
+      shortReasons(["HISTORY", "HISTORY", "AMOUNT"]).join(" "),
+    ).not.toContain("%");
   });
 
   it("never treats TF-IDF as HIGH", () => {

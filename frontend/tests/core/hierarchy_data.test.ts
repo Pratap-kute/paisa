@@ -32,31 +32,33 @@ describe("financial hierarchy adapters", () => {
     expect(roots[0].children?.[0].percentage).toBe(40);
   });
 
-  const portfolio: PortfolioAggregate[] = [{
-    id: "Equity",
-    group: "Equity",
-    sub_group: "Growth",
-    amount: 100,
-    percentage: 100,
-    breakdowns: [
-      {
-        commodity_name: "FUND-A",
-        security_name: "Alpha",
-        security_id: "A",
-        security_type: "Stock",
-        amount: 60,
-        percentage: 60,
-      },
-      {
-        commodity_name: "FUND-B",
-        security_name: "Beta",
-        security_id: "B",
-        security_type: "Stock",
-        amount: 40,
-        percentage: 40,
-      },
-    ],
-  }];
+  const portfolio: PortfolioAggregate[] = [
+    {
+      id: "Equity",
+      group: "Equity",
+      sub_group: "Growth",
+      amount: 100,
+      percentage: 100,
+      breakdowns: [
+        {
+          commodity_name: "FUND-A",
+          security_name: "Alpha",
+          security_id: "A",
+          security_type: "Stock",
+          amount: 60,
+          percentage: 60,
+        },
+        {
+          commodity_name: "FUND-B",
+          security_name: "Beta",
+          security_id: "B",
+          security_type: "Stock",
+          amount: 40,
+          percentage: 40,
+        },
+      ],
+    },
+  ];
 
   it("preserves commodity filtering and recalculates visible shares", () => {
     const filtered = filterCommodityBreakdowns(portfolio, ["FUND-B"]);
@@ -88,15 +90,15 @@ describe("financial hierarchy adapters", () => {
       categoryKey: "Growth",
     });
     expect(comparison.points[0].tooltipRows?.map((row) => row.value)).toEqual([
-      100,
-      1,
+      100, 1,
     ]);
     const hierarchy = buildPortfolioHierarchy(portfolio);
-    expect(hierarchy[0].children?.map((node) => [node.label, node.value]))
-      .toEqual([
-        ["Alpha", 60],
-        ["Beta", 40],
-      ]);
+    expect(
+      hierarchy[0].children?.map((node) => [node.label, node.value]),
+    ).toEqual([
+      ["Alpha", 60],
+      ["Beta", 40],
+    ]);
     expect(hierarchy[0].children?.[0].metadata?.commodity).toBe("FUND-A");
   });
 });

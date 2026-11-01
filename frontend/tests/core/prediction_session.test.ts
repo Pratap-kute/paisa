@@ -329,12 +329,15 @@ describe("prediction session core coverage", () => {
     );
     expect(appliedCount).toBe(3);
 
-    expect(predictionSession.getReviewState(1, 0, "Expenses")?.currentAccount)
-      .toBe("Expenses:Beverages");
-    expect(predictionSession.getReviewState(2, 0, "Expenses")?.currentAccount)
-      .toBe("Expenses:Beverages");
-    expect(predictionSession.getReviewState(3, 0, "Expenses")?.currentAccount)
-      .toBe("Expenses:Beverages");
+    expect(
+      predictionSession.getReviewState(1, 0, "Expenses")?.currentAccount,
+    ).toBe("Expenses:Beverages");
+    expect(
+      predictionSession.getReviewState(2, 0, "Expenses")?.currentAccount,
+    ).toBe("Expenses:Beverages");
+    expect(
+      predictionSession.getReviewState(3, 0, "Expenses")?.currentAccount,
+    ).toBe("Expenses:Beverages");
   });
 
   it("preserves review states across beginRender() template re-evaluations with matching fingerprint", () => {
@@ -355,8 +358,9 @@ describe("prediction session core coverage", () => {
     });
 
     expect(predictionSession.isRowResolved(0)).toBe(true);
-    expect(predictionSession.getReviewState(0, 0, "Expenses")?.currentAccount)
-      .toBe("Expenses:Groceries");
+    expect(
+      predictionSession.getReviewState(0, 0, "Expenses")?.currentAccount,
+    ).toBe("Expenses:Groceries");
   });
 
   it("resets review state and override when template edit materially changes input fingerprint", () => {
@@ -369,8 +373,9 @@ describe("prediction session core coverage", () => {
 
     predictionSession.confirmPrediction(0, "Expenses", "Expenses:Shopping");
     expect(predictionSession.isRowResolved(0)).toBe(true);
-    expect(predictionSession.getReviewState(0, 0, "Expenses")?.currentAccount)
-      .toBe("Expenses:Shopping");
+    expect(
+      predictionSession.getReviewState(0, 0, "Expenses")?.currentAccount,
+    ).toBe("Expenses:Shopping");
 
     predictionSession.beginRender();
     predictionSession.predictInput({

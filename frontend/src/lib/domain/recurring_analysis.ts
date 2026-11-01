@@ -107,19 +107,26 @@ export function median(values: number[]): number {
   return sorted.length === 0
     ? 0
     : sorted.length % 2
-    ? sorted[middle]
-    : new BigNumber(sorted[middle - 1]).plus(sorted[middle]).div(2).toNumber();
+      ? sorted[middle]
+      : new BigNumber(sorted[middle - 1])
+          .plus(sorted[middle])
+          .div(2)
+          .toNumber();
 }
 
 export function inferCadence(dates: Dayjs[]): Rhythm {
   const sorted = [...dates].sort((a, b) => a.valueOf() - b.valueOf());
-  const intervals = sorted.slice(1).map((date, i) =>
-    date.startOf("day").diff(sorted[i].startOf("day"), "day")
-  );
+  const intervals = sorted
+    .slice(1)
+    .map((date, i) =>
+      date.startOf("day").diff(sorted[i].startOf("day"), "day"),
+    );
   const anchorDay = Math.round(median(sorted.map((d) => d.date())));
-  const monthEnd = sorted.length > 1 &&
-    sorted.every((d) =>
-      d.daysInMonth() - d.date() <= recurringPolicy.calendarToleranceDays
+  const monthEnd =
+    sorted.length > 1 &&
+    sorted.every(
+      (d) =>
+        d.daysInMonth() - d.date() <= recurringPolicy.calendarToleranceDays,
     );
   const base: Rhythm = {
     cadence: "custom",
@@ -131,12 +138,12 @@ export function inferCadence(dates: Dayjs[]): Rhythm {
     tolerance: recurringPolicy.calendarToleranceDays,
   };
   if (!intervals.length || intervals.some((n) => n <= 0)) return base;
-  for (
-    const [cadence, months] of [["monthly", 1], ["quarterly", 3], [
-      "half-yearly",
-      6,
-    ], ["yearly", 12]] as const
-  ) {
+  for (const [cadence, months] of [
+    ["monthly", 1],
+    ["quarterly", 3],
+    ["half-yearly", 6],
+    ["yearly", 12],
+  ] as const) {
     const fits = sorted.every((d, i) => {
       const target = sorted[0].startOf("month").add(i * months, "month");
       const scheduled = target.date(
@@ -144,15 +151,20 @@ export function inferCadence(dates: Dayjs[]): Rhythm {
           ? target.daysInMonth()
           : Math.min(anchorDay, target.daysInMonth()),
       );
-      return Math.abs(d.startOf("day").diff(scheduled, "day")) <=
-        recurringPolicy.calendarToleranceDays;
+      return (
+        Math.abs(d.startOf("day").diff(scheduled, "day")) <=
+        recurringPolicy.calendarToleranceDays
+      );
     });
     if (fits) return { ...base, cadence, months, reliable: true };
   }
-  for (const [cadence, days] of [["weekly", 7], ["biweekly", 14]] as const) {
+  for (const [cadence, days] of [
+    ["weekly", 7],
+    ["biweekly", 14],
+  ] as const) {
     if (
-      intervals.every((n) =>
-        Math.abs(n - days) <= recurringPolicy.weeklyToleranceDays
+      intervals.every(
+        (n) => Math.abs(n - days) <= recurringPolicy.weeklyToleranceDays,
       )
     ) {
       return {
@@ -167,10 +179,11 @@ export function inferCadence(dates: Dayjs[]): Rhythm {
   // Only regular custom intervals receive predictions; irregular manual tags remain visible.
   return {
     ...base,
-    reliable: sorted.length >= recurringPolicy.customMinimumOccurrences &&
+    reliable:
+      sorted.length >= recurringPolicy.customMinimumOccurrences &&
       base.days > 3 &&
-      intervals.every((n) =>
-        Math.abs(n - base.days) <= Math.min(3, base.days * 0.1)
+      intervals.every(
+        (n) => Math.abs(n - base.days) <= Math.min(3, base.days * 0.1),
       ),
   };
 }
@@ -196,18 +209,18 @@ export function economicOccurrence(
     return undefined;
   }
   const expenses = transaction.postings.filter((p) =>
-    p.account.startsWith("Expenses:")
+    p.account.startsWith("Expenses:"),
   );
   const income = transaction.postings.filter((p) =>
-    p.account.startsWith("Income:")
+    p.account.startsWith("Income:"),
   );
   // Mixed income/expense transactions cannot safely be treated as a single commitment.
   if (expenses.length && income.length) return undefined;
   const selected = expenses.length
     ? expenses
     : income.length
-    ? income
-    : transaction.postings.filter((p) => p.quantity > 0);
+      ? income
+      : transaction.postings.filter((p) => p.quantity > 0);
   if (!selected.length || selected.some((p) => !Number.isFinite(p.quantity))) {
     return undefined;
   }
@@ -222,39 +235,46 @@ export function economicOccurrence(
   if (
     (expenses.length && !amount.isPositive()) ||
     (income.length && !amount.isNegative())
-  ) return undefined;
+  )
+    return undefined;
   const kind: RecurringKind = expenses.length
     ? "expense"
     : income.length
-    ? "income"
-    : selected.some((p) =>
-        /(?:^|:)(?:Investments?|Broker(?:age)?|Equity|MutualFunds?|SIP)(?:$|:)/i
-          .test(p.account)
-      )
-    ? "investment"
-    : "transfer";
-  const cashPostings = transaction.postings.filter((p) =>
-    p.account.startsWith("Assets:") && p.quantity < 0
+      ? "income"
+      : selected.some((p) =>
+            /(?:^|:)(?:Investments?|Broker(?:age)?|Equity|MutualFunds?|SIP)(?:$|:)/i.test(
+              p.account,
+            ),
+          )
+        ? "investment"
+        : "transfer";
+  const cashPostings = transaction.postings.filter(
+    (p) => p.account.startsWith("Assets:") && p.quantity < 0,
   );
   const cashCommodities = new Set(cashPostings.map((p) => p.commodity));
-  const cashComparable = cashPostings.length > 0 &&
+  const cashComparable =
+    cashPostings.length > 0 &&
     cashCommodities.size === 1 &&
     cashPostings.every((p) => Number.isFinite(p.quantity));
   const cashOutflowAmount = cashComparable
-    ? cashPostings.reduce((sum, p) => sum.minus(p.quantity), new BigNumber(0))
-      .toNumber()
+    ? cashPostings
+        .reduce((sum, p) => sum.minus(p.quantity), new BigNumber(0))
+        .toNumber()
     : undefined;
-  const cashObligation = expenses.length > 0 ||
-    transaction.postings.some((p) =>
-      p.account.startsWith("Liabilities:") && p.quantity > 0
+  const cashObligation =
+    expenses.length > 0 ||
+    transaction.postings.some(
+      (p) => p.account.startsWith("Liabilities:") && p.quantity > 0,
     );
   const context = [
     ...new Set(
-      transaction.postings.map((p) =>
-        `${p.account}:${Math.sign(p.quantity)}:${p.commodity}`
+      transaction.postings.map(
+        (p) => `${p.account}:${Math.sign(p.quantity)}:${p.commodity}`,
       ),
     ),
-  ].sort().join("|");
+  ]
+    .sort()
+    .join("|");
   return {
     transaction,
     amount: amount.abs().toNumber(),
@@ -277,12 +297,12 @@ function validTransactions(
 ): Transaction[] {
   return [
     ...new Map(
-      transactions.filter((t) =>
-        t.date?.isValid() && !t.date.isAfter(asOf, "day")
-      ).map((t) => [t.id, t]),
+      transactions
+        .filter((t) => t.date?.isValid() && !t.date.isAfter(asOf, "day"))
+        .map((t) => [t.id, t]),
     ).values(),
-  ].sort((a, b) =>
-    a.date.valueOf() - b.date.valueOf() || a.id.localeCompare(b.id)
+  ].sort(
+    (a, b) => a.date.valueOf() - b.date.valueOf() || a.id.localeCompare(b.id),
   );
 }
 
@@ -295,12 +315,13 @@ export function analyzeRecurring(
 ): RecurringAnalysis | undefined {
   const transactions = validTransactions(input, asOf);
   if (!transactions.length) return undefined;
-  const occurrences = transactions.map(economicOccurrence).filter((
-    o,
-  ): o is Occurrence => !!o);
+  const occurrences = transactions
+    .map(economicOccurrence)
+    .filter((o): o is Occurrence => !!o);
   const rhythm = inferCadence(transactions.map((t) => t.date));
   const last = transactions[transactions.length - 1];
-  const comparable = occurrences.length === transactions.length &&
+  const comparable =
+    occurrences.length === transactions.length &&
     new Set(occurrences.map((o) => `${o.kind}:${o.commodity}`)).size === 1;
   const amounts = comparable ? occurrences.map((o) => o.amount) : [];
   const {
@@ -317,20 +338,22 @@ export function analyzeRecurring(
   );
   const expectedExpenseAmount = comparable
     ? analyzeAmounts(
-      occurrences.map((o) => o.expenseAmount),
-      occurrences[0].commodity,
-    ).expectedAmount
+        occurrences.map((o) => o.expenseAmount),
+        occurrences[0].commodity,
+      ).expectedAmount
     : undefined;
-  const cashComparable = occurrences.length === transactions.length &&
+  const cashComparable =
+    occurrences.length === transactions.length &&
     occurrences.every((o) => o.cashOutflowAmount !== undefined) &&
     new Set(occurrences.map((o) => o.cashCommodity)).size === 1;
   const expectedCashOutflowAmount = cashComparable
     ? analyzeAmounts(
-      occurrences.map((o) => o.cashOutflowAmount!),
-      occurrences[0].cashCommodity,
-    ).expectedAmount
+        occurrences.map((o) => o.cashOutflowAmount!),
+        occurrences[0].cashCommodity,
+      ).expectedAmount
     : undefined;
-  const cashObligation = occurrences.length === transactions.length &&
+  const cashObligation =
+    occurrences.length === transactions.length &&
     occurrences.every((o) => o.cashObligation);
   const { expectedDate, future, scheduleError, annualFrequency } =
     predictRecurringDates(last.date, rhythm, asOf, period);
@@ -338,7 +361,8 @@ export function analyzeRecurring(
   const windowStart = expectedDate?.subtract(tolerance, "day");
   const windowEnd = expectedDate?.add(tolerance, "day");
   const laterThanUsual = !!windowEnd && asOf.isAfter(windowEnd, "day");
-  const stopped = future.length >= recurringPolicy.stoppedCycles &&
+  const stopped =
+    future.length >= recurringPolicy.stoppedCycles &&
     asOf.isAfter(
       future[recurringPolicy.stoppedCycles - 1].add(tolerance, "day"),
       "day",
@@ -365,8 +389,8 @@ export function analyzeRecurring(
       ? transactions.length >= recurringPolicy.highOccurrences
         ? "high"
         : transactions.length >= recurringPolicy.minimumOccurrences
-        ? "medium"
-        : "low"
+          ? "medium"
+          : "low"
       : "low",
     kind: comparable ? occurrences[0].kind : undefined,
     commodity: comparable ? occurrences[0].commodity : undefined,
@@ -382,23 +406,28 @@ export function analyzeRecurring(
     windowEnd,
     upcomingDates: stopped
       ? []
-      : future.filter((d) =>
-        !d.isBefore(asOf, "day") && !d.isAfter(asOf.add(30, "day"), "day")
-      ),
+      : future.filter(
+          (d) =>
+            !d.isBefore(asOf, "day") && !d.isAfter(asOf.add(30, "day"), "day"),
+        ),
     amountChange,
     lifecycle: stopped
       ? "possibly-stopped"
       : newlyEstablished
-      ? "new"
-      : "active",
+        ? "new"
+        : "active",
     flags: {
       amountChanged: !!amountChange,
-      expectedSoon: !stopped &&
-        future.some((d) =>
-          !d.isBefore(asOf, "day") && !d.isAfter(asOf.add(7, "day"), "day")
+      expectedSoon:
+        !stopped &&
+        future.some(
+          (d) =>
+            !d.isBefore(asOf, "day") && !d.isAfter(asOf.add(7, "day"), "day"),
         ),
       laterThanUsual,
-      cadenceChanged: !period.trim() && transactions.length >= 4 &&
+      cadenceChanged:
+        !period.trim() &&
+        transactions.length >= 4 &&
         previousRhythm.reliable &&
         (!rhythm.reliable || previousRhythm.cadence !== rhythm.cadence),
     },
@@ -424,9 +453,11 @@ export function discoverRecurringCandidates(
   const groups = new Map<string, Transaction[]>();
   for (const t of validTransactions(transactions, asOf)) {
     if (
-      taggedIDs.has(t.id) || t.tag_recurring ||
+      taggedIDs.has(t.id) ||
+      t.tag_recurring ||
       t.postings.some((p) => p.tag_recurring)
-    ) continue;
+    )
+      continue;
     const o = economicOccurrence(t);
     if (!o || isGenericMerchant(o.merchantKey)) continue;
     const key = JSON.stringify([o.merchantKey, o.kind, o.commodity, o.context]);
@@ -438,9 +469,8 @@ export function discoverRecurringCandidates(
   for (const [key, ts] of groups) {
     if (ts.length < recurringPolicy.minimumOccurrences) continue;
     const analysis = analyzeRecurring(key, ts, false, asOf);
-    if (
-      analysis?.rhythm.reliable && analysis.lifecycle !== "possibly-stopped"
-    ) candidates.push(analysis);
+    if (analysis?.rhythm.reliable && analysis.lifecycle !== "possibly-stopped")
+      candidates.push(analysis);
   }
   return candidates.sort((a, b) => a.key.localeCompare(b.key));
 }
@@ -449,9 +479,9 @@ export function analyzeConfirmedRecurring(
   sequences: TransactionSequence[],
   asOf: Dayjs,
 ): RecurringAnalysis[] {
-  return sequences.map((s) =>
-    analyzeRecurring(s.key, s.transactions, true, asOf, s.period)
-  ).filter((s): s is RecurringAnalysis => !!s);
+  return sequences
+    .map((s) => analyzeRecurring(s.key, s.transactions, true, asOf, s.period))
+    .filter((s): s is RecurringAnalysis => !!s);
 }
 
 export function annualOccurrences(rhythm: Rhythm): number | undefined {
@@ -488,15 +518,21 @@ export function summarizeRecurring(
     }
   >();
   const totalFor = (commodity: string) => {
-    const total = totals.get(commodity) ??
-      { commodity, monthly: 0, annual: 0, upcoming7: 0, upcoming30: 0 };
+    const total = totals.get(commodity) ?? {
+      commodity,
+      monthly: 0,
+      annual: 0,
+      upcoming7: 0,
+      upcoming30: 0,
+    };
     totals.set(commodity, total);
     return total;
   };
   for (const s of sequences) {
     if (!s.confirmed || s.lifecycle === "possibly-stopped") continue;
     if (
-      s.kind === "expense" && s.commodity &&
+      s.kind === "expense" &&
+      s.commodity &&
       s.expectedExpenseAmount !== undefined
     ) {
       const total = totalFor(s.commodity);
@@ -509,50 +545,62 @@ export function summarizeRecurring(
       }
     }
     if (
-      !s.cashObligation || !s.cashCommodity ||
+      !s.cashObligation ||
+      !s.cashCommodity ||
       s.expectedCashOutflowAmount === undefined
-    ) continue;
+    )
+      continue;
     const total = totalFor(s.cashCommodity);
     for (const date of s.upcomingDates) {
-      total.upcoming30 = new BigNumber(total.upcoming30).plus(
-        s.expectedCashOutflowAmount,
-      ).toNumber();
+      total.upcoming30 = new BigNumber(total.upcoming30)
+        .plus(s.expectedCashOutflowAmount)
+        .toNumber();
       if (!date.isAfter(asOf.add(7, "day"), "day")) {
-        total.upcoming7 = new BigNumber(total.upcoming7).plus(
-          s.expectedCashOutflowAmount,
-        ).toNumber();
+        total.upcoming7 = new BigNumber(total.upcoming7)
+          .plus(s.expectedCashOutflowAmount)
+          .toNumber();
       }
     }
   }
   return {
     totals: [...totals.values()].sort((a, b) =>
-      a.commodity.localeCompare(b.commodity)
+      a.commodity.localeCompare(b.commodity),
     ),
-    unestimatedCount:
-      sequences.filter((s) =>
-        s.confirmed && s.kind === "expense" &&
-        s.lifecycle !== "possibly-stopped" && !s.annualFrequency
-      ).length,
+    unestimatedCount: sequences.filter(
+      (s) =>
+        s.confirmed &&
+        s.kind === "expense" &&
+        s.lifecycle !== "possibly-stopped" &&
+        !s.annualFrequency,
+    ).length,
     attentionCount: sequences.filter(needsRecurringAttention).length,
   };
 }
 
 export function needsRecurringAttention(item: RecurringAnalysis): boolean {
-  return item.confirmed &&
-    (item.flags.amountChanged || item.flags.laterThanUsual ||
-      item.flags.cadenceChanged || !!item.scheduleError);
+  return (
+    item.confirmed &&
+    (item.flags.amountChanged ||
+      item.flags.laterThanUsual ||
+      item.flags.cadenceChanged ||
+      !!item.scheduleError)
+  );
 }
 
 export function minimumRecurringChange(commodity?: string): number {
   if (
-    commodity && recurringPolicy.minimumChangeAmounts[commodity] !== undefined
-  ) return recurringPolicy.minimumChangeAmounts[commodity];
+    commodity &&
+    recurringPolicy.minimumChangeAmounts[commodity] !== undefined
+  )
+    return recurringPolicy.minimumChangeAmounts[commodity];
   // No purchasing-power equivalence is inferred for unknown commodities.
   // Use one minor currency unit (or 0.01 for arbitrary commodities) plus the ratio.
   if (commodity && /^[A-Z]{3}$/.test(commodity)) {
     const digits =
-      new Intl.NumberFormat("en", { style: "currency", currency: commodity })
-        .resolvedOptions().maximumFractionDigits ?? 2;
+      new Intl.NumberFormat("en", {
+        style: "currency",
+        currency: commodity,
+      }).resolvedOptions().maximumFractionDigits ?? 2;
     return 10 ** -digits;
   }
   return 1 / recurringPolicy.defaultMinorUnits;
@@ -562,22 +610,27 @@ function analyzeAmounts(amounts: number[], commodity?: string) {
   const latestAmount = amounts.at(-1);
   const previousAmount = amounts.at(-2);
   const typicalAmount = amounts.length ? median(amounts) : undefined;
-  const typicalPrevious = amounts.length > 1
-    ? median(amounts.slice(0, -1))
-    : typicalAmount;
-  const baselineStable = amounts.slice(0, -1).every((amount) =>
-    Math.abs(amount - (typicalPrevious ?? 0)) <=
-      Math.max(0.01, (typicalPrevious ?? 0) * recurringPolicy.stableAmountRatio)
-  );
+  const typicalPrevious =
+    amounts.length > 1 ? median(amounts.slice(0, -1)) : typicalAmount;
+  const baselineStable = amounts
+    .slice(0, -1)
+    .every(
+      (amount) =>
+        Math.abs(amount - (typicalPrevious ?? 0)) <=
+        Math.max(
+          0.01,
+          (typicalPrevious ?? 0) * recurringPolicy.stableAmountRatio,
+        ),
+    );
   const approximate = !baselineStable;
   const expectedAmount = approximate ? typicalAmount : latestAmount;
   let amountChange: RecurringAnalysis["amountChange"];
   if (latestAmount !== undefined && previousAmount !== undefined) {
-    const difference = new BigNumber(latestAmount).minus(previousAmount)
+    const difference = new BigNumber(latestAmount)
+      .minus(previousAmount)
       .toNumber();
-    const ratio = previousAmount > 0
-      ? Math.abs(difference) / previousAmount
-      : undefined;
+    const ratio =
+      previousAmount > 0 ? Math.abs(difference) / previousAmount : undefined;
     if (
       Math.abs(difference) >= minimumRecurringChange(commodity) &&
       (ratio === undefined || ratio >= recurringPolicy.minimumChangeRatio)
@@ -587,7 +640,7 @@ function analyzeAmounts(amounts: number[], commodity?: string) {
         latest: latestAmount,
         difference,
         percentage: previousAmount
-          ? difference / previousAmount * 100
+          ? (difference / previousAmount) * 100
           : undefined,
       };
     }
@@ -625,15 +678,19 @@ function predictRecurringDates(
       expectedDate = future[0];
       const annualDates = getFutureMatches(cron, {
         startAt: asOf.startOf("day").toISOString(),
-        endAt: asOf.add(1, "year").startOf("day").subtract(1, "second")
+        endAt: asOf
+          .add(1, "year")
+          .startOf("day")
+          .subtract(1, "second")
           .toISOString(),
         matchCount: recurringPolicy.maximumSchedules + 1,
         timezone: dayjs.tz?.guess() ?? "UTC",
       });
-      annualFrequency = annualDates.length > 0 &&
-          annualDates.length <= recurringPolicy.maximumSchedules
-        ? annualDates.length
-        : undefined;
+      annualFrequency =
+        annualDates.length > 0 &&
+        annualDates.length <= recurringPolicy.maximumSchedules
+          ? annualDates.length
+          : undefined;
     } catch {
       annualFrequency = undefined;
       scheduleError =
@@ -646,7 +703,8 @@ function predictRecurringDates(
       if (
         date.isAfter(asOf.add(30, "day"), "day") &&
         i > recurringPolicy.stoppedCycles
-      ) break;
+      )
+        break;
       future.push(date);
     }
   }

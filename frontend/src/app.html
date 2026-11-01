@@ -18,7 +18,8 @@
         try {
           var key = "theme-preference";
           var stored = localStorage.getItem(key);
-          var theme = stored ||
+          var theme =
+            stored ||
             (window.matchMedia("(prefers-color-scheme: dark)").matches
               ? "dark"
               : "light");

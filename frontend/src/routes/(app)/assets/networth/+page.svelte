@@ -1,88 +1,92 @@
 <script lang="ts">
-import { formatFloat } from "$lib/shared/formatters/currency";
-import type { Legend } from "$lib/shared/charts/types";
-import type { Networth } from "$lib/domain/assets";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { api } from "$lib/api";
-import { last } from "es-toolkit";
-import { onMount } from "svelte";
-import {
-  dateMax,
-  dateMin,
-  dateRange,
-  dateRangeOption,
-  setAllowedDateRange,
-} from "../../../../store";
-import DateRange from "$lib/shared/ui/DateRange.svelte";
-import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-import Metric from "$lib/shared/layout/Metric.svelte";
-import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
-import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
-import { filter, map } from "$lib/shared/utils/collection";
-import { page } from "$app/state";
-import { validPeriod } from "$lib/shared/browser/period";
-import dayjs from "dayjs";
+  import { formatFloat } from "$lib/shared/formatters/currency";
+  import type { Legend } from "$lib/shared/charts/types";
+  import type { Networth } from "$lib/domain/assets";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { api } from "$lib/api";
+  import { last } from "es-toolkit";
+  import { onMount } from "svelte";
+  import {
+    dateMax,
+    dateMin,
+    dateRange,
+    dateRangeOption,
+    setAllowedDateRange,
+  } from "../../../../store";
+  import DateRange from "$lib/shared/ui/DateRange.svelte";
+  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
+  import Metric from "$lib/shared/layout/Metric.svelte";
+  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
+  import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
+  import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
+  import { filter, map } from "$lib/shared/utils/collection";
+  import { page } from "$app/state";
+  import { validPeriod } from "$lib/shared/browser/period";
+  import dayjs from "dayjs";
 
-let xirr = $state(0);
-let isLoading = $state(true);
-let points: Networth[] = $state([]);
-let legends: Legend[] = $state([]);
-let selectedPeriod = $derived(
-  validPeriod(page.url.searchParams.get("period")),
-);
-let currentPoint = $derived.by(() => {
-  if (!selectedPeriod) return last(points);
-  const periodEnd = dayjs(`${selectedPeriod}-01`).endOf("month");
-  return last(points.filter((p) => p.date.isSameOrBefore(periodEnd)));
-});
-let networth = $derived(
-  currentPoint
-    ? currentPoint.investmentAmount + currentPoint.gainAmount -
-      currentPoint.withdrawalAmount
-    : 0,
-);
-let investment = $derived(
-  currentPoint
-    ? currentPoint.investmentAmount - currentPoint.withdrawalAmount
-    : 0,
-);
-let gain = $derived(currentPoint?.gainAmount ?? 0);
-
-let filteredPoints = $derived.by(() => {
-  if (!selectedPeriod) {
-    return filter(points, (p) =>
-      p.date.isSameOrBefore($dateRange.to) &&
-      p.date.isSameOrAfter($dateRange.from));
-  }
-  const start = dayjs(`${selectedPeriod}-01`).startOf("month");
-  const end = start.endOf("month");
-  const inPeriod = points.filter((p) =>
-    p.date.isSameOrAfter(start) && p.date.isSameOrBefore(end)
+  let xirr = $state(0);
+  let isLoading = $state(true);
+  let points: Networth[] = $state([]);
+  let legends: Legend[] = $state([]);
+  let selectedPeriod = $derived(
+    validPeriod(page.url.searchParams.get("period")),
   );
-  const before = points.filter((p) => p.date.isBefore(start)).at(-1);
-  return before ? [before, ...inPeriod] : inPeriod;
-});
+  let currentPoint = $derived.by(() => {
+    if (!selectedPeriod) return last(points);
+    const periodEnd = dayjs(`${selectedPeriod}-01`).endOf("month");
+    return last(points.filter((p) => p.date.isSameOrBefore(periodEnd)));
+  });
+  let networth = $derived(
+    currentPoint
+      ? currentPoint.investmentAmount +
+          currentPoint.gainAmount -
+          currentPoint.withdrawalAmount
+      : 0,
+  );
+  let investment = $derived(
+    currentPoint
+      ? currentPoint.investmentAmount - currentPoint.withdrawalAmount
+      : 0,
+  );
+  let gain = $derived(currentPoint?.gainAmount ?? 0);
 
-$effect(() => {
-  legends = buildNetworthSeries(filteredPoints).legends ?? [];
-});
+  let filteredPoints = $derived.by(() => {
+    if (!selectedPeriod) {
+      return filter(
+        points,
+        (p) =>
+          p.date.isSameOrBefore($dateRange.to) &&
+          p.date.isSameOrAfter($dateRange.from),
+      );
+    }
+    const start = dayjs(`${selectedPeriod}-01`).startOf("month");
+    const end = start.endOf("month");
+    const inPeriod = points.filter(
+      (p) => p.date.isSameOrAfter(start) && p.date.isSameOrBefore(end),
+    );
+    const before = points.filter((p) => p.date.isBefore(start)).at(-1);
+    return before ? [before, ...inPeriod] : inPeriod;
+  });
 
-onMount(async () => {
-  try {
-    const result = await api.networth.getNetworth();
-    points = (result.networthTimeline as unknown as Networth[]) || [];
-    setAllowedDateRange(map(points, (p) => p.date));
+  $effect(() => {
+    legends = buildNetworthSeries(filteredPoints).legends ?? [];
+  });
 
-    xirr = result.xirr || 0;
-  } finally {
-    isLoading = false;
-  }
-});
+  onMount(async () => {
+    try {
+      const result = await api.networth.getNetworth();
+      points = (result.networthTimeline as unknown as Networth[]) || [];
+      setAllowedDateRange(map(points, (p) => p.date));
+
+      xirr = result.xirr || 0;
+    } finally {
+      isLoading = false;
+    }
+  });
 </script>
 
 <svelte:head>
@@ -96,14 +100,21 @@ onMount(async () => {
   >
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
-        <DateRange bind:value={$dateRangeOption} dateMin={$dateMin} dateMax={$dateMax} />
+        <DateRange
+          bind:value={$dateRangeOption}
+          dateMin={$dateMin}
+          dateMax={$dateMax}
+        />
       </div>
     {/snippet}
   </PageHeader>
 
   {#if selectedPeriod}
     <div class="mb-3 text-sm text-muted-foreground">
-      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} · <a href="/assets/networth" class="text-primary hover:underline">Clear period filter</a>
+      Showing {dayjs(`${selectedPeriod}-01`).format("MMMM YYYY")} ·
+      <a href="/assets/networth" class="text-primary hover:underline"
+        >Clear period filter</a
+      >
     </div>
   {/if}
 

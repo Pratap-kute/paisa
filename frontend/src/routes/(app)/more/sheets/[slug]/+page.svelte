@@ -1,249 +1,251 @@
 <script lang="ts">
-import { api } from "$lib/api";
-import { buildDirectoryTree } from "$lib/shared/utils/tree";
-import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
-import type { LedgerFile, Posting } from "$lib/domain/ledger";
-import type { SheetFile } from "$lib/domain/ledger";
-import {
-  createEditor,
-  sheetEditorState,
-} from "$lib/features/editor/sheet_editor";
-import { focus, moveToLine, updateContent } from "$lib/features/editor/runtime";
-import { redo, undo } from "@codemirror/commands";
-import type { EditorView, KeyBinding } from "@codemirror/view";
-import * as toast from "$lib/shared/ui/toast";
-import { isNumber } from "es-toolkit";
-import { onMount } from "svelte";
-import { beforeNavigate, goto } from "$app/navigation";
-import type { PageData } from "./$types";
-import FileTree from "$lib/features/ledger/components/FileTree.svelte";
-import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-import { page } from "$app/stores";
-import Page from "$lib/shared/layout/Page.svelte";
-import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-import Section from "$lib/shared/layout/Section.svelte";
-import Button from "$lib/shared/ui/Button.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
-import Card from "$lib/shared/ui/Card.svelte";
-import Select from "$lib/shared/ui/Select.svelte";
-import {
-  assign,
-  find,
-  fromPairs,
-  isEmpty,
-  map,
-  toNumber,
-  values,
-} from "$lib/shared/utils/collection";
+  import { api } from "$lib/api";
+  import { buildDirectoryTree } from "$lib/shared/utils/tree";
+  import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
+  import type { LedgerFile, Posting } from "$lib/domain/ledger";
+  import type { SheetFile } from "$lib/domain/ledger";
+  import {
+    createEditor,
+    sheetEditorState,
+  } from "$lib/features/editor/sheet_editor";
+  import {
+    focus,
+    moveToLine,
+    updateContent,
+  } from "$lib/features/editor/runtime";
+  import { redo, undo } from "@codemirror/commands";
+  import type { EditorView, KeyBinding } from "@codemirror/view";
+  import * as toast from "$lib/shared/ui/toast";
+  import { isNumber } from "es-toolkit";
+  import { onMount } from "svelte";
+  import { beforeNavigate, goto } from "$app/navigation";
+  import type { PageData } from "./$types";
+  import FileTree from "$lib/features/ledger/components/FileTree.svelte";
+  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
+  import { page } from "$app/stores";
+  import Page from "$lib/shared/layout/Page.svelte";
+  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
+  import Section from "$lib/shared/layout/Section.svelte";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Card from "$lib/shared/ui/Card.svelte";
+  import Select from "$lib/shared/ui/Select.svelte";
+  import {
+    assign,
+    find,
+    fromPairs,
+    isEmpty,
+    map,
+    toNumber,
+    values,
+  } from "$lib/shared/utils/collection";
 
-let ledgerFiles: LedgerFile[] = $state([]);
-let accounts: string[] = $state([]);
-let commodities: string[] = $state([]);
+  let ledgerFiles: LedgerFile[] = $state([]);
+  let accounts: string[] = $state([]);
+  let commodities: string[] = $state([]);
 
-interface Props {
-  data: PageData;
-}
+  interface Props {
+    data: PageData;
+  }
 
-let { data }: Props = $props();
-let editorDom: Element | undefined = $state();
-let editor: EditorView | undefined = $state();
-let filesMap: Record<string, SheetFile> = $state({});
-let postings: Posting[] = $state([]);
-let selectedFile: SheetFile | null = $state(null);
-let selectedVersion: string | null = $state(null);
-let lineNumber = $state(0);
+  let { data }: Props = $props();
+  let editorDom: Element | undefined = $state();
+  let editor: EditorView | undefined = $state();
+  let filesMap: Record<string, SheetFile> = $state({});
+  let postings: Posting[] = $state([]);
+  let selectedFile: SheetFile | null = $state(null);
+  let selectedVersion: string | null = $state(null);
+  let lineNumber = $state(0);
 
-function command(fn: Function) {
-  return () => {
-    fn();
+  function command(fn: Function) {
+    return () => {
+      fn();
+      return true;
+    };
+  }
+
+  function undoEdit() {
+    undo(editor);
+  }
+
+  function redoEdit() {
+    redo(editor);
+  }
+
+  const keybindings: readonly KeyBinding[] = [
+    {
+      key: "Ctrl-s",
+      run: command(save),
+      preventDefault: true,
+    },
+  ];
+
+  let cancelled = false;
+  beforeNavigate(async ({ cancel }) => {
+    if ($sheetEditorState.hasUnsavedChanges) {
+      const confirmed = confirm(
+        "You have unsaved changes. Are you sure you want to leave?",
+      );
+      if (!confirmed) {
+        cancel();
+        cancelled = true;
+      } else {
+        $sheetEditorState = assign({}, $sheetEditorState, {
+          hasUnsavedChanges: false,
+        });
+      }
+    }
+  });
+
+  async function navigate(url: string) {
+    await goto(url, { noScroll: true });
+    if (cancelled) {
+      cancelled = false;
+      return false;
+    }
     return true;
-  };
-}
+  }
 
-function undoEdit() {
-  undo(editor);
-}
+  onMount(async () => {
+    loadFiles(data.name);
+    const line = toNumber($page.url.hash.substring(1));
+    if (isNumber(line)) {
+      lineNumber = line;
+    }
+  });
 
-function redoEdit() {
-  redo(editor);
-}
+  async function loadFiles(selectedFileName: string) {
+    let files;
+    ({
+      files: ledgerFiles,
+      accounts,
+      commodities,
+    } = (await api.editor.getEditorFiles()) as unknown as {
+      files: LedgerFile[];
+      accounts: string[];
+      commodities: string[];
+    });
+    ({ files, postings } = (await api.sheets.getSheetFiles()) as unknown as {
+      files: SheetFile[];
+      postings: Posting[];
+    });
+    filesMap = fromPairs(map(files, (f) => [f.name, f]));
+    if (!isEmpty(files)) {
+      selectedFile = find(files, (f) => f.name == selectedFileName) || files[0];
+    }
+  }
 
-const keybindings: readonly KeyBinding[] = [
-  {
-    key: "Ctrl-s",
-    run: command(save),
-    preventDefault: true,
-  },
-];
-
-let cancelled = false;
-beforeNavigate(async ({ cancel }) => {
-  if ($sheetEditorState.hasUnsavedChanges) {
-    const confirmed = confirm(
-      "You have unsaved changes. Are you sure you want to leave?",
+  async function selectFile(file: SheetFile) {
+    const success = await navigate(
+      `/more/sheets/${encodeURIComponent(file.name)}`,
     );
-    if (!confirmed) {
-      cancel();
-      cancelled = true;
+    if (success) {
+      selectedFile = file;
+    }
+  }
+
+  async function revert(version: string) {
+    const { file } = (await api.sheets.getSheetFile({
+      name: version,
+    })) as unknown as { file: SheetFile };
+
+    updateContent(editor, file.content);
+  }
+
+  async function deleteBackups() {
+    const { file } = (await api.sheets.deleteSheetBackups({
+      name: selectedFile.name,
+    })) as unknown as { file: SheetFile };
+
+    selectedFile.versions = file.versions;
+  }
+
+  async function save() {
+    const doc = editor.state.doc;
+    const { saved, file, message } = (await api.sheets.saveSheetFile({
+      name: selectedFile.name,
+      content: doc.toString(),
+    })) as unknown as { saved: boolean; file: SheetFile; message: string };
+
+    if (!saved) {
+      toast.toast({
+        message: `Failed to save ${selectedFile.name}. reason: ${message}`,
+        type: "is-danger",
+        duration: 10000,
+      });
     } else {
+      toast.toast({
+        message: `Saved ${selectedFile.name}`,
+        type: "is-success",
+      });
+      filesMap[file.name] = file;
+      selectedFile = file;
+      selectedVersion = null;
       $sheetEditorState = assign({}, $sheetEditorState, {
         hasUnsavedChanges: false,
       });
     }
   }
-});
 
-async function navigate(url: string) {
-  await goto(url, { noScroll: true });
-  if (cancelled) {
-    cancelled = false;
-    return false;
-  }
-  return true;
-}
+  $effect(() => {
+    if (selectedFile) {
+      if (!editor || editor.state.doc.toString() != selectedFile.content) {
+        if (editor) {
+          editor.destroy();
+        }
 
-onMount(async () => {
-  loadFiles(data.name);
-  const line = toNumber($page.url.hash.substring(1));
-  if (isNumber(line)) {
-    lineNumber = line;
-  }
-});
-
-async function loadFiles(selectedFileName: string) {
-  let files;
-  ({
-    files: ledgerFiles,
-    accounts,
-    commodities,
-  } = await api.editor.getEditorFiles() as unknown as {
-    files: LedgerFile[];
-    accounts: string[];
-    commodities: string[];
-  });
-  ({ files, postings } = await api.sheets.getSheetFiles() as unknown as {
-    files: SheetFile[];
-    postings: Posting[];
-  });
-  filesMap = fromPairs(map(files, (f) => [f.name, f]));
-  if (!isEmpty(files)) {
-    selectedFile = find(files, (f) => f.name == selectedFileName) || files[0];
-  }
-}
-
-async function selectFile(file: SheetFile) {
-  const success = await navigate(
-    `/more/sheets/${encodeURIComponent(file.name)}`,
-  );
-  if (success) {
-    selectedFile = file;
-  }
-}
-
-async function revert(version: string) {
-  const { file } = await api.sheets.getSheetFile({
-    name: version,
-  }) as unknown as { file: SheetFile };
-
-  updateContent(editor, file.content);
-}
-
-async function deleteBackups() {
-  const { file } = await api.sheets.deleteSheetBackups({
-    name: selectedFile.name,
-  }) as unknown as { file: SheetFile };
-
-  selectedFile.versions = file.versions;
-}
-
-async function save() {
-  const doc = editor.state.doc;
-  const { saved, file, message } = await api.sheets.saveSheetFile({
-    name: selectedFile.name,
-    content: doc.toString(),
-  }) as unknown as { saved: boolean; file: SheetFile; message: string };
-
-  if (!saved) {
-    toast.toast({
-      message: `Failed to save ${selectedFile.name}. reason: ${message}`,
-      type: "is-danger",
-      duration: 10000,
-    });
-  } else {
-    toast.toast({
-      message: `Saved ${selectedFile.name}`,
-      type: "is-success",
-    });
-    filesMap[file.name] = file;
-    selectedFile = file;
-    selectedVersion = null;
-    $sheetEditorState = assign({}, $sheetEditorState, {
-      hasUnsavedChanges: false,
-    });
-  }
-}
-
-$effect(() => {
-  if (selectedFile) {
-    if (!editor || editor.state.doc.toString() != selectedFile.content) {
-      if (editor) {
-        editor.destroy();
-      }
-
-      editor = createEditor(selectedFile.content, editorDom, postings, {
-        keybindings,
-        autocomplete: {
-          account: accounts,
-          commodity: commodities,
-          filename: ledgerFiles.map((f) => f.name),
-        },
-      });
-      if (lineNumber > 0) {
-        moveToLine(editor, lineNumber, true);
-        focus(editor);
-        lineNumber = 0;
+        editor = createEditor(selectedFile.content, editorDom, postings, {
+          keybindings,
+          autocomplete: {
+            account: accounts,
+            commodity: commodities,
+            filename: ledgerFiles.map((f) => f.name),
+          },
+        });
+        if (lineNumber > 0) {
+          moveToLine(editor, lineNumber, true);
+          focus(editor);
+          lineNumber = 0;
+        }
       }
     }
-  }
-});
-
-let modalOpen = $state(false);
-function openCreateModal() {
-  modalOpen = true;
-}
-
-async function createFile(destinationFile: string) {
-  destinationFile = destinationFile.trim() + ".paisa";
-  const { saved, message } = await api.sheets.saveSheetFile({
-    name: destinationFile,
-    content: "",
   });
 
-  if (saved) {
-    toast.toast({
-      message: `Created <b><a href="/more/sheets/${
-        encodeURIComponent(
+  let modalOpen = $state(false);
+  function openCreateModal() {
+    modalOpen = true;
+  }
+
+  async function createFile(destinationFile: string) {
+    destinationFile = destinationFile.trim() + ".paisa";
+    const { saved, message } = await api.sheets.saveSheetFile({
+      name: destinationFile,
+      content: "",
+    });
+
+    if (saved) {
+      toast.toast({
+        message: `Created <b><a href="/more/sheets/${encodeURIComponent(
           destinationFile,
-        )
-      }">${destinationFile}</a></b>`,
-      type: "is-success",
-      duration: 5000,
-    });
+        )}">${destinationFile}</a></b>`,
+        type: "is-success",
+        duration: 5000,
+      });
 
-    const success = await navigate(
-      `/more/sheets/${encodeURIComponent(destinationFile)}`,
-    );
-    if (success) {
-      await loadFiles(destinationFile);
+      const success = await navigate(
+        `/more/sheets/${encodeURIComponent(destinationFile)}`,
+      );
+      if (success) {
+        await loadFiles(destinationFile);
+      }
+    } else {
+      toast.toast({
+        message: `Failed to create ${destinationFile}. reason: ${message}`,
+        type: "is-danger",
+        duration: 10000,
+      });
     }
-  } else {
-    toast.toast({
-      message: `Failed to create ${destinationFile}. reason: ${message}`,
-      type: "is-danger",
-      duration: 10000,
-    });
   }
-}
 </script>
 
 <FileModal
@@ -285,7 +287,8 @@ async function createFile(destinationFile: string) {
           <button
             type="button"
             class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-negative-subtle px-2.5 py-0.5 text-xs font-semibold text-negative transition-colors hover:bg-negative hover:text-inverse-foreground"
-            onclick={() => moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+            onclick={() =>
+              moveToLine(editor, $sheetEditorState.errors[0].line_from)}
             title="Click to jump to error"
           >
             <span class="h-1.5 w-1.5 rounded-full bg-negative"></span>
@@ -299,19 +302,24 @@ async function createFile(destinationFile: string) {
   <Section>
     <!-- Full-Width IDE Container -->
     <div
-      class="grid h-[calc(100vh-13.5rem)] min-h-[520px] w-full grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+      class="grid h-[calc(100vh-13.5rem)] min-h-[520px] w-full grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)]"
+    >
       <!-- File Tree Sidebar -->
       <aside
-        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden">
+        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden"
+      >
         <div
-          class="flex min-h-[38px] items-center gap-2 border-b border-border bg-surface-raised px-3 py-2">
+          class="flex min-h-[38px] items-center gap-2 border-b border-border bg-surface-raised px-3 py-2"
+        >
           <span
-            class="text-[0.725rem] font-bold uppercase tracking-wider text-muted-foreground">
+            class="text-[0.725rem] font-bold uppercase tracking-wider text-muted-foreground"
+          >
             <i class="fa-regular fa-folder-open mr-1"></i>
             SHEETS
           </span>
-          <Badge variant="neutral" size="sm"
-            rounded>{values(filesMap).length}</Badge>
+          <Badge variant="neutral" size="sm" rounded
+            >{values(filesMap).length}</Badge
+          >
           <button
             type="button"
             class="ml-auto inline-flex items-center justify-center rounded-[var(--paisa-radius-sm)] p-1 text-[0.75rem] text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
@@ -334,24 +342,34 @@ async function createFile(destinationFile: string) {
 
       <!-- Main Editor & Live Results Pane -->
       <main
-        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]">
+        class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]"
+      >
         <!-- Integrated Toolbar Header -->
         <div
-          class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-border bg-surface px-3 py-1.5">
+          class="flex min-h-[38px] flex-wrap items-center justify-between gap-2 border-b border-border bg-surface px-3 py-1.5"
+        >
           <div class="flex items-center gap-2">
             <div
-              class="flex items-center gap-1.5 font-mono text-xs font-semibold text-foreground">
+              class="flex items-center gap-1.5 font-mono text-xs font-semibold text-foreground"
+            >
               <i class="fa-regular fa-file-lines text-primary"></i>
-              <span class="max-w-[240px] truncate">{selectedFile?.name || "Sheet"}</span>
+              <span class="max-w-[240px] truncate"
+                >{selectedFile?.name || "Sheet"}</span
+              >
               {#if $sheetEditorState.hasUnsavedChanges}
-                <span class="text-[0.75rem] leading-none text-warning" title="Unsaved changes">●</span>
+                <span
+                  class="text-[0.75rem] leading-none text-warning"
+                  title="Unsaved changes">●</span
+                >
               {/if}
             </div>
           </div>
 
           <div class="flex items-center gap-1.5">
             <Button
-              variant={$sheetEditorState.hasUnsavedChanges ? "primary" : "secondary"}
+              variant={$sheetEditorState.hasUnsavedChanges
+                ? "primary"
+                : "secondary"}
               size="xs"
               disabled={$sheetEditorState.hasUnsavedChanges === false}
               onclick={() => save()}
@@ -401,9 +419,18 @@ async function createFile(destinationFile: string) {
             </Button>
 
             {#if !isEmpty(selectedFile?.versions)}
-              <div class="ml-1 flex items-center gap-1 border-l border-border pl-2">
-                <i class="fas fa-clock-rotate-left text-[0.75rem] text-muted-foreground" title="Backup versions"></i>
-                <Select bind:value={selectedVersion} size="sm" class="max-w-[150px] font-mono text-xs">
+              <div
+                class="ml-1 flex items-center gap-1 border-l border-border pl-2"
+              >
+                <i
+                  class="fas fa-clock-rotate-left text-[0.75rem] text-muted-foreground"
+                  title="Backup versions"
+                ></i>
+                <Select
+                  bind:value={selectedVersion}
+                  size="sm"
+                  class="max-w-[150px] font-mono text-xs"
+                >
                   <option value="" disabled>Select backup...</option>
                   {#each selectedFile?.versions ?? [] as version}
                     <option value={version}>{version}</option>
@@ -437,8 +464,7 @@ async function createFile(destinationFile: string) {
         </div>
 
         <!-- Split Editor & Results Workspace -->
-        <div
-          class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-surface">
+        <div class="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-surface">
           <!-- CodeMirror Editor Pane -->
           <div
             class="relative flex-1 min-w-0 overflow-auto [&_.cm-editor]:h-full [&_.cm-editor]:min-h-full [&_.cm-editor]:border-0 [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto [&_.cm-scroller]:py-2 [&_.sheet-editor]:h-full"
@@ -452,7 +478,8 @@ async function createFile(destinationFile: string) {
           >
             {#each $sheetEditorState.results as result, i}
               <div
-                class="px-3 leading-[1.4] {i + 1 === $sheetEditorState.currentLine
+                class="px-3 leading-[1.4] {i + 1 ===
+                $sheetEditorState.currentLine
                   ? 'bg-surface-hover font-bold text-foreground'
                   : 'text-muted-foreground'}"
               >
@@ -460,7 +487,9 @@ async function createFile(destinationFile: string) {
                   title={result.result}
                   class="truncate m-0 p-0 text-[0.875rem] leading-[1.4] {result.error
                     ? 'font-bold text-negative'
-                    : ''} {result.align === 'left' ? 'text-left' : ''} {result.bold
+                    : ''} {result.align === 'left'
+                    ? 'text-left'
+                    : ''} {result.bold
                     ? 'font-bold text-foreground'
                     : ''} {result.underline ? 'underline' : ''}"
                 >

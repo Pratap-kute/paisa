@@ -3,16 +3,20 @@ import { expect, test } from "vitest";
 import FileTree from "./FileTree.svelte";
 
 test("selects a nested ledger file and displays unsaved state", async () => {
-  const files = [{
-    type: "directory" as const,
-    name: "accounts",
-    children: [{
-      type: "file" as const,
-      name: "accounts/main.ledger",
-      content: "",
-      versions: [],
-    }],
-  }];
+  const files = [
+    {
+      type: "directory" as const,
+      name: "accounts",
+      children: [
+        {
+          type: "file" as const,
+          name: "accounts/main.ledger",
+          content: "",
+          versions: [],
+        },
+      ],
+    },
+  ];
   let selected = "";
   render(FileTree, {
     props: {
@@ -22,9 +26,8 @@ test("selects a nested ledger file and displays unsaved state", async () => {
       hasUnsavedChanges: true,
     },
     events: {
-      select: (
-        event: CustomEvent<{ name: string }>,
-      ) => (selected = event.detail.name),
+      select: (event: CustomEvent<{ name: string }>) =>
+        (selected = event.detail.name),
     },
   });
 

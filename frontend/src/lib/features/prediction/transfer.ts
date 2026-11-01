@@ -21,19 +21,24 @@ function hasTransferLanguage(description: string): boolean {
 }
 
 function isAssetLike(account: string): boolean {
-  return accountMatchesPrefix(account, "Assets") ||
-    accountMatchesPrefix(account, "Liabilities");
+  return (
+    accountMatchesPrefix(account, "Assets") ||
+    accountMatchesPrefix(account, "Liabilities")
+  );
 }
 
 export function detectTransfer(
   input: PredictionInput,
   currentImport: CurrentImportContext = { rows: [] },
 ): boolean {
-  const keyword = hasTransferLanguage(input.description) &&
+  const keyword =
+    hasTransferLanguage(input.description) &&
     isGenericEnough(input.description);
 
   if (
-    input.amount == null || !Number.isFinite(input.amount) || input.amount === 0
+    input.amount == null ||
+    !Number.isFinite(input.amount) ||
+    input.amount === 0
   ) {
     return keyword;
   }
@@ -44,20 +49,19 @@ export function detectTransfer(
 
   for (const row of currentImport.rows) {
     if (row.rowIndex != null && row.rowIndex === input.rowIndex) continue;
-    if (
-      input.commodity && row.commodity &&
-      row.commodity !== input.commodity
-    ) {
+    if (input.commodity && row.commodity && row.commodity !== input.commodity) {
       continue;
     }
     if (
-      row.amount == null || !Number.isFinite(row.amount) || row.amount === 0
+      row.amount == null ||
+      !Number.isFinite(row.amount) ||
+      row.amount === 0
     ) {
       continue;
     }
     const postingAbs = Math.abs(row.amount);
-    const rel = Math.abs(postingAbs - absAmount) /
-      Math.max(postingAbs, absAmount);
+    const rel =
+      Math.abs(postingAbs - absAmount) / Math.max(postingAbs, absAmount);
     if (rel > MATCH.TRANSFER_AMOUNT_TOLERANCE) continue;
     if (!Number.isNaN(inputMs) && row.date) {
       const postingMs = Date.parse(row.date);
@@ -83,6 +87,7 @@ export function detectTransfer(
 
 function isGenericEnough(description: string): boolean {
   const normalized = normalizeDescription(description);
-  return normalized.merchantKey.length === 0 ||
-    hasTransferLanguage(description);
+  return (
+    normalized.merchantKey.length === 0 || hasTransferLanguage(description)
+  );
 }

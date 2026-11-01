@@ -17,8 +17,10 @@ describe("period-aware drilldowns", () => {
       dayjs("2026-04-30"),
       dayjs("2026-05-01"),
     ];
-    expect(dates.filter((date) => isInPeriod(date, "2026-04")))
-      .toEqual([dates[1], dates[2]]);
+    expect(dates.filter((date) => isInPeriod(date, "2026-04"))).toEqual([
+      dates[1],
+      dates[2],
+    ]);
   });
 
   test("treats only a valid non-current period as historical", () => {

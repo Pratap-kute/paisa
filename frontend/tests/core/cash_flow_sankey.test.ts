@@ -5,9 +5,7 @@ import {
   findDirectedCycles,
 } from "$lib/shared/charts/echarts/cash_flow_sankey";
 import type { Graph } from "$lib/shared/charts/types";
-import browserExpense from "../fixture/browser/expense.json" with {
-  type: "json",
-};
+import browserExpense from "../fixture/browser/expense.json" with { type: "json" };
 
 const graph: Graph = {
   nodes: [
@@ -28,11 +26,13 @@ describe("cash-flow Sankey ECharts adapter", () => {
     const data = buildCashFlowSankeyData(graph);
 
     expect(data.nodes.map((node) => node.id)).toEqual([1, 2, 3, 4]);
-    expect(data.links.map((link) => ({
-      source: link.source,
-      target: link.target,
-      value: link.value,
-    }))).toEqual(graph.links);
+    expect(
+      data.links.map((link) => ({
+        source: link.source,
+        target: link.target,
+        value: link.value,
+      })),
+    ).toEqual(graph.links);
     expect(data.totals.linkValue).toBe(
       graph.links.reduce((sum, link) => sum + link.value, 0),
     );
@@ -41,8 +41,8 @@ describe("cash-flow Sankey ECharts adapter", () => {
   it("computes node totals from max incoming/outgoing flow without changing link totals", () => {
     const data = buildCashFlowSankeyData(graph);
     const checking = data.nodes.find((node) => node.name === "Assets:Checking");
-    const investment = data.nodes.find((node) =>
-      node.name === "Assets:Investment"
+    const investment = data.nodes.find(
+      (node) => node.name === "Assets:Investment",
     );
 
     expect(checking?.value).toBe(105_000);
@@ -77,32 +77,35 @@ describe("cash-flow Sankey ECharts adapter", () => {
 
     expect(findDirectedCycles(cycleGraph)).toEqual([[1, 2, 3, 1]]);
     expect(data.hasCircularLinks).toBe(true);
-    expect(data.circularLinks.map((link) => [link.source, link.target]))
-      .toEqual([
-        [1, 2],
-        [2, 3],
-        [3, 1],
-      ]);
     expect(
-      data.cycles.map((cycle) =>
-        cycle.map((link) => [link.source, link.target])
-      ),
-    ).toEqual([[
+      data.circularLinks.map((link) => [link.source, link.target]),
+    ).toEqual([
       [1, 2],
       [2, 3],
       [3, 1],
-    ]]);
+    ]);
+    expect(
+      data.cycles.map((cycle) =>
+        cycle.map((link) => [link.source, link.target]),
+      ),
+    ).toEqual([
+      [
+        [1, 2],
+        [2, 3],
+        [3, 1],
+      ],
+    ]);
 
     const option = buildCashFlowSankeyOption(data);
     expect(option.series[0].type).toBe("graph");
-    expect(option.series[0].data.map((node) => node.nodeId)).toEqual(
-      [1, 2, 3],
-    );
-    expect(option.series[0].links.map((link) => ({
-      source: link.sourceId,
-      target: link.targetId,
-      value: link.value,
-    }))).toEqual(cycleGraph.links);
+    expect(option.series[0].data.map((node) => node.nodeId)).toEqual([1, 2, 3]);
+    expect(
+      option.series[0].links.map((link) => ({
+        source: link.sourceId,
+        target: link.targetId,
+        value: link.value,
+      })),
+    ).toEqual(cycleGraph.links);
     expect(option.media[0].option.series[0].label.show).toBe(false);
   });
 

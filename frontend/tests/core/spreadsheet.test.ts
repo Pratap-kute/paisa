@@ -22,12 +22,18 @@ describe("spreadsheet importing", () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
-      XLSX.utils.aoa_to_sheet([["name", "amount"], ["Rent", 100]]),
+      XLSX.utils.aoa_to_sheet([
+        ["name", "amount"],
+        ["Rent", 100],
+      ]),
       "Sheet1",
     );
     const bytes = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const result = await parse(new File([bytes], "fixture.xlsx"));
-    expect(result.data).toEqual([["name", "amount"], ["Rent", "100"]]);
+    expect(result.data).toEqual([
+      ["name", "amount"],
+      ["Rent", "100"],
+    ]);
   });
 
   test("rejects unsupported extensions", () => {

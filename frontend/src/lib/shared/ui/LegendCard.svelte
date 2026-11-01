@@ -1,27 +1,27 @@
 <script lang="ts">
-import type { Legend } from "$lib/shared/charts/types";
+  import type { Legend } from "$lib/shared/charts/types";
 
-interface Props {
-  clazz?: string;
-  legends: Legend[];
-}
-
-let { clazz = "", legends }: Props = $props();
-
-let selectedLegendIndex: number | null = $state(null);
-
-function onClick(legend: Legend, index: number) {
-  if (!legend.onClick) {
-    return;
+  interface Props {
+    clazz?: string;
+    legends: Legend[];
   }
 
-  legend.onClick(legend);
-  if (selectedLegendIndex === index) {
-    selectedLegendIndex = null;
-  } else {
-    selectedLegendIndex = index;
+  let { clazz = "", legends }: Props = $props();
+
+  let selectedLegendIndex: number | null = $state(null);
+
+  function onClick(legend: Legend, index: number) {
+    if (!legend.onClick) {
+      return;
+    }
+
+    legend.onClick(legend);
+    if (selectedLegendIndex === index) {
+      selectedLegendIndex = null;
+    } else {
+      selectedLegendIndex = index;
+    }
   }
-}
 </script>
 
 <div class="flex flex-wrap items-center gap-2 mb-2 {clazz}">
@@ -50,7 +50,9 @@ function onClick(legend: Legend, index: number) {
         {/if}
         <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
-          {#if legend.value}<span class="ml-1 text-foreground">{legend.value}</span>{/if}
+          {#if legend.value}<span class="ml-1 text-foreground"
+              >{legend.value}</span
+            >{/if}
         </div>
       </button>
     {:else}
@@ -74,7 +76,9 @@ function onClick(legend: Legend, index: number) {
         {/if}
         <div class="legend-label whitespace-pre custom-icon">
           {legend.label}
-          {#if legend.value}<span class="ml-1 text-foreground">{legend.value}</span>{/if}
+          {#if legend.value}<span class="ml-1 text-foreground"
+              >{legend.value}</span
+            >{/if}
         </div>
       </div>
     {/if}
@@ -82,36 +86,36 @@ function onClick(legend: Legend, index: number) {
 </div>
 
 <style>
-.legend-label {
-  color: var(--paisa-chart-text);
-  font-family: var(--paisa-font-sans);
-  font-size: var(--paisa-font-size-sm);
-  text-transform: capitalize;
-  text-align: center;
-  line-height: var(--paisa-line-height-normal);
-}
+  .legend-label {
+    color: var(--paisa-chart-text);
+    font-family: var(--paisa-font-sans);
+    font-size: var(--paisa-font-size-sm);
+    text-transform: capitalize;
+    text-align: center;
+    line-height: var(--paisa-line-height-normal);
+  }
 
-.legend-box {
-  border-radius: var(--paisa-radius-sm);
-  transition: background-color var(--paisa-transition-fast);
-}
+  .legend-box {
+    border-radius: var(--paisa-radius-sm);
+    transition: background-color var(--paisa-transition-fast);
+  }
 
-.legend-box:hover {
-  background-color: var(--paisa-surface-hover);
-}
+  .legend-box:hover {
+    background-color: var(--paisa-surface-hover);
+  }
 
-.legend-box.selected {
-  background-color: var(--paisa-surface-hover);
-  box-shadow: inset 0 0 0 1px var(--paisa-primary);
-}
+  .legend-box.selected {
+    background-color: var(--paisa-surface-hover);
+    box-shadow: inset 0 0 0 1px var(--paisa-primary);
+  }
 
-.legend-pattern-diagonal {
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent 0,
-    transparent 3px,
-    color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 3px,
-    color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 5px
-  );
-}
+  .legend-pattern-diagonal {
+    background-image: repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 3px,
+      color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 3px,
+      color-mix(in srgb, var(--legend-color) 35%, var(--paisa-foreground)) 5px
+    );
+  }
 </style>

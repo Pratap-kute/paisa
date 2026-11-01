@@ -23,12 +23,13 @@ function mapNode(
     name: node.label,
     value: Math.max(0, node.value),
     itemStyle: {
-      color: categoryColors.get(normalizeCategoryKey(categoryKey)) ??
+      color:
+        categoryColors.get(normalizeCategoryKey(categoryKey)) ??
         theme?.primaryColor,
       borderColor: theme?.surfaceColor,
     },
     children: node.children?.map((child) =>
-      mapNode(child, theme, categoryColors, categoryKey)
+      mapNode(child, theme, categoryColors, categoryKey),
     ),
     paisa: node,
   };
@@ -44,18 +45,23 @@ function categoryKeys(nodes: FinancialHierarchyNode[]): string[] {
 function tooltip(params: { data?: { paisa?: FinancialHierarchyNode } }) {
   const node = params.data?.paisa;
   if (!node) return "";
-  const valueLabel = typeof node.metadata?.valueLabel === "string"
-    ? node.metadata.valueLabel
-    : (node.metadata?.account ? "Amount" : "Market value");
+  const valueLabel =
+    typeof node.metadata?.valueLabel === "string"
+      ? node.metadata.valueLabel
+      : node.metadata?.account
+        ? "Amount"
+        : "Market value";
   return [
     `<strong>${node.label}</strong>`,
     `${valueLabel}: <strong>${chartFormatters.currency(node.value)}</strong>`,
     typeof node.percentage === "number"
-      ? `Share: <strong>${
-        chartFormatters.percentage(node.percentage / 100)
-      }</strong>`
+      ? `Share: <strong>${chartFormatters.percentage(
+          node.percentage / 100,
+        )}</strong>`
       : "",
-  ].filter(Boolean).join("<br/>");
+  ]
+    .filter(Boolean)
+    .join("<br/>");
 }
 
 function buildFinancialHierarchyLayout(
@@ -127,9 +133,9 @@ function buildFinancialHierarchyLayout(
           formatter: (params: { name?: string; value?: number }) => {
             if (!params.name) return "";
             if (typeof params.value === "number" && params.value > 0) {
-              return `${params.name}\n${
-                chartFormatters.currency(params.value)
-              }`;
+              return `${params.name}\n${chartFormatters.currency(
+                params.value,
+              )}`;
             }
             return params.name;
           },

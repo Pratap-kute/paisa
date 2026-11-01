@@ -13,24 +13,29 @@ describe("ledger helpers", () => {
 
   test("formats transaction postings and preserves other lines", () => {
     USER_CONFIG.amount_alignment_column = 30;
-    expect(format("2024-01-01 Rent\n  Expenses:Rent  INR 100\n  Assets:Cash"))
-      .toBe("2024-01-01 Rent\n    Expenses:Rent      INR 100\n    Assets:Cash");
+    expect(
+      format("2024-01-01 Rent\n  Expenses:Rent  INR 100\n  Assets:Cash"),
+    ).toBe("2024-01-01 Rent\n    Expenses:Rent      INR 100\n    Assets:Cash");
     expect(format("; comment\nplain text")).toBe("; comment\nplain text");
   });
 
   test("renames matching transaction accounts only", () => {
-    const files = [{
-      type: "file",
-      name: "main.ledger",
-      versions: [],
-      content: "2024-01-01 Rent\n  Expenses:Rent  INR 100\n  Assets:Cash\n",
-    }];
-    const transactions = [{
-      fileName: "main.ledger",
-      beginLine: 1,
-      endLine: 3,
-      postings: [{ account: "Expenses:Rent" }],
-    }];
+    const files = [
+      {
+        type: "file",
+        name: "main.ledger",
+        versions: [],
+        content: "2024-01-01 Rent\n  Expenses:Rent  INR 100\n  Assets:Cash\n",
+      },
+    ];
+    const transactions = [
+      {
+        fileName: "main.ledger",
+        beginLine: 1,
+        endLine: 3,
+        postings: [{ account: "Expenses:Rent" }],
+      },
+    ];
     const result = applyChanges(
       files as never,
       transactions as never,

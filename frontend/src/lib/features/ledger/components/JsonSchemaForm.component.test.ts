@@ -55,13 +55,15 @@ test("normalizes a missing optional array to an empty list", async () => {
     expect(Array.isArray(value.tags)).toBe(true);
     expect(value.tags).toEqual([]);
   });
-  expect(getByText("Nothing here yet. Add one to get started."))
-    .toBeInTheDocument();
+  expect(
+    getByText("Nothing here yet. Add one to get started."),
+  ).toBeInTheDocument();
   unmount();
 });
 
 test("normalizes an empty price widget value to an object", async () => {
-  const providersSpy = vi.spyOn(api.price, "getPriceProviders")
+  const providersSpy = vi
+    .spyOn(api.price, "getPriceProviders")
     .mockResolvedValue({ providers: [] });
 
   let value: Record<string, unknown> | null = null;

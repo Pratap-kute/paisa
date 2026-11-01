@@ -54,9 +54,8 @@ export function similarity(
   input: NormalizedDescription,
   other: NormalizedDescription,
 ): number {
-  const exactKey = input.merchantKey && input.merchantKey === other.merchantKey
-    ? 1
-    : 0;
+  const exactKey =
+    input.merchantKey && input.merchantKey === other.merchantKey ? 1 : 0;
   const dice = Math.max(
     diceCoefficient(input.merchantKey, other.merchantKey),
     diceCoefficient(input.full, other.full),

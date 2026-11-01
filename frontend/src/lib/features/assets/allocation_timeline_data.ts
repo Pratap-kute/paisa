@@ -7,24 +7,23 @@ import { categoryLegends } from "$lib/shared/charts/category";
 export function buildAllocationTimelineSeries(
   timeline: Record<string, Aggregate>[],
 ): PeriodSeriesChartData {
-  const rows = timeline.map((aggregates) => {
-    const nonZero = Object.values(aggregates).filter((item) =>
-      item.market_amount !== 0
-    );
-    const grouped = mapValues(
-      groupBy(nonZero, (item) => secondName(item.account)),
-      (items) => sumBy(items, (item) => item.market_amount),
-    );
-    const total = sum(Object.values(grouped));
-    const first = Object.values(aggregates)[0];
-    return {
-      date: first?.date,
-      values: mapValues(
-        grouped,
-        (value) => total ? value / total : 0,
-      ),
-    };
-  }).filter((row) => row.date);
+  const rows = timeline
+    .map((aggregates) => {
+      const nonZero = Object.values(aggregates).filter(
+        (item) => item.market_amount !== 0,
+      );
+      const grouped = mapValues(
+        groupBy(nonZero, (item) => secondName(item.account)),
+        (items) => sumBy(items, (item) => item.market_amount),
+      );
+      const total = sum(Object.values(grouped));
+      const first = Object.values(aggregates)[0];
+      return {
+        date: first?.date,
+        values: mapValues(grouped, (value) => (total ? value / total : 0)),
+      };
+    })
+    .filter((row) => row.date);
   const groups = uniq(rows.flatMap((row) => Object.keys(row.values))).sort();
   return {
     axis: "time",
@@ -42,9 +41,11 @@ export function buildAllocationTimelineSeries(
       period: row.date!.format("DD MMM YYYY"),
       timestamp: row.date!.valueOf(),
       values: row.values,
-      tooltipRows: groups.map((
+      tooltipRows: groups.map((group) => [
         group,
-      ) => [group, row.values[group] ?? 0, "percentage"]),
+        row.values[group] ?? 0,
+        "percentage",
+      ]),
     })),
   };
 }

@@ -32,11 +32,13 @@ describe("investment performance presentation", () => {
   });
   test("timeline uses backend contribution baseline and masks series and tooltips", () => {
     const result = {
-      timeline: [{
-        date: "2026-09-06",
-        value: 1400000,
-        contributionBaseline: 1350000,
-      }],
+      timeline: [
+        {
+          date: "2026-09-06",
+          value: 1400000,
+          contributionBaseline: 1350000,
+        },
+      ],
     };
     expect(performanceSeries(result).points[0].values).toEqual({
       value: 1400000,

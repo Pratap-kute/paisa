@@ -27,7 +27,9 @@
     color: var(--paisa-primary);
   }
 
-  a:not([class*="block"]):not([class*="flex"]):not([class*="grid"]):not([class*="paisa-"]):not([class*="rounded-"]):hover {
+  a:not([class*="block"]):not([class*="flex"]):not([class*="grid"]):not(
+      [class*="paisa-"]
+    ):not([class*="rounded-"]):hover {
     text-decoration: underline;
     text-underline-offset: 2px;
   }

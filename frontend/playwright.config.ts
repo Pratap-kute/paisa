@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const requestedWorkers = Number(process.env.PAISA_PLAYWRIGHT_WORKERS ?? 5);
-const workers = Number.isFinite(requestedWorkers) && requestedWorkers > 0
-  ? Math.floor(requestedWorkers)
-  : 5;
+const workers =
+  Number.isFinite(requestedWorkers) && requestedWorkers > 0
+    ? Math.floor(requestedWorkers)
+    : 5;
 
 export default defineConfig({
   testDir: "./tests/browser",
@@ -14,26 +15,32 @@ export default defineConfig({
     timeout: 10_000,
     toHaveScreenshot: { animations: "disabled", maxDiffPixelRatio: 0.02 },
   },
-  reporter: [["list"], ["html", {
-    outputFolder: "playwright-report",
-    open: "never",
-  }]],
+  reporter: [
+    ["list"],
+    [
+      "html",
+      {
+        outputFolder: "playwright-report",
+        open: "never",
+      },
+    ],
+  ],
   use: {
-    baseURL: `http://127.0.0.1:${
-      process.env.PAISA_E2E_FRONTEND_PORT ?? 5173
-    }`,
+    baseURL: `http://127.0.0.1:${process.env.PAISA_E2E_FRONTEND_PORT ?? 5173}`,
     timezoneId: "UTC",
     locale: "en-IN",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
-  projects: [{
-    name: "chromium",
-    use: {
-      ...devices["Desktop Chrome"],
-      viewport: { width: 1440, height: 900 },
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1440, height: 900 },
+      },
     },
-  }],
+  ],
   outputDir: "test-results",
 });

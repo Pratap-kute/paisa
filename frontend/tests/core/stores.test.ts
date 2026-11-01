@@ -37,13 +37,17 @@ describe("persisted stores", () => {
     value.set(3);
     value.update((current) => current + 1);
     expect(adapter.getItem("count")).toBe("4");
-    listeners[0](
-      { storageArea: adapter, key: "count", newValue: "7" } as StorageEvent,
-    );
+    listeners[0]({
+      storageArea: adapter,
+      key: "count",
+      newValue: "7",
+    } as StorageEvent);
     expect(get(value)).toBe(7);
-    listeners[0](
-      { storageArea: adapter, key: "count", newValue: "bad" } as StorageEvent,
-    );
+    listeners[0]({
+      storageArea: adapter,
+      key: "count",
+      newValue: "bad",
+    } as StorageEvent);
     expect(get(value)).toBe(0);
   });
 });

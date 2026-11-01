@@ -4,9 +4,9 @@ export function helpUrl(section: string) {
 }
 
 export function postingUrl(posting: Posting) {
-  return `/ledger/editor/${
-    encodeURIComponent(posting.file_name)
-  }#${posting.transaction_begin_line}`;
+  return `/ledger/editor/${encodeURIComponent(
+    posting.file_name,
+  )}#${posting.transaction_begin_line}`;
 }
 
 export function svgUrl(identifier: string) {

@@ -1,22 +1,22 @@
 <script lang="ts">
-import { DropdownMenu } from "bits-ui";
-import type { Snippet } from "svelte";
+  import { DropdownMenu } from "bits-ui";
+  import type { Snippet } from "svelte";
 
-interface Props {
-  open?: boolean;
-  align?: "left" | "right";
-  class?: string;
-  trigger?: Snippet<[Record<string, unknown>, { open: boolean }]>;
-  children?: Snippet;
-}
+  interface Props {
+    open?: boolean;
+    align?: "left" | "right";
+    class?: string;
+    trigger?: Snippet<[Record<string, unknown>, { open: boolean }]>;
+    children?: Snippet;
+  }
 
-let {
-  open = $bindable(false),
-  align = "left",
-  class: className = "",
-  trigger,
-  children,
-}: Props = $props();
+  let {
+    open = $bindable(false),
+    align = "left",
+    class: className = "",
+    trigger,
+    children,
+  }: Props = $props();
 </script>
 
 <DropdownMenu.Root bind:open>

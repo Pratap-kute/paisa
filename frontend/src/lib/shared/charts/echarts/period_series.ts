@@ -11,10 +11,7 @@ import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
 export type PeriodSeriesIntent = "line" | "area" | "bar" | "stacked-bar";
 export type PeriodAxis = "time" | "category" | "value";
 export type PeriodValueFormat =
-  | "currency"
-  | "compactCurrency"
-  | "number"
-  | "percentage";
+  "currency" | "compactCurrency" | "number" | "percentage";
 
 export interface PeriodSeriesPoint {
   period: string;
@@ -80,38 +77,35 @@ function seriesColor(
   index: number,
   categoryColors: Map<string, string>,
 ) {
-  return series.color ??
+  return (
+    series.color ??
     (series.categoryKey
       ? categoryColors.get(normalizeCategoryKey(series.categoryKey))
       : undefined) ??
     theme?.seriesColors[index % (theme.seriesColors.length || 1)] ??
-    "currentColor";
+    "currentColor"
+  );
 }
 
-function tooltipFormatter(
-  data: PeriodSeriesChartData,
-  params: unknown,
-) {
+function tooltipFormatter(data: PeriodSeriesChartData, params: unknown) {
   const items = Array.isArray(params) ? params : [params];
   const first = items[0] as
-    | { dataIndex?: number; axisValueLabel?: string }
-    | undefined;
-  const point = typeof first?.dataIndex === "number"
-    ? data.points[first.dataIndex]
-    : undefined;
+    { dataIndex?: number; axisValueLabel?: string } | undefined;
+  const point =
+    typeof first?.dataIndex === "number"
+      ? data.points[first.dataIndex]
+      : undefined;
   const header = first?.axisValueLabel ?? point?.period ?? "";
-  const rawRows: Array<[string, number, PeriodValueFormat?]> =
-    point?.tooltipRows?.length ? point.tooltipRows : items.map((item) => {
-      const p = item as { seriesName?: string; value?: unknown };
-      const raw = Array.isArray(p.value)
-        ? p.value[p.value.length - 1]
-        : p.value;
-      return [
-        p.seriesName ?? "",
-        Number(raw ?? 0),
-        data.valueFormat,
-      ];
-    });
+  const rawRows: Array<[string, number, PeriodValueFormat?]> = point
+    ?.tooltipRows?.length
+    ? point.tooltipRows
+    : items.map((item) => {
+        const p = item as { seriesName?: string; value?: unknown };
+        const raw = Array.isArray(p.value)
+          ? p.value[p.value.length - 1]
+          : p.value;
+        return [p.seriesName ?? "", Number(raw ?? 0), data.valueFormat];
+      });
 
   const maxVisible = 8;
   let formattedRows: string[] = [];
@@ -121,23 +115,28 @@ function tooltipFormatter(
     const visible = sorted.slice(0, maxVisible);
     const remaining = sorted.slice(maxVisible);
 
-    formattedRows = visible.map(([label, value, format]) =>
-      `${label}: <strong>${
-        formatValue(value, format ?? data.valueFormat)
-      }</strong>`
+    formattedRows = visible.map(
+      ([label, value, format]) =>
+        `${label}: <strong>${formatValue(
+          value,
+          format ?? data.valueFormat,
+        )}</strong>`,
     );
 
     const remainingSum = remaining.reduce((s, r) => s + r[1], 0);
     formattedRows.push(
-      `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} other items: <strong>${
-        formatValue(remainingSum, data.valueFormat)
-      }</strong></span>`,
+      `<span style="opacity: 0.75; font-size: 0.9em;">+ ${remaining.length} other items: <strong>${formatValue(
+        remainingSum,
+        data.valueFormat,
+      )}</strong></span>`,
     );
   } else {
-    formattedRows = rawRows.map(([label, value, format]) =>
-      `${label}: <strong>${
-        formatValue(value, format ?? data.valueFormat)
-      }</strong>`
+    formattedRows = rawRows.map(
+      ([label, value, format]) =>
+        `${label}: <strong>${formatValue(
+          value,
+          format ?? data.valueFormat,
+        )}</strong>`,
     );
   }
 
@@ -156,8 +155,8 @@ function buildPeriodSeriesLayout(
   const horizontal = data.orientation === "horizontal";
   const categoryAxis = data.axis !== "time";
   const categories = data.points.map((point) => point.period);
-  const timeValues = data.points.map((point) =>
-    point.timestamp ?? point.period
+  const timeValues = data.points.map(
+    (point) => point.timestamp ?? point.period,
   );
   const categoryColors = categoryColorAssignments(
     data.series.map((series) => series.categoryKey),
@@ -184,21 +183,19 @@ function buildPeriodSeriesLayout(
     scale: data.scale ?? false,
     min: data.scale
       ? (extent: { min: number; max: number }) => {
-        const span = extent.max - extent.min;
-        const pad = span > 0
-          ? span * 0.1
-          : Math.max(1, Math.abs(extent.min) * 0.05);
-        return Math.floor(extent.min - pad);
-      }
+          const span = extent.max - extent.min;
+          const pad =
+            span > 0 ? span * 0.1 : Math.max(1, Math.abs(extent.min) * 0.05);
+          return Math.floor(extent.min - pad);
+        }
       : undefined,
     max: data.scale
       ? (extent: { min: number; max: number }) => {
-        const span = extent.max - extent.min;
-        const pad = span > 0
-          ? span * 0.1
-          : Math.max(1, Math.abs(extent.max) * 0.05);
-        return Math.ceil(extent.max + pad);
-      }
+          const span = extent.max - extent.min;
+          const pad =
+            span > 0 ? span * 0.1 : Math.max(1, Math.abs(extent.max) * 0.05);
+          return Math.ceil(extent.max + pad);
+        }
       : undefined,
     splitNumber: mobile ? 3 : 5,
     axisLabel: {
@@ -225,7 +222,7 @@ function buildPeriodSeriesLayout(
     animation: false,
     backgroundColor: "transparent",
     color: data.series.map((series, index) =>
-      seriesColor(series, theme, index, categoryColors)
+      seriesColor(series, theme, index, categoryColors),
     ),
     grid: {
       top: options.internalLegend ? (mobile ? 44 : 52) : 16,
@@ -236,22 +233,22 @@ function buildPeriodSeriesLayout(
     },
     legend: options.internalLegend
       ? {
-        top: 0,
-        left: "center",
-        type: "scroll",
-        width: mobile ? "92%" : "88%",
-        itemWidth: mobile ? 12 : 18,
-        itemHeight: mobile ? 8 : 10,
-        itemGap: mobile ? 8 : 14,
-        textStyle: { color: mutedColor, fontSize: mobile ? 10 : 12 },
-        formatter: mobile
-          ? (name: string) =>
-            ({
-              "Interest gain": "Gain",
-              "Interest cost": "Cost",
-            })[name] ?? name
-          : undefined,
-      }
+          top: 0,
+          left: "center",
+          type: "scroll",
+          width: mobile ? "92%" : "88%",
+          itemWidth: mobile ? 12 : 18,
+          itemHeight: mobile ? 8 : 10,
+          itemGap: mobile ? 8 : 14,
+          textStyle: { color: mutedColor, fontSize: mobile ? 10 : 12 },
+          formatter: mobile
+            ? (name: string) =>
+                ({
+                  "Interest gain": "Gain",
+                  "Interest cost": "Cost",
+                })[name] ?? name
+            : undefined,
+        }
       : undefined,
     tooltip: {
       trigger: "axis",
@@ -277,9 +274,8 @@ function buildPeriodSeriesLayout(
         return value;
       });
       const bar = series.intent === "bar" || series.intent === "stacked-bar";
-      const defaultShowSymbol = mobile || data.points.length > 25
-        ? false
-        : !bar;
+      const defaultShowSymbol =
+        mobile || data.points.length > 25 ? false : !bar;
       return {
         type: bar ? "bar" : "line",
         name: series.label,
@@ -301,38 +297,41 @@ function buildPeriodSeriesLayout(
           },
           decal: series.decal
             ? {
-              symbol: "rect",
-              dashArrayX: [1, 0],
-              dashArrayY: [4, 3],
-              rotation: Math.PI / 4,
-              color: theme?.textColor ?? color,
-              backgroundColor: color,
-              maxTileWidth: 32,
-              maxTileHeight: 32,
-            }
+                symbol: "rect",
+                dashArrayX: [1, 0],
+                dashArrayY: [4, 3],
+                rotation: Math.PI / 4,
+                color: theme?.textColor ?? color,
+                backgroundColor: color,
+                maxTileWidth: 32,
+                maxTileHeight: 32,
+              }
             : undefined,
         },
-        lineStyle: bar ? undefined : {
-          color,
-          type: series.dashed ? "dashed" : "solid",
-          width: 2,
-        },
-        areaStyle: series.intent === "area"
-          ? { color, opacity: series.areaOpacity ?? 0.16 }
-          : undefined,
+        lineStyle: bar
+          ? undefined
+          : {
+              color,
+              type: series.dashed ? "dashed" : "solid",
+              width: 2,
+            },
+        areaStyle:
+          series.intent === "area"
+            ? { color, opacity: series.areaOpacity ?? 0.16 }
+            : undefined,
         markLine: series.markLine
           ? {
-            symbol: "none",
-            label: {
-              formatter: series.markLine.label,
-              color: textColor,
-            },
-            lineStyle: {
-              color,
-              type: "dashed",
-            },
-            data: [{ yAxis: series.markLine.value }],
-          }
+              symbol: "none",
+              label: {
+                formatter: series.markLine.label,
+                color: textColor,
+              },
+              lineStyle: {
+                color,
+                type: "dashed",
+              },
+              data: [{ yAxis: series.markLine.value }],
+            }
           : undefined,
       };
     }),

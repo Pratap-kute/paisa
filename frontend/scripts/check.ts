@@ -11,11 +11,7 @@ async function run(cmd: string[]): Promise<void> {
 }
 
 async function toolingFiles(): Promise<string[]> {
-  const patterns = [
-    "scripts/*.ts",
-    "*.config.ts",
-    "tests/browser/*.ts",
-  ];
+  const patterns = ["scripts/*.ts", "*.config.ts", "tests/browser/*.ts"];
   const files = new Set<string>();
 
   for (const pattern of patterns) {
@@ -29,14 +25,8 @@ async function toolingFiles(): Promise<string[]> {
 
 await run(["bun", "x", "svelte-kit", "sync"]);
 
-await run(["bun", "check", "--no-script", ...await toolingFiles()]);
+await run(["bun", "check", "--no-script", ...(await toolingFiles())]);
 
 if (!process.argv.includes("--tooling")) {
-  await run([
-    "bun",
-    "x",
-    "svelte-check",
-    "--tsconfig",
-    "./tsconfig.json",
-  ]);
+  await run(["bun", "x", "svelte-check", "--tsconfig", "./tsconfig.json"]);
 }

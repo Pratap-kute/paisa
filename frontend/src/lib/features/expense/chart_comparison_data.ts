@@ -62,8 +62,8 @@ export function expenseComparisonLegends(postings: Posting[]) {
 export function buildYearlyExpenseTimelineComparisonInput(postings: Posting[]) {
   const byYear = groupBy(postings, (posting) => financialYear(posting.date));
   return mapValues(byYear, (yearPostings) =>
-    mapValues(
-      groupBy(yearPostings, expenseGroup),
-      (groupPostings) => sumBy(groupPostings, (posting) => posting.amount),
-    ));
+    mapValues(groupBy(yearPostings, expenseGroup), (groupPostings) =>
+      sumBy(groupPostings, (posting) => posting.amount),
+    ),
+  );
 }

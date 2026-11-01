@@ -46,55 +46,51 @@ test("allows intended dependency direction", () => {
   ).toBeNull();
 });
 
-for (
-  const source of [
-    "src/lib/features/assets/Card.svelte",
-    "src/routes/+page.svelte",
-    "src/lib/domain/money.ts",
-    "src/lib/shared/layout/AppShell.svelte",
-  ]
-) {
+for (const source of [
+  "src/lib/features/assets/Card.svelte",
+  "src/routes/+page.svelte",
+  "src/lib/domain/money.ts",
+  "src/lib/shared/layout/AppShell.svelte",
+]) {
   test(`rejects direct bits-ui import from ${source}`, () => {
     const violation = classifyViolation(`${root}/${source}`, "bits-ui", root);
     expect(violation?.rule).toContain("restricted");
   });
 }
 
-for (
-  const [name, source, imported, rule] of [
-    ["domain to Svelte", "src/lib/domain/money.ts", "svelte", "domain"],
-    [
-      "domain to feature",
-      "src/lib/domain/money.ts",
-      "$lib/features/assets/data",
-      "domain",
-    ],
-    [
-      "shared to feature",
-      "src/lib/shared/charts/data.ts",
-      "$lib/features/assets/data",
-      "shared",
-    ],
-    [
-      "feature to route",
-      "src/lib/features/assets/data.ts",
-      "../../../routes/+page.svelte",
-      "features",
-    ],
-    [
-      "api to feature",
-      "src/lib/api/client.ts",
-      "$lib/features/assets/data",
-      "api",
-    ],
-    [
-      "generated to route",
-      "src/lib/generated/search/parser.js",
-      "../../../routes/+page.svelte",
-      "generated",
-    ],
-  ] as const
-) {
+for (const [name, source, imported, rule] of [
+  ["domain to Svelte", "src/lib/domain/money.ts", "svelte", "domain"],
+  [
+    "domain to feature",
+    "src/lib/domain/money.ts",
+    "$lib/features/assets/data",
+    "domain",
+  ],
+  [
+    "shared to feature",
+    "src/lib/shared/charts/data.ts",
+    "$lib/features/assets/data",
+    "shared",
+  ],
+  [
+    "feature to route",
+    "src/lib/features/assets/data.ts",
+    "../../../routes/+page.svelte",
+    "features",
+  ],
+  [
+    "api to feature",
+    "src/lib/api/client.ts",
+    "$lib/features/assets/data",
+    "api",
+  ],
+  [
+    "generated to route",
+    "src/lib/generated/search/parser.js",
+    "../../../routes/+page.svelte",
+    "generated",
+  ],
+] as const) {
   test(`rejects ${name}`, () => {
     const violation = classifyViolation(`${root}/${source}`, imported, root);
     expect(violation?.rule).toMatch(new RegExp(rule));

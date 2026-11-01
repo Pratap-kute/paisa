@@ -1,120 +1,122 @@
 <script lang="ts">
-import type { EditorView } from "@codemirror/view";
-import {
-  createEditor,
-  editorState as templateEditorState,
-  updateContent,
-} from "$lib/features/editor/template_editor";
-import type { ImportTemplate } from "$lib/features/importing/types";
-import Button from "$lib/shared/ui/Button.svelte";
-import IconButton from "$lib/shared/ui/IconButton.svelte";
-import Badge from "$lib/shared/ui/Badge.svelte";
-import Dialog from "$lib/shared/ui/Dialog.svelte";
-import Drawer from "$lib/shared/ui/Drawer.svelte";
-import FormField from "$lib/shared/layout/FormField.svelte";
-import Input from "$lib/shared/ui/Input.svelte";
+  import type { EditorView } from "@codemirror/view";
+  import {
+    createEditor,
+    editorState as templateEditorState,
+    updateContent,
+  } from "$lib/features/editor/template_editor";
+  import type { ImportTemplate } from "$lib/features/importing/types";
+  import Button from "$lib/shared/ui/Button.svelte";
+  import IconButton from "$lib/shared/ui/IconButton.svelte";
+  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import Drawer from "$lib/shared/ui/Drawer.svelte";
+  import FormField from "$lib/shared/layout/FormField.svelte";
+  import Input from "$lib/shared/ui/Input.svelte";
 
-interface Props {
-  open?: boolean;
-  selectedTemplate?: ImportTemplate;
-  templates?: ImportTemplate[];
-  columns?: string[];
-  onsave?: (name: string, content: string) => Promise<void>;
-  ondelete?: (template: ImportTemplate) => Promise<void>;
-}
+  interface Props {
+    open?: boolean;
+    selectedTemplate?: ImportTemplate;
+    templates?: ImportTemplate[];
+    columns?: string[];
+    onsave?: (name: string, content: string) => Promise<void>;
+    ondelete?: (template: ImportTemplate) => Promise<void>;
+  }
 
-let {
-  open = $bindable(false),
-  selectedTemplate,
-  templates = [],
-  columns = [],
-  onsave,
-  ondelete,
-}: Props = $props();
+  let {
+    open = $bindable(false),
+    selectedTemplate,
+    templates = [],
+    columns = [],
+    onsave,
+    ondelete,
+  }: Props = $props();
 
-let editorView = $state<EditorView | null>(null);
-let showCheatsheet = $state(false);
-let showSaveAsModal = $state(false);
-let saveAsName = $state("");
+  let editorView = $state<EditorView | null>(null);
+  let showCheatsheet = $state(false);
+  let showSaveAsModal = $state(false);
+  let saveAsName = $state("");
 
-const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
-const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
-const saveAsNameDuplicate = $derived(
-  templates.some((t) => t.name === saveAsName && t.template_type === "custom"),
-);
-
-function initCodeMirror(node: HTMLElement, template?: ImportTemplate) {
-  const editor = createEditor(
-    template?.content || selectedTemplate?.content || "",
-    node,
+  const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
+  const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
+  const saveAsNameDuplicate = $derived(
+    templates.some(
+      (t) => t.name === saveAsName && t.template_type === "custom",
+    ),
   );
-  editorView = editor;
 
-  return {
-    update(newTemplate?: ImportTemplate) {
-      if (editor && newTemplate) {
-        const currentDoc = editor.state.doc.toString();
-        if (currentDoc !== newTemplate.content && !hasUnsavedChanges) {
-          updateContent(editor, newTemplate.content);
+  function initCodeMirror(node: HTMLElement, template?: ImportTemplate) {
+    const editor = createEditor(
+      template?.content || selectedTemplate?.content || "",
+      node,
+    );
+    editorView = editor;
+
+    return {
+      update(newTemplate?: ImportTemplate) {
+        if (editor && newTemplate) {
+          const currentDoc = editor.state.doc.toString();
+          if (currentDoc !== newTemplate.content && !hasUnsavedChanges) {
+            updateContent(editor, newTemplate.content);
+          }
         }
-      }
-    },
-    destroy() {
-      editor?.destroy?.();
-      editorView = null;
-    },
-  };
-}
-
-function getEditorContent(): string {
-  return editorView
-    ? editorView.state.doc.toString()
-    : (selectedTemplate?.content || "");
-}
-
-async function handleDirectSave() {
-  if (!selectedTemplate) return;
-  if (isBuiltin) {
-    saveAsName = `${selectedTemplate.name} (Custom)`;
-    showSaveAsModal = true;
-    return;
+      },
+      destroy() {
+        editor?.destroy?.();
+        editorView = null;
+      },
+    };
   }
-  const content = getEditorContent();
-  await onsave?.(selectedTemplate.name, content);
-}
 
-function handleOpenSaveAs() {
-  saveAsName = selectedTemplate ? `${selectedTemplate.name} Copy` : "";
-  showSaveAsModal = true;
-}
-
-async function handleConfirmSaveAs() {
-  if (!saveAsName || saveAsNameDuplicate) return;
-  const content = getEditorContent();
-  showSaveAsModal = false;
-  await onsave?.(saveAsName, content);
-}
-
-function copySnippet(snippet: string) {
-  if (editorView) {
-    const selection = editorView.state.selection.main;
-    editorView.dispatch({
-      changes: { from: selection.from, to: selection.to, insert: snippet },
-      selection: { anchor: selection.from + snippet.length },
-    });
-    editorView.focus();
+  function getEditorContent(): string {
+    return editorView
+      ? editorView.state.doc.toString()
+      : selectedTemplate?.content || "";
   }
-}
 
-$effect(() => {
-  if (open && editorView && selectedTemplate) {
-    const currentDoc = editorView.state.doc.toString();
-    if (currentDoc !== selectedTemplate.content && !hasUnsavedChanges) {
-      updateContent(editorView, selectedTemplate.content);
+  async function handleDirectSave() {
+    if (!selectedTemplate) return;
+    if (isBuiltin) {
+      saveAsName = `${selectedTemplate.name} (Custom)`;
+      showSaveAsModal = true;
+      return;
     }
-    setTimeout(() => editorView?.focus?.(), 100);
+    const content = getEditorContent();
+    await onsave?.(selectedTemplate.name, content);
   }
-});
+
+  function handleOpenSaveAs() {
+    saveAsName = selectedTemplate ? `${selectedTemplate.name} Copy` : "";
+    showSaveAsModal = true;
+  }
+
+  async function handleConfirmSaveAs() {
+    if (!saveAsName || saveAsNameDuplicate) return;
+    const content = getEditorContent();
+    showSaveAsModal = false;
+    await onsave?.(saveAsName, content);
+  }
+
+  function copySnippet(snippet: string) {
+    if (editorView) {
+      const selection = editorView.state.selection.main;
+      editorView.dispatch({
+        changes: { from: selection.from, to: selection.to, insert: snippet },
+        selection: { anchor: selection.from + snippet.length },
+      });
+      editorView.focus();
+    }
+  }
+
+  $effect(() => {
+    if (open && editorView && selectedTemplate) {
+      const currentDoc = editorView.state.doc.toString();
+      if (currentDoc !== selectedTemplate.content && !hasUnsavedChanges) {
+        updateContent(editorView, selectedTemplate.content);
+      }
+      setTimeout(() => editorView?.focus?.(), 100);
+    }
+  });
 </script>
 
 <Drawer
@@ -126,193 +128,214 @@ $effect(() => {
   contentClass="fixed right-0 top-0 z-50 flex h-full w-full max-w-2xl flex-col border-l border-border-subtle bg-surface shadow-2xl transition-transform duration-200 max-sm:max-w-full"
 >
   {#snippet children()}
-      <!-- HEADER -->
-      <div class="flex shrink-0 items-center justify-between border-b border-border-subtle bg-surface-raised px-4 py-3">
-        <div class="flex min-w-0 items-center gap-2.5">
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <i class="fas fa-code text-sm"></i>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <h2 class="truncate text-sm font-bold text-foreground">
-                {selectedTemplate?.name || "Template Editor"}
-              </h2>
-              <Badge variant={isBuiltin ? "info" : "primary"} size="sm">
-                {selectedTemplate?.template_type || "Template"}
-              </Badge>
-              {#if hasUnsavedChanges}
-                <Badge variant="warning" size="sm" dot>Unsaved</Badge>
-              {/if}
-            </div>
-            <p class="text-[0.6875rem] text-muted-foreground">
-              Handlebars-based ledger transaction mapping template
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-1.5">
-          <button
-            type="button"
-            class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
-            onclick={() => (showCheatsheet = !showCheatsheet)}
-            title="Toggle Variables & Helpers Reference"
-          >
-            <i class="fas fa-book-bookmark text-[0.75rem]"></i>
-            <span class="hidden sm:inline">{showCheatsheet ? "Hide Helpers" : "Helpers Reference"}</span>
-          </button>
-          <IconButton
-            variant="ghost"
-            size="sm"
-            ariaLabel="Close Template Editor"
-            onclick={() => (open = false)}
-          >
-            <i class="fas fa-xmark text-sm"></i>
-          </IconButton>
-        </div>
-      </div>
-
-      <!-- CHEATSHEET / HELPER PANEL -->
-      {#if showCheatsheet}
-        <div class="shrink-0 border-b border-border-subtle bg-surface-raised p-3 text-xs">
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <!-- Available Columns -->
-            <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
-              <span class="mb-1.5 block font-semibold text-foreground">
-                <i class="fas fa-table-columns mr-1 text-primary"></i> Available Columns (Click to insert)
-              </span>
-              {#if columns && columns.length > 0}
-                <div class="flex flex-wrap gap-1">
-                  {#each columns as col}
-                    <button
-                      type="button"
-                      class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                      onclick={() => copySnippet(`{{ROW.${col}}}`)}
-                    >
-                      {`{{ROW.${col}}}`}
-                    </button>
-                  {/each}
-                </div>
-              {:else}
-                <p class="text-[0.6875rem] text-muted-foreground">
-                  Load a CSV/PDF/XLSX file on the import page to view live column names, or use default columns:
-                  <span class="font-mono text-primary">{'{{ ROW.A }}'}</span>,
-                  <span class="font-mono text-primary">{'{{ ROW.B }}'}</span>,
-                  <span class="font-mono text-primary">{'{{ ROW.C }}'}</span>.
-                </p>
-              {/if}
-            </div>
-
-            <!-- Common Helpers -->
-            <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
-              <span class="mb-1.5 block font-semibold text-foreground">
-                <i class="fas fa-wand-magic-sparkles mr-1 text-primary"></i> Template Functions
-              </span>
-              <div class="flex flex-wrap gap-1">
-                <button
-                  type="button"
-                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                  title="Format date as YYYY/MM/DD"
-                  onclick={() => copySnippet('{{date ROW.A "DD/MM/YYYY"}}')}
-                >
-                  date
-                </button>
-                <button
-                  type="button"
-                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                  title="Scrub & parse amount"
-                  onclick={() => copySnippet('{{amount ROW.B}}')}
-                >
-                  amount
-                </button>
-                <button
-                  type="button"
-                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                  title="AI / TF-IDF account predictor"
-                  onclick={() => copySnippet('{{predictAccount ROW.Description prefix="Expenses"}}')}
-                >
-                  predictAccount
-                </button>
-                <button
-                  type="button"
-                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                  title="Regex matcher"
-                  onclick={() => copySnippet('{{regexpMatch ROW.A "UPI/(\\w+)" group=1}}')}
-                >
-                  regexpMatch
-                </button>
-                <button
-                  type="button"
-                  class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
-                  title="Clean multiple whitespace"
-                  onclick={() => copySnippet('{{oneline ROW.A}}')}
-                >
-                  oneline
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      {/if}
-
-      <!-- CODEMIRROR EDITOR BODY -->
-      <div class="relative min-h-0 flex-1 overflow-hidden bg-canvas">
+    <!-- HEADER -->
+    <div
+      class="flex shrink-0 items-center justify-between border-b border-border-subtle bg-surface-raised px-4 py-3"
+    >
+      <div class="flex min-w-0 items-center gap-2.5">
         <div
-          class="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:w-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-xs [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
-          use:initCodeMirror={selectedTemplate}
-        ></div>
-      </div>
-
-      <!-- FOOTER ACTIONS -->
-      <div class="flex shrink-0 items-center justify-between border-t border-border-subtle bg-surface-raised px-4 py-3">
-        <div class="flex items-center gap-2">
-          {#if !isBuiltin && selectedTemplate}
-            <Button
-              variant="danger"
-              size="sm"
-              onclick={() => ondelete?.(selectedTemplate)}
-              title="Delete this custom template"
-            >
-              {#snippet icon()}
-                <i class="fas fa-trash-can text-xs"></i>
-              {/snippet}
-              Delete
-            </Button>
-          {/if}
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={handleOpenSaveAs}
-            title="Save as a new custom template"
-          >
-            {#snippet icon()}
-              <i class="fas fa-copy text-xs"></i>
-            {/snippet}
-            Save As New
-          </Button>
+          class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary"
+        >
+          <i class="fas fa-code text-sm"></i>
         </div>
-
-        <div class="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onclick={() => (open = false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={!hasUnsavedChanges && !isBuiltin}
-            title={hasUnsavedChanges
-              ? isBuiltin
-                ? "Builtin templates must be saved as custom templates"
-                : "Save changes to this template"
-              : "No changes to save"}
-            onclick={handleDirectSave}
-          >
-            {#snippet icon()}
-              <i class="fas {isBuiltin ? 'fa-code-fork' : 'fa-floppy-disk'} text-xs"></i>
-            {/snippet}
-            {isBuiltin ? "Save as Custom" : "Save Changes"}
-          </Button>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h2 class="truncate text-sm font-bold text-foreground">
+              {selectedTemplate?.name || "Template Editor"}
+            </h2>
+            <Badge variant={isBuiltin ? "info" : "primary"} size="sm">
+              {selectedTemplate?.template_type || "Template"}
+            </Badge>
+            {#if hasUnsavedChanges}
+              <Badge variant="warning" size="sm" dot>Unsaved</Badge>
+            {/if}
+          </div>
+          <p class="text-[0.6875rem] text-muted-foreground">
+            Handlebars-based ledger transaction mapping template
+          </p>
         </div>
       </div>
+
+      <div class="flex items-center gap-1.5">
+        <button
+          type="button"
+          class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-border-subtle bg-surface px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-hover hover:text-foreground"
+          onclick={() => (showCheatsheet = !showCheatsheet)}
+          title="Toggle Variables & Helpers Reference"
+        >
+          <i class="fas fa-book-bookmark text-[0.75rem]"></i>
+          <span class="hidden sm:inline"
+            >{showCheatsheet ? "Hide Helpers" : "Helpers Reference"}</span
+          >
+        </button>
+        <IconButton
+          variant="ghost"
+          size="sm"
+          ariaLabel="Close Template Editor"
+          onclick={() => (open = false)}
+        >
+          <i class="fas fa-xmark text-sm"></i>
+        </IconButton>
+      </div>
+    </div>
+
+    <!-- CHEATSHEET / HELPER PANEL -->
+    {#if showCheatsheet}
+      <div
+        class="shrink-0 border-b border-border-subtle bg-surface-raised p-3 text-xs"
+      >
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <!-- Available Columns -->
+          <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
+            <span class="mb-1.5 block font-semibold text-foreground">
+              <i class="fas fa-table-columns mr-1 text-primary"></i> Available Columns
+              (Click to insert)
+            </span>
+            {#if columns && columns.length > 0}
+              <div class="flex flex-wrap gap-1">
+                {#each columns as col}
+                  <button
+                    type="button"
+                    class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                    onclick={() => copySnippet(`{{ROW.${col}}}`)}
+                  >
+                    {`{{ROW.${col}}}`}
+                  </button>
+                {/each}
+              </div>
+            {:else}
+              <p class="text-[0.6875rem] text-muted-foreground">
+                Load a CSV/PDF/XLSX file on the import page to view live column
+                names, or use default columns:
+                <span class="font-mono text-primary">{"{{ ROW.A }}"}</span>,
+                <span class="font-mono text-primary">{"{{ ROW.B }}"}</span>,
+                <span class="font-mono text-primary">{"{{ ROW.C }}"}</span>.
+              </p>
+            {/if}
+          </div>
+
+          <!-- Common Helpers -->
+          <div class="rounded-lg border border-border-subtle bg-surface p-2.5">
+            <span class="mb-1.5 block font-semibold text-foreground">
+              <i class="fas fa-wand-magic-sparkles mr-1 text-primary"></i> Template
+              Functions
+            </span>
+            <div class="flex flex-wrap gap-1">
+              <button
+                type="button"
+                class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                title="Format date as YYYY/MM/DD"
+                onclick={() => copySnippet('{{date ROW.A "DD/MM/YYYY"}}')}
+              >
+                date
+              </button>
+              <button
+                type="button"
+                class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                title="Scrub & parse amount"
+                onclick={() => copySnippet("{{amount ROW.B}}")}
+              >
+                amount
+              </button>
+              <button
+                type="button"
+                class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                title="AI / TF-IDF account predictor"
+                onclick={() =>
+                  copySnippet(
+                    '{{predictAccount ROW.Description prefix="Expenses"}}',
+                  )}
+              >
+                predictAccount
+              </button>
+              <button
+                type="button"
+                class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                title="Regex matcher"
+                onclick={() =>
+                  copySnippet('{{regexpMatch ROW.A "UPI/(\\w+)" group=1}}')}
+              >
+                regexpMatch
+              </button>
+              <button
+                type="button"
+                class="rounded bg-surface-hover px-1.5 py-0.5 font-mono text-[0.6875rem] text-foreground hover:bg-primary hover:text-white"
+                title="Clean multiple whitespace"
+                onclick={() => copySnippet("{{oneline ROW.A}}")}
+              >
+                oneline
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+    <!-- CODEMIRROR EDITOR BODY -->
+    <div class="relative min-h-0 flex-1 overflow-hidden bg-canvas">
+      <div
+        class="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:w-full [&_.cm-editor]:font-mono [&_.cm-editor]:text-xs [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
+        use:initCodeMirror={selectedTemplate}
+      ></div>
+    </div>
+
+    <!-- FOOTER ACTIONS -->
+    <div
+      class="flex shrink-0 items-center justify-between border-t border-border-subtle bg-surface-raised px-4 py-3"
+    >
+      <div class="flex items-center gap-2">
+        {#if !isBuiltin && selectedTemplate}
+          <Button
+            variant="danger"
+            size="sm"
+            onclick={() => ondelete?.(selectedTemplate)}
+            title="Delete this custom template"
+          >
+            {#snippet icon()}
+              <i class="fas fa-trash-can text-xs"></i>
+            {/snippet}
+            Delete
+          </Button>
+        {/if}
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={handleOpenSaveAs}
+          title="Save as a new custom template"
+        >
+          {#snippet icon()}
+            <i class="fas fa-copy text-xs"></i>
+          {/snippet}
+          Save As New
+        </Button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <Button variant="ghost" size="sm" onclick={() => (open = false)}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={!hasUnsavedChanges && !isBuiltin}
+          title={hasUnsavedChanges
+            ? isBuiltin
+              ? "Builtin templates must be saved as custom templates"
+              : "Save changes to this template"
+            : "No changes to save"}
+          onclick={handleDirectSave}
+        >
+          {#snippet icon()}
+            <i
+              class="fas {isBuiltin
+                ? 'fa-code-fork'
+                : 'fa-floppy-disk'} text-xs"
+            ></i>
+          {/snippet}
+          {isBuiltin ? "Save as Custom" : "Save Changes"}
+        </Button>
+      </div>
+    </div>
   {/snippet}
 </Drawer>
 
@@ -327,7 +350,9 @@ $effect(() => {
     <FormField
       id="template-save-name-input"
       label="Template Name"
-      error={saveAsNameDuplicate ? "A custom template with this name already exists." : undefined}
+      error={saveAsNameDuplicate
+        ? "A custom template with this name already exists."
+        : undefined}
     >
       {#snippet children()}
         <Input

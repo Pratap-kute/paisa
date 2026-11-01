@@ -18,10 +18,7 @@ export function fv(
   }
   const typeVal = type === PaymentDueTime.Begin ? 1 : 0;
   const factor = Math.pow(1 + rate, nper);
-  return -(
-    pv * factor +
-    pmt * (1 + rate * typeVal) * ((factor - 1) / rate)
-  );
+  return -(pv * factor + pmt * (1 + rate * typeVal) * ((factor - 1) / rate));
 }
 
 /**

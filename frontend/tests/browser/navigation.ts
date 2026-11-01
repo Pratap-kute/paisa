@@ -4,10 +4,12 @@ import { expect, type Page } from "@playwright/test";
 export async function assertNavigationVisible(page: Page) {
   const viewport = page.viewportSize();
   if (viewport && viewport.width < 1024) {
-    await expect(page.getByRole("button", { name: "Open navigation menu" }))
-      .toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Open navigation menu" }),
+    ).toBeVisible();
     return;
   }
-  await expect(page.locator('aside nav[aria-label="main navigation"]'))
-    .toBeVisible();
+  await expect(
+    page.locator('aside nav[aria-label="main navigation"]'),
+  ).toBeVisible();
 }

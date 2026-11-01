@@ -1,188 +1,203 @@
 <script lang="ts">
-import type {
-  RenderedRow,
-  RenderMetadata,
-} from "$lib/features/importing/spreadsheet";
-import type {
-  Confidence,
-  PredictionResult,
-} from "$lib/features/prediction/types";
-import {
-  type ConfidenceFilter,
-  rowMatchesFilter,
-} from "$lib/features/prediction/session";
-import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
-import { maxBy } from "$lib/shared/utils/collection";
+  import type {
+    RenderedRow,
+    RenderMetadata,
+  } from "$lib/features/importing/spreadsheet";
+  import type {
+    Confidence,
+    PredictionResult,
+  } from "$lib/features/prediction/types";
+  import {
+    type ConfidenceFilter,
+    rowMatchesFilter,
+  } from "$lib/features/prediction/session";
+  import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
+  import { maxBy } from "$lib/shared/utils/collection";
 
-interface Props {
-  data: any[][];
-  renderMetadata: RenderMetadata;
-  predictionRows: Array<{
-    rowIndex: number;
-    confidence: Confidence;
+  interface Props {
+    data: any[][];
+    renderMetadata: RenderMetadata;
+    predictionRows: Array<{
+      rowIndex: number;
+      confidence: Confidence;
+      possibleTransfer: boolean;
+      resolved?: boolean;
+      results: PredictionResult[];
+    }>;
+    selectedSourceRowIndex: number | null;
+    predictionFilter: ConfidenceFilter;
+    onSelectRow: (rowIndex: number) => void;
+    onClearFilter?: () => void;
+  }
+
+  let {
+    data = [],
+    renderMetadata,
+    predictionRows = [],
+    selectedSourceRowIndex = null,
+    predictionFilter = null,
+    onSelectRow,
+    onClearFilter,
+  }: Props = $props();
+
+  function summaryForRow(rowIndex: number) {
+    return predictionRows.find((r) => r.rowIndex === rowIndex);
+  }
+
+  interface ParsedReviewItem {
+    sourceRowIndex: number;
+    date: string;
+    payee: string;
+    narration: string;
+    amount: string;
+    isDebit: boolean;
+    account: string;
+    confidence: Confidence | null;
     possibleTransfer: boolean;
-    resolved?: boolean;
-    results: PredictionResult[];
-  }>;
-  selectedSourceRowIndex: number | null;
-  predictionFilter: ConfidenceFilter;
-  onSelectRow: (rowIndex: number) => void;
-  onClearFilter?: () => void;
-}
-
-let {
-  data = [],
-  renderMetadata,
-  predictionRows = [],
-  selectedSourceRowIndex = null,
-  predictionFilter = null,
-  onSelectRow,
-  onClearFilter,
-}: Props = $props();
-
-function summaryForRow(rowIndex: number) {
-  return predictionRows.find((r) => r.rowIndex === rowIndex);
-}
-
-interface ParsedReviewItem {
-  sourceRowIndex: number;
-  date: string;
-  payee: string;
-  narration: string;
-  amount: string;
-  isDebit: boolean;
-  account: string;
-  confidence: Confidence | null;
-  possibleTransfer: boolean;
-  resolved: boolean;
-  isVisible: boolean;
-}
-
-function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
-  const rowIndex = renderedRow.sourceRowIndex;
-  const summary = summaryForRow(rowIndex);
-  const result = summary?.results[0];
-
-  let date = "";
-  let payee = "";
-  let narration = "";
-  let amount = "";
-  let isDebit = false;
-  let account = result?.account || "";
-
-  const lines = renderedRow.formattedRendered.trim().split("\n");
-  const firstLine = lines[0] || "";
-
-  const dateMatch = firstLine.match(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/);
-  if (dateMatch) {
-    date = dateMatch[1];
+    resolved: boolean;
+    isVisible: boolean;
   }
 
-  const quotedMatch = firstLine.match(/"([^"]+)"/) ||
-    firstLine.match(/'([^']+)'/);
-  if (quotedMatch) {
-    payee = quotedMatch[1];
-  } else {
-    const rest = firstLine.replace(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/, "").replace(
-      /^[\s*!]+/,
-      "",
-    ).trim();
-    if (rest) payee = rest;
-  }
+  function parseRenderedRow(renderedRow: RenderedRow): ParsedReviewItem {
+    const rowIndex = renderedRow.sourceRowIndex;
+    const summary = summaryForRow(rowIndex);
+    const result = summary?.results[0];
 
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+    let date = "";
+    let payee = "";
+    let narration = "";
+    let amount = "";
+    let isDebit = false;
+    let account = result?.account || "";
 
-    if (!amount) {
-      const amtMatch = line.match(/(-?[\d,]+(?:\.\d{2})?)/);
-      if (amtMatch) {
-        amount = amtMatch[1];
-        isDebit = amount.startsWith("-");
+    const lines = renderedRow.formattedRendered.trim().split("\n");
+    const firstLine = lines[0] || "";
+
+    const dateMatch = firstLine.match(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/);
+    if (dateMatch) {
+      date = dateMatch[1];
+    }
+
+    const quotedMatch =
+      firstLine.match(/"([^"]+)"/) || firstLine.match(/'([^']+)'/);
+    if (quotedMatch) {
+      payee = quotedMatch[1];
+    } else {
+      const rest = firstLine
+        .replace(/^(\d{4}[-/.]\d{2}[-/.]\d{2})/, "")
+        .replace(/^[\s*!]+/, "")
+        .trim();
+      if (rest) payee = rest;
+    }
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      if (!amount) {
+        const amtMatch = line.match(/(-?[\d,]+(?:\.\d{2})?)/);
+        if (amtMatch) {
+          amount = amtMatch[1];
+          isDebit = amount.startsWith("-");
+        }
+      }
+
+      if (!account) {
+        const parts = line.split(/\s{2,}|\t/);
+        if (
+          parts[0] &&
+          !parts[0].includes("Assets:Checking") &&
+          !parts[0].includes("Liabilities:CreditCard")
+        ) {
+          account = parts[0].trim();
+        }
       }
     }
 
-    if (!account) {
-      const parts = line.split(/\s{2,}|\t/);
-      if (
-        parts[0] && !parts[0].includes("Assets:Checking") &&
-        !parts[0].includes("Liabilities:CreditCard")
-      ) {
-        account = parts[0].trim();
-      }
+    if (!payee) {
+      const rawRow = data[rowIndex] || [];
+      const candidate = maxBy(rawRow, (cell) =>
+        typeof cell === "string" ? cell.length : 0,
+      );
+      payee = candidate
+        ? String(candidate).trim()
+        : `Transaction #${rowIndex + 1}`;
+    }
+
+    const isVisible = rowMatchesFilter(summary, predictionFilter);
+
+    return {
+      sourceRowIndex: rowIndex,
+      date,
+      payee,
+      narration,
+      amount,
+      isDebit,
+      account,
+      confidence: summary?.confidence || null,
+      possibleTransfer: summary?.possibleTransfer || false,
+      resolved: summary?.resolved ?? false,
+      isVisible,
+    };
+  }
+
+  let reviewItems: ParsedReviewItem[] = $derived.by(() => {
+    if (renderMetadata && renderMetadata.rows.length > 0) {
+      return renderMetadata.rows.map(parseRenderedRow);
+    }
+    return [];
+  });
+
+  let visibleItems = $derived(reviewItems.filter((item) => item.isVisible));
+
+  function indicatorClass(
+    confidence: Confidence | null,
+    possibleTransfer: boolean,
+  ) {
+    if (possibleTransfer) return "bg-[var(--paisa-prediction-transfer)]";
+    switch (confidence) {
+      case "HIGH":
+        return "bg-[var(--paisa-prediction-high)]";
+      case "MEDIUM":
+        return "bg-[var(--paisa-prediction-medium)]";
+      case "NEEDS_REVIEW":
+        return "bg-[var(--paisa-prediction-review)]";
+      default:
+        return "bg-[var(--paisa-prediction-unknown)]";
     }
   }
-
-  if (!payee) {
-    const rawRow = data[rowIndex] || [];
-    const candidate = maxBy(
-      rawRow,
-      (cell) => (typeof cell === "string" ? cell.length : 0),
-    );
-    payee = candidate
-      ? String(candidate).trim()
-      : `Transaction #${rowIndex + 1}`;
-  }
-
-  const isVisible = rowMatchesFilter(summary, predictionFilter);
-
-  return {
-    sourceRowIndex: rowIndex,
-    date,
-    payee,
-    narration,
-    amount,
-    isDebit,
-    account,
-    confidence: summary?.confidence || null,
-    possibleTransfer: summary?.possibleTransfer || false,
-    resolved: summary?.resolved ?? false,
-    isVisible,
-  };
-}
-
-let reviewItems: ParsedReviewItem[] = $derived.by(() => {
-  if (renderMetadata && renderMetadata.rows.length > 0) {
-    return renderMetadata.rows.map(parseRenderedRow);
-  }
-  return [];
-});
-
-let visibleItems = $derived(reviewItems.filter((item) => item.isVisible));
-
-function indicatorClass(
-  confidence: Confidence | null,
-  possibleTransfer: boolean,
-) {
-  if (possibleTransfer) return "bg-[var(--paisa-prediction-transfer)]";
-  switch (confidence) {
-    case "HIGH":
-      return "bg-[var(--paisa-prediction-high)]";
-    case "MEDIUM":
-      return "bg-[var(--paisa-prediction-medium)]";
-    case "NEEDS_REVIEW":
-      return "bg-[var(--paisa-prediction-review)]";
-    default:
-      return "bg-[var(--paisa-prediction-unknown)]";
-  }
-}
 </script>
 
 <div
-  class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-canvas">
+  class="flex h-full min-h-0 w-full flex-1 flex-col overflow-y-auto bg-canvas"
+>
   {#if reviewItems.length === 0}
-    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground">
-      <i class="fas fa-file-circle-question mb-2 text-3xl text-muted-foreground"></i>
-      <p class="text-base font-semibold text-foreground">No Transactions Generated</p>
+    <div
+      class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground"
+    >
+      <i class="fas fa-file-circle-question mb-2 text-3xl text-muted-foreground"
+      ></i>
+      <p class="text-base font-semibold text-foreground">
+        No Transactions Generated
+      </p>
       <p class="mt-1 text-xs text-muted-foreground">
-        The active template did not match rows in this file. Select a matching template above, or switch to <strong>Raw Data</strong> to view all source rows.
+        The active template did not match rows in this file. Select a matching
+        template above, or switch to <strong>Raw Data</strong> to view all source
+        rows.
       </p>
     </div>
   {:else if visibleItems.length === 0}
-    <div class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground">
-      <i class="fas fa-filter-circle-xmark mb-2 text-3xl text-muted-foreground"></i>
-      <p class="text-base font-semibold text-foreground">No Matching Transactions</p>
-      <p class="mt-1 text-xs text-muted-foreground">No transactions match the selected prediction filter.</p>
+    <div
+      class="flex h-full min-h-[240px] flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center text-muted-foreground"
+    >
+      <i class="fas fa-filter-circle-xmark mb-2 text-3xl text-muted-foreground"
+      ></i>
+      <p class="text-base font-semibold text-foreground">
+        No Matching Transactions
+      </p>
+      <p class="mt-1 text-xs text-muted-foreground">
+        No transactions match the selected prediction filter.
+      </p>
       {#if onClearFilter}
         <button
           type="button"
@@ -195,29 +210,52 @@ function indicatorClass(
       {/if}
     </div>
   {:else}
-    <div class="flex flex-col gap-px bg-[var(--paisa-border-subtle)]" role="list" aria-label="Transaction Review List">
+    <div
+      class="flex flex-col gap-px bg-[var(--paisa-border-subtle)]"
+      role="list"
+      aria-label="Transaction Review List"
+    >
       {#each visibleItems as item (item.sourceRowIndex)}
         <button
           type="button"
-          class="flex w-full min-h-[52px] cursor-pointer items-stretch border-0 bg-surface p-0 text-left transition-colors hover:bg-surface-hover {selectedSourceRowIndex === item.sourceRowIndex ? 'bg-primary-subtle' : ''}"
+          class="flex w-full min-h-[52px] cursor-pointer items-stretch border-0 bg-surface p-0 text-left transition-colors hover:bg-surface-hover {selectedSourceRowIndex ===
+          item.sourceRowIndex
+            ? 'bg-primary-subtle'
+            : ''}"
           onclick={() => onSelectRow(item.sourceRowIndex)}
         >
           <div
-            class="shrink-0 transition-[width] duration-150 {indicatorClass(item.confidence, item.possibleTransfer)} {selectedSourceRowIndex === item.sourceRowIndex ? 'w-1' : 'w-[3px]'}"
+            class="shrink-0 transition-[width] duration-150 {indicatorClass(
+              item.confidence,
+              item.possibleTransfer,
+            )} {selectedSourceRowIndex === item.sourceRowIndex
+              ? 'w-1'
+              : 'w-[3px]'}"
           ></div>
 
-          <div class="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2">
+          <div
+            class="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3 py-2"
+          >
             <div class="flex min-w-0 items-baseline justify-between gap-2">
-              <span class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-foreground" title={item.payee}>{item.payee}</span>
+              <span
+                class="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-foreground"
+                title={item.payee}>{item.payee}</span
+              >
               {#if item.amount}
-                <span class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit ? 'text-negative' : 'text-foreground'}">
+                <span
+                  class="shrink-0 whitespace-nowrap font-mono text-[0.8125rem] font-bold tabular-nums ml-2 {item.isDebit
+                    ? 'text-negative'
+                    : 'text-foreground'}"
+                >
                   {item.amount}
                 </span>
               {/if}
             </div>
 
             <div class="flex min-w-0 items-center justify-between gap-2">
-              <div class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-muted-foreground">
+              <div
+                class="flex min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap text-[0.6875rem] text-muted-foreground"
+              >
                 {#if item.date}
                   <span class="shrink-0 tabular-nums">{item.date}</span>
                 {/if}
@@ -225,7 +263,10 @@ function indicatorClass(
                   <span class="shrink-0 text-muted-foreground">·</span>
                 {/if}
                 {#if item.account}
-                  <span class="min-w-0 flex-1 truncate text-muted-foreground" title={item.account}>{item.account}</span>
+                  <span
+                    class="min-w-0 flex-1 truncate text-muted-foreground"
+                    title={item.account}>{item.account}</span
+                  >
                 {/if}
               </div>
 

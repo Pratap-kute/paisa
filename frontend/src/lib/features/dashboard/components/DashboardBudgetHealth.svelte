@@ -1,37 +1,55 @@
 <script lang="ts">
-import type { BudgetSummary } from "../summary";
-import { restName } from "$lib/domain/account";
-import { presentInsight } from "$lib/features/insights/presentation";
-import { formatCurrency } from "$lib/shared/formatters/currency";
+  import type { BudgetSummary } from "../summary";
+  import { restName } from "$lib/domain/account";
+  import { presentInsight } from "$lib/features/insights/presentation";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
 
-interface Props {
-  summary: BudgetSummary;
-  period: string;
-  isPartial?: boolean;
-  comparisonPeriod?: string;
-}
+  interface Props {
+    summary: BudgetSummary;
+    period: string;
+    isPartial?: boolean;
+    comparisonPeriod?: string;
+  }
 
-let { summary, period, isPartial = false, comparisonPeriod }: Props = $props();
+  let {
+    summary,
+    period,
+    isPartial = false,
+    comparisonPeriod,
+  }: Props = $props();
 </script>
 
 <section
   class="rounded-xl p-4 sm:p-6 bg-surface border border-border-subtle shadow-xs flex flex-col min-w-0"
-  data-testid="dashboard-budget-health">
+  data-testid="dashboard-budget-health"
+>
   <div class="flex items-center justify-between mb-3 gap-2">
-    <a href={`/expense/budget?period=${period}`} class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary">Budget Health</a>
-    <a href={`/expense/budget?period=${period}`} class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline">View Budget</a>
+    <a
+      href={`/expense/budget?period=${period}`}
+      class="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-primary"
+      >Budget Health</a
+    >
+    <a
+      href={`/expense/budget?period=${period}`}
+      class="text-xs font-semibold text-primary uppercase tracking-wider hover:underline"
+      >View Budget</a
+    >
   </div>
   <p class="text-base font-semibold text-foreground">{summary.statusLabel}</p>
   {#if summary.configured}
     <p class="mt-1 text-xs text-muted-foreground tabular-nums">
-      {formatCurrency(summary.actual)} spent of {formatCurrency(summary.planned)} planned
+      {formatCurrency(summary.actual)} spent of {formatCurrency(
+        summary.planned,
+      )} planned
     </p>
   {/if}
 
   {#if summary.accounts.length > 0}
     <div class="mt-3 divide-y divide-[var(--paisa-border-subtle)]">
       {#each summary.accounts as item (item.budget.account)}
-        {@const p = item.insight ? presentInsight(item.insight, isPartial, comparisonPeriod) : null}
+        {@const p = item.insight
+          ? presentInsight(item.insight, isPartial, comparisonPeriod)
+          : null}
         {@const proj = item.budget.projection}
         {@const isOverspent = proj
           ? proj.status === "overspent"
@@ -39,19 +57,28 @@ let { summary, period, isPartial = false, comparisonPeriod }: Props = $props();
         {@const factualOverrun = proj
           ? Math.max(proj.observedSpend - proj.effectiveBudget, 0)
           : Math.max(-item.budget.available, 0)}
-        {@const badgeText = p?.badgeText || (
-          isOverspent
+        {@const badgeText =
+          p?.badgeText ||
+          (isOverspent
             ? `Over by ${formatCurrency(factualOverrun)}`
             : proj?.status === "likely-over"
               ? `~${formatCurrency(proj.projectedOverrun ?? 0)} overrun`
               : proj?.status === "at-risk"
                 ? "At risk"
-                : "Needs attention"
-        )}
+                : "Needs attention")}
         {@const badgeColor = isOverspent ? "text-negative" : "text-warning"}
-        <a href={p?.href || `/expense/budget?period=${period}`} class="group flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 transition-colors" data-testid="dashboard-budget-item">
-          <span class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate" title={item.budget.account}>{restName(item.budget.account)}</span>
-          <span class="text-xs font-semibold {badgeColor} whitespace-nowrap">{badgeText}</span>
+        <a
+          href={p?.href || `/expense/budget?period=${period}`}
+          class="group flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0 transition-colors"
+          data-testid="dashboard-budget-item"
+        >
+          <span
+            class="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate"
+            title={item.budget.account}>{restName(item.budget.account)}</span
+          >
+          <span class="text-xs font-semibold {badgeColor} whitespace-nowrap"
+            >{badgeText}</span
+          >
         </a>
       {/each}
     </div>

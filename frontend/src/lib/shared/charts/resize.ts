@@ -33,10 +33,7 @@ export function observeElementSize(
         continue;
       }
 
-      if (
-        roundedWidth === previousWidth &&
-        roundedHeight === previousHeight
-      ) {
+      if (roundedWidth === previousWidth && roundedHeight === previousHeight) {
         continue;
       }
 

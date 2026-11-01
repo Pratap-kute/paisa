@@ -42,92 +42,110 @@ function currentImport(
 
 describe("transfer detector", () => {
   it("flags a true transfer pair in the current import", () => {
-    expect(detectTransfer(
-      transferInput,
-      currentImport([{
-        description: "IMPS from Checking",
-        amount: 5000,
-        date: "2024-01-10",
-        commodity: "INR",
-        prefix: "Assets",
-        rowIndex: 1,
-      }]),
-    )).toBe(true);
+    expect(
+      detectTransfer(
+        transferInput,
+        currentImport([
+          {
+            description: "IMPS from Checking",
+            amount: 5000,
+            date: "2024-01-10",
+            commodity: "INR",
+            prefix: "Assets",
+            rowIndex: 1,
+          },
+        ]),
+      ),
+    ).toBe(true);
   });
 
   it("ignores unrelated same amounts", () => {
-    expect(detectTransfer(
-      {
-        ...transferInput,
-        description: "Coffee",
-        prefix: "Expenses",
-      },
-      currentImport([{
-        description: "Rent",
-        amount: 5000,
-        date: "2024-01-10",
-        commodity: "INR",
-        prefix: "Expenses",
-        rowIndex: 1,
-      }]),
-    )).toBe(false);
+    expect(
+      detectTransfer(
+        {
+          ...transferInput,
+          description: "Coffee",
+          prefix: "Expenses",
+        },
+        currentImport([
+          {
+            description: "Rent",
+            amount: 5000,
+            date: "2024-01-10",
+            commodity: "INR",
+            prefix: "Expenses",
+            rowIndex: 1,
+          },
+        ]),
+      ),
+    ).toBe(false);
   });
 
   it("ignores many counterparts of the same amount", () => {
-    expect(detectTransfer(
-      transferInput,
-      currentImport([
-        {
-          description: "Salary split",
-          amount: 5000,
-          prefix: "Assets",
-          sourceAccount: "Assets:BankA",
-          rowIndex: 1,
-        },
-        {
-          description: "Salary split",
-          amount: 5000,
-          prefix: "Assets",
-          sourceAccount: "Assets:BankB",
-          rowIndex: 2,
-        },
-        {
-          description: "Salary split",
-          amount: 5000,
-          prefix: "Assets",
-          sourceAccount: "Assets:BankC",
-          rowIndex: 3,
-        },
-      ]),
-    )).toBe(false);
+    expect(
+      detectTransfer(
+        transferInput,
+        currentImport([
+          {
+            description: "Salary split",
+            amount: 5000,
+            prefix: "Assets",
+            sourceAccount: "Assets:BankA",
+            rowIndex: 1,
+          },
+          {
+            description: "Salary split",
+            amount: 5000,
+            prefix: "Assets",
+            sourceAccount: "Assets:BankB",
+            rowIndex: 2,
+          },
+          {
+            description: "Salary split",
+            amount: 5000,
+            prefix: "Assets",
+            sourceAccount: "Assets:BankC",
+            rowIndex: 3,
+          },
+        ]),
+      ),
+    ).toBe(false);
   });
 
   it("respects the date window", () => {
-    expect(detectTransfer(
-      transferInput,
-      currentImport([{
-        description: "IMPS from Checking",
-        amount: 5000,
-        date: "2023-01-01",
-        commodity: "INR",
-        prefix: "Assets",
-        rowIndex: 1,
-      }]),
-    )).toBe(false);
+    expect(
+      detectTransfer(
+        transferInput,
+        currentImport([
+          {
+            description: "IMPS from Checking",
+            amount: 5000,
+            date: "2023-01-01",
+            commodity: "INR",
+            prefix: "Assets",
+            rowIndex: 1,
+          },
+        ]),
+      ),
+    ).toBe(false);
   });
 
   it("requires matching currency", () => {
-    expect(detectTransfer(
-      transferInput,
-      currentImport([{
-        description: "IMPS from Checking",
-        amount: 5000,
-        date: "2024-01-10",
-        commodity: "USD",
-        prefix: "Assets",
-        rowIndex: 1,
-      }]),
-    )).toBe(false);
+    expect(
+      detectTransfer(
+        transferInput,
+        currentImport([
+          {
+            description: "IMPS from Checking",
+            amount: 5000,
+            date: "2024-01-10",
+            commodity: "USD",
+            prefix: "Assets",
+            rowIndex: 1,
+          },
+        ]),
+      ),
+    ).toBe(false);
   });
 
   it("never returns an Assets account under Expenses prefix", () => {
@@ -149,14 +167,16 @@ describe("transfer detector", () => {
       },
       {},
       index,
-      currentImport([{
-        description: "IMPS from Checking",
-        amount: 5000,
-        date: "2024-01-10",
-        commodity: "INR",
-        prefix: "Assets",
-        rowIndex: 1,
-      }]),
+      currentImport([
+        {
+          description: "IMPS from Checking",
+          amount: 5000,
+          date: "2024-01-10",
+          commodity: "INR",
+          prefix: "Assets",
+          rowIndex: 1,
+        },
+      ]),
     );
     expect(result.account.startsWith("Assets")).toBe(false);
     expect(result.possibleTransfer).toBe(true);

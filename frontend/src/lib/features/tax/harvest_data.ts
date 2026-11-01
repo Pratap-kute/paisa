@@ -21,8 +21,8 @@ export function unitsRequiredFromGain(
       units += breakdown.units;
       amount += breakdown.current_price;
     } else if (breakdown.tax.taxable !== 0) {
-      const partialUnits = ((taxableGain - gain) * breakdown.units) /
-        breakdown.tax.taxable;
+      const partialUnits =
+        ((taxableGain - gain) * breakdown.units) / breakdown.tax.taxable;
       units += partialUnits;
       amount += partialUnits * harvestable.current_unit_price;
       gain = taxableGain;
@@ -48,8 +48,8 @@ export function unitsRequiredFromAmount(
       units += breakdown.units;
       amount += breakdown.current_price;
     } else if (harvestable.current_unit_price !== 0 && breakdown.units !== 0) {
-      const partialUnits = (expectedAmount - amount) /
-        harvestable.current_unit_price;
+      const partialUnits =
+        (expectedAmount - amount) / harvestable.current_unit_price;
       units += partialUnits;
       amount = expectedAmount;
       gain += partialUnits * (breakdown.tax.taxable / breakdown.units);

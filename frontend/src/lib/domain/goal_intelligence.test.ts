@@ -44,8 +44,9 @@ describe("goal intelligence", () => {
       8,
     );
     expect(health.assumptions.annualReturn).toBe(7);
-    expect(requiredContribution(240000, 600000, 0, dayjs("2027-03-31"), asOf))
-      .toBe(60000);
+    expect(
+      requiredContribution(240000, 600000, 0, dayjs("2027-03-31"), asOf),
+    ).toBe(60000);
   });
   it("calculates pace, coverage, gap, completion and calendar-month delay", () => {
     const health = analyzeGoal(
@@ -67,29 +68,30 @@ describe("goal intelligence", () => {
     expect(health.delayMonths).toBe(2);
     expect(health.attention).toBe("warning");
   });
-  for (
-    const [coverage, status] of [
-      [1, "on-track"],
-      [0.95, "on-track"],
-      [0.94999, "behind"],
-      [0.75, "behind"],
-      [0.74999, "at-risk"],
-      [0, "at-risk"],
-      [-1, "at-risk"],
-      [NaN, "insufficient-data"],
-    ] as const
-  ) {
+  for (const [coverage, status] of [
+    [1, "on-track"],
+    [0.95, "on-track"],
+    [0.94999, "behind"],
+    [0.75, "behind"],
+    [0.74999, "at-risk"],
+    [0, "at-risk"],
+    [-1, "at-risk"],
+    [NaN, "insufficient-data"],
+  ] as const) {
     it(`classifies coverage ${coverage} as ${status}`, () =>
       expect(classifyGoalSchedule(coverage)).toBe(status));
   }
   it("keeps zero months in the denominator and excludes the current month", () => {
-    const pace = contributionPace([
-      { month: "2026-06", amount: 10000 },
-      { month: "2026-07", amount: 0 },
-      { month: "2026-08", amount: 10000 },
-      { month: "2026-09", amount: 900000 },
-      { month: "2025-01", amount: 900000 },
-    ], asOf);
+    const pace = contributionPace(
+      [
+        { month: "2026-06", amount: 10000 },
+        { month: "2026-07", amount: 0 },
+        { month: "2026-08", amount: 10000 },
+        { month: "2026-09", amount: 900000 },
+        { month: "2025-01", amount: 900000 },
+      ],
+      asOf,
+    );
     expect(pace.contributionMonthsObserved).toBe(3);
     expect(pace.activeContributionMonths).toBe(2);
     expect(pace.actualMonthlyContribution).toBeCloseTo(20000 / 3);
@@ -98,9 +100,9 @@ describe("goal intelligence", () => {
     for (const count of [0, 1, 2]) {
       const health = analyzeGoal(
         goal({
-          contributionHistory: goal().contributionHistory?.slice(0, count).map(
-            (m) => ({ ...m, amount: 1000000 }),
-          ),
+          contributionHistory: goal()
+            .contributionHistory?.slice(0, count)
+            .map((m) => ({ ...m, amount: 1000000 })),
         }),
         asOf,
       );
@@ -173,9 +175,13 @@ describe("goal intelligence", () => {
     ).toBe("none");
   });
   it("handles invalid targets, current values, expected returns and unbounded projections", () => {
-    for (
-      const target of [0, -1, NaN, Infinity, undefined as unknown as number]
-    ) {
+    for (const target of [
+      0,
+      -1,
+      NaN,
+      Infinity,
+      undefined as unknown as number,
+    ]) {
       const health = analyzeGoal(goal({ target }), asOf);
       expect(health.validTarget).toBe(false);
       expect(health.attention).toBe("none");
@@ -241,14 +247,17 @@ describe("goal intelligence", () => {
         amount: 48000,
       })),
     });
-    const summary = summarizeGoalHealth([
-      behind,
-      slow,
-      overdue,
-      goal({ id: "none", targetDate: "" }),
-      goal({ id: "retirement", type: "retirement" }),
-      goal({ id: "done", current: 600000 }),
-    ], asOf);
+    const summary = summarizeGoalHealth(
+      [
+        behind,
+        slow,
+        overdue,
+        goal({ id: "none", targetDate: "" }),
+        goal({ id: "retirement", type: "retirement" }),
+        goal({ id: "done", current: 600000 }),
+      ],
+      asOf,
+    );
     expect(summary.attention.map((x) => x.goal.id)).toEqual([
       "overdue",
       "slow",

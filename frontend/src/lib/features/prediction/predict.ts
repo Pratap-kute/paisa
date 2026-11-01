@@ -78,15 +78,9 @@ function predictUnsafe(
   const top = scored[0];
   const second = scored[1];
   const margin = second ? top.score - second.score : top.score;
-  const confidence = decideConfidence(
-    top,
-    margin,
-    possibleTransfer,
-    "HISTORY",
-  );
-  const account = confidence === "UNKNOWN"
-    ? unknownAccount(input.prefix)
-    : top.account;
+  const confidence = decideConfidence(top, margin, possibleTransfer, "HISTORY");
+  const account =
+    confidence === "UNKNOWN" ? unknownAccount(input.prefix) : top.account;
   const reasons = [...top.reasons];
   if (possibleTransfer) reasons.push("TRANSFER");
   if (confidence === "UNKNOWN") reasons.push("UNKNOWN");

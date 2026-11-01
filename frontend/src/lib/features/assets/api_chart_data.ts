@@ -74,9 +74,11 @@ export function toAssetBreakdownPoints(
     0,
   );
 
-  return entries.map(([group, item]) => {
-    const marketAmount = item.marketAmount || 0;
-    const percentage = total > 0 ? (marketAmount / total) * 100 : 0;
-    return { group, marketAmount, percentage };
-  }).sort((a, b) => b.marketAmount - a.marketAmount);
+  return entries
+    .map(([group, item]) => {
+      const marketAmount = item.marketAmount || 0;
+      const percentage = total > 0 ? (marketAmount / total) * 100 : 0;
+      return { group, marketAmount, percentage };
+    })
+    .sort((a, b) => b.marketAmount - a.marketAmount);
 }

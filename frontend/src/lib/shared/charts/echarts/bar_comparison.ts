@@ -7,10 +7,7 @@ import {
 import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
 
 export type ComparisonValueFormat =
-  | "currency"
-  | "compactCurrency"
-  | "number"
-  | "percentage";
+  "currency" | "compactCurrency" | "number" | "percentage";
 
 export interface ComparisonTooltipRow {
   label: string;
@@ -66,34 +63,42 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
   const point = orderedPoints(data)[dataIndex];
   if (!point) return "";
 
-  const rows = point.tooltipRows?.length ? point.tooltipRows : [
-    {
-      label: data.valueLabel ?? "Value",
-      value: point.value,
-      format: data.valueFormat,
-    },
-    ...(typeof point.target === "number"
-      ? [{
-        label: data.targetLabel ?? "Target",
-        value: point.target,
-        format: data.valueFormat,
-      }]
-      : []),
-    ...(typeof point.secondaryValue === "number"
-      ? [{
-        label: point.secondaryLabel ?? "Difference",
-        value: point.secondaryValue,
-        format: data.valueFormat,
-      }]
-      : []),
-  ];
+  const rows = point.tooltipRows?.length
+    ? point.tooltipRows
+    : [
+        {
+          label: data.valueLabel ?? "Value",
+          value: point.value,
+          format: data.valueFormat,
+        },
+        ...(typeof point.target === "number"
+          ? [
+              {
+                label: data.targetLabel ?? "Target",
+                value: point.target,
+                format: data.valueFormat,
+              },
+            ]
+          : []),
+        ...(typeof point.secondaryValue === "number"
+          ? [
+              {
+                label: point.secondaryLabel ?? "Difference",
+                value: point.secondaryValue,
+                format: data.valueFormat,
+              },
+            ]
+          : []),
+      ];
 
   return [
     `<strong>${point.label}</strong>`,
-    ...rows.map((row) =>
-      `${row.label}: <strong>${
-        formatValue(row.value, row.format ?? data.valueFormat)
-      }</strong>`
+    ...rows.map(
+      (row) =>
+        `${row.label}: <strong>${formatValue(
+          row.value,
+          row.format ?? data.valueFormat,
+        )}</strong>`,
     ),
   ].join("<br/>");
 }
@@ -176,10 +181,12 @@ function buildComparisonBarLayout(
         data: points.map((point) => ({
           value: point.value,
           itemStyle: {
-            color: point.color ??
+            color:
+              point.color ??
               (point.categoryKey
-                ? categoryColors.get(normalizeCategoryKey(point.categoryKey)) ??
-                  defaultColor
+                ? (categoryColors.get(
+                    normalizeCategoryKey(point.categoryKey),
+                  ) ?? defaultColor)
                 : defaultColor),
           },
         })),
@@ -200,20 +207,20 @@ function buildComparisonBarLayout(
       },
       points.some((point) => typeof point.target === "number")
         ? {
-          name: data.targetLabel ?? "Target",
-          type: "scatter",
-          symbol: "diamond",
-          symbolSize: mobile ? 10 : 12,
-          itemStyle: {
-            color: theme?.warningColor ?? defaultColor,
-            borderColor: theme?.surfaceColor ?? "transparent",
-            borderWidth: 1,
-          },
-          data: points.map((point, index) =>
-            typeof point.target === "number" ? [point.target, index] : null
-          ),
-          tooltip: { show: false },
-        }
+            name: data.targetLabel ?? "Target",
+            type: "scatter",
+            symbol: "diamond",
+            symbolSize: mobile ? 10 : 12,
+            itemStyle: {
+              color: theme?.warningColor ?? defaultColor,
+              borderColor: theme?.surfaceColor ?? "transparent",
+              borderWidth: 1,
+            },
+            data: points.map((point, index) =>
+              typeof point.target === "number" ? [point.target, index] : null,
+            ),
+            tooltip: { show: false },
+          }
         : undefined,
     ].filter(Boolean),
   };

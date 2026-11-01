@@ -15,9 +15,10 @@ test("scenario privacy strips chart and tooltip amounts", () => {
     ["Difference", 0],
   ]);
   const shown = scenarioSeries(result, "cash");
-  assertEquals(shown.points[0].tooltipRows, [["Baseline", 12345], [
-    "Scenario",
-    -54321,
-  ], ["Difference", -66666]]);
+  assertEquals(shown.points[0].tooltipRows, [
+    ["Baseline", 12345],
+    ["Scenario", -54321],
+    ["Difference", -66666],
+  ]);
   assertEquals(shown.series[0].dashed, true);
 });

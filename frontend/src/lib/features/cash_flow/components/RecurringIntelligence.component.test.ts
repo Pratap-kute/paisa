@@ -13,17 +13,13 @@ const mocks = vi.hoisted(() => ({
   prepare: vi.fn(),
   save: vi.fn(),
 }));
-vi.mock(
-  "$lib/api",
-  () => ({ api: { transaction: { getTransactions: mocks.history } } }),
-);
-vi.mock(
-  "../recurring_confirmation",
-  () => ({
-    prepareRecurringConfirmation: mocks.prepare,
-    saveRecurringConfirmation: mocks.save,
-  }),
-);
+vi.mock("$lib/api", () => ({
+  api: { transaction: { getTransactions: mocks.history } },
+}));
+vi.mock("../recurring_confirmation", () => ({
+  prepareRecurringConfirmation: mocks.prepare,
+  saveRecurringConfirmation: mocks.save,
+}));
 function history(amounts = [499, 499, 649]): Transaction[] {
   return amounts.map((amount, i) => ({
     id: String(i),
@@ -32,15 +28,18 @@ function history(amounts = [499, 499, 649]): Transaction[] {
     fileName: "main.ledger",
     beginLine: i * 4 + 1,
     endLine: i * 4 + 3,
-    postings: [{
-      account: "Expenses:Entertainment",
-      commodity: "INR",
-      quantity: amount,
-    }, {
-      account: "Assets:Bank",
-      commodity: "INR",
-      quantity: -amount,
-    }] as Posting[],
+    postings: [
+      {
+        account: "Expenses:Entertainment",
+        commodity: "INR",
+        quantity: amount,
+      },
+      {
+        account: "Assets:Bank",
+        commodity: "INR",
+        quantity: -amount,
+      },
+    ] as Posting[],
   }));
 }
 afterEach(() => cleanup());
@@ -65,8 +64,9 @@ test("renders a candidate and removes rejection from the current review", async 
   });
   expect(view.container.textContent).toContain("3 occurrences");
   await fireEvent.click(reject);
-  expect(view.queryByRole("button", { name: "Confirm Netflix recurring" }))
-    .toBeNull();
+  expect(
+    view.queryByRole("button", { name: "Confirm Netflix recurring" }),
+  ).toBeNull();
   expect(mocks.save).not.toHaveBeenCalled();
 });
 test("confirmation persists before refreshing and announces success", async () => {
@@ -82,7 +82,7 @@ test("confirmation persists before refreshing and announces success", async () =
   await waitFor(() =>
     expect(view.container.textContent).toContain(
       "Recurring tags saved to the ledger",
-    )
+    ),
   );
   expect(reload).toHaveBeenCalledOnce();
 });
@@ -109,7 +109,7 @@ test("handles no history and no upcoming data", async () => {
     onreload: vi.fn(),
   });
   await waitFor(() =>
-    expect(view.container.textContent).toContain("Not enough history")
+    expect(view.container.textContent).toContain("Not enough history"),
   );
   expect(view.container.textContent).toContain(
     "No recurring payments expected",
@@ -121,8 +121,9 @@ test("read-only mode disables confirmation", async () => {
     sequences: [],
     onreload: vi.fn(),
   });
-  expect(await view.findByRole("button", { name: "Confirm Netflix recurring" }))
-    .toBeDisabled();
+  expect(
+    await view.findByRole("button", { name: "Confirm Netflix recurring" }),
+  ).toBeDisabled();
 });
 test("row surfaces factual changes, stopped status and history", () => {
   const item = analyzeRecurring(
@@ -161,7 +162,7 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   expect(row.container.textContent).toContain("649.00 INR");
   obscure.set(true);
   await waitFor(() =>
-    expect(row.container.textContent).not.toContain("649.00")
+    expect(row.container.textContent).not.toContain("649.00"),
   );
   expect(row.container.textContent).not.toContain("499.00");
   expect(row.container.textContent).not.toContain("30.1%");
@@ -169,7 +170,7 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   expect(row.container.textContent).toContain("0.00 INR");
   obscure.set(false);
   await waitFor(() =>
-    expect(row.container.textContent).toContain("649.00 INR")
+    expect(row.container.textContent).toContain("649.00 INR"),
   );
 });
 

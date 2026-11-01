@@ -27,10 +27,11 @@ function tfidf(query: string): Record<string, number> {
   const result: Record<string, number> = {};
   for (const token of tokenKeys) {
     const tf = tokens[token] / tokenKeys.length;
-    const idf = Math.log(
-      Object.keys(index.docs).length /
-        (1 + Object.keys(index.tokens[token] || []).length),
-    ) + 1;
+    const idf =
+      Math.log(
+        Object.keys(index.docs).length /
+          (1 + Object.keys(index.tokens[token] || []).length),
+      ) + 1;
     result[token] = tf * idf;
   }
   return result;
@@ -63,7 +64,7 @@ export function findTfidfMatches(query: string): [string, number][] {
 export function tfidfFallback(input: PredictionInput): PredictionResult | null {
   const matches = findTfidfMatches(input.description);
   const match = matches.find(([account]) =>
-    accountMatchesPrefix(account, input.prefix)
+    accountMatchesPrefix(account, input.prefix),
   );
   if (!match) return null;
   const cosine = match[1];

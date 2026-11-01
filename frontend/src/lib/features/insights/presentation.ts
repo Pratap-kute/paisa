@@ -21,14 +21,9 @@ export function mapInsightDtoToDomain(dto: DtoInsightResponse): Insight {
     change: dto.change,
     changePercent: dto.changePercent,
     baselineQuality: dto.baselineQuality as
-      | "normal"
-      | "low_baseline"
-      | "no_baseline"
-      | undefined,
+      "normal" | "low_baseline" | "no_baseline" | undefined,
     baselineMethod: dto.baselineMethod as
-      | "previous_period"
-      | "rolling_median"
-      | undefined,
+      "previous_period" | "rolling_median" | undefined,
     baselineValue: dto.baselineValue,
     baselineSampleCount: dto.baselineSampleCount,
     investmentContribution: dto.investmentContribution,
@@ -59,11 +54,7 @@ export function mapInsightsResponseToDomain(
 }
 
 export type InsightTone =
-  | "positive"
-  | "warning"
-  | "critical"
-  | "info"
-  | "neutral";
+  "positive" | "warning" | "critical" | "info" | "neutral";
 
 export interface InsightTag {
   label: string;
@@ -140,9 +131,9 @@ export function presentInsight(
           severity: insight.severity,
           score: insight.score,
           title: "New monthly spending recorded",
-          description: `${
-            formatCurrency(val)
-          } non-tax expenses recorded this month`,
+          description: `${formatCurrency(
+            val,
+          )} non-tax expenses recorded this month`,
           icon: "fa-solid fa-receipt",
           tone: "info",
           badgeText: "New",
@@ -156,11 +147,12 @@ export function presentInsight(
       if (chg > 0) {
         const tone: InsightTone = pct >= 20 ? "warning" : "info";
         const extreme = pct >= EXTREME_PERCENT_THRESHOLD;
-        const driver = insight.driverAccount && insight.driverChange
-          ? ` Driven primarily by ${restName(insight.driverAccount)} (+${
-            formatCurrency(insight.driverChange)
-          }).`
-          : "";
+        const driver =
+          insight.driverAccount && insight.driverChange
+            ? ` Driven primarily by ${restName(insight.driverAccount)} (+${formatCurrency(
+                insight.driverChange,
+              )}).`
+            : "";
         return {
           id: insight.id,
           type: insight.type,
@@ -171,9 +163,9 @@ export function presentInsight(
           title: extreme
             ? `Expenses increased by ${formatCurrency(chg)}`
             : `Expenses increased ${formatPercentage(pct / 100, 0)}`,
-          description: `${formatCurrency(val)} vs ${
-            formatCurrency(prev)
-          } in ${compSuffix}${
+          description: `${formatCurrency(val)} vs ${formatCurrency(
+            prev,
+          )} in ${compSuffix}${
             extreme ? `. ${ratioLabel(val, prev)}` : ""
           }.${driver}`,
           icon: "fa-solid fa-arrow-trend-up",
@@ -196,9 +188,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `Expenses decreased ${formatPercentage(Math.abs(pct) / 100, 0)}`,
-        description: `${formatCurrency(val)} vs ${
-          formatCurrency(prev)
-        } in ${compSuffix}`,
+        description: `${formatCurrency(val)} vs ${formatCurrency(
+          prev,
+        )} in ${compSuffix}`,
         icon: "fa-solid fa-arrow-trend-down",
         tone: "positive",
         badgeText: `-${formatFloat(Math.abs(pct), 1)}%`,
@@ -214,8 +206,8 @@ export function presentInsight(
       const prev = Number(insight.previousValue ?? 0);
       const chg = Number(insight.change ?? 0);
       const pct = Number(insight.changePercent ?? 0);
-      const name = restName(insight.account || "") || insight.account ||
-        "Category";
+      const name =
+        restName(insight.account || "") || insight.account || "Category";
       const isLowBaseline = insight.baselineQuality === "low_baseline";
 
       if (prev === 0 || insight.baselineQuality === "no_baseline") {
@@ -247,9 +239,9 @@ export function presentInsight(
           severity: insight.severity,
           score: insight.score,
           title: `${name} spending increased by ${formatCurrency(chg)}`,
-          description: `${
-            formatCurrency(val)
-          } this month vs a very small amount previously`,
+          description: `${formatCurrency(
+            val,
+          )} this month vs a very small amount previously`,
           icon: "fa-solid fa-arrow-trend-up",
           tone: "info",
           badgeText: `+${formatCurrency(chg)}`,
@@ -274,12 +266,12 @@ export function presentInsight(
           ? `${name} spending increased by ${formatCurrency(chg)}`
           : `${name} spending increased ${formatPercentage(pct / 100, 0)}`,
         description: rolling
-          ? `${formatCurrency(val)} this month. Typical recent spend: ~${
-            formatCurrency(prev)
-          }${extreme ? `. ${ratioLabel(val, prev)}` : ""}`
-          : `${formatCurrency(val)} vs ${
-            formatCurrency(prev)
-          } in ${compSuffix}${extreme ? `. ${ratioLabel(val, prev)}` : ""}`,
+          ? `${formatCurrency(val)} this month. Typical recent spend: ~${formatCurrency(
+              prev,
+            )}${extreme ? `. ${ratioLabel(val, prev)}` : ""}`
+          : `${formatCurrency(val)} vs ${formatCurrency(
+              prev,
+            )} in ${compSuffix}${extreme ? `. ${ratioLabel(val, prev)}` : ""}`,
         icon: "fa-solid fa-arrow-trend-up",
         tone,
         badgeText: `+${formatFloat(pct, 1)}%`,
@@ -301,11 +293,14 @@ export function presentInsight(
         const isLumpSumNormalization = prev > 100;
         const tone: InsightTone = isLumpSumNormalization
           ? "info"
-          : (Math.abs(chg) >= 15 ? "warning" : "info");
+          : Math.abs(chg) >= 15
+            ? "warning"
+            : "info";
         const description = isLumpSumNormalization
-          ? `Normalized from ${
-            formatFloat(prev, 0)
-          }% in ${compSuffix} (previous period had an unusually high savings rate)`
+          ? `Normalized from ${formatFloat(
+              prev,
+              0,
+            )}% in ${compSuffix} (previous period had an unusually high savings rate)`
           : `Down from ${formatFloat(prev, 0)}% in ${compSuffix}`;
 
         return {
@@ -361,9 +356,9 @@ export function presentInsight(
           severity: insight.severity,
           score: insight.score,
           title: `Net worth increased ${formatCurrency(chg)}`,
-          description: `Current balance: ${formatCurrency(val)} (up from ${
-            formatCurrency(prev)
-          })`,
+          description: `Current balance: ${formatCurrency(val)} (up from ${formatCurrency(
+            prev,
+          )})`,
           icon: "fa-solid fa-vault",
           tone: "positive",
           badgeText: `+${formatPercentage(pct / 100, 1)}`,
@@ -382,9 +377,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `Net worth decreased ${formatCurrency(Math.abs(chg))}`,
-        description: `Current balance: ${formatCurrency(val)} (down from ${
-          formatCurrency(prev)
-        })`,
+        description: `Current balance: ${formatCurrency(val)} (down from ${formatCurrency(
+          prev,
+        )})`,
         icon: "fa-solid fa-vault",
         tone: "warning",
         badgeText: `-${formatPercentage(Math.abs(pct) / 100, 1)}`,
@@ -400,12 +395,14 @@ export function presentInsight(
       const gain = Number(insight.gainContribution ?? 0);
       const chg = Number(insight.change ?? 0);
 
-      const invLabel = inv >= 0
-        ? `${formatCurrency(inv)} net capital added`
-        : `${formatCurrency(Math.abs(inv))} net capital withdrawn`;
-      const gainLabel = gain >= 0
-        ? `${formatCurrency(gain)} gain / valuation effect`
-        : `${formatCurrency(Math.abs(gain))} loss / valuation effect`;
+      const invLabel =
+        inv >= 0
+          ? `${formatCurrency(inv)} net capital added`
+          : `${formatCurrency(Math.abs(inv))} net capital withdrawn`;
+      const gainLabel =
+        gain >= 0
+          ? `${formatCurrency(gain)} gain / valuation effect`
+          : `${formatCurrency(Math.abs(gain))} loss / valuation effect`;
 
       return {
         id: insight.id,
@@ -423,15 +420,15 @@ export function presentInsight(
         heroLabel: "net movement",
         tags: [
           {
-            label: `${inv >= 0 ? "+" : "-"}${
-              formatCurrency(Math.abs(inv))
-            } Capital`,
+            label: `${inv >= 0 ? "+" : "-"}${formatCurrency(
+              Math.abs(inv),
+            )} Capital`,
             tone: inv >= 0 ? "info" : "warning",
           },
           {
-            label: `${gain >= 0 ? "+" : "-"}${
-              formatCurrency(Math.abs(gain))
-            } Valuation`,
+            label: `${gain >= 0 ? "+" : "-"}${formatCurrency(
+              Math.abs(gain),
+            )} Valuation`,
             tone: gain >= 0 ? "positive" : "warning",
           },
         ],
@@ -444,8 +441,8 @@ export function presentInsight(
       const val = Number(insight.value ?? 0);
       const prev = Number(insight.previousValue ?? 0);
       const chg = Number(insight.change ?? 0);
-      const name = restName(insight.account || "") || insight.account ||
-        "Budget";
+      const name =
+        restName(insight.account || "") || insight.account || "Budget";
       const pct = prev > 0 ? Math.round((val / prev) * 100) : 100;
       const extreme = pct >= EXTREME_PERCENT_THRESHOLD;
 
@@ -457,9 +454,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `${name} budget exceeded by ${formatCurrency(chg)}`,
-        description: `${formatCurrency(val)} spent vs ${
-          formatCurrency(prev)
-        } budget${extreme ? `. ~${formatFloat(val / prev, 0)}× budget` : "ed"}`,
+        description: `${formatCurrency(val)} spent vs ${formatCurrency(
+          prev,
+        )} budget${extreme ? `. ~${formatFloat(val / prev, 0)}× budget` : "ed"}`,
         icon: "fa-solid fa-circle-exclamation",
         tone: "critical",
         badgeText: "Over budget",
@@ -478,8 +475,8 @@ export function presentInsight(
       const projected = Number(insight.value ?? 0);
       const effectiveBudget = Number(insight.previousValue ?? 0);
       const pct = Number(insight.changePercent ?? 0);
-      const name = restName(insight.account || "") || insight.account ||
-        "Budget";
+      const name =
+        restName(insight.account || "") || insight.account || "Budget";
       const isLikelyOver = projected > effectiveBudget;
       const tone: InsightTone = "warning";
 
@@ -492,12 +489,12 @@ export function presentInsight(
           categoryLabel,
           severity: insight.severity,
           score: insight.score,
-          title: `${name} projected to exceed budget by ${
-            formatCurrency(overrun)
-          }`,
-          description: `${formatCurrency(projected)} projected vs ${
-            formatCurrency(effectiveBudget)
-          } available`,
+          title: `${name} projected to exceed budget by ${formatCurrency(
+            overrun,
+          )}`,
+          description: `${formatCurrency(projected)} projected vs ${formatCurrency(
+            effectiveBudget,
+          )} available`,
           icon: "fa-solid fa-triangle-exclamation",
           tone,
           badgeText: `~${formatCurrency(overrun)} projected overrun`,
@@ -519,9 +516,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: `${name} projected close to its budget`,
-        description: `${formatCurrency(projected)} projected vs ${
-          formatCurrency(effectiveBudget)
-        } available · ${formatCurrency(remaining)} projected remaining`,
+        description: `${formatCurrency(projected)} projected vs ${formatCurrency(
+          effectiveBudget,
+        )} available · ${formatCurrency(remaining)} projected remaining`,
         icon: "fa-solid fa-triangle-exclamation",
         tone,
         badgeText: "At risk",
@@ -540,7 +537,8 @@ export function presentInsight(
       const chg = Number(insight.change ?? 0);
       const pct = Number(insight.changePercent ?? 0);
       const name = insight.account || "Recurring";
-      const isRollingMedian = insight.baselineMethod === "rolling_median" &&
+      const isRollingMedian =
+        insight.baselineMethod === "rolling_median" &&
         (insight.baselineSampleCount ?? 0) >= 3;
       const baselineVal = Number(insight.baselineValue ?? prev);
 
@@ -548,12 +546,12 @@ export function presentInsight(
         ? `${name} bill is unusually high`
         : `${name} recurring cost increased to ${formatCurrency(val)}`;
       const description = isRollingMedian
-        ? `${formatCurrency(val)} this month (typical recent bill: ~${
-          formatCurrency(baselineVal)
-        })`
-        : `Up by ${formatCurrency(chg)} (+${formatFloat(pct, 1)}%) from ${
-          formatCurrency(prev)
-        }`;
+        ? `${formatCurrency(val)} this month (typical recent bill: ~${formatCurrency(
+            baselineVal,
+          )})`
+        : `Up by ${formatCurrency(chg)} (+${formatFloat(pct, 1)}%) from ${formatCurrency(
+            prev,
+          )}`;
 
       return {
         id: insight.id,
@@ -581,8 +579,8 @@ export function presentInsight(
       const prev = Number(insight.previousValue ?? 0);
       const chg = Number(insight.change ?? 0);
       const pct = Number(insight.changePercent ?? 0);
-      const name = restName(insight.account || "") || insight.account ||
-        "Asset Class";
+      const name =
+        restName(insight.account || "") || insight.account || "Asset Class";
 
       if (insight.change != null) {
         return {
@@ -593,16 +591,18 @@ export function presentInsight(
           severity: insight.severity,
           score: insight.score,
           title: `${name} is ${formatFloat(chg, 1)} pp above target`,
-          description: `Current allocation: ${formatFloat(val, 1)}% (target: ${
-            formatFloat(prev, 1)
-          }%)`,
+          description: `Current allocation: ${formatFloat(val, 1)}% (target: ${formatFloat(
+            prev,
+            1,
+          )}%)`,
           icon: "fa-solid fa-chart-pie",
           tone: "warning",
           badgeText: `+${formatFloat(chg, 1)} pp`,
           heroMetric: `+${formatFloat(chg, 1)} pp`,
-          heroLabel: `actual ${formatFloat(val, 1)}% vs ${
-            formatFloat(prev, 1)
-          }% target`,
+          heroLabel: `actual ${formatFloat(val, 1)}% vs ${formatFloat(
+            prev,
+            1,
+          )}% target`,
           actionText: "View Target Allocation",
           href: insight.href || "/assets/allocation",
         };
@@ -657,9 +657,9 @@ export function presentInsight(
         severity: insight.severity,
         score: insight.score,
         title: "Projected month-end cash deficit",
-        description: `Budget projects an ending balance of ${
-          formatCurrency(val)
-        }`,
+        description: `Budget projects an ending balance of ${formatCurrency(
+          val,
+        )}`,
         icon: "fa-solid fa-triangle-exclamation",
         tone: "warning",
         badgeText: "Deficit",

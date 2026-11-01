@@ -12,20 +12,19 @@ const options = (hash: Record<string, unknown> = {}, root: object = {}) => ({
 });
 
 describe("template helpers", () => {
-  test.each(
-    [
-      ["eq", [1, 1], true],
-      ["eq", [1, "1"], false],
-      ["ne", [1, 2], true],
-      ["not", [0], true],
-      ["gte", ["₹1,200.50", 1200], true],
-      ["gt", ["(25.5)", -30], true],
-      ["lte", ["bad", 1], false],
-      ["lt", [1, 2], true],
-    ] as const,
-  )("%s(%j)", (name, args, expected) => {
-    expect((helpers[name] as (...values: unknown[]) => unknown)(...args))
-      .toBe(expected);
+  test.each([
+    ["eq", [1, 1], true],
+    ["eq", [1, "1"], false],
+    ["ne", [1, 2], true],
+    ["not", [0], true],
+    ["gte", ["₹1,200.50", 1200], true],
+    ["gt", ["(25.5)", -30], true],
+    ["lte", ["bad", 1], false],
+    ["lt", [1, 2], true],
+  ] as const)("%s(%j)", (name, args, expected) => {
+    expect((helpers[name] as (...values: unknown[]) => unknown)(...args)).toBe(
+      expected,
+    );
   });
 
   test("normalizes and rounds amounts", () => {
@@ -69,17 +68,18 @@ describe("template helpers", () => {
 
   test("extracts ranges and regular-expression matches", () => {
     const root = { ROW: { A: "one", B: "two", C: "three" } };
-    expect(helpers.textRange("A", "C", options({ separator: "," }, root)))
-      .toBe("one,two,three");
+    expect(helpers.textRange("A", "C", options({ separator: "," }, root))).toBe(
+      "one,two,three",
+    );
     expect(helpers.regexpTest("INV-123", "^INV-\\d+$")).toBe(true);
     expect(helpers.regexpTest(1 as unknown as string, ".")).toBeUndefined();
-    expect(helpers.regexpMatch("INV-123", "INV-(\\d+)", options({ group: 1 })))
-      .toBe("123");
+    expect(
+      helpers.regexpMatch("INV-123", "INV-(\\d+)", options({ group: 1 })),
+    ).toBe("123");
     expect(helpers.regexpMatch("none", "(\\d+)", options())).toBeUndefined();
     expect(
       helpers.match("coffee shop", options({ Food: "coffee", Taxi: "cab" })),
-    )
-      .toBe("Food");
+    ).toBe("Food");
     expect(helpers.match("unknown", options({ Food: "coffee" }))).toBeNull();
   });
 
@@ -90,38 +90,59 @@ describe("template helpers", () => {
       { A: "value 42", index: 2 },
       { A: "tail", index: 3 },
     ];
-    expect(helpers.findAbove("A", options({}, { ROW: sheet[2], SHEET: sheet })))
-      .toBe("header");
+    expect(
+      helpers.findAbove("A", options({}, { ROW: sheet[2], SHEET: sheet })),
+    ).toBe("header");
     expect(
       helpers.findAbove(
         "A",
-        options({ regexp: "(value) (\\d+)", group: 2 }, {
-          ROW: sheet[3],
-          SHEET: sheet,
-        }),
+        options(
+          { regexp: "(value) (\\d+)", group: 2 },
+          {
+            ROW: sheet[3],
+            SHEET: sheet,
+          },
+        ),
       ),
     ).toBe("42");
-    expect(helpers.findBelow("A", options({}, { ROW: sheet[1], SHEET: sheet })))
-      .toBe("value 42");
-    expect(helpers.findBelow("B", options({}, { ROW: sheet[3], SHEET: sheet })))
-      .toBeNull();
+    expect(
+      helpers.findBelow("A", options({}, { ROW: sheet[1], SHEET: sheet })),
+    ).toBe("value 42");
+    expect(
+      helpers.findBelow("B", options({}, { ROW: sheet[3], SHEET: sheet })),
+    ).toBeNull();
   });
 
   test("falls back to an unknown predicted account", () => {
     predictionSession.reset();
-    expect(helpers.predictAccount("merchant", options({ prefix: "Expenses:" })))
-      .toBe("Expenses:Unknown");
-    expect(helpers.predictAccount(options({ prefix: "Expenses" }, {
-      ROW: { A: "merchant" },
-    }))).toBe("Expenses:Unknown");
-    expect(helpers.predictAccount(options({}, {
-      ROW: {
-        A: "01/04/2026",
-        B: "WDL TFR UPI/309191771120/AMAZON SELLER",
-        D: "200.00",
-        index: 4,
-      },
-    }))).toBe("Unknown");
+    expect(
+      helpers.predictAccount("merchant", options({ prefix: "Expenses:" })),
+    ).toBe("Expenses:Unknown");
+    expect(
+      helpers.predictAccount(
+        options(
+          { prefix: "Expenses" },
+          {
+            ROW: { A: "merchant" },
+          },
+        ),
+      ),
+    ).toBe("Expenses:Unknown");
+    expect(
+      helpers.predictAccount(
+        options(
+          {},
+          {
+            ROW: {
+              A: "01/04/2026",
+              B: "WDL TFR UPI/309191771120/AMAZON SELLER",
+              D: "200.00",
+              index: 4,
+            },
+          },
+        ),
+      ),
+    ).toBe("Unknown");
   });
 
   test("predicts from committed history through the helper", () => {
@@ -173,14 +194,19 @@ describe("template helpers", () => {
       },
     ]);
     expect(
-      helpers.predictAccount(options({}, {
-        ROW: {
-          A: "01/04/2026",
-          B: "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
-          D: "200.00",
-          index: 9,
-        },
-      })),
+      helpers.predictAccount(
+        options(
+          {},
+          {
+            ROW: {
+              A: "01/04/2026",
+              B: "WDL TFR UPI/309191771120/AMAZON SELLER SERVICES",
+              D: "200.00",
+              index: 9,
+            },
+          },
+        ),
+      ),
     ).toBe("Expenses:Subscriptions");
     predictionSession.reset();
   });

@@ -93,7 +93,9 @@ async function coreCoverageTargets(): Promise<Set<string>> {
   // report remains repository-wide, while unrelated UI and vendor code is
   // measured by the component suite instead of diluting this unit-test signal.
   const targets = new Set<string>();
-  const entries = await fs.readdir(CORE_TEST_DIRECTORY, { withFileTypes: true });
+  const entries = await fs.readdir(CORE_TEST_DIRECTORY, {
+    withFileTypes: true,
+  });
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".test.ts")) continue;
     const source = await fs.readFile(
@@ -134,22 +136,27 @@ function aggregateCoreCoverage(
     if (filePath === "total" || !isCoreCoverageFile(filePath, targets)) {
       continue;
     }
-    for (
-      const metric of ["lines", "statements", "functions", "branches"] as const
-    ) {
+    for (const metric of [
+      "lines",
+      "statements",
+      "functions",
+      "branches",
+    ] as const) {
       totals[metric].total += metrics[metric].total;
       totals[metric].covered += metrics[metric].covered;
       totals[metric].skipped += metrics[metric].skipped;
     }
   }
 
-  for (
-    const metric of ["lines", "statements", "functions", "branches"] as const
-  ) {
+  for (const metric of [
+    "lines",
+    "statements",
+    "functions",
+    "branches",
+  ] as const) {
     const { total, covered } = totals[metric];
-    totals[metric].pct = total === 0
-      ? 100
-      : Number(((covered / total) * 100).toFixed(2));
+    totals[metric].pct =
+      total === 0 ? 100 : Number(((covered / total) * 100).toFixed(2));
   }
 
   return totals;
@@ -191,24 +198,24 @@ const coreSummary = aggregateCoreCoverage(
   await coreCoverageTargets(),
 );
 console.log(
-  `Core coverage: ${
-    ["lines", "statements", "functions", "branches"].map((metric) => {
+  `Core coverage: ${["lines", "statements", "functions", "branches"]
+    .map((metric) => {
       const value = coreSummary[metric as keyof FileCoverage];
       return `${metric}=${value.pct}%`;
-    }).join(", ")
-  }`,
+    })
+    .join(", ")}`,
 );
 const failed = ["lines", "statements", "functions", "branches"].filter(
   (metric) =>
     coreSummary[metric as keyof FileCoverage].pct < COVERAGE_THRESHOLD,
 );
 if (failed.length) {
-  const message = `Core frontend coverage is below ${COVERAGE_THRESHOLD}%: ${
-    failed.map((metric) => {
+  const message = `Core frontend coverage is below ${COVERAGE_THRESHOLD}%: ${failed
+    .map((metric) => {
       const value = coreSummary[metric as keyof FileCoverage];
       return `${metric}=${value.pct}%`;
-    }).join(", ")
-  }`;
+    })
+    .join(", ")}`;
   if (reportOnly) {
     console.warn(`Coverage target not enforced yet: ${message}`);
   } else {
