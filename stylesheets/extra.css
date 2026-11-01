@@ -39,6 +39,25 @@
   text-align: center;
 }
 
+/* The page-action buttons are floated right. On the home page the logo's
+   negative top margin pulls it beside them, and a block-level image may not
+   overlap a float, so the browser narrows its line and the logo drifts left. */
+.md-content__inner:has(.hero) {
+  position: relative;
+}
+
+.md-content__inner:has(.hero) .md-content__button {
+  position: absolute;
+  top: 0.4rem;
+  right: 0;
+  float: none;
+  margin: 0;
+}
+
+.md-content__inner:has(.hero) .md-content__button:has(+ .md-content__button) {
+  right: 2rem;
+}
+
 .hero img {
   height: 88px;
   margin: -3rem auto 0.75rem;

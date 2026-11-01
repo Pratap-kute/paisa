@@ -15,6 +15,7 @@
         <link rel="canonical" href="https://pratap-kute.github.io/paisa/reference/changelog/">
       
       
+      
         <link rel="prev" href="../tax/schedule-al/">
       
       
@@ -25,7 +26,7 @@
       
       
       <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="zensical-0.0.74">
     
     
   
@@ -37,10 +38,15 @@
   
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.94dd801d.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.813d4b3f.min.css">
       
       
 
@@ -55,7 +61,7 @@
     
       <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -100,14 +106,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#release-changelog" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -181,6 +184,7 @@
     <label class="md-header__button md-icon" for="__drawer">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -235,61 +239,28 @@
         <label class="md-header__button md-icon" for="__search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <span class="md-visually-hidden">Search</span>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/Pratap-kute/paisa" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
   </div>
   <div class="md-source__repository">
     Pratap-kute/paisa
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -307,9 +278,6 @@
       <a href="../.." class="md-tabs__link">
         
   
-  
-    
-  
   Home
 
       </a>
@@ -326,9 +294,6 @@
       <a href="../../product-tour/" class="md-tabs__link">
         
   
-  
-    
-  
   Product Tour
 
       </a>
@@ -342,13 +307,25 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../getting-started/" class="md-tabs__link">
           
-  
-  
-    
   
   Getting Started
 
@@ -364,13 +341,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../using-paisa/" class="md-tabs__link">
           
-  
-  
-    
   
   Using Paisa
 
@@ -388,13 +381,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../" class="md-tabs__link">
           
-  
-  
-    
   
   Reference
 
@@ -413,9 +422,6 @@
       <a href="../../faq/" class="md-tabs__link">
         
   
-  
-    
-  
   FAQ
 
       </a>
@@ -429,13 +435,27 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../project/" class="md-tabs__link">
           
-  
-  
-    
   
   Project
 
@@ -451,13 +471,27 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../development/" class="md-tabs__link">
           
-  
-  
-    
   
   Development
 
@@ -560,7 +594,7 @@
       <a href="https://github.com/Pratap-kute/paisa" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
   </div>
   <div class="md-source__repository">
     Pratap-kute/paisa
@@ -584,8 +618,7 @@
   <span class="md-ellipsis">
     
   
-    Home
-  
+  Home
 
     
   </span>
@@ -611,8 +644,7 @@
   <span class="md-ellipsis">
     
   
-    Product Tour
-  
+  Product Tour
 
     
   </span>
@@ -667,8 +699,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
-  
+  Getting Started
 
     
   </span>
@@ -684,21 +715,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Getting Started
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Getting Started
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -711,8 +742,7 @@
   <span class="md-ellipsis">
     
   
-    Install Paisa
-  
+  Install Paisa
 
     
   </span>
@@ -723,10 +753,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -739,8 +769,7 @@
   <span class="md-ellipsis">
     
   
-    First setup
-  
+  First setup
 
     
   </span>
@@ -751,10 +780,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -767,8 +796,7 @@
   <span class="md-ellipsis">
     
   
-    Journal examples
-  
+  Journal examples
 
     
   </span>
@@ -779,10 +807,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -835,8 +864,7 @@
   <span class="md-ellipsis">
     
   
-    Using Paisa
-  
+  Using Paisa
 
     
   </span>
@@ -852,21 +880,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Using Paisa
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Using Paisa
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -909,8 +937,7 @@
   <span class="md-ellipsis">
     
   
-    Everyday finances
-  
+  Everyday finances
 
     
   </span>
@@ -920,19 +947,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Everyday finances
-  
+  Everyday finances
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -945,8 +972,7 @@
   <span class="md-ellipsis">
     
   
-    Accounts
-  
+  Accounts
 
     
   </span>
@@ -957,10 +983,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -973,8 +999,7 @@
   <span class="md-ellipsis">
     
   
-    Financial reports
-  
+  Financial reports
 
     
   </span>
@@ -985,10 +1010,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1001,8 +1026,7 @@
   <span class="md-ellipsis">
     
   
-    Financial Insights
-  
+  Financial Insights
 
     
   </span>
@@ -1013,10 +1037,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1029,8 +1053,7 @@
   <span class="md-ellipsis">
     
   
-    Budgets
-  
+  Budgets
 
     
   </span>
@@ -1041,10 +1064,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1057,8 +1080,7 @@
   <span class="md-ellipsis">
     
   
-    Recurring transactions
-  
+  Recurring transactions
 
     
   </span>
@@ -1069,10 +1091,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1116,8 +1138,7 @@
   <span class="md-ellipsis">
     
   
-    Liabilities
-  
+  Liabilities
 
     
   </span>
@@ -1133,21 +1154,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_2_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Liabilities
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_2_6">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Liabilities
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -1160,8 +1181,7 @@
   <span class="md-ellipsis">
     
   
-    Balances
-  
+  Balances
 
     
   </span>
@@ -1172,10 +1192,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1188,8 +1208,7 @@
   <span class="md-ellipsis">
     
   
-    Interest
-  
+  Interest
 
     
   </span>
@@ -1200,10 +1219,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1216,8 +1235,7 @@
   <span class="md-ellipsis">
     
   
-    Repayments
-  
+  Repayments
 
     
   </span>
@@ -1228,10 +1246,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1244,8 +1262,7 @@
   <span class="md-ellipsis">
     
   
-    Credit cards
-  
+  Credit cards
 
     
   </span>
@@ -1256,26 +1273,28 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1316,8 +1335,7 @@
   <span class="md-ellipsis">
     
   
-    Journal and imports
-  
+  Journal and imports
 
     
   </span>
@@ -1327,19 +1345,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Journal and imports
-  
+  Journal and imports
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1352,8 +1370,7 @@
   <span class="md-ellipsis">
     
   
-    Journal
-  
+  Journal
 
     
   </span>
@@ -1364,10 +1381,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1380,8 +1397,7 @@
   <span class="md-ellipsis">
     
   
-    Editor
-  
+  Editor
 
     
   </span>
@@ -1392,10 +1408,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1408,8 +1424,7 @@
   <span class="md-ellipsis">
     
   
-    Import statements
-  
+  Import statements
 
     
   </span>
@@ -1420,10 +1435,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1436,8 +1451,7 @@
   <span class="md-ellipsis">
     
   
-    Account suggestions
-  
+  Account suggestions
 
     
   </span>
@@ -1448,10 +1462,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1464,8 +1478,7 @@
   <span class="md-ellipsis">
     
   
-    Bulk edit
-  
+  Bulk edit
 
     
   </span>
@@ -1476,18 +1489,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1526,8 +1540,7 @@
   <span class="md-ellipsis">
     
   
-    Investments
-  
+  Investments
 
     
   </span>
@@ -1537,19 +1550,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_4">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_4">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Investments
-  
+  Investments
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1562,8 +1575,7 @@
   <span class="md-ellipsis">
     
   
-    Portfolio Analysis
-  
+  Portfolio Analysis
 
     
   </span>
@@ -1574,10 +1586,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1590,8 +1602,7 @@
   <span class="md-ellipsis">
     
   
-    Commodities and prices
-  
+  Commodities and prices
 
     
   </span>
@@ -1602,10 +1613,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1618,8 +1629,7 @@
   <span class="md-ellipsis">
     
   
-    Allocation targets
-  
+  Allocation targets
 
     
   </span>
@@ -1630,10 +1640,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1646,8 +1656,7 @@
   <span class="md-ellipsis">
     
   
-    Investment performance
-  
+  Investment performance
 
     
   </span>
@@ -1658,18 +1667,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1704,8 +1714,7 @@
   <span class="md-ellipsis">
     
   
-    Planning
-  
+  Planning
 
     
   </span>
@@ -1715,19 +1724,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Planning
-  
+  Planning
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1740,8 +1749,7 @@
   <span class="md-ellipsis">
     
   
-    Scenario planning
-  
+  Scenario planning
 
     
   </span>
@@ -1752,10 +1760,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1795,8 +1803,7 @@
   <span class="md-ellipsis">
     
   
-    Goals
-  
+  Goals
 
     
   </span>
@@ -1812,21 +1819,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Goals
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_5_2">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Goals
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -1839,8 +1846,7 @@
   <span class="md-ellipsis">
     
   
-    Retirement
-  
+  Retirement
 
     
   </span>
@@ -1851,10 +1857,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1867,8 +1873,7 @@
   <span class="md-ellipsis">
     
   
-    Savings
-  
+  Savings
 
     
   </span>
@@ -1879,26 +1884,28 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1935,8 +1942,7 @@
   <span class="md-ellipsis">
     
   
-    Tools
-  
+  Tools
 
     
   </span>
@@ -1946,19 +1952,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_6">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_6">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Tools
-  
+  Tools
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1971,8 +1977,7 @@
   <span class="md-ellipsis">
     
   
-    Doctor
-  
+  Doctor
 
     
   </span>
@@ -1983,10 +1988,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1999,8 +2004,7 @@
   <span class="md-ellipsis">
     
   
-    Sheets
-  
+  Sheets
 
     
   </span>
@@ -2019,10 +2023,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2035,8 +2039,7 @@
   <span class="md-ellipsis">
     
   
-    Application information and logs
-  
+  Application information and logs
 
     
   </span>
@@ -2047,18 +2050,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2116,8 +2121,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
-  
+  Reference
 
     
   </span>
@@ -2133,21 +2137,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Reference
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_5">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Reference
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -2160,8 +2164,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
-  
+  Configuration
 
     
   </span>
@@ -2172,10 +2175,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2188,8 +2191,7 @@
   <span class="md-ellipsis">
     
   
-    Ledger CLI
-  
+  Ledger CLI
 
     
   </span>
@@ -2200,10 +2202,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2216,8 +2218,7 @@
   <span class="md-ellipsis">
     
   
-    Authentication
-  
+  Authentication
 
     
   </span>
@@ -2228,10 +2229,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2276,8 +2277,7 @@
   <span class="md-ellipsis">
     
   
-    Tax
-  
+  Tax
 
     
   </span>
@@ -2293,21 +2293,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Tax
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_5_5">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Tax
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -2320,8 +2320,7 @@
   <span class="md-ellipsis">
     
   
-    Tax harvesting
-  
+  Tax harvesting
 
     
   </span>
@@ -2332,10 +2331,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2348,8 +2347,7 @@
   <span class="md-ellipsis">
     
   
-    Capital gains
-  
+  Capital gains
 
     
   </span>
@@ -2360,10 +2358,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2376,8 +2374,7 @@
   <span class="md-ellipsis">
     
   
-    Schedule AL
-  
+  Schedule AL
 
     
   </span>
@@ -2388,18 +2385,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -2408,7 +2406,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -2421,8 +2421,7 @@
   <span class="md-ellipsis">
     
   
-    Changelog
-  
+  Changelog
 
     
   </span>
@@ -2432,15 +2431,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Changelog
-  
+  Changelog
 
     
   </span>
@@ -2451,7 +2449,8 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -2460,16 +2459,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#093-2026-10-30-pratap-kute-netmaxt3r" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.3 (2026-10-30) - @Pratap-kute, @netmaxt3r
-      
+      </span>
     </span>
   </a>
   
@@ -2479,9 +2478,9 @@
           <li class="md-nav__item">
   <a href="#bug-fixes-reliability" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Bug Fixes &amp; Reliability
-      
+      </span>
     </span>
   </a>
   
@@ -2490,9 +2489,9 @@
           <li class="md-nav__item">
   <a href="#platform-developer-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Platform &amp; Developer Experience
-      
+      </span>
     </span>
   </a>
   
@@ -2501,9 +2500,9 @@
           <li class="md-nav__item">
   <a href="#documentation-showcase" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Documentation &amp; Showcase
-      
+      </span>
     </span>
   </a>
   
@@ -2517,9 +2516,9 @@
         <li class="md-nav__item">
   <a href="#092-2026-09-12-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.2 (2026-09-12) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -2529,9 +2528,9 @@
           <li class="md-nav__item">
   <a href="#reliability-and-accounting-fixes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Reliability and accounting fixes
-      
+      </span>
     </span>
   </a>
   
@@ -2540,9 +2539,9 @@
           <li class="md-nav__item">
   <a href="#financial-planning-and-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Financial planning and analysis
-      
+      </span>
     </span>
   </a>
   
@@ -2551,9 +2550,9 @@
           <li class="md-nav__item">
   <a href="#workflow-improvements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Workflow improvements
-      
+      </span>
     </span>
   </a>
   
@@ -2562,9 +2561,9 @@
           <li class="md-nav__item">
   <a href="#platform-and-developer-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Platform and developer experience
-      
+      </span>
     </span>
   </a>
   
@@ -2578,9 +2577,9 @@
         <li class="md-nav__item">
   <a href="#091-2026-08-27-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.1 (2026-08-27) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -2590,9 +2589,9 @@
           <li class="md-nav__item">
   <a href="#security" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Security
-      
+      </span>
     </span>
   </a>
   
@@ -2601,9 +2600,9 @@
           <li class="md-nav__item">
   <a href="#reliability-and-data-integrity" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Reliability and data integrity
-      
+      </span>
     </span>
   </a>
   
@@ -2612,9 +2611,9 @@
           <li class="md-nav__item">
   <a href="#performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Performance
-      
+      </span>
     </span>
   </a>
   
@@ -2623,9 +2622,9 @@
           <li class="md-nav__item">
   <a href="#api-and-backend-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         API and backend architecture
-      
+      </span>
     </span>
   </a>
   
@@ -2634,9 +2633,9 @@
           <li class="md-nav__item">
   <a href="#frontend-architecture-and-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Frontend architecture and experience
-      
+      </span>
     </span>
   </a>
   
@@ -2645,9 +2644,9 @@
           <li class="md-nav__item">
   <a href="#testing-and-ci" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Testing and CI
-      
+      </span>
     </span>
   </a>
   
@@ -2661,9 +2660,9 @@
         <li class="md-nav__item">
   <a href="#090-2026-08-24-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.0 (2026-08-24) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -2672,9 +2671,9 @@
         <li class="md-nav__item">
   <a href="#081-2026-08-18-pratap-kute-hasnep" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.8.1 (2026-08-18) - @Pratap-kute, @Hasnep
-      
+      </span>
     </span>
   </a>
   
@@ -2683,9 +2682,9 @@
         <li class="md-nav__item">
   <a href="#080-2026-08-14-ananthakumaran-pratap-kute-labellson-mbeutelspacher" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.8.0 (2026-08-14) - @ananthakumaran, @Pratap-kute, @labellson, @mbeutelspacher
-      
+      </span>
     </span>
   </a>
   
@@ -2694,9 +2693,9 @@
         <li class="md-nav__item">
   <a href="#074-2025-02-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.4 (2025-02-23)
-      
+      </span>
     </span>
   </a>
   
@@ -2705,9 +2704,9 @@
         <li class="md-nav__item">
   <a href="#073-2025-02-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.3 (2025-02-23)
-      
+      </span>
     </span>
   </a>
   
@@ -2716,9 +2715,9 @@
         <li class="md-nav__item">
   <a href="#071-2024-10-20" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.1 (2024-10-20)
-      
+      </span>
     </span>
   </a>
   
@@ -2727,9 +2726,9 @@
         <li class="md-nav__item">
   <a href="#070-2024-08-26" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.0 (2024-08-26)
-      
+      </span>
     </span>
   </a>
   
@@ -2738,9 +2737,9 @@
         <li class="md-nav__item">
   <a href="#066-2024-02-10" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.6 (2024-02-10)
-      
+      </span>
     </span>
   </a>
   
@@ -2749,9 +2748,9 @@
         <li class="md-nav__item">
   <a href="#065-2024-02-02" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.5 (2024-02-02)
-      
+      </span>
     </span>
   </a>
   
@@ -2760,9 +2759,9 @@
         <li class="md-nav__item">
   <a href="#064-2024-01-22" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.4 (2024-01-22)
-      
+      </span>
     </span>
   </a>
   
@@ -2771,9 +2770,9 @@
         <li class="md-nav__item">
   <a href="#063-2024-01-13" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.3 (2024-01-13)
-      
+      </span>
     </span>
   </a>
   
@@ -2782,9 +2781,9 @@
         <li class="md-nav__item">
   <a href="#062-2023-12-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.2 (2023-12-23)
-      
+      </span>
     </span>
   </a>
   
@@ -2793,9 +2792,9 @@
         <li class="md-nav__item">
   <a href="#061-2023-12-16" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.1 (2023-12-16)
-      
+      </span>
     </span>
   </a>
   
@@ -2804,9 +2803,9 @@
         <li class="md-nav__item">
   <a href="#060-2023-12-09" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.0 (2023-12-09)
-      
+      </span>
     </span>
   </a>
   
@@ -2815,9 +2814,9 @@
         <li class="md-nav__item">
   <a href="#059-2023-11-26" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.9 (2023-11-26)
-      
+      </span>
     </span>
   </a>
   
@@ -2826,9 +2825,9 @@
         <li class="md-nav__item">
   <a href="#058-2023-11-18" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.8 (2023-11-18)
-      
+      </span>
     </span>
   </a>
   
@@ -2837,9 +2836,9 @@
         <li class="md-nav__item">
   <a href="#057-2023-11-11" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.7 (2023-11-11)
-      
+      </span>
     </span>
   </a>
   
@@ -2849,9 +2848,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -2865,9 +2864,9 @@
         <li class="md-nav__item">
   <a href="#056-2023-11-04" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.6 (2023-11-04)
-      
+      </span>
     </span>
   </a>
   
@@ -2876,9 +2875,9 @@
         <li class="md-nav__item">
   <a href="#055-2023-10-07" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.5 (2023-10-07)
-      
+      </span>
     </span>
   </a>
   
@@ -2887,9 +2886,9 @@
         <li class="md-nav__item">
   <a href="#054-2023-10-07" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.4 (2023-10-07)
-      
+      </span>
     </span>
   </a>
   
@@ -2898,9 +2897,9 @@
         <li class="md-nav__item">
   <a href="#053-2023-09-30" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.3 (2023-09-30)
-      
+      </span>
     </span>
   </a>
   
@@ -2910,9 +2909,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes_1" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -2926,9 +2925,9 @@
         <li class="md-nav__item">
   <a href="#052-2023-09-22" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.2 (2023-09-22)
-      
+      </span>
     </span>
   </a>
   
@@ -2938,9 +2937,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes_2" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -2954,9 +2953,9 @@
         <li class="md-nav__item">
   <a href="#050-2023-09-16" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.0 (2023-09-16)
-      
+      </span>
     </span>
   </a>
   
@@ -2965,9 +2964,9 @@
         <li class="md-nav__item">
   <a href="#049-2023-09-09" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.9 (2023-09-09)
-      
+      </span>
     </span>
   </a>
   
@@ -2976,9 +2975,9 @@
         <li class="md-nav__item">
   <a href="#048-2023-09-01" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.8 (2023-09-01)
-      
+      </span>
     </span>
   </a>
   
@@ -2987,9 +2986,9 @@
         <li class="md-nav__item">
   <a href="#047-2023-08-19" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.7 (2023-08-19)
-      
+      </span>
     </span>
   </a>
   
@@ -3002,10 +3001,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -3025,8 +3025,7 @@
   <span class="md-ellipsis">
     
   
-    FAQ
-  
+  FAQ
 
     
   </span>
@@ -3083,8 +3082,7 @@
   <span class="md-ellipsis">
     
   
-    Project
-  
+  Project
 
     
   </span>
@@ -3100,21 +3098,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Project
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Project
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -3127,8 +3125,7 @@
   <span class="md-ellipsis">
     
   
-    Manifesto
-  
+  Manifesto
 
     
   </span>
@@ -3139,14 +3136,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3157,8 +3152,7 @@
   <span class="md-ellipsis">
     
   
-    Blog
-  
+  Blog archive
 
     
   </span>
@@ -3169,10 +3163,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3205,8 +3199,7 @@
   <span class="md-ellipsis">
     
   
-    Archive
-  
+  Archive
 
     
   </span>
@@ -3216,23 +3209,21 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_4">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7_4">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Archive
-  
+  Archive
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3243,8 +3234,7 @@
   <span class="md-ellipsis">
     
   
-    2024
-  
+  2024
 
     
   </span>
@@ -3255,18 +3245,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3309,8 +3300,7 @@
   <span class="md-ellipsis">
     
   
-    Categories
-  
+  Categories
 
     
   </span>
@@ -3320,23 +3310,21 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Categories
-  
+  Categories
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3347,8 +3335,7 @@
   <span class="md-ellipsis">
     
   
-    configuration
-  
+  configuration
 
     
   </span>
@@ -3359,14 +3346,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3377,8 +3362,7 @@
   <span class="md-ellipsis">
     
   
-    gold
-  
+  gold
 
     
   </span>
@@ -3389,14 +3373,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3407,8 +3389,7 @@
   <span class="md-ellipsis">
     
   
-    locale
-  
+  locale
 
     
   </span>
@@ -3419,14 +3400,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3437,8 +3416,7 @@
   <span class="md-ellipsis">
     
   
-    price
-  
+  price
 
     
   </span>
@@ -3449,14 +3427,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3467,8 +3443,7 @@
   <span class="md-ellipsis">
     
   
-    sgb
-  
+  sgb
 
     
   </span>
@@ -3479,14 +3454,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -3497,8 +3470,7 @@
   <span class="md-ellipsis">
     
   
-    sovereign-gold-bond
-  
+  sovereign-gold-bond
 
     
   </span>
@@ -3509,18 +3481,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -3571,8 +3545,7 @@
   <span class="md-ellipsis">
     
   
-    Development
-  
+  Development
 
     
   </span>
@@ -3588,21 +3561,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Development
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_8">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Development
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -3615,8 +3588,7 @@
   <span class="md-ellipsis">
     
   
-    Contributor setup
-  
+  Contributor setup
 
     
   </span>
@@ -3627,10 +3599,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3643,8 +3615,7 @@
   <span class="md-ellipsis">
     
   
-    API
-  
+  API
 
     
   </span>
@@ -3655,10 +3626,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3671,8 +3642,7 @@
   <span class="md-ellipsis">
     
   
-    Testing
-  
+  Testing
 
     
   </span>
@@ -3683,10 +3653,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3721,8 +3691,7 @@
   <span class="md-ellipsis">
     
   
-    Design (internal)
-  
+  Design (internal)
 
     
   </span>
@@ -3732,19 +3701,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_8_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Design (internal)
-  
+  Design (internal)
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -3757,8 +3726,7 @@
   <span class="md-ellipsis">
     
   
-    Chart architecture
-  
+  Chart architecture
 
     
   </span>
@@ -3769,10 +3737,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3785,8 +3753,7 @@
   <span class="md-ellipsis">
     
   
-    UI specification
-  
+  UI specification
 
     
   </span>
@@ -3797,18 +3764,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -3824,10 +3793,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -3836,16 +3807,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#093-2026-10-30-pratap-kute-netmaxt3r" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.3 (2026-10-30) - @Pratap-kute, @netmaxt3r
-      
+      </span>
     </span>
   </a>
   
@@ -3855,9 +3826,9 @@
           <li class="md-nav__item">
   <a href="#bug-fixes-reliability" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Bug Fixes &amp; Reliability
-      
+      </span>
     </span>
   </a>
   
@@ -3866,9 +3837,9 @@
           <li class="md-nav__item">
   <a href="#platform-developer-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Platform &amp; Developer Experience
-      
+      </span>
     </span>
   </a>
   
@@ -3877,9 +3848,9 @@
           <li class="md-nav__item">
   <a href="#documentation-showcase" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Documentation &amp; Showcase
-      
+      </span>
     </span>
   </a>
   
@@ -3893,9 +3864,9 @@
         <li class="md-nav__item">
   <a href="#092-2026-09-12-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.2 (2026-09-12) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -3905,9 +3876,9 @@
           <li class="md-nav__item">
   <a href="#reliability-and-accounting-fixes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Reliability and accounting fixes
-      
+      </span>
     </span>
   </a>
   
@@ -3916,9 +3887,9 @@
           <li class="md-nav__item">
   <a href="#financial-planning-and-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Financial planning and analysis
-      
+      </span>
     </span>
   </a>
   
@@ -3927,9 +3898,9 @@
           <li class="md-nav__item">
   <a href="#workflow-improvements" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Workflow improvements
-      
+      </span>
     </span>
   </a>
   
@@ -3938,9 +3909,9 @@
           <li class="md-nav__item">
   <a href="#platform-and-developer-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Platform and developer experience
-      
+      </span>
     </span>
   </a>
   
@@ -3954,9 +3925,9 @@
         <li class="md-nav__item">
   <a href="#091-2026-08-27-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.1 (2026-08-27) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -3966,9 +3937,9 @@
           <li class="md-nav__item">
   <a href="#security" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Security
-      
+      </span>
     </span>
   </a>
   
@@ -3977,9 +3948,9 @@
           <li class="md-nav__item">
   <a href="#reliability-and-data-integrity" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Reliability and data integrity
-      
+      </span>
     </span>
   </a>
   
@@ -3988,9 +3959,9 @@
           <li class="md-nav__item">
   <a href="#performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Performance
-      
+      </span>
     </span>
   </a>
   
@@ -3999,9 +3970,9 @@
           <li class="md-nav__item">
   <a href="#api-and-backend-architecture" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         API and backend architecture
-      
+      </span>
     </span>
   </a>
   
@@ -4010,9 +3981,9 @@
           <li class="md-nav__item">
   <a href="#frontend-architecture-and-experience" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Frontend architecture and experience
-      
+      </span>
     </span>
   </a>
   
@@ -4021,9 +3992,9 @@
           <li class="md-nav__item">
   <a href="#testing-and-ci" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Testing and CI
-      
+      </span>
     </span>
   </a>
   
@@ -4037,9 +4008,9 @@
         <li class="md-nav__item">
   <a href="#090-2026-08-24-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.9.0 (2026-08-24) - @Pratap-kute
-      
+      </span>
     </span>
   </a>
   
@@ -4048,9 +4019,9 @@
         <li class="md-nav__item">
   <a href="#081-2026-08-18-pratap-kute-hasnep" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.8.1 (2026-08-18) - @Pratap-kute, @Hasnep
-      
+      </span>
     </span>
   </a>
   
@@ -4059,9 +4030,9 @@
         <li class="md-nav__item">
   <a href="#080-2026-08-14-ananthakumaran-pratap-kute-labellson-mbeutelspacher" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.8.0 (2026-08-14) - @ananthakumaran, @Pratap-kute, @labellson, @mbeutelspacher
-      
+      </span>
     </span>
   </a>
   
@@ -4070,9 +4041,9 @@
         <li class="md-nav__item">
   <a href="#074-2025-02-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.4 (2025-02-23)
-      
+      </span>
     </span>
   </a>
   
@@ -4081,9 +4052,9 @@
         <li class="md-nav__item">
   <a href="#073-2025-02-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.3 (2025-02-23)
-      
+      </span>
     </span>
   </a>
   
@@ -4092,9 +4063,9 @@
         <li class="md-nav__item">
   <a href="#071-2024-10-20" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.1 (2024-10-20)
-      
+      </span>
     </span>
   </a>
   
@@ -4103,9 +4074,9 @@
         <li class="md-nav__item">
   <a href="#070-2024-08-26" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.7.0 (2024-08-26)
-      
+      </span>
     </span>
   </a>
   
@@ -4114,9 +4085,9 @@
         <li class="md-nav__item">
   <a href="#066-2024-02-10" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.6 (2024-02-10)
-      
+      </span>
     </span>
   </a>
   
@@ -4125,9 +4096,9 @@
         <li class="md-nav__item">
   <a href="#065-2024-02-02" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.5 (2024-02-02)
-      
+      </span>
     </span>
   </a>
   
@@ -4136,9 +4107,9 @@
         <li class="md-nav__item">
   <a href="#064-2024-01-22" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.4 (2024-01-22)
-      
+      </span>
     </span>
   </a>
   
@@ -4147,9 +4118,9 @@
         <li class="md-nav__item">
   <a href="#063-2024-01-13" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.3 (2024-01-13)
-      
+      </span>
     </span>
   </a>
   
@@ -4158,9 +4129,9 @@
         <li class="md-nav__item">
   <a href="#062-2023-12-23" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.2 (2023-12-23)
-      
+      </span>
     </span>
   </a>
   
@@ -4169,9 +4140,9 @@
         <li class="md-nav__item">
   <a href="#061-2023-12-16" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.1 (2023-12-16)
-      
+      </span>
     </span>
   </a>
   
@@ -4180,9 +4151,9 @@
         <li class="md-nav__item">
   <a href="#060-2023-12-09" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.6.0 (2023-12-09)
-      
+      </span>
     </span>
   </a>
   
@@ -4191,9 +4162,9 @@
         <li class="md-nav__item">
   <a href="#059-2023-11-26" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.9 (2023-11-26)
-      
+      </span>
     </span>
   </a>
   
@@ -4202,9 +4173,9 @@
         <li class="md-nav__item">
   <a href="#058-2023-11-18" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.8 (2023-11-18)
-      
+      </span>
     </span>
   </a>
   
@@ -4213,9 +4184,9 @@
         <li class="md-nav__item">
   <a href="#057-2023-11-11" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.7 (2023-11-11)
-      
+      </span>
     </span>
   </a>
   
@@ -4225,9 +4196,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -4241,9 +4212,9 @@
         <li class="md-nav__item">
   <a href="#056-2023-11-04" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.6 (2023-11-04)
-      
+      </span>
     </span>
   </a>
   
@@ -4252,9 +4223,9 @@
         <li class="md-nav__item">
   <a href="#055-2023-10-07" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.5 (2023-10-07)
-      
+      </span>
     </span>
   </a>
   
@@ -4263,9 +4234,9 @@
         <li class="md-nav__item">
   <a href="#054-2023-10-07" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.4 (2023-10-07)
-      
+      </span>
     </span>
   </a>
   
@@ -4274,9 +4245,9 @@
         <li class="md-nav__item">
   <a href="#053-2023-09-30" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.3 (2023-09-30)
-      
+      </span>
     </span>
   </a>
   
@@ -4286,9 +4257,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes_1" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -4302,9 +4273,9 @@
         <li class="md-nav__item">
   <a href="#052-2023-09-22" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.2 (2023-09-22)
-      
+      </span>
     </span>
   </a>
   
@@ -4314,9 +4285,9 @@
           <li class="md-nav__item">
   <a href="#breaking-changes_2" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        Breaking Changes
-      
+      <span class="md-typeset">
+        Breaking Changes 
+      </span>
     </span>
   </a>
   
@@ -4330,9 +4301,9 @@
         <li class="md-nav__item">
   <a href="#050-2023-09-16" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.5.0 (2023-09-16)
-      
+      </span>
     </span>
   </a>
   
@@ -4341,9 +4312,9 @@
         <li class="md-nav__item">
   <a href="#049-2023-09-09" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.9 (2023-09-09)
-      
+      </span>
     </span>
   </a>
   
@@ -4352,9 +4323,9 @@
         <li class="md-nav__item">
   <a href="#048-2023-09-01" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.8 (2023-09-01)
-      
+      </span>
     </span>
   </a>
   
@@ -4363,9 +4334,9 @@
         <li class="md-nav__item">
   <a href="#047-2023-08-19" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         0.4.7 (2023-08-19)
-      
+      </span>
     </span>
   </a>
   
@@ -4398,6 +4369,7 @@
     <li class="md-path__item">
       <a href="../.." class="md-path__link">
         
+  
   <span class="md-ellipsis">
     Home
   </span>
@@ -4413,9 +4385,29 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Reference
   </span>
@@ -4431,9 +4423,9 @@
 
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
                   
-
 
   
     <a href="https://github.com/Pratap-kute/paisa/edit/master/docs/reference/changelog.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
@@ -4808,6 +4800,8 @@ directly from the db file using the following query
 
 
 
+
+
   
   
 
@@ -4890,8 +4884,8 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
     </a>
   
 </div>
@@ -4907,7 +4901,7 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
       
     
     <a href="https://github.com/Pratap-kute/paisa" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
     
@@ -4918,7 +4912,7 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
       
     
     <a href="https://hub.docker.com/r/pratapkute/paisa" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"/></svg>
     </a>
   
 </div>
@@ -4928,20 +4922,25 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
 </footer>
       
     </div>
-    <div class="md-dialog" data-md-component="dialog">
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+      
+<div class="md-progress" data-md-component="progress" role="progressbar" aria-label="Loading"></div>
     
     
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "content.action.edit", "content.action.view", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.path", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.tabs.link","content.code.copy","content.code.select","content.code.annotate","content.action.edit","content.action.view","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.sections","navigation.indexes","navigation.path","navigation.top","navigation.footer","toc.follow","search.suggest","search.highlight","search.share"],"redirect":null,"search":"../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d31f0ffa.min.js"></script>
       
     
   </body>

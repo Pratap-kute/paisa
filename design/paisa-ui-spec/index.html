@@ -15,6 +15,7 @@
         <link rel="canonical" href="https://pratap-kute.github.io/paisa/design/paisa-ui-spec/">
       
       
+      
         <link rel="prev" href="../frontend-chart-architecture/">
       
       
@@ -23,7 +24,7 @@
       
       
       <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="zensical-0.0.74">
     
     
   
@@ -35,10 +36,15 @@
   
 
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/classic/main.94dd801d.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/classic/palette.813d4b3f.min.css">
       
       
 
@@ -53,7 +59,7 @@
     
       <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -98,14 +104,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#paisa-uiux-specification-as-built-reference" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -179,6 +182,7 @@
     <label class="md-header__button md-icon" for="__drawer">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -233,61 +237,28 @@
         <label class="md-header__button md-icon" for="__search">
           
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <span class="md-visually-hidden">Search</span>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
-            
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
-          </a>
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-        <div class="md-search__suggest" data-md-component="search-suggest"></div>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/Pratap-kute/paisa" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
   </div>
   <div class="md-source__repository">
     Pratap-kute/paisa
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
     
@@ -305,9 +276,6 @@
       <a href="../.." class="md-tabs__link">
         
   
-  
-    
-  
   Home
 
       </a>
@@ -324,9 +292,6 @@
       <a href="../../product-tour/" class="md-tabs__link">
         
   
-  
-    
-  
   Product Tour
 
       </a>
@@ -340,13 +305,25 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../getting-started/" class="md-tabs__link">
           
-  
-  
-    
   
   Getting Started
 
@@ -362,13 +339,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../using-paisa/" class="md-tabs__link">
           
-  
-  
-    
   
   Using Paisa
 
@@ -384,13 +377,29 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../reference/" class="md-tabs__link">
           
-  
-  
-    
   
   Reference
 
@@ -409,9 +418,6 @@
       <a href="../../faq/" class="md-tabs__link">
         
   
-  
-    
-  
   FAQ
 
       </a>
@@ -425,13 +431,27 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item">
         <a href="../../project/" class="md-tabs__link">
           
-  
-  
-    
   
   Project
 
@@ -449,13 +469,27 @@
   
   
     
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
     
       <li class="md-tabs__item md-tabs__item--active">
         <a href="../../development/" class="md-tabs__link">
           
-  
-  
-    
   
   Development
 
@@ -558,7 +592,7 @@
       <a href="https://github.com/Pratap-kute/paisa" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
   </div>
   <div class="md-source__repository">
     Pratap-kute/paisa
@@ -582,8 +616,7 @@
   <span class="md-ellipsis">
     
   
-    Home
-  
+  Home
 
     
   </span>
@@ -609,8 +642,7 @@
   <span class="md-ellipsis">
     
   
-    Product Tour
-  
+  Product Tour
 
     
   </span>
@@ -665,8 +697,7 @@
   <span class="md-ellipsis">
     
   
-    Getting Started
-  
+  Getting Started
 
     
   </span>
@@ -682,21 +713,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Getting Started
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Getting Started
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -709,8 +740,7 @@
   <span class="md-ellipsis">
     
   
-    Install Paisa
-  
+  Install Paisa
 
     
   </span>
@@ -721,10 +751,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -737,8 +767,7 @@
   <span class="md-ellipsis">
     
   
-    First setup
-  
+  First setup
 
     
   </span>
@@ -749,10 +778,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -765,8 +794,7 @@
   <span class="md-ellipsis">
     
   
-    Journal examples
-  
+  Journal examples
 
     
   </span>
@@ -777,10 +805,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -833,8 +862,7 @@
   <span class="md-ellipsis">
     
   
-    Using Paisa
-  
+  Using Paisa
 
     
   </span>
@@ -850,21 +878,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Using Paisa
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Using Paisa
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -907,8 +935,7 @@
   <span class="md-ellipsis">
     
   
-    Everyday finances
-  
+  Everyday finances
 
     
   </span>
@@ -918,19 +945,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_2">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_2">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Everyday finances
-  
+  Everyday finances
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -943,8 +970,7 @@
   <span class="md-ellipsis">
     
   
-    Accounts
-  
+  Accounts
 
     
   </span>
@@ -955,10 +981,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -971,8 +997,7 @@
   <span class="md-ellipsis">
     
   
-    Financial reports
-  
+  Financial reports
 
     
   </span>
@@ -983,10 +1008,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -999,8 +1024,7 @@
   <span class="md-ellipsis">
     
   
-    Financial Insights
-  
+  Financial Insights
 
     
   </span>
@@ -1011,10 +1035,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1027,8 +1051,7 @@
   <span class="md-ellipsis">
     
   
-    Budgets
-  
+  Budgets
 
     
   </span>
@@ -1039,10 +1062,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1055,8 +1078,7 @@
   <span class="md-ellipsis">
     
   
-    Recurring transactions
-  
+  Recurring transactions
 
     
   </span>
@@ -1067,10 +1089,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1114,8 +1136,7 @@
   <span class="md-ellipsis">
     
   
-    Liabilities
-  
+  Liabilities
 
     
   </span>
@@ -1131,21 +1152,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_2_6">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Liabilities
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_2_6">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Liabilities
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -1158,8 +1179,7 @@
   <span class="md-ellipsis">
     
   
-    Balances
-  
+  Balances
 
     
   </span>
@@ -1170,10 +1190,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1186,8 +1206,7 @@
   <span class="md-ellipsis">
     
   
-    Interest
-  
+  Interest
 
     
   </span>
@@ -1198,10 +1217,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1214,8 +1233,7 @@
   <span class="md-ellipsis">
     
   
-    Repayments
-  
+  Repayments
 
     
   </span>
@@ -1226,10 +1244,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1242,8 +1260,7 @@
   <span class="md-ellipsis">
     
   
-    Credit cards
-  
+  Credit cards
 
     
   </span>
@@ -1254,26 +1271,28 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1314,8 +1333,7 @@
   <span class="md-ellipsis">
     
   
-    Journal and imports
-  
+  Journal and imports
 
     
   </span>
@@ -1325,19 +1343,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_3">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_3">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Journal and imports
-  
+  Journal and imports
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1350,8 +1368,7 @@
   <span class="md-ellipsis">
     
   
-    Journal
-  
+  Journal
 
     
   </span>
@@ -1362,10 +1379,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1378,8 +1395,7 @@
   <span class="md-ellipsis">
     
   
-    Editor
-  
+  Editor
 
     
   </span>
@@ -1390,10 +1406,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1406,8 +1422,7 @@
   <span class="md-ellipsis">
     
   
-    Import statements
-  
+  Import statements
 
     
   </span>
@@ -1418,10 +1433,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1434,8 +1449,7 @@
   <span class="md-ellipsis">
     
   
-    Account suggestions
-  
+  Account suggestions
 
     
   </span>
@@ -1446,10 +1460,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1462,8 +1476,7 @@
   <span class="md-ellipsis">
     
   
-    Bulk edit
-  
+  Bulk edit
 
     
   </span>
@@ -1474,18 +1487,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1524,8 +1538,7 @@
   <span class="md-ellipsis">
     
   
-    Investments
-  
+  Investments
 
     
   </span>
@@ -1535,19 +1548,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_4">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_4">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Investments
-  
+  Investments
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1560,8 +1573,7 @@
   <span class="md-ellipsis">
     
   
-    Portfolio Analysis
-  
+  Portfolio Analysis
 
     
   </span>
@@ -1572,10 +1584,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1588,8 +1600,7 @@
   <span class="md-ellipsis">
     
   
-    Commodities and prices
-  
+  Commodities and prices
 
     
   </span>
@@ -1600,10 +1611,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1616,8 +1627,7 @@
   <span class="md-ellipsis">
     
   
-    Allocation targets
-  
+  Allocation targets
 
     
   </span>
@@ -1628,10 +1638,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1644,8 +1654,7 @@
   <span class="md-ellipsis">
     
   
-    Investment performance
-  
+  Investment performance
 
     
   </span>
@@ -1656,18 +1665,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1702,8 +1712,7 @@
   <span class="md-ellipsis">
     
   
-    Planning
-  
+  Planning
 
     
   </span>
@@ -1713,19 +1722,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Planning
-  
+  Planning
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1738,8 +1747,7 @@
   <span class="md-ellipsis">
     
   
-    Scenario planning
-  
+  Scenario planning
 
     
   </span>
@@ -1750,10 +1758,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1793,8 +1801,7 @@
   <span class="md-ellipsis">
     
   
-    Goals
-  
+  Goals
 
     
   </span>
@@ -1810,21 +1817,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_5_2">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Goals
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_5_2">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Goals
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -1837,8 +1844,7 @@
   <span class="md-ellipsis">
     
   
-    Retirement
-  
+  Retirement
 
     
   </span>
@@ -1849,10 +1855,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1865,8 +1871,7 @@
   <span class="md-ellipsis">
     
   
-    Savings
-  
+  Savings
 
     
   </span>
@@ -1877,26 +1882,28 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1933,8 +1940,7 @@
   <span class="md-ellipsis">
     
   
-    Tools
-  
+  Tools
 
     
   </span>
@@ -1944,19 +1950,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_6">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_4_6">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Tools
-  
+  Tools
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -1969,8 +1975,7 @@
   <span class="md-ellipsis">
     
   
-    Doctor
-  
+  Doctor
 
     
   </span>
@@ -1981,10 +1986,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -1997,8 +2002,7 @@
   <span class="md-ellipsis">
     
   
-    Sheets
-  
+  Sheets
 
     
   </span>
@@ -2017,10 +2021,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2033,8 +2037,7 @@
   <span class="md-ellipsis">
     
   
-    Application information and logs
-  
+  Application information and logs
 
     
   </span>
@@ -2045,18 +2048,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2109,8 +2114,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
-  
+  Reference
 
     
   </span>
@@ -2126,21 +2130,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Reference
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_5">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Reference
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -2153,8 +2157,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
-  
+  Configuration
 
     
   </span>
@@ -2165,10 +2168,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2181,8 +2184,7 @@
   <span class="md-ellipsis">
     
   
-    Ledger CLI
-  
+  Ledger CLI
 
     
   </span>
@@ -2193,10 +2195,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2209,8 +2211,7 @@
   <span class="md-ellipsis">
     
   
-    Authentication
-  
+  Authentication
 
     
   </span>
@@ -2221,10 +2222,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2266,8 +2267,7 @@
   <span class="md-ellipsis">
     
   
-    Tax
-  
+  Tax
 
     
   </span>
@@ -2283,21 +2283,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Tax
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_5_5">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Tax
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -2310,8 +2310,7 @@
   <span class="md-ellipsis">
     
   
-    Tax harvesting
-  
+  Tax harvesting
 
     
   </span>
@@ -2322,10 +2321,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2338,8 +2337,7 @@
   <span class="md-ellipsis">
     
   
-    Capital gains
-  
+  Capital gains
 
     
   </span>
@@ -2350,10 +2348,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2366,8 +2364,7 @@
   <span class="md-ellipsis">
     
   
-    Schedule AL
-  
+  Schedule AL
 
     
   </span>
@@ -2378,18 +2375,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2402,8 +2400,7 @@
   <span class="md-ellipsis">
     
   
-    Changelog
-  
+  Changelog
 
     
   </span>
@@ -2414,10 +2411,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2437,8 +2435,7 @@
   <span class="md-ellipsis">
     
   
-    FAQ
-  
+  FAQ
 
     
   </span>
@@ -2495,8 +2492,7 @@
   <span class="md-ellipsis">
     
   
-    Project
-  
+  Project
 
     
   </span>
@@ -2512,21 +2508,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Project
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Project
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -2539,8 +2535,7 @@
   <span class="md-ellipsis">
     
   
-    Manifesto
-  
+  Manifesto
 
     
   </span>
@@ -2551,14 +2546,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2569,8 +2562,7 @@
   <span class="md-ellipsis">
     
   
-    Blog
-  
+  Blog archive
 
     
   </span>
@@ -2581,10 +2573,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2617,8 +2609,7 @@
   <span class="md-ellipsis">
     
   
-    Archive
-  
+  Archive
 
     
   </span>
@@ -2628,23 +2619,21 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_4">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7_4">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Archive
-  
+  Archive
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2655,8 +2644,7 @@
   <span class="md-ellipsis">
     
   
-    2024
-  
+  2024
 
     
   </span>
@@ -2667,18 +2655,19 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -2721,8 +2710,7 @@
   <span class="md-ellipsis">
     
   
-    Categories
-  
+  Categories
 
     
   </span>
@@ -2732,23 +2720,21 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_7_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Categories
-  
+  Categories
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2759,8 +2745,7 @@
   <span class="md-ellipsis">
     
   
-    configuration
-  
+  configuration
 
     
   </span>
@@ -2771,14 +2756,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2789,8 +2772,7 @@
   <span class="md-ellipsis">
     
   
-    gold
-  
+  gold
 
     
   </span>
@@ -2801,14 +2783,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2819,8 +2799,7 @@
   <span class="md-ellipsis">
     
   
-    locale
-  
+  locale
 
     
   </span>
@@ -2831,14 +2810,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2849,8 +2826,7 @@
   <span class="md-ellipsis">
     
   
-    price
-  
+  price
 
     
   </span>
@@ -2861,14 +2837,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2879,8 +2853,7 @@
   <span class="md-ellipsis">
     
   
-    sgb
-  
+  sgb
 
     
   </span>
@@ -2891,14 +2864,12 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
-  
-    
   
   
     <li class="md-nav__item">
@@ -2909,8 +2880,7 @@
   <span class="md-ellipsis">
     
   
-    sovereign-gold-bond
-  
+  sovereign-gold-bond
 
     
   </span>
@@ -2921,18 +2891,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -2988,8 +2960,7 @@
   <span class="md-ellipsis">
     
   
-    Development
-  
+  Development
 
     
   </span>
@@ -3005,21 +2976,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_8">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Development
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_8">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Development
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -3032,8 +3003,7 @@
   <span class="md-ellipsis">
     
   
-    Contributor setup
-  
+  Contributor setup
 
     
   </span>
@@ -3044,10 +3014,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3060,8 +3030,7 @@
   <span class="md-ellipsis">
     
   
-    API
-  
+  API
 
     
   </span>
@@ -3072,10 +3041,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -3088,8 +3057,7 @@
   <span class="md-ellipsis">
     
   
-    Testing
-  
+  Testing
 
     
   </span>
@@ -3100,10 +3068,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -3143,8 +3111,7 @@
   <span class="md-ellipsis">
     
   
-    Design (internal)
-  
+  Design (internal)
 
     
   </span>
@@ -3154,19 +3121,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_8_5">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_5_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_8_5">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    Design (internal)
-  
+  Design (internal)
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -3179,8 +3146,7 @@
   <span class="md-ellipsis">
     
   
-    Chart architecture
-  
+  Chart architecture
 
     
   </span>
@@ -3191,10 +3157,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -3203,7 +3169,9 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -3216,8 +3184,7 @@
   <span class="md-ellipsis">
     
   
-    UI specification
-  
+  UI specification
 
     
   </span>
@@ -3227,15 +3194,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    UI specification
-  
+  UI specification
 
     
   </span>
@@ -3246,7 +3212,8 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -3255,16 +3222,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#1-executive-summary-design-philosophy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1. Executive Summary &amp; Design Philosophy
-      
+      </span>
     </span>
   </a>
   
@@ -3274,9 +3241,9 @@
           <li class="md-nav__item">
   <a href="#11-the-core-design-philosophy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1.1 The Core Design Philosophy
-      
+      </span>
     </span>
   </a>
   
@@ -3285,9 +3252,9 @@
           <li class="md-nav__item">
   <a href="#12-the-twelve-design-principles" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1.2 The Twelve Design Principles
-      
+      </span>
     </span>
   </a>
   
@@ -3301,9 +3268,9 @@
         <li class="md-nav__item">
   <a href="#2-technology-architecture-direction" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. Technology &amp; Architecture Direction
-      
+      </span>
     </span>
   </a>
   
@@ -3313,9 +3280,9 @@
           <li class="md-nav__item">
   <a href="#21-core-framework" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.1 Core Framework
-      
+      </span>
     </span>
   </a>
   
@@ -3324,9 +3291,9 @@
           <li class="md-nav__item">
   <a href="#22-styling-direction" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.2 Styling Direction
-      
+      </span>
     </span>
   </a>
   
@@ -3335,9 +3302,9 @@
           <li class="md-nav__item">
   <a href="#23-ui-primitives-accessibility-layer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.3 UI Primitives &amp; Accessibility Layer
-      
+      </span>
     </span>
   </a>
   
@@ -3346,9 +3313,9 @@
           <li class="md-nav__item">
   <a href="#24-visualization-specialized-engines" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.4 Visualization &amp; Specialized Engines
-      
+      </span>
     </span>
   </a>
   
@@ -3362,9 +3329,9 @@
         <li class="md-nav__item">
   <a href="#3-semantic-design-tokens-theme-system" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3. Semantic Design Tokens &amp; Theme System
-      
+      </span>
     </span>
   </a>
   
@@ -3374,9 +3341,9 @@
           <li class="md-nav__item">
   <a href="#31-token-definitions" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.1 Token Definitions
-      
+      </span>
     </span>
   </a>
   
@@ -3385,9 +3352,9 @@
           <li class="md-nav__item">
   <a href="#32-tailwind-css-v4-theme-mapping" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.2 Tailwind CSS v4 Theme Mapping
-      
+      </span>
     </span>
   </a>
   
@@ -3396,9 +3363,9 @@
           <li class="md-nav__item">
   <a href="#33-semantic-utility-classes-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.3 Semantic Utility Classes Rule
-      
+      </span>
     </span>
   </a>
   
@@ -3412,9 +3379,9 @@
         <li class="md-nav__item">
   <a href="#4-typography-system" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4. Typography System
-      
+      </span>
     </span>
   </a>
   
@@ -3424,9 +3391,9 @@
           <li class="md-nav__item">
   <a href="#41-font-families" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.1 Font Families
-      
+      </span>
     </span>
   </a>
   
@@ -3435,9 +3402,9 @@
           <li class="md-nav__item">
   <a href="#42-typographic-hierarchy-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.2 Typographic Hierarchy Scale
-      
+      </span>
     </span>
   </a>
   
@@ -3446,9 +3413,9 @@
           <li class="md-nav__item">
   <a href="#43-tabular-numeric-guarantee" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.3 Tabular Numeric Guarantee
-      
+      </span>
     </span>
   </a>
   
@@ -3462,9 +3429,9 @@
         <li class="md-nav__item">
   <a href="#5-spacing-sizing-and-layout-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5. Spacing, Sizing, and Layout Scale
-      
+      </span>
     </span>
   </a>
   
@@ -3474,9 +3441,9 @@
           <li class="md-nav__item">
   <a href="#51-canonical-8-point-spacing-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.1 Canonical 8-Point Spacing Scale
-      
+      </span>
     </span>
   </a>
   
@@ -3485,9 +3452,9 @@
           <li class="md-nav__item">
   <a href="#52-control-sizing-standards" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.2 Control Sizing Standards
-      
+      </span>
     </span>
   </a>
   
@@ -3496,9 +3463,9 @@
           <li class="md-nav__item">
   <a href="#53-page-width-container-archetypes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.3 Page Width Container Archetypes
-      
+      </span>
     </span>
   </a>
   
@@ -3507,9 +3474,9 @@
           <li class="md-nav__item">
   <a href="#54-visual-baselines" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.4 Visual Baselines
-      
+      </span>
     </span>
   </a>
   
@@ -3523,9 +3490,9 @@
         <li class="md-nav__item">
   <a href="#6-surface-hierarchy-anti-card-soup-policy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6. Surface Hierarchy &amp; Anti-Card-Soup Policy
-      
+      </span>
     </span>
   </a>
   
@@ -3535,9 +3502,9 @@
           <li class="md-nav__item">
   <a href="#61-the-four-tier-surface-model" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.1 The Four-Tier Surface Model
-      
+      </span>
     </span>
   </a>
   
@@ -3546,9 +3513,9 @@
           <li class="md-nav__item">
   <a href="#62-the-container-justification-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.2 The Container Justification Rule
-      
+      </span>
     </span>
   </a>
   
@@ -3557,9 +3524,9 @@
           <li class="md-nav__item">
   <a href="#63-separation-hierarchy-surface-elevation-semantics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.3 Separation Hierarchy &amp; Surface Elevation Semantics
-      
+      </span>
     </span>
   </a>
   
@@ -3573,9 +3540,9 @@
         <li class="md-nav__item">
   <a href="#7-financial-color-semantics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7. Financial Color Semantics
-      
+      </span>
     </span>
   </a>
   
@@ -3585,9 +3552,9 @@
           <li class="md-nav__item">
   <a href="#71-semantic-roles" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7.1 Semantic Roles
-      
+      </span>
     </span>
   </a>
   
@@ -3596,9 +3563,9 @@
           <li class="md-nav__item">
   <a href="#72-sign-vs-context-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7.2 Sign vs. Context Rules
-      
+      </span>
     </span>
   </a>
   
@@ -3612,9 +3579,9 @@
         <li class="md-nav__item">
   <a href="#8-global-information-architecture-navigation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8. Global Information Architecture &amp; Navigation
-      
+      </span>
     </span>
   </a>
   
@@ -3624,9 +3591,9 @@
           <li class="md-nav__item">
   <a href="#81-non-route-expandable-groups-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8.1 Non-Route Expandable Groups Rule
-      
+      </span>
     </span>
   </a>
   
@@ -3635,9 +3602,9 @@
           <li class="md-nav__item">
   <a href="#82-global-command-palette" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8.2 Global Command Palette
-      
+      </span>
     </span>
   </a>
   
@@ -3651,9 +3618,9 @@
         <li class="md-nav__item">
   <a href="#9-appshell-page-anatomy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9. AppShell &amp; Page Anatomy
-      
+      </span>
     </span>
   </a>
   
@@ -3663,9 +3630,9 @@
           <li class="md-nav__item">
   <a href="#91-desktop-appshell-composition" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.1 Desktop AppShell Composition
-      
+      </span>
     </span>
   </a>
   
@@ -3674,9 +3641,9 @@
           <li class="md-nav__item">
   <a href="#92-header-actions-utility-controls" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.2 Header Actions &amp; Utility Controls
-      
+      </span>
     </span>
   </a>
   
@@ -3685,9 +3652,9 @@
           <li class="md-nav__item">
   <a href="#93-pageheader-responsibility-guarantee" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.3 PageHeader Responsibility Guarantee
-      
+      </span>
     </span>
   </a>
   
@@ -3701,9 +3668,9 @@
         <li class="md-nav__item">
   <a href="#10-core-page-archetypes-wireframes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         10. Core Page Archetypes &amp; Wireframes
-      
+      </span>
     </span>
   </a>
   
@@ -3713,9 +3680,9 @@
           <li class="md-nav__item">
   <a href="#archetype-a-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype A: Overview
-      
+      </span>
     </span>
   </a>
   
@@ -3725,9 +3692,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-dashboard-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Dashboard Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3736,9 +3703,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-dashboard-mobile" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Dashboard Mobile
-      
+      </span>
     </span>
   </a>
   
@@ -3752,9 +3719,9 @@
           <li class="md-nav__item">
   <a href="#archetype-b-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype B: Analysis
-      
+      </span>
     </span>
   </a>
   
@@ -3764,9 +3731,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-monthly-expenses-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Monthly Expenses Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3780,9 +3747,9 @@
           <li class="md-nav__item">
   <a href="#archetype-c-data-explorer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype C: Data Explorer
-      
+      </span>
     </span>
   </a>
   
@@ -3792,9 +3759,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-transactions-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Transactions Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3808,9 +3775,9 @@
           <li class="md-nav__item">
   <a href="#archetype-d-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype D: Detail
-      
+      </span>
     </span>
   </a>
   
@@ -3820,9 +3787,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-credit-card-detail-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Credit Card Detail Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3836,9 +3803,9 @@
           <li class="md-nav__item">
   <a href="#archetype-e-operational" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype E: Operational
-      
+      </span>
     </span>
   </a>
   
@@ -3848,9 +3815,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-budget-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Budget Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3864,9 +3831,9 @@
           <li class="md-nav__item">
   <a href="#archetype-f-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype F: Configuration
-      
+      </span>
     </span>
   </a>
   
@@ -3876,9 +3843,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-configuration-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Configuration Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3892,9 +3859,9 @@
           <li class="md-nav__item">
   <a href="#archetype-g-workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype G: Workflow
-      
+      </span>
     </span>
   </a>
   
@@ -3904,9 +3871,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-ledger-import-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Ledger Import Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3920,9 +3887,9 @@
           <li class="md-nav__item">
   <a href="#archetype-h-tool" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype H: Tool
-      
+      </span>
     </span>
   </a>
   
@@ -3932,9 +3899,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-ledger-editor-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Ledger Editor Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -3953,9 +3920,9 @@
         <li class="md-nav__item">
   <a href="#11-data-region-state-model-interaction-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         11. Data Region State Model &amp; Interaction Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -3965,9 +3932,9 @@
           <li class="md-nav__item">
   <a href="#111-the-six-data-states" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         11.1 The Six Data States
-      
+      </span>
     </span>
   </a>
   
@@ -3981,9 +3948,9 @@
         <li class="md-nav__item">
   <a href="#12-component-architecture-layering" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         12. Component Architecture &amp; Layering
-      
+      </span>
     </span>
   </a>
   
@@ -3993,9 +3960,9 @@
           <li class="md-nav__item">
   <a href="#121-dependency-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         12.1 Dependency Rules
-      
+      </span>
     </span>
   </a>
   
@@ -4009,9 +3976,9 @@
         <li class="md-nav__item">
   <a href="#13-data-display-tables-forms-and-chart-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13. Data Display, Tables, Forms, and Chart Rules
-      
+      </span>
     </span>
   </a>
   
@@ -4021,9 +3988,9 @@
           <li class="md-nav__item">
   <a href="#131-table-and-grid-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.1 Table and Grid Rules
-      
+      </span>
     </span>
   </a>
   
@@ -4032,9 +3999,9 @@
           <li class="md-nav__item">
   <a href="#132-form-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.2 Form Rules
-      
+      </span>
     </span>
   </a>
   
@@ -4043,9 +4010,9 @@
           <li class="md-nav__item">
   <a href="#133-chart-rules-echarts-6" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.3 Chart Rules (ECharts 6)
-      
+      </span>
     </span>
   </a>
   
@@ -4059,9 +4026,9 @@
         <li class="md-nav__item">
   <a href="#14-responsive-overflow-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14. Responsive &amp; Overflow Rules
-      
+      </span>
     </span>
   </a>
   
@@ -4071,9 +4038,9 @@
           <li class="md-nav__item">
   <a href="#141-key-responsive-transformations" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14.1 Key Responsive Transformations
-      
+      </span>
     </span>
   </a>
   
@@ -4082,9 +4049,9 @@
           <li class="md-nav__item">
   <a href="#142-overflow-acceptance-checklist" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14.2 Overflow Acceptance Checklist
-      
+      </span>
     </span>
   </a>
   
@@ -4098,9 +4065,9 @@
         <li class="md-nav__item">
   <a href="#15-accessibility-motion-standards" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         15. Accessibility &amp; Motion Standards
-      
+      </span>
     </span>
   </a>
   
@@ -4109,9 +4076,9 @@
         <li class="md-nav__item">
   <a href="#16-development-ui-design-lab-devui" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        16. Development UI Design Lab (/dev/ui)
-      
+      <span class="md-typeset">
+        16. Development UI Design Lab (<code>/dev/ui</code>)
+      </span>
     </span>
   </a>
   
@@ -4120,9 +4087,9 @@
         <li class="md-nav__item">
   <a href="#17-complete-41-route-inventory-canonical-design-contracts" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17. Complete 41-Route Inventory &amp; Canonical Design Contracts
-      
+      </span>
     </span>
   </a>
   
@@ -4132,9 +4099,9 @@
           <li class="md-nav__item">
   <a href="#171-complete-route-inventory-table" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17.1 Complete Route Inventory Table
-      
+      </span>
     </span>
   </a>
   
@@ -4143,9 +4110,9 @@
           <li class="md-nav__item">
   <a href="#172-detailed-canonical-contracts-for-all-41-routes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17.2 Detailed Canonical Contracts for All 41 Routes
-      
+      </span>
     </span>
   </a>
   
@@ -4155,9 +4122,9 @@
           <li class="md-nav__item">
   <a href="#1-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        1. / — Dashboard
-      
+      <span class="md-typeset">
+        1. <code>/</code> — Dashboard
+      </span>
     </span>
   </a>
   
@@ -4166,9 +4133,9 @@
           <li class="md-nav__item">
   <a href="#2-assetsallocation-asset-allocation" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        2. /assets/allocation — Asset Allocation
-      
+      <span class="md-typeset">
+        2. <code>/assets/allocation</code> — Asset Allocation
+      </span>
     </span>
   </a>
   
@@ -4177,9 +4144,9 @@
           <li class="md-nav__item">
   <a href="#3-assetsanalysis-asset-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        3. /assets/analysis — Asset Analysis
-      
+      <span class="md-typeset">
+        3. <code>/assets/analysis</code> — Asset Analysis
+      </span>
     </span>
   </a>
   
@@ -4188,9 +4155,9 @@
           <li class="md-nav__item">
   <a href="#4-assetsbalance-asset-balance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        4. /assets/balance — Asset Balance
-      
+      <span class="md-typeset">
+        4. <code>/assets/balance</code> — Asset Balance
+      </span>
     </span>
   </a>
   
@@ -4199,9 +4166,9 @@
           <li class="md-nav__item">
   <a href="#5-assetsgain-investment-performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        5. /assets/gain — Investment Performance
-      
+      <span class="md-typeset">
+        5. <code>/assets/gain</code> — Investment Performance
+      </span>
     </span>
   </a>
   
@@ -4210,9 +4177,9 @@
           <li class="md-nav__item">
   <a href="#6-assetsgainslug-account-investment-performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        6. /assets/gain/[slug] — Account Investment Performance
-      
+      <span class="md-typeset">
+        6. <code>/assets/gain/[slug]</code> — Account Investment Performance
+      </span>
     </span>
   </a>
   
@@ -4221,9 +4188,9 @@
           <li class="md-nav__item">
   <a href="#7-assetsinvestment-investment" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        7. /assets/investment — Investment
-      
+      <span class="md-typeset">
+        7. <code>/assets/investment</code> — Investment
+      </span>
     </span>
   </a>
   
@@ -4232,9 +4199,9 @@
           <li class="md-nav__item">
   <a href="#8-assetsnetworth-net-worth" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        8. /assets/networth — Net Worth
-      
+      <span class="md-typeset">
+        8. <code>/assets/networth</code> — Net Worth
+      </span>
     </span>
   </a>
   
@@ -4243,9 +4210,9 @@
           <li class="md-nav__item">
   <a href="#9-cash_flowincome_statement-income-statement" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        9. /cash_flow/income_statement — Income Statement
-      
+      <span class="md-typeset">
+        9. <code>/cash_flow/income_statement</code> — Income Statement
+      </span>
     </span>
   </a>
   
@@ -4254,9 +4221,9 @@
           <li class="md-nav__item">
   <a href="#10-cash_flowmonthly-monthly-cash-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        10. /cash_flow/monthly — Monthly Cash Flow
-      
+      <span class="md-typeset">
+        10. <code>/cash_flow/monthly</code> — Monthly Cash Flow
+      </span>
     </span>
   </a>
   
@@ -4265,9 +4232,9 @@
           <li class="md-nav__item">
   <a href="#11-cash_flowrecurring-recurring-transactions" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        11. /cash_flow/recurring — Recurring Transactions
-      
+      <span class="md-typeset">
+        11. <code>/cash_flow/recurring</code> — Recurring Transactions
+      </span>
     </span>
   </a>
   
@@ -4276,9 +4243,9 @@
           <li class="md-nav__item">
   <a href="#12-cash_flowyearly-yearly-cash-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        12. /cash_flow/yearly — Yearly Cash Flow
-      
+      <span class="md-typeset">
+        12. <code>/cash_flow/yearly</code> — Yearly Cash Flow
+      </span>
     </span>
   </a>
   
@@ -4287,9 +4254,9 @@
           <li class="md-nav__item">
   <a href="#13-expensebudget-budget" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        13. /expense/budget — Budget
-      
+      <span class="md-typeset">
+        13. <code>/expense/budget</code> — Budget
+      </span>
     </span>
   </a>
   
@@ -4298,9 +4265,9 @@
           <li class="md-nav__item">
   <a href="#14-expensemonthly-monthly-expenses" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        14. /expense/monthly — Monthly Expenses
-      
+      <span class="md-typeset">
+        14. <code>/expense/monthly</code> — Monthly Expenses
+      </span>
     </span>
   </a>
   
@@ -4309,9 +4276,9 @@
           <li class="md-nav__item">
   <a href="#15-expenseyearly-yearly-expenses" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        15. /expense/yearly — Yearly Expenses
-      
+      <span class="md-typeset">
+        15. <code>/expense/yearly</code> — Yearly Expenses
+      </span>
     </span>
   </a>
   
@@ -4320,9 +4287,9 @@
           <li class="md-nav__item">
   <a href="#16-income-income" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        16. /income — Income
-      
+      <span class="md-typeset">
+        16. <code>/income</code> — Income
+      </span>
     </span>
   </a>
   
@@ -4331,9 +4298,9 @@
           <li class="md-nav__item">
   <a href="#17-ledgereditor-ledger-editor-root" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        17. /ledger/editor — Ledger Editor (Root)
-      
+      <span class="md-typeset">
+        17. <code>/ledger/editor</code> — Ledger Editor (Root)
+      </span>
     </span>
   </a>
   
@@ -4342,9 +4309,9 @@
           <li class="md-nav__item">
   <a href="#18-ledgereditorslug-ledger-editor-file" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        18. /ledger/editor/[slug] — Ledger Editor File
-      
+      <span class="md-typeset">
+        18. <code>/ledger/editor/[slug]</code> — Ledger Editor File
+      </span>
     </span>
   </a>
   
@@ -4353,9 +4320,9 @@
           <li class="md-nav__item">
   <a href="#19-ledgerimport-ledger-import" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        19. /ledger/import — Ledger Import
-      
+      <span class="md-typeset">
+        19. <code>/ledger/import</code> — Ledger Import
+      </span>
     </span>
   </a>
   
@@ -4364,9 +4331,9 @@
           <li class="md-nav__item">
   <a href="#20-ledgerposting-postings" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        20. /ledger/posting — Postings
-      
+      <span class="md-typeset">
+        20. <code>/ledger/posting</code> — Postings
+      </span>
     </span>
   </a>
   
@@ -4375,9 +4342,9 @@
           <li class="md-nav__item">
   <a href="#21-ledgerprice-prices" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        21. /ledger/price — Prices
-      
+      <span class="md-typeset">
+        21. <code>/ledger/price</code> — Prices
+      </span>
     </span>
   </a>
   
@@ -4386,9 +4353,9 @@
           <li class="md-nav__item">
   <a href="#22-ledgertransaction-transactions" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        22. /ledger/transaction — Transactions
-      
+      <span class="md-typeset">
+        22. <code>/ledger/transaction</code> — Transactions
+      </span>
     </span>
   </a>
   
@@ -4397,9 +4364,9 @@
           <li class="md-nav__item">
   <a href="#23-liabilitiesbalance-liabilities-balance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        23. /liabilities/balance — Liabilities Balance
-      
+      <span class="md-typeset">
+        23. <code>/liabilities/balance</code> — Liabilities Balance
+      </span>
     </span>
   </a>
   
@@ -4408,9 +4375,9 @@
           <li class="md-nav__item">
   <a href="#24-liabilitiescredit_cards-credit-cards" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        24. /liabilities/credit_cards — Credit Cards
-      
+      <span class="md-typeset">
+        24. <code>/liabilities/credit_cards</code> — Credit Cards
+      </span>
     </span>
   </a>
   
@@ -4419,9 +4386,9 @@
           <li class="md-nav__item">
   <a href="#25-liabilitiescredit_cardsslug-credit-card-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        25. /liabilities/credit_cards/[slug] — Credit Card Detail
-      
+      <span class="md-typeset">
+        25. <code>/liabilities/credit_cards/[slug]</code> — Credit Card Detail
+      </span>
     </span>
   </a>
   
@@ -4430,9 +4397,9 @@
           <li class="md-nav__item">
   <a href="#26-liabilitiesinterest-interest-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        26. /liabilities/interest — Interest Analysis
-      
+      <span class="md-typeset">
+        26. <code>/liabilities/interest</code> — Interest Analysis
+      </span>
     </span>
   </a>
   
@@ -4441,9 +4408,9 @@
           <li class="md-nav__item">
   <a href="#27-liabilitiesrepayment-loan-repayment" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        27. /liabilities/repayment — Loan Repayment
-      
+      <span class="md-typeset">
+        27. <code>/liabilities/repayment</code> — Loan Repayment
+      </span>
     </span>
   </a>
   
@@ -4452,9 +4419,9 @@
           <li class="md-nav__item">
   <a href="#28-moreabout-about" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        28. /more/about — About
-      
+      <span class="md-typeset">
+        28. <code>/more/about</code> — About
+      </span>
     </span>
   </a>
   
@@ -4463,9 +4430,9 @@
           <li class="md-nav__item">
   <a href="#29-moreconfig-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        29. /more/config — Configuration
-      
+      <span class="md-typeset">
+        29. <code>/more/config</code> — Configuration
+      </span>
     </span>
   </a>
   
@@ -4474,9 +4441,9 @@
           <li class="md-nav__item">
   <a href="#30-moredoctor-doctor" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        30. /more/doctor — Doctor
-      
+      <span class="md-typeset">
+        30. <code>/more/doctor</code> — Doctor
+      </span>
     </span>
   </a>
   
@@ -4485,9 +4452,9 @@
           <li class="md-nav__item">
   <a href="#31-moregoals-goals-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        31. /more/goals — Goals Overview
-      
+      <span class="md-typeset">
+        31. <code>/more/goals</code> — Goals Overview
+      </span>
     </span>
   </a>
   
@@ -4496,9 +4463,9 @@
           <li class="md-nav__item">
   <a href="#32-moregoalsretirementslug-retirement-goal-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        32. /more/goals/retirement/[slug] — Retirement Goal Detail
-      
+      <span class="md-typeset">
+        32. <code>/more/goals/retirement/[slug]</code> — Retirement Goal Detail
+      </span>
     </span>
   </a>
   
@@ -4507,9 +4474,9 @@
           <li class="md-nav__item">
   <a href="#33-moregoalssavingsslug-savings-goal-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        33. /more/goals/savings/[slug] — Savings Goal Detail
-      
+      <span class="md-typeset">
+        33. <code>/more/goals/savings/[slug]</code> — Savings Goal Detail
+      </span>
     </span>
   </a>
   
@@ -4518,9 +4485,9 @@
           <li class="md-nav__item">
   <a href="#34-morelogs-logs" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        34. /more/logs — Logs
-      
+      <span class="md-typeset">
+        34. <code>/more/logs</code> — Logs
+      </span>
     </span>
   </a>
   
@@ -4529,9 +4496,9 @@
           <li class="md-nav__item">
   <a href="#35-moresheets-sheets-root" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        35. /more/sheets — Sheets (Root)
-      
+      <span class="md-typeset">
+        35. <code>/more/sheets</code> — Sheets (Root)
+      </span>
     </span>
   </a>
   
@@ -4540,9 +4507,9 @@
           <li class="md-nav__item">
   <a href="#36-moresheetsslug-sheet-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        36. /more/sheets/[slug] — Sheet Detail
-      
+      <span class="md-typeset">
+        36. <code>/more/sheets/[slug]</code> — Sheet Detail
+      </span>
     </span>
   </a>
   
@@ -4551,9 +4518,9 @@
           <li class="md-nav__item">
   <a href="#37-moretaxcapital_gains-capital-gains-tax" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        37. /more/tax/capital_gains — Capital Gains Tax
-      
+      <span class="md-typeset">
+        37. <code>/more/tax/capital_gains</code> — Capital Gains Tax
+      </span>
     </span>
   </a>
   
@@ -4562,9 +4529,9 @@
           <li class="md-nav__item">
   <a href="#38-moretaxharvest-tax-harvesting" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        38. /more/tax/harvest — Tax Harvesting
-      
+      <span class="md-typeset">
+        38. <code>/more/tax/harvest</code> — Tax Harvesting
+      </span>
     </span>
   </a>
   
@@ -4573,9 +4540,9 @@
           <li class="md-nav__item">
   <a href="#39-moretaxschedule_al-schedule-al" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        39. /more/tax/schedule_al — Schedule AL
-      
+      <span class="md-typeset">
+        39. <code>/more/tax/schedule_al</code> — Schedule AL
+      </span>
     </span>
   </a>
   
@@ -4584,9 +4551,9 @@
           <li class="md-nav__item">
   <a href="#40-insights-insights" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        40. /insights — Insights
-      
+      <span class="md-typeset">
+        40. <code>/insights</code> — Insights
+      </span>
     </span>
   </a>
   
@@ -4595,9 +4562,9 @@
           <li class="md-nav__item">
   <a href="#41-login-login" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        41. /login — Login
-      
+      <span class="md-typeset">
+        41. <code>/login</code> — Login
+      </span>
     </span>
   </a>
   
@@ -4616,9 +4583,9 @@
         <li class="md-nav__item">
   <a href="#18-critical-functionality-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18. Critical Functionality Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4628,9 +4595,9 @@
           <li class="md-nav__item">
   <a href="#181-ledger-import-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.1 Ledger Import Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4639,9 +4606,9 @@
           <li class="md-nav__item">
   <a href="#182-ledger-editor-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.2 Ledger Editor Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4650,9 +4617,9 @@
           <li class="md-nav__item">
   <a href="#183-transactions-bulk-edit-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.3 Transactions &amp; Bulk Edit Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4661,9 +4628,9 @@
           <li class="md-nav__item">
   <a href="#184-budget-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.4 Budget Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4672,9 +4639,9 @@
           <li class="md-nav__item">
   <a href="#185-configuration-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.5 Configuration Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -4688,9 +4655,9 @@
         <li class="md-nav__item">
   <a href="#19-testing-visual-regression-strategy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19. Testing &amp; Visual Regression Strategy
-      
+      </span>
     </span>
   </a>
   
@@ -4700,9 +4667,9 @@
           <li class="md-nav__item">
   <a href="#191-target-test-matrix" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19.1 Target Test Matrix
-      
+      </span>
     </span>
   </a>
   
@@ -4711,9 +4678,9 @@
           <li class="md-nav__item">
   <a href="#192-automated-verification-criteria" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19.2 Automated Verification Criteria
-      
+      </span>
     </span>
   </a>
   
@@ -4727,9 +4694,9 @@
         <li class="md-nav__item">
   <a href="#20-migration-retrospective" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         20. Migration Retrospective
-      
+      </span>
     </span>
   </a>
   
@@ -4738,9 +4705,9 @@
         <li class="md-nav__item">
   <a href="#21-architectural-boundaries" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         21. Architectural Boundaries
-      
+      </span>
     </span>
   </a>
   
@@ -4749,9 +4716,9 @@
         <li class="md-nav__item">
   <a href="#22-known-ambiguities-product-clarifications" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         22. Known Ambiguities &amp; Product Clarifications
-      
+      </span>
     </span>
   </a>
   
@@ -4760,9 +4727,9 @@
         <li class="md-nav__item">
   <a href="#23-migration-completion-status" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         23. Migration Completion Status
-      
+      </span>
     </span>
   </a>
   
@@ -4772,9 +4739,9 @@
           <li class="md-nav__item">
   <a href="#what-if-scenarios-morescenarios" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        What-if Scenarios — /more/scenarios
-      
+      <span class="md-typeset">
+        What-if Scenarios — <code>/more/scenarios</code>
+      </span>
     </span>
   </a>
   
@@ -4792,18 +4759,20 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -4819,10 +4788,12 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -4831,16 +4802,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#1-executive-summary-design-philosophy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1. Executive Summary &amp; Design Philosophy
-      
+      </span>
     </span>
   </a>
   
@@ -4850,9 +4821,9 @@
           <li class="md-nav__item">
   <a href="#11-the-core-design-philosophy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1.1 The Core Design Philosophy
-      
+      </span>
     </span>
   </a>
   
@@ -4861,9 +4832,9 @@
           <li class="md-nav__item">
   <a href="#12-the-twelve-design-principles" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         1.2 The Twelve Design Principles
-      
+      </span>
     </span>
   </a>
   
@@ -4877,9 +4848,9 @@
         <li class="md-nav__item">
   <a href="#2-technology-architecture-direction" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2. Technology &amp; Architecture Direction
-      
+      </span>
     </span>
   </a>
   
@@ -4889,9 +4860,9 @@
           <li class="md-nav__item">
   <a href="#21-core-framework" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.1 Core Framework
-      
+      </span>
     </span>
   </a>
   
@@ -4900,9 +4871,9 @@
           <li class="md-nav__item">
   <a href="#22-styling-direction" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.2 Styling Direction
-      
+      </span>
     </span>
   </a>
   
@@ -4911,9 +4882,9 @@
           <li class="md-nav__item">
   <a href="#23-ui-primitives-accessibility-layer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.3 UI Primitives &amp; Accessibility Layer
-      
+      </span>
     </span>
   </a>
   
@@ -4922,9 +4893,9 @@
           <li class="md-nav__item">
   <a href="#24-visualization-specialized-engines" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         2.4 Visualization &amp; Specialized Engines
-      
+      </span>
     </span>
   </a>
   
@@ -4938,9 +4909,9 @@
         <li class="md-nav__item">
   <a href="#3-semantic-design-tokens-theme-system" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3. Semantic Design Tokens &amp; Theme System
-      
+      </span>
     </span>
   </a>
   
@@ -4950,9 +4921,9 @@
           <li class="md-nav__item">
   <a href="#31-token-definitions" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.1 Token Definitions
-      
+      </span>
     </span>
   </a>
   
@@ -4961,9 +4932,9 @@
           <li class="md-nav__item">
   <a href="#32-tailwind-css-v4-theme-mapping" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.2 Tailwind CSS v4 Theme Mapping
-      
+      </span>
     </span>
   </a>
   
@@ -4972,9 +4943,9 @@
           <li class="md-nav__item">
   <a href="#33-semantic-utility-classes-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         3.3 Semantic Utility Classes Rule
-      
+      </span>
     </span>
   </a>
   
@@ -4988,9 +4959,9 @@
         <li class="md-nav__item">
   <a href="#4-typography-system" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4. Typography System
-      
+      </span>
     </span>
   </a>
   
@@ -5000,9 +4971,9 @@
           <li class="md-nav__item">
   <a href="#41-font-families" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.1 Font Families
-      
+      </span>
     </span>
   </a>
   
@@ -5011,9 +4982,9 @@
           <li class="md-nav__item">
   <a href="#42-typographic-hierarchy-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.2 Typographic Hierarchy Scale
-      
+      </span>
     </span>
   </a>
   
@@ -5022,9 +4993,9 @@
           <li class="md-nav__item">
   <a href="#43-tabular-numeric-guarantee" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         4.3 Tabular Numeric Guarantee
-      
+      </span>
     </span>
   </a>
   
@@ -5038,9 +5009,9 @@
         <li class="md-nav__item">
   <a href="#5-spacing-sizing-and-layout-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5. Spacing, Sizing, and Layout Scale
-      
+      </span>
     </span>
   </a>
   
@@ -5050,9 +5021,9 @@
           <li class="md-nav__item">
   <a href="#51-canonical-8-point-spacing-scale" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.1 Canonical 8-Point Spacing Scale
-      
+      </span>
     </span>
   </a>
   
@@ -5061,9 +5032,9 @@
           <li class="md-nav__item">
   <a href="#52-control-sizing-standards" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.2 Control Sizing Standards
-      
+      </span>
     </span>
   </a>
   
@@ -5072,9 +5043,9 @@
           <li class="md-nav__item">
   <a href="#53-page-width-container-archetypes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.3 Page Width Container Archetypes
-      
+      </span>
     </span>
   </a>
   
@@ -5083,9 +5054,9 @@
           <li class="md-nav__item">
   <a href="#54-visual-baselines" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         5.4 Visual Baselines
-      
+      </span>
     </span>
   </a>
   
@@ -5099,9 +5070,9 @@
         <li class="md-nav__item">
   <a href="#6-surface-hierarchy-anti-card-soup-policy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6. Surface Hierarchy &amp; Anti-Card-Soup Policy
-      
+      </span>
     </span>
   </a>
   
@@ -5111,9 +5082,9 @@
           <li class="md-nav__item">
   <a href="#61-the-four-tier-surface-model" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.1 The Four-Tier Surface Model
-      
+      </span>
     </span>
   </a>
   
@@ -5122,9 +5093,9 @@
           <li class="md-nav__item">
   <a href="#62-the-container-justification-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.2 The Container Justification Rule
-      
+      </span>
     </span>
   </a>
   
@@ -5133,9 +5104,9 @@
           <li class="md-nav__item">
   <a href="#63-separation-hierarchy-surface-elevation-semantics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         6.3 Separation Hierarchy &amp; Surface Elevation Semantics
-      
+      </span>
     </span>
   </a>
   
@@ -5149,9 +5120,9 @@
         <li class="md-nav__item">
   <a href="#7-financial-color-semantics" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7. Financial Color Semantics
-      
+      </span>
     </span>
   </a>
   
@@ -5161,9 +5132,9 @@
           <li class="md-nav__item">
   <a href="#71-semantic-roles" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7.1 Semantic Roles
-      
+      </span>
     </span>
   </a>
   
@@ -5172,9 +5143,9 @@
           <li class="md-nav__item">
   <a href="#72-sign-vs-context-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         7.2 Sign vs. Context Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5188,9 +5159,9 @@
         <li class="md-nav__item">
   <a href="#8-global-information-architecture-navigation" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8. Global Information Architecture &amp; Navigation
-      
+      </span>
     </span>
   </a>
   
@@ -5200,9 +5171,9 @@
           <li class="md-nav__item">
   <a href="#81-non-route-expandable-groups-rule" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8.1 Non-Route Expandable Groups Rule
-      
+      </span>
     </span>
   </a>
   
@@ -5211,9 +5182,9 @@
           <li class="md-nav__item">
   <a href="#82-global-command-palette" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         8.2 Global Command Palette
-      
+      </span>
     </span>
   </a>
   
@@ -5227,9 +5198,9 @@
         <li class="md-nav__item">
   <a href="#9-appshell-page-anatomy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9. AppShell &amp; Page Anatomy
-      
+      </span>
     </span>
   </a>
   
@@ -5239,9 +5210,9 @@
           <li class="md-nav__item">
   <a href="#91-desktop-appshell-composition" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.1 Desktop AppShell Composition
-      
+      </span>
     </span>
   </a>
   
@@ -5250,9 +5221,9 @@
           <li class="md-nav__item">
   <a href="#92-header-actions-utility-controls" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.2 Header Actions &amp; Utility Controls
-      
+      </span>
     </span>
   </a>
   
@@ -5261,9 +5232,9 @@
           <li class="md-nav__item">
   <a href="#93-pageheader-responsibility-guarantee" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         9.3 PageHeader Responsibility Guarantee
-      
+      </span>
     </span>
   </a>
   
@@ -5277,9 +5248,9 @@
         <li class="md-nav__item">
   <a href="#10-core-page-archetypes-wireframes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         10. Core Page Archetypes &amp; Wireframes
-      
+      </span>
     </span>
   </a>
   
@@ -5289,9 +5260,9 @@
           <li class="md-nav__item">
   <a href="#archetype-a-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype A: Overview
-      
+      </span>
     </span>
   </a>
   
@@ -5301,9 +5272,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-dashboard-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Dashboard Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5312,9 +5283,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-dashboard-mobile" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Dashboard Mobile
-      
+      </span>
     </span>
   </a>
   
@@ -5328,9 +5299,9 @@
           <li class="md-nav__item">
   <a href="#archetype-b-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype B: Analysis
-      
+      </span>
     </span>
   </a>
   
@@ -5340,9 +5311,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-monthly-expenses-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Monthly Expenses Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5356,9 +5327,9 @@
           <li class="md-nav__item">
   <a href="#archetype-c-data-explorer" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype C: Data Explorer
-      
+      </span>
     </span>
   </a>
   
@@ -5368,9 +5339,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-transactions-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Transactions Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5384,9 +5355,9 @@
           <li class="md-nav__item">
   <a href="#archetype-d-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype D: Detail
-      
+      </span>
     </span>
   </a>
   
@@ -5396,9 +5367,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-credit-card-detail-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Credit Card Detail Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5412,9 +5383,9 @@
           <li class="md-nav__item">
   <a href="#archetype-e-operational" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype E: Operational
-      
+      </span>
     </span>
   </a>
   
@@ -5424,9 +5395,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-budget-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Budget Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5440,9 +5411,9 @@
           <li class="md-nav__item">
   <a href="#archetype-f-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype F: Configuration
-      
+      </span>
     </span>
   </a>
   
@@ -5452,9 +5423,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-configuration-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Configuration Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5468,9 +5439,9 @@
           <li class="md-nav__item">
   <a href="#archetype-g-workflow" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype G: Workflow
-      
+      </span>
     </span>
   </a>
   
@@ -5480,9 +5451,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-ledger-import-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Ledger Import Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5496,9 +5467,9 @@
           <li class="md-nav__item">
   <a href="#archetype-h-tool" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Archetype H: Tool
-      
+      </span>
     </span>
   </a>
   
@@ -5508,9 +5479,9 @@
           <li class="md-nav__item">
   <a href="#wireframe-ledger-editor-desktop" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Wireframe: Ledger Editor Desktop
-      
+      </span>
     </span>
   </a>
   
@@ -5529,9 +5500,9 @@
         <li class="md-nav__item">
   <a href="#11-data-region-state-model-interaction-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         11. Data Region State Model &amp; Interaction Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -5541,9 +5512,9 @@
           <li class="md-nav__item">
   <a href="#111-the-six-data-states" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         11.1 The Six Data States
-      
+      </span>
     </span>
   </a>
   
@@ -5557,9 +5528,9 @@
         <li class="md-nav__item">
   <a href="#12-component-architecture-layering" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         12. Component Architecture &amp; Layering
-      
+      </span>
     </span>
   </a>
   
@@ -5569,9 +5540,9 @@
           <li class="md-nav__item">
   <a href="#121-dependency-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         12.1 Dependency Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5585,9 +5556,9 @@
         <li class="md-nav__item">
   <a href="#13-data-display-tables-forms-and-chart-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13. Data Display, Tables, Forms, and Chart Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5597,9 +5568,9 @@
           <li class="md-nav__item">
   <a href="#131-table-and-grid-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.1 Table and Grid Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5608,9 +5579,9 @@
           <li class="md-nav__item">
   <a href="#132-form-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.2 Form Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5619,9 +5590,9 @@
           <li class="md-nav__item">
   <a href="#133-chart-rules-echarts-6" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         13.3 Chart Rules (ECharts 6)
-      
+      </span>
     </span>
   </a>
   
@@ -5635,9 +5606,9 @@
         <li class="md-nav__item">
   <a href="#14-responsive-overflow-rules" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14. Responsive &amp; Overflow Rules
-      
+      </span>
     </span>
   </a>
   
@@ -5647,9 +5618,9 @@
           <li class="md-nav__item">
   <a href="#141-key-responsive-transformations" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14.1 Key Responsive Transformations
-      
+      </span>
     </span>
   </a>
   
@@ -5658,9 +5629,9 @@
           <li class="md-nav__item">
   <a href="#142-overflow-acceptance-checklist" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         14.2 Overflow Acceptance Checklist
-      
+      </span>
     </span>
   </a>
   
@@ -5674,9 +5645,9 @@
         <li class="md-nav__item">
   <a href="#15-accessibility-motion-standards" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         15. Accessibility &amp; Motion Standards
-      
+      </span>
     </span>
   </a>
   
@@ -5685,9 +5656,9 @@
         <li class="md-nav__item">
   <a href="#16-development-ui-design-lab-devui" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        16. Development UI Design Lab (/dev/ui)
-      
+      <span class="md-typeset">
+        16. Development UI Design Lab (<code>/dev/ui</code>)
+      </span>
     </span>
   </a>
   
@@ -5696,9 +5667,9 @@
         <li class="md-nav__item">
   <a href="#17-complete-41-route-inventory-canonical-design-contracts" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17. Complete 41-Route Inventory &amp; Canonical Design Contracts
-      
+      </span>
     </span>
   </a>
   
@@ -5708,9 +5679,9 @@
           <li class="md-nav__item">
   <a href="#171-complete-route-inventory-table" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17.1 Complete Route Inventory Table
-      
+      </span>
     </span>
   </a>
   
@@ -5719,9 +5690,9 @@
           <li class="md-nav__item">
   <a href="#172-detailed-canonical-contracts-for-all-41-routes" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         17.2 Detailed Canonical Contracts for All 41 Routes
-      
+      </span>
     </span>
   </a>
   
@@ -5731,9 +5702,9 @@
           <li class="md-nav__item">
   <a href="#1-dashboard" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        1. / — Dashboard
-      
+      <span class="md-typeset">
+        1. <code>/</code> — Dashboard
+      </span>
     </span>
   </a>
   
@@ -5742,9 +5713,9 @@
           <li class="md-nav__item">
   <a href="#2-assetsallocation-asset-allocation" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        2. /assets/allocation — Asset Allocation
-      
+      <span class="md-typeset">
+        2. <code>/assets/allocation</code> — Asset Allocation
+      </span>
     </span>
   </a>
   
@@ -5753,9 +5724,9 @@
           <li class="md-nav__item">
   <a href="#3-assetsanalysis-asset-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        3. /assets/analysis — Asset Analysis
-      
+      <span class="md-typeset">
+        3. <code>/assets/analysis</code> — Asset Analysis
+      </span>
     </span>
   </a>
   
@@ -5764,9 +5735,9 @@
           <li class="md-nav__item">
   <a href="#4-assetsbalance-asset-balance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        4. /assets/balance — Asset Balance
-      
+      <span class="md-typeset">
+        4. <code>/assets/balance</code> — Asset Balance
+      </span>
     </span>
   </a>
   
@@ -5775,9 +5746,9 @@
           <li class="md-nav__item">
   <a href="#5-assetsgain-investment-performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        5. /assets/gain — Investment Performance
-      
+      <span class="md-typeset">
+        5. <code>/assets/gain</code> — Investment Performance
+      </span>
     </span>
   </a>
   
@@ -5786,9 +5757,9 @@
           <li class="md-nav__item">
   <a href="#6-assetsgainslug-account-investment-performance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        6. /assets/gain/[slug] — Account Investment Performance
-      
+      <span class="md-typeset">
+        6. <code>/assets/gain/[slug]</code> — Account Investment Performance
+      </span>
     </span>
   </a>
   
@@ -5797,9 +5768,9 @@
           <li class="md-nav__item">
   <a href="#7-assetsinvestment-investment" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        7. /assets/investment — Investment
-      
+      <span class="md-typeset">
+        7. <code>/assets/investment</code> — Investment
+      </span>
     </span>
   </a>
   
@@ -5808,9 +5779,9 @@
           <li class="md-nav__item">
   <a href="#8-assetsnetworth-net-worth" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        8. /assets/networth — Net Worth
-      
+      <span class="md-typeset">
+        8. <code>/assets/networth</code> — Net Worth
+      </span>
     </span>
   </a>
   
@@ -5819,9 +5790,9 @@
           <li class="md-nav__item">
   <a href="#9-cash_flowincome_statement-income-statement" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        9. /cash_flow/income_statement — Income Statement
-      
+      <span class="md-typeset">
+        9. <code>/cash_flow/income_statement</code> — Income Statement
+      </span>
     </span>
   </a>
   
@@ -5830,9 +5801,9 @@
           <li class="md-nav__item">
   <a href="#10-cash_flowmonthly-monthly-cash-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        10. /cash_flow/monthly — Monthly Cash Flow
-      
+      <span class="md-typeset">
+        10. <code>/cash_flow/monthly</code> — Monthly Cash Flow
+      </span>
     </span>
   </a>
   
@@ -5841,9 +5812,9 @@
           <li class="md-nav__item">
   <a href="#11-cash_flowrecurring-recurring-transactions" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        11. /cash_flow/recurring — Recurring Transactions
-      
+      <span class="md-typeset">
+        11. <code>/cash_flow/recurring</code> — Recurring Transactions
+      </span>
     </span>
   </a>
   
@@ -5852,9 +5823,9 @@
           <li class="md-nav__item">
   <a href="#12-cash_flowyearly-yearly-cash-flow" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        12. /cash_flow/yearly — Yearly Cash Flow
-      
+      <span class="md-typeset">
+        12. <code>/cash_flow/yearly</code> — Yearly Cash Flow
+      </span>
     </span>
   </a>
   
@@ -5863,9 +5834,9 @@
           <li class="md-nav__item">
   <a href="#13-expensebudget-budget" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        13. /expense/budget — Budget
-      
+      <span class="md-typeset">
+        13. <code>/expense/budget</code> — Budget
+      </span>
     </span>
   </a>
   
@@ -5874,9 +5845,9 @@
           <li class="md-nav__item">
   <a href="#14-expensemonthly-monthly-expenses" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        14. /expense/monthly — Monthly Expenses
-      
+      <span class="md-typeset">
+        14. <code>/expense/monthly</code> — Monthly Expenses
+      </span>
     </span>
   </a>
   
@@ -5885,9 +5856,9 @@
           <li class="md-nav__item">
   <a href="#15-expenseyearly-yearly-expenses" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        15. /expense/yearly — Yearly Expenses
-      
+      <span class="md-typeset">
+        15. <code>/expense/yearly</code> — Yearly Expenses
+      </span>
     </span>
   </a>
   
@@ -5896,9 +5867,9 @@
           <li class="md-nav__item">
   <a href="#16-income-income" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        16. /income — Income
-      
+      <span class="md-typeset">
+        16. <code>/income</code> — Income
+      </span>
     </span>
   </a>
   
@@ -5907,9 +5878,9 @@
           <li class="md-nav__item">
   <a href="#17-ledgereditor-ledger-editor-root" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        17. /ledger/editor — Ledger Editor (Root)
-      
+      <span class="md-typeset">
+        17. <code>/ledger/editor</code> — Ledger Editor (Root)
+      </span>
     </span>
   </a>
   
@@ -5918,9 +5889,9 @@
           <li class="md-nav__item">
   <a href="#18-ledgereditorslug-ledger-editor-file" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        18. /ledger/editor/[slug] — Ledger Editor File
-      
+      <span class="md-typeset">
+        18. <code>/ledger/editor/[slug]</code> — Ledger Editor File
+      </span>
     </span>
   </a>
   
@@ -5929,9 +5900,9 @@
           <li class="md-nav__item">
   <a href="#19-ledgerimport-ledger-import" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        19. /ledger/import — Ledger Import
-      
+      <span class="md-typeset">
+        19. <code>/ledger/import</code> — Ledger Import
+      </span>
     </span>
   </a>
   
@@ -5940,9 +5911,9 @@
           <li class="md-nav__item">
   <a href="#20-ledgerposting-postings" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        20. /ledger/posting — Postings
-      
+      <span class="md-typeset">
+        20. <code>/ledger/posting</code> — Postings
+      </span>
     </span>
   </a>
   
@@ -5951,9 +5922,9 @@
           <li class="md-nav__item">
   <a href="#21-ledgerprice-prices" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        21. /ledger/price — Prices
-      
+      <span class="md-typeset">
+        21. <code>/ledger/price</code> — Prices
+      </span>
     </span>
   </a>
   
@@ -5962,9 +5933,9 @@
           <li class="md-nav__item">
   <a href="#22-ledgertransaction-transactions" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        22. /ledger/transaction — Transactions
-      
+      <span class="md-typeset">
+        22. <code>/ledger/transaction</code> — Transactions
+      </span>
     </span>
   </a>
   
@@ -5973,9 +5944,9 @@
           <li class="md-nav__item">
   <a href="#23-liabilitiesbalance-liabilities-balance" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        23. /liabilities/balance — Liabilities Balance
-      
+      <span class="md-typeset">
+        23. <code>/liabilities/balance</code> — Liabilities Balance
+      </span>
     </span>
   </a>
   
@@ -5984,9 +5955,9 @@
           <li class="md-nav__item">
   <a href="#24-liabilitiescredit_cards-credit-cards" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        24. /liabilities/credit_cards — Credit Cards
-      
+      <span class="md-typeset">
+        24. <code>/liabilities/credit_cards</code> — Credit Cards
+      </span>
     </span>
   </a>
   
@@ -5995,9 +5966,9 @@
           <li class="md-nav__item">
   <a href="#25-liabilitiescredit_cardsslug-credit-card-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        25. /liabilities/credit_cards/[slug] — Credit Card Detail
-      
+      <span class="md-typeset">
+        25. <code>/liabilities/credit_cards/[slug]</code> — Credit Card Detail
+      </span>
     </span>
   </a>
   
@@ -6006,9 +5977,9 @@
           <li class="md-nav__item">
   <a href="#26-liabilitiesinterest-interest-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        26. /liabilities/interest — Interest Analysis
-      
+      <span class="md-typeset">
+        26. <code>/liabilities/interest</code> — Interest Analysis
+      </span>
     </span>
   </a>
   
@@ -6017,9 +5988,9 @@
           <li class="md-nav__item">
   <a href="#27-liabilitiesrepayment-loan-repayment" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        27. /liabilities/repayment — Loan Repayment
-      
+      <span class="md-typeset">
+        27. <code>/liabilities/repayment</code> — Loan Repayment
+      </span>
     </span>
   </a>
   
@@ -6028,9 +5999,9 @@
           <li class="md-nav__item">
   <a href="#28-moreabout-about" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        28. /more/about — About
-      
+      <span class="md-typeset">
+        28. <code>/more/about</code> — About
+      </span>
     </span>
   </a>
   
@@ -6039,9 +6010,9 @@
           <li class="md-nav__item">
   <a href="#29-moreconfig-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        29. /more/config — Configuration
-      
+      <span class="md-typeset">
+        29. <code>/more/config</code> — Configuration
+      </span>
     </span>
   </a>
   
@@ -6050,9 +6021,9 @@
           <li class="md-nav__item">
   <a href="#30-moredoctor-doctor" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        30. /more/doctor — Doctor
-      
+      <span class="md-typeset">
+        30. <code>/more/doctor</code> — Doctor
+      </span>
     </span>
   </a>
   
@@ -6061,9 +6032,9 @@
           <li class="md-nav__item">
   <a href="#31-moregoals-goals-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        31. /more/goals — Goals Overview
-      
+      <span class="md-typeset">
+        31. <code>/more/goals</code> — Goals Overview
+      </span>
     </span>
   </a>
   
@@ -6072,9 +6043,9 @@
           <li class="md-nav__item">
   <a href="#32-moregoalsretirementslug-retirement-goal-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        32. /more/goals/retirement/[slug] — Retirement Goal Detail
-      
+      <span class="md-typeset">
+        32. <code>/more/goals/retirement/[slug]</code> — Retirement Goal Detail
+      </span>
     </span>
   </a>
   
@@ -6083,9 +6054,9 @@
           <li class="md-nav__item">
   <a href="#33-moregoalssavingsslug-savings-goal-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        33. /more/goals/savings/[slug] — Savings Goal Detail
-      
+      <span class="md-typeset">
+        33. <code>/more/goals/savings/[slug]</code> — Savings Goal Detail
+      </span>
     </span>
   </a>
   
@@ -6094,9 +6065,9 @@
           <li class="md-nav__item">
   <a href="#34-morelogs-logs" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        34. /more/logs — Logs
-      
+      <span class="md-typeset">
+        34. <code>/more/logs</code> — Logs
+      </span>
     </span>
   </a>
   
@@ -6105,9 +6076,9 @@
           <li class="md-nav__item">
   <a href="#35-moresheets-sheets-root" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        35. /more/sheets — Sheets (Root)
-      
+      <span class="md-typeset">
+        35. <code>/more/sheets</code> — Sheets (Root)
+      </span>
     </span>
   </a>
   
@@ -6116,9 +6087,9 @@
           <li class="md-nav__item">
   <a href="#36-moresheetsslug-sheet-detail" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        36. /more/sheets/[slug] — Sheet Detail
-      
+      <span class="md-typeset">
+        36. <code>/more/sheets/[slug]</code> — Sheet Detail
+      </span>
     </span>
   </a>
   
@@ -6127,9 +6098,9 @@
           <li class="md-nav__item">
   <a href="#37-moretaxcapital_gains-capital-gains-tax" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        37. /more/tax/capital_gains — Capital Gains Tax
-      
+      <span class="md-typeset">
+        37. <code>/more/tax/capital_gains</code> — Capital Gains Tax
+      </span>
     </span>
   </a>
   
@@ -6138,9 +6109,9 @@
           <li class="md-nav__item">
   <a href="#38-moretaxharvest-tax-harvesting" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        38. /more/tax/harvest — Tax Harvesting
-      
+      <span class="md-typeset">
+        38. <code>/more/tax/harvest</code> — Tax Harvesting
+      </span>
     </span>
   </a>
   
@@ -6149,9 +6120,9 @@
           <li class="md-nav__item">
   <a href="#39-moretaxschedule_al-schedule-al" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        39. /more/tax/schedule_al — Schedule AL
-      
+      <span class="md-typeset">
+        39. <code>/more/tax/schedule_al</code> — Schedule AL
+      </span>
     </span>
   </a>
   
@@ -6160,9 +6131,9 @@
           <li class="md-nav__item">
   <a href="#40-insights-insights" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        40. /insights — Insights
-      
+      <span class="md-typeset">
+        40. <code>/insights</code> — Insights
+      </span>
     </span>
   </a>
   
@@ -6171,9 +6142,9 @@
           <li class="md-nav__item">
   <a href="#41-login-login" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        41. /login — Login
-      
+      <span class="md-typeset">
+        41. <code>/login</code> — Login
+      </span>
     </span>
   </a>
   
@@ -6192,9 +6163,9 @@
         <li class="md-nav__item">
   <a href="#18-critical-functionality-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18. Critical Functionality Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6204,9 +6175,9 @@
           <li class="md-nav__item">
   <a href="#181-ledger-import-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.1 Ledger Import Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6215,9 +6186,9 @@
           <li class="md-nav__item">
   <a href="#182-ledger-editor-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.2 Ledger Editor Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6226,9 +6197,9 @@
           <li class="md-nav__item">
   <a href="#183-transactions-bulk-edit-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.3 Transactions &amp; Bulk Edit Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6237,9 +6208,9 @@
           <li class="md-nav__item">
   <a href="#184-budget-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.4 Budget Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6248,9 +6219,9 @@
           <li class="md-nav__item">
   <a href="#185-configuration-preservation-guarantees" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         18.5 Configuration Preservation Guarantees
-      
+      </span>
     </span>
   </a>
   
@@ -6264,9 +6235,9 @@
         <li class="md-nav__item">
   <a href="#19-testing-visual-regression-strategy" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19. Testing &amp; Visual Regression Strategy
-      
+      </span>
     </span>
   </a>
   
@@ -6276,9 +6247,9 @@
           <li class="md-nav__item">
   <a href="#191-target-test-matrix" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19.1 Target Test Matrix
-      
+      </span>
     </span>
   </a>
   
@@ -6287,9 +6258,9 @@
           <li class="md-nav__item">
   <a href="#192-automated-verification-criteria" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         19.2 Automated Verification Criteria
-      
+      </span>
     </span>
   </a>
   
@@ -6303,9 +6274,9 @@
         <li class="md-nav__item">
   <a href="#20-migration-retrospective" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         20. Migration Retrospective
-      
+      </span>
     </span>
   </a>
   
@@ -6314,9 +6285,9 @@
         <li class="md-nav__item">
   <a href="#21-architectural-boundaries" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         21. Architectural Boundaries
-      
+      </span>
     </span>
   </a>
   
@@ -6325,9 +6296,9 @@
         <li class="md-nav__item">
   <a href="#22-known-ambiguities-product-clarifications" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         22. Known Ambiguities &amp; Product Clarifications
-      
+      </span>
     </span>
   </a>
   
@@ -6336,9 +6307,9 @@
         <li class="md-nav__item">
   <a href="#23-migration-completion-status" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         23. Migration Completion Status
-      
+      </span>
     </span>
   </a>
   
@@ -6348,9 +6319,9 @@
           <li class="md-nav__item">
   <a href="#what-if-scenarios-morescenarios" class="md-nav__link">
     <span class="md-ellipsis">
-      
-        What-if Scenarios — /more/scenarios
-      
+      <span class="md-typeset">
+        What-if Scenarios — <code>/more/scenarios</code>
+      </span>
     </span>
   </a>
   
@@ -6388,6 +6359,7 @@
     <li class="md-path__item">
       <a href="../.." class="md-path__link">
         
+  
   <span class="md-ellipsis">
     Home
   </span>
@@ -6403,9 +6375,27 @@
   
     
     
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../../development/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Development
   </span>
@@ -6421,9 +6411,19 @@
   
     
     
+      
+        
+      
+        
+      
+    
+    
+    
+    
       <li class="md-path__item">
         <a href="../frontend-chart-architecture/" class="md-path__link">
           
+  
   <span class="md-ellipsis">
     Design (internal)
   </span>
@@ -6439,9 +6439,9 @@
 
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
                   
-
 
   
     <a href="https://github.com/Pratap-kute/paisa/edit/master/docs/design/paisa-ui-spec.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
@@ -8583,6 +8583,8 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 
 
 
+
+
   
   
 
@@ -8649,8 +8651,8 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
     </a>
   
 </div>
@@ -8666,7 +8668,7 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
       
     
     <a href="https://github.com/Pratap-kute/paisa" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
     
@@ -8677,7 +8679,7 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
       
     
     <a href="https://hub.docker.com/r/pratapkute/paisa" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M349.9 236.3h-66.1v-59.4h66.1zm0-204.3h-66.1v60.7h66.1zm78.2 144.8H362v59.4h66.1zm-156.3-72.1h-66.1v60.1h66.1zm78.1 0h-66.1v60.1h66.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1zm78.1 0h-66.1v59.4h66.1zm-78.1-72.1h-66.1v60.1h66.1z"/></svg>
     </a>
   
 </div>
@@ -8687,20 +8689,25 @@ Licensed under <a href="https://github.com/Pratap-kute/paisa/blob/master/COPYING
 </footer>
       
     </div>
-    <div class="md-dialog" data-md-component="dialog">
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+      
+<div class="md-progress" data-md-component="progress" role="progressbar" aria-label="Loading"></div>
     
     
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.tabs.link", "content.code.copy", "content.code.select", "content.code.annotate", "content.action.edit", "content.action.view", "navigation.instant", "navigation.instant.prefetch", "navigation.instant.progress", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.path", "navigation.top", "navigation.footer", "toc.follow", "search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.tabs.link","content.code.copy","content.code.select","content.code.annotate","content.action.edit","content.action.view","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.sections","navigation.indexes","navigation.path","navigation.top","navigation.footer","toc.follow","search.suggest","search.highlight","search.share"],"redirect":null,"search":"../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d31f0ffa.min.js"></script>
       
     
   </body>
