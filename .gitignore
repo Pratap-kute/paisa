@@ -42,3 +42,4 @@ test-results/
 .direnv/
 /site/
 .playwright-mcp/
+tools/docs-lexers/build/
