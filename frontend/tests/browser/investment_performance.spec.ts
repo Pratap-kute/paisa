@@ -127,7 +127,10 @@ test("performance error is retryable and missing return is not zero", async ({
   await expect(page.getByRole("alert")).toContainText("Unable to load");
   fail = false;
   await page.getByRole("button", { name: "Retry" }).click();
-  await expect(page.getByRole("status")).toContainText("capital base");
+  // Loading skeletons are status regions too, so name the one that matters.
+  await expect(
+    page.getByRole("status").filter({ hasText: "capital base" }),
+  ).toBeVisible();
 });
 
 test("performance amount privacy", async ({ page }) => {

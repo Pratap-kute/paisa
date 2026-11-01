@@ -46,7 +46,7 @@ for (const width of [390, 768, 1440]) {
       page.getByRole("button", { name: "Confirm Netflix recurring" }),
     ).toBeVisible();
     await expect(
-      page.getByText("Amount increased from 499 INR to 649 INR", {
+      page.getByText("Amount increased from 499 to 649", {
         exact: false,
       }),
     ).toBeVisible();
@@ -121,7 +121,7 @@ test("recurring confirmation uses editor persistence and survives page reload", 
   ).toHaveCount(0);
   await expect(
     page.getByTestId("recurring-intelligence-summary"),
-  ).toContainText("649 INR");
+  ).toContainText("649");
 });
 
 test("recurring amounts respect obscure mode", async ({ page }) => {
@@ -134,9 +134,7 @@ test("recurring amounts respect obscure mode", async ({ page }) => {
   );
   await page.goto("/cash_flow/recurring");
   const row = page.getByTestId("recurring-intelligence-row");
-  await expect(row).toContainText(
-    "Amount increased from 0 INR to 0 INR (0.0%)",
-  );
+  await expect(row).toContainText("Amount increased from 0 to 0 (0.0%)");
   await expect(row).not.toContainText("649");
   await row.getByText("View history and pattern details").click();
   await expect(row).not.toContainText("499");

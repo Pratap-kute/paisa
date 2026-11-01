@@ -1,6 +1,6 @@
 <script lang="ts">
   import type dayjs from "dayjs";
-  import { financialYear } from "$lib/domain/time";
+  import { financialYear, resolveFinancialYear } from "$lib/domain/time";
   import { forEachFinancialYear } from "$lib/shared/formatters/date";
 
   interface Props {
@@ -21,12 +21,11 @@
     forEachFinancialYear(dateMin, dateMax).reverse().map(financialYear),
   );
 
-  // The shared year store starts empty, so pages opened directly would
-  // otherwise render a blank selection.
+  // The shared year starts empty and the range changes once a page has loaded
+  // its data, so keep the selection within it (latest by default).
   $effect(() => {
-    if (!value && years.length > 0) {
-      value = years[0];
-    }
+    const next = resolveFinancialYear(value, years);
+    if (next !== value) value = next;
   });
 </script>
 

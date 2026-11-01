@@ -992,7 +992,7 @@ Practical consequences: cash accounts report no XIRR or gain; the per-posting an
 7. **Commodity quantities** are written as `quantity @ unit price` (for example `413.2717 @ 169.3801`).
 8. **Neutral facts stay neutral:** expense totals, balances and statement amounts use foreground colour. Positive, negative and warning colours express outcomes (section 7), and never carry meaning alone (section 15).
 9. **Signs:** a single Amount column shows signed values; Debit and Credit columns show magnitudes (13.1.6).
-10. **Totals and KPIs** show one value per metric. Text values such as "Not configured" wrap instead of truncating, and every metric exposes its full value as a tooltip.
+10. **Totals and KPIs** show one value per metric. On phones, text values such as "Not configured" wrap at a smaller size instead of truncating; wider layouts keep the regular size. Every metric exposes its full value as a tooltip.
 11. **Labelled scope.** Two pages may legitimately report different gains for the same assets. The Balance, Gain and Investment pages report investment returns of investment accounts only. Net Worth reports the gain of everything, net of interest paid on loans, and says so ("After interest paid on loans").
 
 ---

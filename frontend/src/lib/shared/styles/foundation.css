@@ -520,10 +520,16 @@
   font-variant-numeric: tabular-nums;
 }
 
-.paisa4-metric-text {
-  white-space: normal;
-  font-size: 1.375rem;
-  line-height: 28px;
+/*
+ * Words such as "Not configured" are cut off by the ellipsis in a narrow tile, so
+ * on phones they wrap at a size that fits. Wider layouts keep the regular size.
+ */
+@media (max-width: 640px) {
+  .paisa4-metric-text {
+    white-space: normal;
+    font-size: 1.375rem;
+    line-height: 28px;
+  }
 }
 
 .paisa4-metric-meta {

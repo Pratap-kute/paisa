@@ -9,7 +9,7 @@
   import CommandPalette from "./CommandPalette.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import { financialYear } from "$lib/domain/time";
+  import { financialYear, resolveFinancialYear } from "$lib/domain/time";
   import {
     dateMax,
     dateMin,
@@ -317,13 +317,15 @@
   );
   let showYearlyDepth = $derived(pathname === "/cash_flow/yearly");
 
-  // The year store starts empty, so default to the latest financial year or the
-  // picker renders blank on pages opened directly.
+  // The year store starts empty and the available range changes once a page has
+  // loaded its data, so keep the year within the range (latest by default).
   $effect(() => {
-    if (showFinancialYearPicker && !$year) {
-      const latest = forEachFinancialYear($dateMin, $dateMax).at(-1);
-      if (latest) year.set(financialYear(latest));
-    }
+    if (!showFinancialYearPicker) return;
+    const available = forEachFinancialYear($dateMin, $dateMax)
+      .reverse()
+      .map(financialYear);
+    const next = resolveFinancialYear($year, available);
+    if (next !== $year) year.set(next);
   });
 
   const navLinkClass =
