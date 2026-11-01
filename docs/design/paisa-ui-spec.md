@@ -38,7 +38,7 @@ Paisa is a desktop-first, local-first personal finance management system built o
 7. **Financial work should remain information-dense:** Users with large ledgers require high information density. Desktop views prioritize compact vertical rhythm, dense data grids, right-aligned tabular numbers, and full workspace utilization.
 8. **Missing data must never break composition:** Financial states frequently encounter zero transactions, single data points, missing price feeds, unconfigured goals, or empty categories. Every layout must be resilient under 0, 1, 2, or 10,000+ items without layout shifts or geometry collapse.
 9. **Interaction patterns should be predictable:** Common actions (filtering, sorting, date ranges, search, saving, keyboard shortcuts) must behave identically across all pages.
-10. **Mobile prioritizes and reorganizes rather than shrinking desktop:** Mobile views transform multi-pane layouts into dedicated tabs, drawers, and vertical priority stacks with touch targets $\ge 44\text{px}$, rather than squeezing desktop tables into unreadable widths.
+10. **Mobile prioritizes and reorganizes rather than shrinking desktop:** Mobile views transform multi-pane layouts into dedicated tabs, drawers, and vertical priority stacks with 44px touch targets on touch devices, rather than squeezing desktop tables into unreadable widths.
 11. **Implementation simplicity is a design quality:** Standardize UI primitives, layout containers, and color tokens so future features can be constructed from existing building blocks without inventing custom ad-hoc CSS.
 12. **Do not invent product functionality for visual completeness:** Never include mock UI features (e.g., payment gateways, bank logins, arbitrary SaaS widgets, AI match badges in standard views) unless they are backed by Paisa's real engine. Actual Paisa functionality always wins over external design mockups.
 
@@ -241,7 +241,7 @@ Paisa standardizes on **Inter** for all UI copy, navigation, forms, and financia
 ### 4.1 Font Families
 
 - **Primary UI Font (`--paisa-font-ui` / `--paisa-font-sans`):** `"Inter Variable", Inter, "fa6-solid", "fa6-regular", "fa6-brands", "arcticons", "fluent-emoji-high-contrast", "mdi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` — the font stack includes icon font families for inline icon rendering via CSS class selectors.
-- **Monospace Font (`--paisa-font-code` / `--paisa-font-mono`):** `"JetBrains Mono Variable", "JetBrains Mono", monospace` (Used exclusively in: Ledger Editor, CodeMirror Template Editor, Generated Ledger Previews, Raw Transaction IDs, Posting syntax).
+- **Monospace Font (`--paisa-font-code` / `--paisa-font-mono`):** `"JetBrains Mono Variable", "JetBrains Mono", monospace` (Used exclusively in: Ledger Editor, CodeMirror Template Editor, Generated Ledger Previews, Raw Transaction IDs, Posting syntax, search query input). Amounts, quantities, prices, percentages and dates are **never** set in the monospace font: the primary UI font with tabular figures (section 4.3) aligns columns just as well, takes less width and keeps pages visually consistent.
 
 ### 4.2 Typographic Hierarchy Scale
 
@@ -264,7 +264,7 @@ All financial amounts, quantities, percentage changes, dates, and account codes 
 font-variant-numeric: tabular-nums;
 ```
 
-This guarantees alignment across rows, lists, and summary columns. Amounts must never wrap onto multiple lines or split across currency symbols.
+This guarantees alignment across rows, lists, and summary columns. Amounts must never wrap onto multiple lines or split across currency symbols. The guarantee covers table libraries as well: Tabulator cells inherit it through `integrations/tabulator.css`, and the `paisa-tabular-nums` utility exists for markup that needs it explicitly.
 
 ---
 
@@ -288,7 +288,10 @@ $$\text{Scale: } [4\text{px}, 8\text{px}, 12\text{px}, 16\text{px}, 24\text{px},
 
 - **Compact Desktop (Dense Workspaces / Editor Toolbars / Tables):** Height $\approx 32\text{px}$ (`h-8`), font size 13px.
 - **Normal Desktop (Forms / Standard Buttons / Dropdowns):** Height $\approx 36\text{px}–40\text{px}$ (`h-9` / `h-10`), font size 14px.
-- **Mobile Touch Targets:** Minimum interactive dimension $\ge 44\text{px}$ (`min-h-[44px] min-w-[44px]`).
+- **Touch Targets:** Controls used repeatedly (header actions, month and period pickers, tabs, legend toggles, buttons) have a hit area of at least $44\text{px} \times 44\text{px}$ **on touch devices**. WCAG 2.2 AA (2.5.8) only requires $24\text{px}$ with spacing, so $44\text{px}$ is a comfort target for frequent thumb use, not a minimum for every element:
+  - Apply it with `@media (pointer: coarse)` (Tailwind: `pointer-coarse:`), **not** by viewport width, so a narrow desktop window stays dense and a tablet still gets large targets.
+  - Fine pointers keep the compact sizes above.
+  - Inline text links inside sentences are exempt.
 
 ### 5.3 Page Width Container Archetypes
 
@@ -652,6 +655,25 @@ Every page in Paisa maps strictly to one of eight core archetypes. An implementa
 
 ```
 +-----------------------------------------------------------------------------------------------+
+| Transactions                                                                                  |
+| Journal transactions, search, and bulk edits                                                  |
++-----------------------------------------------------------------------------------------------+
+| [ Q Search payee, account:Expenses:Food, commodity:INR...  ] [420 transaction(s)] [Bulk Edit v] [Download] |
++-----------------------------------------------------------------------------------------------+
+| DATE & PAYEE        DEBITS                                      CREDITS                       |
++-----------------------------------------------------------------------------------------------+
+| 18 Aug 2026         Expenses:Shopping:Electronics    1,249.00   Liabilities:CreditCard  1,249.00 |
+| Amazon India                                                                                  |
+| 17 Aug 2026         Expenses:Food:Delivery              480.00  Assets:Checking:HDFC       480.00 |
+| Swiggy                                                                                        |
+| 01 Aug 2026         Assets:Checking:HDFC           1,85,000.00  Income:Salary       1,85,000.00 |
+| Employer Corp                                                                                 |
++-----------------------------------------------------------------------------------------------+
+```
+
+**Debit and Credit columns:** Transactions use the standard double-entry layout. A positive posting is a debit and a negative posting is a credit. Both columns show the **magnitude** of the amount without a sign, because the column already states the side; a minus sign in the Credits column would read as a negative credit. A transaction with several postings stacks them within their column. Single-column layouts that have no Debit and Credit headers (the compact variant, the Postings table) keep signed amounts.
+
+-----------------------------------------------------------------------------------------------+
 | Transactions                 Journal transactions, search, and bulk edits        [420 Records]|
 +-----------------------------------------------------------------------------------------------+
 | [ Q Search payee, account:Expenses:Food, commodity:INR...            ] [Bulk Edit v] [Export]|
@@ -931,7 +953,10 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 2. **Tabular Figures:** Always apply `font-variant-numeric: tabular-nums`.
 3. **No Splitting of Amounts:** Currency symbols and values must never wrap across lines.
 4. **Header Sticky Behavior:** Table headers remain sticky during vertical scrolling.
-5. **Mobile Transformation:** Tables collapse into compact record cards on viewports $< 768\text{px}$.
+5. **Mobile Transformation:** How a table adapts below $768\text{px}$ depends on how it is read, not on a blanket rule:
+   - **Record tables** (read one entry at a time, e.g. Postings, Transactions) become stacked records: key facts on the first lines (date and amount, payee, account and balance) and secondary facts (units, price, market value) only when they apply. Virtualized lists use a fixed height per record variant so scrolling stays stable. Record rows use hairline dividers rather than boxed cards.
+   - **Comparison tables** (read across columns, e.g. Capital Gains, Tax Harvesting, Balances, Prices) stay tables and scroll horizontally inside their container with the identifying first column sticky. Turning them into cards would remove the ability to compare. *(Planned: the sticky first column is not implemented yet; today these tables scroll horizontally without it.)*
+6. **Debit and Credit Columns:** Where a table labels columns as Debits and Credits, a positive posting is a debit, a negative posting is a credit, and both columns show unsigned magnitudes. Tables with a single Amount column keep signed values.
 
 ### 13.2 Form Rules
 
@@ -949,6 +974,15 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 5. **Responsive Behavior:** Charts auto-resize via `ResizeObserver`. Option builders in `$lib/shared/charts/echarts/responsive.ts` produce viewport-aware configurations.
 6. **Tooltips:** Tooltips use the Paisa chart tooltip formatter (`$lib/shared/charts/tooltip.ts`) with semantic styling.
 
+### 13.4 Financial Data Conventions
+
+1. **Digit grouping follows the user's locale** (for example `1,72,320.00` for INR) and is identical everywhere an amount appears.
+2. **Dates** are written unambiguously as `DD MMM YYYY`.
+3. **Commodity quantities** are written as `quantity @ unit price` (for example `413.2717 @ 169.3801`).
+4. **Neutral facts stay neutral:** expense totals, balances and statement amounts use foreground colour. Positive, negative and warning colours express outcomes (section 7), and never carry meaning alone (section 15).
+5. **Signs:** a single Amount column shows signed values; Debit and Credit columns show magnitudes (13.1.6).
+6. **Totals and KPIs** show one value per metric. Text values such as "Not configured" wrap instead of truncating, and every metric exposes its full value as a tooltip.
+
 ---
 
 ## 14. Responsive & Overflow Rules
@@ -959,7 +993,7 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 | :--- | :--- | :--- |
 | **Global Navigation** | Fixed collapsible sidebar | Slide-over drawer toggled via burger menu |
 | **Analysis Views** | Multi-chart row + timeline | Ordered vertical stack |
-| **Multi-Column Tables** | Virtualized dense table | Compact multi-line record cards |
+| **Multi-Column Tables** | Virtualized dense table | Record tables: stacked multi-line records. Comparison tables: horizontal scroll with sticky first column |
 | **Ledger Import** | 35% Source / 65% Preview split | `[Source]` / `[Preview]` tabs + bottom sheet inspector |
 | **Ledger Editor** | 3-Pane workspace (Files \| Editor \| Balance) | Fullscreen Editor with drawer panel toggles |
 | **Configuration** | Sticky left navigation rail + main panel | Top horizontal section selector + vertical form stack |
@@ -977,8 +1011,8 @@ The following sensitive routes must pass automated overflow tests without horizo
 - **Keyboard Navigation:** All interactive elements focusable via `Tab` / `Shift+Tab`.
 - **Visible Focus Ring:** 2px offset brand ring (`focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2`).
 - **Color Independence:** Financial status must include textual labels, icons, or badges.
-- **Screen Reader Labels:** All icon-only buttons declare explicit `aria-label` or `title`.
-- **Motion Standards:** Transitions 150–200ms; disable all transitions when `prefers-reduced-motion: reduce` is active.
+- **Screen Reader Labels:** All icon-only buttons declare explicit `aria-label` or `title`. Tooltip-only triggers (such as note icons) use the tooltip text as their `aria-label`.
+- **Motion Standards:** Transitions 150–200ms. Under `prefers-reduced-motion: reduce`, `foundation.css` sets the transition tokens to `0ms` and disables CSS animation globally without `!important`. Svelte JS transitions (`transition:slide`) are not affected by CSS and must be skipped explicitly where used.
 
 ---
 
@@ -1349,7 +1383,7 @@ The table and 41 individual route design contracts below represent the binding U
 - **Secondary Information:** Associated transaction dates, payees, commodity tags.
 - **Primary Actions:** Account filter, Search query.
 - **Desktop Composition:** Search/filter bar $\rightarrow$ Full-width dense postings data table with right-aligned amounts.
-- **Mobile Transformation:** Postings list with compact multi-line records.
+- **Mobile Transformation:** The ten column grid becomes one record per row below 768px: date and signed amount, payee with status and note, account with balance, plus units @ price and market value change for commodity postings. Records use a fixed height per variant inside the virtual list.
 - **Loading Behavior:** Table row skeletons.
 - **Empty Behavior:** ZeroState indicating no postings match query.
 - **Error Behavior:** Local error banner.
@@ -1377,10 +1411,10 @@ The table and 41 individual route design contracts below represent the binding U
 - **Primary Archetype:** Data Explorer
 - **Primary Question:** What transactions match my query, and how do I bulk edit them?
 - **Page Header:** Title: "Transactions", Description: "Journal transactions, search, and bulk edits"; Actions: Transaction count badge, Download/Export button.
-- **Primary Information:** Virtualized list of transactions with date, payee, posting accounts, commodity amounts.
+- **Primary Information:** Virtualized list of transactions with date, payee, and the posting accounts split into Debits (positive postings) and Credits (negative postings) columns, each showing unsigned amounts and commodity details.
 - **Secondary Information:** Search autocomplete suggestions (accounts, commodities, files).
 - **Primary Actions:** Search query input, Bulk Edit toggle, Download balanced postings, Preview Bulk Edit modal.
-- **Desktop Composition:** Search toolbar with bulk edit button $\rightarrow$ Slide-down `BulkEditForm` $\rightarrow$ Virtualized transaction stream.
+- **Desktop Composition:** Search toolbar with transaction count, bulk edit button and download $\rightarrow$ Slide-down `BulkEditForm` $\rightarrow$ Debits/Credits column header $\rightarrow$ Virtualized transaction stream.
 - **Mobile Transformation:** Full-width search $\rightarrow$ Transaction records stack $\rightarrow$ Bulk edit in full modal.
 - **Loading Behavior:** Pulsing transaction card skeletons.
 - **Empty Behavior:** ZeroState indicating no transactions match query.

@@ -86,8 +86,8 @@
   }
 
   .paisa-tx-date {
-    font-size: 0.6875rem;
-    font-family: var(--paisa-font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
     color: var(--paisa-muted-foreground);
     font-weight: 500;
   }

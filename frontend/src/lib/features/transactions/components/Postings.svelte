@@ -105,11 +105,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 120px;
-    font-family: var(--paisa-font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   .paisa-posting-amount {
-    font-family: var(--paisa-font-mono);
     font-size: 0.8125rem;
     font-variant-numeric: tabular-nums;
     text-align: right;

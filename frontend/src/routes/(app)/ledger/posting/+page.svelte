@@ -9,6 +9,7 @@
   import { accountColorStyle } from "$lib/shared/theme/colors";
   import PostingNote from "$lib/features/transactions/components/PostingNote.svelte";
   import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
+  import PostingRecord from "$lib/features/transactions/components/PostingRecord.svelte";
   import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
   import { iconText } from "$lib/shared/ui/icon";
   import { change } from "$lib/domain/posting";
@@ -29,6 +30,18 @@
   let filteredPostings: Posting[] = $state([]);
   let rows: { posting: Posting; transaction: Transaction }[] = [];
   let listHeight = $state(600);
+  // Below the tablet breakpoint the ten column grid becomes one record per row.
+  let compact = $state(false);
+
+  const RECORD_HEIGHT = 72;
+  const RECORD_HEIGHT_WITH_UNITS = 92;
+
+  function recordHeight(index: number) {
+    const p = filteredPostings[index];
+    return p && p.commodity !== USER_CONFIG.default_currency
+      ? RECORD_HEIGHT_WITH_UNITS
+      : RECORD_HEIGHT;
+  }
 
   function handleInputRaw(predicate: (t: Transaction) => boolean) {
     if (!postings) return;
@@ -73,9 +86,14 @@
   onMount(() => {
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
+    const query = window.matchMedia("(max-width: 767px)");
+    const syncCompact = () => (compact = query.matches);
+    syncCompact();
+    query.addEventListener("change", syncCompact);
     loadPostings();
     return () => {
       window.removeEventListener("resize", updateDimensions);
+      query.removeEventListener("change", syncCompact);
     };
   });
 
@@ -134,7 +152,8 @@
         class="flex w-full min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-lg)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)]"
       >
         <div class="paisa-posting-table-container">
-          <div class="paisa-posting-table">
+          <div class="paisa-posting-table" class:is-compact={compact}>
+            {#if !compact}
             <div
               class="posting-row items-baseline gap-1 px-3 pb-2 pt-2.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
             >
@@ -149,18 +168,21 @@
               <div class="text-right">Change</div>
               <div class="text-right">CAGR</div>
             </div>
+            {/if}
 
             {#if filteredPostings.length > 0}
-              {#key filteredPostings}
+              {#key [filteredPostings, compact]}
                 <VirtualList
                   width="100%"
                   height={listHeight}
                   itemCount={filteredPostings.length}
-                  itemSize={27}
+                  itemSize={compact ? recordHeight : 27}
                 >
                   <svelte:fragment slot="item" let:index let:style>
                     {@const p = filteredPostings[index]}
-                    {#if p}
+                    {#if p && compact}
+                      <PostingRecord posting={p} {style} />
+                    {:else if p}
                       {@const c = change(p)}
                       <div
                         class="posting-row items-baseline gap-1 px-3 pt-1 transition-colors hover:bg-surface-hover"
@@ -268,6 +290,10 @@
   .paisa-posting-table {
     width: 100%;
     min-width: 1120px;
+  }
+
+  .paisa-posting-table.is-compact {
+    min-width: 0;
   }
 
   .posting-row {

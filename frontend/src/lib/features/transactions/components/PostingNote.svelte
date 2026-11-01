@@ -15,6 +15,7 @@
       <button
         {...tooltipProps}
         type="button"
+        aria-label={posting.note}
         class="inline-flex items-center border-0 bg-transparent p-0 text-xs"
       >
         <i class="fa-regular fa-comment-dots"></i>

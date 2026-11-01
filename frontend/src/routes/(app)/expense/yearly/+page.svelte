@@ -184,7 +184,6 @@
       <Metric
         label="Total Expenses"
         value={expense || "—"}
-        status="negative"
         secondary={postingCountSubtitle}
         loading={isLoading}
       />

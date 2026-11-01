@@ -614,7 +614,7 @@
       <button
         type="button"
         onclick={() => (commandPaletteOpen = true)}
-        class="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-surface-raised text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+        class="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-surface-raised text-muted-foreground transition-colors hover:text-foreground pointer-coarse:h-11 pointer-coarse:w-11 lg:hidden"
         aria-label="Search"
       >
         <i class="fa-solid fa-magnifying-glass text-xs"></i>

@@ -175,6 +175,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+@utility paisa-tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 @utility paisa-type-section-heading {
   font-family: var(--paisa-font-ui);
   font-size: 1rem;
@@ -266,6 +270,15 @@
 .paisa4-control:focus-visible {
   outline: 2px solid var(--paisa-primary);
   outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .paisa4-button,
+  .paisa4-icon-action,
+  .paisa4-control {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .paisa4-button:disabled,
@@ -721,4 +734,21 @@
 
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Spec section 15: no transitions or animation when reduced motion is requested. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --paisa-transition-fast: 0ms;
+    --paisa-transition-normal: 0ms;
+    --default-transition-duration: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
 }

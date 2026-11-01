@@ -99,6 +99,12 @@
     transition: background-color var(--paisa-transition-fast);
   }
 
+  @media (pointer: coarse) {
+    .legend-box {
+      min-height: 44px;
+    }
+  }
+
   .legend-box:hover {
     background-color: var(--paisa-surface-hover);
   }
