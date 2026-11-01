@@ -50,9 +50,9 @@ ARG GOLANGCI_LINT_VERSION=2.14.0
 RUN curl -sSL "https://github.com/golangci/golangci-lint/releases/download/v${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64.tar.gz" | \
     tar -xz -C /usr/local/bin --strip-components=1 "golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64/golangci-lint"
 
-# Install Deno
-ENV DENO_INSTALL="/usr/local"
-RUN curl -fsSL https://deno.land/install.sh | sh
+# Install Bun
+ENV BUN_INSTALL="/usr/local"
+RUN curl -fsSL https://bun.sh/install | bash
 
 # Install pinned hledger 1.52.4 static binary
 RUN curl -sSL https://github.com/hledgerorg/hledger/releases/download/1.52.4/hledger-linux-x64.tar.gz | tar -xz -C /usr/local/bin

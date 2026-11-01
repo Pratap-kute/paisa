@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any -- A few implementation signatures bridge typed lodash-style overloads.
 import {
   maxBy as toolkitMaxBy,
   minBy as toolkitMinBy,

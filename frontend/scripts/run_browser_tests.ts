@@ -1,13 +1,28 @@
+import net from "node:net";
+
+async function checkPort(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host: "127.0.0.1", port });
+    socket.once("connect", () => {
+      socket.end();
+      resolve(true);
+    });
+    socket.once("error", () => {
+      resolve(false);
+    });
+  });
+}
+
 async function waitForPort(
   port: number,
-  serverStatus: Promise<Deno.CommandStatus>,
+  serverProc: ReturnType<typeof Bun.spawn>,
   timeout = 120_000,
 ) {
   let isDone = false;
-  serverStatus.then((status) => {
+  serverProc.exited.then((code) => {
     isDone = true;
-    if (!status.success) {
-      throw new Error(`Test server exited early with code ${status.code}`);
+    if (code !== 0) {
+      throw new Error(`Test server exited early with code ${code}`);
     }
   });
 
@@ -16,58 +31,35 @@ async function waitForPort(
     if (isDone) {
       throw new Error(`Test server exited before port ${port} became ready`);
     }
-    try {
-      const connection = await Deno.connect({ hostname: "127.0.0.1", port });
-      connection.close();
-      return;
-    } catch (error) {
-      if (
-        !(error instanceof Deno.errors.ConnectionRefused) &&
-        !(error instanceof Deno.errors.ConnectionReset) &&
-        !(error instanceof Deno.errors.ConnectionAborted) &&
-        !(error instanceof Deno.errors.NotConnected)
-      ) {
-        throw error;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    const ready = await checkPort(port);
+    if (ready) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
   throw new Error(`Timed out waiting for port ${port}`);
 }
 
-const server = new Deno.Command(Deno.execPath(), {
-  args: [
-    "run",
-    "--allow-env",
-    "--allow-net",
-    "--allow-read",
-    "--allow-run",
-    "--allow-write",
-    "scripts/test_server.ts",
-  ],
-  stdin: "null",
+const server = Bun.spawn(["bun", "run", "scripts/test_server.ts"], {
+  stdin: "ignore",
   stdout: "inherit",
   stderr: "inherit",
-}).spawn();
+});
 
 try {
-  await waitForPort(
-    Number(Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173),
-    server.status,
-  );
-  const status = await new Deno.Command(Deno.execPath(), {
-    args: ["task", "playwright", "test", ...Deno.args],
+  const port = Number(process.env.PAISA_E2E_FRONTEND_PORT ?? 5173);
+  await waitForPort(port, server);
+  const userArgs = process.argv.slice(2);
+  const status = await Bun.spawn(["bun", "x", "playwright", "test", ...userArgs], {
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-    env: { ...Deno.env.toObject(), PAISA_E2E_DEV_UI: "1" },
-  }).spawn().status;
-  Deno.exitCode = status.code;
+    env: { ...process.env, PAISA_E2E_DEV_UI: "1" },
+  }).exited;
+  process.exitCode = status;
 } finally {
   try {
     server.kill("SIGTERM");
   } catch (_error) {
     // Child process may already have terminated
   }
-  await server.status;
+  await server.exited;
 }

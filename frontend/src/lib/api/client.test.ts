@@ -1,7 +1,7 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { clearAuthToken, createApiClient, setAuthToken } from "./client";
 
-Deno.test("sends the stored authentication token on generated API requests", async () => {
+test("sends the stored authentication token on generated API requests", async () => {
   const values = new Map<string, string>();
   const storage = {
     getItem: (key: string) => values.get(key) ?? null,

@@ -6,12 +6,12 @@ mkdir -p "${GOPATH:-$HOME/go}"
 
 # Install frontend dependencies
 cd frontend
-deno install
+bun install
 
 # Install Playwright Chromium browser
-deno task playwright install chromium
+bun run playwright install chromium
 
 # Pre-sync SvelteKit types
-deno run -A npm:@sveltejs/kit sync
+bun run svelte-kit sync
 
 echo "Paisa Dev Container environment ready!"

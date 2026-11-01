@@ -1,6 +1,5 @@
 import "dayjs/plugin/isSameOrBefore.js";
-import { expect } from "@std/expect";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it, expect } from "bun:test";
 import dayjs from "dayjs";
 import type { Transaction } from "$lib/domain/ledger";
 import { tagRecurringContent } from "./recurring_confirmation";

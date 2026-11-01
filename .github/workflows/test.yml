@@ -39,7 +39,7 @@ jobs:
       - uses: ./.github/actions/ci-setup
       - name: Backend and frontend coverage
         run: |
-          cd frontend && deno run -A npm:@sveltejs/kit sync
+          cd frontend && bun run svelte-kit sync
           cd ..
           make test-backend test-unit test-coverage
       - name: Upload coverage artifacts on failure
@@ -62,7 +62,7 @@ jobs:
         run: |
           hledger --version
           cd backend && make build
-          cd ../frontend && TZ=UTC deno task test:integration
+          cd ../frontend && TZ=UTC bun run test:integration
 
   browser:
     name: Browser E2E Tests
@@ -74,7 +74,7 @@ jobs:
       - name: Install Playwright Chromium
         run: |
           cd frontend
-          deno task playwright install --with-deps chromium
+          bun run playwright install --with-deps chromium
       - name: Browser E2E tests
         run: make test-e2e
       - name: Upload browser test reports on failure

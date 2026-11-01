@@ -1,6 +1,13 @@
-// deno-lint-ignore-file no-explicit-any -- Import fixtures intentionally exercise heterogeneous spreadsheet rows.
-import { describe, it as test } from "@std/testing/bdd";
-import { expect } from "@std/expect";
+import { describe, test, expect, beforeEach } from "bun:test";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+GlobalRegistrator.register();
+import fs from "node:fs";
+
+beforeEach(() => {
+  if (typeof globalThis.USER_CONFIG !== "undefined") {
+    globalThis.USER_CONFIG.amount_alignment_column = 52;
+  }
+});
 
 import {
   asRows,
@@ -41,8 +48,10 @@ Handlebars.registerHelper(
 
 function fixturePath(path: string): string {
   try {
-    Deno.statSync(`../fixture/${path}`);
-    return `../fixture/${path}`;
+    if (fs.existsSync(`../fixture/${path}`)) {
+      return `../fixture/${path}`;
+    }
+    return `fixture/${path}`;
   } catch (_) {
     return `fixture/${path}`;
   }
@@ -50,24 +59,29 @@ function fixturePath(path: string): string {
 
 function templatePath(path: string): string {
   try {
-    Deno.statSync(`../backend/pkg/model/template/templates/${path}`);
-    return `../backend/pkg/model/template/templates/${path}`;
-  } catch (_) {
+    if (fs.existsSync(`../backend/pkg/model/template/templates/${path}`)) {
+      return `../backend/pkg/model/template/templates/${path}`;
+    }
     try {
-      Deno.statSync(`../backend/internal/model/template/templates/${path}`);
-      return `../backend/internal/model/template/templates/${path}`;
+      if (fs.existsSync(`../backend/internal/model/template/templates/${path}`)) {
+        return `../backend/internal/model/template/templates/${path}`;
+      }
+      return `pkg/model/template/templates/${path}`;
     } catch (_) {
       return `pkg/model/template/templates/${path}`;
     }
+  } catch (_) {
+    return `pkg/model/template/templates/${path}`;
   }
 }
 
 describe("import", () => {
-  Array.from(Deno.readDirSync(fixturePath("import"))).forEach(
-    ({ name: dir }) => {
+  Array.from(fs.readdirSync(fixturePath("import"), { withFileTypes: true })).forEach(
+    (entry) => {
+      const dir = entry.name;
       test(dir, async () => {
         const files = Array.from(
-          Deno.readDirSync(fixturePath(`import/${dir}`)),
+          fs.readdirSync(fixturePath(`import/${dir}`), { withFileTypes: true }),
           ({ name }) => name,
         );
         for (const file of files) {
@@ -80,14 +94,16 @@ describe("import", () => {
             if (!inputFile || inputFile.endsWith(".pdf")) {
               break;
             }
-            const input = Deno.readFileSync(
+            const input = fs.readFileSync(
               fixturePath(`import/${dir}/${inputFile}`),
             );
-            const output = Deno.readTextFileSync(
+            const output = fs.readFileSync(
               fixturePath(`import/${dir}/${file}`),
+              "utf-8",
             );
-            const template = Deno.readTextFileSync(
+            const template = fs.readFileSync(
               templatePath(`${dir}.handlebars`),
+              "utf-8",
             );
 
             const compiled = Handlebars.compile(template);

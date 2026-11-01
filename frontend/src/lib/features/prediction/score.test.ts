@@ -1,5 +1,4 @@
-import { expect } from "@std/expect";
-import { beforeEach, describe, it } from "@std/testing/bdd";
+import { beforeEach, describe, it, expect } from "bun:test";
 import { buildIndex } from "./index";
 import { predict } from "./predict";
 import { predictionSession } from "./session";

@@ -1,8 +1,8 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { get } from "svelte/store";
 import { dismissToast, toast, toasts } from "./toast";
 
-Deno.test("toast stacks, supports single replacement, and dismisses", () => {
+test("toast stacks, supports single replacement, and dismisses", () => {
   toasts.set([]);
   const first = toast({ message: "first" });
   toast({ message: "second" });
@@ -16,6 +16,6 @@ Deno.test("toast stacks, supports single replacement, and dismisses", () => {
   expect(get(toasts).map(({ message }) => message)).toEqual(["only"]);
 });
 
-Deno.test("toast rejects empty messages", () => {
+test("toast rejects empty messages", () => {
   expect(() => toast({ message: "" })).toThrow("message is required");
 });

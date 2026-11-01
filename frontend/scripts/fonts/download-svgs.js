@@ -1,6 +1,5 @@
-import { spawnSync } from "bun";
-import { join } from "path";
-import { mkdirSync, readFileSync, rmdirSync, writeFileSync } from "fs";
+import { join } from "node:path";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { locate } from "@iconify/json";
 import { IconSet } from "@iconify/tools";
 import { cleanupSVG } from "@iconify/tools/lib/svg/cleanup";
@@ -43,12 +42,12 @@ function downloadSVGs(sets) {
 }
 
 function main() {
-  rmdirSync(outputDir, { force: true, recursive: true });
+  rmSync(outputDir, { force: true, recursive: true });
   mkdirSync(outputDir, { recursive: true });
   console.log("downloading arcticons");
   downloadSVGs(["arcticons"]);
   try {
-    spawnSync([
+    Bun.spawnSync([
       "npx",
       "oslllo-svg-fixer",
       "-s",

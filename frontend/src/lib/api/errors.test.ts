@@ -1,7 +1,7 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import { normalizeApiError } from "./errors.ts";
 
-Deno.test("normalizeApiError reads generated client response errors", () => {
+test("normalizeApiError reads generated client response errors", () => {
   const error = normalizeApiError({
     status: 401,
     error: {
@@ -17,7 +17,7 @@ Deno.test("normalizeApiError reads generated client response errors", () => {
   });
 });
 
-Deno.test("normalizeApiError preserves generated client validation codes", () => {
+test("normalizeApiError preserves generated client validation codes", () => {
   const error = normalizeApiError({
     status: 400,
     error: { code: "invalid_scenario_event" },

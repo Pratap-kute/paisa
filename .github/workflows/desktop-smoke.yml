@@ -29,9 +29,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: oven-sh/setup-bun@v2
         with:
-          deno-version: v2.9.4
+          bun-version: 1.4.4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26.5"
@@ -41,7 +41,7 @@ jobs:
         run: brew install ledger sqlite3
       - if: runner.os == 'Windows'
         run: choco install ledger sqlite
-      - run: cd frontend && deno install && deno task build
+      - run: cd frontend && bun install --frozen-lockfile && bun run build
       - run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
       - name: Build Linux desktop app
         if: runner.os == 'Linux'
@@ -56,10 +56,10 @@ jobs:
         working-directory: frontend
         env:
           PAISA_DESKTOP_BINARY: ${{ github.workspace }}/${{ matrix.binary }}
-        run: xvfb-run -a deno task test:desktop
+        run: xvfb-run -a bun run test:desktop
       - name: Smoke-test desktop app
         if: runner.os != 'Linux'
         working-directory: frontend
         env:
           PAISA_DESKTOP_BINARY: ${{ github.workspace }}/${{ matrix.binary }}
-        run: deno task test:desktop
+        run: bun run test:desktop

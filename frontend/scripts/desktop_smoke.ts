@@ -1,56 +1,58 @@
-import { basename, dirname, fromFileUrl, join } from "@std/path";
+import { basename, dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
+import os from "node:os";
 
-const configured = Deno.env.get("PAISA_DESKTOP_BINARY");
+const configured = process.env.PAISA_DESKTOP_BINARY;
 if (!configured) {
   throw new Error(
     "PAISA_DESKTOP_BINARY must point to the packaged Wails executable",
   );
 }
-const executable = Deno.realPathSync(configured);
-const root = fromFileUrl(new URL("../", import.meta.url));
-const fixture = await Deno.makeTempDir({ prefix: "paisa-desktop-" });
-await Deno.copyFile(
+const executable = fsSync.realpathSync(configured);
+const root = fileURLToPath(new URL("../", import.meta.url));
+const fixture = await fs.mkdtemp(join(os.tmpdir(), "paisa-desktop-"));
+await fs.copyFile(
   join(root, "tests/fixture/inr/main.ledger"),
   join(fixture, "main.ledger"),
 );
-await Deno.copyFile(
+await fs.copyFile(
   join(root, "tests/fixture/inr/paisa.yaml"),
   join(fixture, "paisa.yaml"),
 );
 
-const child = new Deno.Command(executable, {
+const child = Bun.spawn([executable], {
   cwd: fixture,
   env: {
+    ...process.env,
     PAISA_CONFIG: join(fixture, "paisa.yaml"),
     TZ: "UTC",
     PAISA_GPU_POLICY: "never",
   },
-  stdout: "piped",
-  stderr: "piped",
-}).spawn();
+  stdout: "pipe",
+  stderr: "pipe",
+});
 
 try {
   const result = await Promise.race([
-    child.status.then((status) => ({ exited: true, status })),
+    child.exited.then((code) => ({ exited: true, code })),
     new Promise<{ exited: false }>((resolve) =>
       setTimeout(() => resolve({ exited: false }), 10_000)
     ),
   ]);
   if (result.exited) {
     throw new Error(
-      `${basename(executable)} exited early with ${result.status.code}`,
+      `${basename(executable)} exited early with code ${result.code}`,
     );
   }
   const database = join(fixture, "paisa.db");
   try {
-    await Deno.stat(database);
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) {
-      throw new Error(
-        `Desktop app stayed alive but did not create ${database}`,
-      );
-    }
-    throw error;
+    await fs.stat(database);
+  } catch (_error) {
+    throw new Error(
+      `Desktop app stayed alive but did not create ${database}`,
+    );
   }
   console.log(
     `Desktop smoke passed for ${basename(dirname(executable))}/${
@@ -60,11 +62,9 @@ try {
 } finally {
   try {
     child.kill("SIGTERM");
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) {
-      console.error("Failed to stop desktop app", error);
-    }
+  } catch (_error) {
+    // Child may have already exited
   }
-  await child.status;
-  await Deno.remove(fixture, { recursive: true });
+  await child.exited;
+  await fs.rm(fixture, { recursive: true, force: true });
 }

@@ -1,15 +1,16 @@
 /** Run manually against scripts/test_server.ts; never use a hosted demo. */
 import { Buffer } from "node:buffer";
 import { chromium } from "@playwright/test";
-import { fromFileUrl } from "@std/path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
 
 const baseURL = `http://127.0.0.1:${
-  Deno.env.get("PAISA_E2E_FRONTEND_PORT") ?? 5173
+  process.env.PAISA_E2E_FRONTEND_PORT ?? 5173
 }`;
-const output = fromFileUrl(
+const output = fileURLToPath(
   new URL("../../docs/images/showcase/", import.meta.url),
 );
-await Deno.mkdir(output, { recursive: true });
+await fs.mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   const context = await browser.newContext({
@@ -68,7 +69,7 @@ try {
     ["credit-cards", "/liabilities/credit_cards", "text=Amount Due"],
   ];
   const selectedNames = new Set(
-    (Deno.env.get("PAISA_SHOWCASE_NAMES") ?? "")
+    (process.env.PAISA_SHOWCASE_NAMES ?? "")
       .split(",")
       .map((name) => name.trim())
       .filter(Boolean),

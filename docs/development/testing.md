@@ -2,15 +2,15 @@
 
 The frontend test stack has five layers:
 
-- `deno task test:unit` runs Deno business-logic and fixture tests.
-- `deno task test:core` runs the focused Vitest core-logic suite.
-- `deno task test:component` runs Svelte component tests in `happy-dom`.
-- `deno task test:e2e` runs Chromium against an isolated real backend and Vite
+- `bun run test:unit` runs Bun business-logic and fixture tests.
+- `bun run test:core` runs the focused Vitest core-logic suite.
+- `bun run test:component` runs Svelte component tests in `happy-dom`.
+- `bun run test:e2e` runs Chromium against an isolated real backend and Vite
   frontend.
-- `deno task test:visual` compares the Linux Chromium visual baselines.
+- `bun run test:visual` compares the Linux Chromium visual baselines.
 
-Run all frontend checks with `deno task test:frontend`.
-`deno task test:coverage` enforces a 60% minimum for statements, branches,
+Run all frontend checks with `bun run test:frontend`.
+`bun run test:coverage` enforces a 60% minimum for statements, branches,
 functions, and lines across maintainable core logic in
 `src/lib/{domain,features,shared}`. The exact includes and exclusions are
 defined in `frontend/vitest.config.ts`; generated parsers and selected browser-only
@@ -19,7 +19,7 @@ to `coverage/core`.
 
 Component coverage remains informational because route, chart, and Svelte
 rendering code has a different testing cost profile. Its HTML and LCOV reports
-are written to `coverage/component`. `deno task test:coverage:report` generates
+are written to `coverage/component`. `bun run test:coverage:report` generates
 both reports without enforcing the core threshold, which is useful while
 investigating a temporary regression. Reports from different instrumentation
 runners are not concatenated or treated as one coverage measurement.
@@ -29,7 +29,7 @@ runners are not concatenated or treated as one coverage measurement.
 Install the matching Chromium build before running browser tests:
 
 ```bash
-cd frontend && deno task playwright install --with-deps chromium
+cd frontend && bun run playwright install --with-deps chromium
 ```
 
 When using the Dev Container, the required Chromium build and system dependencies are configured automatically.
@@ -53,13 +53,9 @@ re-running the server.
 
 ## Updating visual baselines
 
-Run `deno task test:visual:update` inside Linux or the Dev Container, review every
+Run `bun run test:visual:update` inside Linux or the Dev Container, review every
 changed PNG, and commit intentional changes. Do not update screenshots merely to
 make a failing test pass.
 
 Failed CI runs upload `coverage`, `playwright-report`, and `test-results`
-artifacts for seven days. Pull requests run the frontend suite, while direct
-pushes run it only on `master`; stale runs are cancelled when a newer commit is
-pushed. Documentation-only changes are skipped. The cross-platform packaged
-desktop launch smoke runs weekly on Sunday and can be dispatched manually from
-GitHub Actions.
+artifacts so differences can be inspected from the workflow summary.

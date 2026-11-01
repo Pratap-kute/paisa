@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any -- The sheet language intentionally evaluates heterogeneous user-defined values.
 import type { SyntaxNode } from "@lezer/common";
 import * as Terms from "$lib/generated/sheet/parser.terms.js";
 import type { EditorState } from "@codemirror/state";

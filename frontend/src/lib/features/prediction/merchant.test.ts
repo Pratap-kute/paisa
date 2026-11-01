@@ -1,5 +1,4 @@
-import { expect } from "@std/expect";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it, expect } from "bun:test";
 import { buildIndex } from "./index";
 import { matchPosting, similarity } from "./merchant";
 import { normalizeDescription } from "./normalize";

@@ -1,15 +1,24 @@
 /** Optional GIF enhancement, generated exclusively from local capture PNGs. */
-import { fromFileUrl } from "@std/path";
-const images = fromFileUrl(
+import { fileURLToPath } from "node:url";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+
+const images = fileURLToPath(
   new URL("../../docs/images/showcase/", import.meta.url),
 );
-const temporary = await Deno.makeTempDir({ prefix: "paisa-showcase-gif-" });
+const temporary = await fs.mkdtemp(path.join(os.tmpdir(), "paisa-showcase-gif-"));
+
 async function ffmpeg(args: string[]) {
-  const result = await new Deno.Command("ffmpeg", {
-    args: ["-hide_banner", "-loglevel", "error", "-y", ...args],
-  }).output();
-  if (!result.success) throw new Error(new TextDecoder().decode(result.stderr));
+  const proc = Bun.spawn(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const stderr = await new Response(proc.stderr).text();
+  const code = await proc.exited;
+  if (code !== 0) throw new Error(stderr);
 }
+
 try {
   const names = [
     "dashboard",
@@ -20,9 +29,9 @@ try {
     "dashboard",
   ];
   for (let i = 0; i < names.length; i++) {
-    await Deno.copyFile(`${images}/${names[i]}.png`, `${temporary}/${i}.png`);
+    await fs.copyFile(`${images}/${names[i]}.png`, `${temporary}/${i}.png`);
   }
-  await Deno.writeTextFile(
+  await fs.writeFile(
     `${temporary}/frames.txt`,
     names.map((_, i) => `file '${i}.png'\nduration 2\n`).join("") +
       "file '5.png'\n",
@@ -49,10 +58,10 @@ try {
     "0",
     `${temporary}/overview.gif`,
   ]);
-  if ((await Deno.stat(`${temporary}/overview.gif`)).size > 6 * 1024 * 1024) {
+  if ((await fs.stat(`${temporary}/overview.gif`)).size > 6 * 1024 * 1024) {
     throw new Error("GIF exceeds 6 MiB; retain the standalone PNGs instead.");
   }
-  await Deno.copyFile(
+  await fs.copyFile(
     `${temporary}/overview.gif`,
     `${images}/paisa-overview.gif`,
   );
@@ -60,5 +69,5 @@ try {
     "Created 12-second overview GIF from six 2-second local screen captures.",
   );
 } finally {
-  await Deno.remove(temporary, { recursive: true });
+  await fs.rm(temporary, { recursive: true, force: true });
 }

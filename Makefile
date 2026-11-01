@@ -24,17 +24,17 @@ help: ## Display this help message
 .PHONY: dev develop debug serve serve-now watch
 dev develop: ## Start frontend and backend in development mode
 	@if [ ! -f backend/web/static/index.html ]; then $(MAKE) build-frontend; fi
-	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend
+	bun run scripts/dev.ts --frontend
 
 debug: ## Start frontend and backend with fixed date for debugging
 	@if [ ! -f backend/web/static/index.html ]; then $(MAKE) build-frontend; fi
-	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500,0.0.0.0:5173 scripts/dev.ts --frontend --now
+	bun run scripts/dev.ts --frontend --now
 
 serve: ## Start the backend HTTP server only
-	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts
+	bun run scripts/dev.ts
 
 serve-now: ## Start backend server with fixed current date
-	deno run --allow-env --allow-read --allow-run --allow-write --allow-net=0.0.0.0:7500 scripts/dev.ts --now
+	bun run scripts/dev.ts --now
 
 watch: ## Watch and rebuild frontend assets on change
 	$(MAKE) -C frontend watch
@@ -125,12 +125,12 @@ test-coverage: ## Generate frontend test coverage report
 .PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck audit audit-all audit-frontend audit-backend audit-desktop vulncheck vulncheck-all vulncheck-frontend vulncheck-backend vulncheck-desktop vulncheck-go format fmt
 quality: lint test-backend ## Run full code quality pipeline (linters, typecheck, tests)
 
-lint: lint-frontend typecheck lint-backend ## Run all linters (Deno, TypeScript, GolangCI)
+lint: lint-frontend typecheck lint-backend ## Run all linters (Biome, TypeScript, GolangCI)
 
 lint-backend lint-go go-lint: ## Run golangci-lint for Go backend
 	$(MAKE) -C backend lint
 
-lint-frontend: ## Run Deno linter for frontend code
+lint-frontend: ## Run Biome linter for frontend code
 	$(MAKE) -C frontend lint
 
 check typecheck: ## Run TypeScript and Svelte template type checks
@@ -138,7 +138,7 @@ check typecheck: ## Run TypeScript and Svelte template type checks
 
 audit vulncheck audit-all vulncheck-all: audit-frontend audit-backend audit-desktop ## Run vulnerability checks across frontend, backend, and desktop
 
-audit-frontend vulncheck-frontend: ## Run vulnerability audit for frontend (deno audit)
+audit-frontend vulncheck-frontend: ## Run vulnerability audit for frontend (bun audit)
 	$(MAKE) -C frontend audit
 
 audit-backend vulncheck-backend vulncheck-go: ## Run vulnerability check for backend (govulncheck)

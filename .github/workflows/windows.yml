@@ -15,9 +15,9 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: oven-sh/setup-bun@v2
         with:
-          deno-version: v2.x
+          bun-version: 1.4.4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26.5"
@@ -26,8 +26,8 @@ jobs:
           choco install wget
           choco install nsis
           cd frontend
-          deno install
-          deno task build
+          bun install --frozen-lockfile
+          bun run build
           cd ..
           wget https://github.com/FullofQuarks/Windows-Ledger-Binaries/releases/download/v3.3.2/ledger.exe
           cp ledger.exe backend/pkg/binary/ledger

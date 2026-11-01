@@ -1,5 +1,4 @@
-import { expect } from "@std/expect";
-import { describe, it } from "@std/testing/bdd";
+import { describe, it, expect } from "bun:test";
 import { confidenceLabel, reasonLabel, shortReasons } from "./explain";
 import { decideConfidence } from "./confidence";
 import { emptyBreakdown } from "./score";

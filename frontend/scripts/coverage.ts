@@ -1,7 +1,8 @@
-import { ensureDir } from "@std/fs";
+import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import { COVERAGE_THRESHOLD } from "../vitest.shared.ts";
 
-await ensureDir("coverage");
+fsSync.mkdirSync("coverage", { recursive: true });
 
 const CORE_TEST_DIRECTORY = "tests/core";
 
@@ -25,15 +26,13 @@ type CoverageSummary = {
 };
 
 async function ensureSvelteKitSync() {
-  try {
-    Deno.statSync(".svelte-kit/tsconfig.json");
-  } catch (_) {
-    await new Deno.Command(Deno.execPath(), {
-      args: ["run", "-A", "npm:@sveltejs/kit", "sync"],
+  if (!fsSync.existsSync(".svelte-kit/tsconfig.json")) {
+    const proc = Bun.spawn(["bun", "x", "svelte-kit", "sync"], {
       stdin: "inherit",
       stdout: "inherit",
       stderr: "inherit",
-    }).spawn().status;
+    });
+    await proc.exited;
   }
 }
 
@@ -43,9 +42,9 @@ async function runVitest(
   env: Record<string, string> = {},
 ) {
   const args = [
-    "run",
-    "-A",
-    "npm:vitest@^4",
+    "bun",
+    "x",
+    "vitest",
     "run",
     "--config",
     "vitest.config.ts",
@@ -68,16 +67,18 @@ async function runVitest(
       args.push("--coverage.clean=false");
     }
   }
-  return await new Deno.Command(Deno.execPath(), {
-    args,
+  const proc = Bun.spawn(args, {
     env: {
+      ...process.env,
       ...env,
       VITE_CONFIG_NATIVE_IGNORE_WARNING: "true",
     },
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
-  }).spawn().status;
+  });
+  const code = await proc.exited;
+  return { success: code === 0, code };
 }
 
 function relativeCoveragePath(filePath: string): string {
@@ -92,10 +93,12 @@ async function coreCoverageTargets(): Promise<Set<string>> {
   // report remains repository-wide, while unrelated UI and vendor code is
   // measured by the component suite instead of diluting this unit-test signal.
   const targets = new Set<string>();
-  for await (const entry of Deno.readDir(CORE_TEST_DIRECTORY)) {
-    if (!entry.isFile || !entry.name.endsWith(".test.ts")) continue;
-    const source = await Deno.readTextFile(
+  const entries = await fs.readdir(CORE_TEST_DIRECTORY, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".test.ts")) continue;
+    const source = await fs.readFile(
       `${CORE_TEST_DIRECTORY}/${entry.name}`,
+      "utf-8",
     );
     for (const match of source.matchAll(/from\s+["']\$lib\/([^"']+)["']/g)) {
       targets.add(`src/lib/${match[1]}.ts`);
@@ -157,14 +160,13 @@ async function readCoverageSummary(
 ): Promise<CoverageSummary> {
   const summaryPath = `coverage/${project}/coverage-summary.json`;
   try {
-    return JSON.parse(await Deno.readTextFile(summaryPath));
-  } catch (error) {
-    if (!(error instanceof Deno.errors.NotFound)) throw error;
+    const content = await fs.readFile(summaryPath, "utf-8");
+    return JSON.parse(content);
+  } catch (_error) {
     let listing = "";
     try {
-      listing = [...Deno.readDirSync(`coverage/${project}`)].map((entry) =>
-        entry.name
-      ).join(", ");
+      const entries = fsSync.readdirSync(`coverage/${project}`);
+      listing = entries.join(", ");
     } catch (_) {
       listing = "(directory missing)";
     }
@@ -176,13 +178,13 @@ async function readCoverageSummary(
 
 await ensureSvelteKitSync();
 
-const reportOnly = Deno.args.includes("--report-only");
+const reportOnly = process.argv.includes("--report-only");
 const core = await runVitest(
   "core",
   true,
   reportOnly ? { COVERAGE_REPORT_ONLY: "true" } : {},
 );
-if (!core.success) Deno.exit(core.code);
+if (!core.success) process.exit(core.code);
 
 const coreSummary = aggregateCoreCoverage(
   await readCoverageSummary("core"),
@@ -215,7 +217,7 @@ if (failed.length) {
 }
 
 const component = await runVitest("component", true);
-if (!component.success) Deno.exit(component.code);
+if (!component.success) process.exit(component.code);
 
 console.log("Core coverage report: coverage/core/index.html");
 console.log("Component coverage report: coverage/component/index.html");

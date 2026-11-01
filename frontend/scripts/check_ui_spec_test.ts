@@ -1,4 +1,4 @@
-import { expect } from "@std/expect";
+import { test, expect } from "bun:test";
 import {
   extractDefinedCssVariables,
   findBitsUiViolations,
@@ -12,7 +12,7 @@ import {
   FORBIDDEN_BULMA_CLASSES,
 } from "./check_ui_spec.ts";
 
-Deno.test("findRawPaletteViolations catches arbitrary raw palette classes", () => {
+test("findRawPaletteViolations catches arbitrary raw palette classes", () => {
   const sample = `
     <div class="text-red-500 bg-emerald-600 border-blue-400 hover:text-gray-700">
       <span class="text-muted-foreground">Valid semantic</span>
@@ -32,7 +32,7 @@ Deno.test("findRawPaletteViolations catches arbitrary raw palette classes", () =
   ]);
 });
 
-Deno.test("findRawPaletteViolations ignores semantic color classes", () => {
+test("findRawPaletteViolations ignores semantic color classes", () => {
   const sample = `
     <div class="text-primary bg-primary-subtle text-negative bg-negative-subtle text-neutral">
       <span class="border-border bg-surface text-foreground">Semantic OK</span>
@@ -45,7 +45,7 @@ Deno.test("findRawPaletteViolations ignores semantic color classes", () => {
   expect(violations.length).toBe(0);
 });
 
-Deno.test("findBitsUiViolations forbids direct imports outside src/lib/shared/ui (including multiline)", () => {
+test("findBitsUiViolations forbids direct imports outside src/lib/shared/ui (including multiline)", () => {
   const singleLine = `import { Dialog } from "bits-ui";`;
   const multiLine = `import {
     Dialog,
@@ -70,14 +70,14 @@ Deno.test("findBitsUiViolations forbids direct imports outside src/lib/shared/ui
   }
 });
 
-Deno.test("findBulmaViolations catches old Bulma imports", () => {
+test("findBulmaViolations catches old Bulma imports", () => {
   const sample = `@import "bulma/css/bulma.css";`;
   const violations = findBulmaViolations("src/routes/+layout.svelte", sample);
   expect(violations.length).toBe(1);
   expect(violations[0].rule).toBe("no-bulma-imports");
 });
 
-Deno.test("findBulmaClassViolations catches removed classes in class attributes and directives", () => {
+test("findBulmaClassViolations catches removed classes in class attributes and directives", () => {
   const sample = `
     <div class="has-text-success is-size-7"></div>
     <div class={'table ' + (compact ? 'is-narrow' : '')}></div>
@@ -100,7 +100,7 @@ Deno.test("findBulmaClassViolations catches removed classes in class attributes 
   ).toBe(true);
 });
 
-Deno.test("findBulmaClassViolations covers every removed compatibility class", () => {
+test("findBulmaClassViolations covers every removed compatibility class", () => {
   const content = `<div class="${
     [...FORBIDDEN_BULMA_CLASSES].join(" ")
   }"></div>`;
@@ -111,7 +111,7 @@ Deno.test("findBulmaClassViolations covers every removed compatibility class", (
   expect(violations.length).toBe(FORBIDDEN_BULMA_CLASSES.size);
 });
 
-Deno.test("findBulmaClassViolations requires context for generic Bulma class names", () => {
+test("findBulmaClassViolations requires context for generic Bulma class names", () => {
   const legitimate = `
     <div class="table"></div>
     <div class="is-small is-narrow is-fullwidth is-hoverable"></div>
@@ -129,7 +129,7 @@ Deno.test("findBulmaClassViolations requires context for generic Bulma class nam
   ).toBe(FORBIDDEN_BULMA_CLASS_COMBINATIONS.length);
 });
 
-Deno.test("findBulmaClassViolations rejects removed Bulma CSS selectors", () => {
+test("findBulmaClassViolations rejects removed Bulma CSS selectors", () => {
   const sample = `
     .has-text-success { color: green; }
     .icon.is-small { width: 1rem; }
@@ -151,7 +151,7 @@ Deno.test("findBulmaClassViolations rejects removed Bulma CSS selectors", () => 
   ).toBe(true);
 });
 
-Deno.test("findBulmaClassViolations avoids prose, selectors, and partial-name false positives", () => {
+test("findBulmaClassViolations avoids prose, selectors, and partial-name false positives", () => {
   const sample = `
     // Do not add has-text-danger to application markup.
     const description = "table is-narrow";
@@ -170,7 +170,7 @@ Deno.test("findBulmaClassViolations avoids prose, selectors, and partial-name fa
   ).toEqual([]);
 });
 
-Deno.test("findImportantViolations enforces integration allowlist", () => {
+test("findImportantViolations enforces integration allowlist", () => {
   const sample = `.rule { color: red !important; }`;
   const disallowed = findImportantViolations("src/routes/+page.svelte", sample);
   expect(disallowed.length).toBe(1);
@@ -189,7 +189,7 @@ Deno.test("findImportantViolations enforces integration allowlist", () => {
   expect(removedCompatibilityFile.length).toBe(1);
 });
 
-Deno.test("findForbiddenTokenViolations catches removed tokens in every file", () => {
+test("findForbiddenTokenViolations catches removed tokens in every file", () => {
   const sample = `
     <span class="text-[var(--paisa-danger)] bg-[var(--paisa-danger-light)]">Error</span>
     <span class="text-[var(--paisa-success)] bg-[var(--paisa-success-light)]">OK</span>
@@ -212,7 +212,7 @@ Deno.test("findForbiddenTokenViolations catches removed tokens in every file", (
   expect(definitionViolations.length).toBe(8);
 });
 
-Deno.test("findForbiddenTokenViolations covers the complete removed token set", () => {
+test("findForbiddenTokenViolations covers the complete removed token set", () => {
   const removedTokens = [
     "--paisa-canvas-bg",
     "--paisa-surface-bg",
@@ -243,7 +243,7 @@ Deno.test("findForbiddenTokenViolations covers the complete removed token set", 
   expect(violations.length).toBe(removedTokens.length);
 });
 
-Deno.test("findUndefinedTokenViolations flags undefined tokens but allows dynamic allowlist", () => {
+test("findUndefinedTokenViolations flags undefined tokens but allows dynamic allowlist", () => {
   const defined = new Set(["--paisa-primary", "--paisa-surface"]);
   const sample = `
     color: var(--paisa-primary);
@@ -260,8 +260,8 @@ Deno.test("findUndefinedTokenViolations flags undefined tokens but allows dynami
   expect(violations[0].detail).toContain("--paisa-bogus-token");
 });
 
-Deno.test("extractDefinedCssVariables extracts tokens strictly from approved files", async () => {
-  const tokens = await extractDefinedCssVariables(Deno.cwd());
+test("extractDefinedCssVariables extracts tokens strictly from approved files", async () => {
+  const tokens = await extractDefinedCssVariables(process.cwd());
   expect(tokens.has("--paisa-canvas")).toBe(true);
   expect(tokens.has("--paisa-surface")).toBe(true);
   expect(tokens.has("--paisa-primary")).toBe(true);
