@@ -34,23 +34,64 @@ const child = Bun.spawn([executable], {
   stderr: "pipe",
 });
 
-try {
-  const result = await Promise.race([
-    child.exited.then((code) => ({ exited: true, code })),
-    new Promise<{ exited: false }>((resolve) =>
-      setTimeout(() => resolve({ exited: false }), 10_000),
-    ),
-  ]);
-  if (result.exited) {
-    throw new Error(
-      `${basename(executable)} exited early with code ${result.code}`,
-    );
+// Keep the app's output so a failure says why, not only that it failed.
+let output = "";
+const collect = async (stream: ReadableStream<Uint8Array>) => {
+  const decoder = new TextDecoder();
+  for await (const chunk of stream) {
+    output += decoder.decode(chunk, { stream: true });
   }
-  const database = join(fixture, "paisa.db");
+};
+const collected = [collect(child.stdout), collect(child.stderr)];
+
+// A cold start on a CI runner can take far longer than a local one.
+const STARTUP_TIMEOUT_MS = 90_000;
+const POLL_INTERVAL_MS = 500;
+
+async function exists(path: string) {
   try {
-    await fs.stat(database);
+    await fs.stat(path);
+    return true;
   } catch (_error) {
-    throw new Error(`Desktop app stayed alive but did not create ${database}`);
+    return false;
+  }
+}
+
+try {
+  const database = join(fixture, "paisa.db");
+  let exitCode: number | undefined;
+  child.exited.then((code) => {
+    exitCode = code;
+  });
+
+  const deadline = Date.now() + STARTUP_TIMEOUT_MS;
+  let ready = false;
+  while (Date.now() < deadline) {
+    if (await exists(database)) {
+      ready = true;
+      break;
+    }
+    if (exitCode !== undefined) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  if (!ready) {
+    const reason =
+      exitCode !== undefined
+        ? `exited early with code ${exitCode}`
+        : `stayed alive but did not create ${database} within ${STARTUP_TIMEOUT_MS / 1000}s`;
+    child.kill();
+    await child.exited;
+    // A helper process can keep the pipes open after the app is killed.
+    await Promise.race([
+      Promise.allSettled(collected),
+      new Promise((resolve) => setTimeout(resolve, 2_000)),
+    ]);
+    throw new Error(
+      `${basename(executable)} ${reason}\n--- app output ---\n${output || "(none)"}`,
+    );
   }
   console.log(
     `Desktop smoke passed for ${basename(dirname(executable))}/${basename(
@@ -59,7 +100,7 @@ try {
   );
 } finally {
   try {
-    child.kill("SIGTERM");
+    child.kill();
   } catch (_error) {
     // Child may have already exited
   }
