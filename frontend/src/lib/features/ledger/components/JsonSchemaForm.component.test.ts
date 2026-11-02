@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
 import type { JSONSchema7 } from "json-schema";
-import { api } from "$lib/api";
+import { api } from "#lib/api";
 import JsonSchemaForm from "./JsonSchemaForm.svelte";
 import JsonSchemaFormHarness from "./JsonSchemaForm.test-harness.svelte";
 

@@ -2,17 +2,17 @@
   import dayjs from "dayjs";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { api, type DtoInvestmentPerformance } from "$lib/api";
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import { api, type DtoInvestmentPerformance } from "#lib/api";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import Select from "#lib/shared/ui/Select.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
   import {
     performanceDecomposition,
     performanceLink,
@@ -21,7 +21,7 @@
     performanceQuery,
     performanceReason,
     performanceSeries,
-  } from "$lib/features/assets/performance";
+  } from "#lib/features/assets/performance";
 
   let { account = "" }: { account?: string } = $props();
   let result: DtoInvestmentPerformance | undefined = $state();
@@ -112,13 +112,12 @@
     }
   }
   function selectPeriod(event: Event & { currentTarget: HTMLSelectElement }) {
-    const url = new URL(page.url);
+    const url = new URL(page.url.href);
     url.searchParams.delete("from");
     url.searchParams.delete("to");
     url.searchParams.set("preset", event.currentTarget.value);
     void goto(`${url.pathname}${url.search}`, {
-      noScroll: true,
-      keepFocus: true,
+      reset: false,
     });
   }
 </script>

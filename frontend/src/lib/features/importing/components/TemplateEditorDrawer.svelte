@@ -4,15 +4,15 @@
     createEditor,
     editorState as templateEditorState,
     updateContent,
-  } from "$lib/features/editor/template_editor";
-  import type { ImportTemplate } from "$lib/features/importing/types";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import IconButton from "$lib/shared/ui/IconButton.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import Drawer from "$lib/shared/ui/Drawer.svelte";
-  import FormField from "$lib/shared/layout/FormField.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
+  } from "#lib/features/editor/template_editor";
+  import type { ImportTemplate } from "#lib/features/importing/types";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import IconButton from "#lib/shared/ui/IconButton.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Dialog from "#lib/shared/ui/Dialog.svelte";
+  import Drawer from "#lib/shared/ui/Drawer.svelte";
+  import FormField from "#lib/shared/layout/FormField.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
 
   interface Props {
     open?: boolean;

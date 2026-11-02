@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { toastPosition, toasts } from "$lib/shared/ui/toast";
+  import { toastPosition, toasts } from "#lib/shared/ui/toast";
   import ToastItem from "./ToastItem.svelte";
 </script>
 

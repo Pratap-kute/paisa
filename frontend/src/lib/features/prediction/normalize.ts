@@ -1,1 +1,1 @@
-export * from "$lib/domain/merchant";
+export * from "#lib/domain/merchant";

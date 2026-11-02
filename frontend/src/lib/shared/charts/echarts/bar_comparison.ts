@@ -1,10 +1,10 @@
-import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
+import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,
   normalizeCategoryKey,
   type PaisaChartTheme,
-} from "$lib/shared/charts/echarts/theme";
-import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
+} from "#lib/shared/charts/echarts/theme";
+import { responsiveChartOption } from "#lib/shared/charts/echarts/responsive";
 
 export type ComparisonValueFormat =
   "currency" | "compactCurrency" | "number" | "percentage";

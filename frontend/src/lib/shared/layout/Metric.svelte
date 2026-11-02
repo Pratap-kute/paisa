@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Skeleton from "$lib/shared/ui/Skeleton.svelte";
+  import Skeleton from "#lib/shared/ui/Skeleton.svelte";
 
   type Status = "neutral" | "positive" | "negative" | "warning" | "primary";
 

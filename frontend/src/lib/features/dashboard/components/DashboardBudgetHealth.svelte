@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { BudgetSummary } from "../summary";
-  import { restName } from "$lib/domain/account";
-  import { presentInsight } from "$lib/features/insights/presentation";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { restName } from "#lib/domain/account";
+  import { presentInsight } from "#lib/features/insights/presentation";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
 
   interface Props {
     summary: BudgetSummary;

@@ -1,8 +1,8 @@
-import type { Transaction } from "$lib/domain/ledger";
+import type { Transaction } from "#lib/domain/ledger";
 import { groupBy } from "es-toolkit";
 import { format } from "./journal";
-import type { LedgerFile } from "$lib/domain/ledger";
-import { sortBy } from "$lib/shared/utils/collection";
+import type { LedgerFile } from "#lib/domain/ledger";
+import { sortBy } from "#lib/shared/utils/collection";
 
 interface OperationResult {
   updated: boolean;

@@ -1,39 +1,39 @@
 <script lang="ts">
-  import InvestmentPerformance from "$lib/features/assets/components/InvestmentPerformance.svelte";
+  import InvestmentPerformance from "#lib/features/assets/components/InvestmentPerformance.svelte";
   import { page } from "$app/state";
-  import COLORS from "$lib/shared/theme/colors";
-  import type { Networth } from "$lib/domain/assets";
+  import COLORS from "#lib/shared/theme/colors";
+  import type { Networth } from "#lib/domain/assets";
   import {
     formatCurrency,
     formatReturnPercent,
-  } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
-  import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
-  import { firstName, restName } from "$lib/domain/account";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import type { AccountGain, PortfolioAggregate } from "$lib/domain/assets";
-  import type { AssetBreakdown } from "$lib/domain/assets";
-  import { buildLegends } from "$lib/features/assets/gain";
+  } from "#lib/shared/formatters/currency";
+  import { formatPercentage } from "#lib/shared/formatters/currency";
+  import { formatFloatUptoPrecision } from "#lib/shared/formatters/currency";
+  import { firstName, restName } from "#lib/domain/account";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import type { AccountGain, PortfolioAggregate } from "#lib/domain/assets";
+  import type { AssetBreakdown } from "#lib/domain/assets";
+  import { buildLegends } from "#lib/features/assets/gain";
   import {
     buildPortfolioComparison,
     filterCommodityBreakdowns,
-  } from "$lib/features/assets/hierarchy_data";
-  import type { Posting } from "$lib/domain/ledger";
-  import { api } from "$lib/api";
+  } from "#lib/features/assets/hierarchy_data";
+  import type { Posting } from "#lib/domain/ledger";
+  import { api } from "#lib/api";
   import { last } from "es-toolkit";
-  import Button from "$lib/shared/ui/Button.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
   import type { PageData } from "./$types";
 
-  import { iconify } from "$lib/shared/ui/icon";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import GainAccountTimelineChart from "$lib/features/assets/components/GainAccountTimelineChart.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
+  import { iconify } from "#lib/shared/ui/icon";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import GainAccountTimelineChart from "#lib/features/assets/components/GainAccountTimelineChart.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
 
   let commodities: string[] = [];
   let selectedCommodities: string[] = $state([]);

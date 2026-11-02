@@ -1,6 +1,6 @@
 <script lang="ts">
   import { afterNavigate } from "$app/navigation";
-  import AppShell from "$lib/shared/layout/AppShell.svelte";
+  import AppShell from "#lib/shared/layout/AppShell.svelte";
   import { willRefresh } from "../../store";
   import type { Snippet } from "svelte";
 

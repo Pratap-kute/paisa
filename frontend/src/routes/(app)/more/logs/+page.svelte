@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import type { Log } from "$lib/features/logs/types";
+  import { api } from "#lib/api";
+  import type { Log } from "#lib/features/logs/types";
   import { onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import { omit } from "es-toolkit";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
 
   let logs: Log[] = $state([]);
   let searchQuery = $state("");

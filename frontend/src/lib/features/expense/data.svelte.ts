@@ -3,7 +3,7 @@ import {
   createAsyncState,
   type DtoBudgetsSummaryResponse,
   type DtoExpenseResponse,
-} from "$lib/api";
+} from "#lib/api";
 
 export function createExpenseState() {
   return createAsyncState<void, DtoExpenseResponse | null>(

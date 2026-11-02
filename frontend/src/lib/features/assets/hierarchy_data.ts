@@ -1,10 +1,10 @@
-import type { PortfolioAggregate } from "$lib/domain/assets";
+import type { PortfolioAggregate } from "#lib/domain/assets";
 import { sumBy } from "es-toolkit";
-import type { Aggregate } from "$lib/domain/assets";
-import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
-import { sortBy } from "$lib/shared/utils/collection";
+import type { Aggregate } from "#lib/domain/assets";
+import type { ComparisonBarChartData } from "#lib/shared/charts/echarts/bar_comparison";
+import { sortBy } from "#lib/shared/utils/collection";
 
-import type { FinancialHierarchyNode } from "$lib/shared/charts/hierarchy_data";
+import type { FinancialHierarchyNode } from "#lib/shared/charts/hierarchy_data";
 
 function parentAccount(account: string) {
   const parts = account.split(":");

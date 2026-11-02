@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { DashboardAttentionItem, MetricStatus } from "../summary";
-  import Spinner from "$lib/shared/ui/Spinner.svelte";
+  import Spinner from "#lib/shared/ui/Spinner.svelte";
 
   interface Props {
     items: DashboardAttentionItem[];

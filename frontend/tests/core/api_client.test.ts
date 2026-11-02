@@ -4,8 +4,8 @@ import {
   createApiClient,
   getAuthToken,
   setAuthToken,
-} from "$lib/api/client";
-import { ApiError, isApiError } from "$lib/api/errors";
+} from "#lib/api/client";
+import { ApiError, isApiError } from "#lib/api/errors";
 
 describe("API Client Runtime", () => {
   it("injects X-Auth header when token is stored", async () => {

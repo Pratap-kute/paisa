@@ -1,17 +1,17 @@
 import { describe, test, expect } from "bun:test";
-import type { AssetBreakdown } from "$lib/domain/assets";
-import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
-import type { Insight } from "$lib/domain/insights";
-import type { GoalSummary } from "$lib/domain/goals_models";
+import type { AssetBreakdown } from "#lib/domain/assets";
+import type { AccountBudget, Budget } from "#lib/domain/cash_flow";
+import type { Insight } from "#lib/domain/insights";
+import type { GoalSummary } from "#lib/domain/goals_models";
 import {
   goal as baseGoal,
   type GoalScenario,
-} from "$lib/domain/testing/goal_fixtures";
+} from "#lib/domain/testing/goal_fixtures";
 import {
   analyzeRecurring,
   type RecurringAnalysis,
-} from "$lib/domain/recurring_analysis";
-import type { Posting, Transaction } from "$lib/domain/ledger";
+} from "#lib/domain/recurring_analysis";
+import type { Posting, Transaction } from "#lib/domain/ledger";
 import dayjs from "dayjs";
 
 Object.defineProperty(globalThis, "localStorage", {

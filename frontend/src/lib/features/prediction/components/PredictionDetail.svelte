@@ -4,14 +4,14 @@
     PredictionInput,
     PredictionResult,
     PredictionReviewStatus,
-  } from "$lib/features/prediction/types";
+  } from "#lib/features/prediction/types";
   import {
     confidenceLabel,
     shortReasons,
-  } from "$lib/features/prediction/explain";
-  import { accountMatchesPrefix } from "$lib/features/prediction/score";
+  } from "#lib/features/prediction/explain";
+  import { accountMatchesPrefix } from "#lib/features/prediction/score";
   import PredictionRowBadge from "./PredictionRowBadge.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Props {
     result?: PredictionResult | null;

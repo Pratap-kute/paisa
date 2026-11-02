@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { dismissToast, type ToastMessage } from "$lib/shared/ui/toast";
+  import { dismissToast, type ToastMessage } from "#lib/shared/ui/toast";
 
   interface Props {
     item: ToastMessage;

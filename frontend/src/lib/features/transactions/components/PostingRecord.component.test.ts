@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import dayjs from "dayjs";
 import PostingRecord from "./PostingRecord.svelte";
-import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "#lib/domain/ledger";
 
 const posting = (overrides: Partial<Posting>): Posting =>
   ({

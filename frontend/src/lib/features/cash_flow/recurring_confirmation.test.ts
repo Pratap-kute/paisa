@@ -1,7 +1,7 @@
 import "dayjs/plugin/isSameOrBefore.js";
 import { describe, it, expect } from "bun:test";
 import dayjs from "dayjs";
-import type { Transaction } from "$lib/domain/ledger";
+import type { Transaction } from "#lib/domain/ledger";
 import { tagRecurringContent } from "./recurring_confirmation";
 const content =
   "2026/06/08 Netflix\n    Expenses:Entertainment  499 INR\n    Assets:Bank\n\n2026/07/08 Netflix\n    Expenses:Entertainment  499 INR\n    Assets:Bank\n";
@@ -83,7 +83,7 @@ describe("recurring ledger metadata edits", () => {
 });
 
 it("sends one batch and reports rollback or recovery without claiming success", async () => {
-  const { api } = await import("$lib/api");
+  const { api } = await import("#lib/api");
   const { saveRecurringConfirmation } =
     await import("./recurring_confirmation");
   const original = api.editor.saveEditorFiles;

@@ -25,16 +25,16 @@ import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import {
   initialSheetEditorState,
   sheetEditorState,
-} from "$lib/shared/state/store";
-import { fullEditorExtensions } from "$lib/shared/editor/base";
-import { sheetExtension, sheetLanguage } from "$lib/features/sheets/language";
-import { schedulePlugin } from "$lib/features/editor/schedule_extension";
-export { sheetEditorState } from "$lib/shared/state/store";
-import { functions } from "$lib/features/sheets/functions";
+} from "#lib/shared/state/store";
+import { fullEditorExtensions } from "#lib/shared/editor/base";
+import { sheetExtension, sheetLanguage } from "#lib/features/sheets/language";
+import { schedulePlugin } from "#lib/features/editor/schedule_extension";
+export { sheetEditorState } from "#lib/shared/state/store";
+import { functions } from "#lib/features/sheets/functions";
 
-import { buildAST, Environment } from "$lib/features/sheets/interpreter";
-import type { Posting } from "$lib/domain/ledger";
-import { assign, map } from "$lib/shared/utils/collection";
+import { buildAST, Environment } from "#lib/features/sheets/interpreter";
+import type { Posting } from "#lib/domain/ledger";
+import { assign, map } from "#lib/shared/utils/collection";
 
 let latestIdentifiers: string[] = [];
 

@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatFloat } from "$lib/shared/formatters/currency";
-  import type { Interest } from "$lib/domain/liabilities";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatFloat } from "#lib/shared/formatters/currency";
+  import type { Interest } from "#lib/domain/liabilities";
   import {
     buildInterestOverviewComparison,
     buildInterestTimelineSeries,
     interestSummary,
-  } from "$lib/features/liabilities/interest_data";
+  } from "#lib/features/liabilities/interest_data";
   import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { isEmpty as isEmptyValue, some } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import { isEmpty as isEmptyValue, some } from "#lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);

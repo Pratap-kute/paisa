@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import LiabilitiesBalance from "$lib/features/liabilities/components/LiabilitiesBalance.svelte";
-  import type { LiabilityBreakdown } from "$lib/domain/liabilities";
+  import { api } from "#lib/api";
+  import LiabilitiesBalance from "#lib/features/liabilities/components/LiabilitiesBalance.svelte";
+  import type { LiabilityBreakdown } from "#lib/domain/liabilities";
   import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
 
   let breakdowns: LiabilityBreakdown[] = $state([]);
   let isLoading = $state(true);

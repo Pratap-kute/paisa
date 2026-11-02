@@ -1,7 +1,7 @@
 import { sum } from "es-toolkit";
-import COLORS from "$lib/shared/theme/colors";
-import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
-import { sortBy } from "$lib/shared/utils/collection";
+import COLORS from "#lib/shared/theme/colors";
+import type { ComparisonBarChartData } from "#lib/shared/charts/echarts/bar_comparison";
+import { sortBy } from "#lib/shared/utils/collection";
 
 export function buildCreditCardYearlySpendsComparison(
   yearlySpends: Record<string, Record<string, number>>,

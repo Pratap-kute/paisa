@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import InsightsPanel from "./InsightsPanel.svelte";
-import type { Insight as _Insight } from "$lib/domain/insights";
+import type { Insight as _Insight } from "#lib/domain/insights";
 
 test("renders InsightsPanel with top insights and link", () => {
   const insights: _Insight[] = [

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import type { ScheduleAL } from "$lib/domain/tax";
-  import { scheduleALTotal } from "$lib/features/tax/schedule_al_data";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import type { ScheduleAL } from "#lib/domain/tax";
+  import { scheduleALTotal } from "#lib/features/tax/schedule_al_data";
   import { onMount } from "svelte";
   import { dateMin, year } from "../../../../../store";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
-  import { minBy } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
+  import { minBy } from "#lib/shared/utils/collection";
 
   let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
   let selectedScheduleAl: ScheduleAL | null = $derived(

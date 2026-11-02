@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import { tooltip } from "$lib/shared/charts/tooltip";
-  import type { TransactionSchedule } from "$lib/domain/recurring";
-  import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Tooltip from "$lib/shared/ui/Tooltip.svelte";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import { tooltip } from "#lib/shared/charts/tooltip";
+  import type { TransactionSchedule } from "#lib/domain/recurring";
+  import { scheduleIcon } from "#lib/features/cash_flow/schedule_presentation";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Tooltip from "#lib/shared/ui/Tooltip.svelte";
 
   interface Props {
     schedule: TransactionSchedule;

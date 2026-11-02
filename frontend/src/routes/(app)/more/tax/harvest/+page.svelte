@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatFloat } from "$lib/shared/formatters/currency";
-  import { formatShare } from "$lib/shared/formatters/currency";
-  import { restName } from "$lib/domain/account";
-  import type { Harvestable } from "$lib/domain/tax";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatFloat } from "#lib/shared/formatters/currency";
+  import { formatShare } from "#lib/shared/formatters/currency";
+  import { restName } from "#lib/domain/account";
+  import type { Harvestable } from "#lib/domain/tax";
   import {
     filterHarvestables,
     harvestablePercentage,
-  } from "$lib/features/tax/harvest_data";
+  } from "#lib/features/tax/harvest_data";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import HarvestCard from "$lib/features/tax/components/HarvestCard.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import HarvestCard from "#lib/features/tax/components/HarvestCard.svelte";
 
   let isLoading = $state(true);
   let harvestables: Harvestable[] = $state([]);

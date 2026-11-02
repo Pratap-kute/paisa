@@ -2,7 +2,7 @@ import { describe, test, expect } from "bun:test";
 import fs from "node:fs";
 
 import { applyChanges } from "./bulk_edit";
-import type { LedgerFile, Transaction } from "$lib/domain/ledger";
+import type { LedgerFile, Transaction } from "#lib/domain/ledger";
 import { trim } from "es-toolkit";
 function fixturePath(path: string): string {
   try {

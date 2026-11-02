@@ -1,17 +1,17 @@
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { groupSumBy, sumPostings } from "$lib/domain/transactions";
-import { now } from "$lib/domain/time";
-import type { Forecast } from "$lib/domain/goals_models";
-import type { Point } from "$lib/domain/goals_models";
-import type { Posting } from "$lib/domain/ledger";
+import { formatCurrency } from "#lib/shared/formatters/currency";
+import { groupSumBy, sumPostings } from "#lib/domain/transactions";
+import { now } from "#lib/domain/time";
+import type { Forecast } from "#lib/domain/goals_models";
+import type { Point } from "#lib/domain/goals_models";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy } from "es-toolkit";
-import COLORS from "$lib/shared/theme/colors";
-import { iconify } from "$lib/shared/ui/icon";
+import COLORS from "#lib/shared/theme/colors";
+import { iconify } from "#lib/shared/ui/icon";
 import type {
   PeriodSeriesChartData,
   PeriodSeriesPoint,
-} from "$lib/shared/charts/echarts/period_series";
-import { sortBy } from "$lib/shared/utils/collection";
+} from "#lib/shared/charts/echarts/period_series";
+import { sortBy } from "#lib/shared/utils/collection";
 
 export type GoalProjectionKind =
   "required-path" | "configured-payment" | "forecast";

@@ -3,7 +3,25 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "types": ["bun", "./src/app.d.ts"]
+    "types": [
+      "bun",
+      "./src/app.d.ts"
+    ],
+    "paths": {
+      "#lib": [
+        "./src/lib"
+      ],
+      "#lib/*": [
+        "./src/lib/*"
+      ],
+      "xlsx": [
+        "./src/lib/shared/vendor/xlsx.mjs"
+      ]
+    },
+    "strict": false
   },
-  "exclude": ["src/**/*.test.ts", "tests/**/*.ts"]
+  "exclude": [
+    "src/**/*.test.ts",
+    "tests/**/*.ts"
+  ]
 }

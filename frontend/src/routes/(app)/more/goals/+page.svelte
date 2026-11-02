@@ -1,25 +1,25 @@
 <script lang="ts">
-  import type { GoalSummary } from "$lib/domain/goals_models";
+  import type { GoalSummary } from "#lib/domain/goals_models";
   import { dndzone } from "svelte-dnd-action";
   import { flip } from "svelte/animate";
-  import GoalSummaryCard from "$lib/features/goals/components/GoalSummaryCard.svelte";
-  import GoalHealthSummary from "$lib/features/goals/components/GoalHealthSummary.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
-  import { helpUrl } from "$lib/shared/browser/navigation";
-  import { api } from "$lib/api";
+  import GoalSummaryCard from "#lib/features/goals/components/GoalSummaryCard.svelte";
+  import GoalHealthSummary from "#lib/features/goals/components/GoalHealthSummary.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
+  import { helpUrl } from "#lib/shared/browser/navigation";
+  import { api } from "#lib/api";
   import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";
-  import * as toast from "$lib/shared/ui/toast";
+  import * as toast from "#lib/shared/ui/toast";
   import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
   import {
     find,
     isEmpty as isEmptyValue,
     sortBy,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   const goalDndzone = dndzone;
 

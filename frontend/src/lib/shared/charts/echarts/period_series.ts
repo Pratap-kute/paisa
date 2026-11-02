@@ -1,12 +1,12 @@
 import dayjs from "dayjs";
-import type { Legend } from "$lib/shared/charts/types";
-import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
+import type { Legend } from "#lib/shared/charts/types";
+import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,
   normalizeCategoryKey,
   type PaisaChartTheme,
-} from "$lib/shared/charts/echarts/theme";
-import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
+} from "#lib/shared/charts/echarts/theme";
+import { responsiveChartOption } from "#lib/shared/charts/echarts/responsive";
 
 export type PeriodSeriesIntent = "line" | "area" | "bar" | "stacked-bar";
 export type PeriodAxis = "time" | "category" | "value";

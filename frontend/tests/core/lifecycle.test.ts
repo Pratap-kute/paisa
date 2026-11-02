@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { createAsyncState, createMutation } from "$lib/api/lifecycle.svelte";
-import { ApiError } from "$lib/api/errors";
+import { createAsyncState, createMutation } from "#lib/api/lifecycle.svelte";
+import { ApiError } from "#lib/api/errors";
 
 describe("Request Lifecycle & AsyncState", () => {
   it("transitions loading -> success", async () => {

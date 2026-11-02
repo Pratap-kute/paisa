@@ -1,23 +1,23 @@
 <script lang="ts">
-  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
-  import { configUpdated } from "$lib/shared/browser/config";
-  import { api, clearAuthToken, getAuthToken, setAuthToken } from "$lib/api";
-  import { authTokenAfterAccountSave } from "$lib/shared/browser/auth";
+  import ConfirmDialog from "#lib/shared/ui/ConfirmDialog.svelte";
+  import { configUpdated } from "#lib/shared/browser/config";
+  import { api, clearAuthToken, getAuthToken, setAuthToken } from "#lib/api";
+  import { authTokenAfterAccountSave } from "#lib/shared/browser/auth";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import type { JSONSchema7 } from "json-schema";
-  import JsonSchemaForm from "$lib/features/ledger/components/JsonSchemaForm.svelte";
+  import JsonSchemaForm from "#lib/features/ledger/components/JsonSchemaForm.svelte";
   import { cloneDeep, isEqual, startCase } from "es-toolkit";
-  import * as toast from "$lib/shared/ui/toast";
+  import * as toast from "#lib/shared/ui/toast";
   import { refresh } from "../../../../store";
-  import { sync } from "$lib/api/sync";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Tabs from "$lib/shared/ui/Tabs.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  import { sync } from "#lib/api/sync";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import Tabs from "#lib/shared/ui/Tabs.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Schema extends JSONSchema7 {
     "ui:widget"?: string;

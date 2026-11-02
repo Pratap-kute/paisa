@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-  import type { CashFlow } from "$lib/domain/cash_flow";
-  import { api } from "$lib/api";
+  import { buildCashFlowSeries } from "#lib/features/cash_flow/chart_data";
+  import type { CashFlow } from "#lib/domain/cash_flow";
+  import { api } from "#lib/api";
   import { onMount } from "svelte";
   import {
     dateMax,
@@ -10,15 +10,15 @@
     dateRangeOption,
     setAllowedDateRange,
   } from "../../../../store";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import DateRange from "$lib/shared/ui/DateRange.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { filter, map, some } from "$lib/shared/utils/collection";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import DateRange from "#lib/shared/ui/DateRange.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import { filter, map, some } from "#lib/shared/utils/collection";
 
   let cashFlows: CashFlow[] = $state([]);
   let isLoading = $state(true);

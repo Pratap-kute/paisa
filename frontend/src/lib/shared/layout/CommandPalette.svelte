@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { setColorPreference } from "$lib/shared/browser/theme";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
+  import { setColorPreference } from "#lib/shared/browser/theme";
+  import Dialog from "#lib/shared/ui/Dialog.svelte";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { getColorPreference } from "$lib/shared/browser/theme";
-  import { accountTfIdf, theme as themeStore } from "$lib/shared/state/store";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  import { getColorPreference } from "#lib/shared/browser/theme";
+  import { accountTfIdf, theme as themeStore } from "#lib/shared/state/store";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Props {
     open?: boolean;

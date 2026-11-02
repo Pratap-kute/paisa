@@ -38,7 +38,7 @@ function resolveLocalImport(
   imported: string,
   frontendRoot: string,
 ): string | null {
-  if (imported.startsWith("$lib/")) {
+  if (imported.startsWith("#lib/")) {
     return resolve(frontendRoot, "src/lib", imported.slice(5));
   }
   if (imported.startsWith(".")) {

@@ -1,8 +1,8 @@
-import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy } from "es-toolkit";
 import { assertType, Environment, Query } from "./interpreter";
 import { BigNumber } from "bignumber.js";
-import { sortBy } from "$lib/shared/utils/collection";
+import { sortBy } from "#lib/shared/utils/collection";
 
 type PostingsOrQuery = Posting[] | Query;
 

@@ -1,23 +1,23 @@
 <script lang="ts">
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
-  import type { LedgerFile, Transaction as T } from "$lib/domain/ledger";
-  import { api } from "$lib/api";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
+  import type { LedgerFile, Transaction as T } from "#lib/domain/ledger";
+  import { api } from "#lib/api";
   import { debounce } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
-  import Transaction from "$lib/features/transactions/components/Transaction.svelte";
-  import BulkEditForm from "$lib/features/ledger/components/BulkEditForm.svelte";
+  import Transaction from "#lib/features/transactions/components/Transaction.svelte";
+  import BulkEditForm from "#lib/features/ledger/components/BulkEditForm.svelte";
   import { slide } from "svelte/transition";
-  import * as bulkEdit from "$lib/features/ledger/bulk_edit";
-  import * as toast from "$lib/shared/ui/toast";
-  import DiffViewModal from "$lib/features/ledger/components/DiffViewModal.svelte";
-  import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
-  import { editorState } from "$lib/features/editor/search_query_editor";
+  import * as bulkEdit from "#lib/features/ledger/bulk_edit";
+  import * as toast from "#lib/shared/ui/toast";
+  import DiffViewModal from "#lib/features/ledger/components/DiffViewModal.svelte";
+  import SearchQuery from "#lib/features/ledger/components/SearchQuery.svelte";
+  import { editorState } from "#lib/features/editor/search_query_editor";
   import { get } from "svelte/store";
-  import { download } from "$lib/features/importing/export";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import { filter } from "$lib/shared/utils/collection";
+  import { download } from "#lib/features/importing/export";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import { filter } from "#lib/shared/utils/collection";
 
   let bulkEditOpen = $state(false);
   let transactions: T[] | null = $state(null);

@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { api } from "$lib/api";
+  import { api } from "#lib/api";
   import { goto } from "$app/navigation";
-  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-  import * as toast from "$lib/shared/ui/toast";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
+  import FileModal from "#lib/features/ledger/components/FileModal.svelte";
+  import * as toast from "#lib/shared/ui/toast";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
 
   let modalOpen = $state(false);
   function openCreateModal() {

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { Posting } from "$lib/domain/ledger";
-  import { firstName } from "$lib/domain/account";
-  import { change } from "$lib/domain/posting";
-  import { postingUrl } from "$lib/shared/browser/navigation";
+  import type { Posting } from "#lib/domain/ledger";
+  import { firstName } from "#lib/domain/account";
+  import { change } from "#lib/domain/posting";
+  import { postingUrl } from "#lib/shared/browser/navigation";
   import {
     formatCurrency,
     formatFloat,
     formatReturnPercent,
-  } from "$lib/shared/formatters/currency";
-  import { accountColorStyle } from "$lib/shared/theme/colors";
-  import { iconText } from "$lib/shared/ui/icon";
+  } from "#lib/shared/formatters/currency";
+  import { accountColorStyle } from "#lib/shared/theme/colors";
+  import { iconText } from "#lib/shared/ui/icon";
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 

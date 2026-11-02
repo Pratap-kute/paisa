@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Separator from "$lib/shared/ui/Separator.svelte";
+  import Separator from "#lib/shared/ui/Separator.svelte";
 
   interface Props {
     income?: string;

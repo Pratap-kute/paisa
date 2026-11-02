@@ -2,11 +2,11 @@
   import {
     buildCashFlowSankeyData,
     buildCashFlowSankeyOption,
-  } from "$lib/shared/charts/echarts/cash_flow_sankey";
-  import { readPaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-  import type { Graph } from "$lib/shared/charts/types";
-  import EChartSurface from "$lib/shared/charts/EChartSurface.svelte";
-  import { theme } from "$lib/shared/state/store";
+  } from "#lib/shared/charts/echarts/cash_flow_sankey";
+  import { readPaisaChartTheme } from "#lib/shared/charts/echarts/theme";
+  import type { Graph } from "#lib/shared/charts/types";
+  import EChartSurface from "#lib/shared/charts/EChartSurface.svelte";
+  import { theme } from "#lib/shared/state/store";
 
   interface Props {
     graph: Graph;

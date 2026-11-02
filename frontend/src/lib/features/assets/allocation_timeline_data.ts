@@ -1,8 +1,8 @@
-import { secondName } from "$lib/domain/account";
+import { secondName } from "#lib/domain/account";
 import { groupBy, mapValues, sum, sumBy, uniq } from "es-toolkit";
-import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import type { Aggregate } from "$lib/domain/assets";
-import { categoryLegends } from "$lib/shared/charts/category";
+import type { PeriodSeriesChartData } from "#lib/shared/charts/echarts/period_series";
+import type { Aggregate } from "#lib/domain/assets";
+import { categoryLegends } from "#lib/shared/charts/category";
 
 export function buildAllocationTimelineSeries(
   timeline: Record<string, Aggregate>[],

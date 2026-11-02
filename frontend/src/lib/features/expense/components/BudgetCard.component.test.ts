@@ -2,7 +2,7 @@ import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import dayjs from "dayjs";
 import BudgetCard from "./BudgetCard.svelte";
-import type { AccountBudget } from "$lib/domain/cash_flow";
+import type { AccountBudget } from "#lib/domain/cash_flow";
 
 Object.defineProperty(globalThis, "USER_CONFIG", {
   configurable: true,

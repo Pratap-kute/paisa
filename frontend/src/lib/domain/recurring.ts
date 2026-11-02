@@ -1,5 +1,5 @@
 import type dayjs from "dayjs";
-import type { Transaction } from "$lib/domain/ledger";
+import type { Transaction } from "#lib/domain/ledger";
 export interface TransactionSchedule {
   actual: dayjs.Dayjs | null;
   scheduled: dayjs.Dayjs;

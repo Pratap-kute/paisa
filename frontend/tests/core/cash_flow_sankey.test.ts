@@ -3,8 +3,8 @@ import {
   buildCashFlowSankeyData,
   buildCashFlowSankeyOption,
   findDirectedCycles,
-} from "$lib/shared/charts/echarts/cash_flow_sankey";
-import type { Graph } from "$lib/shared/charts/types";
+} from "#lib/shared/charts/echarts/cash_flow_sankey";
+import type { Graph } from "#lib/shared/charts/types";
 import browserExpense from "../fixture/browser/expense.json" with { type: "json" };
 
 const graph: Graph = {

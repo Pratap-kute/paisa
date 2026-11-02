@@ -1,11 +1,11 @@
-import type { Insight, InsightsResult } from "$lib/domain/insights";
-import type { DtoInsightResponse, DtoInsightsResponse } from "$lib/api";
-import { restName } from "$lib/domain/account";
+import type { Insight, InsightsResult } from "#lib/domain/insights";
+import type { DtoInsightResponse, DtoInsightsResponse } from "#lib/api";
+import { restName } from "#lib/domain/account";
 import {
   formatCurrency,
   formatFloat,
   formatPercentage,
-} from "$lib/shared/formatters/currency";
+} from "#lib/shared/formatters/currency";
 import dayjs from "dayjs";
 import { buildInsightActionHref } from "./navigation";
 

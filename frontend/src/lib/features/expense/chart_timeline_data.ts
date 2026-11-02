@@ -1,13 +1,13 @@
 import dayjs from "dayjs";
-import { financialYear } from "$lib/domain/time";
-import { forEachMonth } from "$lib/shared/formatters/date";
-import { now } from "$lib/domain/time";
-import { forEachFinancialYear } from "$lib/shared/formatters/date";
-import type { Posting } from "$lib/domain/ledger";
+import { financialYear } from "#lib/domain/time";
+import { forEachMonth } from "#lib/shared/formatters/date";
+import { now } from "#lib/domain/time";
+import { forEachFinancialYear } from "#lib/shared/formatters/date";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy, mapValues, sumBy } from "es-toolkit";
-import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import { expenseGroup } from "$lib/features/expense/expense";
-import { maxBy, minBy } from "$lib/shared/utils/collection";
+import type { PeriodSeriesChartData } from "#lib/shared/charts/echarts/period_series";
+import { expenseGroup } from "#lib/features/expense/expense";
+import { maxBy, minBy } from "#lib/shared/utils/collection";
 
 export function expenseGroupsByContribution(postings: Posting[]) {
   const totals = mapValues(groupBy(postings, expenseGroup), (items) =>

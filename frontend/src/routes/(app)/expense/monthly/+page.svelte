@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatShare } from "$lib/shared/formatters/currency";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import { restName } from "$lib/domain/account";
-  import type { Posting } from "$lib/domain/ledger";
-  import type { Legend } from "$lib/shared/charts/types";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatShare } from "#lib/shared/formatters/currency";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import { restName } from "#lib/domain/account";
+  import type { Posting } from "#lib/domain/ledger";
+  import type { Legend } from "#lib/shared/charts/types";
   import { onMount } from "svelte";
   import { sumBy } from "es-toolkit";
   import dayjs from "dayjs";
-  import { firstName } from "$lib/domain/account";
-  import { api } from "$lib/api";
+  import { firstName } from "#lib/domain/account";
+  import { api } from "#lib/api";
   import {
     buildMonthlyExpenseTimelineSeries,
     expenseGroupsByContribution,
-  } from "$lib/features/expense/chart_timeline_data";
+  } from "#lib/features/expense/chart_timeline_data";
   import {
     categoryColor,
     categoryColorResolver,
     categoryLegends,
-  } from "$lib/shared/charts/category";
-  import { buildMonthlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-  import { expenseGroup } from "$lib/features/expense/expense";
-  import { iconify } from "$lib/shared/ui/icon";
+  } from "#lib/shared/charts/category";
+  import { buildMonthlyExpenseHeatmapData } from "#lib/features/expense/expense_heatmap_data";
+  import { buildExpenseBreakdownComparison } from "#lib/features/expense/chart_comparison_data";
+  import { expenseGroup } from "#lib/features/expense/expense";
+  import { iconify } from "#lib/shared/ui/icon";
   import {
     dateMax,
     dateMin,
@@ -31,25 +31,25 @@
     setAllowedDateRange,
   } from "../../../../store";
   import { writable } from "svelte/store";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
-  import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import DailyExpenseCalendar from "$lib/features/expense/components/DailyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { isEmpty, map, sortBy } from "$lib/shared/utils/collection";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ResponsiveGrid from "#lib/shared/layout/ResponsiveGrid.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import MonthPicker from "#lib/shared/ui/MonthPicker.svelte";
+  import IncomeContextStrip from "#lib/shared/layout/IncomeContextStrip.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import DailyExpenseCalendar from "#lib/features/expense/components/DailyExpenseCalendar.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import { isEmpty, map, sortBy } from "#lib/shared/utils/collection";
   import { get } from "svelte/store";
   import { page } from "$app/state";
-  import { validPeriod } from "$lib/shared/browser/period";
+  import { validPeriod } from "#lib/shared/browser/period";
 
   let groups = writable<string[]>([]);
   let expenses: Posting[] | undefined = $state(),

@@ -1,8 +1,8 @@
-import type { LedgerFileError } from "$lib/domain/ledger";
+import type { LedgerFileError } from "#lib/domain/ledger";
 import { handlebars } from "./handlebars_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, keymap } from "@codemirror/view";
-import { fullEditorExtensions } from "$lib/shared/editor/base";
+import { fullEditorExtensions } from "#lib/shared/editor/base";
 import {
   history,
   historyKeymap,
@@ -24,7 +24,7 @@ import {
   ifIn,
 } from "@codemirror/autocomplete";
 import Handlebars from "handlebars";
-import { assign, map } from "$lib/shared/utils/collection";
+import { assign, map } from "#lib/shared/utils/collection";
 
 interface EditorState {
   hasUnsavedChanges: boolean;

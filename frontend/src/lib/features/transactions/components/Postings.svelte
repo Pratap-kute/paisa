@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
-  import type { Posting } from "$lib/domain/ledger";
-  import { accountColorStyle } from "$lib/shared/theme/colors";
-  import { iconText } from "$lib/shared/ui/icon";
-  import { firstName } from "$lib/domain/account";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatFloatUptoPrecision } from "#lib/shared/formatters/currency";
+  import type { Posting } from "#lib/domain/ledger";
+  import { accountColorStyle } from "#lib/shared/theme/colors";
+  import { iconText } from "#lib/shared/ui/icon";
+  import { firstName } from "#lib/domain/account";
 
   const unlessDefaultCurrency = (p: Posting) => {
     if (

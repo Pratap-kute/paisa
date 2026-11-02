@@ -1,4 +1,4 @@
-import * as toast from "$lib/shared/ui/toast";
+import * as toast from "#lib/shared/ui/toast";
 import { api } from "./client";
 import { extractErrorMessage } from "./errors";
 import type { ServerSyncRequest } from "./generated/Api";

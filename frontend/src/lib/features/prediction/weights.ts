@@ -42,4 +42,4 @@ export const CONFIDENCE = {
   UNKNOWN_SCORE: 45,
 } as const;
 
-export { GENERIC_MERCHANT_KEYS } from "$lib/domain/merchant";
+export { GENERIC_MERCHANT_KEYS } from "#lib/domain/merchant";

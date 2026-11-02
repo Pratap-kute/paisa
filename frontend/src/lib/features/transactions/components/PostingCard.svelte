@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { formatFloat } from "$lib/shared/formatters/currency";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import { firstName, restName } from "$lib/domain/account";
-  import type { Posting } from "$lib/domain/ledger";
-  import { iconify } from "$lib/shared/ui/icon";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { formatFloat } from "#lib/shared/formatters/currency";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import { firstName, restName } from "#lib/domain/account";
+  import type { Posting } from "#lib/domain/ledger";
+  import { iconify } from "#lib/shared/ui/icon";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
   import PostingNote from "./PostingNote.svelte";
   import PostingStatus from "./PostingStatus.svelte";
 
-  import Card from "$lib/shared/ui/Card.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
 
   interface Props {
     posting: Posting;

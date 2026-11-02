@@ -1,9 +1,9 @@
-import { api } from "$lib/api";
-import { ledger } from "$lib/features/editor/ledger_parser";
+import { api } from "#lib/api";
+import { ledger } from "#lib/features/editor/ledger_parser";
 import { StreamLanguage } from "@codemirror/language";
 import { EditorView, type KeyBinding, keymap } from "@codemirror/view";
 import { EditorState as State } from "@codemirror/state";
-import { fullEditorExtensions } from "$lib/shared/editor/base";
+import { fullEditorExtensions } from "#lib/shared/editor/base";
 import {
   history,
   historyKeymap,
@@ -16,7 +16,7 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import { editorState, initialEditorState } from "$lib/shared/state/store";
+import { editorState, initialEditorState } from "#lib/shared/state/store";
 import {
   autocompletion,
   completeFromList,
@@ -25,11 +25,11 @@ import {
   ifIn,
 } from "@codemirror/autocomplete";
 import { MergeView } from "@codemirror/merge";
-import { schedulePlugin } from "$lib/features/editor/schedule_extension";
+import { schedulePlugin } from "#lib/features/editor/schedule_extension";
 import dayjs from "dayjs";
-import { assign, map } from "$lib/shared/utils/collection";
+import { assign, map } from "#lib/shared/utils/collection";
 
-export { editorState } from "$lib/shared/state/store";
+export { editorState } from "#lib/shared/state/store";
 
 async function lint(editor: EditorView): Promise<Diagnostic[]> {
   const doc = editor.state.doc;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { rem } from "$lib/shared/browser/responsive";
+  import { rem } from "#lib/shared/browser/responsive";
   import { onDestroy, onMount } from "svelte";
   import {
     type ColumnDefinition,

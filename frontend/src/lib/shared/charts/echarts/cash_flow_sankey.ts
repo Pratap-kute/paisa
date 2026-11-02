@@ -1,9 +1,9 @@
-import type { Graph, Legend } from "$lib/shared/charts/types";
-import { firstName } from "$lib/domain/account";
-import { generateColorScheme } from "$lib/shared/theme/colors";
-import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
-import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
+import type { Graph, Legend } from "#lib/shared/charts/types";
+import { firstName } from "#lib/domain/account";
+import { generateColorScheme } from "#lib/shared/theme/colors";
+import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
+import type { PaisaChartTheme } from "#lib/shared/charts/echarts/theme";
+import { responsiveChartOption } from "#lib/shared/charts/echarts/responsive";
 
 export interface CashFlowSankeyNode {
   id: number;

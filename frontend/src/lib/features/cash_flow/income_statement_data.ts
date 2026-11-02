@@ -1,9 +1,9 @@
-import type { IncomeStatement } from "$lib/domain/cash_flow";
+import type { IncomeStatement } from "#lib/domain/cash_flow";
 import type {
   IncomeStatementCategory,
   IncomeStatementWaterfallData,
   WaterfallStep,
-} from "$lib/shared/charts/waterfall_data";
+} from "#lib/shared/charts/waterfall_data";
 
 const sum = (values: Record<string, number>) =>
   Object.values(values).reduce((acc, v) => acc + v, 0);
@@ -63,4 +63,4 @@ export type {
   IncomeStatementCategory,
   IncomeStatementWaterfallData,
   WaterfallStep,
-} from "$lib/shared/charts/waterfall_data";
+} from "#lib/shared/charts/waterfall_data";

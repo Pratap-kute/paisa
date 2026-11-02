@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { predictionSession } from "$lib/features/prediction/session";
-import type { HistoryPosting } from "$lib/features/prediction/types";
+import { predictionSession } from "#lib/features/prediction/session";
+import type { HistoryPosting } from "#lib/features/prediction/types";
 
 function hist(payee: string, account: string, date: string): HistoryPosting {
   return {

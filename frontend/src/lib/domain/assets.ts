@@ -1,5 +1,5 @@
 import type dayjs from "dayjs";
-import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "#lib/domain/ledger";
 export interface Price {
   id: string;
   date: dayjs.Dayjs;

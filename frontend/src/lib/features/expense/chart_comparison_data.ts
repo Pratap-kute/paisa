@@ -1,10 +1,10 @@
-import { financialYear } from "$lib/domain/time";
-import type { Posting } from "$lib/domain/ledger";
+import { financialYear } from "#lib/domain/time";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy, mapValues, sumBy, uniq } from "es-toolkit";
-import { generateColorScheme } from "$lib/shared/theme/colors";
-import { iconify } from "$lib/shared/ui/icon";
-import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
-import { byExpenseGroup, expenseGroup } from "$lib/features/expense/expense";
+import { generateColorScheme } from "#lib/shared/theme/colors";
+import { iconify } from "#lib/shared/ui/icon";
+import type { ComparisonBarChartData } from "#lib/shared/charts/echarts/bar_comparison";
+import { byExpenseGroup, expenseGroup } from "#lib/features/expense/expense";
 
 export function buildExpenseBreakdownComparison(
   postings: Posting[],

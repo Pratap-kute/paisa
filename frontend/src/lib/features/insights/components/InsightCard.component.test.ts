@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import InsightCard from "./InsightCard.svelte";
-import type { Insight as _Insight } from "$lib/domain/insights";
+import type { Insight as _Insight } from "#lib/domain/insights";
 
 test("renders InsightCard correctly with hero metric and title", () => {
   const insight: _Insight = {

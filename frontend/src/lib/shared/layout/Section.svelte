@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { iconGlyphOr } from "$lib/shared/ui/icon";
+  import { iconGlyphOr } from "#lib/shared/ui/icon";
 
   interface Props {
     title?: string;

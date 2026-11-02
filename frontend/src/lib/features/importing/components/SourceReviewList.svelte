@@ -2,17 +2,17 @@
   import type {
     RenderedRow,
     RenderMetadata,
-  } from "$lib/features/importing/spreadsheet";
+  } from "#lib/features/importing/spreadsheet";
   import type {
     Confidence,
     PredictionResult,
-  } from "$lib/features/prediction/types";
+  } from "#lib/features/prediction/types";
   import {
     type ConfidenceFilter,
     rowMatchesFilter,
-  } from "$lib/features/prediction/session";
-  import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
-  import { maxBy } from "$lib/shared/utils/collection";
+  } from "#lib/features/prediction/session";
+  import PredictionRowBadge from "#lib/features/prediction/components/PredictionRowBadge.svelte";
+  import { maxBy } from "#lib/shared/utils/collection";
 
   interface Props {
     data: any[][];

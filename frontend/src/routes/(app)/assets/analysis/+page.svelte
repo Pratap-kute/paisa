@@ -1,34 +1,34 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { api } from "#lib/api";
+  import { formatPercentage } from "#lib/shared/formatters/currency";
   import type {
     PortfolioAggregate,
     PortfolioAllocation,
-  } from "$lib/domain/assets";
+  } from "#lib/domain/assets";
   import {
     buildFlattenedHoldings,
     buildPortfolioComparison,
     buildTopHoldingsComparison,
     filterCommodityBreakdowns,
-  } from "$lib/features/assets/hierarchy_data";
-  import COLORS from "$lib/shared/theme/colors";
-  import { nonZeroCurrency } from "$lib/shared/tables/formatters";
+  } from "#lib/features/assets/hierarchy_data";
+  import COLORS from "#lib/shared/theme/colors";
+  import { nonZeroCurrency } from "#lib/shared/tables/formatters";
   import { onMount } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import Table from "$lib/shared/ui/Table.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import ResponsiveGrid from "#lib/shared/layout/ResponsiveGrid.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import Table from "#lib/shared/ui/Table.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
   import {
     isEmpty as isEmptyValue,
     max,
     some,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   let commodities: string[] = $state([]);
   let selectedCommodities: string[] = $state([]);

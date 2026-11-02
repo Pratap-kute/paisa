@@ -1,5 +1,5 @@
 <script lang="ts">
-  import COLORS from "$lib/shared/theme/colors";
+  import COLORS from "#lib/shared/theme/colors";
 
   interface Props {
     size?: number;

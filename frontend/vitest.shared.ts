@@ -12,7 +12,7 @@ export const sharedResolve = {
     "$app/navigation": fileURLToPath(
       new URL("./tests/setup/navigation.ts", import.meta.url),
     ),
-    $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
+    "#lib": fileURLToPath(new URL("./src/lib", import.meta.url)),
     xlsx: fileURLToPath(
       new URL("./src/lib/shared/vendor/xlsx.mjs", import.meta.url),
     ),

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import DashboardInvestmentPerformance from "./DashboardInvestmentPerformance.svelte";
-import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatCurrency } from "#lib/shared/formatters/currency";
 
 // A browser collapses the whitespace between markup lines; textContent does not.
 const rendered = (node: Element | null | undefined) =>
@@ -37,7 +37,7 @@ test("shows unavailable performance without a fabricated zero", () => {
 });
 
 test("privacy changes mask already-rendered monetary values", async () => {
-  const { obscure } = await import("$lib/shared/state/persisted");
+  const { obscure } = await import("#lib/shared/state/persisted");
   const { tick } = await import("svelte");
   obscure.set(false);
   const { container } = render(DashboardInvestmentPerformance, {

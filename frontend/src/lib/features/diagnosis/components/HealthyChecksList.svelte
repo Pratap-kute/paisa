@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { DiagnosticCheck } from "$lib/features/diagnosis/types";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  import type { DiagnosticCheck } from "#lib/features/diagnosis/types";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Props {
     checks?: DiagnosticCheck[];

@@ -1,14 +1,14 @@
 <script lang="ts">
-  import type { GoalSummary } from "$lib/domain/goals_models";
+  import type { GoalSummary } from "#lib/domain/goals_models";
   import {
     goalStatusLabel,
     summarizeGoalHealth,
-  } from "$lib/domain/goal_intelligence";
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
-  import { obscure } from "$lib/shared/state/persisted";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
+  } from "#lib/domain/goal_intelligence";
+  import { formatCurrencyCrude } from "#lib/shared/formatters/currency";
+  import { obscure } from "#lib/shared/state/persisted";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
 
   let { goals }: { goals: GoalSummary[] } = $props();
   const health = $derived(summarizeGoalHealth(goals));

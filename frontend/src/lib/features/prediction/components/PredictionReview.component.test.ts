@@ -3,8 +3,8 @@ import { expect, test, vi } from "vitest";
 import PredictionRowBadge from "./PredictionRowBadge.svelte";
 import PredictionReviewBar from "./PredictionReviewBar.svelte";
 import PredictionDetail from "./PredictionDetail.svelte";
-import { emptyBreakdown } from "$lib/features/prediction/score";
-import type { PredictionResult } from "$lib/features/prediction/types";
+import { emptyBreakdown } from "#lib/features/prediction/score";
+import type { PredictionResult } from "#lib/features/prediction/types";
 
 // A browser collapses the whitespace between markup lines; textContent does not.
 const rendered = (node: Element | null | undefined) =>

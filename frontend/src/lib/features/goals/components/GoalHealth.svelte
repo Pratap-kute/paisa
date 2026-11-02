@@ -1,16 +1,16 @@
 <script lang="ts">
-  import type { GoalSummary } from "$lib/domain/goals_models";
+  import type { GoalSummary } from "#lib/domain/goals_models";
   import {
     analyzeGoal,
     type GoalIntelligence,
     goalStatusLabel,
-  } from "$lib/domain/goal_intelligence";
+  } from "#lib/domain/goal_intelligence";
   import {
     formatCurrency,
     formatCurrencyCrude,
     formatFloat,
-  } from "$lib/shared/formatters/currency";
-  import { obscure } from "$lib/shared/state/persisted";
+  } from "#lib/shared/formatters/currency";
+  import { obscure } from "#lib/shared/state/persisted";
 
   let { goal, compact = false }: { goal: GoalSummary; compact?: boolean } =
     $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Insight } from "$lib/domain/insights";
+  import type { Insight } from "#lib/domain/insights";
   import dayjs from "dayjs";
 
   interface Props {

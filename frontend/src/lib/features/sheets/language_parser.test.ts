@@ -1,5 +1,5 @@
 import { describe, test } from "bun:test";
-import { sheetLanguage } from "$lib/features/sheets/language";
+import { sheetLanguage } from "#lib/features/sheets/language";
 import { fileTests } from "@lezer/generator/dist/test";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

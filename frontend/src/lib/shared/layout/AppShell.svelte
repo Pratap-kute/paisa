@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { forEachFinancialYear } from "$lib/shared/formatters/date";
-  import { page } from "$app/stores";
+  import { forEachFinancialYear } from "#lib/shared/formatters/date";
+  import { page } from "$app/state";
   import { afterNavigate, goto } from "$app/navigation";
   import { onMount, type Snippet } from "svelte";
   import Logo from "./Logo.svelte";
   import ThemeSwitcher from "./ThemeSwitcher.svelte";
   import Actions from "./Actions.svelte";
   import CommandPalette from "./CommandPalette.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import { financialYear, resolveFinancialYear } from "$lib/domain/time";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Spinner from "#lib/shared/ui/Spinner.svelte";
+  import { financialYear, resolveFinancialYear } from "#lib/domain/time";
   import {
     dateMax,
     dateMin,
@@ -20,23 +20,23 @@
     confirmRefresh,
     cancelRefresh,
   } from "../../../store";
-  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
+  import ConfirmDialog from "#lib/shared/ui/ConfirmDialog.svelte";
   import {
     cashflowExpenseDepth,
     cashflowExpenseDepthAllowed,
     cashflowIncomeDepth,
     cashflowIncomeDepthAllowed,
   } from "../../../persisted_store";
-  import DateRange from "$lib/shared/ui/DateRange.svelte";
-  import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
-  import InputRange from "$lib/shared/ui/InputRange.svelte";
-  import { validPeriod } from "$lib/shared/browser/period";
+  import DateRange from "#lib/shared/ui/DateRange.svelte";
+  import MonthPicker from "#lib/shared/ui/MonthPicker.svelte";
+  import InputRange from "#lib/shared/ui/InputRange.svelte";
+  import { validPeriod } from "#lib/shared/browser/period";
 
   import {
     type NavGroup,
     navigationState,
     type NavSection,
-  } from "$lib/shared/state/navigation.svelte";
+  } from "#lib/shared/state/navigation.svelte";
 
   interface Props {
     isBurger?: boolean | null;
@@ -284,7 +284,7 @@
     ),
   );
 
-  let pathname = $derived($page.url.pathname);
+  let pathname = $derived(page.url.pathname);
   let showDateRange = $derived(
     pathname === "/cash_flow/monthly" ||
       pathname === "/expense/monthly" ||
@@ -297,16 +297,15 @@
       pathname === "/insights",
   );
   let insightsMonth = $derived(
-    validPeriod($page.url.searchParams.get("period")) ?? $month,
+    validPeriod(page.url.searchParams.get("period")) ?? $month,
   );
 
   async function selectInsightsMonth(period: string) {
-    if ($page.url.searchParams.get("period") === period) return;
-    const url = new URL($page.url);
+    if (page.url.searchParams.get("period") === period) return;
+    const url = new URL(page.url.href);
     url.searchParams.set("period", period);
     await goto(`${url.pathname}${url.search}`, {
-      keepFocus: true,
-      noScroll: true,
+      reset: false,
     });
   }
   let showFinancialYearPicker = $derived(

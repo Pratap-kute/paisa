@@ -1,29 +1,29 @@
 <script lang="ts">
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCommodityAmount } from "$lib/shared/formatters/currency";
-  import RecurringSummary from "$lib/features/cash_flow/components/RecurringSummary.svelte";
-  import { analyzeConfirmedRecurring } from "$lib/domain/recurring_analysis";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCommodityAmount } from "#lib/shared/formatters/currency";
+  import RecurringSummary from "#lib/features/cash_flow/components/RecurringSummary.svelte";
+  import { analyzeConfirmedRecurring } from "#lib/domain/recurring_analysis";
   import { onMount } from "svelte";
   import dayjs from "dayjs";
   import { sumBy, take } from "es-toolkit";
-  import { api } from "$lib/api";
-  import type { AssetBreakdown, Networth } from "$lib/domain/assets";
-  import type { Budget, CashFlow } from "$lib/domain/cash_flow";
-  import type { GoalSummary } from "$lib/domain/goals_models";
-  import { analyzeGoal } from "$lib/domain/goal_intelligence";
-  import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
-  import type { InsightsResult } from "$lib/domain/insights";
-  import type { Posting, Transaction } from "$lib/domain/ledger";
-  import type { TransactionSequence } from "$lib/domain/recurring";
-  import { restName } from "$lib/domain/account";
-  import { now } from "$lib/domain/time";
+  import { api } from "#lib/api";
+  import type { AssetBreakdown, Networth } from "#lib/domain/assets";
+  import type { Budget, CashFlow } from "#lib/domain/cash_flow";
+  import type { GoalSummary } from "#lib/domain/goals_models";
+  import { analyzeGoal } from "#lib/domain/goal_intelligence";
+  import GoalHealth from "#lib/features/goals/components/GoalHealth.svelte";
+  import type { InsightsResult } from "#lib/domain/insights";
+  import type { Posting, Transaction } from "#lib/domain/ledger";
+  import type { TransactionSequence } from "#lib/domain/recurring";
+  import { restName } from "#lib/domain/account";
+  import { now } from "#lib/domain/time";
   import {
     enrichTrantionSequence,
     sortTrantionSequence,
-  } from "$lib/domain/transaction_sequence";
-  import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-  import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
+  } from "#lib/domain/transaction_sequence";
+  import { buildCashFlowSeries } from "#lib/features/cash_flow/chart_data";
+  import { buildExpenseBreakdownComparison } from "#lib/features/expense/chart_comparison_data";
+  import { mapInsightsResponseToDomain } from "#lib/features/insights/presentation";
   import {
     buildDashboardAttention,
     expensePaceFor,
@@ -33,32 +33,32 @@
     summarizeAnalyzedRecurring,
     summarizeBudget,
     summarizeCash,
-  } from "$lib/features/dashboard/summary";
-  import DashboardInvestmentPerformance from "$lib/features/dashboard/components/DashboardInvestmentPerformance.svelte";
-  import type { DtoInvestmentPerformance } from "$lib/api";
+  } from "#lib/features/dashboard/summary";
+  import DashboardInvestmentPerformance from "#lib/features/dashboard/components/DashboardInvestmentPerformance.svelte";
+  import type { DtoInvestmentPerformance } from "#lib/api";
   let investmentPerformance: DtoInvestmentPerformance | null | undefined =
     $state();
   let investmentPerformanceError: string | null | undefined = $state();
-  import DashboardKpiStrip from "$lib/features/dashboard/components/DashboardKpiStrip.svelte";
-  import DashboardInsightGateway from "$lib/features/dashboard/components/DashboardInsightGateway.svelte";
-  import DashboardBudgetHealth from "$lib/features/dashboard/components/DashboardBudgetHealth.svelte";
-  import DashboardCashAccounts from "$lib/features/dashboard/components/DashboardCashAccounts.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import LastNMonths from "$lib/shared/ui/LastNMonths.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  import DashboardKpiStrip from "#lib/features/dashboard/components/DashboardKpiStrip.svelte";
+  import DashboardInsightGateway from "#lib/features/dashboard/components/DashboardInsightGateway.svelte";
+  import DashboardBudgetHealth from "#lib/features/dashboard/components/DashboardBudgetHealth.svelte";
+  import DashboardCashAccounts from "#lib/features/dashboard/components/DashboardCashAccounts.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import LastNMonths from "#lib/shared/ui/LastNMonths.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
   import {
     formatCurrency,
     formatPercentage,
     formatShare,
-  } from "$lib/shared/formatters/currency";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import { some, sortBy } from "$lib/shared/utils/collection";
+  } from "#lib/shared/formatters/currency";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import { some, sortBy } from "#lib/shared/utils/collection";
   import { refresh } from "../../store";
 
   const period = now().format("YYYY-MM");

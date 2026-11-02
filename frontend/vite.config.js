@@ -66,9 +66,6 @@ export default defineConfig({
         out: "../backend/web/static",
         fallback: "index.html",
       }),
-      alias: {
-        xlsx: "src/lib/shared/vendor/xlsx.mjs",
-      },
     }),
     fixVendorEvalPlugin(),
     fixArimaBufferPlugin(),

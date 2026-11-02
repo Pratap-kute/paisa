@@ -102,13 +102,13 @@ async function coreCoverageTargets(): Promise<Set<string>> {
       `${CORE_TEST_DIRECTORY}/${entry.name}`,
       "utf-8",
     );
-    for (const match of source.matchAll(/from\s+["']\$lib\/([^"']+)["']/g)) {
+    for (const match of source.matchAll(/from\s+["']#lib\/([^"']+)["']/g)) {
       targets.add(`src/lib/${match[1]}.ts`);
       targets.add(`src/lib/${match[1]}.js`);
     }
   }
   if (targets.size === 0) {
-    throw new Error(`No $lib coverage targets found in ${CORE_TEST_DIRECTORY}`);
+    throw new Error(`No #lib coverage targets found in ${CORE_TEST_DIRECTORY}`);
   }
   return targets;
 }

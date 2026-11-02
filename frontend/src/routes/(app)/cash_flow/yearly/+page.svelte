@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { depth } from "$lib/domain/account";
-  import { firstName } from "$lib/domain/account";
-  import type { Graph } from "$lib/shared/charts/types";
-  import type { Legend } from "$lib/shared/charts/types";
-  import type { Posting } from "$lib/domain/ledger";
+  import { api } from "#lib/api";
+  import { depth } from "#lib/domain/account";
+  import { firstName } from "#lib/domain/account";
+  import type { Graph } from "#lib/shared/charts/types";
+  import type { Legend } from "#lib/shared/charts/types";
+  import type { Posting } from "#lib/domain/ledger";
   import { onMount } from "svelte";
   import { partition } from "es-toolkit";
-  import { buildCashFlowSankeyData } from "$lib/features/cash_flow/cash_flow_sankey_data";
-  import { buildCashFlowHierarchyData } from "$lib/features/cash_flow/cash_flow_hierarchy";
-  import CashFlowSankeyChart from "$lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
-  import FinancialHierarchyChart from "$lib/shared/charts/FinancialHierarchyChart.svelte";
+  import { buildCashFlowSankeyData } from "#lib/features/cash_flow/cash_flow_sankey_data";
+  import { buildCashFlowHierarchyData } from "#lib/features/cash_flow/cash_flow_hierarchy";
+  import CashFlowSankeyChart from "#lib/features/cash_flow/components/CashFlowSankeyChart.svelte";
+  import FinancialHierarchyChart from "#lib/shared/charts/FinancialHierarchyChart.svelte";
   import { dateMax, dateMin, year } from "../../../../store";
   import {
     cashflowExpenseDepth,
@@ -20,15 +20,15 @@
     cashflowViewMode,
     setCashflowDepthAllowed,
   } from "../../../../persisted_store";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
-  import InputRange from "$lib/shared/ui/InputRange.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
-  import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import FinancialYearPicker from "#lib/shared/ui/FinancialYearPicker.svelte";
+  import InputRange from "#lib/shared/ui/InputRange.svelte";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
+  import { max as arrayMax, minBy } from "#lib/shared/utils/collection";
 
   let graph: Record<string, Graph> | undefined = $state();
   let expenses: Posting[] = $state([]);

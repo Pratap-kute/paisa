@@ -2,7 +2,7 @@ import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import type { BudgetSummary } from "../summary";
 import DashboardBudgetHealth from "./DashboardBudgetHealth.svelte";
-import { formatCurrency } from "$lib/shared/formatters/currency";
+import { formatCurrency } from "#lib/shared/formatters/currency";
 
 test("renders likely-over with projected overrun warning rather than overspent even when available < 0", () => {
   const summary: BudgetSummary = {

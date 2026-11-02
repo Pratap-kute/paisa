@@ -1,6 +1,6 @@
 import type dayjs from "dayjs";
-import { now } from "$lib/domain/time";
-import { iconGlyph } from "$lib/shared/ui/icon";
+import { now } from "#lib/domain/time";
+import { iconGlyph } from "#lib/shared/ui/icon";
 export function dueDateIcon(
   dueDate: dayjs.Dayjs,
   clearedDate: dayjs.Dayjs,

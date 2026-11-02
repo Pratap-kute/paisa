@@ -6,8 +6,8 @@ import HealthyChecksList from "./HealthyChecksList.svelte";
 import type {
   DiagnosticCheck,
   QualityIssue,
-} from "$lib/features/diagnosis/types";
-import { obscure } from "$lib/shared/state/persisted";
+} from "#lib/features/diagnosis/types";
+import { obscure } from "#lib/shared/state/persisted";
 
 afterEach(() => cleanup());
 

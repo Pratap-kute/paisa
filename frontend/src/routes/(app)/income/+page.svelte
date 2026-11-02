@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import type { Income } from "$lib/domain/cash_flow";
-  import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
-  import type { Tax } from "$lib/domain/tax";
-  import type { Legend } from "$lib/shared/charts/types";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import type { Income } from "#lib/domain/cash_flow";
+  import type { IncomeYearlyCard } from "#lib/domain/cash_flow";
+  import type { Tax } from "#lib/domain/tax";
+  import type { Legend } from "#lib/shared/charts/types";
   import {
     buildMonthlyIncomeSeries,
     buildYearlyIncomeComparisonSeries,
-  } from "$lib/features/income/time_series_data";
+  } from "#lib/features/income/time_series_data";
   import { sumBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import MonthlyIncomeChart from "$lib/features/income/components/MonthlyIncomeChart.svelte";
-  import YearlyIncomeChart from "$lib/features/income/components/YearlyIncomeChart.svelte";
-  import { isEmpty } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import MonthlyIncomeChart from "#lib/features/income/components/MonthlyIncomeChart.svelte";
+  import YearlyIncomeChart from "#lib/features/income/components/YearlyIncomeChart.svelte";
+  import { isEmpty } from "#lib/shared/utils/collection";
 
   let grossIncome = $state(0);
   let netTax = $state(0);

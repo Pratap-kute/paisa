@@ -1,13 +1,13 @@
 import {
   formatFloat,
   formatReturnPercent,
-} from "$lib/shared/formatters/currency";
-import { formatPercentage } from "$lib/shared/formatters/currency";
-import { isZero } from "$lib/shared/utils/number";
-import { lastName } from "$lib/domain/account";
+} from "#lib/shared/formatters/currency";
+import { formatPercentage } from "#lib/shared/formatters/currency";
+import { isZero } from "#lib/shared/utils/number";
+import { lastName } from "#lib/domain/account";
 import { type CellComponent } from "tabulator-tables";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { iconText } from "$lib/shared/ui/icon";
+import { formatCurrency } from "#lib/shared/formatters/currency";
+import { iconText } from "#lib/shared/ui/icon";
 
 export function indendedAssetAccountName(cell: CellComponent) {
   const account = cell.getValue();

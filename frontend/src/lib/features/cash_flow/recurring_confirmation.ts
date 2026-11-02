@@ -1,7 +1,7 @@
-import { sha256Hex } from "$lib/shared/utils/crypto";
-import { api } from "$lib/api";
-import type { Transaction } from "$lib/domain/ledger";
-import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
+import { sha256Hex } from "#lib/shared/utils/crypto";
+import { api } from "#lib/api";
+import type { Transaction } from "#lib/domain/ledger";
+import type { RecurringAnalysis } from "#lib/domain/recurring_analysis";
 
 export interface RecurringFileEdit {
   name: string;

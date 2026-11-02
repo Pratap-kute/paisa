@@ -1,7 +1,7 @@
 import type {
   GoalIntelligenceData,
   GoalSummary,
-} from "$lib/domain/goals_models";
+} from "#lib/domain/goals_models";
 
 // Goal analysis as the backend returns it for a goal of 6,00,000 on 5 Sep 2026
 // (target date 31 Mar 2027 unless stated). Generated from the Go analysis in

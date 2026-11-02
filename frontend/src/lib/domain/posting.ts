@@ -1,4 +1,4 @@
-import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "#lib/domain/ledger";
 
 export interface Change {
   class: string;

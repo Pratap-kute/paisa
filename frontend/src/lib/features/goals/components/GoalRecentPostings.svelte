@@ -1,12 +1,12 @@
 <script lang="ts">
-  import COLORS from "$lib/shared/theme/colors";
-  import { firstName, restName } from "$lib/domain/account";
-  import type { Posting } from "$lib/domain/ledger";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { iconify } from "$lib/shared/ui/icon";
-  import PostingGroup from "$lib/features/transactions/components/PostingGroup.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
+  import COLORS from "#lib/shared/theme/colors";
+  import { firstName, restName } from "#lib/domain/account";
+  import type { Posting } from "#lib/domain/ledger";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { iconify } from "#lib/shared/ui/icon";
+  import PostingGroup from "#lib/features/transactions/components/PostingGroup.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
 
   interface Props {
     postings: Posting[];

@@ -3,7 +3,7 @@ import {
   createAsyncState,
   type DtoBalancedPostingResponse,
   type DtoTransactionResponse,
-} from "$lib/api";
+} from "#lib/api";
 
 export function createTransactionsState() {
   return createAsyncState<void, DtoTransactionResponse[]>(

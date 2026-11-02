@@ -1,4 +1,4 @@
-import type { HandleClientError } from "@sveltejs/kit";
+import type { HandleClientError } from "@sveltejs/kit/hooks";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
@@ -40,8 +40,8 @@ if (pdfjs.GlobalWorkerOptions) {
 }
 
 import Handlebars from "handlebars";
-import helpers from "$lib/features/importing/template_helpers";
-import * as toast from "$lib/shared/ui/toast";
+import helpers from "#lib/features/importing/template_helpers";
+import * as toast from "#lib/shared/ui/toast";
 import { mapValues } from "es-toolkit";
 Handlebars.registerHelper(
   mapValues(helpers, (helper, name) => {
@@ -64,15 +64,15 @@ toast.setDefaults({
 
 globalThis.USER_CONFIG = {} as any;
 
-export const handleError: HandleClientError = ({ error, status, message }) => {
+// The status and message are inherited from the caught error, so only the
+// extra details shown on the error page are added here.
+export const handleError: HandleClientError = ({ error }) => {
   let stack: string | undefined = undefined;
   if (error instanceof Error) {
     stack = error.stack;
   }
   return {
-    message,
     stack,
-    status,
     detail: (error as any)?.toString?.() ?? String(error),
   } as any;
 };

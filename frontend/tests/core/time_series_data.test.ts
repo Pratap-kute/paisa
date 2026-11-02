@@ -1,29 +1,29 @@
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
-import type { Income } from "$lib/domain/cash_flow";
-import type { IncomeYearlyCard } from "$lib/domain/cash_flow";
-import type { InvestmentYearlyCard, Networth } from "$lib/domain/assets";
-import type { Point } from "$lib/domain/goals_models";
-import type { Posting } from "$lib/domain/ledger";
+import type { Income } from "#lib/domain/cash_flow";
+import type { IncomeYearlyCard } from "#lib/domain/cash_flow";
+import type { InvestmentYearlyCard, Networth } from "#lib/domain/assets";
+import type { Point } from "#lib/domain/goals_models";
+import type { Posting } from "#lib/domain/ledger";
 import { describe, expect, it } from "vitest";
 import {
   buildGainAccountSeries,
   buildMonthlyInvestmentSeries,
   buildNetworthSeries,
   buildYearlyInvestmentSeries,
-} from "$lib/features/assets/time_series_data";
+} from "#lib/features/assets/time_series_data";
 import {
   buildGoalInvestmentSeries,
   buildGoalProgressSeries,
-} from "$lib/features/goals/time_series_data";
+} from "#lib/features/goals/time_series_data";
 import {
   buildMonthlyIncomeSeries,
   buildYearlyIncomeComparisonSeries,
   buildYearlyIncomeSeries,
   buildYearlyIncomeValueSeries,
-} from "$lib/features/income/time_series_data";
-import { buildRepaymentSeries } from "$lib/features/liabilities/time_series_data";
-import type { Forecast } from "$lib/domain/goals_models";
+} from "#lib/features/income/time_series_data";
+import { buildRepaymentSeries } from "#lib/features/liabilities/time_series_data";
+import type { Forecast } from "#lib/domain/goals_models";
 
 dayjs.extend(isSameOrBefore);
 

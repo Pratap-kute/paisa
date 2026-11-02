@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { AssetBreakdown } from "$lib/domain/assets";
-  import { restName } from "$lib/domain/account";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import type { AssetBreakdown } from "#lib/domain/assets";
+  import { restName } from "#lib/domain/account";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
 
   interface Props {
     accounts: AssetBreakdown[];

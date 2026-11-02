@@ -1,10 +1,10 @@
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/svelte";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import dayjs from "dayjs";
-import type { Posting, Transaction } from "$lib/domain/ledger";
-import { analyzeRecurring } from "$lib/domain/recurring_analysis";
+import type { Posting, Transaction } from "#lib/domain/ledger";
+import { analyzeRecurring } from "#lib/domain/recurring_analysis";
 import RecurringIntelligence from "./RecurringIntelligence.svelte";
-import { obscure } from "$lib/shared/state/persisted";
+import { obscure } from "#lib/shared/state/persisted";
 import RecurringSummary from "./RecurringSummary.svelte";
 import RecurringIntelligenceRow from "./RecurringIntelligenceRow.svelte";
 
@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   prepare: vi.fn(),
   save: vi.fn(),
 }));
-vi.mock("$lib/api", () => ({
+vi.mock("#lib/api", () => ({
   api: { transaction: { getTransactions: mocks.history } },
 }));
 vi.mock("../recurring_confirmation", () => ({

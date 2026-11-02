@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { FYCapitalGain } from "$lib/domain/tax";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import type { FYCapitalGain } from "#lib/domain/tax";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
   const DATE_FORMAT = "DD MMM YYYY";
 
   interface Props {

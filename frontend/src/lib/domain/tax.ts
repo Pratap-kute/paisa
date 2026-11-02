@@ -1,5 +1,5 @@
 import type dayjs from "dayjs";
-import type { Posting } from "$lib/domain/ledger";
+import type { Posting } from "#lib/domain/ledger";
 export interface Tax {
   start_date: string;
   end_date: string;

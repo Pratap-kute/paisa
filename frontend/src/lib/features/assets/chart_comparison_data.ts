@@ -1,9 +1,9 @@
-import { restName } from "$lib/domain/account";
-import type { Gain } from "$lib/domain/assets";
-import COLORS from "$lib/shared/theme/colors";
-import type { AllocationTarget } from "$lib/domain/assets";
-import type { ComparisonBarChartData } from "$lib/shared/charts/echarts/bar_comparison";
-import { sortBy } from "$lib/shared/utils/collection";
+import { restName } from "#lib/domain/account";
+import type { Gain } from "#lib/domain/assets";
+import COLORS from "#lib/shared/theme/colors";
+import type { AllocationTarget } from "#lib/domain/assets";
+import type { ComparisonBarChartData } from "#lib/shared/charts/echarts/bar_comparison";
+import { sortBy } from "#lib/shared/utils/collection";
 
 export function buildAllocationTargetComparison(
   allocationTargets: AllocationTarget[],

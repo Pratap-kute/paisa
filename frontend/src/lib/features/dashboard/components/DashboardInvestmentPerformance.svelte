@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { DtoInvestmentPerformance } from "$lib/api";
-  import { obscure } from "$lib/shared/state/persisted";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { performancePercent } from "$lib/features/assets/performance";
+  import type { DtoInvestmentPerformance } from "#lib/api";
+  import { obscure } from "#lib/shared/state/persisted";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { performancePercent } from "#lib/features/assets/performance";
   let {
     summary,
     error = null,

@@ -2,10 +2,10 @@
   import {
     formatFeatureName,
     type QualityIssue,
-  } from "$lib/features/diagnosis/types";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import { obscure } from "$lib/shared/state/persisted";
+  } from "#lib/features/diagnosis/types";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import { obscure } from "#lib/shared/state/persisted";
 
   interface Props {
     issue: QualityIssue;

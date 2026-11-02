@@ -1,11 +1,11 @@
 import dayjs from "dayjs";
 import { describe, expect, it } from "vitest";
-import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
+import { buildIncomeStatementWaterfall } from "#lib/features/cash_flow/income_statement_data";
 import {
   buildIncomeStatementWaterfallOption,
   incomeStatementAxisRange,
-} from "$lib/shared/charts/echarts/waterfall";
-import type { IncomeStatement } from "$lib/domain/cash_flow";
+} from "#lib/shared/charts/echarts/waterfall";
+import type { IncomeStatement } from "#lib/domain/cash_flow";
 
 describe("income statement waterfall adapter", () => {
   it("preserves ordered start, delta, end, and breakdown values", () => {
