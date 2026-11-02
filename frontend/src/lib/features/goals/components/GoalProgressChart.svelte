@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { Point } from "$lib/domain/goals_models";
+  import type { Point } from "#lib/domain/goals_models";
   import {
     buildGoalProgressSeries,
     type GoalProjectionKind,
-  } from "$lib/features/goals/time_series_data";
-  import type { Forecast } from "$lib/domain/goals_models";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  } from "#lib/features/goals/time_series_data";
+  import type { Forecast } from "#lib/domain/goals_models";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
 
   interface Props {
     projectionKind?: GoalProjectionKind;

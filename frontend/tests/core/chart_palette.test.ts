@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   chartColors,
   generateColorScheme,
-} from "$lib/shared/theme/chartPalette";
+} from "#lib/shared/theme/chartPalette";
 
 describe("Paisa chart palette", () => {
   it("preserves semantic financial colors", () => {

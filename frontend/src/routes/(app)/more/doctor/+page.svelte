@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { api } from "$lib/api";
+  import { api } from "#lib/api";
   import type {
     DiagnosisResponse,
     DiagnosticCheck,
     QualityIssue,
-  } from "$lib/features/diagnosis/types";
-  import DiagnosisStatusBanner from "$lib/features/diagnosis/components/DiagnosisStatusBanner.svelte";
-  import DiagnosisMetrics from "$lib/features/diagnosis/components/DiagnosisMetrics.svelte";
-  import QualityIssueRow from "$lib/features/diagnosis/components/QualityIssueRow.svelte";
-  import HealthyChecksList from "$lib/features/diagnosis/components/HealthyChecksList.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
+  } from "#lib/features/diagnosis/types";
+  import DiagnosisStatusBanner from "#lib/features/diagnosis/components/DiagnosisStatusBanner.svelte";
+  import DiagnosisMetrics from "#lib/features/diagnosis/components/DiagnosisMetrics.svelte";
+  import QualityIssueRow from "#lib/features/diagnosis/components/QualityIssueRow.svelte";
+  import HealthyChecksList from "#lib/features/diagnosis/components/HealthyChecksList.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
   import { onMount } from "svelte";
 
   let issues = $state<QualityIssue[]>([]);

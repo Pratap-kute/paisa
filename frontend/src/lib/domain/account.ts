@@ -1,5 +1,5 @@
 import { drop, dropRight, last, take } from "es-toolkit";
-import { first } from "$lib/shared/utils/collection";
+import { first } from "#lib/shared/utils/collection";
 export function firstName(account: string) {
   return first(account.split(":"));
 }

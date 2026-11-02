@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCommodityAmount } from "$lib/shared/formatters/currency";
-  import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import { postingUrl } from "$lib/shared/browser/navigation";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCommodityAmount } from "#lib/shared/formatters/currency";
+  import type { RecurringAnalysis } from "#lib/domain/recurring_analysis";
+  import { formatPercentage } from "#lib/shared/formatters/currency";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import { postingUrl } from "#lib/shared/browser/navigation";
   interface Props {
     item: RecurringAnalysis;
     busy?: boolean;

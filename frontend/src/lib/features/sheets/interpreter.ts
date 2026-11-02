@@ -1,16 +1,16 @@
 import type { SyntaxNode } from "@lezer/common";
-import * as Terms from "$lib/generated/sheet/parser.terms.js";
+import * as Terms from "#lib/generated/sheet/parser.terms.js";
 import type { EditorState } from "@codemirror/state";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import type { Posting } from "$lib/domain/ledger";
-import type { SheetLineResult } from "$lib/shared/state/models";
+import { formatCurrency } from "#lib/shared/formatters/currency";
+import type { Posting } from "#lib/domain/ledger";
+import type { SheetLineResult } from "#lib/shared/state/models";
 import { BigNumber } from "bignumber.js";
-import { asTransaction } from "$lib/domain/transactions";
+import { asTransaction } from "#lib/domain/transactions";
 import {
   buildAST as buildSearchAST,
   QueryAST,
   type TransactionPredicate,
-} from "$lib/features/editor/search_query_editor";
+} from "#lib/features/editor/search_query_editor";
 import { type Diagnostic } from "@codemirror/lint";
 
 const STACK_LIMIT = 1000;

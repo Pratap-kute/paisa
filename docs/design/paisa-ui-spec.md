@@ -56,7 +56,7 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 ### 2.2 Styling Direction
 
 - **CSS Engine:** Tailwind CSS v4 + native CSS custom properties.
-- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `$lib/shared/styles/foundation.css` (primary Tailwind integration point and canonical tokens) and `$lib/shared/theme/tokens.css` (extended token superset and integration mappings).
+- **Token System:** Semantic CSS variables defined in `:root` and `[data-theme="dark"]`, mapped into Tailwind via `@theme inline`. Centralized in `#lib/shared/styles/foundation.css` (primary Tailwind integration point and canonical tokens) and `#lib/shared/theme/tokens.css` (extended token superset and integration mappings).
 - **Three Token Tiers:**
   1. **Canonical Tokens:** Permitted for all application components and views (`--paisa-canvas`, `--paisa-surface`, `--paisa-surface-raised`, `--paisa-surface-hover`, `--paisa-foreground`, `--paisa-muted-foreground`, `--paisa-border`, `--paisa-border-subtle`, `--paisa-border-strong`, `--paisa-primary`, `--paisa-primary-subtle`, `--paisa-positive`, `--paisa-positive-subtle`, `--paisa-negative`, `--paisa-negative-subtle`, `--paisa-warning`, `--paisa-warning-subtle`, `--paisa-neutral`, `--paisa-prediction-*`).
   2. **Specialized Tokens:** Stable integration and component semantics (`--paisa-table-*`, `--paisa-input-*`, `--paisa-chart-*`, `--paisa-tooltip-*`, `--paisa-login-*`) remain valid and should alias the canonical foundation where the semantics match.
@@ -68,13 +68,13 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 
 ### 2.3 UI Primitives & Accessibility Layer
 
-- **Component Ownership:** All application routes import Paisa-owned Svelte UI components located in `$lib/shared/ui/` or `$lib/shared/layout/`.
-- **Bits UI Boundary:** Bits UI is utilized internally under the hood of Paisa UI primitives (e.g., `$lib/shared/ui/Dialog.svelte`, `$lib/shared/ui/Tabs.svelte`, `$lib/shared/ui/Dropdown.svelte`) to guarantee WAI-ARIA compliance, keyboard navigation, and focus trapping.
+- **Component Ownership:** All application routes import Paisa-owned Svelte UI components located in `#lib/shared/ui/` or `#lib/shared/layout/`.
+- **Bits UI Boundary:** Bits UI is utilized internally under the hood of Paisa UI primitives (e.g., `#lib/shared/ui/Dialog.svelte`, `#lib/shared/ui/Tabs.svelte`, `#lib/shared/ui/Dropdown.svelte`) to guarantee WAI-ARIA compliance, keyboard navigation, and focus trapping.
 - **Encapsulation Guarantee:** Domain components and SvelteKit routes **must never** import Bits UI directly. All interactions go through Paisa's own typed props and slots/snippets.
 
 ### 2.4 Visualization & Specialized Engines
 
-- **ECharts 6:** All financial data visualizations (timelines, bar charts, comparison bars, waterfall charts, sankey flows, sunbursts, treemaps, hierarchies). Charts are rendered via `<EChartSurface />` with built-in `ResizeObserver` lifecycle management. Higher-level wrappers include `<TimeSeriesChart />`, `<ComparisonBarChart />`, and `<FinancialHierarchyChart />`. Chart data transforms and option builders live in `$lib/shared/charts/echarts/`. D3.js has been fully removed.
+- **ECharts 6:** All financial data visualizations (timelines, bar charts, comparison bars, waterfall charts, sankey flows, sunbursts, treemaps, hierarchies). Charts are rendered via `<EChartSurface />` with built-in `ResizeObserver` lifecycle management. Higher-level wrappers include `<TimeSeriesChart />`, `<ComparisonBarChart />`, and `<FinancialHierarchyChart />`. Chart data transforms and option builders live in `#lib/shared/charts/echarts/`. D3.js has been fully removed.
 - **CodeMirror 6:** Retained for ledger journal editing, sheet expression evaluation, and template editing.
 - **Tabulator Tables:** Retained behind the `<Table />` wrapper boundary for complex data-dense grids. Replacement with native/virtualized table engines is a decoupled future concern.
 
@@ -444,7 +444,7 @@ In the current repository, `Cash Flow`, `Expenses`, `Assets`, `Liabilities`, and
 
 ### 8.2 Global Command Palette
 
-The global shortcut (`Ctrl+K` / `Cmd+K`) opens the **Command Palette** (`$lib/shared/layout/CommandPalette.svelte`), providing instant fuzzy search across four categories: **Navigation** (all routes), **Actions** (sync, theme toggle, price update), **Accounts** (jump to account-specific views), and **Search** (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.
+The global shortcut (`Ctrl+K` / `Cmd+K`) opens the **Command Palette** (`#lib/shared/layout/CommandPalette.svelte`), providing instant fuzzy search across four categories: **Navigation** (all routes), **Actions** (sync, theme toggle, price update), **Accounts** (jump to account-specific views), and **Search** (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.
 
 ---
 
@@ -901,19 +901,19 @@ Every data region, table, chart frame, and section in Paisa must explicitly hand
 
 ## 12. Component Architecture & Layering
 
-Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the full dependency enforcement rules):
+Paisa enforces a strict 5-area ownership model (see `#lib/README.md` for the full dependency enforcement rules):
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. SvelteKit Routes (frontend/src/routes/(app)/...)         │
 │    Page URLs, loading orchestration, composition            │
 ├─────────────────────────────────────────────────────────────┤
-│ 2. Feature Modules ($lib/features/<feature>/)               │
+│ 2. Feature Modules (#lib/features/<feature>/)               │
 │    Business-specific UI, data transforms, chart data        │
 │    e.g. features/expense/, features/prediction/,            │
 │         features/importing/, features/insights/             │
 ├─────────────────────────────────────────────────────────────┤
-│ 3. Shared Presentation ($lib/shared/)                       │
+│ 3. Shared Presentation (#lib/shared/)                       │
 │    ├── layout/: AppShell, Page, PageHeader, MetricStrip,    │
 │    │   Section, CommandPalette, ResponsiveGrid, Stack       │
 │    ├── ui/: Button, Input, Select, Dialog, ConfirmDialog,   │
@@ -925,11 +925,11 @@ Paisa enforces a strict 5-area ownership model (see `$lib/README.md` for the ful
 │    ├── styles/: foundation.css, base.css, utilities.css     │
 │    └── theme/: tokens.css, chartPalette.ts, color.ts        │
 ├─────────────────────────────────────────────────────────────┤
-│ 4. Domain ($lib/domain/)                                    │
+│ 4. Domain (#lib/domain/)                                    │
 │    Framework-independent financial concepts & calculations   │
 │    (postings, accounts, assets, cash flow, goals, tax, etc.)│
 ├─────────────────────────────────────────────────────────────┤
-│ 5. API ($lib/api/)                                          │
+│ 5. API (#lib/api/)                                          │
 │    Backend transport, generated DTOs, auth, error handling   │
 ├─────────────────────────────────────────────────────────────┤
 │ 6. Foundation: Tailwind CSS v4 / Bits UI / ECharts / Native │
@@ -974,12 +974,12 @@ Practical consequences: cash accounts report no XIRR or gain; the per-posting an
 
 ### 13.3 Chart Rules (ECharts 6)
 
-1. **Container Management:** Every chart is rendered inside `<EChartSurface />` (`$lib/shared/charts/EChartSurface.svelte`), which manages lifecycle (lazy ECharts core import, `ResizeObserver` binding, instance disposal on unmount).
+1. **Container Management:** Every chart is rendered inside `<EChartSurface />` (`#lib/shared/charts/EChartSurface.svelte`), which manages lifecycle (lazy ECharts core import, `ResizeObserver` binding, instance disposal on unmount).
 2. **Higher-Level Wrappers:** Use `<TimeSeriesChart />`, `<ComparisonBarChart />`, or `<FinancialHierarchyChart />` for standard chart patterns. These accept typed data contracts and delegate to `<EChartSurface />`.
-3. **Theme Integration:** Chart themes are read from `$lib/shared/charts/echarts/theme.ts` which derives colors from semantic CSS variables at render time.
-4. **Color Palette:** Use semantic colors from `$lib/shared/theme/chartPalette.ts`.
-5. **Responsive Behavior:** Charts auto-resize via `ResizeObserver`. Option builders in `$lib/shared/charts/echarts/responsive.ts` produce viewport-aware configurations.
-6. **Tooltips:** Tooltips use the Paisa chart tooltip formatter (`$lib/shared/charts/tooltip.ts`) with semantic styling.
+3. **Theme Integration:** Chart themes are read from `#lib/shared/charts/echarts/theme.ts` which derives colors from semantic CSS variables at render time.
+4. **Color Palette:** Use semantic colors from `#lib/shared/theme/chartPalette.ts`.
+5. **Responsive Behavior:** Charts auto-resize via `ResizeObserver`. Option builders in `#lib/shared/charts/echarts/responsive.ts` produce viewport-aware configurations.
+6. **Tooltips:** Tooltips use the Paisa chart tooltip formatter (`#lib/shared/charts/tooltip.ts`) with semantic styling.
 
 ### 13.4 Financial Data Conventions
 

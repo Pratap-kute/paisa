@@ -1,27 +1,27 @@
 <script lang="ts">
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import MonthPicker from "$lib/shared/ui/MonthPicker.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import BoxedTabs from "$lib/shared/ui/BoxedTabs.svelte";
-  import InsightCard from "$lib/features/insights/components/InsightCard.svelte";
-  import InsightItem from "$lib/features/insights/components/InsightItem.svelte";
-  import InsightsSummaryBar from "$lib/features/insights/components/InsightsSummaryBar.svelte";
-  import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import MonthPicker from "#lib/shared/ui/MonthPicker.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import Spinner from "#lib/shared/ui/Spinner.svelte";
+  import BoxedTabs from "#lib/shared/ui/BoxedTabs.svelte";
+  import InsightCard from "#lib/features/insights/components/InsightCard.svelte";
+  import InsightItem from "#lib/features/insights/components/InsightItem.svelte";
+  import InsightsSummaryBar from "#lib/features/insights/components/InsightsSummaryBar.svelte";
+  import { mapInsightsResponseToDomain } from "#lib/features/insights/presentation";
   import {
     type Insight,
     INSIGHT_CATEGORIES,
     type InsightCategoryFilter,
     type InsightsResult,
-  } from "$lib/domain/insights";
-  import { now } from "$lib/domain/time";
-  import { api } from "$lib/api";
+  } from "#lib/domain/insights";
+  import { now } from "#lib/domain/time";
+  import { api } from "#lib/api";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import dayjs from "dayjs";
-  import { validPeriod } from "$lib/shared/browser/period";
+  import { validPeriod } from "#lib/shared/browser/period";
   import { dateMax, dateMin, month, setAllowedDateRange } from "../../../store";
 
   const initialUrlPeriod = validPeriod(page.url.searchParams.get("period"));
@@ -38,22 +38,20 @@
 
   async function selectMonth(period: string) {
     if (page.url.searchParams.get("period") === period) return;
-    const url = new URL(page.url);
+    const url = new URL(page.url.href);
     url.searchParams.set("period", period);
     await goto(`${url.pathname}${url.search}`, {
-      keepFocus: true,
-      noScroll: true,
+      reset: false,
     });
   }
 
   onMount(async () => {
     if (!initialUrlPeriod) {
-      const url = new URL(page.url);
+      const url = new URL(page.url.href);
       url.searchParams.set("period", selectedMonth);
       await goto(`${url.pathname}${url.search}`, {
         replaceState: true,
-        keepFocus: true,
-        noScroll: true,
+        reset: false,
       });
     }
 

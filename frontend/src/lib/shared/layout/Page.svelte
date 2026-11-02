@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
-  import ErrorState from "$lib/shared/ui/ErrorState.svelte";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
+  import ErrorState from "#lib/shared/ui/ErrorState.svelte";
 
   type PageWidth = "fluid" | "analysis" | "standard" | "narrow";
 

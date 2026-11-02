@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-canvas p-6">
   <div class="w-full max-w-lg">
-    {#if $page.status === 404 || $page.error?.status === 404 || $page.error?.message === "Not found"}
+    {#if page.status === 404 || page.error?.status === 404 || page.error?.message === "Not found"}
       <div
         class="overflow-hidden rounded-[var(--paisa-radius-md)] border border-[var(--paisa-negative)] bg-surface"
       >
@@ -29,10 +29,10 @@
         </div>
         <div class="space-y-3 p-4 text-sm text-foreground">
           <p>Paisa has encountered a critical error</p>
-          <p>{$page.error.message}</p>
-          {#if $page.error.stack}
+          <p>{page.error.message}</p>
+          {#if page.error.stack}
             <pre
-              class="overflow-x-auto rounded-[var(--paisa-radius-sm)] bg-surface-hover p-3 text-xs">{$page
+              class="overflow-x-auto rounded-[var(--paisa-radius-sm)] bg-surface-hover p-3 text-xs">{page
                 .error.stack}</pre>
           {/if}
           <p>

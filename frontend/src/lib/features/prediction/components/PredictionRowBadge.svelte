@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import type { Confidence } from "$lib/features/prediction/types";
-  import { confidenceLabel } from "$lib/features/prediction/explain";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import type { Confidence } from "#lib/features/prediction/types";
+  import { confidenceLabel } from "#lib/features/prediction/explain";
 
   interface Props {
     confidence?: Confidence | null;

@@ -1,65 +1,65 @@
 <script lang="ts">
-  import { api } from "$lib/api";
+  import { api } from "#lib/api";
   import Select from "svelte-select";
   import Handlebars from "handlebars";
-  import type { ImportTemplate } from "$lib/features/importing/types";
-  import type { PredictionHistoryEntry } from "$lib/features/prediction/types_api";
-  import type { AccountTfIdf } from "$lib/shared/state/models";
-  import { editorState as templateEditorState } from "$lib/features/editor/template_editor";
+  import type { ImportTemplate } from "#lib/features/importing/types";
+  import type { PredictionHistoryEntry } from "#lib/features/prediction/types_api";
+  import type { AccountTfIdf } from "#lib/shared/state/models";
+  import { editorState as templateEditorState } from "#lib/features/editor/template_editor";
   import {
     createEditor as createPreviewEditor,
     updateContent as updatePreviewContent,
-  } from "$lib/features/editor/runtime";
-  import TemplateEditorDrawer from "$lib/features/importing/components/TemplateEditorDrawer.svelte";
-  import FileDropzone from "$lib/shared/ui/FileDropzone.svelte";
+  } from "#lib/features/editor/runtime";
+  import TemplateEditorDrawer from "#lib/features/importing/components/TemplateEditorDrawer.svelte";
+  import FileDropzone from "#lib/shared/ui/FileDropzone.svelte";
   import {
     asRows,
     parse,
     type RenderMetadata,
     renderWithMetadata,
-  } from "$lib/features/importing/spreadsheet";
+  } from "#lib/features/importing/spreadsheet";
   import {
     commitParseOutcome,
     displayCell,
     emptyRenderMetadata,
-  } from "$lib/features/importing/import_commit";
+  } from "#lib/features/importing/import_commit";
   import { range } from "es-toolkit";
   import { EditorView } from "@codemirror/view";
   import { onMount } from "svelte";
   import { accountTfIdf } from "../../../../store";
-  import * as toast from "$lib/shared/ui/toast";
-  import { ensureFileExtension } from "$lib/features/ledger/file";
-  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import Drawer from "$lib/shared/ui/Drawer.svelte";
-  import Switch from "$lib/shared/ui/Switch.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
-  import FormField from "$lib/shared/layout/FormField.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import IconButton from "$lib/shared/ui/IconButton.svelte";
-  import PredictionReviewBar from "$lib/features/prediction/components/PredictionReviewBar.svelte";
-  import PredictionRowBadge from "$lib/features/prediction/components/PredictionRowBadge.svelte";
-  import PredictionDetail from "$lib/features/prediction/components/PredictionDetail.svelte";
-  import SourceReviewList from "$lib/features/importing/components/SourceReviewList.svelte";
+  import * as toast from "#lib/shared/ui/toast";
+  import { ensureFileExtension } from "#lib/features/ledger/file";
+  import FileModal from "#lib/features/ledger/components/FileModal.svelte";
+  import Dialog from "#lib/shared/ui/Dialog.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import Drawer from "#lib/shared/ui/Drawer.svelte";
+  import Switch from "#lib/shared/ui/Switch.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import ConfirmDialog from "#lib/shared/ui/ConfirmDialog.svelte";
+  import FormField from "#lib/shared/layout/FormField.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
+  import IconButton from "#lib/shared/ui/IconButton.svelte";
+  import PredictionReviewBar from "#lib/features/prediction/components/PredictionReviewBar.svelte";
+  import PredictionRowBadge from "#lib/features/prediction/components/PredictionRowBadge.svelte";
+  import PredictionDetail from "#lib/features/prediction/components/PredictionDetail.svelte";
+  import SourceReviewList from "#lib/features/importing/components/SourceReviewList.svelte";
   import {
     type ConfidenceFilter,
     predictionSession,
     rowMatchesFilter,
-  } from "$lib/features/prediction/session";
+  } from "#lib/features/prediction/session";
   import type {
     Confidence,
     PredictionResult,
-  } from "$lib/features/prediction/types";
+  } from "#lib/features/prediction/types";
   import {
     assign,
     each,
     find,
     isEmpty,
     maxBy,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   let templates: ImportTemplate[] = $state([]);
   let selectedTemplate: ImportTemplate | undefined = $state();

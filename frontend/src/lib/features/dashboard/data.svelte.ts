@@ -1,4 +1,4 @@
-import { api, createAsyncState, type DtoDashboardResponse } from "$lib/api";
+import { api, createAsyncState, type DtoDashboardResponse } from "#lib/api";
 
 export function createDashboardState() {
   return createAsyncState<void, DtoDashboardResponse | null>(

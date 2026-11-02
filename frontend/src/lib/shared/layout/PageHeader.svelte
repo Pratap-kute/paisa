@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { helpUrl } from "$lib/shared/browser/navigation";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import { iconGlyphOr } from "$lib/shared/ui/icon";
+  import { helpUrl } from "#lib/shared/browser/navigation";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import { iconGlyphOr } from "#lib/shared/ui/icon";
 
   interface Props {
     title: string;

@@ -2,7 +2,7 @@ import type {
   DtoAssetsBalanceResponse,
   DtoExpenseResponse,
   DtoNetworthTimelineItemResponse,
-} from "$lib/api";
+} from "#lib/api";
 
 export interface ChartTimeSeriesPoint {
   date: string;

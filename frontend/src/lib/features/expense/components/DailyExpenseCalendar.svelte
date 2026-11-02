@@ -1,11 +1,11 @@
 <script lang="ts">
   import dayjs from "dayjs";
-  import type { ExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { tooltip } from "$lib/shared/charts/tooltip";
-  import { categoryColor } from "$lib/shared/charts/category";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Tooltip from "$lib/shared/ui/Tooltip.svelte";
-  import { iconText } from "$lib/shared/ui/icon";
+  import type { ExpenseHeatmapData } from "#lib/features/expense/expense_heatmap_data";
+  import { tooltip } from "#lib/shared/charts/tooltip";
+  import { categoryColor } from "#lib/shared/charts/category";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Tooltip from "#lib/shared/ui/Tooltip.svelte";
+  import { iconText } from "#lib/shared/ui/icon";
 
   interface Props {
     data: ExpenseHeatmapData;

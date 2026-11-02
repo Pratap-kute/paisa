@@ -1,10 +1,10 @@
-import type { DtoInvestmentPerformance } from "$lib/api";
-import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import COLORS from "$lib/shared/theme/colors";
+import type { DtoInvestmentPerformance } from "#lib/api";
+import type { PeriodSeriesChartData } from "#lib/shared/charts/echarts/period_series";
+import COLORS from "#lib/shared/theme/colors";
 import {
   formatCurrency,
   formatPercentage,
-} from "$lib/shared/formatters/currency";
+} from "#lib/shared/formatters/currency";
 
 export const performancePresets = [
   { value: "current_fy", label: "Current FY" },
@@ -13,7 +13,9 @@ export const performancePresets = [
   { value: "since_inception", label: "Since Inception" },
 ];
 
-export function performanceQuery(params: URLSearchParams) {
+type ReadableParams = Pick<URLSearchParams, "get" | "has">;
+
+export function performanceQuery(params: ReadableParams) {
   if (params.has("from") || params.has("to")) {
     return {
       from: params.get("from") ?? "",
@@ -26,7 +28,7 @@ export function performanceQuery(params: URLSearchParams) {
 
 export function performanceLink(
   account: string,
-  params: URLSearchParams,
+  params: ReadableParams,
 ): string {
   const query = new URLSearchParams();
   for (const key of ["preset", "from", "to"]) {

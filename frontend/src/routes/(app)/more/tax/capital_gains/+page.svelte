@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import type { CapitalGain } from "$lib/domain/tax";
-  import type { FYCapitalGain } from "$lib/domain/tax";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import CapitalGainCard from "$lib/features/assets/components/CapitalGainCard.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
+  import { api } from "#lib/api";
+  import type { CapitalGain } from "#lib/domain/tax";
+  import type { FYCapitalGain } from "#lib/domain/tax";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import CapitalGainCard from "#lib/features/assets/components/CapitalGainCard.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
   import { sumBy, uniq } from "es-toolkit";
   import { onMount } from "svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { values } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import { values } from "#lib/shared/utils/collection";
 
   let years: string[] = $state([]);
   let selectedYear: string = $state("");

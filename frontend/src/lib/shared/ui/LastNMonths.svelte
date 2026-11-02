@@ -1,6 +1,6 @@
 <script lang="ts">
   import BoxedTabs from "./BoxedTabs.svelte";
-  import { now } from "$lib/domain/time";
+  import { now } from "#lib/domain/time";
 
   let currentMonth = now();
   interface Props {

@@ -1,7 +1,7 @@
 import type { LayoutLoad } from "./$types";
-import { configUpdated } from "$lib/shared/browser/config";
-import { setNow } from "$lib/domain/time";
-import { clearAuthToken, createApiClient, normalizeApiError } from "$lib/api";
+import { configUpdated } from "#lib/shared/browser/config";
+import { setNow } from "#lib/domain/time";
+import { clearAuthToken, createApiClient, normalizeApiError } from "#lib/api";
 import dayjs from "dayjs";
 import { redirect } from "@sveltejs/kit";
 

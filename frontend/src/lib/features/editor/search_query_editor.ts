@@ -1,4 +1,4 @@
-import type { Posting, Transaction } from "$lib/domain/ledger";
+import type { Posting, Transaction } from "#lib/domain/ledger";
 import {
   autocompletion,
   closeBrackets,
@@ -18,16 +18,16 @@ import type { SyntaxNode } from "@lezer/common";
 import dayjs from "dayjs";
 import { sumBy } from "es-toolkit";
 import { writable } from "svelte/store";
-import * as Terms from "$lib/generated/search/parser.terms.js";
-import { queryExtension } from "$lib/features/editor/query_language";
-import { baseEditorExtensions } from "$lib/shared/editor/base";
+import * as Terms from "#lib/generated/search/parser.terms.js";
+import { queryExtension } from "#lib/features/editor/query_language";
+import { baseEditorExtensions } from "#lib/shared/editor/base";
 import {
   assign,
   every,
   includes,
   map,
   some,
-} from "$lib/shared/utils/collection";
+} from "#lib/shared/utils/collection";
 
 abstract class AST {
   readonly id: number;

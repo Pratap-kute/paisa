@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import { delayedLoading } from "../../../store";
-  import Logo from "$lib/shared/layout/Logo.svelte";
+  import Logo from "#lib/shared/layout/Logo.svelte";
   interface Props {
     children?: import("svelte").Snippet;
   }

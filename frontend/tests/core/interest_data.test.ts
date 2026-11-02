@@ -6,8 +6,8 @@ import {
   interestSummary,
   padTimeDomain,
   timelineDomain,
-} from "$lib/features/liabilities/interest_data";
-import type { Interest } from "$lib/domain/liabilities";
+} from "#lib/features/liabilities/interest_data";
+import type { Interest } from "#lib/domain/liabilities";
 
 const interest: Interest = {
   account: "Liabilities:Loan:Home",

@@ -7,7 +7,7 @@ import {
   type DtoEditorValidateResponse,
   type DtoLedgerFileRequest,
   type DtoLedgerFileResponse,
-} from "$lib/api";
+} from "#lib/api";
 
 export function createEditorFilesState() {
   return createAsyncState<void, DtoEditorFilesResponse | null>(

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCommodityAmount } from "$lib/shared/formatters/currency";
-  import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
-  import { summarizeRecurring } from "$lib/domain/recurring_analysis";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCommodityAmount } from "#lib/shared/formatters/currency";
+  import type { RecurringAnalysis } from "#lib/domain/recurring_analysis";
+  import { summarizeRecurring } from "#lib/domain/recurring_analysis";
   import type { Dayjs } from "dayjs";
   interface Props {
     items: RecurringAnalysis[];

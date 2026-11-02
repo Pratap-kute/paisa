@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { formatReturnPercent } from "$lib/shared/formatters/currency";
-  import type { Legend } from "$lib/shared/charts/types";
-  import type { Networth } from "$lib/domain/assets";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { api } from "$lib/api";
+  import { formatReturnPercent } from "#lib/shared/formatters/currency";
+  import type { Legend } from "#lib/shared/charts/types";
+  import type { Networth } from "#lib/domain/assets";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { api } from "#lib/api";
   import { last } from "es-toolkit";
   import { onMount } from "svelte";
   import {
@@ -13,19 +13,19 @@
     dateRangeOption,
     setAllowedDateRange,
   } from "../../../../store";
-  import DateRange from "$lib/shared/ui/DateRange.svelte";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import NetworthTimelineChart from "$lib/features/assets/components/NetworthTimelineChart.svelte";
-  import { buildNetworthSeries } from "$lib/features/assets/time_series_data";
-  import { filter, map } from "$lib/shared/utils/collection";
+  import DateRange from "#lib/shared/ui/DateRange.svelte";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import NetworthTimelineChart from "#lib/features/assets/components/NetworthTimelineChart.svelte";
+  import { buildNetworthSeries } from "#lib/features/assets/time_series_data";
+  import { filter, map } from "#lib/shared/utils/collection";
   import { page } from "$app/state";
-  import { validPeriod } from "$lib/shared/browser/period";
+  import { validPeriod } from "#lib/shared/browser/period";
   import dayjs from "dayjs";
 
   let xirr = $state(0);

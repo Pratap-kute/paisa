@@ -1,20 +1,20 @@
 <script lang="ts">
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
-  import { api } from "$lib/api";
-  import Table from "$lib/shared/ui/Table.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import type { Price } from "$lib/domain/assets";
-  import { nonZeroPercentageChange } from "$lib/shared/tables/formatters";
-  import { toast } from "$lib/shared/ui/toast";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
+  import { api } from "#lib/api";
+  import Table from "#lib/shared/ui/Table.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import type { Price } from "#lib/domain/assets";
+  import { nonZeroPercentageChange } from "#lib/shared/tables/formatters";
+  import { toast } from "#lib/shared/ui/toast";
   import { omitBy } from "es-toolkit";
   import { onMount } from "svelte";
   import type { CellComponent, ColumnDefinition } from "tabulator-tables";
   import type dayjs from "dayjs";
-  import { find } from "$lib/shared/utils/collection";
+  import { find } from "#lib/shared/utils/collection";
 
   interface PriceRow {
     commodity_name: string;

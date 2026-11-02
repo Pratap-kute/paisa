@@ -4,17 +4,17 @@ import {
   type Rhythm,
 } from "./recurring_analysis";
 import { groupBy, partition } from "es-toolkit";
-import type { Transaction } from "$lib/domain/ledger";
+import type { Transaction } from "#lib/domain/ledger";
 import type {
   TransactionSchedule,
   TransactionSequence,
-} from "$lib/domain/recurring";
-import { now, prefixMinutesSeconds } from "$lib/domain/time";
-import { transactionTotal } from "$lib/domain/transactions";
+} from "#lib/domain/recurring";
+import { now, prefixMinutesSeconds } from "#lib/domain/time";
+import { transactionTotal } from "#lib/domain/transactions";
 import dayjs from "dayjs";
 import { type CronExprs, parse } from "@datasert/cronjs-parser";
 import { getFutureMatches } from "@datasert/cronjs-matcher";
-import { sortBy } from "$lib/shared/utils/collection";
+import { sortBy } from "#lib/shared/utils/collection";
 
 const end = now().add(36, "month");
 

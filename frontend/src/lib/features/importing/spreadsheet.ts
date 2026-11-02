@@ -1,9 +1,9 @@
 import Papa from "papaparse";
 import type * as XLSXTypes from "xlsx";
 import { trim } from "es-toolkit";
-import { format } from "$lib/features/ledger/journal";
+import { format } from "#lib/features/ledger/journal";
 import { pdf2array } from "./pdf";
-import { assign, each, isEmpty, map } from "$lib/shared/utils/collection";
+import { assign, each, isEmpty, map } from "#lib/shared/utils/collection";
 
 interface Result {
   data: string[][];

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Card from "$lib/shared/ui/Card.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Skeleton from "$lib/shared/ui/Skeleton.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Skeleton from "#lib/shared/ui/Skeleton.svelte";
 
   interface Props {
     dangerCount?: number;

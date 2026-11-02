@@ -1,14 +1,14 @@
 <script lang="ts">
   import Select from "svelte-select";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import FormField from "$lib/shared/layout/FormField.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import SelectField from "$lib/shared/ui/Select.svelte";
-  import type { PriceProvider } from "$lib/features/ledger/types";
+  import Dialog from "#lib/shared/ui/Dialog.svelte";
+  import FormField from "#lib/shared/layout/FormField.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
+  import SelectField from "#lib/shared/ui/Select.svelte";
+  import type { PriceProvider } from "#lib/features/ledger/types";
   import { createEventDispatcher, onMount } from "svelte";
-  import type { AutoCompleteItem } from "$lib/features/ledger/types";
-  import { api } from "$lib/api";
+  import type { AutoCompleteItem } from "#lib/features/ledger/types";
+  import { api } from "#lib/api";
 
   let label = "Choose Price Provider";
   interface Props {

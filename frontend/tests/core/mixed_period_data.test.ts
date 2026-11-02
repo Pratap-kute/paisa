@@ -1,17 +1,17 @@
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore.js";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter.js";
-import type { CashFlow } from "$lib/domain/cash_flow";
-import type { Posting } from "$lib/domain/ledger";
+import type { CashFlow } from "#lib/domain/cash_flow";
+import type { Posting } from "#lib/domain/ledger";
 import { describe, expect, it } from "vitest";
 import {
   buildMonthlyExpenseTimelineSeries,
   buildYearlyExpenseTimelineSeries,
   expenseGroupsByContribution,
-} from "$lib/features/expense/chart_timeline_data";
-import { buildCashFlowSeries } from "$lib/features/cash_flow/chart_data";
-import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
-import type { Aggregate } from "$lib/domain/assets";
+} from "#lib/features/expense/chart_timeline_data";
+import { buildCashFlowSeries } from "#lib/features/cash_flow/chart_data";
+import { buildAllocationTimelineSeries } from "#lib/features/assets/allocation_timeline_data";
+import type { Aggregate } from "#lib/domain/assets";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { formatShare } from "$lib/shared/formatters/currency";
+  import { formatShare } from "#lib/shared/formatters/currency";
   import { dropRight, range } from "es-toolkit";
-  import { floor } from "$lib/shared/utils/collection";
+  import { floor } from "#lib/shared/utils/collection";
   interface Props {
     small?: boolean;
     progressPercent: number;

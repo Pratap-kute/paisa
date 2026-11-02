@@ -1,15 +1,15 @@
-import { now } from "$lib/domain/time";
-import { restName } from "$lib/domain/account";
-import type { Posting } from "$lib/domain/ledger";
+import { now } from "#lib/domain/time";
+import { restName } from "#lib/domain/account";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy, mapValues, sum, uniq } from "es-toolkit";
-import { generateColorScheme } from "$lib/shared/theme/colors";
-import { forEachMonth } from "$lib/shared/formatters/date";
-import { iconify } from "$lib/shared/ui/icon";
+import { generateColorScheme } from "#lib/shared/theme/colors";
+import { forEachMonth } from "#lib/shared/formatters/date";
+import { iconify } from "#lib/shared/ui/icon";
 import type {
   PeriodSeriesChartData,
   PeriodSeriesPoint,
-} from "$lib/shared/charts/echarts/period_series";
-import { minBy, sortBy } from "$lib/shared/utils/collection";
+} from "#lib/shared/charts/echarts/period_series";
+import { minBy, sortBy } from "#lib/shared/utils/collection";
 
 function initialValues(keys: string[]) {
   return Object.fromEntries(keys.map((k) => [k, 0])) as Record<string, number>;

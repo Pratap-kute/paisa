@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Progress from "$lib/shared/ui/Progress.svelte";
-  import type { Point } from "$lib/domain/goals_models";
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+  import Progress from "#lib/shared/ui/Progress.svelte";
+  import type { Point } from "#lib/domain/goals_models";
+  import { formatCurrencyCrude } from "#lib/shared/formatters/currency";
   import { range } from "es-toolkit";
   interface Props {
     progressPercent: number;

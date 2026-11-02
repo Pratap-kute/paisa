@@ -1,31 +1,31 @@
 <script lang="ts">
-  import RecurringIntelligence from "$lib/features/cash_flow/components/RecurringIntelligence.svelte";
-  import { isMobile } from "$lib/shared/browser/responsive";
-  import { monthDays } from "$lib/domain/time";
-  import type { TransactionSchedule } from "$lib/domain/recurring";
-  import type { TransactionSequence } from "$lib/domain/recurring";
+  import RecurringIntelligence from "#lib/features/cash_flow/components/RecurringIntelligence.svelte";
+  import { isMobile } from "#lib/shared/browser/responsive";
+  import { monthDays } from "#lib/domain/time";
+  import type { TransactionSchedule } from "#lib/domain/recurring";
+  import type { TransactionSequence } from "#lib/domain/recurring";
   import {
     enrichTrantionSequence,
     nextUnpaidSchedule,
     sortTrantionSequence,
-  } from "$lib/domain/transaction_sequence";
-  import { helpUrl } from "$lib/shared/browser/navigation";
-  import { api } from "$lib/api";
+  } from "#lib/domain/transaction_sequence";
+  import { helpUrl } from "#lib/shared/browser/navigation";
+  import { api } from "#lib/api";
   import { compact, flatMap, groupBy } from "es-toolkit";
   import { onMount } from "svelte";
-  import RecurringCard from "$lib/features/cash_flow/components/RecurringCard.svelte";
-  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
+  import RecurringCard from "#lib/features/cash_flow/components/RecurringCard.svelte";
+  import EmptyState from "#lib/shared/ui/EmptyState.svelte";
   import { month, setAllowedDateRange } from "../../../../store";
   import type { Dayjs } from "dayjs";
-  import RecurringDay from "$lib/features/cash_flow/components/RecurringDay.svelte";
+  import RecurringDay from "#lib/features/cash_flow/components/RecurringDay.svelte";
   import dayjs from "dayjs";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import { isEmpty as isEmptyValue } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import { isEmpty as isEmptyValue } from "#lib/shared/utils/collection";
   import { get } from "svelte/store";
   import { page } from "$app/state";
-  import { validPeriod } from "$lib/shared/browser/period";
+  import { validPeriod } from "#lib/shared/browser/period";
 
   let transactionSequences: TransactionSequence[] = $state([]);
   let transactionSequencesDelayed: TransactionSequence[] = $state([]);

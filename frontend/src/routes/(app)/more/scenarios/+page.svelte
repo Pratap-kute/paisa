@@ -4,20 +4,20 @@
     type DtoScenarioBaseline,
     type DtoScenarioRequest,
     type DtoScenarioResult,
-  } from "$lib/api";
-  import { normalizeApiError } from "$lib/api/errors";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import BoxedTabs from "$lib/shared/ui/BoxedTabs.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import Input from "$lib/shared/ui/Input.svelte";
-  import Skeleton from "$lib/shared/ui/Skeleton.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  } from "#lib/api";
+  import { normalizeApiError } from "#lib/api/errors";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import BoxedTabs from "#lib/shared/ui/BoxedTabs.svelte";
+  import Select from "#lib/shared/ui/Select.svelte";
+  import Input from "#lib/shared/ui/Input.svelte";
+  import Skeleton from "#lib/shared/ui/Skeleton.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
   import {
     impactTone,
     scenarioInput,
@@ -26,7 +26,7 @@
     scenarioQuality,
     scenarioSeries,
     scenarioSource,
-  } from "$lib/features/scenarios/scenario";
+  } from "#lib/features/scenarios/scenario";
 
   let baseline = $state<DtoScenarioBaseline>();
   let result = $state<DtoScenarioResult>();

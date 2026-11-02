@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
-  import { firstName, restName } from "$lib/domain/account";
-  import type { IncomeStatement } from "$lib/domain/cash_flow";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatPercentage } from "#lib/shared/formatters/currency";
+  import { firstName, restName } from "#lib/domain/account";
+  import type { IncomeStatement } from "#lib/domain/cash_flow";
   import { onMount } from "svelte";
-  import { buildIncomeStatementWaterfall } from "$lib/features/cash_flow/income_statement_data";
+  import { buildIncomeStatementWaterfall } from "#lib/features/cash_flow/income_statement_data";
   import { dateMax, dateMin, year } from "../../../../store";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
-  import { iconify } from "$lib/shared/ui/icon";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import IncomeStatementWaterfallChart from "$lib/features/cash_flow/components/IncomeStatementWaterfallChart.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import FinancialYearPicker from "#lib/shared/ui/FinancialYearPicker.svelte";
+  import { iconify } from "#lib/shared/ui/icon";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import IncomeStatementWaterfallChart from "#lib/features/cash_flow/components/IncomeStatementWaterfallChart.svelte";
   import {
     keys,
     maxBy,
@@ -24,7 +24,7 @@
     some,
     sortBy,
     values,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   let isEmpty = $state(false);
   let isLoading = $state(true);

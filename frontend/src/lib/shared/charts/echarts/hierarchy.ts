@@ -1,11 +1,11 @@
-import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
+import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
 import {
   categoryColorAssignments,
   normalizeCategoryKey,
   type PaisaChartTheme,
-} from "$lib/shared/charts/echarts/theme";
-import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
-import type { FinancialHierarchyNode } from "$lib/shared/charts/hierarchy_data";
+} from "#lib/shared/charts/echarts/theme";
+import { responsiveChartOption } from "#lib/shared/charts/echarts/responsive";
+import type { FinancialHierarchyNode } from "#lib/shared/charts/hierarchy_data";
 
 export interface FinancialHierarchyChartData {
   roots: FinancialHierarchyNode[];

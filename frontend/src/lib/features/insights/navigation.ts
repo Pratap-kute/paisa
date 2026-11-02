@@ -1,4 +1,4 @@
-import type { Insight } from "$lib/domain/insights";
+import type { Insight } from "#lib/domain/insights";
 
 export function buildInsightActionHref(insight: Insight): string {
   const url = new URL(insight.href || "/insights", "https://paisa.local");

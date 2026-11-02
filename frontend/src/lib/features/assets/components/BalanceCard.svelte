@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { firstName } from "$lib/domain/account";
-  import type { AssetBreakdown } from "$lib/domain/assets";
-  import { accountColorStyle } from "$lib/shared/theme/colors";
-  import { iconText } from "$lib/shared/ui/icon";
-  import { restName } from "$lib/domain/account";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { firstName } from "#lib/domain/account";
+  import type { AssetBreakdown } from "#lib/domain/assets";
+  import { accountColorStyle } from "#lib/shared/theme/colors";
+  import { iconText } from "#lib/shared/ui/icon";
+  import { restName } from "#lib/domain/account";
 
-  import Card from "$lib/shared/ui/Card.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
 
   interface Props {
     assetBreakdown: AssetBreakdown;

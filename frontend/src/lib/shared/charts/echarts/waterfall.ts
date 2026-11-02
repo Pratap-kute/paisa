@@ -1,7 +1,7 @@
-import { chartFormatters } from "$lib/shared/charts/echarts/formatters";
-import type { PaisaChartTheme } from "$lib/shared/charts/echarts/theme";
-import type { IncomeStatementWaterfallData } from "$lib/shared/charts/waterfall_data";
-import { responsiveChartOption } from "$lib/shared/charts/echarts/responsive";
+import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
+import type { PaisaChartTheme } from "#lib/shared/charts/echarts/theme";
+import type { IncomeStatementWaterfallData } from "#lib/shared/charts/waterfall_data";
+import { responsiveChartOption } from "#lib/shared/charts/echarts/responsive";
 
 export function incomeStatementAxisRange(data: IncomeStatementWaterfallData) {
   const values = data.steps.flatMap((step) =>

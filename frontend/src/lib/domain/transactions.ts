@@ -1,6 +1,6 @@
 import { groupBy as groupByItems, mapValues, sumBy } from "es-toolkit";
-import type { Posting, Transaction } from "$lib/domain/ledger";
-import { max } from "$lib/shared/utils/collection";
+import type { Posting, Transaction } from "#lib/domain/ledger";
+import { max } from "#lib/shared/utils/collection";
 export function sumPostings(postings: Posting[]) {
   return postings.reduce(
     (sum, p) =>

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import Dialog from "$lib/shared/ui/Dialog.svelte";
-  import { createDiffEditor } from "$lib/features/editor/runtime";
-  import type { LedgerFile } from "$lib/domain/ledger";
+  import Dialog from "#lib/shared/ui/Dialog.svelte";
+  import { createDiffEditor } from "#lib/features/editor/runtime";
+  import type { LedgerFile } from "#lib/domain/ledger";
   let editorDom: Element | undefined = $state();
   let selectedFileIndex = $state(0);
 

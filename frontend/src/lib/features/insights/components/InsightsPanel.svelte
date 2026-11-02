@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Insight } from "$lib/domain/insights";
+  import type { Insight } from "#lib/domain/insights";
   import InsightCard from "./InsightCard.svelte";
-  import Spinner from "$lib/shared/ui/Spinner.svelte";
+  import Spinner from "#lib/shared/ui/Spinner.svelte";
 
   interface Props {
     insights: Insight[];

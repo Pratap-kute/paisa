@@ -2,13 +2,13 @@
   import {
     type Dimensions,
     observeElementSize,
-  } from "$lib/shared/charts/resize";
+  } from "#lib/shared/charts/resize";
   import {
     createEChartSurfaceController,
     type EChartRenderer,
     type EChartSurfaceController,
     type PaisaChartEventHandler,
-  } from "$lib/shared/charts/echarts/surface_lifecycle";
+  } from "#lib/shared/charts/echarts/surface_lifecycle";
   import type { EChartsCoreOption } from "echarts/core";
   import { untrack } from "svelte";
 
@@ -40,7 +40,7 @@
   async function ensureChart() {
     if (!element || controller || typeof window === "undefined") return;
 
-    const echarts = await import("$lib/shared/charts/echarts/core");
+    const echarts = await import("#lib/shared/charts/echarts/core");
     if (!element?.isConnected || controller) return;
     controller = createEChartSurfaceController({
       element,

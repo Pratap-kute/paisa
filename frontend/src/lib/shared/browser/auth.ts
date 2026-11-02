@@ -1,11 +1,11 @@
-import { sha256Hex } from "$lib/shared/utils/crypto";
+import { sha256Hex } from "#lib/shared/utils/crypto";
 import {
   api,
   clearAuthToken,
   getAuthToken,
   normalizeApiError,
   setAuthToken,
-} from "$lib/api";
+} from "#lib/api";
 
 interface LoginResult {
   success: boolean;

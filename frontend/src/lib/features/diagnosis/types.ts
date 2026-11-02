@@ -5,7 +5,7 @@ import type {
   DtoIssueAction,
   DtoIssueEntity,
   DtoIssueResponse,
-} from "$lib/api/generated/Api";
+} from "#lib/api/generated/Api";
 
 export type QualityLevel = "danger" | "warning" | "info";
 export type QualityCategory =

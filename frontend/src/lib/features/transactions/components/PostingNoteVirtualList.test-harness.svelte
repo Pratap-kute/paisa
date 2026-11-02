@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Posting } from "$lib/domain/ledger";
-  import TooltipProvider from "$lib/shared/ui/TooltipProvider.svelte";
+  import type { Posting } from "#lib/domain/ledger";
+  import TooltipProvider from "#lib/shared/ui/TooltipProvider.svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import PostingNote from "./PostingNote.svelte";
 

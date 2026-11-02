@@ -6,7 +6,7 @@ import {
   type DtoGainsResponse,
   type DtoInvestmentResponse,
   type DtoNetworthResponse,
-} from "$lib/api";
+} from "#lib/api";
 
 export function createNetworthState() {
   return createAsyncState<void, DtoNetworthResponse | null>(

@@ -1,16 +1,16 @@
 <script lang="ts">
   import dayjs from "dayjs";
-  import { formatFloat } from "$lib/shared/formatters/currency";
-  import { restName } from "$lib/domain/account";
-  import type { Harvestable } from "$lib/domain/tax";
+  import { formatFloat } from "#lib/shared/formatters/currency";
+  import { restName } from "#lib/domain/account";
+  import type { Harvestable } from "#lib/domain/tax";
   import { round } from "es-toolkit";
   import {
     harvestablePercentage,
     unitsRequiredFromAmount,
     unitsRequiredFromGain,
-  } from "$lib/features/tax/harvest_data";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Card from "$lib/shared/ui/Card.svelte";
+  } from "#lib/features/tax/harvest_data";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Card from "#lib/shared/ui/Card.svelte";
 
   interface Props {
     harvestable: Harvestable;

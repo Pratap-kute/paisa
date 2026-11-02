@@ -1,20 +1,20 @@
 <script lang="ts">
-  import type { GoalSummary } from "$lib/domain/goals_models";
+  import type { GoalSummary } from "#lib/domain/goals_models";
   import {
     analyzeGoal,
     goalStatusLabel,
     goalStatusShortLabel,
-  } from "$lib/domain/goal_intelligence";
+  } from "#lib/domain/goal_intelligence";
   import {
     formatCurrency,
     formatFloat,
     formatPercentage,
     formatReturnPercent,
-  } from "$lib/shared/formatters/currency";
-  import { obscure } from "$lib/shared/state/persisted";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
+  } from "#lib/shared/formatters/currency";
+  import { obscure } from "#lib/shared/state/persisted";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
   let {
     goal,
     xirr,

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { Transaction } from "$lib/domain/ledger";
-  import { postingUrl } from "$lib/shared/browser/navigation";
-  import Postings from "$lib/features/transactions/components/Postings.svelte";
-  import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
+  import type { Transaction } from "#lib/domain/ledger";
+  import { postingUrl } from "#lib/shared/browser/navigation";
+  import Postings from "#lib/features/transactions/components/Postings.svelte";
+  import PostingStatus from "#lib/features/transactions/components/PostingStatus.svelte";
   import TransactionNote from "./TransactionNote.svelte";
 
   interface Props {

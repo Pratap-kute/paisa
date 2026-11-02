@@ -1,7 +1,7 @@
 <script lang="ts">
-  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
-  import { createLeaveGuard } from "$lib/shared/browser/unsaved_changes.svelte";
-  import type { LedgerFile } from "$lib/domain/ledger";
+  import ConfirmDialog from "#lib/shared/ui/ConfirmDialog.svelte";
+  import { createLeaveGuard } from "#lib/shared/browser/unsaved_changes.svelte";
+  import type { LedgerFile } from "#lib/domain/ledger";
   import {
     createEditor,
     editorState,
@@ -9,27 +9,27 @@
     moveToEnd,
     moveToLine,
     updateContent,
-  } from "$lib/features/editor/runtime";
+  } from "#lib/features/editor/runtime";
   import { insertTab } from "@codemirror/commands";
-  import { buildDirectoryTree } from "$lib/shared/utils/tree";
-  import { api } from "$lib/api";
+  import { buildDirectoryTree } from "#lib/shared/utils/tree";
+  import { api } from "#lib/api";
   import { redo, undo } from "@codemirror/commands";
   import type { EditorView, KeyBinding } from "@codemirror/view";
-  import * as toast from "$lib/shared/ui/toast";
-  import { format } from "$lib/features/ledger/journal";
+  import * as toast from "#lib/shared/ui/toast";
+  import { format } from "#lib/features/ledger/journal";
   import { isNumber, last } from "es-toolkit";
   import { onDestroy, onMount } from "svelte";
   import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import FileTree from "$lib/features/ledger/components/FileTree.svelte";
-  import FileModal from "$lib/features/ledger/components/FileModal.svelte";
-  import Button from "$lib/shared/ui/Button.svelte";
-  import Badge from "$lib/shared/ui/Badge.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import { page } from "$app/stores";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import LedgerBalance from "$lib/features/ledger/components/LedgerBalance.svelte";
+  import FileTree from "#lib/features/ledger/components/FileTree.svelte";
+  import FileModal from "#lib/features/ledger/components/FileModal.svelte";
+  import Button from "#lib/shared/ui/Button.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
+  import Select from "#lib/shared/ui/Select.svelte";
+  import { page } from "$app/state";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import LedgerBalance from "#lib/features/ledger/components/LedgerBalance.svelte";
   import {
     assign,
     find,
@@ -38,7 +38,7 @@
     map,
     toNumber,
     values,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   interface Props {
     data: PageData;
@@ -93,13 +93,13 @@
 
   async function navigate(url: string) {
     if (!(await leaveGuard.ask())) return false;
-    await goto(url, { noScroll: true });
+    await goto(url, { reset: false });
     return true;
   }
 
   onMount(() => {
     loadFiles(data.name);
-    const line = toNumber($page.url.hash.substring(1));
+    const line = toNumber(page.url.hash.substring(1));
     if (isNumber(line)) {
       lineNumber = line;
     }

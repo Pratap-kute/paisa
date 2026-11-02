@@ -1,18 +1,18 @@
 <script lang="ts">
-  import Card from "$lib/shared/ui/Card.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
   import {
     formatCurrency,
     formatCurrencyCrude,
     formatShare,
-  } from "$lib/shared/formatters/currency";
-  import type { GoalSummary } from "$lib/domain/goals_models";
-  import { iconGlyph } from "$lib/shared/ui/icon";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import Progress from "$lib/shared/ui/Progress.svelte";
+  } from "#lib/shared/formatters/currency";
+  import type { GoalSummary } from "#lib/domain/goals_models";
+  import { iconGlyph } from "#lib/shared/ui/icon";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import Progress from "#lib/shared/ui/Progress.svelte";
   import type { Action } from "svelte/action";
-  import { analyzeGoal } from "$lib/domain/goal_intelligence";
+  import { analyzeGoal } from "#lib/domain/goal_intelligence";
   import GoalHealth from "./GoalHealth.svelte";
-  import { obscure } from "$lib/shared/state/persisted";
+  import { obscure } from "#lib/shared/state/persisted";
 
   interface Props {
     goal: GoalSummary;

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Transaction } from "$lib/domain/ledger";
-  import { formatTextAsHtml } from "$lib/shared/ui/rich_text";
-  import Tooltip from "$lib/shared/ui/Tooltip.svelte";
+  import type { Transaction } from "#lib/domain/ledger";
+  import { formatTextAsHtml } from "#lib/shared/ui/rich_text";
+  import Tooltip from "#lib/shared/ui/Tooltip.svelte";
   interface Props {
     transaction: Transaction;
   }

@@ -3,7 +3,7 @@ import {
   formatCurrencyCrude,
   formatFloat,
   formatPercentage,
-} from "$lib/shared/formatters/currency";
+} from "#lib/shared/formatters/currency";
 
 export const chartFormatters = {
   currency: formatCurrency,

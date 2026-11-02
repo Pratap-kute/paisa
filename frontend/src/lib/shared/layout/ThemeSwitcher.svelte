@@ -2,7 +2,7 @@
   import {
     getColorPreference,
     setColorPreference,
-  } from "$lib/shared/browser/theme";
+  } from "#lib/shared/browser/theme";
   import { onMount } from "svelte";
   import * as store from "../../../store";
 

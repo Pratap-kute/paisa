@@ -1,36 +1,36 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
-  import type { GoalSummary } from "$lib/domain/goals_models";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { obscure } from "$lib/shared/state/persisted";
+  import { api } from "#lib/api";
+  import GoalHealth from "#lib/features/goals/components/GoalHealth.svelte";
+  import type { GoalSummary } from "#lib/domain/goals_models";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { obscure } from "#lib/shared/state/persisted";
   import {
     formatFloat,
     formatReturnPercent,
-  } from "$lib/shared/formatters/currency";
-  import type { AssetBreakdown } from "$lib/domain/assets";
+  } from "#lib/shared/formatters/currency";
+  import type { AssetBreakdown } from "#lib/domain/assets";
   import type {
     Forecast,
     Point,
     RetirementGoalProgress,
-  } from "$lib/domain/goals_models";
-  import type { Posting } from "$lib/domain/ledger";
+  } from "#lib/domain/goals_models";
+  import type { Posting } from "#lib/domain/ledger";
   import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
-  import { findBreakPoints, forecast } from "$lib/domain/goals";
+  import { findBreakPoints, forecast } from "#lib/domain/goals";
   import type { PageData } from "./$types";
-  import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
-  import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
-  import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
-  import { sortBy } from "$lib/shared/utils/collection";
+  import ProgressWithBreakpoints from "#lib/shared/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "#lib/features/assets/components/AssetsBalance.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import GoalProgressChart from "#lib/features/goals/components/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "#lib/features/goals/components/GoalInvestmentChart.svelte";
+  import GoalRecentPostings from "#lib/features/goals/components/GoalRecentPostings.svelte";
+  import { sortBy } from "#lib/shared/utils/collection";
 
   interface Props {
     data: PageData;

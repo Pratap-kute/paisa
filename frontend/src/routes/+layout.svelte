@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
-  import { getColorPreference } from "$lib/shared/browser/theme";
-  import ToastContainer from "$lib/shared/ui/ToastContainer.svelte";
-  import TooltipProvider from "$lib/shared/ui/TooltipProvider.svelte";
+  import { browser } from "$app/env";
+  import { getColorPreference } from "#lib/shared/browser/theme";
+  import ToastContainer from "#lib/shared/ui/ToastContainer.svelte";
+  import TooltipProvider from "#lib/shared/ui/TooltipProvider.svelte";
   interface Props {
     children?: import("svelte").Snippet;
   }

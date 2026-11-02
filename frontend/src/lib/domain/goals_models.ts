@@ -1,6 +1,6 @@
 import type { Dayjs } from "dayjs";
-import type { Posting } from "$lib/domain/ledger";
-import type { AssetBreakdown } from "$lib/domain/assets";
+import type { Posting } from "#lib/domain/ledger";
+import type { AssetBreakdown } from "#lib/domain/assets";
 export interface Point {
   date: Dayjs;
   value: number;

@@ -1,38 +1,38 @@
 <script lang="ts">
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatShare } from "$lib/shared/formatters/currency";
-  import type { Legend } from "$lib/shared/charts/types";
-  import type { Posting } from "$lib/domain/ledger";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatShare } from "#lib/shared/formatters/currency";
+  import type { Legend } from "#lib/shared/charts/types";
+  import type { Posting } from "#lib/domain/ledger";
   import { onMount } from "svelte";
   import { sumBy, uniq } from "es-toolkit";
-  import { financialYear } from "$lib/domain/time";
-  import { api } from "$lib/api";
-  import { buildYearlyExpenseTimelineSeries } from "$lib/features/expense/chart_timeline_data";
+  import { financialYear } from "#lib/domain/time";
+  import { api } from "#lib/api";
+  import { buildYearlyExpenseTimelineSeries } from "#lib/features/expense/chart_timeline_data";
   import {
     categoryColor,
     categoryColorResolver,
     categoryLegends,
-  } from "$lib/shared/charts/category";
-  import { buildYearlyExpenseHeatmapData } from "$lib/features/expense/expense_heatmap_data";
-  import { buildExpenseBreakdownComparison } from "$lib/features/expense/chart_comparison_data";
-  import { expenseGroup } from "$lib/features/expense/expense";
+  } from "#lib/shared/charts/category";
+  import { buildYearlyExpenseHeatmapData } from "#lib/features/expense/expense_heatmap_data";
+  import { buildExpenseBreakdownComparison } from "#lib/features/expense/chart_comparison_data";
+  import { expenseGroup } from "#lib/features/expense/expense";
   import { dateMax, dateMin, year } from "../../../../store";
   import { writable } from "svelte/store";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ResponsiveGrid from "$lib/shared/layout/ResponsiveGrid.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import FinancialYearPicker from "$lib/shared/ui/FinancialYearPicker.svelte";
-  import IncomeContextStrip from "$lib/shared/layout/IncomeContextStrip.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import YearlyExpenseCalendar from "$lib/features/expense/components/YearlyExpenseCalendar.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
-  import { isEmpty, map, maxBy, minBy } from "$lib/shared/utils/collection";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ResponsiveGrid from "#lib/shared/layout/ResponsiveGrid.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import FinancialYearPicker from "#lib/shared/ui/FinancialYearPicker.svelte";
+  import IncomeContextStrip from "#lib/shared/layout/IncomeContextStrip.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import YearlyExpenseCalendar from "#lib/features/expense/components/YearlyExpenseCalendar.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
+  import { isEmpty, map, maxBy, minBy } from "#lib/shared/utils/collection";
 
   let groups = writable<string[]>([]);
   let expenses: Posting[] = $state([]),

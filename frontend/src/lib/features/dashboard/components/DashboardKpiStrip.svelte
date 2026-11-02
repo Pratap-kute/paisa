@@ -5,9 +5,9 @@
     DashboardTrend,
     ExpensePace,
   } from "../summary";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
 
   interface Props {
     netWorth?: number;

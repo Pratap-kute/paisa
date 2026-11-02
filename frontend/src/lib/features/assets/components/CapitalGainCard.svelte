@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { formatFloat } from "$lib/shared/formatters/currency";
-  import type { CapitalGain } from "$lib/domain/tax";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
+  import { formatFloat } from "#lib/shared/formatters/currency";
+  import type { CapitalGain } from "#lib/domain/tax";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
   import CapitalGainDetailCard from "./CapitalGainDetailCard.svelte";
-  import Toggleable from "$lib/shared/ui/Toggleable.svelte";
-  import Card from "$lib/shared/ui/Card.svelte";
+  import Toggleable from "#lib/shared/ui/Toggleable.svelte";
+  import Card from "#lib/shared/ui/Card.svelte";
 
   interface Props {
     financialYear: string;

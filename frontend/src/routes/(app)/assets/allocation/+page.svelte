@@ -1,36 +1,36 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
-  import type { Aggregate } from "$lib/domain/assets";
-  import type { AllocationTarget } from "$lib/domain/assets";
-  import type { Legend } from "$lib/shared/charts/types";
-  import { buildAllocationTimelineSeries } from "$lib/features/assets/allocation_timeline_data";
+  import { api } from "#lib/api";
+  import { formatPercentage } from "#lib/shared/formatters/currency";
+  import type { Aggregate } from "#lib/domain/assets";
+  import type { AllocationTarget } from "#lib/domain/assets";
+  import type { Legend } from "#lib/shared/charts/types";
+  import { buildAllocationTimelineSeries } from "#lib/features/assets/allocation_timeline_data";
   import {
     buildAllocationCategoryComparison,
     buildAllocationHierarchy,
-  } from "$lib/features/assets/hierarchy_data";
-  import { buildAllocationTargetComparison } from "$lib/features/assets/chart_comparison_data";
-  import COLORS from "$lib/shared/theme/colors";
-  import LegendCard from "$lib/shared/ui/LegendCard.svelte";
-  import Table from "$lib/shared/ui/Table.svelte";
-  import { accountName, nonZeroCurrency } from "$lib/shared/tables/formatters";
+  } from "#lib/features/assets/hierarchy_data";
+  import { buildAllocationTargetComparison } from "#lib/features/assets/chart_comparison_data";
+  import COLORS from "#lib/shared/theme/colors";
+  import LegendCard from "#lib/shared/ui/LegendCard.svelte";
+  import Table from "#lib/shared/ui/Table.svelte";
+  import { accountName, nonZeroCurrency } from "#lib/shared/tables/formatters";
   import { last, sumBy } from "es-toolkit";
   import { onMount, tick } from "svelte";
   import type { ColumnDefinition, ProgressBarParams } from "tabulator-tables";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import TimeSeriesChart from "$lib/shared/charts/TimeSeriesChart.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
   import {
     filter,
     isEmpty,
     map,
     max as arrayMax,
     values,
-  } from "$lib/shared/utils/collection";
+  } from "#lib/shared/utils/collection";
 
   let allocationTargets: AllocationTarget[] = $state([]);
   let aggregates: Record<string, Aggregate> = $state({});

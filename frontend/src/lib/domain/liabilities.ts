@@ -1,5 +1,5 @@
 import type dayjs from "dayjs";
-import type { Posting, Transaction } from "$lib/domain/ledger";
+import type { Posting, Transaction } from "#lib/domain/ledger";
 export interface InterestOverview {
   date: dayjs.Dayjs;
   drawn_amount: number;

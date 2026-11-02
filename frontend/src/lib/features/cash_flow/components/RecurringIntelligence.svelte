@@ -1,22 +1,22 @@
 <script lang="ts">
-  import { obscure } from "$lib/shared/state/persisted";
-  import { formatCommodityAmount } from "$lib/shared/formatters/currency";
+  import { obscure } from "#lib/shared/state/persisted";
+  import { formatCommodityAmount } from "#lib/shared/formatters/currency";
   import { onMount } from "svelte";
-  import { api } from "$lib/api";
-  import type { Transaction } from "$lib/domain/ledger";
-  import type { TransactionSequence } from "$lib/domain/recurring";
+  import { api } from "#lib/api";
+  import type { Transaction } from "#lib/domain/ledger";
+  import type { TransactionSequence } from "#lib/domain/recurring";
   import {
     analyzeConfirmedRecurring,
     discoverRecurringCandidates,
     needsRecurringAttention,
     type RecurringAnalysis,
-  } from "$lib/domain/recurring_analysis";
-  import { now } from "$lib/domain/time";
+  } from "#lib/domain/recurring_analysis";
+  import { now } from "#lib/domain/time";
   import {
     prepareRecurringConfirmation,
     saveRecurringConfirmation,
   } from "../recurring_confirmation";
-  import Section from "$lib/shared/layout/Section.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
   import RecurringIntelligenceRow from "./RecurringIntelligenceRow.svelte";
   import RecurringSummary from "./RecurringSummary.svelte";
   interface Props {

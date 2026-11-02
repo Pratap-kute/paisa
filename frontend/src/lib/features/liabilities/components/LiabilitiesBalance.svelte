@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { LiabilityBreakdown } from "$lib/domain/liabilities";
-  import { buildTree } from "$lib/shared/utils/tree";
+  import type { LiabilityBreakdown } from "#lib/domain/liabilities";
+  import { buildTree } from "#lib/shared/utils/tree";
   import { onMount } from "svelte";
-  import Table from "$lib/shared/ui/Table.svelte";
+  import Table from "#lib/shared/ui/Table.svelte";
   import {
     indendedLiabilityAccountName,
     nonZeroCurrency,
     nonZeroReturnChange,
-  } from "$lib/shared/tables/formatters";
+  } from "#lib/shared/tables/formatters";
 
   interface Props {
     breakdowns: LiabilityBreakdown[];

@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { now } from "$lib/domain/time";
-  import { recurringLabel } from "$lib/domain/recurring_analysis";
-  import type { TransactionSequence } from "$lib/domain/recurring";
+  import { now } from "#lib/domain/time";
+  import { recurringLabel } from "#lib/domain/recurring_analysis";
+  import type { TransactionSequence } from "#lib/domain/recurring";
   import {
     intervalText,
     nextUnpaidSchedule,
     totalRecurring,
-  } from "$lib/domain/transaction_sequence";
-  import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  } from "#lib/domain/transaction_sequence";
+  import { scheduleIcon } from "#lib/features/cash_flow/schedule_presentation";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Props {
     transactionSequece: TransactionSequence;

@@ -1,5 +1,5 @@
-import type { Legend } from "$lib/shared/charts/types";
-import { categorySeriesIndex } from "$lib/shared/charts/echarts/theme";
+import type { Legend } from "#lib/shared/charts/types";
+import { categorySeriesIndex } from "#lib/shared/charts/echarts/theme";
 
 export const categoryColor = (key: string) =>
   `var(--paisa-chart-series-${categorySeriesIndex(key, 12) + 1})`;

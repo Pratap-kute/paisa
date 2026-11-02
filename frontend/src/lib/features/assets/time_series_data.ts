@@ -1,19 +1,19 @@
-import { now } from "$lib/domain/time";
-import { restName, secondName } from "$lib/domain/account";
-import type { InvestmentYearlyCard, Networth } from "$lib/domain/assets";
-import type { Legend } from "$lib/shared/charts/types";
-import type { Posting } from "$lib/domain/ledger";
+import { now } from "#lib/domain/time";
+import { restName, secondName } from "#lib/domain/account";
+import type { InvestmentYearlyCard, Networth } from "#lib/domain/assets";
+import type { Legend } from "#lib/shared/charts/types";
+import type { Posting } from "#lib/domain/ledger";
 import { groupBy, sum, uniq } from "es-toolkit";
 import type dayjs from "dayjs";
-import { generateColorScheme } from "$lib/shared/theme/colors";
-import COLORS from "$lib/shared/theme/colors";
-import { forEachMonth } from "$lib/shared/formatters/date";
+import { generateColorScheme } from "#lib/shared/theme/colors";
+import COLORS from "#lib/shared/theme/colors";
+import { forEachMonth } from "#lib/shared/formatters/date";
 import type {
   PeriodSeriesChartData,
   PeriodSeriesDefinition,
   PeriodSeriesPoint,
-} from "$lib/shared/charts/echarts/period_series";
-import { minBy, sortBy } from "$lib/shared/utils/collection";
+} from "#lib/shared/charts/echarts/period_series";
+import { minBy, sortBy } from "#lib/shared/utils/collection";
 
 function financialYear(card: {
   start_date: dayjs.Dayjs;

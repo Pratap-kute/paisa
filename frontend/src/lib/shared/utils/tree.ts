@@ -1,6 +1,6 @@
 import { dropRight } from "es-toolkit";
-import type { Directory } from "$lib/domain/ledger";
-import { sortBy } from "$lib/shared/utils/collection";
+import type { Directory } from "#lib/domain/ledger";
+import { sortBy } from "#lib/shared/utils/collection";
 
 interface NamedFile {
   type: "file";

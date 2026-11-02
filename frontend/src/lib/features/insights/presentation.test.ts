@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import type { Insight } from "$lib/domain/insights";
+import type { Insight } from "#lib/domain/insights";
 
 Object.defineProperty(globalThis, "localStorage", {
   configurable: true,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { presentInsight } from "$lib/features/insights/presentation";
-import type { Insight as _Insight } from "$lib/domain/insights";
+import { presentInsight } from "#lib/features/insights/presentation";
+import type { Insight as _Insight } from "#lib/domain/insights";
 
 describe("presentInsight", () => {
   test("presents expense increase insight", () => {

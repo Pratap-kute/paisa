@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { expect, test, vi } from "vitest";
-import { api, tokenKey } from "$lib/api";
-import { sha256Hex } from "$lib/shared/utils/crypto";
+import { api, tokenKey } from "#lib/api";
+import { sha256Hex } from "#lib/shared/utils/crypto";
 import LoginPage from "./+page.svelte";
 
 test("submits the values visible in password-manager-populated inputs", async () => {

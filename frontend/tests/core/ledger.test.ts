@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { applyChanges } from "$lib/features/ledger/bulk_edit";
-import { ensureFileExtension } from "$lib/features/ledger/file";
-import { format } from "$lib/features/ledger/journal";
+import { applyChanges } from "#lib/features/ledger/bulk_edit";
+import { ensureFileExtension } from "#lib/features/ledger/file";
+import { format } from "#lib/features/ledger/journal";
 
 describe("ledger helpers", () => {
   test("normalizes file extensions", () => {

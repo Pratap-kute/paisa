@@ -1,6 +1,6 @@
-import type { CashFlow } from "$lib/domain/cash_flow";
-import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import { categoryColorResolver } from "$lib/shared/charts/category";
+import type { CashFlow } from "#lib/domain/cash_flow";
+import type { PeriodSeriesChartData } from "#lib/shared/charts/echarts/period_series";
+import { categoryColorResolver } from "#lib/shared/charts/category";
 
 export function buildCashFlowSeries(
   cashFlows: CashFlow[],

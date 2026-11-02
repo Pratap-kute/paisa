@@ -1,26 +1,26 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatShare } from "$lib/shared/formatters/currency";
-  import type { CreditCardBill } from "$lib/domain/liabilities";
-  import type { CreditCardSummary } from "$lib/domain/liabilities";
+  import { api } from "#lib/api";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import { formatShare } from "#lib/shared/formatters/currency";
+  import type { CreditCardBill } from "#lib/domain/liabilities";
+  import type { CreditCardSummary } from "#lib/domain/liabilities";
   import { goto } from "$app/navigation";
-  import DueDate from "$lib/features/liabilities/components/DueDate.svelte";
-  import TransactionCard from "$lib/features/transactions/components/TransactionCard.svelte";
-  import { buildCreditCardYearlySpendsComparison } from "$lib/features/liabilities/chart_comparison_data";
-  import { iconify } from "$lib/shared/ui/icon";
+  import DueDate from "#lib/features/liabilities/components/DueDate.svelte";
+  import TransactionCard from "#lib/features/transactions/components/TransactionCard.svelte";
+  import { buildCreditCardYearlySpendsComparison } from "#lib/features/liabilities/chart_comparison_data";
+  import { iconify } from "#lib/shared/ui/icon";
   import { clone } from "es-toolkit";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import MetricStrip from "$lib/shared/layout/MetricStrip.svelte";
-  import Metric from "$lib/shared/layout/Metric.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import Select from "$lib/shared/ui/Select.svelte";
-  import ComparisonBarChart from "$lib/shared/charts/ComparisonBarChart.svelte";
-  import { findIndex, now, reverse } from "$lib/shared/utils/collection";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import MetricStrip from "#lib/shared/layout/MetricStrip.svelte";
+  import Metric from "#lib/shared/layout/Metric.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import Select from "#lib/shared/ui/Select.svelte";
+  import ComparisonBarChart from "#lib/shared/charts/ComparisonBarChart.svelte";
+  import { findIndex, now, reverse } from "#lib/shared/utils/collection";
 
   interface Props {
     data: PageData;

@@ -1,7 +1,7 @@
 import { render } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import InsightItem from "./InsightItem.svelte";
-import type { Insight as _Insight } from "$lib/domain/insights";
+import type { Insight as _Insight } from "#lib/domain/insights";
 
 test("renders InsightItem correctly with title, description and badge", () => {
   const insight: _Insight = {

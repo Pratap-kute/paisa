@@ -1,20 +1,20 @@
-import type { RecurringAnalysis } from "$lib/domain/recurring_analysis";
-import type { AssetBreakdown, Networth } from "$lib/domain/assets";
-import type { AccountBudget, Budget } from "$lib/domain/cash_flow";
-import type { Insight } from "$lib/domain/insights";
-import type { GoalSummary } from "$lib/domain/goals_models";
+import type { RecurringAnalysis } from "#lib/domain/recurring_analysis";
+import type { AssetBreakdown, Networth } from "#lib/domain/assets";
+import type { AccountBudget, Budget } from "#lib/domain/cash_flow";
+import type { Insight } from "#lib/domain/insights";
+import type { GoalSummary } from "#lib/domain/goals_models";
 import {
   goalStatusLabel,
   summarizeGoalHealth,
-} from "$lib/domain/goal_intelligence";
-import type { Posting } from "$lib/domain/ledger";
-import { now } from "$lib/domain/time";
+} from "#lib/domain/goal_intelligence";
+import type { Posting } from "#lib/domain/ledger";
+import { now } from "#lib/domain/time";
 import {
   type InsightTone,
   presentInsight,
-} from "$lib/features/insights/presentation";
-import { formatCurrency } from "$lib/shared/formatters/currency";
-import { iconGlyphOr } from "$lib/shared/ui/icon";
+} from "#lib/features/insights/presentation";
+import { formatCurrency } from "#lib/shared/formatters/currency";
+import { iconGlyphOr } from "#lib/shared/ui/icon";
 import type { Dayjs } from "dayjs";
 
 export type MetricStatus =

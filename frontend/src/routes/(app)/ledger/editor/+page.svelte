@@ -1,8 +1,8 @@
 <script lang="ts">
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
   import type { PageData } from "./$types";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
 
   interface Props {
     data: PageData;

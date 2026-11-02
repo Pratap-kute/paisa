@@ -1,18 +1,18 @@
 import { describe, expect, test, vi } from "vitest";
 import { get } from "svelte/store";
-import { persisted } from "$lib/shared/browser/persisted";
+import { persisted } from "#lib/shared/browser/persisted";
 import {
   dismissToast,
   setDefaults,
   toast,
   toastPosition,
   toasts,
-} from "$lib/shared/ui/toast";
+} from "#lib/shared/ui/toast";
 import {
   delayedLoading,
   delayedUnLoading,
   loading,
-} from "$lib/shared/state/store";
+} from "#lib/shared/state/store";
 
 describe("persisted stores", () => {
   test("reads, writes, updates, and recovers from invalid values", () => {

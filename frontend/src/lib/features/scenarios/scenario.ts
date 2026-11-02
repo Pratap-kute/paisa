@@ -2,9 +2,9 @@ import type {
   DtoScenarioAssumption,
   DtoScenarioReason,
   DtoScenarioResult,
-} from "$lib/api";
-import type { PeriodSeriesChartData } from "$lib/shared/charts/echarts/period_series";
-import COLORS from "$lib/shared/theme/colors";
+} from "#lib/api";
+import type { PeriodSeriesChartData } from "#lib/shared/charts/echarts/period_series";
+import COLORS from "#lib/shared/theme/colors";
 
 export type ScenarioMetric = "netWorth" | "investment" | "cash";
 export function scenarioSeries(

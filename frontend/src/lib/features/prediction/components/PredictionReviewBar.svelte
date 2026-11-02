@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { ConfidenceFilter } from "$lib/features/prediction/session";
-  import type { PredictionReviewProgress } from "$lib/features/prediction/types";
+  import type { ConfidenceFilter } from "#lib/features/prediction/session";
+  import type { PredictionReviewProgress } from "#lib/features/prediction/types";
 
   interface Props {
     counts: {

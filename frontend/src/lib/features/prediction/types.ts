@@ -1,5 +1,5 @@
-import type { NormalizedDescription } from "$lib/domain/merchant";
-export type { NormalizedDescription } from "$lib/domain/merchant";
+import type { NormalizedDescription } from "#lib/domain/merchant";
+export type { NormalizedDescription } from "#lib/domain/merchant";
 export type Confidence = "HIGH" | "MEDIUM" | "NEEDS_REVIEW" | "UNKNOWN";
 
 export type AccountSource = "USER" | "RULE" | "HISTORY" | "TFIDF" | "UNKNOWN";

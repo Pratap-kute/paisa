@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { api } from "$lib/api";
-  import SavingsGoalIntelligence from "$lib/features/goals/components/SavingsGoalIntelligence.svelte";
-  import type { GoalSummary } from "$lib/domain/goals_models";
-  import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
-  import type { Point } from "$lib/domain/goals_models";
-  import type { Posting } from "$lib/domain/ledger";
-  import type { AssetBreakdown } from "$lib/domain/assets";
+  import { api } from "#lib/api";
+  import SavingsGoalIntelligence from "#lib/features/goals/components/SavingsGoalIntelligence.svelte";
+  import type { GoalSummary } from "#lib/domain/goals_models";
+  import type { Forecast, SavingsGoalProgress } from "#lib/domain/goals_models";
+  import type { Point } from "#lib/domain/goals_models";
+  import type { Posting } from "#lib/domain/ledger";
+  import type { AssetBreakdown } from "#lib/domain/assets";
   import { onMount } from "svelte";
   import ARIMAPromise from "arima/async";
   import {
@@ -13,19 +13,19 @@
     forecast,
     project,
     solvePMTOrNper,
-  } from "$lib/domain/goals";
+  } from "#lib/domain/goals";
   import type { PageData } from "./$types";
   import dayjs from "dayjs";
-  import ProgressWithBreakpoints from "$lib/shared/ui/ProgressWithBreakpoints.svelte";
-  import AssetsBalance from "$lib/features/assets/components/AssetsBalance.svelte";
-  import Page from "$lib/shared/layout/Page.svelte";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import Section from "$lib/shared/layout/Section.svelte";
-  import ChartFrame from "$lib/shared/ui/ChartFrame.svelte";
-  import GoalProgressChart from "$lib/features/goals/components/GoalProgressChart.svelte";
-  import GoalInvestmentChart from "$lib/features/goals/components/GoalInvestmentChart.svelte";
-  import GoalRecentPostings from "$lib/features/goals/components/GoalRecentPostings.svelte";
-  import { isEmpty, sortBy } from "$lib/shared/utils/collection";
+  import ProgressWithBreakpoints from "#lib/shared/ui/ProgressWithBreakpoints.svelte";
+  import AssetsBalance from "#lib/features/assets/components/AssetsBalance.svelte";
+  import Page from "#lib/shared/layout/Page.svelte";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import Section from "#lib/shared/layout/Section.svelte";
+  import ChartFrame from "#lib/shared/ui/ChartFrame.svelte";
+  import GoalProgressChart from "#lib/features/goals/components/GoalProgressChart.svelte";
+  import GoalInvestmentChart from "#lib/features/goals/components/GoalInvestmentChart.svelte";
+  import GoalRecentPostings from "#lib/features/goals/components/GoalRecentPostings.svelte";
+  import { isEmpty, sortBy } from "#lib/shared/utils/collection";
 
   interface Props {
     data: PageData;
@@ -33,7 +33,7 @@
 
   let { data }: Props = $props();
 
-  let projectionKind: import("$lib/features/goals/time_series_data").GoalProjectionKind =
+  let projectionKind: import("#lib/features/goals/time_series_data").GoalProjectionKind =
     $state("forecast");
   let targetDateObject: dayjs.Dayjs | undefined = $state();
   let savingsTotal = $state(0),

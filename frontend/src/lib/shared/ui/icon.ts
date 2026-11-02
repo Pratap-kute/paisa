@@ -4,7 +4,7 @@ import fa6regular from "../../../../fonts/fa6-regular-info.json" with { type: "j
 import fa6solid from "../../../../fonts/fa6-solid-info.json" with { type: "json" };
 import fluentemoji from "../../../../fonts/fluent-emoji-high-contrast-info.json" with { type: "json" };
 import mdi from "../../../../fonts/mdi-info.json" with { type: "json" };
-import { stemmer } from "$lib/shared/utils/stemmer";
+import { stemmer } from "#lib/shared/utils/stemmer";
 
 const icons = {
   arcticons: arcticons["codepoints"],

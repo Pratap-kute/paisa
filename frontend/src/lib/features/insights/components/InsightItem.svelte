@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Insight } from "$lib/domain/insights";
+  import type { Insight } from "#lib/domain/insights";
   import { presentInsight } from "../presentation";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  import Badge from "#lib/shared/ui/Badge.svelte";
 
   interface Props {
     insight: Insight;

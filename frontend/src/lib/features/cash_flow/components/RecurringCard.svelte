@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { now } from "$lib/domain/time";
-  import { recurringLabel } from "$lib/domain/recurring_analysis";
-  import type { TransactionSchedule } from "$lib/domain/recurring";
-  import type { TransactionSequence } from "$lib/domain/recurring";
+  import { now } from "#lib/domain/time";
+  import { recurringLabel } from "#lib/domain/recurring_analysis";
+  import type { TransactionSchedule } from "#lib/domain/recurring";
+  import type { TransactionSequence } from "#lib/domain/recurring";
   import {
     intervalText,
     totalRecurring,
-  } from "$lib/domain/transaction_sequence";
-  import { formatCurrency } from "$lib/shared/formatters/currency";
-  import Badge from "$lib/shared/ui/Badge.svelte";
+  } from "#lib/domain/transaction_sequence";
+  import { formatCurrency } from "#lib/shared/formatters/currency";
+  import Badge from "#lib/shared/ui/Badge.svelte";
   import RecurringSchedule from "./RecurringSchedule.svelte";
 
   interface Props {

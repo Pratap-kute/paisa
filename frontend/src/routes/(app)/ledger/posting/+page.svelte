@@ -1,31 +1,31 @@
 <script lang="ts">
-  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
-  import { api } from "$lib/api";
-  import { postingUrl } from "$lib/shared/browser/navigation";
+  import LoadingState from "#lib/shared/ui/LoadingState.svelte";
+  import { api } from "#lib/api";
+  import { postingUrl } from "#lib/shared/browser/navigation";
   import {
     formatCurrency,
     formatFloat,
     formatReturnPercent,
-  } from "$lib/shared/formatters/currency";
-  import { firstName } from "$lib/domain/account";
-  import { asTransaction } from "$lib/domain/transactions";
-  import type { LedgerFile, Posting } from "$lib/domain/ledger";
-  import type { Transaction } from "$lib/domain/ledger";
-  import { accountColorStyle } from "$lib/shared/theme/colors";
-  import PostingNote from "$lib/features/transactions/components/PostingNote.svelte";
-  import PostingStatus from "$lib/features/transactions/components/PostingStatus.svelte";
-  import PostingRecord from "$lib/features/transactions/components/PostingRecord.svelte";
-  import SearchQuery from "$lib/features/ledger/components/SearchQuery.svelte";
-  import { iconText } from "$lib/shared/ui/icon";
-  import { change } from "$lib/domain/posting";
-  import { editorState } from "$lib/features/editor/search_query_editor";
+  } from "#lib/shared/formatters/currency";
+  import { firstName } from "#lib/domain/account";
+  import { asTransaction } from "#lib/domain/transactions";
+  import type { LedgerFile, Posting } from "#lib/domain/ledger";
+  import type { Transaction } from "#lib/domain/ledger";
+  import { accountColorStyle } from "#lib/shared/theme/colors";
+  import PostingNote from "#lib/features/transactions/components/PostingNote.svelte";
+  import PostingStatus from "#lib/features/transactions/components/PostingStatus.svelte";
+  import PostingRecord from "#lib/features/transactions/components/PostingRecord.svelte";
+  import SearchQuery from "#lib/features/ledger/components/SearchQuery.svelte";
+  import { iconText } from "#lib/shared/ui/icon";
+  import { change } from "#lib/domain/posting";
+  import { editorState } from "#lib/features/editor/search_query_editor";
   import { debounce } from "es-toolkit";
   import { get } from "svelte/store";
   import { onDestroy, onMount } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
-  import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
-  import { map } from "$lib/shared/utils/collection";
+  import PageHeader from "#lib/shared/layout/PageHeader.svelte";
+  import ZeroState from "#lib/shared/ui/ZeroState.svelte";
+  import { map } from "#lib/shared/utils/collection";
 
   let files: LedgerFile[] = $state([]);
   let accounts: string[] = $state([]);
