@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
   import { api } from "$lib/api";
   import { formatCurrency } from "$lib/shared/formatters/currency";
   import type { ScheduleAL } from "$lib/domain/tax";
@@ -7,7 +8,7 @@
   import { dateMin, year } from "../../../../../store";
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import { minBy } from "$lib/shared/utils/collection";
 
   let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
@@ -31,7 +32,7 @@
 </script>
 
 <svelte:head>
-  <title>Schedule AL — Paisa</title>
+  <title>Schedule AL - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">
@@ -95,29 +96,18 @@
             </table>
           </div>
         {:else}
-          <ZeroState item={[]}>
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-raised text-xl text-muted-foreground"
-            >
-              <i class="fa-solid fa-file-invoice"></i>
-            </div>
-            <div class="mb-1 text-[0.9375rem] font-semibold text-foreground">
-              No Schedule AL data for the selected financial year
-            </div>
-            <div class="max-w-[360px] text-[0.8125rem] text-muted-foreground">
-              Configure Schedule AL entries in settings or select a different
-              financial year.
-            </div>
-          </ZeroState>
+          <EmptyState
+            item={[]}
+            icon="fa-file-invoice"
+            title="No Schedule AL data for the selected financial year"
+            description="Configure Schedule AL entries in settings or select a different financial year."
+          />
         {/if}
       {:else}
         <div
-          class="flex items-center justify-center gap-3 rounded-[var(--paisa-radius-lg)] border border-border bg-surface px-6 py-16 text-sm text-muted-foreground"
+          class="rounded-[var(--paisa-radius-lg)] border border-border bg-surface"
         >
-          <div
-            class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"
-          ></div>
-          <span>Loading Schedule AL...</span>
+          <LoadingState message="Loading Schedule AL..." />
         </div>
       {/if}
     </div>

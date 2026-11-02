@@ -61,6 +61,9 @@ type CapitalGainResponse struct {
 
 type CapitalGainsResponse struct {
 	CapitalGains map[string]CapitalGainResponse `json:"capital_gains"`
+	// FYTotals sums each financial year across accounts. A net loss owes no
+	// tax, so the short and long term tax are never negative.
+	FYTotals map[string]FYCapitalGainResponse `json:"fy_totals"`
 }
 
 type ScheduleALSectionResponse struct {

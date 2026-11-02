@@ -63,9 +63,9 @@ func calculateAverageExpense(db *gorm.DB, conf config.RetirementGoal) decimal.De
 }
 
 func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
-	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").All(), conf.Savings)
+	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").UntilToday().All(), conf.Savings)
 	savings = service.PopulateMarketPrice(db, savings)
-	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All(), conf.Savings)
+	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").UntilToday().All(), conf.Savings)
 	savingsWithCapitalGains = service.PopulateMarketPrice(db, savingsWithCapitalGains)
 	savingsTotal := accounting.CurrentBalance(savings)
 	investmentTotal := accounting.CostBalance(savings)
@@ -77,6 +77,7 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 	}
 
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
+	target := retirementTarget(yearlyExpenses, conf.SWR)
 
 	return gin.H{
 		"type":                "retirement",
@@ -89,9 +90,10 @@ func getRetirementDetail(db *gorm.DB, conf config.RetirementGoal) gin.H {
 		"swr":                 conf.SWR,
 		"yearlyExpense":       yearlyExpenses,
 		"yearlyExpenseSource": expenseSource(conf),
-		"target":              retirementTarget(yearlyExpenses, conf.SWR),
+		"target":              target,
 		"xirr":                service.XIRR(db, savingsWithCapitalGains),
 		"postings":            savingsWithCapitalGains,
 		"balances":            balances,
+		"intelligence":        analyze("retirement", savingsTotal, target, "", 0, 0, nil),
 	}
 }

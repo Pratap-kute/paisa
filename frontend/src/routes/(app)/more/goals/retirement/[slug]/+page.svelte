@@ -1,11 +1,13 @@
 <script lang="ts">
   import { api } from "$lib/api";
-  import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
   import GoalHealth from "$lib/features/goals/components/GoalHealth.svelte";
   import type { GoalSummary } from "$lib/domain/goals_models";
   import { formatCurrency } from "$lib/shared/formatters/currency";
   import { obscure } from "$lib/shared/state/persisted";
-  import { formatFloat } from "$lib/shared/formatters/currency";
+  import {
+    formatFloat,
+    formatReturnPercent,
+  } from "$lib/shared/formatters/currency";
   import type { AssetBreakdown } from "$lib/domain/assets";
   import type {
     Forecast,
@@ -78,10 +80,8 @@
     savingsTimeline = savingsTimeline || [];
     postings = postings || [];
     balances = balances || {};
-    targetSavings =
-      detail.target ??
-      (swr > 0 && Number.isFinite(swr) ? yearlyExpense * (100 / swr) : 0);
-    if (!Number.isFinite(targetSavings)) targetSavings = 0;
+    // The backend computes the retirement target from expenses and the SWR.
+    targetSavings = Number.isFinite(detail.target) ? (detail.target ?? 0) : 0;
     goal = {
       ...detail,
       current: savingsTotal,
@@ -98,11 +98,7 @@
     if (yearlyExpense > 0) {
       progressPercent = Math.max(
         0,
-        Math.min(
-          100,
-          calculateGoalProgress(savingsTotal, targetSavings).progressRatio *
-            100,
-        ),
+        Math.min(100, (detail.intelligence?.progressRatio ?? 0) * 100),
       );
       savingsX = savingsTotal / yearlyExpense;
       targetX = targetSavings / yearlyExpense;
@@ -148,7 +144,7 @@
     <Metric
       label="Net Investment"
       value={formatCurrency($obscure ? 0 : investmentTotal)}
-      secondary={`${formatCurrency($obscure ? 0 : gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatFloat(xirr)} XIRR`}
+      secondary={`${formatCurrency($obscure ? 0 : gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatReturnPercent(xirr)} XIRR`}
       status="primary"
     />
     <Metric

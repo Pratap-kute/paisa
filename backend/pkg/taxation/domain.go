@@ -184,6 +184,30 @@ func ComputeCapitalGains(db *gorm.DB, account string, commodity config.Commodity
 	return capitalGain
 }
 
+// CapitalGainTotals sums each financial year across accounts. Losses net off
+// gains within the year, so a year with a net loss owes no tax: the short and
+// long term tax are floored at zero, while Taxable and Slab stay signed so a
+// net loss is still visible. Carrying a loss forward is not modelled.
+func CapitalGainTotals(gains map[string]CapitalGain) map[string]FYCapitalGain {
+	totals := make(map[string]FYCapitalGain)
+	for _, accountGain := range gains {
+		for fy, g := range accountGain.FY {
+			total := totals[fy]
+			total.Units = total.Units.Add(g.Units)
+			total.PurchasePrice = total.PurchasePrice.Add(g.PurchasePrice)
+			total.SellPrice = total.SellPrice.Add(g.SellPrice)
+			total.Tax = Add(total.Tax, g.Tax)
+			totals[fy] = total
+		}
+	}
+	for fy, total := range totals {
+		total.Tax.ShortTerm = decimal.Max(total.Tax.ShortTerm, decimal.Zero)
+		total.Tax.LongTerm = decimal.Max(total.Tax.LongTerm, decimal.Zero)
+		totals[fy] = total
+	}
+	return totals
+}
+
 func GetScheduleAL(db *gorm.DB) map[string]ScheduleAL {
 	allPostings := query.Init(db).Like("Assets:%", "Liabilities:%").All()
 	scheduleALs := make(map[string]ScheduleAL)

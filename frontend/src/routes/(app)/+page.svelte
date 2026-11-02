@@ -26,7 +26,7 @@
   import { mapInsightsResponseToDomain } from "$lib/features/insights/presentation";
   import {
     buildDashboardAttention,
-    buildExpensePace,
+    expensePaceFor,
     buildExpenseTrend,
     buildNetWorthTrend,
     currentExpenses,
@@ -55,6 +55,7 @@
   import {
     formatCurrency,
     formatPercentage,
+    formatShare,
   } from "$lib/shared/formatters/currency";
   import { postingUrl } from "$lib/shared/browser/navigation";
   import { some, sortBy } from "$lib/shared/utils/collection";
@@ -77,6 +78,9 @@
   let insightsFailed = $state(false);
   let insightsResponse: InsightsResult | null = $state(null);
 
+  let expensePaceResponse:
+    | { period: string; projectedExpenses: number; overBudget?: number }
+    | undefined = $state();
   let currentPeriodExpenses = $derived(currentExpenses(expenses, period));
   let currentPeriodExpenseTotal = $derived(
     sumBy(currentPeriodExpenses, (posting) => posting.amount),
@@ -141,14 +145,7 @@
       cashSummary.available ? cashSummary.total : undefined,
     ),
   );
-  let expensePace = $derived(
-    buildExpensePace(
-      currentPeriodExpenseTotal,
-      period,
-      dashboardAsOf,
-      budgetSummary.configured ? budgetSummary.planned : undefined,
-    ),
-  );
+  let expensePace = $derived(expensePaceFor(expensePaceResponse, period));
   let attentionItems = $derived(
     buildDashboardAttention({
       insights: insightsResponse?.insights,
@@ -189,6 +186,13 @@
       investmentPerformance = res.investmentPerformance;
       investmentPerformanceError = res.investmentPerformanceError;
       allGoalSummaries = (res.goalSummaries as unknown as GoalSummary[]) || [];
+      expensePaceResponse = res.expensePace?.period
+        ? {
+            period: res.expensePace.period,
+            projectedExpenses: res.expensePace.projectedExpenses ?? 0,
+            overBudget: res.expensePace.overBudget,
+          }
+        : undefined;
       budgetsByMonth =
         (res.budget?.budgetsByMonth as unknown as Record<string, Budget>) || {};
       allTransactionSequences = sortTrantionSequence(
@@ -491,7 +495,7 @@
                       >{goal.name}</span
                     ><span
                       class="text-xs font-semibold tabular-nums whitespace-nowrap"
-                      >{formatPercentage(completed, 1)}</span
+                      >{formatShare(completed)}</span
                     >
                   </div>
                   <div

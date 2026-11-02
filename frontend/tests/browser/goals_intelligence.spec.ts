@@ -15,6 +15,42 @@ const savings = {
   rate: 0,
   priority: 10,
   contributionHistory: history,
+  // What the backend returns for these numbers: 60,000 a month is needed to reach
+  // 6,00,000 by 31 Aug 2022 and the recent pace is 48,000, so it is behind plan.
+  intelligence: {
+    progressRatio: 0.4,
+    remainingAmount: 360000,
+    validTarget: true,
+    requiredMonthlyContribution: 60000,
+    actualMonthlyContribution: 48000,
+    contributionMonthsObserved: 3,
+    activeContributionMonths: 3,
+    paceCoverage: 0.8,
+    paceGap: 12000,
+    projectedCompletionDate: "2022-10-01",
+    projectionSource: "recent-pace",
+    delayMonths: 2,
+    state: "active",
+    scheduleStatus: "behind",
+    attention: "warning",
+    deadlineSource: "configured",
+    targetDate: "2022-08-31",
+    annualReturn: 0,
+    reasons: [],
+  },
+};
+// Retirement goals have no schedule: only progress towards the target.
+const retirementIntelligence = {
+  progressRatio: 0.4,
+  remainingAmount: 360000,
+  validTarget: true,
+  contributionMonthsObserved: 0,
+  activeContributionMonths: 0,
+  state: "active",
+  scheduleStatus: "no-deadline",
+  attention: "none",
+  deadlineSource: "none",
+  reasons: [],
 };
 for (const width of [390, 768, 1440]) {
   for (const theme of ["light", "dark"]) {
@@ -39,6 +75,7 @@ for (const width of [390, 768, 1440]) {
                 swr: 4,
                 yearlyExpense: 24000,
                 yearlyExpenseSource: "configured",
+                intelligence: retirementIntelligence,
               },
             ],
           },
@@ -73,7 +110,7 @@ test("goals overview handles no configured goals", async ({ page }) => {
     route.fulfill({ json: { goals: [] } }),
   );
   await page.goto("/more/goals");
-  await expect(page.getByText(/haven't configured any goals/)).toBeVisible();
+  await expect(page.getByText("No goals configured")).toBeVisible();
   await expect(page.getByText("Needs Attention", { exact: true })).toHaveCount(
     0,
   );

@@ -134,7 +134,7 @@ test("row surfaces factual changes, stopped status and history", () => {
   )!;
   const view = render(RecurringIntelligenceRow, { item });
   expect(view.container.textContent).toContain(
-    "Amount increased from 499.00 INR to 649.00 INR",
+    "Amount increased from 499.00 to 649.00",
   );
   expect(view.container.textContent).toContain("Possibly stopped");
   expect(view.container.querySelector("summary")?.textContent).toContain(
@@ -159,7 +159,7 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   const item = analyzeRecurring("Netflix", history(), true, asOf)!;
   const row = render(RecurringIntelligenceRow, { item });
   const summary = render(RecurringSummary, { items: [item], asOf });
-  expect(row.container.textContent).toContain("649.00 INR");
+  expect(row.container.textContent).toContain("649.00");
   obscure.set(true);
   await waitFor(() =>
     expect(row.container.textContent).not.toContain("649.00"),
@@ -167,11 +167,9 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   expect(row.container.textContent).not.toContain("499.00");
   expect(row.container.textContent).not.toContain("30.1%");
   expect(summary.container.textContent).not.toContain("649.00");
-  expect(row.container.textContent).toContain("0.00 INR");
+  expect(row.container.textContent).toContain("0.00");
   obscure.set(false);
-  await waitFor(() =>
-    expect(row.container.textContent).toContain("649.00 INR"),
-  );
+  await waitFor(() => expect(row.container.textContent).toContain("649.00"));
 });
 
 test("an explicit annual Period never renders a conflicting monthly cadence", () => {

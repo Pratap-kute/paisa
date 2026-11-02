@@ -26,7 +26,9 @@ type AllocationSummary struct {
 }
 
 func GetAllocationSummary(db *gorm.DB) AllocationSummary {
-	postings := query.Init(db).Like("Assets:%").All()
+	// As of today, like the balance and net worth pages: a posting dated later is
+	// not part of the current allocation.
+	postings := query.Init(db).Like("Assets:%").UntilToday().All()
 	now := utils.EndOfToday()
 	postings = lo.Map(postings, func(p posting.Posting, _ int) posting.Posting {
 		p.MarketAmount = GetMarketPrice(db, p, now)

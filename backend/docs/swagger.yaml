@@ -229,6 +229,13 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/dto.CapitalGainResponse'
         type: object
+      fy_totals:
+        additionalProperties:
+          $ref: '#/definitions/dto.FYCapitalGainResponse'
+        description: |-
+          FYTotals sums each financial year across accounts. A net loss owes no
+          tax, so the short and long term tax are never negative.
+        type: object
     type: object
   dto.CashFlowResponse:
     properties:
@@ -352,6 +359,10 @@ definitions:
           $ref: '#/definitions/dto.CashFlowResponse'
         type: array
       checkingBalances: {}
+      expensePace:
+        allOf:
+        - $ref: '#/definitions/dto.ExpensePaceResponse'
+        x-nullable: true
       expenses:
         $ref: '#/definitions/dto.PeriodicPostingsSummaryResponse'
       goalSummaries:
@@ -494,6 +505,16 @@ definitions:
       message:
         type: string
     type: object
+  dto.ExpensePaceResponse:
+    properties:
+      overBudget:
+        description: OverBudget is omitted when the projection is within the budget.
+        type: number
+      period:
+        type: string
+      projectedExpenses:
+        type: number
+    type: object
   dto.ExpenseResponse:
     properties:
       expenses:
@@ -567,6 +588,51 @@ definitions:
       yearlyExpenseSource:
         type: string
     type: object
+  dto.GoalIntelligenceResponse:
+    properties:
+      activeContributionMonths:
+        type: integer
+      actualMonthlyContribution:
+        type: number
+      annualReturn:
+        type: number
+      attention:
+        type: string
+      configuredCompletionDate:
+        type: string
+      contributionMonthsObserved:
+        type: integer
+      deadlineSource:
+        type: string
+      delayMonths:
+        type: integer
+      paceCoverage:
+        type: number
+      paceGap:
+        type: number
+      progressRatio:
+        type: number
+      projectedCompletionDate:
+        type: string
+      projectionSource:
+        type: string
+      reasons:
+        items:
+          type: string
+        type: array
+      remainingAmount:
+        type: number
+      requiredMonthlyContribution:
+        type: number
+      scheduleStatus:
+        type: string
+      state:
+        type: string
+      targetDate:
+        type: string
+      validTarget:
+        type: boolean
+    type: object
   dto.GoalSummariesResponse:
     properties:
       goals:
@@ -586,6 +652,8 @@ definitions:
         type: string
       id:
         type: string
+      intelligence:
+        $ref: '#/definitions/dto.GoalIntelligenceResponse'
       name:
         type: string
       paymentPerPeriod:
@@ -1273,6 +1341,10 @@ definitions:
         type: string
       amount:
         type: number
+      annualized_return:
+        description: Compound annual rate in percent, omitted for lots held under
+          a year.
+        type: number
       balance:
         type: number
       commodity:
@@ -1283,6 +1355,8 @@ definitions:
         type: string
       forecast:
         type: boolean
+      holding_days:
+        type: integer
       id:
         type: integer
       market_amount:
@@ -1307,6 +1381,9 @@ definitions:
         type: string
       transaction_note:
         type: string
+      unrealized_gain:
+        description: Set for open commodity lots only (see service.ComputePostingReturn).
+        type: number
     type: object
   dto.PostingsResponse:
     properties:

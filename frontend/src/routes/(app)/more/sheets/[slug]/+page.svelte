@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
+  import { createLeaveGuard } from "$lib/shared/browser/unsaved_changes.svelte";
   import { api } from "$lib/api";
   import { buildDirectoryTree } from "$lib/shared/utils/tree";
   import { formatFloatUptoPrecision } from "$lib/shared/formatters/currency";
@@ -18,7 +20,7 @@
   import * as toast from "$lib/shared/ui/toast";
   import { isNumber } from "es-toolkit";
   import { onMount } from "svelte";
-  import { beforeNavigate, goto } from "$app/navigation";
+  import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import FileTree from "$lib/features/ledger/components/FileTree.svelte";
   import FileModal from "$lib/features/ledger/components/FileModal.svelte";
@@ -80,29 +82,18 @@
     },
   ];
 
-  let cancelled = false;
-  beforeNavigate(async ({ cancel }) => {
-    if ($sheetEditorState.hasUnsavedChanges) {
-      const confirmed = confirm(
-        "You have unsaved changes. Are you sure you want to leave?",
-      );
-      if (!confirmed) {
-        cancel();
-        cancelled = true;
-      } else {
-        $sheetEditorState = assign({}, $sheetEditorState, {
-          hasUnsavedChanges: false,
-        });
-      }
-    }
-  });
+  const leaveGuard = createLeaveGuard(
+    () => $sheetEditorState.hasUnsavedChanges,
+    () => {
+      $sheetEditorState = assign({}, $sheetEditorState, {
+        hasUnsavedChanges: false,
+      });
+    },
+  );
 
   async function navigate(url: string) {
+    if (!(await leaveGuard.ask())) return false;
     await goto(url, { noScroll: true });
-    if (cancelled) {
-      cancelled = false;
-      return false;
-    }
     return true;
   }
 
@@ -247,6 +238,17 @@
     }
   }
 </script>
+
+<ConfirmDialog
+  open={leaveGuard.open}
+  title="Leave this page?"
+  description="You have unsaved changes that will be lost."
+  confirmLabel="Leave"
+  cancelLabel="Stay"
+  variant="danger"
+  onconfirm={leaveGuard.leave}
+  oncancel={leaveGuard.stay}
+/>
 
 <FileModal
   bind:open={modalOpen}

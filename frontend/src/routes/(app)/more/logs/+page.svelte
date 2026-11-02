@@ -10,7 +10,7 @@
   import Badge from "$lib/shared/ui/Badge.svelte";
   import Button from "$lib/shared/ui/Button.svelte";
   import Card from "$lib/shared/ui/Card.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
 
   let logs: Log[] = $state([]);
   let searchQuery = $state("");
@@ -240,13 +240,16 @@
 
       {#if filteredLogs.length === 0}
         <div class="py-16">
-          <ZeroState item={[]}>
-            <p class="text-sm text-muted-foreground">
-              {logs.length === 0
-                ? "No logs recorded yet."
-                : "No logs matching current filters."}
-            </p>
-          </ZeroState>
+          <EmptyState
+            item={[]}
+            icon="fa-scroll"
+            title={logs.length === 0
+              ? "No logs recorded yet"
+              : "No logs match the filters"}
+            description={logs.length === 0
+              ? "Log entries will appear here as Paisa runs."
+              : "Try different filters or a different search."}
+          />
         </div>
       {:else}
         <VirtualList

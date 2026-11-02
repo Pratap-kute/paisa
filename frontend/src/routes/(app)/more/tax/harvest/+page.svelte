@@ -2,7 +2,7 @@
   import { api } from "$lib/api";
   import { formatCurrency } from "$lib/shared/formatters/currency";
   import { formatFloat } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatShare } from "$lib/shared/formatters/currency";
   import { restName } from "$lib/domain/account";
   import type { Harvestable } from "$lib/domain/tax";
   import {
@@ -145,7 +145,7 @@
         />
         <Metric
           label="Overall Harvestable Ratio"
-          value={formatPercentage(portfolioMetrics.overallRatio / 100, 1)}
+          value={formatShare(portfolioMetrics.overallRatio / 100)}
           secondary="of total held units"
         />
       </MetricStrip>

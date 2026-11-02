@@ -2464,6 +2464,13 @@ const docTemplate = `{
                     "additionalProperties": {
                         "$ref": "#/definitions/dto.CapitalGainResponse"
                     }
+                },
+                "fy_totals": {
+                    "description": "FYTotals sums each financial year across accounts. A net loss owes no\ntax, so the short and long term tax are never negative.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.FYCapitalGainResponse"
+                    }
                 }
             }
         },
@@ -2653,6 +2660,14 @@ const docTemplate = `{
                     }
                 },
                 "checkingBalances": {},
+                "expensePace": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ExpensePaceResponse"
+                        }
+                    ],
+                    "x-nullable": true
+                },
                 "expenses": {
                     "$ref": "#/definitions/dto.PeriodicPostingsSummaryResponse"
                 },
@@ -2872,6 +2887,21 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ExpensePaceResponse": {
+            "type": "object",
+            "properties": {
+                "overBudget": {
+                    "description": "OverBudget is omitted when the projection is within the budget.",
+                    "type": "number"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "projectedExpenses": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.ExpenseResponse": {
             "type": "object",
             "properties": {
@@ -2984,6 +3014,74 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.GoalIntelligenceResponse": {
+            "type": "object",
+            "properties": {
+                "activeContributionMonths": {
+                    "type": "integer"
+                },
+                "actualMonthlyContribution": {
+                    "type": "number"
+                },
+                "annualReturn": {
+                    "type": "number"
+                },
+                "attention": {
+                    "type": "string"
+                },
+                "configuredCompletionDate": {
+                    "type": "string"
+                },
+                "contributionMonthsObserved": {
+                    "type": "integer"
+                },
+                "deadlineSource": {
+                    "type": "string"
+                },
+                "delayMonths": {
+                    "type": "integer"
+                },
+                "paceCoverage": {
+                    "type": "number"
+                },
+                "paceGap": {
+                    "type": "number"
+                },
+                "progressRatio": {
+                    "type": "number"
+                },
+                "projectedCompletionDate": {
+                    "type": "string"
+                },
+                "projectionSource": {
+                    "type": "string"
+                },
+                "reasons": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "remainingAmount": {
+                    "type": "number"
+                },
+                "requiredMonthlyContribution": {
+                    "type": "number"
+                },
+                "scheduleStatus": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "targetDate": {
+                    "type": "string"
+                },
+                "validTarget": {
+                    "type": "boolean"
+                }
+            }
+        },
         "dto.GoalSummariesResponse": {
             "type": "object",
             "properties": {
@@ -3012,6 +3110,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "intelligence": {
+                    "$ref": "#/definitions/dto.GoalIntelligenceResponse"
                 },
                 "name": {
                     "type": "string"
@@ -4062,6 +4163,10 @@ const docTemplate = `{
                 "amount": {
                     "type": "number"
                 },
+                "annualized_return": {
+                    "description": "Compound annual rate in percent, omitted for lots held under a year.",
+                    "type": "number"
+                },
                 "balance": {
                     "type": "number"
                 },
@@ -4076,6 +4181,9 @@ const docTemplate = `{
                 },
                 "forecast": {
                     "type": "boolean"
+                },
+                "holding_days": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -4112,6 +4220,10 @@ const docTemplate = `{
                 },
                 "transaction_note": {
                     "type": "string"
+                },
+                "unrealized_gain": {
+                    "description": "Set for open commodity lots only (see service.ComputePostingReturn).",
+                    "type": "number"
                 }
             }
         },

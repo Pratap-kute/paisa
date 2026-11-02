@@ -6,7 +6,7 @@
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
 
   let breakdowns: LiabilityBreakdown[] = $state([]);
   let isLoading = $state(true);
@@ -51,11 +51,12 @@
         {/each}
       </div>
     {:else if !hasBreakdowns}
-      <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          <strong class="text-foreground">Hurray!</strong> You have no liabilities.
-        </p>
-      </ZeroState>
+      <EmptyState
+        item={[]}
+        icon="fa-circle-check"
+        title="No liabilities"
+        description="There are no loans, credit cards or other liabilities in your journal."
+      />
     {:else}
       <div
         class="max-w-full overflow-auto rounded-[var(--paisa-radius-md)] border border-border-subtle"

@@ -73,6 +73,16 @@ goals:
 	require.Empty(t, summaries[3].ContributionHistory)
 	detail := GetGoalDetails(db, "savings", "House")
 	require.Equal(t, summaries[2].ContributionHistory, detail["contributionHistory"])
+	// The backend owns the projections; summary and detail agree on them.
+	house := summaries[2].Intelligence
+	require.True(t, house.ValidTarget)
+	require.Equal(t, "active", house.State)
+	require.NotNil(t, house.TargetDate)
+	require.Equal(t, "2027-03-31", *house.TargetDate)
+	require.NotNil(t, house.RequiredMonthlyContribution)
+	require.Equal(t, 3, house.ContributionMonthsObserved)
+	require.Equal(t, house, detail["intelligence"])
+	require.Equal(t, "no-deadline", summaries[0].Intelligence.ScheduleStatus)
 	raw, err := json.Marshal(summaries)
 	require.NoError(t, err)
 	require.Contains(t, string(raw), "contributionHistory")

@@ -1,8 +1,8 @@
 {
   "budget": {
-    "availableForBudgeting": 994.95,
     "budgetsByMonth": {},
-    "checkingBalance": 994.95
+    "checkingBalance": 994.95,
+    "availableForBudgeting": 994.95
   },
   "cashFlows": [
     {
@@ -29,8 +29,43 @@
   "checkingBalances": {
     "asset_breakdowns": {}
   },
+  "expensePace": null,
   "expenses": {},
   "goalSummaries": [],
+  "investmentPerformance": {
+    "startDate": "2021-04-01",
+    "endDate": "2022-02-07",
+    "account": "",
+    "openingValue": 0,
+    "closingValue": 10025.05,
+    "contributions": 10005.05,
+    "withdrawals": 0,
+    "netContribution": 10005.05,
+    "portfolioChange": 10025.05,
+    "investmentReturn": 20,
+    "periodReturn": null,
+    "sinceInceptionXirr": 0.0217,
+    "returnUnavailableReason": "insufficient_valuation_data",
+    "quality": {
+      "status": "partial",
+      "reasons": [
+        {
+          "code": "valuation_fallback",
+          "commodity": "AAPL",
+          "date": "2022-02-07"
+        }
+      ]
+    },
+    "openingQuotes": [],
+    "closingQuotes": [
+      {
+        "commodity": "AAPL",
+        "date": "2022-01-15",
+        "source": "trade"
+      }
+    ]
+  },
+  "investmentPerformanceError": null,
   "networth": {
     "networth": {
       "date": "2022-02-07T23:59:59.999999999Z",
@@ -139,39 +174,5 @@
       "fileName": "main.ledger",
       "note": ""
     }
-  ],
-  "investmentPerformanceError": null,
-  "investmentPerformance": {
-    "startDate": "2021-04-01",
-    "endDate": "2022-02-07",
-    "account": "",
-    "openingValue": 0,
-    "closingValue": 10025.05,
-    "contributions": 10005.05,
-    "withdrawals": 0,
-    "netContribution": 10005.05,
-    "portfolioChange": 10025.05,
-    "investmentReturn": 20,
-    "periodReturn": null,
-    "sinceInceptionXirr": 0.0217,
-    "returnUnavailableReason": "insufficient_valuation_data",
-    "quality": {
-      "status": "partial",
-      "reasons": [
-        {
-          "code": "valuation_fallback",
-          "commodity": "AAPL",
-          "date": "2022-02-07"
-        }
-      ]
-    },
-    "openingQuotes": [],
-    "closingQuotes": [
-      {
-        "commodity": "AAPL",
-        "date": "2022-01-15",
-        "source": "trade"
-      }
-    ]
-  }
+  ]
 }

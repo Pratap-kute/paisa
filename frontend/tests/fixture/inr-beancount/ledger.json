@@ -142,7 +142,9 @@
       "note": "",
       "transaction_note": "",
       "market_amount": 804.42048,
-      "balance": 10
+      "balance": 10,
+      "unrealized_gain": 0,
+      "holding_days": 27
     },
     {
       "date": "2022-01-11T00:00:00Z",
@@ -250,7 +252,9 @@
       "note": "",
       "transaction_note": "",
       "market_amount": 10000,
-      "balance": 100
+      "balance": 100,
+      "unrealized_gain": 0,
+      "holding_days": 29
     },
     {
       "date": "2022-01-09T00:00:00Z",
@@ -304,7 +308,9 @@
       "note": "",
       "transaction_note": "",
       "market_amount": 7963.762752,
-      "balance": 0.76
+      "balance": 0.76,
+      "unrealized_gain": 0,
+      "holding_days": 30
     },
     {
       "date": "2022-01-07T00:00:00Z",
@@ -322,7 +328,9 @@
       "note": "",
       "transaction_note": "",
       "market_amount": 80218.4,
-      "balance": 800
+      "balance": 800,
+      "unrealized_gain": 218.4,
+      "holding_days": 31
     },
     {
       "date": "2022-01-07T00:00:00Z",

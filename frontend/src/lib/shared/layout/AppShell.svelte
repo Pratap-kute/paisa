@@ -9,14 +9,18 @@
   import CommandPalette from "./CommandPalette.svelte";
   import Badge from "$lib/shared/ui/Badge.svelte";
   import Spinner from "$lib/shared/ui/Spinner.svelte";
-  import { financialYear } from "$lib/domain/time";
+  import { financialYear, resolveFinancialYear } from "$lib/domain/time";
   import {
     dateMax,
     dateMin,
     dateRangeOption,
     month,
     year,
+    refreshNeedsConfirmation,
+    confirmRefresh,
+    cancelRefresh,
   } from "../../../store";
+  import ConfirmDialog from "$lib/shared/ui/ConfirmDialog.svelte";
   import {
     cashflowExpenseDepth,
     cashflowExpenseDepthAllowed,
@@ -313,6 +317,17 @@
   );
   let showYearlyDepth = $derived(pathname === "/cash_flow/yearly");
 
+  // The year store starts empty and the available range changes once a page has
+  // loaded its data, so keep the year within the range (latest by default).
+  $effect(() => {
+    if (!showFinancialYearPicker) return;
+    const available = forEachFinancialYear($dateMin, $dateMax)
+      .reverse()
+      .map(financialYear);
+    const next = resolveFinancialYear($year, available);
+    if (next !== $year) year.set(next);
+  });
+
   const navLinkClass =
     "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-surface-hover";
   const navLinkActiveClass = "bg-primary-subtle font-semibold text-primary";
@@ -605,7 +620,7 @@
       <button
         type="button"
         onclick={() => (commandPaletteOpen = true)}
-        class="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-surface-raised text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+        class="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle bg-surface-raised text-muted-foreground transition-colors hover:text-foreground pointer-coarse:h-11 pointer-coarse:w-11 lg:hidden"
         aria-label="Search"
       >
         <i class="fa-solid fa-magnifying-glass text-xs"></i>
@@ -714,3 +729,14 @@
 </div>
 
 <CommandPalette bind:open={commandPaletteOpen} />
+
+<ConfirmDialog
+  open={$refreshNeedsConfirmation}
+  title="Discard unsaved changes?"
+  description="You have unsaved changes. Refreshing will discard them."
+  confirmLabel="Discard"
+  cancelLabel="Keep editing"
+  variant="danger"
+  onconfirm={confirmRefresh}
+  oncancel={cancelRefresh}
+/>

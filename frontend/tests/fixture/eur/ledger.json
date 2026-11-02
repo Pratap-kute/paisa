@@ -16,7 +16,9 @@
       "note": "",
       "transaction_note": "",
       "market_amount": 10025.05,
-      "balance": 1
+      "balance": 1,
+      "unrealized_gain": 20,
+      "holding_days": 33
     },
     {
       "date": "2022-01-05T00:00:00Z",

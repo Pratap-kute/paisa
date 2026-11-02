@@ -85,8 +85,6 @@ export interface DashboardAttentionInput {
   comparisonPeriod?: string;
 }
 
-export const MIN_EXPENSE_PROJECTION_DAYS = 3;
-
 const attentionSeverities = new Set(["critical", "warning"]);
 const budgetInsightTypes = new Set(["budget_overspent", "budget_risk"]);
 
@@ -110,41 +108,21 @@ function sortInsights(insights: Insight[]): Insight[] {
     );
 }
 
-export function buildExpensePace(
-  currentMonthExpenses: number,
+// The backend projects the current month's spending at the pace so far and
+// compares it with the month's budget. This only maps it to the metric status,
+// and only for the month the dashboard is showing.
+export function expensePaceFor(
+  pace:
+    | { period: string; projectedExpenses: number; overBudget?: number }
+    | null
+    | undefined,
   period: string,
-  asOf: Dayjs | null | undefined,
-  plannedBudget?: number,
 ): ExpensePace | undefined {
-  const currentDate = asOf?.isValid() ? asOf : now();
-  if (
-    period !== currentDate.format("YYYY-MM") ||
-    !Number.isFinite(currentMonthExpenses) ||
-    currentMonthExpenses <= 0
-  )
-    return undefined;
-
-  const elapsedDays = currentDate.date();
-  const daysInMonth = currentDate.daysInMonth();
-  if (
-    elapsedDays < MIN_EXPENSE_PROJECTION_DAYS ||
-    elapsedDays > daysInMonth ||
-    daysInMonth <= 0
-  )
-    return undefined;
-
-  const projectedExpenses = (currentMonthExpenses / elapsedDays) * daysInMonth;
-  if (!Number.isFinite(projectedExpenses)) return undefined;
-  const validBudget =
-    Number.isFinite(plannedBudget) && (plannedBudget ?? 0) > 0;
-  const overBudget =
-    validBudget && projectedExpenses > plannedBudget!
-      ? projectedExpenses - plannedBudget!
-      : undefined;
+  if (!pace || pace.period !== period) return undefined;
   return {
-    projectedExpenses,
-    overBudget,
-    status: overBudget === undefined ? "neutral" : "warning",
+    projectedExpenses: pace.projectedExpenses,
+    overBudget: pace.overBudget,
+    status: pace.overBudget === undefined ? "neutral" : "warning",
   };
 }
 
@@ -249,10 +227,10 @@ export function buildDashboardAttention(
     });
   }
 
-  const goalAttention = summarizeGoalHealth(
-    input.goals ?? [],
-    input.asOf,
-  ).attention.slice(0, 1);
+  const goalAttention = summarizeGoalHealth(input.goals ?? []).attention.slice(
+    0,
+    1,
+  );
   for (const { goal, analysis } of goalAttention) {
     result.push({
       id: `goal:${

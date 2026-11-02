@@ -2,7 +2,6 @@
   import { api } from "$lib/api";
   import SavingsGoalIntelligence from "$lib/features/goals/components/SavingsGoalIntelligence.svelte";
   import type { GoalSummary } from "$lib/domain/goals_models";
-  import { calculateGoalProgress } from "$lib/domain/goal_intelligence";
   import type { Forecast, SavingsGoalProgress } from "$lib/domain/goals_models";
   import type { Point } from "$lib/domain/goals_models";
   import type { Posting } from "$lib/domain/ledger";
@@ -95,10 +94,7 @@
 
     progressPercent = Math.max(
       0,
-      Math.min(
-        100,
-        calculateGoalProgress(savingsTotal, targetSavings).progressRatio * 100,
-      ),
+      Math.min(100, (detail.intelligence?.progressRatio ?? 0) * 100),
     );
 
     ({ pmt, targetDate } = solvePMTOrNper(

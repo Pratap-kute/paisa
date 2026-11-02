@@ -27,7 +27,7 @@
   import Page from "$lib/shared/layout/Page.svelte";
   import PageHeader from "$lib/shared/layout/PageHeader.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import { max as arrayMax, minBy } from "$lib/shared/utils/collection";
 
   let graph: Record<string, Graph> | undefined = $state();
@@ -241,11 +241,12 @@
     {/snippet}
 
     {#if !isLoading && isEmpty}
-      <ZeroState item={[]}>
-        <p class="text-sm text-muted-foreground">
-          No cash-flow activity for the selected year.
-        </p>
-      </ZeroState>
+      <EmptyState
+        item={[]}
+        icon="fa-chart-line"
+        title="No cash flow in this year"
+        description="Income and expenses for the selected financial year will appear here."
+      />
     {:else}
       {#if !isLoading && !isEmpty}
         <LegendCard {legends} clazz="mb-3 paisa-overflow-x-auto" />

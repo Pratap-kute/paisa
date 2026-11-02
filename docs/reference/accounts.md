@@ -68,6 +68,11 @@ accounts as well, for example `#!ledger
 Assets:Checking:HDFC` and
 `#!ledger Assets:Checking:AXIS`.
 
+On the Asset Balance page a checking account shows its balance but no gain or
+XIRR. When a group holds both checking and investment accounts, its gain covers
+the investment accounts only, so it is not the group's market value minus its net
+investment.
+
 The distinction is necessary because Checking account is an asset, but not an
 investment. So you ideally you want to disregard them when you calculate your
 absolute returns etc.

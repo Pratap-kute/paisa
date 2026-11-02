@@ -26,6 +26,13 @@ commodities. Start with the question you want to answer:
 performance where prices are available. **Net Worth** plots assets, liabilities,
 and investment performance over a selected period.
 
+Balance, Allocation, Goals, Gain and Net Worth all use postings dated up to
+today, so a future-dated posting is not counted until its date arrives. Cash is
+not an investment: `Assets:Checking` accounts show their balance but no gain or
+XIRR, and a group that holds both checking and investments reports the gain of
+its investment accounts only. That gain is therefore not the group's market
+value minus its net investment.
+
 Missing or stale prices can affect converted balances and performance figures.
 Use [Commodities and prices](commodities.md) to configure price sources and
 [Doctor](doctor.md) to find valuation problems.

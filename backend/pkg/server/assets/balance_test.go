@@ -72,7 +72,8 @@ func TestComputeBreakdown(t *testing.T) {
 		got := ComputeBreakdown(db, ps, true, "Assets:Checking:SBI")
 		assert.True(t, got.InvestmentAmount.IsZero(), "Checking account should have 0 investmentAmount")
 		assert.Equal(t, "500", got.MarketAmount.String())
-		assert.Equal(t, "500", got.GainAmount.String(), "gainAmount should equal marketAmount when net investment is zero")
+		assert.True(t, got.GainAmount.IsZero(), "cash is not an investment so it has no gain")
+		assert.True(t, got.XIRR.IsZero(), "cash is not an investment so it has no XIRR")
 		assert.True(t, got.AbsoluteReturn.IsZero(), "absoluteReturn should be 0 when investmentAmount is 0")
 	})
 }
@@ -118,4 +119,45 @@ func TestInterestMustBelongToSameTransaction(t *testing.T) {
 	got := GetBalance(db)["asset_breakdowns"].(map[string]AssetBreakdown)["Assets:FixedDeposit:SBI"]
 	assert.Equal(t, "1000", got.InvestmentAmount.String())
 	assert.Equal(t, "0", got.GainAmount.String())
+}
+
+// The balance page must use the same definition of investment, withdrawal and
+// gain as the net worth and gain pages, with cash accounts left out.
+func TestBreakdownMatchesNetworthDefinition(t *testing.T) {
+	db := assetTestDB(t)
+	mk := func(id, account, commodity string, qty, amt float64, day int) posting.Posting {
+		p := assetPosting(account, commodity, qty, amt)
+		p.TransactionID = id
+		p.Date = time.Date(2024, time.January, day, 0, 0, 0, 0, time.UTC)
+		return p
+	}
+	all := []posting.Posting{
+		mk("salary", "Assets:Checking:SBI", "INR", 2000, 2000, 1),
+		mk("salary", "Income:Salary", "INR", -2000, -2000, 1),
+		mk("buy", "Assets:Equity:MF", "MF", 5, 500, 2),
+		mk("buy", "Assets:Checking:SBI", "INR", -500, -500, 2),
+	}
+	require.NoError(t, db.Create(&all).Error)
+	assetPostings := []posting.Posting{all[0], all[2], all[3]}
+
+	breakdowns := ComputeBreakdowns(db, assetPostings, true)
+	want := service.ComputeNetworth(db, []posting.Posting{all[2]})
+
+	root := breakdowns["Assets"]
+	assert.Equal(t, want.InvestmentAmount.String(), root.InvestmentAmount.String())
+	assert.Equal(t, want.WithdrawalAmount.String(), root.WithdrawalAmount.String())
+	assert.Equal(t, want.GainAmount.String(), root.GainAmount.String())
+	assert.Equal(t, "2000", root.MarketAmount.String(), "market value still includes the cash balance")
+
+	cash := breakdowns["Assets:Checking"]
+	assert.Equal(t, "1500", cash.MarketAmount.String())
+	assert.True(t, cash.InvestmentAmount.IsZero())
+	assert.True(t, cash.GainAmount.IsZero())
+	assert.True(t, cash.XIRR.IsZero())
+
+	var gainTotal decimal.Decimal
+	for _, g := range service.GetGain(db) {
+		gainTotal = gainTotal.Add(g.Networth.GainAmount)
+	}
+	assert.Equal(t, gainTotal.String(), root.GainAmount.String(), "balance rollup equals the gain page total")
 }

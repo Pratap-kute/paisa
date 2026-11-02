@@ -175,6 +175,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+@utility paisa-tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 @utility paisa-type-section-heading {
   font-family: var(--paisa-font-ui);
   font-size: 1rem;
@@ -266,6 +270,15 @@
 .paisa4-control:focus-visible {
   outline: 2px solid var(--paisa-primary);
   outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .paisa4-button,
+  .paisa4-icon-action,
+  .paisa4-control {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .paisa4-button:disabled,
@@ -507,6 +520,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Words such as "Not configured" are cut off by the ellipsis in a narrow tile, so
+ * on phones they wrap at a size that fits. Wider layouts keep the regular size.
+ */
+@media (max-width: 640px) {
+  .paisa4-metric-text {
+    white-space: normal;
+    font-size: 1.375rem;
+    line-height: 28px;
+  }
+}
+
 .paisa4-metric-meta {
   display: flex;
   gap: 8px;
@@ -715,4 +740,40 @@
 
 ::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+/* Spec section 15: no transitions or animation when reduced motion is requested. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --paisa-transition-fast: 0ms;
+    --paisa-transition-normal: 0ms;
+    --default-transition-duration: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
+}
+
+/*
+ * Comparison tables scroll sideways inside their container; this keeps the
+ * identifying column in view. Set the offset with a left-* utility, for
+ * example left-0, or left-10 for a column that follows a 2.5rem one.
+ */
+.paisa-sticky-col {
+  position: sticky;
+  z-index: 1;
+  background-color: var(--paisa-surface);
+}
+
+th.paisa-sticky-col {
+  background-color: var(--paisa-surface-raised);
+}
+
+tr:hover > .paisa-sticky-col {
+  background-color: var(--paisa-surface-hover);
 }

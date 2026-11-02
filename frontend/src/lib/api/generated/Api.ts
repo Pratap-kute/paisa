@@ -135,6 +135,11 @@ export interface DtoCapitalGainResponse {
 
 export interface DtoCapitalGainsResponse {
   capital_gains?: Record<string, DtoCapitalGainResponse>;
+  /**
+   * FYTotals sums each financial year across accounts. A net loss owes no
+   * tax, so the short and long term tax are never negative.
+   */
+  fy_totals?: Record<string, DtoFYCapitalGainResponse>;
 }
 
 export interface DtoCashFlowResponse {
@@ -201,6 +206,7 @@ export interface DtoDashboardResponse {
   budget?: DtoBudgetsSummaryResponse;
   cashFlows?: DtoCashFlowResponse[];
   checkingBalances?: any;
+  expensePace?: DtoExpensePaceResponse | null;
   expenses?: DtoPeriodicPostingsSummaryResponse;
   goalSummaries?: DtoGoalSummaryResponse[];
   investmentPerformance?: DtoInvestmentPerformance | null;
@@ -273,6 +279,13 @@ export interface DtoErrorResponse {
   message?: string;
 }
 
+export interface DtoExpensePaceResponse {
+  /** OverBudget is omitted when the projection is within the budget. */
+  overBudget?: number;
+  period?: string;
+  projectedExpenses?: number;
+}
+
 export interface DtoExpenseResponse {
   expenses?: DtoPostingResponse[];
   graph?: Record<string, DtoGraphResponse>;
@@ -312,6 +325,29 @@ export interface DtoGoalDetailResponse {
   yearlyExpenseSource?: string;
 }
 
+export interface DtoGoalIntelligenceResponse {
+  activeContributionMonths?: number;
+  actualMonthlyContribution?: number;
+  annualReturn?: number;
+  attention?: string;
+  configuredCompletionDate?: string;
+  contributionMonthsObserved?: number;
+  deadlineSource?: string;
+  delayMonths?: number;
+  paceCoverage?: number;
+  paceGap?: number;
+  progressRatio?: number;
+  projectedCompletionDate?: string;
+  projectionSource?: string;
+  reasons?: string[];
+  remainingAmount?: number;
+  requiredMonthlyContribution?: number;
+  scheduleStatus?: string;
+  state?: string;
+  targetDate?: string;
+  validTarget?: boolean;
+}
+
 export interface DtoGoalSummariesResponse {
   goals?: DtoGoalSummaryResponse[];
 }
@@ -321,6 +357,7 @@ export interface DtoGoalSummaryResponse {
   current?: number;
   icon?: string;
   id?: string;
+  intelligence?: DtoGoalIntelligenceResponse;
   name?: string;
   paymentPerPeriod?: number;
   priority?: number;
@@ -672,11 +709,14 @@ export interface DtoPortfolioAllocationResponse {
 export interface DtoPostingResponse {
   account?: string;
   amount?: number;
+  /** Compound annual rate in percent, omitted for lots held under a year. */
+  annualized_return?: number;
   balance?: number;
   commodity?: string;
   date?: string;
   file_name?: string;
   forecast?: boolean;
+  holding_days?: number;
   id?: number;
   market_amount?: number;
   note?: string;
@@ -689,6 +729,8 @@ export interface DtoPostingResponse {
   transaction_end_line?: number;
   transaction_id?: string;
   transaction_note?: string;
+  /** Set for open commodity lots only (see service.ComputePostingReturn). */
+  unrealized_gain?: number;
 }
 
 export interface DtoPostingsResponse {
@@ -1023,10 +1065,8 @@ export interface ApiConfig<SecurityDataType = unknown> {
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<
-  D extends unknown,
-  E extends unknown = unknown,
-> extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown>
+  extends Response {
   data: D;
   error: E;
 }

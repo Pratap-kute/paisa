@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api } from "$lib/api";
   import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatShare } from "$lib/shared/formatters/currency";
   import type { CreditCardBill } from "$lib/domain/liabilities";
   import type { CreditCardSummary } from "$lib/domain/liabilities";
   import { goto } from "$app/navigation";
@@ -129,7 +129,7 @@
       />
       <Metric
         label="Utilization"
-        value={formatPercentage(utilization, 2)}
+        value={formatShare(utilization)}
         secondary={`Limit ${formatCurrency(creditCard.creditLimit)}`}
         status={utilization > 0.8 ? "warning" : "neutral"}
       />

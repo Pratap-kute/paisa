@@ -3,6 +3,7 @@ package generator
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -86,4 +87,29 @@ func TestDemoExpensesPreserveCheckingReserve(t *testing.T) {
 
 	assert.GreaterOrEqual(t, state.Balance, 10_000.0)
 	assert.LessOrEqual(t, state.CreditBalance, 0.0)
+}
+
+func TestDemoLoanIsNeverOverpaid(t *testing.T) {
+	ledgerPath := filepath.Join(t.TempDir(), "main.ledger")
+	ledgerFile, err := os.Create(ledgerPath)
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, ledgerFile.Close()) })
+
+	state := GeneratorState{
+		Balance:      500_000,
+		Ledger:       ledgerFile,
+		Rent:         10_000,
+		LoanBalance:  1_000, // less than one regular payment
+		YearlySalary: 1_000_000,
+	}
+	emitExpense(&state, time.Date(2014, time.January, 1, 0, 0, 0, 0, time.UTC))
+	assert.Equal(t, 0.0, state.LoanBalance, "the final payment clears the loan exactly")
+
+	// Once it is repaid no further loan payment is emitted.
+	emitExpense(&state, time.Date(2014, time.February, 1, 0, 0, 0, 0, time.UTC))
+	assert.Equal(t, 0.0, state.LoanBalance)
+	require.NoError(t, ledgerFile.Sync())
+	raw, err := os.ReadFile(ledgerPath)
+	require.NoError(t, err)
+	assert.Equal(t, 1, strings.Count(string(raw), "Liabilities:Homeloan"), "only the final payment touches the loan")
 }

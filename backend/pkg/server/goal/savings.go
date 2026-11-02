@@ -31,15 +31,16 @@ func getSavingsSummary(ps []posting.Posting, conf config.SavingsGoal) GoalSummar
 }
 
 func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
-	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").All(), conf.Accounts)
+	savings := accounting.FilterByGlob(query.Init(db).Like("Assets:%").UntilToday().All(), conf.Accounts)
 	savings = service.PopulateMarketPrice(db, savings)
 	savingsTotal := accounting.CurrentBalance(savings)
 	investmentTotal := accounting.CostBalance(savings)
 
-	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").All(), conf.Accounts)
+	savingsWithCapitalGains := accounting.FilterByGlob(query.Init(db).Like("Assets:%", "Income:CapitalGains:%").UntilToday().All(), conf.Accounts)
 	savingsWithCapitalGains = service.PopulateMarketPrice(db, savingsWithCapitalGains)
 
 	balances := assets.ComputeBreakdowns(db, savingsWithCapitalGains, false)
+	history := contributionHistory(db, savingsWithCapitalGains, conf.Accounts)
 
 	return gin.H{
 		"type":                "savings",
@@ -56,6 +57,7 @@ func getSavingsDetail(db *gorm.DB, conf config.SavingsGoal) gin.H {
 		"xirr":                service.XIRR(db, savingsWithCapitalGains),
 		"postings":            savingsWithCapitalGains,
 		"balances":            balances,
-		"contributionHistory": contributionHistory(db, savingsWithCapitalGains, conf.Accounts),
+		"contributionHistory": history,
+		"intelligence":        analyze("savings", savingsTotal, decimal.NewFromFloat(conf.Target), conf.TargetDate, conf.Rate, conf.PaymentPerPeriod, history),
 	}
 }

@@ -1,36 +1,23 @@
 import type { Posting } from "$lib/domain/ledger";
-import { now } from "$lib/domain/time";
 
 export interface Change {
   class: string;
+  // Unrealized gain of the lot; zero when it has none.
   value: number;
-  percentage: number;
+  // Compound annual rate in percent; undefined for lots held under a year.
+  annualizedReturn?: number;
   days: number;
 }
 
+// The backend owns the return calculation; this only reads it and picks a
+// colour class.
 export function change(p: Posting): Change {
-  let changePercentage = 0,
-    days = 0,
-    changeAmount = 0,
-    changeClass = "";
-  if (p.commodity !== USER_CONFIG.default_currency) {
-    days = now().diff(p.date, "days");
-    if (p.quantity > 0 && days > 0) {
-      changeAmount = p.market_amount - p.amount;
-      if (changeAmount > 0) {
-        changeClass = "paisa-text-success";
-      } else if (changeAmount < 0) {
-        changeClass = "paisa-text-danger";
-      }
-      const perYear = 365 / days;
-      changePercentage = (changeAmount / p.amount) * 100 * perYear;
-    }
-  }
-
+  const value = p.unrealized_gain ?? 0;
   return {
-    class: changeClass,
-    value: changeAmount,
-    percentage: changePercentage,
-    days,
+    class:
+      value > 0 ? "paisa-text-success" : value < 0 ? "paisa-text-danger" : "",
+    value,
+    annualizedReturn: p.annualized_return,
+    days: p.holding_days ?? 0,
   };
 }

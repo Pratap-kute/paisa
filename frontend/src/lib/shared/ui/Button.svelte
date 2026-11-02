@@ -102,6 +102,14 @@
     outline-offset: 2px;
   }
 
+  /* Touch devices get a 44px hit area; fine pointers keep the dense sizes. */
+  @media (pointer: coarse) {
+    .paisa-button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
   .paisa-button:disabled {
     cursor: not-allowed;
     opacity: 0.5;

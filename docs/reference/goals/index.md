@@ -20,6 +20,21 @@ More goal types will be added in the future. Feel free to create a
 [issue tracker](https://github.com/Pratap-kute/paisa/issues) if you have
 any suggestions.
 
+### Goal analysis
+
+Each goal shows an analysis that Paisa calculates from your postings as of
+today:
+
+- **Progress** and the remaining amount.
+- **Required contribution:** the monthly amount needed to meet the target date
+  (savings goals with a target date).
+- **Pace:** your recent monthly contributions compared with the required one.
+- **Projected completion:** when the goal is expected to finish at the current
+  pace, and whether that is on track or delayed against the target date.
+
+The goal summary on the dashboard and the Goals page read the same analysis, so
+they always agree.
+
 ### Create Goal
 
 To add a new goal, go to the `Configuration` page and expand the goals section.

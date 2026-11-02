@@ -7,9 +7,9 @@
       "marketAmount": 101145.7000000304,
       "balanceUnits": 0,
       "latestPrice": 0,
-      "xirr": 12.85,
-      "gainAmount": 12343.2625128704,
-      "absoluteReturn": 0.1248942153111966
+      "xirr": 3.2,
+      "gainAmount": 245.7,
+      "absoluteReturn": 0.002486093824057
     },
     "Assets:Checking": {
       "group": "Assets:Checking",
@@ -18,8 +18,8 @@
       "marketAmount": 12097.5625128704,
       "balanceUnits": 0,
       "latestPrice": 0,
-      "xirr": 48.45,
-      "gainAmount": 12097.5625128704,
+      "xirr": 0,
+      "gainAmount": 0,
       "absoluteReturn": 0
     },
     "Assets:Dollar": {

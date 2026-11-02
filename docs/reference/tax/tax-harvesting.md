@@ -6,7 +6,8 @@ description: "Configure tax harvesting so Paisa shows when a commodity is eligib
 
 Gains from asset types like Mutual Fund, Stock are subject to capital gains tax.
 The taxation rate itself differs based on how long you hold your investment,
-whether it's debt or equity, whether you have more than 1 Lakh gains in a year
+whether it's debt or equity, whether you have more than 1 Lakh (1.25 Lakh from 23 Jul 2024) of
+long term equity gains in a year
 etc. To further complicate things, there might be exit load applicable.
 
 Paisa takes a generic approach and let the user configure when a commodity is

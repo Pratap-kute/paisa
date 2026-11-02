@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LoadingState from "$lib/shared/ui/LoadingState.svelte";
   import type { PageData } from "./$types";
   import Page from "$lib/shared/layout/Page.svelte";
   import Section from "$lib/shared/layout/Section.svelte";
@@ -24,12 +25,5 @@
     </Section>
   </Page>
 {:else}
-  <div
-    class="flex items-center justify-center gap-3 py-16 text-sm text-muted-foreground"
-  >
-    <div
-      class="h-5 w-5 animate-spin rounded-full border-2 border-border-strong border-t-[var(--paisa-primary)]"
-    ></div>
-    <span>Loading editor...</span>
-  </div>
+  <LoadingState message="Loading editor..." />
 {/if}

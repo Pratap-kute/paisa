@@ -1,4 +1,5 @@
 <script lang="ts">
+  import dayjs from "dayjs";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { api, type DtoInvestmentPerformance } from "$lib/api";
@@ -136,7 +137,9 @@
         onchange={selectPeriod}
       />
       {#if result}<span class="text-sm text-muted-foreground"
-          >{result.startDate} → {result.endDate}</span
+          >{dayjs(result.startDate).format("DD MMM YYYY")} → {dayjs(
+            result.endDate,
+          ).format("DD MMM YYYY")}</span
         >{/if}
     </div>
     {#if result?.quality}

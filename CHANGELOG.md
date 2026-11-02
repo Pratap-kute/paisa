@@ -1,5 +1,23 @@
 # CHANGELOG
 
+### Unreleased
+
+#### Accounting and calculation fixes
+- Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost.
+- Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed.
+- Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax.
+- Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only.
+- Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included.
+- The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them.
+- Demo data: the last home loan payment is capped at the balance owed.
+
+#### UI and UX
+- Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones.
+- Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix.
+- Financial year pickers default to the latest year with data, so yearly pages no longer open blank.
+- Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser `confirm()` for refresh, template deletion, config reset and unsaved changes.
+- Touch targets are 44px on touch screens, and animations are disabled under reduced motion.
+
 ### 0.9.3 (2026-10-30) - [@Pratap-kute](https://github.com/Pratap-kute), [@netmaxt3r](https://github.com/netmaxt3r)
 
 #### Bug Fixes & Reliability

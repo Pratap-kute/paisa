@@ -1,5 +1,6 @@
 <script lang="ts">
   import { now } from "$lib/domain/time";
+  import { recurringLabel } from "$lib/domain/recurring_analysis";
   import type { TransactionSequence } from "$lib/domain/recurring";
   import {
     intervalText,
@@ -7,7 +8,7 @@
     totalRecurring,
   } from "$lib/domain/transaction_sequence";
   import { scheduleIcon } from "$lib/features/cash_flow/schedule_presentation";
-  import { formatCurrencyCrude } from "$lib/shared/formatters/currency";
+  import { formatCurrency } from "$lib/shared/formatters/currency";
   import Badge from "$lib/shared/ui/Badge.svelte";
 
   interface Props {
@@ -26,7 +27,7 @@
 {#if schedule && n}
   <div class="mb-0 text-center">
     <div class="truncate text-xs font-medium text-foreground">
-      {transactionSequece.key}
+      {recurringLabel(transactionSequece.key)}
     </div>
     <div class="my-1">
       <Badge variant="neutral" size="sm" rounded
@@ -58,7 +59,7 @@
           </span>
         </div>
         <span class="font-bold"
-          >{formatCurrencyCrude(totalRecurring(transactionSequece))}</span
+          >{formatCurrency(totalRecurring(transactionSequece))}</span
         >
         <span class="text-xs"
           >{n.isBefore(now()) ? "past due" : `due ${n.fromNow()}`}</span

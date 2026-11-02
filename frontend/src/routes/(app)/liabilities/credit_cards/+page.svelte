@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api } from "$lib/api";
   import CreditCardCard from "$lib/features/liabilities/components/CreditCardCard.svelte";
-  import ZeroState from "$lib/shared/ui/ZeroState.svelte";
+  import EmptyState from "$lib/shared/ui/EmptyState.svelte";
   import { helpUrl } from "$lib/shared/browser/navigation";
   import type { CreditCardSummary } from "$lib/domain/liabilities";
   import { onMount } from "svelte";
@@ -34,14 +34,18 @@
   />
 
   <Section>
-    <ZeroState item={!isEmpty}>
-      <p class="text-sm text-muted-foreground">
-        <strong class="text-foreground">Oops!</strong> You haven't configured
-        any credit cards yet. Checkout the
-        <a href={helpUrl("credit-card")} class="text-primary underline">docs</a> page
-        to get started.
-      </p>
-    </ZeroState>
+    <EmptyState
+      item={!isEmpty}
+      icon="fa-credit-card"
+      title="No credit cards configured"
+      description="Add a credit card account to track statements and utilization."
+    >
+      {#snippet actions()}
+        <a href={helpUrl("credit-card")} class="text-primary underline"
+          >Read the guide</a
+        >
+      {/snippet}
+    </EmptyState>
 
     {#if !isEmpty}
       <div

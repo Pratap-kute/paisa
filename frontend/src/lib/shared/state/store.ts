@@ -118,20 +118,30 @@ export function setAllowedDateRange(dates: dayjs.Dayjs[]) {
 }
 
 export const willRefresh = writable<number>(0);
-export function refresh(): boolean {
-  if (get(editorState).hasUnsavedChanges) {
-    const confirmed = confirm(
-      "You have unsaved changes. Are you sure you want to leave?",
-    );
-    if (!confirmed) {
-      return false;
-    } else {
-      editorState.update((current) => ({
-        ...current,
-        hasUnsavedChanges: false,
-      }));
-    }
-  }
+// True while the app asks whether to discard unsaved editor changes before it
+// reloads its data. The dialog lives in AppShell and settles it with
+// confirmRefresh or cancelRefresh.
+export const refreshNeedsConfirmation = writable<boolean>(false);
+
+function reload() {
   willRefresh.update((n) => n + 1);
-  return true;
+}
+
+/** Reloads the data, first asking when the editor holds unsaved changes. */
+export function refresh() {
+  if (get(editorState).hasUnsavedChanges) {
+    refreshNeedsConfirmation.set(true);
+    return;
+  }
+  reload();
+}
+
+export function confirmRefresh() {
+  refreshNeedsConfirmation.set(false);
+  editorState.update((current) => ({ ...current, hasUnsavedChanges: false }));
+  reload();
+}
+
+export function cancelRefresh() {
+  refreshNeedsConfirmation.set(false);
 }

@@ -90,6 +90,25 @@ export function formatPercentage(value: number, precision = 0): string {
   );
 }
 
+/**
+ * Formats a return the backend reports in percent, such as XIRR or an
+ * annualized return (6 means 6%). Use formatPercentage for ratios (0.06).
+ */
+export function formatReturnPercent(
+  value: number | null | undefined,
+  precision = 2,
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "—";
+  }
+  return `${formatFloat(value, precision)}%`;
+}
+
+/** Shares, progress and utilisation of a total: one decimal, for a ratio (0.656). */
+export function formatShare(ratio: number): string {
+  return formatPercentage(ratio, 1);
+}
+
 export function formatFixedWidthFloat(
   value: number,
   width: number,
@@ -110,14 +129,19 @@ export function formatFixedWidthFloat(
   return formatted;
 }
 
-/** Commodity labels retain the same locale, precision and privacy policy as money elsewhere. */
+/**
+ * Commodity labels retain the same locale, precision and privacy policy as money
+ * elsewhere. The default currency is implied and never written out.
+ */
 export function formatCommodityAmount(
   value: number | undefined,
   commodity?: string,
   masked = get(obscure),
 ): string {
   if (value === undefined) return "Amount unavailable";
-  return `${formatCurrency(masked ? 0 : value)}${
-    commodity ? ` ${commodity}` : ""
-  }`;
+  const label =
+    commodity && commodity !== USER_CONFIG.default_currency
+      ? ` ${commodity}`
+      : "";
+  return `${formatCurrency(masked ? 0 : value)}${label}`;
 }

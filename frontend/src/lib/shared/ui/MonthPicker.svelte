@@ -81,7 +81,7 @@
 </script>
 
 <div
-  class="relative inline-flex h-8 items-stretch rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface shadow-xs"
+  class="relative inline-flex h-8 items-stretch pointer-coarse:h-[46px] rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface shadow-xs"
 >
   <button
     type="button"
@@ -208,6 +208,13 @@
     font-size: 0.8125rem;
     cursor: pointer;
     transition: background-color 150ms ease;
+  }
+
+  @media (pointer: coarse) {
+    .paisa-month-nav,
+    .paisa-month-trigger {
+      min-width: 2.75rem;
+    }
   }
 
   .paisa-month-nav:hover:not(:disabled),

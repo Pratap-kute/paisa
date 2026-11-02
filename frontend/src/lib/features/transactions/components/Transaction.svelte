@@ -12,12 +12,14 @@
 
   let { compact = false, t }: Props = $props();
 
+  // Ledger convention: a positive posting debits its account, a negative one
+  // credits it.
   const debits = (t: Transaction) => {
-    return t.postings.filter((p) => p.amount < 0);
+    return t.postings.filter((p) => p.amount >= 0);
   };
 
   const credits = (t: Transaction) => {
-    return t.postings.filter((p) => p.amount >= 0);
+    return t.postings.filter((p) => p.amount < 0);
   };
 </script>
 
@@ -36,12 +38,12 @@
 
   <!-- Debits Column -->
   <div class="paisa-tx-postings-debit">
-    <Postings postings={debits(t)} />
+    <Postings postings={debits(t)} absolute={!compact} />
   </div>
 
   <!-- Credits Column -->
   <div class="paisa-tx-postings-credit">
-    <Postings postings={credits(t)} />
+    <Postings postings={credits(t)} absolute={!compact} />
   </div>
 </div>
 
@@ -84,8 +86,8 @@
   }
 
   .paisa-tx-date {
-    font-size: 0.6875rem;
-    font-family: var(--paisa-font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
     color: var(--paisa-muted-foreground);
     font-weight: 500;
   }

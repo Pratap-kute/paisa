@@ -3,6 +3,10 @@ import { expect, test } from "vitest";
 import type { DashboardAttentionItem } from "../summary";
 import DashboardInsightGateway from "./DashboardInsightGateway.svelte";
 
+// A browser collapses the whitespace between markup lines; textContent does not.
+const rendered = (node: Element | null | undefined) =>
+  (node?.textContent ?? "").replace(/\s+/g, " ").trim();
+
 function item(index: number): DashboardAttentionItem {
   return {
     id: `item-${index}`,
@@ -24,7 +28,7 @@ test("renders an honest empty attention state and period-aware insights link", (
     items: [],
     period: "2026-08",
   });
-  expect(container.textContent).toContain(
+  expect(rendered(container)).toContain(
     "No material issues detected this month",
   );
   expect(container.querySelector("a")?.getAttribute("href")).toBe(
@@ -37,7 +41,7 @@ test("renders one keyboard-accessible attention link", () => {
     items: [item(1)],
     period: "2026-08",
   });
-  expect(container.textContent).toContain("1 item needs attention");
+  expect(rendered(container)).toContain("1 item needs attention");
   const links = container.querySelectorAll(
     "[data-testid='dashboard-attention-item']",
   );
@@ -51,7 +55,7 @@ test("renders a maximum presentation set of three attention rows", () => {
     items: [item(1), item(2), item(3)],
     period: "2026-08",
   });
-  expect(container.textContent).toContain("3 items need attention");
+  expect(rendered(container)).toContain("3 items need attention");
   expect(
     container.querySelectorAll("[data-testid='dashboard-attention-item']"),
   ).toHaveLength(3);
@@ -64,6 +68,6 @@ test("does not present failure as financial health", () => {
     period: "2026-08",
     failed: true,
   });
-  expect(container.textContent).toContain("Insights unavailable");
-  expect(container.textContent).not.toContain("No material issues");
+  expect(rendered(container)).toContain("Insights unavailable");
+  expect(rendered(container)).not.toContain("No material issues");
 });

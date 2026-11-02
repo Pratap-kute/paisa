@@ -32,7 +32,7 @@
         <tr
           class="border-b border-border-subtle bg-surface-raised text-left font-medium text-muted-foreground"
         >
-          <th class="px-3 py-2">Purchase Date</th>
+          <th class="paisa-sticky-col left-0 px-3 py-2">Purchase Date</th>
           <th class="px-3 py-2 text-right">Purchase Price</th>
           <th class="px-3 py-2">Sell Date</th>
           <th class="px-3 py-2 text-right">Sell Price</th>
@@ -46,7 +46,9 @@
       <tbody class="divide-y divide-[var(--paisa-border-subtle)]">
         {#each fyCapitalGain.posting_pairs as pp}
           <tr class="transition-colors hover:bg-surface-hover">
-            <td class="whitespace-nowrap px-3 py-2 text-foreground">
+            <td
+              class="paisa-sticky-col left-0 whitespace-nowrap px-3 py-2 text-foreground"
+            >
               {pp.purchase.date.format(DATE_FORMAT)}
             </td>
             <td

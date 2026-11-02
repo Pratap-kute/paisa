@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test } from "vitest";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime.js";
 import customParseFormat from "dayjs/plugin/customParseFormat.js";
-import type { GoalSummary } from "$lib/domain/goals_models";
+import { goal, type GoalScenario } from "$lib/domain/testing/goal_fixtures";
 import { obscure } from "$lib/shared/state/persisted";
 import type { Action } from "svelte/action";
 import GoalSummaryCard from "./GoalSummaryCard.svelte";
@@ -12,24 +12,6 @@ import SavingsGoalIntelligence from "./SavingsGoalIntelligence.svelte";
 
 dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
-function goal(overrides: Partial<GoalSummary> = {}): GoalSummary {
-  return {
-    type: "savings",
-    id: "House",
-    name: "House",
-    icon: "",
-    current: 240000,
-    target: 600000,
-    targetDate: "2027-03-31",
-    rate: 0,
-    priority: 1,
-    contributionHistory: ["2026-06", "2026-07", "2026-08"].map((month) => ({
-      month,
-      amount: 60000,
-    })),
-    ...overrides,
-  };
-}
 beforeEach(() => {
   globalThis.__now = dayjs("2026-09-05");
   obscure.set(false);
@@ -38,20 +20,13 @@ afterEach(() => {
   cleanup();
   obscure.set(false);
 });
-for (const [amount, label] of [
-  [60000, "On track"],
-  [48000, "Behind plan"],
-  [10000, "At risk"],
-] as const) {
+for (const [scenario, label] of [
+  ["onTrack", "On track"],
+  ["behind", "Behind plan"],
+  ["atRisk", "At risk"],
+] as [GoalScenario, string][]) {
   test(`card renders ${label} and monthly pace`, () => {
-    const view = render(GoalSummaryCard, {
-      goal: goal({
-        contributionHistory: goal().contributionHistory?.map((m) => ({
-          ...m,
-          amount,
-        })),
-      }),
-    });
+    const view = render(GoalSummaryCard, { goal: goal(scenario) });
     expect(view.getByText(label)).toBeInTheDocument();
     expect(view.getByText("Required")).toBeInTheDocument();
     expect(view.getAllByText("60K/mo").length).toBeGreaterThanOrEqual(1);
@@ -60,7 +35,7 @@ for (const [amount, label] of [
 }
 test("overdue is factual and includes remaining amount", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({ targetDate: "2026-09-04" }),
+    goal: goal("overdue", { targetDate: "2026-09-04" }),
   });
   expect(view.getByText("Target date has passed")).toBeInTheDocument();
   expect(view.getByText("3.6L")).toBeInTheDocument();
@@ -68,7 +43,7 @@ test("overdue is factual and includes remaining amount", () => {
 });
 test("short history displays required pace without a warning", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({ contributionHistory: [{ month: "2026-08", amount: 900000 }] }),
+    goal: goal("shortHistory"),
   });
   expect(
     view.getByText("More contribution history needed"),
@@ -78,7 +53,7 @@ test("short history displays required pace without a warning", () => {
 });
 test("completed goal has no contribution warnings and shows Target funded", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({ current: 720000, targetDate: "2020-01-01" }),
+    goal: goal("completed", { current: 720000, targetDate: "2020-01-01" }),
   });
   expect(view.getByText("Goal reached")).toBeInTheDocument();
   expect(view.queryByText("Required")).toBeNull();
@@ -87,7 +62,7 @@ test("completed goal has no contribution warnings and shows Target funded", () =
 });
 test("retirement renders funding and expense basis without schedule claims", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({
+    goal: goal("retirementActive", {
       type: "retirement",
       swr: 4,
       yearlyExpense: 24000,
@@ -102,7 +77,7 @@ test("retirement renders funding and expense basis without schedule claims", () 
 });
 test("retirement target funded and configured expense source", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({
+    goal: goal("retirementFunded", {
       type: "retirement",
       current: 600000,
       swr: 4,
@@ -110,7 +85,7 @@ test("retirement target funded and configured expense source", () => {
       yearlyExpenseSource: "configured",
     }),
   });
-  expect(view.getByText("100%+ funded")).toBeInTheDocument();
+  expect(view.getByText("100.0% funded")).toBeInTheDocument();
   expect(view.getByText("Target funded")).toBeInTheDocument();
   expect(
     view.getByText("Using configured yearly expenses"),
@@ -118,9 +93,8 @@ test("retirement target funded and configured expense source", () => {
 });
 test("no deadline remains explicit with a payment projection", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({
+    goal: goal("noDeadlinePayment", {
       targetDate: "",
-      contributionHistory: [],
       paymentPerPeriod: 15000,
     }),
   });
@@ -134,9 +108,13 @@ test("empty overview has no invented metrics or warnings", () => {
 test("attention excludes unassessable and completed goals", () => {
   const view = render(GoalHealthSummary, {
     goals: [
-      goal({ id: "late", name: "Late", targetDate: "2020-01-01" }),
-      goal({ id: "done", name: "Done", current: 600000 }),
-      goal({ id: "new", name: "New", contributionHistory: [] }),
+      goal("overdueLong", {
+        id: "late",
+        name: "Late",
+        targetDate: "2020-01-01",
+      }),
+      goal("completedExact", { id: "done", name: "Done", current: 600000 }),
+      goal("noHistory", { id: "new", name: "New" }),
     ],
   });
   expect(view.getByRole("link", { name: "Late" })).toBeInTheDocument();
@@ -146,7 +124,7 @@ test("attention excludes unassessable and completed goals", () => {
 test("card renders compact primary metrics and accessible drag handle", () => {
   const actionMock: Action = () => ({ update: () => {}, destroy: () => {} });
   const view = render(GoalSummaryCard, {
-    goal: goal({ current: 240000, target: 600000 }),
+    goal: goal("onTrack", { current: 240000, target: 600000 }),
     action: actionMock,
   });
   expect(view.getByText("2.4L")).toBeInTheDocument();
@@ -157,7 +135,7 @@ test("card renders compact primary metrics and accessible drag handle", () => {
 });
 test("long goal name wraps/truncates safely without crashing", () => {
   const view = render(GoalSummaryCard, {
-    goal: goal({
+    goal: goal("onTrack", {
       name: "A very long descriptive name for a home down payment and family emergency fund",
     }),
   });
@@ -168,12 +146,7 @@ test("long goal name wraps/truncates safely without crashing", () => {
   ).toBeInTheDocument();
 });
 test("privacy masks current, target, required pace, recent pace and remaining on cards and details", async () => {
-  const input = goal({
-    contributionHistory: goal().contributionHistory?.map((m) => ({
-      ...m,
-      amount: 48000,
-    })),
-  });
+  const input = goal("behind");
   const card = render(GoalSummaryCard, { goal: input });
   const detail = render(SavingsGoalIntelligence, {
     goal: input,

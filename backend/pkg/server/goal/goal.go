@@ -17,7 +17,7 @@ type GoalSummary = dto.GoalSummaryResponse
 func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	goals := config.GetConfig().Goals
 	summaries := make([]GoalSummary, 0, len(goals.Retirement)+len(goals.Savings))
-	assetPostings := query.Init(db).Like("Assets:%").All()
+	assetPostings := query.Init(db).Like("Assets:%").UntilToday().All()
 	assetPostings = service.PopulateMarketPrice(db, assetPostings)
 	// Reuse asset history: older activity is needed to retain observed zero
 	// months. Only the additional capital-gain offsets need a new bounded query.
@@ -29,12 +29,15 @@ func GetGoalSummaries(db *gorm.DB) []GoalSummary {
 	}
 
 	for _, goal := range goals.Retirement {
-		summaries = append(summaries, getRetirementSummary(db, assetPostings, goal))
+		summary := getRetirementSummary(db, assetPostings, goal)
+		summary.Intelligence = analyze(summary.Type, summary.Current, summary.Target, summary.TargetDate, summary.Rate, summary.PaymentPerPeriod, nil)
+		summaries = append(summaries, summary)
 	}
 
 	for _, goal := range config.GetConfig().Goals.Savings {
 		summary := getSavingsSummary(assetPostings, goal)
 		summary.ContributionHistory = contributionHistory(db, contributionPostings, goal.Accounts)
+		summary.Intelligence = analyze(summary.Type, summary.Current, summary.Target, summary.TargetDate, summary.Rate, summary.PaymentPerPeriod, summary.ContributionHistory)
 		summaries = append(summaries, summary)
 	}
 

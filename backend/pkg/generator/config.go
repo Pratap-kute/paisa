@@ -447,7 +447,8 @@ func emitExpense(state *GeneratorState, start time.Time) {
 	if state.LoanBalance > 0 && availableAfterCardPayment >= monthlyInterest {
 		emi := math.Min(availableAfterCardPayment, 30000.0)
 		interest := (state.LoanBalance * 0.08 / 12)
-		principal := emi - interest
+		// The last payment never repays more than what is still owed.
+		principal := math.Min(emi-interest, state.LoanBalance)
 		state.LoanBalance -= principal
 		emit("EMI", "Expenses:Interest:Homeloan", interest, 1.0)
 		emit("EMI", "Liabilities:Homeloan", principal, 1.0)

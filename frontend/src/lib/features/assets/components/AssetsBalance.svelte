@@ -8,7 +8,7 @@
     formatCurrencyChange,
     indendedAssetAccountName,
     nonZeroCurrency,
-    nonZeroFloatChange,
+    nonZeroReturnChange,
     nonZeroPercentageChange,
   } from "$lib/shared/tables/formatters";
 
@@ -85,7 +85,7 @@
       title: "XIRR",
       field: "xirr",
       hozAlign: "right",
-      formatter: nonZeroFloatChange,
+      formatter: nonZeroReturnChange,
       cssClass: "paisa-tabular-nums",
       visible: !compact,
     },

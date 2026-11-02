@@ -216,3 +216,7 @@
 .tabulator .paisa-text-muted {
   color: var(--paisa-muted-foreground);
 }
+
+.tabulator .tabulator-cell {
+  font-variant-numeric: tabular-nums;
+}

@@ -9,6 +9,7 @@
     formatCurrency,
     formatFloat,
     formatPercentage,
+    formatReturnPercent,
   } from "$lib/shared/formatters/currency";
   import { obscure } from "$lib/shared/state/persisted";
   import Section from "$lib/shared/layout/Section.svelte";
@@ -74,7 +75,7 @@
       value={money(health.actualMonthlyContribution)}
       secondary={`Per month · ${health.contributionMonthsObserved} completed months observed`}
     />
-    <Metric label="Historical XIRR" value={`${formatFloat(xirr)}%`} />
+    <Metric label="Historical XIRR" value={formatReturnPercent(xirr)} />
     <Metric
       label="Net Investment"
       value={money(investmentTotal)}

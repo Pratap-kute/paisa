@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatCurrency } from "$lib/shared/formatters/currency";
-  import { formatPercentage } from "$lib/shared/formatters/currency";
+  import { formatShare } from "$lib/shared/formatters/currency";
   import { postingUrl } from "$lib/shared/browser/navigation";
   import { restName } from "$lib/domain/account";
   import type { Posting } from "$lib/domain/ledger";
@@ -207,17 +207,17 @@
         taxRate =
           grossIncome === 0
             ? ""
-            : formatPercentage(sum(taxes) / grossIncome) + " on income";
+            : formatShare(sum(taxes) / grossIncome) + " on income";
         expenseRateValue =
           netIncomeAmount === 0
             ? ""
-            : formatPercentage(sum(expenses) / netIncomeAmount);
+            : formatShare(sum(expenses) / netIncomeAmount);
         expenseRate =
           netIncomeAmount === 0 ? "" : expenseRateValue + " of net income";
         savingRate =
           netIncomeAmount === 0
             ? ""
-            : formatPercentage(sum(investments) / netIncomeAmount) +
+            : formatShare(sum(investments) / netIncomeAmount) +
               " of net income";
       }
     }
@@ -245,7 +245,6 @@
       <Metric
         label="Total Expenses"
         value={expense || "—"}
-        status="negative"
         secondary={postingCountSubtitle}
         loading={isLoading}
       />

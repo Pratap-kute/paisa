@@ -69,6 +69,12 @@
       box-shadow 150ms ease;
   }
 
+  @media (pointer: coarse) {
+    .paisa-boxed-tab {
+      min-height: 44px;
+    }
+  }
+
   .paisa-boxed-tab:focus-visible {
     outline: 2px solid var(--paisa-primary);
     outline-offset: 2px;
