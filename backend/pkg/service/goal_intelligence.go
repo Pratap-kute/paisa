@@ -18,6 +18,8 @@ const (
 
 const goalDateLayout = "2006-01-02"
 
+const goalStateOverdue = "overdue"
+
 type GoalContribution struct {
 	Month  string
 	Amount float64
@@ -275,7 +277,7 @@ func AnalyzeGoal(in GoalInput, asOf time.Time) GoalIntelligence {
 		return result
 	}
 	if deadline != nil && deadline.Before(asOf) {
-		result.State = "overdue"
+		result.State = goalStateOverdue
 		result.Attention = "critical"
 		result.Reasons = append(result.Reasons, "Target date has passed")
 	}
@@ -289,38 +291,58 @@ func AnalyzeGoal(in GoalInput, asOf time.Time) GoalIntelligence {
 			result.ConfiguredCompletionDate = formatGoalDate(*date)
 		}
 	}
-	if deadline != nil && result.State != "overdue" {
+	if deadline != nil && result.State != goalStateOverdue {
 		result.RequiredMonthlyContribution = requiredContribution(in.Current, in.Target, rate, *deadline, asOf)
 	}
 
 	actual := result.ActualMonthlyContribution
 	required := result.RequiredMonthlyContribution
-	if actual != nil && required != nil {
-		if gap := math.Max(*required-*actual, 0); finite(gap) {
-			result.PaceGap = floatPtr(gap)
-		}
-		if *required > 0 && finite(*actual / *required) {
-			result.PaceCoverage = floatPtr(*actual / *required)
-		}
-	}
+	applyPaceGap(&result, actual, required)
 
 	reliable := result.ContributionMonthsObserved >= goalMinimumObservedMonths
-	if deadline != nil && result.State != "overdue" {
-		switch {
-		case required != nil && *required == 0:
-			result.ScheduleStatus = "on-track"
-		case reliable && result.PaceCoverage != nil:
-			result.ScheduleStatus = classifyGoalSchedule(*result.PaceCoverage)
-		default:
-			result.Reasons = append(result.Reasons, "More contribution history needed")
-		}
-		switch result.ScheduleStatus {
-		case "at-risk":
-			result.Attention = "critical"
-		case "behind":
-			result.Attention = "warning"
-		}
+	applyScheduleStatus(&result, deadline, required, reliable)
+	applyProjection(&result, in, deadline, rate, asOf, reliable)
+	return result
+}
+
+// applyPaceGap records how far the recent pace falls short of the required one.
+func applyPaceGap(result *GoalIntelligence, actual, required *float64) {
+	if actual == nil || required == nil {
+		return
 	}
+	if gap := math.Max(*required-*actual, 0); finite(gap) {
+		result.PaceGap = floatPtr(gap)
+	}
+	if *required > 0 && finite(*actual / *required) {
+		result.PaceCoverage = floatPtr(*actual / *required)
+	}
+}
+
+// applyScheduleStatus classifies a goal with a deadline against its recent pace.
+func applyScheduleStatus(result *GoalIntelligence, deadline *time.Time, required *float64, reliable bool) {
+	if deadline == nil || result.State == goalStateOverdue {
+		return
+	}
+	switch {
+	case required != nil && *required == 0:
+		result.ScheduleStatus = "on-track"
+	case reliable && result.PaceCoverage != nil:
+		result.ScheduleStatus = classifyGoalSchedule(*result.PaceCoverage)
+	default:
+		result.Reasons = append(result.Reasons, "More contribution history needed")
+	}
+	switch result.ScheduleStatus {
+	case "at-risk":
+		result.Attention = "critical"
+	case "behind":
+		result.Attention = "warning"
+	}
+}
+
+// applyProjection projects the completion date and how far it is past the deadline.
+func applyProjection(result *GoalIntelligence, in GoalInput, deadline *time.Time, rate float64, asOf time.Time, reliable bool) {
+	actual := result.ActualMonthlyContribution
+	required := result.RequiredMonthlyContribution
 
 	// A short lump sum cannot create a confident actual-pace projection. Without
 	// a deadline, the configured payment can still supply a clearly labelled plan.
@@ -353,5 +375,4 @@ func AnalyzeGoal(in GoalInput, asOf time.Time) GoalIntelligence {
 		result.DelayMonths = new(int)
 		*result.DelayMonths = max(0, delay)
 	}
-	return result
 }
