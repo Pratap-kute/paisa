@@ -1,9 +1,7 @@
 name: Desktop Smoke
 
+# Manual only: run it before a desktop release from the Actions tab.
 on:
-  schedule:
-    # Weekly on Sunday at 02:30 UTC (08:00 IST), plus manual runs.
-    - cron: "30 2 * * 0"
   workflow_dispatch:
 
 concurrency:
@@ -22,7 +20,7 @@ jobs:
         include:
           - os: ubuntu-22.04
             binary: desktop/build/bin/Paisa
-          - os: macos-13
+          - os: macos-14
             binary: desktop/build/bin/Paisa.app/Contents/MacOS/Paisa
           - os: windows-2022
             binary: desktop/build/bin/Paisa.exe
