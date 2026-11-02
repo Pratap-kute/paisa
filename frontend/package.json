@@ -95,19 +95,13 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@happy-dom/global-registrator": "^21.0.4",
-    "@iconify/tools": "^3.0.5",
+    "@iconify/tools": "^5",
     "@types/bun": "^1.4.4",
     "happy-dom": "^21.0.4",
-    "svgtofont": "^4.0.0"
+    "svgtofont": "^6"
   },
   "trustedDependencies": [
     "@parcel/watcher",
     "rolldown"
-  ],
-  "overrides": {
-    "svgo": "^3.3.5",
-    "cookie": "^0.7.0",
-    "@xmldom/xmldom": "^0.8.15",
-    "tar": "^7.5.21"
-  }
+  ]
 }
