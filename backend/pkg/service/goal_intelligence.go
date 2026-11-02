@@ -87,8 +87,6 @@ func formatGoalDate(t time.Time) *string {
 	return &s
 }
 
-func floatPtr(v float64) *float64 { return &v }
-
 // goalPMT and goalNPER use the beginning-of-month payment convention.
 func goalPMT(rate float64, nper int, pv, fv float64) float64 {
 	if nper == 0 {
@@ -188,7 +186,7 @@ func requiredContribution(current, target, annualRate float64, deadline, asOf ti
 	if !finite(value) {
 		return nil
 	}
-	return floatPtr(math.Max(0, value))
+	return new(math.Max(0, value))
 }
 
 func projectedCompletion(current, target, annualRate, payment float64, asOf time.Time) *time.Time {
@@ -271,7 +269,7 @@ func AnalyzeGoal(in GoalInput, asOf time.Time) GoalIntelligence {
 	rate := in.Rate
 	validRate := finite(rate) && rate > -100 && rate <= 100
 	if validRate {
-		result.AnnualReturn = floatPtr(rate)
+		result.AnnualReturn = new(rate)
 	}
 	if result.State == "completed" {
 		return result
@@ -311,10 +309,10 @@ func applyPaceGap(result *GoalIntelligence, actual, required *float64) {
 		return
 	}
 	if gap := math.Max(*required-*actual, 0); finite(gap) {
-		result.PaceGap = floatPtr(gap)
+		result.PaceGap = new(gap)
 	}
 	if *required > 0 && finite(*actual / *required) {
-		result.PaceCoverage = floatPtr(*actual / *required)
+		result.PaceCoverage = new(*actual / *required)
 	}
 }
 
@@ -351,7 +349,7 @@ func applyProjection(result *GoalIntelligence, in GoalInput, deadline *time.Time
 	case reliable:
 		payment = actual
 	case deadline == nil && in.PaymentPerPeriod != 0:
-		payment = floatPtr(in.PaymentPerPeriod)
+		payment = new(in.PaymentPerPeriod)
 	}
 	if payment != nil && finite(*payment) {
 		if date := projectedCompletion(in.Current, in.Target, rate, *payment, asOf); date != nil {

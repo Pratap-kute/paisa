@@ -28,6 +28,12 @@ clean: ## Remove desktop build outputs
 
 ##@ Security & Code Quality
 
-.PHONY: audit vulncheck
-audit vulncheck: ## Run govulncheck vulnerability scanner for desktop
+.PHONY: audit vulncheck govulncheck govulnerability govulnabrity modern modernize modern-fix modernize-fix
+modern modernize: ## Check for desktop code that go fix would modernize (fails if any)
+	go fix -diff ./...
+
+modern-fix modernize-fix: ## Apply the go fix modernizations for desktop
+	go fix ./...
+
+audit vulncheck govulncheck govulnerability govulnabrity: ## Run govulncheck vulnerability scanner for desktop
 	govulncheck ./...
