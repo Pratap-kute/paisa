@@ -65,6 +65,11 @@ adviser, before filing.
 
 ### Not modelled
 
+Rates for `equity35` and `unlisted_equity` do not change with the sale date.
+Debt units bought before 1 Apr 2023 are still taxed under the earlier rules
+(indexation, 20%) even when sold after 23 Jul 2024, when the rules for them
+changed. Check these cases yourself.
+
 The annual long term exemption (₹1.25 lakh from 23 Jul 2024), carrying a loss
 forward to later years, set-off of short term losses against long term gains,
 surcharge and cess, and the 2025 changes to the definition of specified mutual
