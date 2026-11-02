@@ -2464,6 +2464,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Unreleased
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unreleased">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accounting-and-calculation-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Accounting and calculation fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-and-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        UI and UX
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#093-2026-10-30-pratap-kute-netmaxt3r" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3812,6 +3851,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#unreleased" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Unreleased
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Unreleased">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#accounting-and-calculation-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Accounting and calculation fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ui-and-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        UI and UX
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#093-2026-10-30-pratap-kute-netmaxt3r" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -4445,6 +4523,25 @@
 
 
 <h1 id="release-changelog">Release Changelog<a class="headerlink" href="#release-changelog" title="Permanent link">&para;</a></h1>
+<h3 id="unreleased">Unreleased<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h3>
+<h4 id="accounting-and-calculation-fixes">Accounting and calculation fixes<a class="headerlink" href="#accounting-and-calculation-fixes" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost.</li>
+<li>Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed.</li>
+<li>Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax.</li>
+<li>Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only.</li>
+<li>Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included.</li>
+<li>The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them.</li>
+<li>Demo data: the last home loan payment is capped at the balance owed.</li>
+</ul>
+<h4 id="ui-and-ux">UI and UX<a class="headerlink" href="#ui-and-ux" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones.</li>
+<li>Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix.</li>
+<li>Financial year pickers default to the latest year with data, so yearly pages no longer open blank.</li>
+<li>Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser <code>confirm()</code> for refresh, template deletion, config reset and unsaved changes.</li>
+<li>Touch targets are 44px on touch screens, and animations are disabled under reduced motion.</li>
+</ul>
 <h3 id="093-2026-10-30-pratap-kute-netmaxt3r">0.9.3 (2026-10-30) - <a href="https://github.com/Pratap-kute">@Pratap-kute</a>, <a href="https://github.com/netmaxt3r">@netmaxt3r</a><a class="headerlink" href="#093-2026-10-30-pratap-kute-netmaxt3r" title="Permanent link">&para;</a></h3>
 <h4 id="bug-fixes-reliability">Bug Fixes &amp; Reliability<a class="headerlink" href="#bug-fixes-reliability" title="Permanent link">&para;</a></h4>
 <ul>

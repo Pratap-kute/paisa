@@ -3570,6 +3570,12 @@ commodities. Start with the question you want to answer:</p>
 <p><strong>Asset Balance</strong> displays the account hierarchy with market value, cost, and
 performance where prices are available. <strong>Net Worth</strong> plots assets, liabilities,
 and investment performance over a selected period.</p>
+<p>Balance, Allocation, Goals, Gain and Net Worth all use postings dated up to
+today, so a future-dated posting is not counted until its date arrives. Cash is
+not an investment: <code>Assets:Checking</code> accounts show their balance but no gain or
+XIRR, and a group that holds both checking and investments reports the gain of
+its investment accounts only. That gain is therefore not the group's market
+value minus its net investment.</p>
 <p>Missing or stale prices can affect converted balances and performance figures.
 Use <a href="../commodities/">Commodities and prices</a> to configure price sources and
 <a href="../doctor/">Doctor</a> to find valuation problems.</p>

@@ -2457,6 +2457,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-tax-is-calculated" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How tax is calculated
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How tax is calculated">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#not-modelled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Not modelled
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3392,6 +3420,34 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#how-tax-is-calculated" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How tax is calculated
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How tax is calculated">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#not-modelled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Not modelled
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3552,6 +3608,37 @@ the asset class.</p>
 <strong>Slab</strong> rate. Since the tax rate would depend on the person, the whole taxable
 amount is shown instead of the tax. You can multiply this with your slab rate to
 get the tax amount.</p>
+<h2 id="how-tax-is-calculated">How tax is calculated<a class="headerlink" href="#how-tax-is-calculated" title="Permanent link">&para;</a></h2>
+<p>Paisa gives an estimate. Check it against your own records, and with a tax
+adviser, before filing.</p>
+<ul>
+<li><strong>Matching:</strong> sales are matched to purchases first-in, first-out (FIFO).</li>
+<li><strong>Listed equity</strong> (<code>equity</code>, <code>equity65</code>):</li>
+<li>Held for more than a year is long term. Gains on sales before 1 Apr 2018 were
+    exempt.</li>
+<li>Units bought before 1 Feb 2018 are grandfathered: the cost is the higher of
+    your actual cost and the lower of the 31 Jan 2018 price and the sale price,
+    so the rule never creates a loss or makes a loss bigger. Without a price for
+    31 Jan 2018 the actual cost is used.</li>
+<li>The rates follow the <strong>sale date</strong>: 15% short term and 10% long term up to
+    22 Jul 2024, and 20% and 12.5% from 23 Jul 2024.</li>
+<li><strong>Debt funds</strong> (<code>debt</code>): units bought before 1 Apr 2023 and held for more than
+  3 years get indexation and 20% long term tax. Units bought on or after 1 Apr
+  2023 get no indexation and the whole gain is <strong>Taxable at Slab Rate</strong>.</li>
+<li><strong>Yearly totals:</strong> the totals for a financial year add up all accounts, so a
+  loss in one account offsets a gain in another. A year with a net loss owes no
+  tax, so its Short Term and Long Term tax are shown as 0 while the Taxable Gain
+  stays negative.</li>
+</ul>
+<h3 id="not-modelled">Not modelled<a class="headerlink" href="#not-modelled" title="Permanent link">&para;</a></h3>
+<p>Rates for <code>equity35</code> and <code>unlisted_equity</code> do not change with the sale date.
+Debt units bought before 1 Apr 2023 are still taxed under the earlier rules
+(indexation, 20%) even when sold after 23 Jul 2024, when the rules for them
+changed. Check these cases yourself.</p>
+<p>The annual long term exemption (₹1.25 lakh from 23 Jul 2024), carrying a loss
+forward to later years, set-off of short term losses against long term gains,
+surcharge and cess, and the 2025 changes to the definition of specified mutual
+funds.</p>
 
 
 
