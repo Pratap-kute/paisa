@@ -30,14 +30,20 @@ clean: ## Remove backend binaries and Go test cache
 
 ##@ Testing & Code Quality
 
-.PHONY: test lint audit vulncheck format fmt
+.PHONY: test lint modern modernize modern-fix modernize-fix audit vulncheck govulncheck govulnerability govulnabrity format fmt
 test: ensure-static ## Run all Go unit and regression tests
 	go test -count=1 ./...
 
 lint: ensure-static ## Run golangci-lint
 	golangci-lint run
 
-audit vulncheck: ensure-static ## Run govulncheck vulnerability scanner
+modern modernize: ensure-static ## Check for code that go fix would modernize (fails if any)
+	go fix -diff ./...
+
+modern-fix modernize-fix: ensure-static ## Apply the go fix modernizations
+	go fix ./...
+
+audit vulncheck govulncheck govulnerability govulnabrity: ensure-static ## Run govulncheck vulnerability scanner
 	govulncheck ./...
 
 format fmt: ## Format Go source code

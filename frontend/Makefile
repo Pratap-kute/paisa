@@ -64,11 +64,11 @@ test-coverage: ## Generate frontend test coverage report
 
 ##@ Code Quality & Security
 
-.PHONY: lint check typecheck format fmt audit vulncheck
+.PHONY: lint check typecheck format fmt audit vulncheck govulncheck govulnerability govulnabrity
 lint: ## Run Biome linter
 	bun run lint
 
-audit vulncheck: ## Run Bun dependency vulnerability audit
+audit vulncheck govulncheck govulnerability govulnabrity: ## Run Bun dependency vulnerability audit
 	bun run audit
 
 check typecheck: ## Run TypeScript and Svelte template type checks

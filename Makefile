@@ -122,7 +122,7 @@ test-coverage: ## Generate frontend test coverage report
 
 ##@ Code Quality & Security
 
-.PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck audit audit-all audit-frontend audit-backend audit-desktop vulncheck vulncheck-all vulncheck-frontend vulncheck-backend vulncheck-desktop vulncheck-go format fmt
+.PHONY: quality lint lint-go go-lint lint-backend lint-frontend check typecheck modern modernize modern-fix modernize-fix modern-backend modernize-backend modern-desktop modernize-desktop modern-fix-backend modern-fix-desktop audit audit-all audit-frontend audit-backend audit-desktop vulncheck vulncheck-all vulncheck-frontend vulncheck-backend vulncheck-desktop vulncheck-go govulncheck govulncheck-all govulncheck-backend govulncheck-desktop govulncheck-go govulnabrity govulnerability format fmt
 quality: lint test-backend ## Run full code quality pipeline (linters, typecheck, tests)
 
 lint: lint-frontend typecheck lint-backend ## Run all linters (Biome, TypeScript, GolangCI)
@@ -133,18 +133,34 @@ lint-backend lint-go go-lint: ## Run golangci-lint for Go backend
 lint-frontend: ## Run Biome linter for frontend code
 	$(MAKE) -C frontend lint
 
+modern modernize: modern-backend modern-desktop ## Check that go fix has nothing left to modernize in backend and desktop
+
+modern-backend modernize-backend: ## Run the go fix check for backend
+	$(MAKE) -C backend modern
+
+modern-desktop modernize-desktop: ## Run the go fix check for desktop
+	$(MAKE) -C desktop modern
+
+modern-fix modernize-fix: modern-fix-backend modern-fix-desktop ## Apply go fix modernizations in backend and desktop
+
+modern-fix-backend: ## Apply go fix modernizations for backend
+	$(MAKE) -C backend modern-fix
+
+modern-fix-desktop: ## Apply go fix modernizations for desktop
+	$(MAKE) -C desktop modern-fix
+
 check typecheck: ## Run TypeScript and Svelte template type checks
 	$(MAKE) -C frontend check
 
-audit vulncheck audit-all vulncheck-all: audit-frontend audit-backend audit-desktop ## Run vulnerability checks across frontend, backend, and desktop
+audit vulncheck govulncheck govulnerability govulnabrity audit-all vulncheck-all govulncheck-all: audit-frontend audit-backend audit-desktop ## Run vulnerability checks across frontend, backend, and desktop
 
 audit-frontend vulncheck-frontend: ## Run vulnerability audit for frontend (bun audit)
 	$(MAKE) -C frontend audit
 
-audit-backend vulncheck-backend vulncheck-go: ## Run vulnerability check for backend (govulncheck)
+audit-backend vulncheck-backend vulncheck-go govulncheck-backend govulncheck-go: ## Run vulnerability check for backend (govulncheck)
 	$(MAKE) -C backend audit
 
-audit-desktop vulncheck-desktop: ## Run vulnerability check for desktop (govulncheck)
+audit-desktop vulncheck-desktop govulncheck-desktop: ## Run vulnerability check for desktop (govulncheck)
 	$(MAKE) -C desktop audit
 
 format fmt: ## Format frontend and Go source files
