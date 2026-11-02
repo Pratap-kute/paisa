@@ -191,7 +191,8 @@ func ComputeCapitalGains(db *gorm.DB, account string, commodity config.Commodity
 func CapitalGainTotals(gains map[string]CapitalGain) map[string]FYCapitalGain {
 	totals := make(map[string]FYCapitalGain)
 	for _, accountGain := range gains {
-		for fy, g := range accountGain.FY {
+		for fy := range accountGain.FY {
+			g := accountGain.FY[fy]
 			total := totals[fy]
 			total.Units = total.Units.Add(g.Units)
 			total.PurchasePrice = total.PurchasePrice.Add(g.PurchasePrice)
@@ -200,7 +201,8 @@ func CapitalGainTotals(gains map[string]CapitalGain) map[string]FYCapitalGain {
 			totals[fy] = total
 		}
 	}
-	for fy, total := range totals {
+	for fy := range totals {
+		total := totals[fy]
 		total.Tax.ShortTerm = decimal.Max(total.Tax.ShortTerm, decimal.Zero)
 		total.Tax.LongTerm = decimal.Max(total.Tax.LongTerm, decimal.Zero)
 		totals[fy] = total
