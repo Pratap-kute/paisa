@@ -53,6 +53,20 @@ export default defineConfig({
   },
   build: {
     target: "es2021",
+    rolldownOptions: {
+      output: {
+        // Keep each vendor chunk below Vite's 500 kB warning limit by
+        // splitting the large libraries and the icon tables apart.
+        codeSplitting: {
+          groups: [
+            { name: "zrender", test: /node_modules[\\/]zrender/, priority: 30 },
+            { name: "echarts", test: /node_modules[\\/]echarts/, priority: 20 },
+            { name: "icons-arcticons", test: /fonts[\\/]arcticons-info/, priority: 10 },
+            { name: "icons-mdi", test: /fonts[\\/]mdi-info/, priority: 10 },
+          ],
+        },
+      },
+    },
   },
   plugins: [
     tailwindcss(),
