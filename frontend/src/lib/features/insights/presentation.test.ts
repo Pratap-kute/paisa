@@ -1,10 +1,11 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, afterAll } from "bun:test";
 import type { Insight } from "#lib/domain/insights";
 
 Object.defineProperty(globalThis, "localStorage", {
   configurable: true,
   value: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
 });
+const previousUserConfig = globalThis.USER_CONFIG;
 globalThis.USER_CONFIG = {
   accounts: [],
   default_currency: "INR",
@@ -27,6 +28,15 @@ const base: Insight = {
   severity: "warning",
   score: 50,
 };
+
+// Do not leak this file's USER_CONFIG into test files that run after it.
+afterAll(() => {
+  if (previousUserConfig === undefined) {
+    delete (globalThis as { USER_CONFIG?: unknown }).USER_CONFIG;
+  } else {
+    globalThis.USER_CONFIG = previousUserConfig;
+  }
+});
 
 describe("insight presentation refinements", () => {
   test("uses absolute impact and a ratio for an extreme expense percentage", () => {
