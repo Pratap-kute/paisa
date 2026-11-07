@@ -4618,7 +4618,7 @@ end-user guide and may change without notice.</p>
 </div>
 <blockquote>
 <p><strong>Document Status:</strong> As-Built Reference Specification (Post-Migration)<br />
-<strong>Current Stack:</strong> Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI + ECharts 6<br />
+<strong>Current Stack:</strong> Svelte 5 + SvelteKit 3 + Tailwind CSS v4 + Bits UI + ECharts 6<br />
 <strong>Source-of-Truth Priority:</strong> Existing Paisa Business Logic &amp; Functionality &gt; Existing Route/Component Code &gt; Existing Workflows &gt; This Specification &gt; Visual Mockups<br />
 <strong>Canonical File:</strong> <code>docs/design/paisa-ui-spec.md</code></p>
 </blockquote>
@@ -4649,7 +4649,7 @@ end-user guide and may change without notice.</p>
 <p>The Paisa frontend uses modern styling and component ergonomics while preserving the proven application core.</p>
 <h3 id="21-core-framework">2.1 Core Framework<a class="headerlink" href="#21-core-framework" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Framework:</strong> Svelte 5 with SvelteKit 2.</li>
+<li><strong>Framework:</strong> Svelte 5 with SvelteKit 3.</li>
 <li><strong>State Management:</strong> Svelte 5 Runes (<code>$state</code>, <code>$derived</code>, <code>$effect</code>, <code>$props</code>, <code>$bindable</code>) and existing persisted Svelte stores (<code>store.ts</code>, <code>persisted_store.ts</code>).</li>
 </ul>
 <h3 id="22-styling-direction">2.2 Styling Direction<a class="headerlink" href="#22-styling-direction" title="Permanent link">&para;</a></h3>
@@ -5074,7 +5074,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 </span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>│       Balance (/assets/balance)                             │
 </span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>│       Net Worth (/assets/networth)                          │
 </span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>│       Investment (/assets/investment)                       │
-</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>│       Gain (/assets/gain)                                   │
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>│       Performance (/assets/gain)                            │
 </span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>│       Allocation (/assets/allocation)                       │
 </span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>│       Analysis (/assets/analysis)                           │
 </span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>│   ▾ Liabilities                                             │
@@ -5083,34 +5083,36 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 </span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>│       Repayment (/liabilities/repayment)                    │
 </span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>│       Interest (/liabilities/interest)                      │
 </span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>│   Goals (/more/goals)                                       │
-</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>├─────────────────────────────────────────────────────────────┤
-</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>│ LEDGER                                                      │
-</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>│   Transactions (/ledger/transaction)                        │
-</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>│   Import (/ledger/import)                                   │
-</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>│   Editor (/ledger/editor)                                   │
-</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>│   Postings (/ledger/posting)                                │
-</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>│   Prices (/ledger/price)                                    │
-</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>├─────────────────────────────────────────────────────────────┤
-</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>│ TAX (Conditionally visible when USER_CONFIG.currency == INR)│
-</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>│   Tax Capital Gains (/more/tax/capital_gains)               │
-</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>│   Tax Harvest (/more/tax/harvest)                           │
-</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>│   Schedule AL (/more/tax/schedule_al)                       │
-</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>├─────────────────────────────────────────────────────────────┤
-</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>│ TOOLS                                                       │
-</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>│   Sheets (/more/sheets)                                     │
-</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>├─────────────────────────────────────────────────────────────┤
-</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>│ SYSTEM / BOTTOM                                             │
-</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>│   Configuration (/more/config)                              │
-</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>│   ▾ System (Expandable Group)                               │
-</span><span id="__span-4-51"><a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a>│       Doctor (/more/doctor)                                 │
-</span><span id="__span-4-52"><a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a>│       Logs (/more/logs)                                     │
-</span><span id="__span-4-53"><a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a>│   About (/more/about)                                       │
-</span><span id="__span-4-54"><a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a>└─────────────────────────────────────────────────────────────┘
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>│   Scenarios (/more/scenarios)                               │
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>├─────────────────────────────────────────────────────────────┤
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>│ LEDGER                                                      │
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>│   Transactions (/ledger/transaction)                        │
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>│   Import (/ledger/import) (hidden when read-only)           │
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>│   Editor (/ledger/editor)                                   │
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>│   Postings (/ledger/posting)                                │
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>│   Prices (/ledger/price)                                    │
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>├─────────────────────────────────────────────────────────────┤
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>│ TAX (Conditionally visible when USER_CONFIG.currency == INR)│
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>│   Tax Capital Gains (/more/tax/capital_gains)               │
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>│   Tax Harvest (/more/tax/harvest)                           │
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>│   Schedule AL (/more/tax/schedule_al)                       │
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>├─────────────────────────────────────────────────────────────┤
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a>│ TOOLS                                                       │
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a>│   Sheets (/more/sheets)                                     │
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a>├─────────────────────────────────────────────────────────────┤
+</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a>│ SYSTEM / BOTTOM                                             │
+</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a>│   Configuration (/more/config)                              │
+</span><span id="__span-4-51"><a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a>│   ▾ Diagnostics (Expandable Group)                          │
+</span><span id="__span-4-52"><a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a>│       Doctor (/more/doctor)                                 │
+</span><span id="__span-4-53"><a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a>│       Logs (/more/logs)                                     │
+</span><span id="__span-4-54"><a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a>│   About (/more/about)                                       │
+</span><span id="__span-4-55"><a id="__codelineno-4-55" name="__codelineno-4-55" href="#__codelineno-4-55"></a>└─────────────────────────────────────────────────────────────┘
 </span></code></pre></div>
 <h3 id="81-non-route-expandable-groups-rule">8.1 Non-Route Expandable Groups Rule<a class="headerlink" href="#81-non-route-expandable-groups-rule" title="Permanent link">&para;</a></h3>
-<p>In the current repository, <code>Cash Flow</code>, <code>Expenses</code>, <code>Assets</code>, <code>Liabilities</code>, and <code>System</code> do not have standalone index page routes (<code>+page.svelte</code>). They are strictly <strong>non-route expandable navigation groups</strong> whose children are the real routes. When a route within a group is active, the parent group is automatically expanded.</p>
+<p>In the current repository, <code>Cash Flow</code>, <code>Expenses</code>, <code>Assets</code>, <code>Liabilities</code>, and <code>Diagnostics</code> do not have standalone index page routes (<code>+page.svelte</code>). They are strictly <strong>non-route expandable navigation groups</strong> whose children are the real routes. When a route within a group is active, the parent group is automatically expanded. A group's open or closed state set by the user is remembered; navigating into a collapsed group that holds the current route reopens it.</p>
+<p>Navigation accessibility: the active link carries <code>aria-current="page"</code>, each group button carries <code>aria-expanded</code> and <code>aria-controls</code> for its panel, and each section is a labelled group. Visibility rules are the same in the sidebar, the mobile drawer and the command palette: the Tax section only shows for INR, and Import is hidden when <code>USER_CONFIG.readonly</code> is true because saving to the journal is a no-op in that mode. Editor stays visible so files can still be read.</p>
 <h3 id="82-global-command-palette">8.2 Global Command Palette<a class="headerlink" href="#82-global-command-palette" title="Permanent link">&para;</a></h3>
-<p>The global shortcut (<code>Ctrl+K</code> / <code>Cmd+K</code>) opens the <strong>Command Palette</strong> (<code>#lib/shared/layout/CommandPalette.svelte</code>), providing instant fuzzy search across four categories: <strong>Navigation</strong> (all routes), <strong>Actions</strong> (sync, theme toggle, price update), <strong>Accounts</strong> (jump to account-specific views), and <strong>Search</strong> (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.</p>
+<p>The global shortcut (<code>Ctrl+K</code> / <code>Cmd+K</code>) opens the <strong>Command Palette</strong> (<code>#lib/shared/layout/CommandPalette.svelte</code>), providing instant fuzzy search across four categories: <strong>Navigation</strong> (every route the sidebar shows), <strong>Actions</strong> (sync, theme toggle, price update), <strong>Accounts</strong> (jump to account-specific views), and <strong>Search</strong> (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.</p>
 <hr />
 <h2 id="9-appshell-page-anatomy">9. AppShell &amp; Page Anatomy<a class="headerlink" href="#9-appshell-page-anatomy" title="Permanent link">&para;</a></h2>
 <p>The application shell provides global context, synchronous feedback, and navigation while keeping out of the way of page-level data.</p>
@@ -5563,7 +5565,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 </span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
 </span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>The backend owns financial semantics: returns (XIRR, annualized return, unrealized gain), gain and net investment, cash-versus-investment classification, goal projections and schedule status, and spending projections. The frontend fetches, filters, sums rows it already holds, formats, and chooses colours and wording. It does not re-derive a figure the backend reports, and it does not use the browser clock for a financial calculation. Interactive what-if tools that recompute locally on every input change (the goal planner) may keep their own arithmetic.
 </span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>
-</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>Practical consequences: cash accounts report no XIRR or gain; the per-posting annualized return is compound and absent for lots held under a year; the Balance, Gain and Net Worth pages share one event-based definition of investment, withdrawal and gain (`service.ComputeNetworth`).
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>Practical consequences: cash accounts report no XIRR or gain, and every breakdown carries `cashAmount` (the checking balance inside the group) so the frontend shows the cash split without classifying accounts itself; the per-posting annualized return is compound and absent for lots held under a year; the Balance, Gain and Net Worth pages share one event-based definition of investment, withdrawal and gain (`service.ComputeNetworth`).
 </span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>
 </span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>---
 </span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>
@@ -5763,7 +5765,7 @@ $$\text{1. Spacing} \longrightarrow \text{2. Alignment} \longrightarrow \text{3.
 </span><span id="__span-17-210"><a id="__codelineno-17-210" name="__codelineno-17-210" href="#__codelineno-17-210"></a>- **Primary Question:** What are the exact current balances of all asset accounts?
 </span><span id="__span-17-211"><a id="__codelineno-17-211" name="__codelineno-17-211" href="#__codelineno-17-211"></a>- **Page Header:** Title: "Asset Balance", Description: "Hierarchical balance tree across all asset accounts".
 </span><span id="__span-17-212"><a id="__codelineno-17-212" name="__codelineno-17-212" href="#__codelineno-17-212"></a>- **Primary Information:** Asset account tree with market valuation, cost, and balance.
-</span><span id="__span-17-213"><a id="__codelineno-17-213" name="__codelineno-17-213" href="#__codelineno-17-213"></a>- **Secondary Information:** Commodity quantities and currency breakdowns.
+</span><span id="__span-17-213"><a id="__codelineno-17-213" name="__codelineno-17-213" href="#__codelineno-17-213"></a>- **Secondary Information:** Commodity quantities and currency breakdowns, and a Cash column (the checking balance inside each group, from the backend's `cashAmount`). Market value minus cash is the value of the investments. The gain column is titled "Investment Change" with a tooltip saying it excludes cash accounts, so a group holding both reads as investments plus cash.
 </span><span id="__span-17-214"><a id="__codelineno-17-214" name="__codelineno-17-214" href="#__codelineno-17-214"></a>- **Primary Actions:** Expand/Collapse tree nodes, search account.
 </span><span id="__span-17-215"><a id="__codelineno-17-215" name="__codelineno-17-215" href="#__codelineno-17-215"></a>- **Desktop Composition:** Account balance hierarchy tree/table with right-aligned currency amounts.
 </span><span id="__span-17-216"><a id="__codelineno-17-216" name="__codelineno-17-216" href="#__codelineno-17-216"></a>- **Mobile Transformation:** Indented hierarchical balance list with collapsible account nodes.
