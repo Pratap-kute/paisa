@@ -62,10 +62,16 @@
   let nextId = 0;
   let metric = $state<ScenarioMetric>("netWorth");
   const chart = $derived(
-    result?.available ? scenarioSeries(result, metric, $obscure) : undefined,
+    result?.available
+      ? scenarioSeries(result, metric, obscure.value)
+      : undefined,
   );
   const money = (value: number | null | undefined) =>
-    value == null ? "Unavailable" : $obscure ? "••••" : formatCurrency(value);
+    value == null
+      ? "Unavailable"
+      : obscure.value
+        ? "••••"
+        : formatCurrency(value);
   const number = (value: string) =>
     value.trim() === "" ? undefined : Number(value);
   const inputValue = (field: Field) =>
@@ -272,13 +278,13 @@
             </div>
             <Input
               id={field.key}
-              type={$obscure ? "password" : "text"}
+              type={obscure.value ? "password" : "text"}
               inputmode="decimal"
-              value={$obscure ? "••••" : inputValue(field.key)}
-              disabled={baselineLoading || $obscure}
+              value={obscure.value ? "••••" : inputValue(field.key)}
+              disabled={baselineLoading || obscure.value}
               oninput={(e) => (overrides[field.key] = e.currentTarget.value)}
             />
-            {#if !$obscure && baseline?.[field.key]?.value != null && overrides[field.key] != null && overrides[field.key] !== "" && Number.isFinite(Number(overrides[field.key])) && Number(overrides[field.key]) !== baseline?.[field.key]?.value}
+            {#if !obscure.value && baseline?.[field.key]?.value != null && overrides[field.key] != null && overrides[field.key] !== "" && Number.isFinite(Number(overrides[field.key])) && Number(overrides[field.key]) !== baseline?.[field.key]?.value}
               {@const delta =
                 Number(overrides[field.key]) -
                 (baseline?.[field.key]?.value ?? 0)}
@@ -467,9 +473,9 @@
                     <Input
                       inputmode="decimal"
                       id={`amount-${event.id}`}
-                      type={$obscure ? "password" : "text"}
-                      value={$obscure ? "••••" : event.amount}
-                      disabled={$obscure}
+                      type={obscure.value ? "password" : "text"}
+                      value={obscure.value ? "••••" : event.amount}
+                      disabled={obscure.value}
                       oninput={(e) => (event.amount = e.currentTarget.value)}
                       size="sm"
                     />
@@ -781,7 +787,7 @@
       <ChartFrame height="compact">
         <TimeSeriesChart
           data={chart}
-          ariaLabel={$obscure
+          ariaLabel={obscure.value
             ? "Baseline and scenario projection. Values hidden."
             : "Baseline dashed and scenario solid monthly projection"}
           testId="scenario-projection"

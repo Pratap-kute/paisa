@@ -1,5 +1,4 @@
 import { obscure } from "#lib/shared/state/persisted";
-import { get } from "svelte/store";
 
 export function unicodeMinus(s: string): string {
   if (typeof s !== "string") {
@@ -9,7 +8,7 @@ export function unicodeMinus(s: string): string {
 }
 
 export function normalize(value: number): number {
-  if (get(obscure)) {
+  if (obscure.value) {
     return 0;
   }
   if (
@@ -136,7 +135,7 @@ export function formatFixedWidthFloat(
 export function formatCommodityAmount(
   value: number | undefined,
   commodity?: string,
-  masked = get(obscure),
+  masked = obscure.value,
 ): string {
   if (value === undefined) return "Amount unavailable";
   const label =

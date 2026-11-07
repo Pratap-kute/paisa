@@ -32,9 +32,9 @@
     })),
   );
 
-  function handleFilter(e: any) {
+  function handleFilter(filteredItems: any[]) {
     if (accountItems?.find((i) => i.label === filterText)) return;
-    if (e.detail.length === 0 && filterText.length > 0) {
+    if (filteredItems.length === 0 && filterText.length > 0) {
       if (!customAccountItems.some((i) => i.value === filterText)) {
         customAccountItems = [
           ...customAccountItems,
@@ -44,15 +44,15 @@
     }
   }
 
-  function handleChange(e: any) {
-    let items: any[];
-    if (e.type === "clear") {
-      items = accountItems.filter((item) => item.value !== e.detail?.value);
-    } else {
-      items = structuredClone(e.detail) || [];
-    }
-
+  function handleChange(selected: any[] | null | undefined) {
+    const items: any[] = structuredClone(selected) || [];
     accounts = items.map((i) => i.value);
+  }
+
+  function handleClear(removed: any) {
+    accounts = accountItems
+      .filter((item) => item.value !== removed?.value)
+      .map((i) => i.value);
   }
 </script>
 
@@ -65,18 +65,18 @@
   showChevron={true}
   searchable={true}
   clearable={false}
-  on:change={handleChange}
-  on:clear={handleChange}
-  on:filter={handleFilter}
+  onchange={handleChange}
+  onclear={handleClear}
+  onfilter={handleFilter}
   bind:filterText
 >
-  <div slot="selection" let:selection>
+  {#snippet selection({ selection })}
     <span>{iconify(selection.label)}</span>
-  </div>
-  <div slot="item" let:item>
+  {/snippet}
+  {#snippet item({ item })}
     {item.created ? "Add: " : ""}
-    {iconify(item.label)}
-  </div>
+    {iconify(item.label as string)}
+  {/snippet}
 </Select>
 
 <style>

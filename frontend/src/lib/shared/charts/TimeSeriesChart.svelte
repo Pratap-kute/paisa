@@ -18,14 +18,14 @@
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(
     buildPeriodSeriesOption(data, {
-      darkMode: $theme === "dark",
+      darkMode: theme.value === "dark",
       theme: tokenTheme,
       internalLegend,
     }),
   );
 
   $effect(() => {
-    $theme;
+    theme.value;
     tokenTheme = readPaisaChartTheme();
   });
 </script>

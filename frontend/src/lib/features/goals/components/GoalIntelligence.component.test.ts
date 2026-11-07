@@ -14,11 +14,11 @@ dayjs.extend(relativeTime);
 dayjs.extend(customParseFormat);
 beforeEach(() => {
   globalThis.__now = dayjs("2026-09-05");
-  obscure.set(false);
+  obscure.value = false;
 });
 afterEach(() => {
   cleanup();
-  obscure.set(false);
+  obscure.value = false;
 });
 for (const [scenario, label] of [
   ["onTrack", "On track"],
@@ -156,7 +156,7 @@ test("privacy masks current, target, required pace, recent pace and remaining on
   });
   const summary = render(GoalHealthSummary, { goals: [input] });
   expect(detail.container.textContent).toContain("48,000.00");
-  obscure.set(true);
+  obscure.value = true;
   await waitFor(() => {
     for (const view of [card, detail, summary]) {
       for (const amount of [

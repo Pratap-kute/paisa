@@ -17,7 +17,7 @@ import { history, historyKeymap } from "@codemirror/commands";
 import type { SyntaxNode } from "@lezer/common";
 import dayjs from "dayjs";
 import { sumBy } from "es-toolkit";
-import { writable } from "svelte/store";
+import { Ref } from "#lib/shared/state/ref.svelte";
 import * as Terms from "#lib/generated/search/parser.terms.js";
 import { queryExtension } from "#lib/features/editor/query_language";
 import { baseEditorExtensions } from "#lib/shared/editor/base";
@@ -389,7 +389,7 @@ const initialEditorState: QueryEditorEditorState = {
   predicate: () => true,
 };
 
-export const editorState = writable(initialEditorState);
+export const editorState = new Ref(initialEditorState);
 
 const allowedCombinations: Record<string, Record<string, [number]>> = {
   [Terms.Account]: {
@@ -456,9 +456,9 @@ function lint(editor: EditorView): Diagnostic[] {
     diagnostics.push(...ast.validate());
 
     if (diagnostics.length === 0) {
-      editorState.update((current) =>
-        assign({}, current, { predicate: ast.evaluate() }),
-      );
+      editorState.value = assign({}, editorState.value, {
+        predicate: ast.evaluate(),
+      });
     }
   }
 
@@ -738,7 +738,7 @@ export function createEditor(
     ]),
   );
 
-  editorState.set(initialEditorState);
+  editorState.value = initialEditorState;
 
   return new EditorView({
     extensions: [

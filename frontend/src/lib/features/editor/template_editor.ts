@@ -16,7 +16,7 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import { writable } from "svelte/store";
+import { Ref } from "#lib/shared/state/ref.svelte";
 import {
   autocompletion,
   completeFromList,
@@ -42,16 +42,14 @@ const initialEditorState: EditorState = {
   template: null,
 };
 
-export const editorState = writable(initialEditorState);
+export const editorState = new Ref(initialEditorState);
 
 function lint(editor: EditorView): Diagnostic[] {
   const doc = editor.state.doc;
   try {
     Handlebars.parse(doc.toString());
     const compiled = Handlebars.compile(doc.toString(), { noEscape: true });
-    editorState.update((current) =>
-      assign({}, current, { template: compiled }),
-    );
+    editorState.value = assign({}, editorState.value, { template: compiled });
   } catch (e) {
     const lines = e.message.split("\n");
     const match = lines[0].match(/Parse error on line (\d+):/);
@@ -73,7 +71,7 @@ function lint(editor: EditorView): Diagnostic[] {
 export function createEditor(content: string, dom: Element) {
   const autocompletions: Record<string, string[]> = {};
 
-  editorState.set(initialEditorState);
+  editorState.value = initialEditorState;
 
   return new EditorView({
     extensions: [
@@ -92,14 +90,12 @@ export function createEditor(content: string, dom: Element) {
       }),
       keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
-        editorState.update((current) =>
-          assign({}, current, {
-            hasUnsavedChanges:
-              current.hasUnsavedChanges || viewUpdate.docChanged,
-            undoDepth: undoDepth(viewUpdate.state),
-            redoDepth: redoDepth(viewUpdate.state),
-          }),
-        );
+        editorState.value = assign({}, editorState.value, {
+          hasUnsavedChanges:
+            editorState.value.hasUnsavedChanges || viewUpdate.docChanged,
+          undoDepth: undoDepth(viewUpdate.state),
+          redoDepth: redoDepth(viewUpdate.state),
+        });
       }),
     ],
     doc: content,

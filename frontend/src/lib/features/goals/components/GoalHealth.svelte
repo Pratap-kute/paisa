@@ -15,9 +15,9 @@
   let { goal, compact = false }: { goal: GoalSummary; compact?: boolean } =
     $props();
   const health = $derived(analyzeGoal(goal));
-  const money = (value: number) => formatCurrency($obscure ? 0 : value);
+  const money = (value: number) => formatCurrency(obscure.value ? 0 : value);
   const compactMoney = (value: number) =>
-    formatCurrencyCrude($obscure ? 0 : value);
+    formatCurrencyCrude(obscure.value ? 0 : value);
 
   function statusClass(analysis: GoalIntelligence): string {
     if (analysis.attention === "critical") return "text-negative";

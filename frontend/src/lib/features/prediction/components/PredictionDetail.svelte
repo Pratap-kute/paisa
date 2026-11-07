@@ -204,8 +204,8 @@
           showChevron={true}
           searchable={true}
           clearable={false}
-          on:change={(e) => {
-            const account = e.detail?.value;
+          onchange={(selected) => {
+            const account = selected?.value;
             if (account) onOverride?.(account);
           }}
         />

@@ -34,7 +34,7 @@
     if (typeof document !== "undefined") {
       document.firstElementChild?.setAttribute("data-theme", next);
     }
-    themeStore.set(next);
+    themeStore.value = next;
   }
 
   function navigate(href: string) {
@@ -340,8 +340,8 @@
 
     // Accounts search results when query matches
     const accountItems: CommandItem[] = [];
-    if (trimmed && $accountTfIdf?.tf_idf) {
-      const matchedAccounts = Object.keys($accountTfIdf.tf_idf)
+    if (trimmed && accountTfIdf.value?.tf_idf) {
+      const matchedAccounts = Object.keys(accountTfIdf.value.tf_idf)
         .filter((acc) => acc.toLowerCase().includes(trimmed))
         .slice(0, 5);
 

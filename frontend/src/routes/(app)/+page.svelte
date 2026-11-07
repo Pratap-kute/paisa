@@ -510,8 +510,8 @@
                     class="flex items-center justify-between gap-3 text-xs text-muted-foreground tabular-nums"
                   >
                     <span class="truncate"
-                      >{formatCurrency($obscure ? 0 : goal.current)} of {formatCurrency(
-                        $obscure ? 0 : goal.target,
+                      >{formatCurrency(obscure.value ? 0 : goal.current)} of {formatCurrency(
+                        obscure.value ? 0 : goal.target,
                       )}</span
                     >
                     {#if goal.targetDate && dayjs(goal.targetDate).isValid()}<span
@@ -567,7 +567,7 @@
                     >~{formatCommodityAmount(
                       item.expectedCashOutflowAmount ?? item.expectedAmount,
                       item.cashCommodity ?? item.commodity,
-                      $obscure,
+                      obscure.value,
                     )}</span
                   >
                 </div>

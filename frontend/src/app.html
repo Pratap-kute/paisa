@@ -16,9 +16,9 @@
     <script>
       (function () {
         try {
-          var key = "theme-preference";
-          var stored = localStorage.getItem(key);
-          var theme =
+          const key = "theme-preference";
+          const stored = localStorage.getItem(key);
+          const theme =
             stored ||
             (window.matchMedia("(prefers-color-scheme: dark)").matches
               ? "dark"

@@ -5,11 +5,11 @@
 
 <div
   class="paisa-toast-container"
-  class:is-bottom={$toastPosition === "bottom-right"}
-  class:is-center={$toastPosition === "center"}
+  class:is-bottom={toastPosition.value === "bottom-right"}
+  class:is-center={toastPosition.value === "center"}
   aria-live="polite"
 >
-  {#each $toasts as item (item.id)}
+  {#each toasts.value as item (item.id)}
     <ToastItem {item} />
   {/each}
 </div>

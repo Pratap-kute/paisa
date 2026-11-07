@@ -8,7 +8,6 @@ import {
   summarizeGoalHealth,
 } from "#lib/domain/goal_intelligence";
 import type { Posting } from "#lib/domain/ledger";
-import { now } from "#lib/domain/time";
 import {
   type InsightTone,
   presentInsight,

@@ -38,12 +38,10 @@ async function lint(editor: EditorView): Promise<Diagnostic[]> {
     content: editor.state.doc.toString(),
   });
 
-  editorState.update((current) =>
-    assign({}, current, {
-      errors: response.errors || [],
-      output: response.output,
-    }),
-  );
+  editorState.value = assign({}, editorState.value, {
+    errors: response.errors || [],
+    output: response.output,
+  });
 
   return map(response.errors || [], (error) => {
     const lineNum = error.line_from || error.line || 1;
@@ -95,7 +93,7 @@ export function createEditor(
     keybindings?: readonly KeyBinding[];
   },
 ) {
-  editorState.set(initialEditorState);
+  editorState.value = initialEditorState;
 
   return new EditorView({
     extensions: [
@@ -125,14 +123,12 @@ export function createEditor(
       }),
       keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
-        editorState.update((current) =>
-          assign({}, current, {
-            hasUnsavedChanges:
-              current.hasUnsavedChanges || viewUpdate.docChanged,
-            undoDepth: undoDepth(viewUpdate.state),
-            redoDepth: redoDepth(viewUpdate.state),
-          }),
-        );
+        editorState.value = assign({}, editorState.value, {
+          hasUnsavedChanges:
+            editorState.value.hasUnsavedChanges || viewUpdate.docChanged,
+          undoDepth: undoDepth(viewUpdate.state),
+          redoDepth: redoDepth(viewUpdate.state),
+        });
       }),
       schedulePlugin,
     ],

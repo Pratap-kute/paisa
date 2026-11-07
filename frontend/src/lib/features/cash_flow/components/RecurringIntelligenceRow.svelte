@@ -26,7 +26,7 @@
   // the details element is opened.
   let historyOpen = $state(false);
   function money(value: number | undefined) {
-    return formatCommodityAmount(value, item.commodity, $obscure);
+    return formatCommodityAmount(value, item.commodity, obscure.value);
   }
 </script>
 
@@ -57,7 +57,7 @@
       {item.approximate ? "Typical: ~" : ""}{formatCommodityAmount(
         item.expectedCashOutflowAmount ?? item.expectedAmount,
         item.cashCommodity ?? item.commodity,
-        $obscure,
+        obscure.value,
       )}
     </p>
   </div>
@@ -73,7 +73,7 @@
         item.amountChange.previous,
       )} to {money(item.amountChange.latest)}{item.amountChange.percentage !==
       undefined
-        ? ` (${formatPercentage($obscure ? 0 : item.amountChange.percentage / 100, 1)})`
+        ? ` (${formatPercentage(obscure.value ? 0 : item.amountChange.percentage / 100, 1)})`
         : ""}.
     </p>
   {/if}

@@ -1,7 +1,7 @@
-export interface AutoCompleteItem {
+export type AutoCompleteItem = {
   label: string;
   id: string;
-}
+};
 
 export interface AutoCompleteField {
   id: string;

@@ -12,7 +12,7 @@
   let { items, asOf, compact = false }: Props = $props();
   let summary = $derived(summarizeRecurring(items, asOf));
   function amount(value: number, commodity: string) {
-    return formatCommodityAmount(value, commodity, $obscure);
+    return formatCommodityAmount(value, commodity, obscure.value);
   }
 </script>
 

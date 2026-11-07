@@ -301,7 +301,7 @@
       pathname === "/insights",
   );
   let insightsMonth = $derived(
-    validPeriod(page.url.searchParams.get("period")) ?? $month,
+    validPeriod(page.url.searchParams.get("period")) ?? month.value,
   );
 
   async function selectInsightsMonth(period: string) {
@@ -324,11 +324,11 @@
   // loaded its data, so keep the year within the range (latest by default).
   $effect(() => {
     if (!showFinancialYearPicker) return;
-    const available = forEachFinancialYear($dateMin, $dateMax)
+    const available = forEachFinancialYear(dateMin.value, dateMax.value)
       .reverse()
       .map(financialYear);
-    const next = resolveFinancialYear($year, available);
-    if (next !== $year) year.set(next);
+    const next = resolveFinancialYear(year.value, available);
+    if (next !== year.value) year.value = next;
   });
 
   const navLinkClass =
@@ -590,14 +590,14 @@
       </button>
 
       <!-- Page Contextual Filters (DateRange, Month, FY, Depth) -->
-      {#if showDateRange || showMonthPicker || showFinancialYearPicker || (showYearlyDepth && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1))}
+      {#if showDateRange || showMonthPicker || showFinancialYearPicker || (showYearlyDepth && (cashflowExpenseDepthAllowed.value.max > 1 || cashflowIncomeDepthAllowed.value.max > 1))}
         <div class="hidden sm:flex items-center gap-2">
           {#if showDateRange}
             <div>
               <DateRange
-                bind:value={$dateRangeOption}
-                dateMin={$dateMin}
-                dateMax={$dateMax}
+                bind:value={dateRangeOption.value}
+                dateMin={dateMin.value}
+                dateMax={dateMax.value}
               />
             </div>
           {/if}
@@ -607,15 +607,15 @@
               {#if pathname === "/insights"}
                 <MonthPicker
                   value={insightsMonth}
-                  max={$dateMax}
-                  min={$dateMin}
+                  max={dateMax.value}
+                  min={dateMin.value}
                   onchange={selectInsightsMonth}
                 />
               {:else}
                 <MonthPicker
-                  bind:value={$month}
-                  max={$dateMax}
-                  min={$dateMin}
+                  bind:value={month.value}
+                  max={dateMax.value}
+                  min={dateMin.value}
                 />
               {/if}
             </div>
@@ -630,10 +630,10 @@
                 aria-hidden="true"
               ></i>
               <select
-                bind:value={$year}
+                bind:value={year.value}
                 class="cursor-pointer appearance-none border-0 bg-transparent pr-4 font-semibold text-foreground focus:outline-none"
               >
-                {#each forEachFinancialYear($dateMin, $dateMax).reverse() as fy}
+                {#each forEachFinancialYear(dateMin.value, dateMax.value).reverse() as fy}
                   <option class="bg-surface text-foreground"
                     >{financialYear(fy)}</option
                   >
@@ -646,17 +646,17 @@
             </div>
           {/if}
 
-          {#if showYearlyDepth && ($cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1)}
+          {#if showYearlyDepth && (cashflowExpenseDepthAllowed.value.max > 1 || cashflowIncomeDepthAllowed.value.max > 1)}
             <div class="flex items-center gap-1.5">
               <InputRange
                 label="Expenses"
-                bind:value={$cashflowExpenseDepth}
-                allowed={$cashflowExpenseDepthAllowed}
+                bind:value={cashflowExpenseDepth.value}
+                allowed={cashflowExpenseDepthAllowed.value}
               />
               <InputRange
                 label="Income"
-                bind:value={$cashflowIncomeDepth}
-                allowed={$cashflowIncomeDepthAllowed}
+                bind:value={cashflowIncomeDepth.value}
+                allowed={cashflowIncomeDepthAllowed.value}
               />
             </div>
           {/if}
@@ -694,7 +694,7 @@
 <CommandPalette bind:open={commandPaletteOpen} />
 
 <ConfirmDialog
-  open={$refreshNeedsConfirmation}
+  open={refreshNeedsConfirmation.value}
   title="Discard unsaved changes?"
   description="You have unsaved changes. Refreshing will discard them."
   confirmLabel="Discard"

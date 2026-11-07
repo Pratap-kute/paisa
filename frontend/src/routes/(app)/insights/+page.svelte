@@ -27,7 +27,7 @@
   const initialUrlPeriod = validPeriod(page.url.searchParams.get("period"));
   const initialMonth = initialUrlPeriod ?? now().format("YYYY-MM");
   setAllowedDateRange([dayjs(`${initialMonth}-01`)]);
-  month.set(initialMonth);
+  month.value = initialMonth;
   let selectedMonth = $derived(
     validPeriod(page.url.searchParams.get("period")) ?? initialMonth,
   );
@@ -69,7 +69,7 @@
   });
 
   $effect(() => {
-    month.set(selectedMonth);
+    month.value = selectedMonth;
   });
 
   async function loadInsights(period: string) {
@@ -145,8 +145,8 @@
           <div class="sm:hidden">
             <MonthPicker
               value={selectedMonth}
-              min={$dateMin}
-              max={$dateMax}
+              min={dateMin.value}
+              max={dateMax.value}
               onchange={selectMonth}
             />
           </div>

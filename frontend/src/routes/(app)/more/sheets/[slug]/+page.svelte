@@ -83,9 +83,9 @@
   ];
 
   const leaveGuard = createLeaveGuard(
-    () => $sheetEditorState.hasUnsavedChanges,
+    () => sheetEditorState.value.hasUnsavedChanges,
     () => {
-      $sheetEditorState = assign({}, $sheetEditorState, {
+      sheetEditorState.value = assign({}, sheetEditorState.value, {
         hasUnsavedChanges: false,
       });
     },
@@ -172,7 +172,7 @@
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = null;
-      $sheetEditorState = assign({}, $sheetEditorState, {
+      sheetEditorState.value = assign({}, sheetEditorState.value, {
         hasUnsavedChanges: false,
       });
     }
@@ -252,7 +252,7 @@
 
 <FileModal
   bind:open={modalOpen}
-  on:save={(e) => createFile(e.detail)}
+  onsave={createFile}
   label="Create"
   placeholder="scratch"
   help="Filename without any extension"
@@ -279,22 +279,22 @@
 
     {#snippet actions()}
       <div class="flex items-center gap-2">
-        {#if $sheetEditorState.hasUnsavedChanges}
+        {#if sheetEditorState.value.hasUnsavedChanges}
           <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
         {/if}
         <Badge variant="neutral" size="sm">
-          {formatFloatUptoPrecision($sheetEditorState.evalDuration, 2)}ms
+          {formatFloatUptoPrecision(sheetEditorState.value.evalDuration, 2)}ms
         </Badge>
-        {#if $sheetEditorState.errors.length > 0}
+        {#if sheetEditorState.value.errors.length > 0}
           <button
             type="button"
             class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(239,68,68,0.2)] bg-negative-subtle px-2.5 py-0.5 text-xs font-semibold text-negative transition-colors hover:bg-negative hover:text-inverse-foreground"
             onclick={() =>
-              moveToLine(editor, $sheetEditorState.errors[0].line_from)}
+              moveToLine(editor, sheetEditorState.value.errors[0].line_from)}
             title="Click to jump to error"
           >
             <span class="h-1.5 w-1.5 rounded-full bg-negative"></span>
-            <span>{$sheetEditorState.errors.length} error(s)</span>
+            <span>{sheetEditorState.value.errors.length} error(s)</span>
           </button>
         {/if}
       </div>
@@ -334,10 +334,10 @@
         <div class="relative flex-1 overflow-y-auto p-2">
           <FileTree
             path=""
-            on:select={(e) => selectFile(e.detail)}
+            onselect={selectFile}
             files={buildDirectoryTree(values(filesMap))}
             selectedFileName={selectedFile?.name ?? ""}
-            hasUnsavedChanges={$sheetEditorState.hasUnsavedChanges}
+            hasUnsavedChanges={sheetEditorState.value.hasUnsavedChanges}
           />
         </div>
       </aside>
@@ -358,7 +358,7 @@
               <span class="max-w-[240px] truncate"
                 >{selectedFile?.name || "Sheet"}</span
               >
-              {#if $sheetEditorState.hasUnsavedChanges}
+              {#if sheetEditorState.value.hasUnsavedChanges}
                 <span
                   class="text-[0.75rem] leading-none text-warning"
                   title="Unsaved changes">●</span
@@ -369,11 +369,11 @@
 
           <div class="flex items-center gap-1.5">
             <Button
-              variant={$sheetEditorState.hasUnsavedChanges
+              variant={sheetEditorState.value.hasUnsavedChanges
                 ? "primary"
                 : "secondary"}
               size="xs"
-              disabled={$sheetEditorState.hasUnsavedChanges === false}
+              disabled={sheetEditorState.value.hasUnsavedChanges === false}
               onclick={() => save()}
               title="Save sheet (Ctrl+S)"
             >
@@ -386,7 +386,7 @@
             <Button
               variant="ghost"
               size="xs"
-              disabled={$sheetEditorState.undoDepth === 0}
+              disabled={sheetEditorState.value.undoDepth === 0}
               onclick={undoEdit}
               title="Undo edit (Ctrl+Z)"
             >
@@ -398,7 +398,7 @@
             <Button
               variant="ghost"
               size="xs"
-              disabled={$sheetEditorState.redoDepth === 0}
+              disabled={sheetEditorState.value.redoDepth === 0}
               onclick={redoEdit}
               title="Redo edit (Ctrl+Y)"
             >
@@ -410,7 +410,7 @@
             <Button
               variant="ghost"
               size="xs"
-              disabled={$sheetEditorState.hasUnsavedChanges}
+              disabled={sheetEditorState.value.hasUnsavedChanges}
               onclick={() => openCreateModal()}
               title="Create new sheet file"
             >
@@ -478,10 +478,10 @@
           <div
             class="sheet-result w-56 sm:w-64 md:w-72 border-l border-border bg-surface-raised overflow-y-auto py-2 font-mono text-xs text-right select-text shadow-inner"
           >
-            {#each $sheetEditorState.results as result, i}
+            {#each sheetEditorState.value.results as result, i}
               <div
                 class="px-3 leading-[1.4] {i + 1 ===
-                $sheetEditorState.currentLine
+                sheetEditorState.value.currentLine
                   ? 'bg-surface-hover font-bold text-foreground'
                   : 'text-muted-foreground'}"
               >

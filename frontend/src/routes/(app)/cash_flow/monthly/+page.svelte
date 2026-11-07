@@ -27,8 +27,8 @@
     filter(
       cashFlows,
       (c) =>
-        c.date.isSameOrBefore($dateRange.to) &&
-        c.date.isSameOrAfter($dateRange.from),
+        c.date.isSameOrBefore(dateRange.value.to) &&
+        c.date.isSameOrAfter(dateRange.value.from),
     ),
   );
   let hasFilteredCashFlows = $derived(
@@ -70,9 +70,9 @@
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
         <DateRange
-          bind:value={$dateRangeOption}
-          dateMin={$dateMin}
-          dateMax={$dateMax}
+          bind:value={dateRangeOption.value}
+          dateMin={dateMin.value}
+          dateMax={dateMax.value}
         />
       </div>
     {/snippet}

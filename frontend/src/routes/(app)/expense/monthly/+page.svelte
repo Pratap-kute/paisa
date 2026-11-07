@@ -30,7 +30,6 @@
     month,
     setAllowedDateRange,
   } from "../../../../store";
-  import { writable } from "svelte/store";
   import LegendCard from "#lib/shared/ui/LegendCard.svelte";
   import Page from "#lib/shared/layout/Page.svelte";
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
@@ -47,11 +46,10 @@
   import DailyExpenseCalendar from "#lib/features/expense/components/DailyExpenseCalendar.svelte";
   import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
   import { isEmpty, map, sortBy } from "#lib/shared/utils/collection";
-  import { get } from "svelte/store";
   import { page } from "$app/state";
   import { validPeriod } from "#lib/shared/browser/period";
 
-  let groups = writable<string[]>([]);
+  let groups = $state<string[]>([]);
   let expenses: Posting[] | undefined = $state(),
     grouped_expenses: Record<string, Posting[]> | undefined = $state(),
     grouped_incomes: Record<string, Posting[]> | undefined = $state(),
@@ -75,10 +73,10 @@
   let requestedPeriod = $derived(
     validPeriod(page.url.searchParams.get("period")),
   );
-  const fallbackMonth = get(month);
+  const fallbackMonth = month.value;
 
   $effect(() => {
-    month.set(requestedPeriod ?? fallbackMonth);
+    month.value = requestedPeriod ?? fallbackMonth;
   });
 
   onMount(async () => {
@@ -105,16 +103,15 @@
       setAllowedDateRange(map(expenses, (e: Posting) => e.date));
       const allGroups = expenseGroupsByContribution(expenses);
       expenseColor = categoryColorResolver(allGroups);
-      groups.set(allGroups);
+      groups = allGroups;
       const requestedAccount = page.url.searchParams.get("account");
       if (requestedAccount) {
         const requestedGroup = restName(requestedAccount);
-        if (allGroups.includes(requestedGroup)) groups.set([requestedGroup]);
+        if (allGroups.includes(requestedGroup)) groups = [requestedGroup];
       }
       legends = categoryLegends(allGroups, (group) => {
-        groups.update((selected) =>
-          selected.length === 1 && selected[0] === group ? allGroups : [group],
-        );
+        groups =
+          groups.length === 1 && groups[0] === group ? allGroups : [group];
       });
     } finally {
       isLoading = false;
@@ -131,35 +128,35 @@
 
   let current_month_expenses: Posting[] = $derived(
     sortBy(
-      ((grouped_expenses && grouped_expenses[$month]) || []).filter(
-        (e: Posting) => isEmpty($groups) || $groups.includes(expenseGroup(e)),
+      ((grouped_expenses && grouped_expenses[month.value]) || []).filter(
+        (e: Posting) => isEmpty(groups) || groups.includes(expenseGroup(e)),
       ),
       (e: Posting) => e.date,
     ).reverse(),
   );
   let selectedMonthExpenses: Posting[] = $derived(
-    grouped_expenses?.[$month] || [],
+    grouped_expenses?.[month.value] || [],
   );
   let selectedMonthHeatmapData = $derived(
-    buildMonthlyExpenseHeatmapData($month, selectedMonthExpenses, $groups),
+    buildMonthlyExpenseHeatmapData(month.value, selectedMonthExpenses, groups),
   );
   let selectedMonthBreakdownData = $derived(
     buildExpenseBreakdownComparison(selectedMonthExpenses),
   );
   let expenseTimelineData = $derived(
-    buildMonthlyExpenseTimelineSeries(expenses ?? [], $groups, $dateRange),
+    buildMonthlyExpenseTimelineSeries(expenses ?? [], groups, dateRange.value),
   );
   let hasSelectedMonthExpenses = $derived(selectedMonthExpenses.length > 0);
   let hasExpenses = $derived((expenses?.length ?? 0) > 0);
   let hasTrendInRange = $derived(
     (expenses ?? []).some(
       (e) =>
-        e.date.isSameOrAfter($dateRange.from) &&
-        e.date.isSameOrBefore($dateRange.to),
+        e.date.isSameOrAfter(dateRange.value.from) &&
+        e.date.isSameOrBefore(dateRange.value.to),
     ),
   );
   let formattedCurrentMonth = $derived(
-    dayjs($month, "YYYY-MM").format("MMMM YYYY"),
+    dayjs(month.value, "YYYY-MM").format("MMMM YYYY"),
   );
   let postingCountSubtitle = $derived(
     hasSelectedMonthExpenses
@@ -170,24 +167,24 @@
     if (!hasSelectedMonthExpenses) return undefined;
     if (
       current_month_expenses.length !== selectedMonthExpenses.length &&
-      $groups.length > 0
+      groups.length > 0
     ) {
       return `${current_month_expenses.length} of ${selectedMonthExpenses.length} postings for ${formattedCurrentMonth}`;
     }
     return `${current_month_expenses.length} postings for ${formattedCurrentMonth}`;
   });
   let recentExpensesEmptyMessage = $derived(
-    hasSelectedMonthExpenses && $groups.length > 0
+    hasSelectedMonthExpenses && groups.length > 0
       ? `No postings in the selected categories for ${formattedCurrentMonth}.`
       : `No expenses recorded for ${formattedCurrentMonth}.`,
   );
 
   $effect(() => {
     if (grouped_expenses) {
-      const expenses = grouped_expenses[$month] || [];
-      const incomes = grouped_incomes?.[$month] || [];
-      const taxes = grouped_taxes?.[$month] || [];
-      const investments = grouped_investments?.[$month] || [];
+      const expenses = grouped_expenses[month.value] || [];
+      const incomes = grouped_incomes?.[month.value] || [];
+      const taxes = grouped_taxes?.[month.value] || [];
+      const investments = grouped_investments?.[month.value] || [];
 
       income = sumCurrency(incomes, -1);
       tax = sumCurrency(taxes);
@@ -235,7 +232,11 @@
   >
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
-        <MonthPicker bind:value={$month} min={$dateMin} max={$dateMax} />
+        <MonthPicker
+          bind:value={month.value}
+          min={dateMin.value}
+          max={dateMax.value}
+        />
       </div>
     {/snippet}
   </PageHeader>
@@ -331,7 +332,7 @@
       {#if hasSelectedMonthExpenses}
         <a
           href="/ledger/transaction?query={encodeURIComponent(
-            `date:${$month}`,
+            `date:${month.value}`,
           )}"
           class="text-xs font-semibold text-primary hover:underline"
         >

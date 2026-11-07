@@ -1,17 +1,16 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import Dialog from "#lib/shared/ui/Dialog.svelte";
   import { createDiffEditor } from "#lib/features/editor/runtime";
   import type { LedgerFile } from "#lib/domain/ledger";
   let editorDom: Element | undefined = $state();
   let selectedFileIndex = $state(0);
 
-  const dispatch = createEventDispatcher();
   interface Props {
     oldFiles?: LedgerFile[];
     newFiles?: LedgerFile[];
     updatedTransactionsCount?: number;
     open?: boolean;
+    onsave?: (files: LedgerFile[]) => void;
   }
 
   let {
@@ -19,6 +18,7 @@
     newFiles = [],
     updatedTransactionsCount = 0,
     open = $bindable(false),
+    onsave,
   }: Props = $props();
 
   let changedFiles = $derived.by(() => {
@@ -142,7 +142,7 @@
           type="button"
           class="paisa-save-btn"
           onclick={() => {
-            dispatch("save", changedNewFiles);
+            onsave?.(changedNewFiles);
             close();
           }}
         >

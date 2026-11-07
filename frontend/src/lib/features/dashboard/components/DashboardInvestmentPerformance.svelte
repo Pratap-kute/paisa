@@ -31,12 +31,12 @@
   {:else if summary && summary.quality?.status !== "unavailable"}
     <div class="flex flex-wrap items-baseline gap-3">
       <span class="text-lg font-semibold tabular-nums"
-        >{formatCurrency($obscure ? 0 : (summary.investmentReturn ?? 0))} investment
+        >{formatCurrency(obscure.value ? 0 : (summary.investmentReturn ?? 0))} investment
         return</span
       ><span class="text-sm"
         >{summary.periodReturn == null
           ? "Period return unavailable"
-          : `${performancePercent($obscure ? 0 : summary.periodReturn)} period return`}</span
+          : `${performancePercent(obscure.value ? 0 : summary.periodReturn)} period return`}</span
       >
     </div>
     {#if summary.quality?.status === "partial"}<p

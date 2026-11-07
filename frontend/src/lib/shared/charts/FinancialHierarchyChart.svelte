@@ -17,7 +17,7 @@
     buildFinancialHierarchyOption(data, { theme: tokenTheme }),
   );
   $effect(() => {
-    $theme;
+    theme.value;
     tokenTheme = readPaisaChartTheme();
   });
 </script>

@@ -10,7 +10,6 @@
   import { cloneDeep } from "es-toolkit";
   import { onMount } from "svelte";
   import * as toast from "#lib/shared/ui/toast";
-  import { writable } from "svelte/store";
   import type { Action } from "svelte/action";
   import Page from "#lib/shared/layout/Page.svelte";
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
@@ -26,7 +25,7 @@
   let isEmpty = $state(false);
   let config: UserConfig;
   let goals: GoalSummary[] = $state([]);
-  let dragDisabled = writable(true);
+  let dragDisabled = $state(true);
 
   function handleConsider(e: CustomEvent<DndEvent<GoalSummary>>) {
     goals = e.detail.items;
@@ -34,7 +33,7 @@
 
   async function handleFinalize(e: CustomEvent<DndEvent<GoalSummary>>) {
     goals = e.detail.items;
-    dragDisabled.set(true);
+    dragDisabled = true;
 
     for (let i = 0; i < goals.length; i++) {
       const g = goals[i];
@@ -90,22 +89,22 @@
   const dragHandle: Action<HTMLElement, {}> = (node: HTMLElement) => {
     function startDrag(e: Event) {
       e.preventDefault();
-      dragDisabled.set(false);
+      dragDisabled = false;
     }
 
     function stopDrag(_e: KeyboardEvent) {
-      dragDisabled.set(true);
+      dragDisabled = true;
     }
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Enter" || e.key === " ") {
-        dragDisabled.set(false);
+        dragDisabled = false;
       }
     }
 
-    dragDisabled.subscribe((disabled) => {
-      node.tabIndex = disabled ? 0 : -1;
-      node.style.cursor = disabled ? "grab" : "grabbing";
+    $effect(() => {
+      node.tabIndex = dragDisabled ? 0 : -1;
+      node.style.cursor = dragDisabled ? "grab" : "grabbing";
     });
 
     node.addEventListener("mousedown", startDrag);
@@ -163,7 +162,7 @@
           items: goals,
           dropTargetStyle: {},
           flipDurationMs: 300,
-          dragDisabled: $dragDisabled,
+          dragDisabled,
         }}
         onconsider={handleConsider}
         onfinalize={handleFinalize}

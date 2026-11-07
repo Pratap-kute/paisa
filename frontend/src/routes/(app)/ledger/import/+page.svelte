@@ -180,7 +180,7 @@
       api.account.getTfIdf(),
       api.prediction.getPredictionHistory(),
     ]);
-    accountTfIdf.set(tfidf as unknown as AccountTfIdf);
+    accountTfIdf.value = tfidf as unknown as AccountTfIdf;
     predictionSession.loadHistory(
       (historyResponse.history ?? []) as unknown as PredictionHistoryEntry[],
     );
@@ -231,7 +231,7 @@
       message: `Saved ${name}`,
       type: "is-success",
     });
-    $templateEditorState = assign({}, $templateEditorState, {
+    templateEditorState.value = assign({}, templateEditorState.value, {
       hasUnsavedChanges: false,
     });
     ({ templates } = await loadTemplates());
@@ -275,13 +275,13 @@
       type: "is-success",
     });
 
-    $templateEditorState = assign({}, $templateEditorState, {
+    templateEditorState.value = assign({}, templateEditorState.value, {
       hasUnsavedChanges: false,
     });
   }
 
   $effect(() => {
-    const currentTemplate = $templateEditorState.template;
+    const currentTemplate = templateEditorState.value.template;
     const currentRows = rows;
     const currentReverse = options.reverse;
     const currentTrim = options.trim;
@@ -330,8 +330,11 @@
     }
   });
 
-  async function handleFilesSelect(e: { detail: { acceptedFiles: File[] } }) {
-    const { acceptedFiles } = e.detail;
+  async function handleFilesSelect({
+    acceptedFiles,
+  }: {
+    acceptedFiles: File[];
+  }) {
     if (!acceptedFiles || acceptedFiles.length === 0) return;
 
     loading = true;
@@ -663,7 +666,7 @@
     } catch (e) {
       console.warn("Handlebars compile error on select:", e);
     }
-    $templateEditorState = assign({}, $templateEditorState, {
+    templateEditorState.value = assign({}, templateEditorState.value, {
       template: compiled,
       content: template.content,
       hasUnsavedChanges: false,
@@ -789,54 +792,52 @@
               listAutoWidth={false}
               --list-max-height="300px"
               --list-z-index="50"
-              on:change={(e) => {
-                if (e.detail?.value) onSelectTemplate(e.detail.value);
+              onchange={(selected) => {
+                if (selected?.value) onSelectTemplate(selected.value);
               }}
             >
               <!-- Selected item inside input -->
-              <div
-                slot="selection"
-                let:selection
-                class="flex items-center gap-2 overflow-hidden text-xs font-semibold text-foreground"
-              >
-                <i class="fas fa-file-code text-primary text-xs shrink-0"></i>
-                <span class="truncate" title={selection.label}
-                  >{selection.label}</span
+              {#snippet selection({ selection })}
+                <div
+                  class="flex items-center gap-2 overflow-hidden text-xs font-semibold text-foreground"
                 >
-              </div>
+                  <i class="fas fa-file-code text-primary text-xs shrink-0"></i>
+                  <span class="truncate" title={selection.label}
+                    >{selection.label}</span
+                  >
+                </div>
+              {/snippet}
 
               <!-- Dropdown items -->
-              <div
-                slot="item"
-                let:item
-                class="flex w-full items-center justify-between gap-3"
-              >
-                <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                  <i
-                    class="fas {item.template_type === 'builtin'
-                      ? 'fa-box-archive text-muted-foreground'
-                      : 'fa-file-code text-primary'} text-xs shrink-0"
-                  ></i>
-                  <span
-                    class="truncate font-medium text-xs text-foreground"
-                    title={item.label}
-                  >
-                    {item.label}
-                  </span>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  {#if item.template_type === "builtin"}
+              {#snippet item({ item })}
+                <div class="flex w-full items-center justify-between gap-3">
+                  <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <i
+                      class="fas {item.template_type === 'builtin'
+                        ? 'fa-box-archive text-muted-foreground'
+                        : 'fa-file-code text-primary'} text-xs shrink-0"
+                    ></i>
                     <span
-                      class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium bg-surface-raised text-muted-foreground border border-border-subtle"
+                      class="truncate font-medium text-xs text-foreground"
+                      title={item.label as string}
                     >
-                      Built-in
+                      {item.label}
                     </span>
-                  {/if}
-                  {#if selectedTemplate?.name === item.label}
-                    <i class="fas fa-check text-primary text-xs"></i>
-                  {/if}
+                  </div>
+                  <div class="flex items-center gap-2 shrink-0">
+                    {#if item.template_type === "builtin"}
+                      <span
+                        class="rounded px-1.5 py-0.5 text-[0.625rem] font-medium bg-surface-raised text-muted-foreground border border-border-subtle"
+                      >
+                        Built-in
+                      </span>
+                    {/if}
+                    {#if selectedTemplate?.name === item.label}
+                      <i class="fas fa-check text-primary text-xs"></i>
+                    {/if}
+                  </div>
                 </div>
-              </div>
+              {/snippet}
             </Select>
           </div>
 
@@ -852,7 +853,7 @@
               <i class="fas fa-code text-xs"></i>
             {/snippet}
             <span>Edit Template</span>
-            {#if $templateEditorState.hasUnsavedChanges}
+            {#if templateEditorState.value.hasUnsavedChanges}
               <span class="inline-block h-1.5 w-1.5 rounded-full bg-warning"
               ></span>
             {/if}
@@ -938,7 +939,7 @@
           <FileDropzone
             multiple={false}
             accept=".csv,.txt,.xls,.xlsx,.pdf,.CSV,.TXT,.XLS,.XLSX,.PDF"
-            on:drop={handleFilesSelect}
+            ondrop={handleFilesSelect}
           >
             <div
               class="flex flex-col items-center justify-center px-[var(--paisa-space-4)] py-[var(--paisa-space-6)] text-center"

@@ -1,9 +1,6 @@
 import { formatCurrencyCrude } from "#lib/shared/formatters/currency";
 import { formatFloat } from "#lib/shared/formatters/currency";
 import { formatPercentage } from "#lib/shared/formatters/currency";
-import {} from "#lib/shared/formatters/currency";
-import {} from "#lib/shared/formatters/currency";
-import {} from "#lib/shared/formatters/currency";
 import { describe, expect, it } from "vitest";
 import { chartFormatters } from "#lib/shared/charts/echarts/formatters";
 import {

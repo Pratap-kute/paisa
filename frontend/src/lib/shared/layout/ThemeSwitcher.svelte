@@ -4,16 +4,16 @@
     setColorPreference,
   } from "#lib/shared/browser/theme";
   import { onMount } from "svelte";
-  import * as store from "../../../store";
+  import { theme as themeState } from "#lib/shared/state/store";
 
   let theme = getColorPreference();
-  store.theme.set(theme);
+  themeState.value = theme;
 
   function setTheme(value: string) {
     theme = value;
     setColorPreference(value);
     reflectPreference();
-    store.theme.set(value);
+    themeState.value = value;
   }
 
   const toggle = () => {

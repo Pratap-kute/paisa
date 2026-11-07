@@ -258,7 +258,7 @@
           itemCount={filteredLogs.length}
           itemSize={ITEM_SIZE}
         >
-          <svelte:fragment slot="item" let:index let:style>
+          {#snippet item({ index, style })}
             {@const log = filteredLogs[index]}
             {@const fields = omit(log, ["time", "level", "msg"])}
             <div
@@ -312,7 +312,7 @@
                 </div>
               </div>
             </div>
-          </svelte:fragment>
+          {/snippet}
         </VirtualList>
       {/if}
     </div>

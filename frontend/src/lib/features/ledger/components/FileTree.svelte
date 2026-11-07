@@ -2,7 +2,6 @@
   import FileTree from "./FileTree.svelte";
 
   import type { Directory, LedgerFile } from "#lib/domain/ledger";
-  import { createEventDispatcher } from "svelte";
 
   interface Props {
     files: Array<Directory | LedgerFile>;
@@ -21,13 +20,6 @@
     root = true,
     onselect,
   }: Props = $props();
-
-  const dispatch = createEventDispatcher();
-
-  function handleSelect(file: LedgerFile | Directory) {
-    onselect?.(file);
-    dispatch("select", file);
-  }
 
   function fileName(path: string) {
     return path.split("/").at(-1) ?? "";
@@ -65,7 +57,7 @@
               files={file.children}
               {selectedFileName}
               {hasUnsavedChanges}
-              on:select={(e) => dispatch("select", e.detail)}
+              {onselect}
             />
           </div>
         </details>
@@ -78,7 +70,7 @@
           class:is-active={file.name === selectedFileName}
           onclick={(e) => {
             e.preventDefault();
-            handleSelect(file);
+            onselect?.(file);
           }}
         >
           <span class="file-name" title={fileName(file.name)}>

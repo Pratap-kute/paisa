@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { Ref } from "#lib/shared/state/ref.svelte";
 
 export interface ToastOptions {
   message: string;
@@ -24,21 +24,21 @@ let defaults: ToastOptions = {
   closeOnClick: true,
   position: "top-right",
 };
-export const toasts = writable<ToastMessage[]>([]);
-export const toastPosition = writable(defaults.position ?? "top-right");
+export const toasts = new Ref<ToastMessage[]>([]);
+export const toastPosition = new Ref(defaults.position ?? "top-right");
 
 export function setDefaults(options: Omit<ToastOptions, "message">) {
   defaults = { ...defaults, ...options };
-  toastPosition.set(defaults.position ?? "top-right");
+  toastPosition.value = defaults.position ?? "top-right";
 }
 
 export function dismissToast(id: number) {
-  toasts.update((items) => items.filter((item) => item.id !== id));
+  toasts.value = toasts.value.filter((item) => item.id !== id);
 }
 
 export function toast(options: ToastOptions) {
   if (!options.message) throw new Error("message is required");
   const item = { ...defaults, ...options, id: nextId++ };
-  toasts.update((items) => (options.single ? [item] : [...items, item]));
+  toasts.value = options.single ? [item] : [...toasts.value, item];
   return item.id;
 }

@@ -6,16 +6,17 @@
   import Input from "#lib/shared/ui/Input.svelte";
   import SelectField from "#lib/shared/ui/Select.svelte";
   import type { PriceProvider } from "#lib/features/ledger/types";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { onMount } from "svelte";
   import type { AutoCompleteItem } from "#lib/features/ledger/types";
   import { api } from "#lib/api";
 
   let label = "Choose Price Provider";
   interface Props {
     open?: boolean;
+    onselect?: (selected: { code: string; provider: string }) => void;
   }
 
-  let { open = $bindable(false) }: Props = $props();
+  let { open = $bindable(false), onselect }: Props = $props();
   let code = $state("");
 
   let providers: PriceProvider[] = $state([]);
@@ -91,8 +92,6 @@
       return (res.completions as unknown as AutoCompleteItem[]) || [];
     };
   }
-
-  const dispatch = createEventDispatcher();
 
   let providerOptions = $derived(
     providers.map((p) => ({ value: p.code, label: p.label })),
@@ -177,7 +176,7 @@
                       debounceWait={500}
                       searchable={true}
                       clearable={false}
-                      on:change={() => {
+                      onchange={() => {
                         selectedProvider.fields.forEach((f, j) => {
                           if (j > i) {
                             clearCache(j);
@@ -215,7 +214,7 @@
         size="md"
         disabled={!code.trim()}
         onclick={() => {
-          dispatch("select", { code: code, provider: selectedProvider.code });
+          onselect?.({ code: code, provider: selectedProvider.code });
           reset();
           close();
         }}

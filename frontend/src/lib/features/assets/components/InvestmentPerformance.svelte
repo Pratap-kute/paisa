@@ -46,10 +46,10 @@
       : performancePresets,
   );
   const chart = $derived(
-    result ? performanceSeries(result, $obscure) : undefined,
+    result ? performanceSeries(result, obscure.value) : undefined,
   );
   const decomposition = $derived.by(() => {
-    $obscure;
+    obscure.value;
     return result ? performanceDecomposition(result) : [];
   });
   const allDrivers = $derived(
@@ -88,10 +88,12 @@
     return () => controller.abort();
   });
   function money(value = 0) {
-    return formatCurrency($obscure ? 0 : value);
+    return formatCurrency(obscure.value ? 0 : value);
   }
   function percent(value: number | null | undefined) {
-    return performancePercent(value == null ? value : $obscure ? 0 : value);
+    return performancePercent(
+      value == null ? value : obscure.value ? 0 : value,
+    );
   }
   function periodUnavailableSummary(reason?: string | null) {
     switch (reason) {

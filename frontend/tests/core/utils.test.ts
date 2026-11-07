@@ -71,10 +71,10 @@ describe("core utilities", () => {
     expect(formatCurrencyCrude(0)).toBe("0");
     expect(formatCurrencyCrude(-250000)).toBe("−2.5L");
 
-    obscure.set(true);
+    obscure.value = true;
     expect(formatCurrencyCrude(19386000)).toBe("0");
     expect(formatCurrency(19386000)).toBe("0.00");
-    obscure.set(false);
+    obscure.value = false;
   });
 
   test("iterates calendar periods", () => {

@@ -143,24 +143,24 @@
   <MetricStrip cols={4}>
     <Metric
       label="Net Investment"
-      value={formatCurrency($obscure ? 0 : investmentTotal)}
-      secondary={`${formatCurrency($obscure ? 0 : gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatReturnPercent(xirr)} XIRR`}
+      value={formatCurrency(obscure.value ? 0 : investmentTotal)}
+      secondary={`${formatCurrency(obscure.value ? 0 : gainTotal)} ${gainTotal >= 0 ? "gain" : "loss"} at ${formatReturnPercent(xirr)} XIRR`}
       status="primary"
     />
     <Metric
       label="Current Savings"
-      value={formatCurrency($obscure ? 0 : savingsTotal)}
+      value={formatCurrency(obscure.value ? 0 : savingsTotal)}
       secondary="{formatFloat(savingsX, 0)}x times Yearly Expenses"
       status="positive"
     />
     <Metric
       label="Yearly Expenses"
-      value={formatCurrency($obscure ? 0 : yearlyExpense)}
+      value={formatCurrency(obscure.value ? 0 : yearlyExpense)}
       status="negative"
     />
     <Metric
       label="Target Savings"
-      value={formatCurrency($obscure ? 0 : targetSavings)}
+      value={formatCurrency(obscure.value ? 0 : targetSavings)}
       secondary="{formatFloat(
         targetX,
         0,
