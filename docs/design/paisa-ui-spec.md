@@ -13,7 +13,7 @@ description: "Internal maintainer reference: as-built UI and UX specification fo
 
 
 > **Document Status:** As-Built Reference Specification (Post-Migration)  
-> **Current Stack:** Svelte 5 + SvelteKit 2 + Tailwind CSS v4 + Bits UI + ECharts 6  
+> **Current Stack:** Svelte 5 + SvelteKit 3 + Tailwind CSS v4 + Bits UI + ECharts 6  
 > **Source-of-Truth Priority:** Existing Paisa Business Logic & Functionality > Existing Route/Component Code > Existing Workflows > This Specification > Visual Mockups  
 > **Canonical File:** `docs/design/paisa-ui-spec.md`
 
@@ -50,7 +50,7 @@ The Paisa frontend uses modern styling and component ergonomics while preserving
 
 ### 2.1 Core Framework
 
-- **Framework:** Svelte 5 with SvelteKit 2.
+- **Framework:** Svelte 5 with SvelteKit 3.
 - **State Management:** Svelte 5 Runes (`$state`, `$derived`, `$effect`, `$props`, `$bindable`) and existing persisted Svelte stores (`store.ts`, `persisted_store.ts`).
 
 ### 2.2 Styling Direction
@@ -404,7 +404,7 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 │       Balance (/assets/balance)                             │
 │       Net Worth (/assets/networth)                          │
 │       Investment (/assets/investment)                       │
-│       Gain (/assets/gain)                                   │
+│       Performance (/assets/gain)                            │
 │       Allocation (/assets/allocation)                       │
 │       Analysis (/assets/analysis)                           │
 │   ▾ Liabilities                                             │
@@ -413,10 +413,11 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 │       Repayment (/liabilities/repayment)                    │
 │       Interest (/liabilities/interest)                      │
 │   Goals (/more/goals)                                       │
+│   Scenarios (/more/scenarios)                               │
 ├─────────────────────────────────────────────────────────────┤
 │ LEDGER                                                      │
 │   Transactions (/ledger/transaction)                        │
-│   Import (/ledger/import)                                   │
+│   Import (/ledger/import) (hidden when read-only)           │
 │   Editor (/ledger/editor)                                   │
 │   Postings (/ledger/posting)                                │
 │   Prices (/ledger/price)                                    │
@@ -431,7 +432,7 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 ├─────────────────────────────────────────────────────────────┤
 │ SYSTEM / BOTTOM                                             │
 │   Configuration (/more/config)                              │
-│   ▾ System (Expandable Group)                               │
+│   ▾ Diagnostics (Expandable Group)                          │
 │       Doctor (/more/doctor)                                 │
 │       Logs (/more/logs)                                     │
 │   About (/more/about)                                       │
@@ -440,11 +441,13 @@ The navigation system organizes Paisa's routes into a clean, hierarchical sideba
 
 ### 8.1 Non-Route Expandable Groups Rule
 
-In the current repository, `Cash Flow`, `Expenses`, `Assets`, `Liabilities`, and `System` do not have standalone index page routes (`+page.svelte`). They are strictly **non-route expandable navigation groups** whose children are the real routes. When a route within a group is active, the parent group is automatically expanded.
+In the current repository, `Cash Flow`, `Expenses`, `Assets`, `Liabilities`, and `Diagnostics` do not have standalone index page routes (`+page.svelte`). They are strictly **non-route expandable navigation groups** whose children are the real routes. When a route within a group is active, the parent group is automatically expanded. A group's open or closed state set by the user is remembered; navigating into a collapsed group that holds the current route reopens it.
+
+Navigation accessibility: the active link carries `aria-current="page"`, each group button carries `aria-expanded` and `aria-controls` for its panel, and each section is a labelled group. Visibility rules are the same in the sidebar, the mobile drawer and the command palette: the Tax section only shows for INR, and Import is hidden when `USER_CONFIG.readonly` is true because saving to the journal is a no-op in that mode. Editor stays visible so files can still be read.
 
 ### 8.2 Global Command Palette
 
-The global shortcut (`Ctrl+K` / `Cmd+K`) opens the **Command Palette** (`#lib/shared/layout/CommandPalette.svelte`), providing instant fuzzy search across four categories: **Navigation** (all routes), **Actions** (sync, theme toggle, price update), **Accounts** (jump to account-specific views), and **Search** (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.
+The global shortcut (`Ctrl+K` / `Cmd+K`) opens the **Command Palette** (`#lib/shared/layout/CommandPalette.svelte`), providing instant fuzzy search across four categories: **Navigation** (every route the sidebar shows), **Actions** (sync, theme toggle, price update), **Accounts** (jump to account-specific views), and **Search** (transaction queries). The palette supports keyboard navigation, Mac-aware shortcut display, and responsive design.
 
 ---
 
@@ -948,7 +951,7 @@ Paisa enforces a strict 5-area ownership model (see `#lib/README.md` for the ful
 
 The backend owns financial semantics: returns (XIRR, annualized return, unrealized gain), gain and net investment, cash-versus-investment classification, goal projections and schedule status, and spending projections. The frontend fetches, filters, sums rows it already holds, formats, and chooses colours and wording. It does not re-derive a figure the backend reports, and it does not use the browser clock for a financial calculation. Interactive what-if tools that recompute locally on every input change (the goal planner) may keep their own arithmetic.
 
-Practical consequences: cash accounts report no XIRR or gain; the per-posting annualized return is compound and absent for lots held under a year; the Balance, Gain and Net Worth pages share one event-based definition of investment, withdrawal and gain (`service.ComputeNetworth`).
+Practical consequences: cash accounts report no XIRR or gain, and every breakdown carries `cashAmount` (the checking balance inside the group) so the frontend shows the cash split without classifying accounts itself; the per-posting annualized return is compound and absent for lots held under a year; the Balance, Gain and Net Worth pages share one event-based definition of investment, withdrawal and gain (`service.ComputeNetworth`).
 
 ---
 
@@ -1148,7 +1151,7 @@ The table and 41 individual route design contracts below represent the binding U
 - **Primary Question:** What are the exact current balances of all asset accounts?
 - **Page Header:** Title: "Asset Balance", Description: "Hierarchical balance tree across all asset accounts".
 - **Primary Information:** Asset account tree with market valuation, cost, and balance.
-- **Secondary Information:** Commodity quantities and currency breakdowns.
+- **Secondary Information:** Commodity quantities and currency breakdowns, and a Cash column (the checking balance inside each group, from the backend's `cashAmount`). Market value minus cash is the value of the investments. The gain column is titled "Investment Change" with a tooltip saying it excludes cash accounts, so a group holding both reads as investments plus cash.
 - **Primary Actions:** Expand/Collapse tree nodes, search account.
 - **Desktop Composition:** Account balance hierarchy tree/table with right-aligned currency amounts.
 - **Mobile Transformation:** Indented hierarchical balance list with collapsible account nodes.

@@ -161,3 +161,53 @@ func TestBreakdownMatchesNetworthDefinition(t *testing.T) {
 	}
 	assert.Equal(t, gainTotal.String(), root.GainAmount.String(), "balance rollup equals the gain page total")
 }
+
+// A group holding cash and investments reports market value for both, but its
+// gain covers the investments only. This is deliberate: cash is not an
+// investment, so the gain is not marketAmount minus net investment.
+func TestMixedGroupGainCoversInvestmentsOnly(t *testing.T) {
+	db := assetTestDB(t)
+	mk := func(id, account, commodity string, qty, amt float64, day int) posting.Posting {
+		p := assetPosting(account, commodity, qty, amt)
+		p.TransactionID = id
+		p.Date = time.Date(2024, time.January, day, 0, 0, 0, 0, time.UTC)
+		return p
+	}
+	all := []posting.Posting{
+		mk("salary", "Assets:Checking:SBI", "INR", 2000, 2000, 1),
+		mk("salary", "Income:Salary", "INR", -2000, -2000, 1),
+		mk("buy", "Assets:Equity:MF", "MF", 10, 1000, 2),
+		mk("buy", "Assets:Checking:SBI", "INR", -1000, -1000, 2),
+	}
+	require.NoError(t, db.Create(&all).Error)
+	// the fund is now worth 120 a unit, so 10 units are worth 1200: a gain of 200
+	require.NoError(t, db.Create(&price.Price{
+		Date:          time.Date(2024, time.January, 3, 0, 0, 0, 0, time.UTC),
+		CommodityType: config.Unknown,
+		CommodityID:   "MF",
+		CommodityName: "MF",
+		Value:         decimal.NewFromInt(120),
+	}).Error)
+
+	ps := service.PopulateMarketPrice(db, []posting.Posting{all[0], all[2], all[3]})
+	breakdowns := ComputeBreakdowns(db, ps, true)
+	root := breakdowns["Assets"]
+	cash := breakdowns["Assets:Checking"]
+	investments := breakdowns["Assets:Equity"]
+
+	assert.Equal(t, "1000", cash.MarketAmount.String())
+	assert.Equal(t, "1200", investments.MarketAmount.String())
+	assert.Equal(t, "1000", root.CashAmount.String(), "cash inside the group")
+	assert.Equal(t, "1000", cash.CashAmount.String())
+	assert.True(t, investments.CashAmount.IsZero())
+	assert.Equal(t, investments.MarketAmount.String(), root.MarketAmount.Sub(root.CashAmount).String(),
+		"market value minus cash is the value of the investments")
+	assert.Equal(t, root.MarketAmount.String(), cash.MarketAmount.Add(investments.MarketAmount).String(),
+		"group balance is investments plus cash")
+	assert.Equal(t, "200", investments.GainAmount.String())
+	assert.Equal(t, investments.GainAmount.String(), root.GainAmount.String(),
+		"group gain covers investments only, cash adds nothing")
+	assert.Equal(t, investments.XIRR.String(), root.XIRR.String())
+	assert.True(t, cash.GainAmount.IsZero())
+	assert.True(t, cash.XIRR.IsZero())
+}

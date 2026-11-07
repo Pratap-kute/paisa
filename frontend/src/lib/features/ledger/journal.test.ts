@@ -1,6 +1,14 @@
-import { describe, test, expect } from "bun:test";
+import { describe, test, expect, beforeEach } from "bun:test";
 import fs from "node:fs";
 import { format } from "./journal";
+
+// The formatter reads the global USER_CONFIG, which other test files replace.
+// Pin the default alignment so this file does not depend on file order.
+beforeEach(() => {
+  if (typeof globalThis.USER_CONFIG !== "undefined") {
+    globalThis.USER_CONFIG.amount_alignment_column = 52;
+  }
+});
 
 function readFixture(name: string) {
   try {

@@ -184,12 +184,16 @@
           href: "/ledger/transaction",
           icon: "fa-solid fa-list-check",
         },
-        {
-          kind: "link",
-          label: "Import",
-          href: "/ledger/import",
-          icon: "fa-solid fa-file-import",
-        },
+        ...(readonly
+          ? []
+          : [
+              {
+                kind: "link" as const,
+                label: "Import",
+                href: "/ledger/import",
+                icon: "fa-solid fa-file-import",
+              },
+            ]),
         {
           kind: "link",
           label: "Editor",
@@ -262,7 +266,7 @@
       {
         kind: "group",
         id: "system",
-        label: "System",
+        label: "Diagnostics",
         icon: "fa-solid fa-stethoscope",
         children: [
           { label: "Doctor", href: "/more/doctor" },
@@ -328,111 +332,49 @@
   });
 
   const navLinkClass =
-    "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-surface-hover";
+    "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] pointer-coarse:min-h-11";
   const navLinkActiveClass = "bg-primary-subtle font-semibold text-primary";
   const navGroupButtonClass =
     "flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-1.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]";
   const navSubLinkClass =
-    "block rounded px-2.5 py-1.5 text-xs text-foreground/70 no-underline transition-colors hover:bg-surface-hover hover:text-foreground";
+    "block rounded px-2.5 py-1.5 text-[0.8125rem] text-foreground/70 no-underline transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] pointer-coarse:min-h-11 pointer-coarse:py-3";
   const navSubLinkActiveClass =
     "font-semibold text-primary bg-primary-subtle/70";
 </script>
 
-{#snippet navPanel(onNavigate?: () => void)}
-  {#each navSections as section}
-    <div class="flex flex-col gap-0.5">
-      <div
-        class="px-2.5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
-      >
-        {section.title}
-      </div>
-      {#each section.items as item}
-        {#if item.kind === "link"}
-          {@const active = navigationState.isPathActive(item.href, pathname)}
-          <a
-            href={item.href}
-            class="{navLinkClass} {active ? navLinkActiveClass : ''}"
-            onclick={onNavigate}
-          >
-            {#if item.icon}
-              <i
-                class="{item.icon} w-4 text-center text-xs {active
-                  ? 'text-primary'
-                  : 'text-muted-foreground'}"
-                aria-hidden="true"
-              ></i>
-            {/if}
-            <span class="truncate">{item.label}</span>
-          </a>
-        {:else}
-          {@const active = navigationState.isGroupActive(item, pathname)}
-          {@const expanded = navigationState.isGroupExpanded(item, pathname)}
-          <button
-            type="button"
-            class="{navGroupButtonClass} {active ? navLinkActiveClass : ''}"
-            aria-expanded={expanded}
-            onclick={() => navigationState.toggleGroup(item, pathname)}
-          >
-            {#if item.icon}
-              <i
-                class="{item.icon} w-4 text-center text-xs {active
-                  ? 'text-primary'
-                  : 'text-muted-foreground'}"
-                aria-hidden="true"
-              ></i>
-            {/if}
-            <span class="min-w-0 flex-1 truncate">{item.label}</span>
-            <i
-              class="fa-solid fa-chevron-down w-3 text-[0.625rem] text-muted-foreground transition-transform {expanded
-                ? 'rotate-180'
-                : ''}"
-              aria-hidden="true"
-            ></i>
-          </button>
-          {#if expanded}
-            <div class="flex flex-col gap-0.5 pl-7 pr-1">
-              {#each item.children as sub}
-                {@const subActive = navigationState.isPathActive(
-                  sub.href,
-                  pathname,
-                )}
-                <a
-                  href={sub.href}
-                  class="{navSubLinkClass} {subActive
-                    ? navSubLinkActiveClass
-                    : ''}"
-                  onclick={onNavigate}
-                >
-                  {sub.label}
-                </a>
-              {/each}
-            </div>
-          {/if}
-        {/if}
-      {/each}
-    </div>
-  {/each}
-{/snippet}
-
-{#snippet systemNav(onNavigate?: () => void)}
-  <div class="flex flex-col gap-0.5">
+{#snippet navSectionBlock(
+  section: NavSection,
+  scope: string,
+  muted: boolean,
+  onNavigate?: () => void,
+)}
+  {@const headingId = `${scope}-nav-${section.title.toLowerCase()}`}
+  <div class="flex flex-col gap-0.5" role="group" aria-labelledby={headingId}>
     <div
+      id={headingId}
       class="px-2.5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
     >
-      {systemSection.title}
+      {section.title}
     </div>
-    {#each systemSection.items as item}
+    {#each section.items as item (item.kind === "group" ? item.id : item.href)}
       {#if item.kind === "link"}
         {@const active = navigationState.isPathActive(item.href, pathname)}
         <a
           href={item.href}
-          class="{navLinkClass} text-xs {active
+          class="{navLinkClass} {muted ? 'text-xs' : ''} {active
             ? navLinkActiveClass
-            : 'text-muted-foreground'}"
+            : muted
+              ? 'text-muted-foreground'
+              : ''}"
+          aria-current={active ? "page" : undefined}
           onclick={onNavigate}
         >
           {#if item.icon}
-            <i class="{item.icon} w-4 text-center text-xs" aria-hidden="true"
+            <i
+              class="{item.icon} w-4 text-center text-xs {active || muted
+                ? ''
+                : 'text-muted-foreground'} {active ? 'text-primary' : ''}"
+              aria-hidden="true"
             ></i>
           {/if}
           <span class="truncate">{item.label}</span>
@@ -440,16 +382,24 @@
       {:else}
         {@const active = navigationState.isGroupActive(item, pathname)}
         {@const expanded = navigationState.isGroupExpanded(item, pathname)}
+        {@const panelId = `${scope}-nav-group-${item.id}`}
         <button
           type="button"
-          class="{navGroupButtonClass} text-xs {active
+          class="{navGroupButtonClass} {muted ? 'text-xs' : ''} {active
             ? navLinkActiveClass
-            : 'text-muted-foreground'}"
+            : muted
+              ? 'text-muted-foreground'
+              : ''} pointer-coarse:min-h-11"
           aria-expanded={expanded}
+          aria-controls={panelId}
           onclick={() => navigationState.toggleGroup(item, pathname)}
         >
           {#if item.icon}
-            <i class="{item.icon} w-4 text-center text-xs" aria-hidden="true"
+            <i
+              class="{item.icon} w-4 text-center text-xs {active || muted
+                ? ''
+                : 'text-muted-foreground'} {active ? 'text-primary' : ''}"
+              aria-hidden="true"
             ></i>
           {/if}
           <span class="min-w-0 flex-1 truncate">{item.label}</span>
@@ -460,9 +410,12 @@
             aria-hidden="true"
           ></i>
         </button>
-        {#if expanded}
-          <div class="flex flex-col gap-0.5 pl-7 pr-1">
-            {#each item.children as sub}
+        <div
+          id={panelId}
+          class="flex-col gap-0.5 pl-7 pr-1 {expanded ? 'flex' : 'hidden'}"
+        >
+          {#if expanded}
+            {#each item.children as sub (sub.href)}
               {@const subActive = navigationState.isPathActive(
                 sub.href,
                 pathname,
@@ -472,16 +425,27 @@
                 class="{navSubLinkClass} {subActive
                   ? navSubLinkActiveClass
                   : ''}"
+                aria-current={subActive ? "page" : undefined}
                 onclick={onNavigate}
               >
                 {sub.label}
               </a>
             {/each}
-          </div>
-        {/if}
+          {/if}
+        </div>
       {/if}
     {/each}
   </div>
+{/snippet}
+
+{#snippet navPanel(scope: string, onNavigate?: () => void)}
+  {#each navSections as section (section.title)}
+    {@render navSectionBlock(section, scope, false, onNavigate)}
+  {/each}
+{/snippet}
+
+{#snippet systemNav(scope: string, onNavigate?: () => void)}
+  {@render navSectionBlock(systemSection, scope, true, onNavigate)}
 {/snippet}
 
 <svelte:window
@@ -508,14 +472,14 @@
     </div>
 
     <nav
-      class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4"
+      class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4 [scrollbar-gutter:stable] [scrollbar-width:thin]"
       aria-label="main navigation"
     >
-      {@render navPanel()}
+      {@render navPanel("desktop")}
     </nav>
 
     <div class="shrink-0 border-t border-border-subtle bg-surface px-3 py-3">
-      {@render systemNav()}
+      {@render systemNav("desktop")}
     </div>
   </aside>
 
@@ -559,14 +523,14 @@
       </div>
 
       <nav
-        class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4"
+        class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4 [scrollbar-gutter:stable] [scrollbar-width:thin]"
         aria-label="drawer navigation"
       >
-        {@render navPanel(() => (mobileDrawerOpen = false))}
+        {@render navPanel("drawer", () => (mobileDrawerOpen = false))}
       </nav>
 
       <div class="shrink-0 border-t border-border-subtle px-3 py-3">
-        {@render systemNav(() => (mobileDrawerOpen = false))}
+        {@render systemNav("drawer", () => (mobileDrawerOpen = false))}
       </div>
     </div>
   {/if}
@@ -606,9 +570,9 @@
       >
         <i class="fa-solid fa-magnifying-glass text-[11px]" aria-hidden="true"
         ></i>
-        <span class="min-w-0 flex-1 truncate">Search Paisa or commands...</span>
+        <span class="min-w-0 flex-1 truncate">Search…</span>
         <kbd
-          class="rounded border border-border-subtle bg-surface px-1.5 py-0.5 font-mono text-[0.625rem]"
+          class="rounded border border-border-subtle bg-surface px-1.5 py-0.5 font-mono text-[0.6875rem]"
           >{isMac ? "⌘K" : "Ctrl K"}</kbd
         >
       </button>

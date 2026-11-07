@@ -7,6 +7,7 @@
 - Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed.
 - Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax.
 - Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only.
+- Asset Balance labels the gain column "Investment Change" and adds a Cash column, so a group's market value splits into investments plus cash.
 - Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included.
 - The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them.
 - Demo data: the last home loan payment is capped at the balance owed.

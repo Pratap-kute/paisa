@@ -20,6 +20,7 @@ type AssetBreakdown struct {
 	InvestmentAmount decimal.Decimal `json:"investmentAmount"`
 	WithdrawalAmount decimal.Decimal `json:"withdrawalAmount"`
 	MarketAmount     decimal.Decimal `json:"marketAmount"`
+	CashAmount       decimal.Decimal `json:"cashAmount"`
 	BalanceUnits     decimal.Decimal `json:"balanceUnits"`
 	LatestPrice      decimal.Decimal `json:"latestPrice"`
 	XIRR             decimal.Decimal `json:"xirr"`
@@ -83,12 +84,17 @@ func ComputeBreakdowns(db *gorm.DB, postings []posting.Posting, rollup bool) map
 // not an investment: checking accounts report their balance but no returns, and
 // checking postings never count towards the gain of a parent group. As a result
 // the gain of a group that holds checking is not marketAmount minus net
-// investment; it is the gain of its investment accounts only.
+// investment; it is the gain of its investment accounts only. CashAmount is the
+// checking balance inside the group, so MarketAmount minus CashAmount is the
+// value of the investments that the gain refers to.
 func ComputeBreakdown(db *gorm.DB, ps []posting.Posting, leaf bool, group string) AssetBreakdown {
 	psWithoutCapitalGains := lo.Filter(ps, func(p posting.Posting, _ int) bool {
 		return !service.IsCapitalGains(p)
 	})
 	marketAmount := accounting.CurrentBalance(psWithoutCapitalGains)
+	cashAmount := accounting.CurrentBalance(lo.Filter(psWithoutCapitalGains, func(p posting.Posting, _ int) bool {
+		return utils.IsCheckingAccount(p.Account)
+	}))
 	var balanceUnits decimal.Decimal
 	if leaf {
 		balanceUnits = lo.Reduce(ps, func(acc decimal.Decimal, p posting.Posting, _ int) decimal.Decimal {
@@ -102,6 +108,7 @@ func ComputeBreakdown(db *gorm.DB, ps []posting.Posting, leaf bool, group string
 	breakdown := AssetBreakdown{
 		Group:        group,
 		MarketAmount: marketAmount,
+		CashAmount:   cashAmount,
 		BalanceUnits: balanceUnits,
 	}
 

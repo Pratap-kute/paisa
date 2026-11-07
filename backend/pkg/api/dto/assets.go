@@ -7,6 +7,7 @@ type AssetBreakdownResponse struct {
 	InvestmentAmount decimal.Decimal `json:"investmentAmount"`
 	WithdrawalAmount decimal.Decimal `json:"withdrawalAmount"`
 	MarketAmount     decimal.Decimal `json:"marketAmount"`
+	CashAmount       decimal.Decimal `json:"cashAmount"`
 	BalanceUnits     decimal.Decimal `json:"balanceUnits"`
 	LatestPrice      decimal.Decimal `json:"latestPrice"`
 	XIRR             decimal.Decimal `json:"xirr"`

@@ -75,8 +75,20 @@
       cssClass: "paisa-tabular-nums",
     },
     {
-      title: "Change",
+      title: "Cash",
+      field: "cashAmount",
+      headerTooltip:
+        "Checking balance included in Market Value. Cash has no gain or XIRR.",
+      hozAlign: "right",
+      formatter: nonZeroCurrency,
+      cssClass: "paisa-tabular-nums",
+      visible: !compact,
+    },
+    {
+      title: "Investment Change",
       field: "gainAmount",
+      headerTooltip:
+        "Gain on investments only. Excludes cash (checking) accounts.",
       hozAlign: "right",
       formatter: formatCurrencyChange,
       cssClass: "paisa-tabular-nums",
