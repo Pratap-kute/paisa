@@ -15,6 +15,7 @@
   import type { CellComponent, ColumnDefinition } from "tabulator-tables";
   import type dayjs from "dayjs";
   import { find } from "#lib/shared/utils/collection";
+  import { preferredSource } from "#lib/features/ledger/price_source";
 
   interface PriceRow {
     commodity_name: string;
@@ -150,6 +151,7 @@
     return Object.keys(source).map((commodity) => {
       const history = source[commodity];
       const latest = history[0];
+      const preferred = preferredSource(history);
       return {
         commodity_name: latest.commodity_name,
         date: latest.date,
@@ -160,8 +162,8 @@
         change_1y: change(history, 365, 7),
         change_3y: change(history, 365 * 3, 7),
         change_5y: change(history, 365 * 5, 7),
-        commodity_type: latest.commodity_type,
-        commodity_id: latest.commodity_id,
+        commodity_type: preferred.commodity_type,
+        commodity_id: preferred.commodity_id,
         _children: history.slice(1).map((p) => ({
           commodity_name: "",
           date: p.date,

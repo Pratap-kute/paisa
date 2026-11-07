@@ -51,6 +51,20 @@ export default defineConfig({
   css: {
     preprocessorOptions: {},
   },
+  // Pre-bundle these so Vite does not discover them mid-session, re-optimize
+  // and reload the page, which fails any dynamic import still in flight.
+  optimizeDeps: {
+    include: [
+      "dayjs/plugin/customParseFormat",
+      "dayjs/plugin/isSameOrAfter",
+      "dayjs/plugin/isSameOrBefore",
+      "dayjs/plugin/localeData",
+      "dayjs/plugin/relativeTime",
+      "dayjs/plugin/timezone",
+      "dayjs/plugin/updateLocale",
+      "dayjs/plugin/utc",
+    ],
+  },
   build: {
     target: "es2021",
     rolldownOptions: {

@@ -71,7 +71,8 @@ Assets:Checking:HDFC` and
 On the Asset Balance page a checking account shows its balance but no gain or
 XIRR. When a group holds both checking and investment accounts, its gain covers
 the investment accounts only, so it is not the group's market value minus its net
-investment.
+investment. The Cash column shows the checking balance inside each group, so
+market value minus cash is the value of the investments the gain refers to.
 
 The distinction is necessary because Checking account is an asset, but not an
 investment. So you ideally you want to disregard them when you calculate your
