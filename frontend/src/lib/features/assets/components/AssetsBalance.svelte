@@ -2,7 +2,6 @@
   import type { AssetBreakdown } from "#lib/domain/assets";
   import { buildTree } from "#lib/shared/utils/tree";
   import { onMount } from "svelte";
-  import { withCash } from "#lib/features/assets/cash";
   import Table from "#lib/shared/ui/Table.svelte";
   import {
     accountName,
@@ -78,7 +77,8 @@
     {
       title: "Cash",
       field: "cashAmount",
-      headerTooltip: "Checking balance included in Market Value. Cash has no gain or XIRR.",
+      headerTooltip:
+        "Checking balance included in Market Value. Cash has no gain or XIRR.",
       hozAlign: "right",
       formatter: nonZeroCurrency,
       cssClass: "paisa-tabular-nums",
@@ -87,7 +87,8 @@
     {
       title: "Investment Change",
       field: "gainAmount",
-      headerTooltip: "Gain on investments only. Excludes cash (checking) accounts.",
+      headerTooltip:
+        "Gain on investments only. Excludes cash (checking) accounts.",
       hozAlign: "right",
       formatter: formatCurrencyChange,
       cssClass: "paisa-tabular-nums",
@@ -111,12 +112,12 @@
   ]);
 
   let tree: AssetBreakdown[] = $derived(
-    breakdowns ? buildTree(withCash(breakdowns), (i) => i.group) : [],
+    breakdowns ? buildTree(Object.values(breakdowns), (i) => i.group) : [],
   );
 </script>
 
 {#if indent}
   <Table data={tree} tree {columns} />
 {:else}
-  <Table data={withCash(breakdowns || {})} {columns} />
+  <Table data={Object.values(breakdowns || {})} {columns} />
 {/if}

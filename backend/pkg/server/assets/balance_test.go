@@ -197,6 +197,11 @@ func TestMixedGroupGainCoversInvestmentsOnly(t *testing.T) {
 
 	assert.Equal(t, "1000", cash.MarketAmount.String())
 	assert.Equal(t, "1200", investments.MarketAmount.String())
+	assert.Equal(t, "1000", root.CashAmount.String(), "cash inside the group")
+	assert.Equal(t, "1000", cash.CashAmount.String())
+	assert.True(t, investments.CashAmount.IsZero())
+	assert.Equal(t, investments.MarketAmount.String(), root.MarketAmount.Sub(root.CashAmount).String(),
+		"market value minus cash is the value of the investments")
 	assert.Equal(t, root.MarketAmount.String(), cash.MarketAmount.Add(investments.MarketAmount).String(),
 		"group balance is investments plus cash")
 	assert.Equal(t, "200", investments.GainAmount.String())

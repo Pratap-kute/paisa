@@ -70,6 +70,7 @@ export interface DtoAllocationTargetResponse {
 export interface DtoAssetBreakdownResponse {
   absoluteReturn?: number;
   balanceUnits?: number;
+  cashAmount?: number;
   gainAmount?: number;
   group?: string;
   investmentAmount?: number;

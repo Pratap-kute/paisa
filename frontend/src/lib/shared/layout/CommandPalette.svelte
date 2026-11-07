@@ -42,7 +42,7 @@
     goto(href);
   }
 
-  const staticCommands: CommandItem[] = [
+  const allStaticCommands: CommandItem[] = [
     // Overview
     {
       id: "nav-dashboard",
@@ -322,6 +322,18 @@
       action: () => navigate("/ledger/import"),
     },
   ];
+
+  // Keep the palette in step with the sidebar: no tax pages outside INR and no
+  // import in read-only mode.
+  const isINR =
+    typeof USER_CONFIG !== "undefined" &&
+    USER_CONFIG.default_currency === "INR";
+  const readonly = typeof USER_CONFIG !== "undefined" && USER_CONFIG.readonly;
+  const staticCommands = allStaticCommands.filter(
+    (command) =>
+      (isINR || !command.id.startsWith("nav-tax")) &&
+      (!readonly || !command.id.includes("import")),
+  );
 
   const filteredCommands = $derived.by(() => {
     const trimmed = query.trim().toLowerCase();

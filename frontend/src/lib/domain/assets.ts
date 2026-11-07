@@ -39,6 +39,7 @@ export interface AssetBreakdown {
   withdrawalAmount: number;
   balanceUnits: number;
   marketAmount: number;
+  cashAmount: number;
   xirr: number;
   gainAmount: number;
   absoluteReturn: number;

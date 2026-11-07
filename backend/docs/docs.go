@@ -2289,6 +2289,9 @@ const docTemplate = `{
                 "balanceUnits": {
                     "type": "number"
                 },
+                "cashAmount": {
+                    "type": "number"
+                },
                 "gainAmount": {
                     "type": "number"
                 },

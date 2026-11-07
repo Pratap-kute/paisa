@@ -75,7 +75,11 @@ export default defineConfig({
           groups: [
             { name: "zrender", test: /node_modules[\\/]zrender/, priority: 30 },
             { name: "echarts", test: /node_modules[\\/]echarts/, priority: 20 },
-            { name: "icons-arcticons", test: /fonts[\\/]arcticons-info/, priority: 10 },
+            {
+              name: "icons-arcticons",
+              test: /fonts[\\/]arcticons-info/,
+              priority: 10,
+            },
             { name: "icons-mdi", test: /fonts[\\/]mdi-info/, priority: 10 },
           ],
         },
