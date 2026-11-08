@@ -26,8 +26,16 @@ runs:
       run: |
         echo "CGO_ENABLED=1" >> "$GITHUB_ENV"
 
+    - name: Restore CI tools cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/paisa-ci-bin
+        key: ci-tools-${{ runner.os }}-hledger-1.52.4-golangci-lint-2.14.0
+
     - name: Install system dependencies & accounting tools
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends \
@@ -40,16 +48,36 @@ runs:
 
         pip install --break-system-packages "beancount<3"
 
+        mkdir -p ~/.cache/paisa-ci-bin
+        tmpdir="$(mktemp -d)"
+        trap 'rm -rf "$tmpdir"' EXIT
+
+        download_release_asset() {
+          local repo="$1" tag="$2" asset="$3" dest="$4"
+          for attempt in 1 2 3; do
+            if gh release download "$tag" --repo "$repo" --pattern "$asset" --output "$dest" --clobber 2>/dev/null || \
+               curl -fsSL --retry 5 --retry-all-errors -o "$dest" "https://github.com/$repo/releases/download/$tag/$asset"; then
+              return 0
+            fi
+            echo "Retrying download of $repo@$tag/$asset (attempt $attempt)..." >&2
+            sleep $((attempt * 2))
+          done
+          return 1
+        }
+
         # Install pinned hledger 1.52.4 static binary
-        if [ ! -f /usr/local/bin/hledger ]; then
-          curl -sSL https://github.com/hledgerorg/hledger/releases/download/1.52.4/hledger-linux-x64.tar.gz | sudo tar -xz -C /usr/local/bin
+        if [ ! -f ~/.cache/paisa-ci-bin/hledger ]; then
+          download_release_asset "hledgerorg/hledger" "1.52.4" "hledger-linux-x64.tar.gz" "$tmpdir/hledger.tar.gz"
+          tar -xzf "$tmpdir/hledger.tar.gz" -C ~/.cache/paisa-ci-bin hledger
         fi
+        sudo install -m 0755 ~/.cache/paisa-ci-bin/hledger /usr/local/bin/hledger
 
         # Install golangci-lint
-        if ! command -v golangci-lint &>/dev/null; then
-          curl -sSL "https://github.com/golangci/golangci-lint/releases/download/v2.14.0/golangci-lint-2.14.0-linux-amd64.tar.gz" | \
-            sudo tar -xz -C /usr/local/bin --strip-components=1 golangci-lint-2.14.0-linux-amd64/golangci-lint
+        if [ ! -f ~/.cache/paisa-ci-bin/golangci-lint ]; then
+          download_release_asset "golangci/golangci-lint" "v2.14.0" "golangci-lint-2.14.0-linux-amd64.tar.gz" "$tmpdir/golangci-lint.tar.gz"
+          tar -xzf "$tmpdir/golangci-lint.tar.gz" -C ~/.cache/paisa-ci-bin --strip-components=1 golangci-lint-2.14.0-linux-amd64/golangci-lint
         fi
+        sudo install -m 0755 ~/.cache/paisa-ci-bin/golangci-lint /usr/local/bin/golangci-lint
 
         # Verify accounting tools are in PATH
         ledger --version
