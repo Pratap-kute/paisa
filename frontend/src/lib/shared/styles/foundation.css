@@ -18,6 +18,10 @@
 
 :root {
   color-scheme: light;
+
+  /* Font Awesome 7 made every icon a fixed 1.25em wide. Keep the natural
+     width so icon spacing matches the layout the app was designed with. */
+  --fa-width: auto;
   --paisa-canvas: #f8fafc;
   --paisa-surface: #ffffff;
   --paisa-surface-raised: #f1f5f9;

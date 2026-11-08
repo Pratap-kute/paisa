@@ -4,7 +4,7 @@
   --border: 1px solid var(--paisa-input-border);
   --border-hover: 1px solid var(--paisa-input-border-hover);
   --border-focused: 1px solid var(--paisa-input-border-focus);
-  --border-radius: var(--paisa-radius-sm);
+  --border-radius: var(--paisa-radius-md);
   --input-color: var(--paisa-input-text);
   --item-color: var(--paisa-foreground);
   --selected-item-color: var(--paisa-input-text);
@@ -37,6 +37,21 @@
   --disabled-placeholder-color: var(--paisa-input-disabled-text);
   --error-background: var(--paisa-input-bg);
   --error-border: 1px solid var(--paisa-negative);
+
+  /* Match the size of the text input (36px, 0.875rem). The library defaults to
+     a 42px, 16px control, which also sizes the rows of the dropdown list. */
+  --height: 36px;
+  --font-size: 0.875rem;
+  --padding: 0 0 0 0.75rem;
+  --value-container-padding: 0;
+  --selected-item-padding: 0 1.25rem 0 0;
+  --chevron-width: 2rem;
+  --chevron-height: 34px;
+  --clear-select-width: 2rem;
+  --item-height: auto;
+  --item-line-height: 1.25rem;
+  --item-padding: 0.375rem 0.625rem;
+  --group-title-font-size: 0.75rem;
 }
 
 html .svelte-select.svelte-select {
