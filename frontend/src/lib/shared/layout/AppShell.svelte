@@ -331,11 +331,22 @@
     if (next !== year.value) year.value = next;
   });
 
+  const collapsed = $derived(navigationState.sidebarCollapsed);
+  const sidebarWidth = $derived(collapsed ? "4rem" : "16rem");
+
   const navLinkClass =
     "flex items-center gap-3 rounded-md px-2.5 py-1.5 text-sm font-medium text-foreground no-underline transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] pointer-coarse:min-h-11";
   const navLinkActiveClass = "bg-primary-subtle font-semibold text-primary";
   const navGroupButtonClass =
     "flex w-full items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-1.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-surface-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)]";
+  const navLinkCompactClass = navLinkClass.replace(
+    "gap-3 px-2.5",
+    "justify-center px-0",
+  );
+  const navGroupButtonCompactClass = navGroupButtonClass.replace(
+    "gap-3 px-2.5",
+    "justify-center px-0",
+  );
   const navSubLinkClass =
     "block rounded px-2.5 py-1.5 text-[0.8125rem] text-foreground/70 no-underline transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] pointer-coarse:min-h-11 pointer-coarse:py-3";
   const navSubLinkActiveClass =
@@ -347,21 +358,34 @@
   scope: string,
   muted: boolean,
   onNavigate?: () => void,
+  compact: boolean = false,
 )}
   {@const headingId = `${scope}-nav-${section.title.toLowerCase()}`}
   <div class="flex flex-col gap-0.5" role="group" aria-labelledby={headingId}>
-    <div
-      id={headingId}
-      class="px-2.5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
-    >
-      {section.title}
-    </div>
+    {#if compact}
+      <div id={headingId} class="sr-only">{section.title}</div>
+      <div
+        data-rail-divider
+        class="mx-2 mb-1 h-px bg-border-subtle"
+        aria-hidden="true"
+      ></div>
+    {:else}
+      <div
+        id={headingId}
+        class="px-2.5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground"
+      >
+        {section.title}
+      </div>
+    {/if}
     {#each section.items as item (item.kind === "group" ? item.id : item.href)}
       {#if item.kind === "link"}
         {@const active = navigationState.isPathActive(item.href, pathname)}
         <a
           href={item.href}
-          class="{navLinkClass} {muted ? 'text-xs' : ''} {active
+          title={compact ? item.label : undefined}
+          class="{compact ? navLinkCompactClass : navLinkClass} {muted
+            ? 'text-xs'
+            : ''} {active
             ? navLinkActiveClass
             : muted
               ? 'text-muted-foreground'
@@ -377,7 +401,7 @@
               aria-hidden="true"
             ></i>
           {/if}
-          <span class="truncate">{item.label}</span>
+          <span class={compact ? "sr-only" : "truncate"}>{item.label}</span>
         </a>
       {:else}
         {@const active = navigationState.isGroupActive(item, pathname)}
@@ -385,14 +409,27 @@
         {@const panelId = `${scope}-nav-group-${item.id}`}
         <button
           type="button"
-          class="{navGroupButtonClass} {muted ? 'text-xs' : ''} {active
+          title={compact ? item.label : undefined}
+          class="{compact
+            ? navGroupButtonCompactClass
+            : navGroupButtonClass} {muted ? 'text-xs' : ''} {active
             ? navLinkActiveClass
             : muted
               ? 'text-muted-foreground'
               : ''} pointer-coarse:min-h-11"
-          aria-expanded={expanded}
-          aria-controls={panelId}
-          onclick={() => navigationState.toggleGroup(item, pathname)}
+          aria-expanded={compact ? undefined : expanded}
+          aria-controls={compact ? undefined : panelId}
+          aria-label={compact ? item.label : undefined}
+          onclick={() => {
+            if (compact) {
+              // A rail has no room for the sub-links, so open the sidebar
+              // with this group expanded.
+              navigationState.sidebarCollapsed = false;
+              if (!expanded) navigationState.toggleGroup(item, pathname);
+              return;
+            }
+            navigationState.toggleGroup(item, pathname);
+          }}
         >
           {#if item.icon}
             <i
@@ -402,19 +439,23 @@
               aria-hidden="true"
             ></i>
           {/if}
-          <span class="min-w-0 flex-1 truncate">{item.label}</span>
-          <i
-            class="fa-solid fa-chevron-down w-3 text-[0.625rem] text-muted-foreground transition-transform {expanded
-              ? 'rotate-180'
-              : ''}"
-            aria-hidden="true"
-          ></i>
+          {#if !compact}
+            <span class="min-w-0 flex-1 truncate">{item.label}</span>
+            <i
+              class="fa-solid fa-chevron-down w-3 text-[0.625rem] text-muted-foreground transition-transform {expanded
+                ? 'rotate-180'
+                : ''}"
+              aria-hidden="true"
+            ></i>
+          {/if}
         </button>
         <div
           id={panelId}
-          class="flex-col gap-0.5 pl-7 pr-1 {expanded ? 'flex' : 'hidden'}"
+          class="flex-col gap-0.5 pl-7 pr-1 {expanded && !compact
+            ? 'flex'
+            : 'hidden'}"
         >
-          {#if expanded}
+          {#if expanded && !compact}
             {#each item.children as sub (sub.href)}
               {@const subActive = navigationState.isPathActive(
                 sub.href,
@@ -438,14 +479,22 @@
   </div>
 {/snippet}
 
-{#snippet navPanel(scope: string, onNavigate?: () => void)}
+{#snippet navPanel(
+  scope: string,
+  onNavigate?: () => void,
+  compact: boolean = false,
+)}
   {#each navSections as section (section.title)}
-    {@render navSectionBlock(section, scope, false, onNavigate)}
+    {@render navSectionBlock(section, scope, false, onNavigate, compact)}
   {/each}
 {/snippet}
 
-{#snippet systemNav(scope: string, onNavigate?: () => void)}
-  {@render navSectionBlock(systemSection, scope, true, onNavigate)}
+{#snippet systemNav(
+  scope: string,
+  onNavigate?: () => void,
+  compact: boolean = false,
+)}
+  {@render navSectionBlock(systemSection, scope, true, onNavigate, compact)}
 {/snippet}
 
 <svelte:window
@@ -453,33 +502,41 @@
     e.key === "Escape" && mobileDrawerOpen && (mobileDrawerOpen = false)}
 />
 
-<div class="min-h-screen overflow-x-hidden bg-canvas text-foreground">
+<div
+  class="min-h-screen overflow-x-hidden bg-canvas text-foreground"
+  style:--paisa-sidebar-width={sidebarWidth}
+>
   <!-- Desktop Sidebar -->
   <aside
-    class="fixed bottom-0 left-0 top-0 z-40 hidden w-64 flex-col border-r border-border-subtle bg-surface lg:flex"
+    id="desktop-sidebar"
+    class="fixed bottom-0 left-0 top-0 z-40 hidden w-64 flex-col overflow-hidden border-r border-border-subtle bg-surface transition-[width] duration-200 motion-reduce:transition-none lg:flex lg:w-[var(--paisa-sidebar-width)]"
   >
     <div
-      class="flex h-14 shrink-0 items-center gap-3 border-b border-border-subtle px-5"
+      class="flex h-14 shrink-0 items-center border-b border-border-subtle {collapsed
+        ? 'justify-center'
+        : 'gap-3 px-5'}"
     >
       <div
         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-subtle"
       >
         <Logo size={20} />
       </div>
-      <span class="text-base font-bold tracking-tight text-foreground"
-        >Paisa</span
-      >
+      {#if !collapsed}
+        <span class="text-base font-bold tracking-tight text-foreground"
+          >Paisa</span
+        >
+      {/if}
     </div>
 
     <nav
-      class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4 [scrollbar-gutter:stable] [scrollbar-width:thin]"
+      class="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4 [scrollbar-gutter:stable] [scrollbar-width:thin] [&>div:first-child_[data-rail-divider]]:hidden"
       aria-label="main navigation"
     >
-      {@render navPanel("desktop")}
+      {@render navPanel("desktop", undefined, collapsed)}
     </nav>
 
     <div class="shrink-0 border-t border-border-subtle bg-surface px-3 py-3">
-      {@render systemNav("desktop")}
+      {@render systemNav("desktop", undefined, collapsed)}
     </div>
   </aside>
 
@@ -537,7 +594,7 @@
 
   <!-- Top Header -->
   <header
-    class="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border-subtle bg-surface px-3 lg:left-64 lg:max-w-[calc(100vw-16rem)] lg:px-6"
+    class="fixed left-0 right-0 top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border-subtle bg-surface px-3 transition-[left,max-width] duration-200 motion-reduce:transition-none lg:left-[var(--paisa-sidebar-width)] lg:max-w-[calc(100vw-var(--paisa-sidebar-width))] lg:px-6"
   >
     <div class="flex min-w-0 items-center gap-3">
       <div class="flex items-center gap-3 lg:hidden">
@@ -561,6 +618,23 @@
           >
         </div>
       </div>
+
+      <button
+        type="button"
+        onclick={() => navigationState.toggleSidebar()}
+        class="hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-raised text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--paisa-primary)] lg:flex"
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        aria-controls="desktop-sidebar"
+        aria-expanded={!collapsed}
+      >
+        <i
+          class="fa-solid {collapsed
+            ? 'fa-angles-right'
+            : 'fa-angles-left'} text-xs"
+          aria-hidden="true"
+        ></i>
+      </button>
 
       <button
         type="button"
@@ -681,7 +755,7 @@
 
   <!-- Main Content -->
   <main
-    class="paisa-overflow-x-auto ml-0 mt-14 flex min-h-[calc(100vh-3.5rem)] min-w-0 max-w-full flex-col overflow-x-auto bg-canvas lg:ml-64 lg:max-w-[calc(100vw-16rem)]"
+    class="paisa-overflow-x-auto ml-0 mt-14 flex min-h-[calc(100vh-3.5rem)] min-w-0 max-w-full flex-col overflow-x-auto bg-canvas transition-[margin,max-width] duration-200 motion-reduce:transition-none lg:ml-[var(--paisa-sidebar-width)] lg:max-w-[calc(100vw-var(--paisa-sidebar-width))]"
   >
     <div class="flex w-full min-w-0 flex-1 flex-col p-4 lg:p-6">
       <Spinner>

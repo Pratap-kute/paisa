@@ -7,6 +7,7 @@
   color-scheme: light;
 
   /* Navigation */
+  --paisa-sidebar-width: 16rem;
   --paisa-breadcrumb-muted: var(--paisa-muted-foreground);
   --paisa-breadcrumb-separator: var(--paisa-primary);
 

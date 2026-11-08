@@ -33,8 +33,26 @@ export class NavigationState {
     {},
   );
 
+  #sidebarCollapsed = new PersistedState<boolean>(
+    "paisa_sidebar_collapsed",
+    false,
+  );
+
   get preferences(): Record<string, boolean> {
     return this.#expandedPreferences.value;
+  }
+
+  /** Whether the desktop sidebar is shrunk to its icon rail. */
+  get sidebarCollapsed(): boolean {
+    return this.#sidebarCollapsed.value;
+  }
+
+  set sidebarCollapsed(collapsed: boolean) {
+    this.#sidebarCollapsed.value = collapsed;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   isPathActive(targetHref: string, currentPath: string): boolean {
