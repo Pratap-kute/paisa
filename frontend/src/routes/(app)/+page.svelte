@@ -238,6 +238,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Dashboard - Paisa</title>
+</svelte:head>
+
 <Page width="analysis">
   {#if dashboardFailed && !dashboardLoading}
     <div

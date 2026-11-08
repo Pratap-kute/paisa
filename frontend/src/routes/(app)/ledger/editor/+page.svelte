@@ -11,6 +11,10 @@
   let { data }: Props = $props();
 </script>
 
+<svelte:head>
+  <title>Editor - Paisa</title>
+</svelte:head>
+
 {#if data.journalMissing}
   <Page width="fluid">
     <Section>

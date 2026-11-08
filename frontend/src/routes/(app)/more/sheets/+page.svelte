@@ -40,6 +40,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Sheets - Paisa</title>
+</svelte:head>
+
 <FileModal
   bind:open={modalOpen}
   onsave={createFile}
