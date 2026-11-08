@@ -1,19 +1,18 @@
-import { test, expect } from "bun:test";
-import { get } from "svelte/store";
-import { dismissToast, toast, toasts } from "./toast";
+import { expect, test } from "vitest";
+import { dismissToast, toast, toasts } from "#lib/shared/ui/toast";
 
 test("toast stacks, supports single replacement, and dismisses", () => {
-  toasts.set([]);
+  toasts.value = [];
   const first = toast({ message: "first" });
   toast({ message: "second" });
-  expect(get(toasts).map(({ message }) => message)).toEqual([
+  expect(toasts.value.map(({ message }) => message)).toEqual([
     "first",
     "second",
   ]);
   dismissToast(first);
-  expect(get(toasts).map(({ message }) => message)).toEqual(["second"]);
+  expect(toasts.value.map(({ message }) => message)).toEqual(["second"]);
   toast({ message: "only", single: true });
-  expect(get(toasts).map(({ message }) => message)).toEqual(["only"]);
+  expect(toasts.value.map(({ message }) => message)).toEqual(["only"]);
 });
 
 test("toast rejects empty messages", () => {

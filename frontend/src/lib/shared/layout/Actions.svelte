@@ -22,7 +22,7 @@
   const obscureId = "obscure";
   let initialized = false;
   $effect(() => {
-    const isObscured = $obscure;
+    const isObscured = obscure.value;
     if (!initialized) {
       initialized = true;
       return;
@@ -111,18 +111,18 @@
           class="flex w-full cursor-pointer items-center gap-2 text-sm text-foreground transition-colors hover:text-primary"
         >
           <input
-            bind:checked={$obscure}
+            bind:checked={obscure.value}
             id={obscureId}
             type="checkbox"
             class="sr-only"
           />
           <i
-            class="fas {$obscure
+            class="fas {obscure.value
               ? 'fa-eye-slash'
               : 'fa-eye'} w-5 text-center text-xs"
             aria-hidden="true"
           ></i>
-          <span>{$obscure ? "Show" : "Hide"} numbers</span>
+          <span>{obscure.value ? "Show" : "Hide"} numbers</span>
         </label>
       </div>
       {#if showLogout}

@@ -109,7 +109,7 @@
           >~{formatCommodityAmount(
             item.expectedCashOutflowAmount ?? item.expectedAmount,
             item.cashCommodity ?? item.commodity,
-            $obscure,
+            obscure.value,
           )}</span
         >
       </li>

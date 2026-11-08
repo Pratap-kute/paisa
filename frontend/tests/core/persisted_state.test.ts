@@ -1,6 +1,5 @@
-import { test, expect } from "bun:test";
-import { get } from "svelte/store";
-import { persisted } from "./persisted";
+import { expect, test } from "vitest";
+import { PersistedState } from "#lib/shared/state/persisted.svelte";
 
 class MemoryStorage implements Storage {
   #values = new Map<string, string>();
@@ -27,29 +26,32 @@ class MemoryStorage implements Storage {
 test("persisted serializes values and follows storage events", () => {
   const storage = new MemoryStorage();
   let listener: ((event: StorageEvent) => void) | undefined;
-  const store = persisted("theme", "light", {
+  const state = new PersistedState("theme", "light", {
     storage,
     onStorage: (next) => (listener = next),
   });
 
-  store.set("dark");
+  state.value = "dark";
   expect(storage.getItem("theme")).toBe('"dark"');
   listener?.({
     storageArea: storage,
     key: "theme",
     newValue: '"system"',
   } as unknown as StorageEvent);
-  expect(get(store)).toBe("system");
+  expect(state.value).toBe("system");
   listener?.({
     storageArea: storage,
     key: "theme",
     newValue: null,
   } as unknown as StorageEvent);
-  expect(get(store)).toBe("light");
+  expect(state.value).toBe("light");
 });
 
 test("persisted is safe without browser storage", () => {
-  const store = persisted("missing", 1, { storage: null, onStorage: () => {} });
-  store.update((value) => value + 1);
-  expect(get(store)).toBe(2);
+  const state = new PersistedState("missing", 1, {
+    storage: null,
+    onStorage: () => {},
+  });
+  state.value += 1;
+  expect(state.value).toBe(2);
 });

@@ -13,7 +13,7 @@
 
   let scheduleAls: Record<string, ScheduleAL> | null = $state(null);
   let selectedScheduleAl: ScheduleAL | null = $derived(
-    scheduleAls ? (scheduleAls[$year] ?? null) : null,
+    scheduleAls ? (scheduleAls[year.value] ?? null) : null,
   );
   let hasEntries = $derived((selectedScheduleAl?.entries?.length ?? 0) > 0);
   let total = $derived(scheduleALTotal(selectedScheduleAl?.entries ?? []));
@@ -26,7 +26,7 @@
 
     const firstScheduleAl = minBy(Object.values(scheduleAls), (e) => e.date);
     if (firstScheduleAl) {
-      dateMin.set(firstScheduleAl.date);
+      dateMin.value = firstScheduleAl.date;
     }
   });
 </script>

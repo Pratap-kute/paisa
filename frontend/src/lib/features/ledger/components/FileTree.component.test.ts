@@ -24,10 +24,7 @@ test("selects a nested ledger file and displays unsaved state", async () => {
       path: "",
       selectedFileName: "accounts/main.ledger",
       hasUnsavedChanges: true,
-    },
-    events: {
-      select: (event: CustomEvent<{ name: string }>) =>
-        (selected = event.detail.name),
+      onselect: (file: { name: string }) => (selected = file.name),
     },
   });
 

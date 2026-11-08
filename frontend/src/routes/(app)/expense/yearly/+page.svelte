@@ -17,7 +17,6 @@
   import { buildExpenseBreakdownComparison } from "#lib/features/expense/chart_comparison_data";
   import { expenseGroup } from "#lib/features/expense/expense";
   import { dateMax, dateMin, year } from "../../../../store";
-  import { writable } from "svelte/store";
   import LegendCard from "#lib/shared/ui/LegendCard.svelte";
   import Page from "#lib/shared/layout/Page.svelte";
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
@@ -34,7 +33,7 @@
   import TimeSeriesChart from "#lib/shared/charts/TimeSeriesChart.svelte";
   import { isEmpty, map, maxBy, minBy } from "#lib/shared/utils/collection";
 
-  let groups = writable<string[]>([]);
+  let groups = $state<string[]>([]);
   let expenses: Posting[] = $state([]),
     grouped_expenses: Record<string, Posting[]> = $state({}),
     grouped_incomes: Record<string, Posting[]> = $state({}),
@@ -73,18 +72,17 @@
       if (dates.length > 0) {
         const minimum = minBy(dates, (d) => d.valueOf())!;
         const maximum = maxBy(dates, (d) => d.valueOf())!;
-        dateMin.set(minimum);
-        dateMax.set(maximum);
-        if (!$year) year.set(financialYear(maximum));
+        dateMin.value = minimum;
+        dateMax.value = maximum;
+        if (!year.value) year.value = financialYear(maximum);
       }
 
       const allGroups = uniq(expenses.map(expenseGroup)).sort();
-      groups.set(allGroups);
+      groups = allGroups;
       expenseColor = categoryColorResolver(allGroups);
       legends = categoryLegends(allGroups, (group) => {
-        groups.update((selected) =>
-          selected.length === 1 && selected[0] === group ? allGroups : [group],
-        );
+        groups =
+          groups.length === 1 && groups[0] === group ? allGroups : [group];
       });
     } finally {
       isLoading = false;
@@ -99,30 +97,32 @@
     return formatCurrency(sign * sumBy(postings, (p) => p.amount));
   }
 
-  let currentYearExpenses: Posting[] = $derived(grouped_expenses[$year] || []);
+  let currentYearExpenses: Posting[] = $derived(
+    grouped_expenses[year.value] || [],
+  );
   let currentYearHeatmapData = $derived(
-    buildYearlyExpenseHeatmapData($year, currentYearExpenses, $groups),
+    buildYearlyExpenseHeatmapData(year.value, currentYearExpenses, groups),
   );
   let currentYearBreakdownData = $derived(
     buildExpenseBreakdownComparison(currentYearExpenses),
   );
   let expenseTimelineData = $derived(
-    buildYearlyExpenseTimelineSeries(expenses, $groups),
+    buildYearlyExpenseTimelineSeries(expenses, groups),
   );
   let hasCurrentYearExpenses = $derived(currentYearExpenses.length > 0);
   let hasExpenses = $derived(expenses.length > 0);
   let postingCountSubtitle = $derived(
     hasCurrentYearExpenses
-      ? `${currentYearExpenses.length} postings in ${$year}`
+      ? `${currentYearExpenses.length} postings in ${year.value}`
       : "No expenses recorded",
   );
 
   $effect(() => {
     if (grouped_expenses) {
-      const yearExpenses = grouped_expenses[$year] || [];
-      const incomes = grouped_incomes[$year] || [];
-      const taxes = grouped_taxes[$year] || [];
-      const investments = grouped_investments[$year] || [];
+      const yearExpenses = grouped_expenses[year.value] || [];
+      const incomes = grouped_incomes[year.value] || [];
+      const taxes = grouped_taxes[year.value] || [];
+      const investments = grouped_investments[year.value] || [];
 
       income = sumCurrency(incomes, -1);
       tax = sumCurrency(taxes);
@@ -160,7 +160,7 @@
 </script>
 
 <svelte:head>
-  <title>Yearly Expenses - {$year} - Paisa</title>
+  <title>Yearly Expenses - {year.value} - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">
@@ -171,9 +171,9 @@
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
         <FinancialYearPicker
-          bind:value={$year}
-          dateMin={$dateMin}
-          dateMax={$dateMax}
+          bind:value={year.value}
+          dateMin={dateMin.value}
+          dateMax={dateMax.value}
         />
       </div>
     {/snippet}
@@ -218,7 +218,7 @@
         class="overflow-visible [&_.paisa-chart-frame-body]:overflow-visible"
         rows={Math.min(8, currentYearExpenses.length || 4)}
         empty={!isLoading && !hasCurrentYearExpenses}
-        emptyMessage="No expenses recorded for {$year}"
+        emptyMessage="No expenses recorded for {year.value}"
       >
         <ComparisonBarChart
           data={currentYearBreakdownData}
@@ -235,7 +235,7 @@
       <ChartFrame height="content" empty={!hasCurrentYearExpenses}>
         <YearlyExpenseCalendar
           data={currentYearHeatmapData}
-          ariaLabel="Monthly expense activity for {$year}"
+          ariaLabel="Monthly expense activity for {year.value}"
           testId="yearly-expense-calendar"
           colorFor={expenseColor}
         />

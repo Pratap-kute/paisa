@@ -40,9 +40,13 @@
   }
 </script>
 
+<svelte:head>
+  <title>Sheets - Paisa</title>
+</svelte:head>
+
 <FileModal
   bind:open={modalOpen}
-  on:save={(e) => createFile(e.detail)}
+  onsave={createFile}
   label="Create"
   placeholder="scratch"
   help="Filename without any extension"

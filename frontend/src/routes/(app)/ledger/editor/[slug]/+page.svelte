@@ -85,9 +85,13 @@
   ];
 
   const leaveGuard = createLeaveGuard(
-    () => $editorState.hasUnsavedChanges,
+    () => editorState.value.hasUnsavedChanges,
     () => {
-      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     },
   );
 
@@ -183,7 +187,11 @@
         selectedFile = file as unknown as LedgerFile;
       }
       selectedVersion = "";
-      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     } else {
       toast.toast({
         message: `Saved ${selectedFile.name}`,
@@ -194,7 +202,11 @@
         selectedFile = file as unknown as LedgerFile;
       }
       selectedVersion = "";
-      $editorState = assign({}, $editorState, { hasUnsavedChanges: false });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     }
   }
 
@@ -271,8 +283,8 @@
   let copiedOutput = $state(false);
 
   async function copyOutput() {
-    if ($editorState.output) {
-      await navigator.clipboard.writeText($editorState.output);
+    if (editorState.value.output) {
+      await navigator.clipboard.writeText(editorState.value.output);
       copiedOutput = true;
       toast.toast({
         message: "Output copied to clipboard",
@@ -287,7 +299,7 @@
 
   let gridColsClass = $derived.by(() => {
     const hasSidebar = sidebarOpen;
-    const hasOutput = outputOpen && !isEmpty($editorState.output);
+    const hasOutput = outputOpen && !isEmpty(editorState.value.output);
 
     if (hasSidebar && hasOutput) {
       return "grid-cols-1 md:grid-cols-[minmax(180px,200px)_1fr_minmax(220px,280px)] lg:grid-cols-[minmax(200px,240px)_1fr_minmax(260px,340px)]";
@@ -317,12 +329,7 @@
   <title>{selectedFile?.name || "Editor"} - Paisa</title>
 </svelte:head>
 
-<FileModal
-  bind:open={modalOpen}
-  on:save={(e) => createFile(e.detail)}
-  label="Create"
-  help=""
-/>
+<FileModal bind:open={modalOpen} onsave={createFile} label="Create" help="" />
 
 <Page width="fluid">
   <Section class="!pb-0">
@@ -352,7 +359,7 @@
           >
             {selectedFile?.name || "No file selected"}
           </span>
-          {#if $editorState.hasUnsavedChanges}
+          {#if editorState.value.hasUnsavedChanges}
             <Badge variant="warning" size="sm" rounded dot>Unsaved</Badge>
           {/if}
         </div>
@@ -363,10 +370,12 @@
           class="flex items-center gap-1 rounded-[var(--paisa-radius-md)] border border-border-subtle bg-surface-raised p-0.5"
         >
           <Button
-            variant={$editorState.hasUnsavedChanges ? "primary" : "secondary"}
+            variant={editorState.value.hasUnsavedChanges
+              ? "primary"
+              : "secondary"}
             size="sm"
             onclick={save}
-            disabled={!$editorState.hasUnsavedChanges}
+            disabled={!editorState.value.hasUnsavedChanges}
             title="Save file (Ctrl+S)"
           >
             {#snippet icon()}
@@ -390,7 +399,7 @@
           <Button
             variant="ghost"
             size="sm"
-            disabled={$editorState.undoDepth === 0}
+            disabled={editorState.value.undoDepth === 0}
             onclick={undoEdit}
             title="Undo edit (Ctrl+Z)"
             ariaLabel="Undo edit"
@@ -403,7 +412,7 @@
           <Button
             variant="ghost"
             size="sm"
-            disabled={$editorState.redoDepth === 0}
+            disabled={editorState.value.redoDepth === 0}
             onclick={redoEdit}
             title="Redo edit (Ctrl+Y)"
             ariaLabel="Redo edit"
@@ -416,7 +425,7 @@
           <Button
             variant="ghost"
             size="sm"
-            disabled={$editorState.hasUnsavedChanges}
+            disabled={editorState.value.hasUnsavedChanges}
             onclick={() => openCreateModal()}
             title="Create new ledger file"
           >
@@ -470,19 +479,20 @@
       </div>
 
       <div class="flex items-center gap-2">
-        {#if $editorState.errors.length > 0}
+        {#if editorState.value.errors.length > 0}
           <button
             type="button"
             class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-negative-subtle px-2.5 py-1 text-xs font-semibold text-negative transition-colors hover:bg-negative hover:text-inverse-foreground"
             onclick={() => {
               if (editor)
-                moveToLine(editor, $editorState.errors[0].line_from, true);
+                moveToLine(editor, editorState.value.errors[0].line_from, true);
             }}
             title="Click to jump to error line"
           >
             <span class="h-1.5 w-1.5 rounded-full bg-negative"></span>
             <span
-              >{$editorState.errors.length} error{$editorState.errors.length > 1
+              >{editorState.value.errors.length} error{editorState.value.errors
+                .length > 1
                 ? "s"
                 : ""}</span
             >
@@ -497,7 +507,7 @@
           </div>
         {/if}
 
-        {#if !isEmpty($editorState.output)}
+        {#if !isEmpty(editorState.value.output)}
           <Button
             variant={outputOpen ? "secondary" : "ghost"}
             size="sm"
@@ -542,10 +552,10 @@
           <div class="relative flex-1 overflow-y-auto p-2">
             <FileTree
               path=""
-              on:select={(e) => selectFile(e.detail)}
+              onselect={selectFile}
               files={buildDirectoryTree(values(filesMap))}
               selectedFileName={selectedFile?.name ?? ""}
-              hasUnsavedChanges={$editorState.hasUnsavedChanges}
+              hasUnsavedChanges={editorState.value.hasUnsavedChanges}
             />
           </div>
         </aside>
@@ -564,7 +574,7 @@
             <span class="max-w-[200px] truncate">
               {selectedFile ? last(selectedFile.name.split("/")) : "editor"}
             </span>
-            {#if $editorState.hasUnsavedChanges}
+            {#if editorState.value.hasUnsavedChanges}
               <span
                 class="text-[0.75rem] leading-none text-warning"
                 title="Unsaved changes">●</span
@@ -582,7 +592,7 @@
         </div>
       </main>
 
-      {#if outputOpen && !isEmpty($editorState.output)}
+      {#if outputOpen && !isEmpty(editorState.value.output)}
         <section
           class="flex min-w-0 flex-col overflow-hidden rounded-[var(--paisa-radius-md)] border border-border bg-surface shadow-[var(--paisa-shadow-sm)] max-md:hidden"
         >
@@ -618,7 +628,7 @@
           </div>
 
           <div class="relative flex-1 overflow-hidden">
-            <LedgerBalance output={$editorState.output} />
+            <LedgerBalance output={editorState.value.output} />
           </div>
         </section>
       {/if}

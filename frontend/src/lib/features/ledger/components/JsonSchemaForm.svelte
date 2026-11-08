@@ -174,20 +174,26 @@
     >
       {#snippet children()}
         <Select
-          bind:justValue={value}
           class="icon-select"
-          {value}
+          value={value ? { value, label: value } : undefined}
+          onchange={(selected) => (value = selected?.value ?? "")}
           showChevron={true}
           loadOptions={searchIcons}
           searchable={true}
           clearable={!required}
         >
-          <div class="custom-icon" slot="selection" let:selection>
-            <span>{iconGlyph(selection.value)} {selection.value}</span>
-          </div>
-          <div class="custom-icon" slot="item" let:item>
-            <span class="name">{iconGlyph(item.value)} {item.value}</span>
-          </div>
+          {#snippet selection({ selection })}
+            <div class="custom-icon">
+              <span>{iconGlyph(selection.value)} {selection.value}</span>
+            </div>
+          {/snippet}
+          {#snippet item({ item })}
+            <div class="custom-icon">
+              <span class="name"
+                >{iconGlyph(item.value as string)} {item.value}</span
+              >
+            </div>
+          {/snippet}
         </Select>
       {/snippet}
     </FormField>
@@ -319,9 +325,9 @@
     </div>
     <PriceCodeSearchModal
       bind:open={modalOpen}
-      on:select={(e) => {
-        value["code"] = e.detail.code;
-        value["provider"] = e.detail.provider;
+      onselect={(selected) => {
+        value["code"] = selected.code;
+        value["provider"] = selected.provider;
       }}
     />
     <div

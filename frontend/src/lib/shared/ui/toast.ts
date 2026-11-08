@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
+import { Ref } from "#lib/shared/state/ref.svelte";
 
 export interface ToastOptions {
   message: string;
@@ -24,12 +24,12 @@ let defaults: ToastOptions = {
   closeOnClick: true,
   position: "top-right",
 };
-export const toasts = writable<ToastMessage[]>([]);
-export const toastPosition = writable(defaults.position ?? "top-right");
+export const toasts = new Ref<ToastMessage[]>([]);
+export const toastPosition = new Ref(defaults.position ?? "top-right");
 
 export function setDefaults(options: Omit<ToastOptions, "message">) {
   defaults = { ...defaults, ...options };
-  toastPosition.set(defaults.position ?? "top-right");
+  toastPosition.value = defaults.position ?? "top-right";
 }
 
 export function dismissToast(id: number) {

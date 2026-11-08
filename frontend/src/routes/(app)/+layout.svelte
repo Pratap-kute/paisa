@@ -17,7 +17,7 @@
   });
 </script>
 
-{#key $willRefresh}
+{#key willRefresh.value}
   <AppShell bind:isBurger>
     {@render children?.()}
   </AppShell>

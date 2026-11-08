@@ -16,7 +16,7 @@ import {
   lintGutter,
   lintKeymap,
 } from "@codemirror/lint";
-import { writable } from "svelte/store";
+import { Ref } from "#lib/shared/state/ref.svelte";
 import {
   autocompletion,
   completeFromList,
@@ -42,7 +42,7 @@ const initialEditorState: EditorState = {
   template: null,
 };
 
-export const editorState = writable(initialEditorState);
+export const editorState = new Ref(initialEditorState);
 
 function lint(editor: EditorView): Diagnostic[] {
   const doc = editor.state.doc;
@@ -73,7 +73,7 @@ function lint(editor: EditorView): Diagnostic[] {
 export function createEditor(content: string, dom: Element) {
   const autocompletions: Record<string, string[]> = {};
 
-  editorState.set(initialEditorState);
+  editorState.value = initialEditorState;
 
   return new EditorView({
     extensions: [

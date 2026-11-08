@@ -20,8 +20,7 @@
   import { change } from "#lib/domain/posting";
   import { editorState } from "#lib/features/editor/search_query_editor";
   import { debounce } from "es-toolkit";
-  import { get } from "svelte/store";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
   import ZeroState from "#lib/shared/ui/ZeroState.svelte";
@@ -57,12 +56,9 @@
 
   const handleInput = debounce(handleInputRaw, 100);
 
-  const unsubscribe = editorState.subscribe((state) => {
-    handleInput(state.predicate);
-  });
-
-  onDestroy(() => {
-    unsubscribe();
+  $effect(() => {
+    const { predicate } = editorState.value;
+    untrack(() => handleInput(predicate));
   });
 
   function updateDimensions() {
@@ -85,7 +81,7 @@
       posting: p,
       transaction: asTransaction(p),
     }));
-    handleInputRaw(get(editorState).predicate);
+    handleInputRaw(editorState.value.predicate);
   }
 
   onMount(() => {
@@ -183,7 +179,7 @@
                   itemCount={filteredPostings.length}
                   itemSize={compact ? recordHeight : 27}
                 >
-                  <svelte:fragment slot="item" let:index let:style>
+                  {#snippet item({ index, style })}
                     {@const p = filteredPostings[index]}
                     {#if p && compact}
                       <PostingRecord posting={p} {style} />
@@ -254,7 +250,7 @@
                         </div>
                       </div>
                     {/if}
-                  </svelte:fragment>
+                  {/snippet}
                 </VirtualList>
               {/key}
             {:else}

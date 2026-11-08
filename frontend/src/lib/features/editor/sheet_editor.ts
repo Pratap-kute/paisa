@@ -65,7 +65,7 @@ function lint(env: Environment) {
     });
 
     if (diagnostics.length == 0) {
-      sheetEditorState.update((current) => {
+      const evaluatePending = (current: typeof sheetEditorState.value) => {
         if (!current.pendingEval) {
           return current;
         }
@@ -96,7 +96,8 @@ function lint(env: Environment) {
           evalDuration: endTime - startTime,
           results,
         });
-      });
+      };
+      sheetEditorState.update(evaluatePending);
     }
 
     return diagnostics;
@@ -116,7 +117,7 @@ export function createEditor(
   env.scope = functions;
   env.postings = postings;
 
-  sheetEditorState.set(initialSheetEditorState);
+  sheetEditorState.value = initialSheetEditorState;
 
   let firstLoad = true;
 
@@ -191,22 +192,17 @@ export function createEditor(
         const currentLine = viewUpdate.state.doc.lineAt(
           viewUpdate.state.selection.main.head,
         );
-        sheetEditorState.update((current) => {
-          let pendingEval = current.pendingEval;
-          if (current.doc !== doc) {
-            pendingEval = true;
-          }
-
-          return assign({}, current, {
-            pendingEval,
+        sheetEditorState.update((current) =>
+          assign({}, current, {
+            pendingEval: current.pendingEval || current.doc !== doc,
             doc,
             currentLine: currentLine.number,
             hasUnsavedChanges:
               current.hasUnsavedChanges || viewUpdate.docChanged,
             undoDepth: undoDepth(viewUpdate.state),
             redoDepth: redoDepth(viewUpdate.state),
-          });
-        });
+          }),
+        );
       }),
       schedulePlugin,
     ],

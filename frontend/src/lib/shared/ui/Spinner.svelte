@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
-  import { delayedLoading } from "../../../store";
+  import { loading } from "../../../store";
   import Logo from "#lib/shared/layout/Logo.svelte";
   interface Props {
     children?: import("svelte").Snippet;
@@ -13,11 +13,11 @@
 <div class="paisa-spinner-shell">
   <div
     class="paisa-spinner-content"
-    style={$delayedLoading ? "visibility: hidden" : ""}
+    style={loading.delayed ? "visibility: hidden" : ""}
   >
     {@render children?.()}
   </div>
-  {#if $delayedLoading}
+  {#if loading.delayed}
     <div class="circle-container" transition:fade={{ duration: 400 }}>
       <Logo {size} animation />
     </div>

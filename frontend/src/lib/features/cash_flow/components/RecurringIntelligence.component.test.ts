@@ -49,7 +49,7 @@ beforeEach(() => {
   USER_CONFIG.readonly = false;
   USER_CONFIG.display_precision = 2;
   USER_CONFIG.locale = "en-IN";
-  obscure.set(false);
+  obscure.value = false;
   mocks.history.mockResolvedValue({ transactions: history() });
   mocks.prepare.mockResolvedValue([{ name: "main.ledger" }]);
   mocks.save.mockResolvedValue(undefined);
@@ -160,7 +160,7 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   const row = render(RecurringIntelligenceRow, { item });
   const summary = render(RecurringSummary, { items: [item], asOf });
   expect(row.container.textContent).toContain("649.00");
-  obscure.set(true);
+  obscure.value = true;
   await waitFor(() =>
     expect(row.container.textContent).not.toContain("649.00"),
   );
@@ -168,7 +168,7 @@ test("privacy masks amounts and percentages immediately when toggled", async () 
   expect(row.container.textContent).not.toContain("30.1%");
   expect(summary.container.textContent).not.toContain("649.00");
   expect(row.container.textContent).toContain("0.00");
-  obscure.set(false);
+  obscure.value = false;
   await waitFor(() => expect(row.container.textContent).toContain("649.00"));
 });
 

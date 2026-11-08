@@ -13,7 +13,7 @@
   let { goals }: { goals: GoalSummary[] } = $props();
   const health = $derived(summarizeGoalHealth(goals));
   const compactMoney = (value: number) =>
-    formatCurrencyCrude($obscure ? 0 : value);
+    formatCurrencyCrude(obscure.value ? 0 : value);
 </script>
 
 {#if goals.length}

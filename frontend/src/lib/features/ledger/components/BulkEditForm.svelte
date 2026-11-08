@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import Select from "svelte-select";
 
   interface Props {
     accounts: string[];
+    onpreview?: (detail: {
+      operation: string;
+      args: { oldAccountName: string; newAccountName: string };
+    }) => void;
   }
 
-  let { accounts }: Props = $props();
+  let { accounts, onpreview }: Props = $props();
 
   let selectItems = $derived(
     accounts.map((account) => ({ id: account, name: account })),
@@ -18,8 +21,6 @@
   let selectedOperation = $state(OPERATIONS[0].id);
 
   let args = $state({ oldAccountName: "", newAccountName: "" });
-
-  const dispatch = createEventDispatcher();
 </script>
 
 <div class="paisa-bulk-edit-card">
@@ -59,7 +60,7 @@
             placeholder="Old Account name"
             searchable={true}
             clearable={false}
-            on:change={(_e) => {
+            onchange={() => {
               args.oldAccountName = selectedItem?.name || "";
             }}
           ></Select>
@@ -87,7 +88,7 @@
         type="button"
         class="paisa-preview-btn"
         onclick={(_e) =>
-          dispatch("preview", { operation: selectedOperation, args: args })}
+          onpreview?.({ operation: selectedOperation, args: args })}
       >
         <i class="fa-solid fa-eye mr-1.5 text-xs"></i>
         <span>Preview</span>

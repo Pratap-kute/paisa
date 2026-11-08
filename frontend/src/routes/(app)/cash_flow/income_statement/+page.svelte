@@ -75,11 +75,11 @@
 
   $effect(() => {
     if (yearly) {
-      if (yearly[$year] == null) {
+      if (yearly[year.value] == null) {
         incomeStatement = null;
         isEmpty = true;
       } else {
-        incomeStatement = yearly[$year];
+        incomeStatement = yearly[year.value];
         years = sortBy(keys(yearly)).reverse();
         diff = incomeStatement.endingBalance - incomeStatement.startingBalance;
         diffPercent = diff / incomeStatement.startingBalance;
@@ -112,15 +112,15 @@
       const earliest = minBy(statements, (statement) => statement.date);
       const latest = maxBy(statements, (statement) => statement.date);
       if (earliest) {
-        dateMin.set(earliest.date);
+        dateMin.value = earliest.date;
       }
       if (latest) {
-        dateMax.set(latest.date);
+        dateMax.value = latest.date;
       }
-      if (!$year) {
+      if (!year.value) {
         const sortedYears = Object.keys(yearly).sort();
         const latestYear = sortedYears[sortedYears.length - 1];
-        if (latestYear) year.set(latestYear);
+        if (latestYear) year.value = latestYear;
       }
 
       const rawGroups: AccountGroup[] = [
@@ -181,7 +181,7 @@
 </script>
 
 <svelte:head>
-  <title>Income Statement - {$year} - Paisa</title>
+  <title>Income Statement - {year.value} - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">
@@ -192,9 +192,9 @@
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
         <FinancialYearPicker
-          bind:value={$year}
-          dateMin={$dateMin}
-          dateMax={$dateMax}
+          bind:value={year.value}
+          dateMin={dateMin.value}
+          dateMax={dateMax.value}
         />
       </div>
     {/snippet}
@@ -202,7 +202,7 @@
 
   {#if incomeStatement || isLoading}
     <MetricStrip cols={4}>
-      <Metric label="Selected Year" value={$year} loading={isLoading} />
+      <Metric label="Selected Year" value={year.value} loading={isLoading} />
       <Metric
         label="Starting Net Worth"
         value={incomeStatement

@@ -39,16 +39,16 @@ test("shows unavailable performance without a fabricated zero", () => {
 test("privacy changes mask already-rendered monetary values", async () => {
   const { obscure } = await import("#lib/shared/state/persisted");
   const { tick } = await import("svelte");
-  obscure.set(false);
+  obscure.value = false;
   const { container } = render(DashboardInvestmentPerformance, {
     summary: { investmentReturn: 7654321, quality: { status: "complete" } },
   });
   const visible = formatCurrency(7654321);
   expect(rendered(container)).toContain(visible);
-  obscure.set(true);
+  obscure.value = true;
   await tick();
   expect(rendered(container)).not.toContain(visible);
-  obscure.set(false);
+  obscure.value = false;
 });
 
 test("shows reconciliation failure error message", () => {

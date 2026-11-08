@@ -1,19 +1,16 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
   import type { Snippet } from "svelte";
 
   interface Props {
     accept?: string;
     multiple?: boolean;
     children?: Snippet;
+    ondrop?: (detail: { acceptedFiles: File[]; rejectedFiles: File[] }) => void;
   }
 
-  let { accept = "", multiple = false, children }: Props = $props();
+  let { accept = "", multiple = false, children, ondrop }: Props = $props();
   let input: HTMLInputElement | undefined = $state();
   let dragging = $state(false);
-  const dispatch = createEventDispatcher<{
-    drop: { acceptedFiles: File[]; rejectedFiles: File[] };
-  }>();
 
   function accepted(file: File) {
     const rules = accept
@@ -35,7 +32,7 @@
     const acceptedFiles = selected
       .filter(accepted)
       .slice(0, multiple ? undefined : 1);
-    dispatch("drop", {
+    ondrop?.({
       acceptedFiles,
       rejectedFiles: selected.filter((file) => !accepted(file)),
     });

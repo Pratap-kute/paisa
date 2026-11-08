@@ -95,7 +95,7 @@ export function createEditor(
     keybindings?: readonly KeyBinding[];
   },
 ) {
-  editorState.set(initialEditorState);
+  editorState.value = initialEditorState;
 
   return new EditorView({
     extensions: [

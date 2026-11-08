@@ -34,12 +34,16 @@
   let expenses: Posting[] = $state([]);
   let isLoading = $state(true);
   let rawGraph: Graph | undefined = $derived.by(() => {
-    if (!graph || isLoading || !graph[$year]) return undefined;
-    return graph[$year];
+    if (!graph || isLoading || !graph[year.value]) return undefined;
+    return graph[year.value];
   });
   let selectedGraph: Graph | undefined = $derived.by(() => {
-    if (!graph || isLoading || !graph[$year]) return undefined;
-    return filter(graph[$year], $cashflowIncomeDepth, $cashflowExpenseDepth);
+    if (!graph || isLoading || !graph[year.value]) return undefined;
+    return filter(
+      graph[year.value],
+      cashflowIncomeDepth.value,
+      cashflowExpenseDepth.value,
+    );
   });
   let sankeyData = $derived(
     selectedGraph ? buildCashFlowSankeyData(selectedGraph) : undefined,
@@ -53,7 +57,8 @@
   let isEmpty = $derived(!isLoading && Boolean(graph) && !selectedGraph);
 
   let showDepthControls = $derived(
-    $cashflowExpenseDepthAllowed.max > 1 || $cashflowIncomeDepthAllowed.max > 1,
+    cashflowExpenseDepthAllowed.value.max > 1 ||
+      cashflowIncomeDepthAllowed.value.max > 1,
   );
 
   function maxDepth(prefix: string) {
@@ -94,7 +99,7 @@
       });
       const firstExpense = minBy(expenses, (e) => e.date);
       if (firstExpense) {
-        dateMin.set(firstExpense.date);
+        dateMin.value = firstExpense.date;
       }
 
       setCashflowDepthAllowed(maxDepth("Expenses"), maxDepth("Income"));
@@ -106,7 +111,7 @@
 </script>
 
 <svelte:head>
-  <title>Yearly Cash Flow - {$year} - Paisa</title>
+  <title>Yearly Cash Flow - {year.value} - Paisa</title>
 </svelte:head>
 
 <Page width="analysis">
@@ -123,29 +128,29 @@
         >
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode ===
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {cashflowViewMode.value ===
             'treemap'
               ? 'bg-surface-raised font-semibold text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'}"
-            onclick={() => ($cashflowViewMode = "treemap")}
+            onclick={() => (cashflowViewMode.value = "treemap")}
           >
             Breakdown
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {$cashflowViewMode ===
+            class="inline-flex items-center gap-1 rounded-[calc(var(--paisa-radius-md)-2px)] px-2 py-1 text-xs font-medium transition-all {cashflowViewMode.value ===
             'sankey'
               ? 'bg-surface-raised font-semibold text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'}"
-            onclick={() => ($cashflowViewMode = "sankey")}
+            onclick={() => (cashflowViewMode.value = "sankey")}
           >
             Flow
           </button>
         </div>
         <FinancialYearPicker
-          bind:value={$year}
-          dateMin={$dateMin}
-          dateMax={$dateMax}
+          bind:value={year.value}
+          dateMin={dateMin.value}
+          dateMax={dateMax.value}
         />
         {#if showDepthControls}
           <details
@@ -159,13 +164,13 @@
             <div class="min-w-[180px] border-t border-border-subtle px-2 pb-2">
               <InputRange
                 label="Expenses"
-                bind:value={$cashflowExpenseDepth}
-                allowed={$cashflowExpenseDepthAllowed}
+                bind:value={cashflowExpenseDepth.value}
+                allowed={cashflowExpenseDepthAllowed.value}
               />
               <InputRange
                 label="Income"
-                bind:value={$cashflowIncomeDepth}
-                allowed={$cashflowIncomeDepthAllowed}
+                bind:value={cashflowIncomeDepth.value}
+                allowed={cashflowIncomeDepthAllowed.value}
               />
             </div>
           </details>
@@ -176,7 +181,7 @@
 
   <Section
     title="Yearly Cash Flow"
-    subtitle={$cashflowViewMode === "treemap"
+    subtitle={cashflowViewMode.value === "treemap"
       ? "Interactive hierarchical treemap (click tile to zoom in/out)"
       : "Multi-year flows at selected account depth"}
   >
@@ -191,11 +196,11 @@
         >
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode ===
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {cashflowViewMode.value ===
             'treemap'
               ? 'bg-surface-raised font-semibold text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'}"
-            onclick={() => ($cashflowViewMode = "treemap")}
+            onclick={() => (cashflowViewMode.value = "treemap")}
           >
             <svg
               class="h-3.5 w-3.5"
@@ -215,11 +220,11 @@
           </button>
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {$cashflowViewMode ===
+            class="inline-flex items-center gap-1.5 rounded-[calc(var(--paisa-radius-md)-2px)] px-2.5 py-1 text-xs font-medium transition-all {cashflowViewMode.value ===
             'sankey'
               ? 'bg-surface-raised font-semibold text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'}"
-            onclick={() => ($cashflowViewMode = "sankey")}
+            onclick={() => (cashflowViewMode.value = "sankey")}
           >
             <svg
               class="h-3.5 w-3.5"
@@ -253,7 +258,7 @@
       {/if}
       <ChartFrame height="tall" preserveChildren>
         {#if selectedGraph}
-          {#if $cashflowViewMode === "treemap"}
+          {#if cashflowViewMode.value === "treemap"}
             <FinancialHierarchyChart
               data={hierarchyData}
               ariaLabel="Yearly cash flow hierarchical treemap chart"

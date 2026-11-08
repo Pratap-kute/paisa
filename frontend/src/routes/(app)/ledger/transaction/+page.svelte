@@ -3,7 +3,7 @@
   import type { LedgerFile, Transaction as T } from "#lib/domain/ledger";
   import { api } from "#lib/api";
   import { debounce } from "es-toolkit";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
   import VirtualList from "svelte-tiny-virtual-list";
   import Transaction from "#lib/features/transactions/components/Transaction.svelte";
   import BulkEditForm from "#lib/features/ledger/components/BulkEditForm.svelte";
@@ -13,7 +13,6 @@
   import DiffViewModal from "#lib/features/ledger/components/DiffViewModal.svelte";
   import SearchQuery from "#lib/features/ledger/components/SearchQuery.svelte";
   import { editorState } from "#lib/features/editor/search_query_editor";
-  import { get } from "svelte/store";
   import { download } from "#lib/features/importing/export";
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
   import Button from "#lib/shared/ui/Button.svelte";
@@ -46,12 +45,9 @@
 
   const handleInput = debounce(handleInputRaw, 100);
 
-  const unsubscribe = editorState.subscribe((state) => {
-    handleInput(state.predicate);
-  });
-
-  onDestroy(() => {
-    unsubscribe();
+  $effect(() => {
+    const { predicate } = editorState.value;
+    untrack(() => handleInput(predicate));
   });
 
   const itemSize = (i: number) => {
@@ -85,7 +81,7 @@
 
     const txRes = await api.transaction.getTransactions();
     transactions = (txRes.transactions as unknown as T[]) || [];
-    handleInputRaw(get(editorState).predicate);
+    handleInputRaw(editorState.value.predicate);
     newFiles = files;
   }
 
@@ -144,7 +140,7 @@
 </svelte:head>
 
 <DiffViewModal
-  on:save={(e) => saveAll(e.detail)}
+  onsave={saveAll}
   bind:open={openPreviewModal}
   oldFiles={files}
   {newFiles}
@@ -220,7 +216,7 @@
 
     {#if bulkEditOpen}
       <div class="w-full" transition:slide={{ duration: 180 }}>
-        <BulkEditForm {accounts} on:preview={(e) => showPreview(e.detail)} />
+        <BulkEditForm {accounts} onpreview={showPreview} />
       </div>
     {/if}
 
@@ -244,12 +240,12 @@
               itemCount={filtered.length}
               {itemSize}
             >
-              <svelte:fragment slot="item" let:index let:style>
+              {#snippet item({ index, style })}
                 {@const t = filtered[index]}
                 <div {style} class="box-border w-full">
                   <Transaction {t} />
                 </div>
-              </svelte:fragment>
+              {/snippet}
             </VirtualList>
           </div>
         {:else}

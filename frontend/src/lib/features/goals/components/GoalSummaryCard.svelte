@@ -28,7 +28,7 @@
   );
 
   let progressLabel = $derived.by(() => {
-    if ($obscure) {
+    if (obscure.value) {
       return `0.0% ${goal.type === "retirement" ? "funded" : "complete"}`;
     }
     if (health.progressRatio >= 1 || health.state === "completed") {
@@ -86,14 +86,14 @@
     <div class="grid grid-cols-2 gap-3 mb-3">
       <Metric
         label="Current"
-        value={formatCurrencyCrude($obscure ? 0 : goal.current)}
-        fullValue={formatCurrency($obscure ? 0 : goal.current)}
+        value={formatCurrencyCrude(obscure.value ? 0 : goal.current)}
+        fullValue={formatCurrency(obscure.value ? 0 : goal.current)}
         status="neutral"
       />
       <Metric
         label="Target"
-        value={formatCurrencyCrude($obscure ? 0 : goal.target)}
-        fullValue={formatCurrency($obscure ? 0 : goal.target)}
+        value={formatCurrencyCrude(obscure.value ? 0 : goal.target)}
+        fullValue={formatCurrency(obscure.value ? 0 : goal.target)}
         status="neutral"
       />
     </div>

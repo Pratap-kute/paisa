@@ -23,7 +23,6 @@
   import PageHeader from "#lib/shared/layout/PageHeader.svelte";
   import Section from "#lib/shared/layout/Section.svelte";
   import { isEmpty as isEmptyValue } from "#lib/shared/utils/collection";
-  import { get } from "svelte/store";
   import { page } from "$app/state";
   import { validPeriod } from "#lib/shared/browser/period";
 
@@ -35,17 +34,17 @@
   let requestedPeriod = $derived(
     validPeriod(page.url.searchParams.get("period")),
   );
-  const fallbackMonth = get(month);
+  const fallbackMonth = month.value;
 
   $effect(() => {
-    month.set(requestedPeriod ?? fallbackMonth);
+    month.value = requestedPeriod ?? fallbackMonth;
   });
 
-  let days: Dayjs[] = $derived(monthDays($month).days);
+  let days: Dayjs[] = $derived(monthDays(month.value).days);
   let schedulesByDate: Record<string, TransactionSchedule[]> = $derived(
     groupBy(
       transactionSequences.flatMap(
-        (ts) => (ts.schedulesByMonth && ts.schedulesByMonth[$month]) || [],
+        (ts) => (ts.schedulesByMonth && ts.schedulesByMonth[month.value]) || [],
       ),
       (s) => s.scheduled.format("YYYY-MM-DD"),
     ),
@@ -128,7 +127,7 @@
         >
           {#each days as day (day)}
             <RecurringDay
-              month={$month}
+              month={month.value}
               {day}
               schedules={schedulesByDate[day.format("YYYY-MM-DD")] || []}
             />

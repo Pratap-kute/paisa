@@ -17,13 +17,13 @@
   const sankeyData = $derived(buildCashFlowSankeyData(graph));
   const option = $derived(
     buildCashFlowSankeyOption(sankeyData, {
-      darkMode: $theme === "dark",
+      darkMode: theme.value === "dark",
       theme: tokenTheme,
     }),
   );
 
   $effect(() => {
-    $theme;
+    theme.value;
     tokenTheme = readPaisaChartTheme();
   });
 </script>

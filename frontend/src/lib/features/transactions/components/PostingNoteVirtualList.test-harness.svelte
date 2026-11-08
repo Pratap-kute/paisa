@@ -22,14 +22,14 @@
       itemCount={postings.length}
       itemSize={27}
     >
-      <svelte:fragment slot="item" let:index let:style>
+      {#snippet item({ index, style })}
         {@const posting = postings[index]}
         {#if posting}
           <div {style}>
             <PostingNote {posting} />
           </div>
         {/if}
-      </svelte:fragment>
+      {/snippet}
     </VirtualList>
   {/key}
 </TooltipProvider>

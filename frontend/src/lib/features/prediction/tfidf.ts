@@ -1,4 +1,3 @@
-import { get } from "svelte/store";
 import { cosineSimilarity } from "./cosine_similarity";
 import { accountTfIdf } from "#lib/shared/state/store";
 import { CONFIDENCE } from "./weights";
@@ -19,7 +18,7 @@ function tokenize(s: string): Record<string, number> {
 }
 
 function tfidf(query: string): Record<string, number> {
-  const snapshot = get(accountTfIdf);
+  const snapshot = accountTfIdf.value;
   if (snapshot == null) return {};
   const { index } = snapshot;
   const tokens = tokenize(query);
@@ -38,7 +37,7 @@ function tfidf(query: string): Record<string, number> {
 }
 
 export function findTfidfMatches(query: string): [string, number][] {
-  const snapshot = get(accountTfIdf);
+  const snapshot = accountTfIdf.value;
   if (snapshot == null) return [];
   const queryVector = tfidf(query);
   const { tf_idf, index } = snapshot;

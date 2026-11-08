@@ -1,7 +1,7 @@
 import type { LedgerFileError } from "#lib/domain/ledger";
 import type { SheetFileError } from "#lib/domain/ledger";
 import type { SheetLineResult } from "#lib/shared/state/models";
-import { derived, get, writable } from "svelte/store";
+import { Ref } from "./ref.svelte";
 import dayjs from "dayjs";
 import { dayjsExtent } from "#lib/shared/formatters/date";
 import type { AccountTfIdf } from "#lib/shared/state/models";
@@ -54,74 +54,81 @@ export const initialSheetEditorState: SheetEditorState = {
   results: [],
 };
 
-export const editorState = writable<EditorState>(initialEditorState);
-export const sheetEditorState = writable<SheetEditorState>(
+export const editorState = new Ref<EditorState>(initialEditorState);
+export const sheetEditorState = new Ref<SheetEditorState>(
   initialSheetEditorState,
 );
 
-export const month = writable<string>(now().format("YYYY-MM"));
-export const year = writable<string>("");
-export const dateRangeOption = writable<number>(3);
+export const month = new Ref<string>(now().format("YYYY-MM"));
+export const year = new Ref<string>("");
+export const dateRangeOption = new Ref<number>(3);
 
-export const dateMin = writable<dayjs.Dayjs>(dayjs("1980", "YYYY"));
-export const dateMax = writable<dayjs.Dayjs>(now());
+export const dateMin = new Ref<dayjs.Dayjs>(dayjs("1980", "YYYY"));
+export const dateMax = new Ref<dayjs.Dayjs>(now());
 
-export const dateRange = derived(
-  [dateMin, dateMax, dateRangeOption],
-  ([$dateMin, $dateMax, $dateRangeOption]) => {
-    if ($dateRangeOption === -1) {
-      return { from: $dateMin, to: $dateMax };
-    } else {
-      return {
-        from: $dateMax.subtract($dateRangeOption, "year"),
-        to: $dateMax,
-      };
+export const dateRange = {
+  get value() {
+    if (dateRangeOption.value === -1) {
+      return { from: dateMin.value, to: dateMax.value };
     }
+    return {
+      from: dateMax.value.subtract(dateRangeOption.value, "year"),
+      to: dateMax.value,
+    };
   },
-);
+};
 
-export const theme = writable<string>("light");
-
-export const loading = writable<boolean>(false);
+export const theme = new Ref<string>("light");
 
 const DELAY = 200;
 const DEBOUNCE_DELAY = 200;
 
-let timeoutId: NodeJS.Timeout;
-export const delayedLoading = derived(
-  [loading],
-  ([$l], set) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
+/**
+ * Tracks whether data is loading. `delayed` follows it after a short pause so
+ * a spinner does not flash for fast requests.
+ */
+class LoadingState {
+  #current = new Ref(false);
+  #delayed = new Ref(false);
+  #timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    timeoutId = setTimeout(
+  get value() {
+    return this.#current.value;
+  }
+
+  set value(next: boolean) {
+    this.#current.value = next;
+    clearTimeout(this.#timeoutId);
+    this.#timeoutId = setTimeout(
       () => {
-        return set($l);
+        this.#delayed.value = next;
       },
-      $l ? DELAY : DEBOUNCE_DELAY,
+      next ? DELAY : DEBOUNCE_DELAY,
     );
-  },
-  false,
-);
+  }
 
-export const delayedUnLoading = delayedLoading;
+  get delayed() {
+    return this.#delayed.value;
+  }
+}
 
-export const accountTfIdf = writable<AccountTfIdf | null>(null);
+export const loading = new LoadingState();
+
+export const accountTfIdf = new Ref<AccountTfIdf | null>(null);
 
 export function setAllowedDateRange(dates: dayjs.Dayjs[]) {
   const [start, end] = dayjsExtent(dates);
   if (start && end) {
-    dateMin.set(start);
-    dateMax.set(end);
+    dateMin.value = start;
+    dateMax.value = end;
   }
 }
 
-export const willRefresh = writable<number>(0);
+export const willRefresh = new Ref<number>(0);
 // True while the app asks whether to discard unsaved editor changes before it
 // reloads its data. The dialog lives in AppShell and settles it with
 // confirmRefresh or cancelRefresh.
-export const refreshNeedsConfirmation = writable<boolean>(false);
+export const refreshNeedsConfirmation = new Ref<boolean>(false);
 
 function reload() {
   willRefresh.update((n) => n + 1);
@@ -129,19 +136,19 @@ function reload() {
 
 /** Reloads the data, first asking when the editor holds unsaved changes. */
 export function refresh() {
-  if (get(editorState).hasUnsavedChanges) {
-    refreshNeedsConfirmation.set(true);
+  if (editorState.value.hasUnsavedChanges) {
+    refreshNeedsConfirmation.value = true;
     return;
   }
   reload();
 }
 
 export function confirmRefresh() {
-  refreshNeedsConfirmation.set(false);
+  refreshNeedsConfirmation.value = false;
   editorState.update((current) => ({ ...current, hasUnsavedChanges: false }));
   reload();
 }
 
 export function cancelRefresh() {
-  refreshNeedsConfirmation.set(false);
+  refreshNeedsConfirmation.value = false;
 }

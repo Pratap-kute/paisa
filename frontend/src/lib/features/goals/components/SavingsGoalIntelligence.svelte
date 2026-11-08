@@ -28,7 +28,9 @@
   } = $props();
   const health = $derived(analyzeGoal(goal));
   const money = (value: number | undefined) =>
-    value === undefined ? "Unavailable" : formatCurrency($obscure ? 0 : value);
+    value === undefined
+      ? "Unavailable"
+      : formatCurrency(obscure.value ? 0 : value);
 </script>
 
 <Section title="Plan">
@@ -68,7 +70,7 @@
     <Metric
       label="Current Savings"
       value={money(goal.current)}
-      secondary={`${formatPercentage($obscure ? 0 : health.progressRatio, 2)} complete`}
+      secondary={`${formatPercentage(obscure.value ? 0 : health.progressRatio, 2)} complete`}
     />
     <Metric
       label="Recent contribution pace"

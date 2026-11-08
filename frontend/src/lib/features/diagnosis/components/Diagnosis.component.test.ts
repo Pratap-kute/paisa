@@ -12,7 +12,7 @@ import { obscure } from "#lib/shared/state/persisted";
 afterEach(() => cleanup());
 
 beforeEach(() => {
-  obscure.set(false);
+  obscure.value = false;
 });
 
 test("DiagnosisStatusBanner renders Healthy on clean checks", () => {
@@ -163,7 +163,7 @@ test("QualityIssueRow masks numerical amounts when privacy mode is active", () =
     },
   };
 
-  obscure.set(true);
+  obscure.value = true;
   const view = render(QualityIssueRow, { issue });
 
   expect(view.container.textContent).not.toContain("-500.00");

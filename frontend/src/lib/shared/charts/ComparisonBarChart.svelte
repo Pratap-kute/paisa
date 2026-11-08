@@ -19,13 +19,13 @@
   let tokenTheme = $state(readPaisaChartTheme());
   const option = $derived(
     buildComparisonBarOption(data, {
-      darkMode: $theme === "dark",
+      darkMode: theme.value === "dark",
       theme: tokenTheme,
     }),
   );
 
   $effect(() => {
-    $theme;
+    theme.value;
     tokenTheme = readPaisaChartTheme();
   });
 </script>

@@ -15,11 +15,11 @@
   const option = $derived(
     buildIncomeStatementWaterfallOption(data, {
       theme: tokenTheme,
-      darkMode: $theme === "dark",
+      darkMode: theme.value === "dark",
     }),
   );
   $effect(() => {
-    $theme;
+    theme.value;
     tokenTheme = readPaisaChartTheme();
   });
 </script>

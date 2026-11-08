@@ -34,7 +34,7 @@
 
   function maskText(text?: string): string {
     if (!text) return "";
-    if (!$obscure) return text;
+    if (!obscure.value) return text;
     // Obscure monetary and numerical figures when privacy mode is active
     return text.replace(/-?\b\d+(?:,\d+)*(?:\.\d+)?\b/g, "****");
   }

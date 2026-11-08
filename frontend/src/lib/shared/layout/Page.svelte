@@ -74,8 +74,10 @@
     max-width: 100%;
   }
 
+  /* The 1600px cap assumes the full 16rem sidebar, so it grows by whatever
+     width a collapsed sidebar gives back instead of leaving side margins. */
   .paisa-page-analysis {
-    max-width: 1600px;
+    max-width: calc(1600px + 16rem - var(--paisa-sidebar-width, 16rem));
   }
 
   .paisa-page-standard {

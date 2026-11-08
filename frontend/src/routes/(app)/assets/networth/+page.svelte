@@ -59,8 +59,8 @@
       return filter(
         points,
         (p) =>
-          p.date.isSameOrBefore($dateRange.to) &&
-          p.date.isSameOrAfter($dateRange.from),
+          p.date.isSameOrBefore(dateRange.value.to) &&
+          p.date.isSameOrAfter(dateRange.value.from),
       );
     }
     const start = dayjs(`${selectedPeriod}-01`).startOf("month");
@@ -101,9 +101,9 @@
     {#snippet actions()}
       <div class="inline-flex items-center sm:hidden">
         <DateRange
-          bind:value={$dateRangeOption}
-          dateMin={$dateMin}
-          dateMax={$dateMax}
+          bind:value={dateRangeOption.value}
+          dateMin={dateMin.value}
+          dateMax={dateMax.value}
         />
       </div>
     {/snippet}

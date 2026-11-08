@@ -38,7 +38,9 @@
   let saveAsName = $state("");
 
   const isBuiltin = $derived(selectedTemplate?.template_type === "builtin");
-  const hasUnsavedChanges = $derived($templateEditorState.hasUnsavedChanges);
+  const hasUnsavedChanges = $derived(
+    templateEditorState.value.hasUnsavedChanges,
+  );
   const saveAsNameDuplicate = $derived(
     templates.some(
       (t) => t.name === saveAsName && t.template_type === "custom",

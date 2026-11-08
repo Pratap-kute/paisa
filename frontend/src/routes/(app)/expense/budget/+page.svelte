@@ -18,10 +18,9 @@
   import { isEmpty as isEmptyValue } from "#lib/shared/utils/collection";
   import { page } from "$app/state";
   import { isHistoricalPeriod, validPeriod } from "#lib/shared/browser/period";
-  import { get } from "svelte/store";
 
   const monthStart = now().startOf("month");
-  const fallbackMonth = get(month);
+  const fallbackMonth = month.value;
   let requestedPeriod = $derived(
     validPeriod(page.url.searchParams.get("period")),
   );
@@ -34,9 +33,9 @@
   let isEmpty = $state(false);
   let isLoading = $state(true);
 
-  let currentMonthBudget: Budget = $derived(budgetsByMonth[$month]);
+  let currentMonthBudget: Budget = $derived(budgetsByMonth[month.value]);
   let currentMonthAccountBudgets: AccountBudget[] = $derived(
-    budgetsByMonth[$month]?.accounts || [],
+    budgetsByMonth[month.value]?.accounts || [],
   );
   let showCurrentMonthMetrics = $derived(
     currentMonthBudget?.date.isSameOrAfter(monthStart) ?? false,
@@ -114,7 +113,7 @@
   });
 
   $effect(() => {
-    month.set(requestedPeriod ?? fallbackMonth);
+    month.value = requestedPeriod ?? fallbackMonth;
   });
 </script>
 

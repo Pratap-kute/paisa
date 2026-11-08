@@ -3,7 +3,6 @@
   import Input from "#lib/shared/ui/Input.svelte";
   import Button from "#lib/shared/ui/Button.svelte";
   import FormField from "#lib/shared/layout/FormField.svelte";
-  import { createEventDispatcher } from "svelte";
 
   interface Props {
     label?: string;
@@ -22,13 +21,8 @@
   }: Props = $props();
   let destinationFile = $state("");
 
-  const dispatch = createEventDispatcher();
-
   function handleSave(e?: Event) {
-    if (onsave) {
-      onsave(destinationFile);
-    }
-    dispatch("save", destinationFile);
+    onsave?.(destinationFile);
     destinationFile = "";
   }
 </script>

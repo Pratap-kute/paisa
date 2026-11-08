@@ -116,4 +116,19 @@ describe("NavigationState", () => {
       nav.isGroupExpanded(liabilitiesGroup, "/liabilities/credit_cards"),
     ).toBe(true);
   });
+
+  test("sidebar starts expanded and toggles", () => {
+    expect(nav.sidebarCollapsed).toBe(false);
+    nav.toggleSidebar();
+    expect(nav.sidebarCollapsed).toBe(true);
+    nav.toggleSidebar();
+    expect(nav.sidebarCollapsed).toBe(false);
+  });
+
+  test("sidebar collapsed state persists across reloads", () => {
+    nav.sidebarCollapsed = true;
+    expect(localStorage.getItem("paisa_sidebar_collapsed")).toBe("true");
+
+    expect(new NavigationState().sidebarCollapsed).toBe(true);
+  });
 });

@@ -1,28 +1,34 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
   "files": {
-    "ignore": [
-      "**/node_modules/**",
-      "**/.svelte-kit/**",
-      "**/build/**",
-      "**/dist/**",
-      "**/coverage/**",
-      "**/*.svelte",
-      "tests/fixture/**",
-      "tests/fixtures/**",
-      "src/lib/api/generated/**",
-      "src/lib/generated/**",
-      "src/lib/shared/vendor/**",
-      "graphify-out/**"
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/.svelte-kit/**",
+      "!**/build/**",
+      "!**/dist/**",
+      "!**/coverage/**",
+      "!**/*.svelte",
+      "!**/tests/fixture/**",
+      "!**/tests/fixtures/**",
+      "!**/src/lib/api/generated/**",
+      "!**/src/lib/generated/**",
+      "!**/src/lib/shared/vendor/**",
+      "!**/graphify-out/**"
     ]
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "correctness": {
-        "recommended": true
+        "preset": "recommended"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }
