@@ -2464,15 +2464,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#unreleased" class="md-nav__link">
+  <a href="#094-2026-11-08-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Unreleased
+        0.9.4 (2026-11-08) - @Pratap-kute
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unreleased">
+    <nav class="md-nav" aria-label="0.9.4 (2026-11-08) - @Pratap-kute">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2491,6 +2491,28 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         UI and UX
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-dependency-upgrades" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Security and dependency upgrades
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-documentation-and-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Platform, documentation and developer experience
       </span>
     </span>
   </a>
@@ -3851,15 +3873,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#unreleased" class="md-nav__link">
+  <a href="#094-2026-11-08-pratap-kute" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Unreleased
+        0.9.4 (2026-11-08) - @Pratap-kute
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Unreleased">
+    <nav class="md-nav" aria-label="0.9.4 (2026-11-08) - @Pratap-kute">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3878,6 +3900,28 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         UI and UX
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-and-dependency-upgrades" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Security and dependency upgrades
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#platform-documentation-and-developer-experience" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Platform, documentation and developer experience
       </span>
     </span>
   </a>
@@ -4523,25 +4567,43 @@
 
 
 <h1 id="release-changelog">Release Changelog<a class="headerlink" href="#release-changelog" title="Permanent link">&para;</a></h1>
-<h3 id="unreleased">Unreleased<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h3>
+<h3 id="094-2026-11-08-pratap-kute">0.9.4 (2026-11-08) - <a href="https://github.com/Pratap-kute">@Pratap-kute</a><a class="headerlink" href="#094-2026-11-08-pratap-kute" title="Permanent link">&para;</a></h3>
 <h4 id="accounting-and-calculation-fixes">Accounting and calculation fixes<a class="headerlink" href="#accounting-and-calculation-fixes" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost.</li>
-<li>Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed.</li>
-<li>Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax.</li>
-<li>Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only.</li>
-<li>Asset Balance labels the gain column "Investment Change" and adds a Cash column, so a group's market value splits into investments plus cash.</li>
-<li>Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included.</li>
-<li>The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them.</li>
-<li>Demo data: the last home loan payment is capped at the balance owed.</li>
+<li>Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>, <a href="https://github.com/Pratap-kute/paisa/pull/25">#25</a>).</li>
+<li>Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Asset Balance labels the gain column "Investment Change" and adds a Cash column (<code>cashAmount</code> computed in the backend), so a group's market value splits into investments plus cash (<a href="https://github.com/Pratap-kute/paisa/pull/29">#29</a>).</li>
+<li>Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>, <a href="https://github.com/Pratap-kute/paisa/pull/25">#25</a>).</li>
+<li>Demo data: the last home loan payment is capped at the balance owed (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
 </ul>
 <h4 id="ui-and-ux">UI and UX<a class="headerlink" href="#ui-and-ux" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones.</li>
-<li>Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix.</li>
-<li>Financial year pickers default to the latest year with data, so yearly pages no longer open blank.</li>
-<li>Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser <code>confirm()</code> for refresh, template deletion, config reset and unsaved changes.</li>
-<li>Touch targets are 44px on touch screens, and animations are disabled under reduced motion.</li>
+<li>Added a collapsible desktop sidebar that collapses to a <code>4rem</code> icon rail with tooltips, expands group menus on click, persists state in <code>localStorage</code>, and dynamically adjusts wide-screen analysis layouts (<a href="https://github.com/Pratap-kute/paisa/pull/30">#30</a>).</li>
+<li>Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Financial year pickers default to the latest year with data, so yearly pages no longer open blank (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser <code>confirm()</code> for refresh, template deletion, config reset and unsaved changes (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+<li>Commodities &amp; Prices show the provider's commodity type and ID instead of <code>"unknown"</code> when the newest price comes from a ledger <code>P</code> directive (<a href="https://github.com/Pratap-kute/paisa/pull/29">#29</a>).</li>
+<li>Command Palette filters out tax navigation when the default currency is not INR and hides the Import action in read-only mode (<a href="https://github.com/Pratap-kute/paisa/pull/29">#29</a>).</li>
+<li>Standardized browser tab <code>&lt;title&gt;</code> tags across Dashboard, Editor, Sheets, Insights, and Scenarios pages, and aligned <code>svelte-select</code> dropdown and Font Awesome 7 icon sizing with design tokens (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>, <a href="https://github.com/Pratap-kute/paisa/pull/30">#30</a>).</li>
+<li>Touch targets are 44px on touch screens, and animations are disabled under reduced motion (<a href="https://github.com/Pratap-kute/paisa/pull/23">#23</a>).</li>
+</ul>
+<h4 id="security-and-dependency-upgrades">Security and dependency upgrades<a class="headerlink" href="#security-and-dependency-upgrades" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Upgraded <code>golang.org/x/net</code> to <code>v0.60.0</code> (and related <code>golang.org/x</code> modules) in <code>backend</code> and <code>desktop</code> to resolve five reachable HTTP/2 vulnerabilities reported by <code>govulncheck</code> (<a href="https://github.com/Pratap-kute/paisa/pull/27">#27</a>).</li>
+<li>Upgraded to SvelteKit 3, <code>@sveltejs/adapter-static</code> 4, TypeScript 6, <code>@iconify/tools</code> 5, and <code>svgtofont</code> 6; migrated <code>$lib</code> to <code>#lib</code> subpath imports and <code>$app/stores</code> to <code>$app/state</code>, clearing 40 frontend dependency audit findings (<a href="https://github.com/Pratap-kute/paisa/pull/26">#26</a>).</li>
+<li>Completed Svelte 5 runes migration by replacing <code>svelte/store</code>, <code>createEventDispatcher</code>, and <code>on:</code> component listeners with rune-based <code>Ref&lt;T&gt;</code>, <code>PersistedState</code>, <code>$state</code>, <code>$effect</code>, and callback props (<a href="https://github.com/Pratap-kute/paisa/pull/30">#30</a>).</li>
+<li>Upgraded frontend packages to latest major releases including Vitest 5, Biome 2, PDF.js 6, <code>svelte-select</code> 6, <code>svelte-tiny-virtual-list</code> 4, <code>bignumber.js</code> 11, Font Awesome 7, and Playwright 1.65 (<a href="https://github.com/Pratap-kute/paisa/pull/30">#30</a>).</li>
+</ul>
+<h4 id="platform-documentation-and-developer-experience">Platform, documentation and developer experience<a class="headerlink" href="#platform-documentation-and-developer-experience" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Migrated the frontend toolchain from Deno to Bun (<code>package.json</code>, <code>bun.lock</code>, Biome lint, native <code>bun fmt</code>), including CI, Dockerfiles, Dev Container, and dev scripts (<a href="https://github.com/Pratap-kute/paisa/pull/19">#19</a>).</li>
+<li>Migrated the documentation build pipeline to Zensical with a custom Pygments lexer plugin (<code>paisa_lexers</code>), added <code>CONTRIBUTING.md</code> and contributor guides, and enforced automated documentation validation (<code>scripts/check_docs.py</code>) in CI (<a href="https://github.com/Pratap-kute/paisa/pull/20">#20</a>, <a href="https://github.com/Pratap-kute/paisa/pull/21">#21</a>, <a href="https://github.com/Pratap-kute/paisa/pull/22">#22</a>).</li>
+<li>Added <code>make modern</code> (<code>go fix</code>) and <code>make audit</code> (<code>bun audit</code> and <code>govulncheck</code>) targets across frontend, backend, and desktop modules (<a href="https://github.com/Pratap-kute/paisa/pull/28">#28</a>).</li>
+<li>Hardened CI binary downloads with <code>gh release download</code> retries and binary caching, and updated the macOS/Windows desktop smoke test workflow (<a href="https://github.com/Pratap-kute/paisa/pull/24">#24</a>, <a href="https://github.com/Pratap-kute/paisa/pull/30">#30</a>).</li>
 </ul>
 <h3 id="093-2026-10-30-pratap-kute-netmaxt3r">0.9.3 (2026-10-30) - <a href="https://github.com/Pratap-kute">@Pratap-kute</a>, <a href="https://github.com/netmaxt3r">@netmaxt3r</a><a class="headerlink" href="#093-2026-10-30-pratap-kute-netmaxt3r" title="Permanent link">&para;</a></h3>
 <h4 id="bug-fixes-reliability">Bug Fixes &amp; Reliability<a class="headerlink" href="#bug-fixes-reliability" title="Permanent link">&para;</a></h4>
@@ -4551,7 +4613,6 @@
 </ul>
 <h4 id="platform-developer-experience">Platform &amp; Developer Experience<a class="headerlink" href="#platform-developer-experience" title="Permanent link">&para;</a></h4>
 <ul>
-<li>Migrated the frontend toolchain from Deno to Bun (<code>package.json</code>, <code>bun.lock</code>, Biome lint), including CI, Docker, Dev Container, and dev scripts</li>
 <li>Completely replaced Nix with lean Ubuntu 24.04 Dev Container configuration (<code>.devcontainer/Dockerfile</code>) and standard composite GitHub Actions workflows - <a href="https://github.com/Pratap-kute">@Pratap-kute</a></li>
 <li>Added Docker-based Alpine static Ledger build pipeline (<code>packaging/ledger/Dockerfile</code>) for standalone Linux releases - <a href="https://github.com/Pratap-kute">@Pratap-kute</a></li>
 <li>Configured CGO and SQLite build environments across GitHub Actions workflows - <a href="https://github.com/Pratap-kute">@Pratap-kute</a></li>
