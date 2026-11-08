@@ -26,7 +26,7 @@
       desc: "Latest release downloads, updates, and release notes",
       href: "https://github.com/Pratap-kute/paisa/releases",
       icon: "fa-solid fa-download",
-      badge: "v0.9.3",
+      badge: "v0.9.4",
     },
     {
       name: "Live Demo",
@@ -99,7 +99,7 @@
                 <h1 class="text-2xl font-bold tracking-tight text-foreground">
                   Paisa
                 </h1>
-                <Badge variant="primary" size="sm" rounded>v0.9.3</Badge>
+                <Badge variant="primary" size="sm" rounded>v0.9.4</Badge>
                 <Badge variant="neutral" size="sm" rounded>AGPL-3.0</Badge>
               </div>
               <p class="mt-1 text-sm text-muted-foreground">

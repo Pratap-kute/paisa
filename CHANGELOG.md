@@ -1,23 +1,39 @@
 # CHANGELOG
 
-### Unreleased
+### 0.9.4 (2026-11-08) - [@Pratap-kute](https://github.com/Pratap-kute)
 
 #### Accounting and calculation fixes
-- Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost.
-- Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed.
-- Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax.
-- Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only.
-- Asset Balance labels the gain column "Investment Change" and adds a Cash column, so a group's market value splits into investments plus cash.
-- Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included.
-- The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them.
-- Demo data: the last home loan payment is capped at the balance owed.
+- Capital gains tax: grandfathering now applies to long term equity only and uses the higher of the actual cost and the lower of the 31 Jan 2018 price and the sale price, so it can no longer create or inflate a loss. A missing price keeps the actual cost ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Capital gains tax: long term equity gains are exempt only for sales before 1 Apr 2018, equity rates follow the sale date (20% short term and 12.5% long term from 23 Jul 2024), and debt units bought on or after 1 Apr 2023 are no longer indexed ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Capital Gains yearly totals add up all accounts. A year with a net loss owes no tax ([#23](https://github.com/Pratap-kute/paisa/pull/23), [#25](https://github.com/Pratap-kute/paisa/pull/25)).
+- Asset Balance, Gain and Net Worth use one event based accounting. Cash (checking) accounts report their balance but no gain or XIRR, and a group's gain covers its investment accounts only ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Asset Balance labels the gain column "Investment Change" and adds a Cash column (`cashAmount` computed in the backend), so a group's market value splits into investments plus cash ([#29](https://github.com/Pratap-kute/paisa/pull/29)).
+- Asset Balance, Allocation and Goals count postings up to today. Future-dated postings are no longer included ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- The backend now calculates per-posting unrealized gain, holding days and compound annualized return (shown only for lots held a year or more), goal analysis (required contribution, projected completion, schedule status) and the dashboard expense pace. The frontend no longer recomputes them ([#23](https://github.com/Pratap-kute/paisa/pull/23), [#25](https://github.com/Pratap-kute/paisa/pull/25)).
+- Demo data: the last home loan payment is capped at the balance owed ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
 
 #### UI and UX
-- Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones.
-- Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix.
-- Financial year pickers default to the latest year with data, so yearly pages no longer open blank.
-- Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser `confirm()` for refresh, template deletion, config reset and unsaved changes.
-- Touch targets are 44px on touch screens, and animations are disabled under reduced motion.
+- Added a collapsible desktop sidebar that collapses to a `4rem` icon rail with tooltips, expands group menus on click, persists state in `localStorage`, and dynamically adjusts wide-screen analysis layouts ([#30](https://github.com/Pratap-kute/paisa/pull/30)).
+- Transactions show debits and credits in two columns, with account icons rendered correctly. Postings render as one record per row on phones ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Returns (XIRR, APR, annualized) are percentages, shares and progress use one decimal, and the default currency has no suffix ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Financial year pickers default to the latest year with data, so yearly pages no longer open blank ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Loading and empty states explain the reason and the next step. An in-app confirmation dialog replaces browser `confirm()` for refresh, template deletion, config reset and unsaved changes ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+- Commodities & Prices show the provider's commodity type and ID instead of `"unknown"` when the newest price comes from a ledger `P` directive ([#29](https://github.com/Pratap-kute/paisa/pull/29)).
+- Command Palette filters out tax navigation when the default currency is not INR and hides the Import action in read-only mode ([#29](https://github.com/Pratap-kute/paisa/pull/29)).
+- Standardized browser tab `<title>` tags across Dashboard, Editor, Sheets, Insights, and Scenarios pages, and aligned `svelte-select` dropdown and Font Awesome 7 icon sizing with design tokens ([#23](https://github.com/Pratap-kute/paisa/pull/23), [#30](https://github.com/Pratap-kute/paisa/pull/30)).
+- Touch targets are 44px on touch screens, and animations are disabled under reduced motion ([#23](https://github.com/Pratap-kute/paisa/pull/23)).
+
+#### Security and dependency upgrades
+- Upgraded `golang.org/x/net` to `v0.60.0` (and related `golang.org/x` modules) in `backend` and `desktop` to resolve five reachable HTTP/2 vulnerabilities reported by `govulncheck` ([#27](https://github.com/Pratap-kute/paisa/pull/27)).
+- Upgraded to SvelteKit 3, `@sveltejs/adapter-static` 4, TypeScript 6, `@iconify/tools` 5, and `svgtofont` 6; migrated `$lib` to `#lib` subpath imports and `$app/stores` to `$app/state`, clearing 40 frontend dependency audit findings ([#26](https://github.com/Pratap-kute/paisa/pull/26)).
+- Completed Svelte 5 runes migration by replacing `svelte/store`, `createEventDispatcher`, and `on:` component listeners with rune-based `Ref<T>`, `PersistedState`, `$state`, `$effect`, and callback props ([#30](https://github.com/Pratap-kute/paisa/pull/30)).
+- Upgraded frontend packages to latest major releases including Vitest 5, Biome 2, PDF.js 6, `svelte-select` 6, `svelte-tiny-virtual-list` 4, `bignumber.js` 11, Font Awesome 7, and Playwright 1.65 ([#30](https://github.com/Pratap-kute/paisa/pull/30)).
+
+#### Platform, documentation and developer experience
+- Migrated the frontend toolchain from Deno to Bun (`package.json`, `bun.lock`, Biome lint, native `bun fmt`), including CI, Dockerfiles, Dev Container, and dev scripts ([#19](https://github.com/Pratap-kute/paisa/pull/19)).
+- Migrated the documentation build pipeline to Zensical with a custom Pygments lexer plugin (`paisa_lexers`), added `CONTRIBUTING.md` and contributor guides, and enforced automated documentation validation (`scripts/check_docs.py`) in CI ([#20](https://github.com/Pratap-kute/paisa/pull/20), [#21](https://github.com/Pratap-kute/paisa/pull/21), [#22](https://github.com/Pratap-kute/paisa/pull/22)).
+- Added `make modern` (`go fix`) and `make audit` (`bun audit` and `govulncheck`) targets across frontend, backend, and desktop modules ([#28](https://github.com/Pratap-kute/paisa/pull/28)).
+- Hardened CI binary downloads with `gh release download` retries and binary caching, and updated the macOS/Windows desktop smoke test workflow ([#24](https://github.com/Pratap-kute/paisa/pull/24), [#30](https://github.com/Pratap-kute/paisa/pull/30)).
 
 ### 0.9.3 (2026-10-30) - [@Pratap-kute](https://github.com/Pratap-kute), [@netmaxt3r](https://github.com/netmaxt3r)
 
@@ -26,7 +42,6 @@
 - Pinned `beancount<3` in CI setup and Dev Container to restore missing `bean-query` and `bean-report` CLI binaries - [@Pratap-kute](https://github.com/Pratap-kute)
 
 #### Platform & Developer Experience
-- Migrated the frontend toolchain from Deno to Bun (`package.json`, `bun.lock`, Biome lint), including CI, Docker, Dev Container, and dev scripts
 - Completely replaced Nix with lean Ubuntu 24.04 Dev Container configuration (`.devcontainer/Dockerfile`) and standard composite GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)
 - Added Docker-based Alpine static Ledger build pipeline (`packaging/ledger/Dockerfile`) for standalone Linux releases - [@Pratap-kute](https://github.com/Pratap-kute)
 - Configured CGO and SQLite build environments across GitHub Actions workflows - [@Pratap-kute](https://github.com/Pratap-kute)
