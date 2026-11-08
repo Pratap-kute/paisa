@@ -1,3 +1,4 @@
+import { untrack } from "svelte";
 import { PersistedState } from "./persisted.svelte";
 import { Ref } from "./ref.svelte";
 
@@ -15,17 +16,17 @@ export const cashflowViewMode = new PersistedState<"treemap" | "sankey">(
   "treemap",
 );
 
+// Called from effects, so the current depths are read without subscribing.
 export function setCashflowDepthAllowed(expense: number, income: number) {
   cashflowExpenseDepthAllowed.value = { min: 1, max: expense };
-  if (
-    cashflowExpenseDepth.value === 0 ||
-    cashflowExpenseDepth.value > expense
-  ) {
+  const expenseDepth = untrack(() => cashflowExpenseDepth.value);
+  if (expenseDepth === 0 || expenseDepth > expense) {
     cashflowExpenseDepth.value = expense;
   }
 
   cashflowIncomeDepthAllowed.value = { min: 1, max: income };
-  if (cashflowIncomeDepth.value === 0 || cashflowIncomeDepth.value > income) {
+  const incomeDepth = untrack(() => cashflowIncomeDepth.value);
+  if (incomeDepth === 0 || incomeDepth > income) {
     cashflowIncomeDepth.value = income;
   }
 }

@@ -85,9 +85,11 @@
   const leaveGuard = createLeaveGuard(
     () => sheetEditorState.value.hasUnsavedChanges,
     () => {
-      sheetEditorState.value = assign({}, sheetEditorState.value, {
-        hasUnsavedChanges: false,
-      });
+      sheetEditorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     },
   );
 
@@ -172,9 +174,11 @@
       filesMap[file.name] = file;
       selectedFile = file;
       selectedVersion = null;
-      sheetEditorState.value = assign({}, sheetEditorState.value, {
-        hasUnsavedChanges: false,
-      });
+      sheetEditorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     }
   }
 

@@ -97,7 +97,7 @@ function lint(env: Environment) {
           results,
         });
       };
-      sheetEditorState.value = evaluatePending(sheetEditorState.value);
+      sheetEditorState.update(evaluatePending);
     }
 
     return diagnostics;
@@ -192,15 +192,17 @@ export function createEditor(
         const currentLine = viewUpdate.state.doc.lineAt(
           viewUpdate.state.selection.main.head,
         );
-        const current = sheetEditorState.value;
-        sheetEditorState.value = assign({}, current, {
-          pendingEval: current.pendingEval || current.doc !== doc,
-          doc,
-          currentLine: currentLine.number,
-          hasUnsavedChanges: current.hasUnsavedChanges || viewUpdate.docChanged,
-          undoDepth: undoDepth(viewUpdate.state),
-          redoDepth: redoDepth(viewUpdate.state),
-        });
+        sheetEditorState.update((current) =>
+          assign({}, current, {
+            pendingEval: current.pendingEval || current.doc !== doc,
+            doc,
+            currentLine: currentLine.number,
+            hasUnsavedChanges:
+              current.hasUnsavedChanges || viewUpdate.docChanged,
+            undoDepth: undoDepth(viewUpdate.state),
+            redoDepth: redoDepth(viewUpdate.state),
+          }),
+        );
       }),
       schedulePlugin,
     ],

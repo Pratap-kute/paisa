@@ -33,12 +33,12 @@ export function setDefaults(options: Omit<ToastOptions, "message">) {
 }
 
 export function dismissToast(id: number) {
-  toasts.value = toasts.value.filter((item) => item.id !== id);
+  toasts.update((items) => items.filter((item) => item.id !== id));
 }
 
 export function toast(options: ToastOptions) {
   if (!options.message) throw new Error("message is required");
   const item = { ...defaults, ...options, id: nextId++ };
-  toasts.value = options.single ? [item] : [...toasts.value, item];
+  toasts.update((items) => (options.single ? [item] : [...items, item]));
   return item.id;
 }

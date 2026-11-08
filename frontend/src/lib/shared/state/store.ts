@@ -131,7 +131,7 @@ export const willRefresh = new Ref<number>(0);
 export const refreshNeedsConfirmation = new Ref<boolean>(false);
 
 function reload() {
-  willRefresh.value++;
+  willRefresh.update((n) => n + 1);
 }
 
 /** Reloads the data, first asking when the editor holds unsaved changes. */
@@ -145,7 +145,7 @@ export function refresh() {
 
 export function confirmRefresh() {
   refreshNeedsConfirmation.value = false;
-  editorState.value = { ...editorState.value, hasUnsavedChanges: false };
+  editorState.update((current) => ({ ...current, hasUnsavedChanges: false }));
   reload();
 }
 

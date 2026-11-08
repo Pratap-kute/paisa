@@ -231,9 +231,11 @@
       message: `Saved ${name}`,
       type: "is-success",
     });
-    templateEditorState.value = assign({}, templateEditorState.value, {
-      hasUnsavedChanges: false,
-    });
+    templateEditorState.update((current) =>
+      assign({}, current, {
+        hasUnsavedChanges: false,
+      }),
+    );
     ({ templates } = await loadTemplates());
     selectedTemplate = template;
   }
@@ -275,9 +277,11 @@
       type: "is-success",
     });
 
-    templateEditorState.value = assign({}, templateEditorState.value, {
-      hasUnsavedChanges: false,
-    });
+    templateEditorState.update((current) =>
+      assign({}, current, {
+        hasUnsavedChanges: false,
+      }),
+    );
   }
 
   $effect(() => {
@@ -666,11 +670,13 @@
     } catch (e) {
       console.warn("Handlebars compile error on select:", e);
     }
-    templateEditorState.value = assign({}, templateEditorState.value, {
-      template: compiled,
-      content: template.content,
-      hasUnsavedChanges: false,
-    });
+    templateEditorState.update((current) =>
+      assign({}, current, {
+        template: compiled,
+        content: template.content,
+        hasUnsavedChanges: false,
+      }),
+    );
   }
 
   function openSaveModal() {

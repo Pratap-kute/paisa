@@ -456,9 +456,9 @@ function lint(editor: EditorView): Diagnostic[] {
     diagnostics.push(...ast.validate());
 
     if (diagnostics.length === 0) {
-      editorState.value = assign({}, editorState.value, {
-        predicate: ast.evaluate(),
-      });
+      editorState.update((current) =>
+        assign({}, current, { predicate: ast.evaluate() }),
+      );
     }
   }
 

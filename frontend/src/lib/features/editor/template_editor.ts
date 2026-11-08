@@ -49,7 +49,9 @@ function lint(editor: EditorView): Diagnostic[] {
   try {
     Handlebars.parse(doc.toString());
     const compiled = Handlebars.compile(doc.toString(), { noEscape: true });
-    editorState.value = assign({}, editorState.value, { template: compiled });
+    editorState.update((current) =>
+      assign({}, current, { template: compiled }),
+    );
   } catch (e) {
     const lines = e.message.split("\n");
     const match = lines[0].match(/Parse error on line (\d+):/);
@@ -90,12 +92,14 @@ export function createEditor(content: string, dom: Element) {
       }),
       keymap.of(completionKeymap),
       EditorView.updateListener.of((viewUpdate) => {
-        editorState.value = assign({}, editorState.value, {
-          hasUnsavedChanges:
-            editorState.value.hasUnsavedChanges || viewUpdate.docChanged,
-          undoDepth: undoDepth(viewUpdate.state),
-          redoDepth: redoDepth(viewUpdate.state),
-        });
+        editorState.update((current) =>
+          assign({}, current, {
+            hasUnsavedChanges:
+              current.hasUnsavedChanges || viewUpdate.docChanged,
+            undoDepth: undoDepth(viewUpdate.state),
+            redoDepth: redoDepth(viewUpdate.state),
+          }),
+        );
       }),
     ],
     doc: content,

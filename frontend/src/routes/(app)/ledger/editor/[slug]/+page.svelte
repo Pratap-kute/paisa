@@ -87,9 +87,11 @@
   const leaveGuard = createLeaveGuard(
     () => editorState.value.hasUnsavedChanges,
     () => {
-      editorState.value = assign({}, editorState.value, {
-        hasUnsavedChanges: false,
-      });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     },
   );
 
@@ -185,9 +187,11 @@
         selectedFile = file as unknown as LedgerFile;
       }
       selectedVersion = "";
-      editorState.value = assign({}, editorState.value, {
-        hasUnsavedChanges: false,
-      });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     } else {
       toast.toast({
         message: `Saved ${selectedFile.name}`,
@@ -198,9 +202,11 @@
         selectedFile = file as unknown as LedgerFile;
       }
       selectedVersion = "";
-      editorState.value = assign({}, editorState.value, {
-        hasUnsavedChanges: false,
-      });
+      editorState.update((current) =>
+        assign({}, current, {
+          hasUnsavedChanges: false,
+        }),
+      );
     }
   }
 
