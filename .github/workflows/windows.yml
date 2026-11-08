@@ -15,21 +15,31 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Pre-install Bun from npm registry
+        run: |
+          New-Item -ItemType Directory -Force -Path "$HOME\.bun\bin" | Out-Null
+          curl.exe -fsSL --retry 5 --retry-all-errors "https://registry.npmjs.org/@oven/bun-windows-x64/-/bun-windows-x64-1.4.4.tgz" -o bun.tgz
+          tar.exe -xzf bun.tgz -C "$HOME\.bun\bin" --strip-components=2 package/bin/bun.exe
+          Remove-Item bun.tgz
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26.5"
-      - run: |
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           choco install sqlite
-          choco install wget
           choco install nsis
           cd frontend
           bun install --frozen-lockfile
           bun run build
           cd ..
-          wget https://github.com/FullofQuarks/Windows-Ledger-Binaries/releases/download/v3.3.2/ledger.exe
+          gh release download v3.3.2 --repo FullofQuarks/Windows-Ledger-Binaries --pattern ledger.exe --clobber
+          if (-not (Test-Path ledger.exe)) {
+            curl.exe -fsSL --retry 5 --retry-all-errors -H "Accept: application/octet-stream" -o ledger.exe "https://api.github.com/repos/FullofQuarks/Windows-Ledger-Binaries/releases/assets/102333204"
+          }
           cp ledger.exe backend/pkg/binary/ledger
           cd backend
           go build -o ../paisa-cli-windows-amd64.exe .

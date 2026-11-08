@@ -15,6 +15,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Pre-install Bun from npm registry
+        run: |
+          mkdir -p ~/.bun/bin
+          bun_pkg="bun-darwin-aarch64"
+          if [ "$(uname -m)" = "x86_64" ]; then bun_pkg="bun-darwin-x64"; fi
+          curl -fsSL --retry 5 --retry-all-errors "https://registry.npmjs.org/@oven/${bun_pkg}/-/${bun_pkg}-1.4.4.tgz" | tar -xz -C ~/.bun/bin --strip-components=2 package/bin/bun
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4

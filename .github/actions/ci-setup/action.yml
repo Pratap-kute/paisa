@@ -11,6 +11,12 @@ runs:
         cache: true
         cache-dependency-path: backend/go.sum
 
+    - name: Pre-install Bun from npm registry
+      shell: bash
+      run: |
+        mkdir -p ~/.bun/bin
+        curl -fsSL --retry 5 --retry-all-errors "https://registry.npmjs.org/@oven/bun-linux-x64/-/bun-linux-x64-1.4.4.tgz" | tar -xz -C ~/.bun/bin --strip-components=2 package/bin/bun
+
     - name: Set up Bun
       uses: oven-sh/setup-bun@v2
       with:

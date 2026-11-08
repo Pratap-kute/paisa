@@ -27,6 +27,24 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Pre-install Bun from npm registry (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p ~/.bun/bin
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            bun_pkg="bun-darwin-aarch64"
+            if [ "$(uname -m)" = "x86_64" ]; then bun_pkg="bun-darwin-x64"; fi
+          else
+            bun_pkg="bun-linux-x64"
+          fi
+          curl -fsSL --retry 5 --retry-all-errors "https://registry.npmjs.org/@oven/${bun_pkg}/-/${bun_pkg}-1.4.4.tgz" | tar -xz -C ~/.bun/bin --strip-components=2 package/bin/bun
+      - name: Pre-install Bun from npm registry (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          New-Item -ItemType Directory -Force -Path "$HOME\.bun\bin" | Out-Null
+          curl.exe -fsSL --retry 5 --retry-all-errors "https://registry.npmjs.org/@oven/bun-windows-x64/-/bun-windows-x64-1.4.4.tgz" -o bun.tgz
+          tar.exe -xzf bun.tgz -C "$HOME\.bun\bin" --strip-components=2 package/bin/bun.exe
+          Remove-Item bun.tgz
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.4
