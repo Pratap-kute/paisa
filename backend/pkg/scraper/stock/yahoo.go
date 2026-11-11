@@ -52,7 +52,8 @@ func selectAgent() {
 }
 
 type Quote struct {
-	Close []float64
+	// Yahoo reports a missing close (market holiday, halted) as null.
+	Close []*float64
 }
 
 type Indicators struct {
@@ -122,8 +123,8 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 		exchangeResult := exchangeResponse.Chart.Result[0]
 		exchangePrice = make([]ExchangePrice, 0, len(exchangeResult.Timestamp))
 		for i, t := range exchangeResult.Timestamp {
-			if i < len(exchangeResult.Indicators.Quote[0].Close) {
-				exchangePrice = append(exchangePrice, ExchangePrice{Timestamp: t, Close: exchangeResult.Indicators.Quote[0].Close[i]})
+			if i < len(exchangeResult.Indicators.Quote[0].Close) && exchangeResult.Indicators.Quote[0].Close[i] != nil {
+				exchangePrice = append(exchangePrice, ExchangePrice{Timestamp: t, Close: *exchangeResult.Indicators.Quote[0].Close[i]})
 			}
 		}
 		slices.SortFunc(exchangePrice, func(a, b ExchangePrice) int {
@@ -137,11 +138,11 @@ func GetHistory(ticker string, commodityName string) ([]*price.Price, error) {
 	}
 
 	for i, timestamp := range result.Timestamp {
-		if i >= len(result.Indicators.Quote[0].Close) {
+		if i >= len(result.Indicators.Quote[0].Close) || result.Indicators.Quote[0].Close[i] == nil {
 			continue
 		}
 		date := time.Unix(timestamp, 0)
-		value := result.Indicators.Quote[0].Close[i] * scale
+		value := *result.Indicators.Quote[0].Close[i] * scale
 
 		if needExchangePrice {
 			rate, ok := utils.FindLatestLessOrEqual(exchangePrice, timestamp, func(p ExchangePrice) int64 {

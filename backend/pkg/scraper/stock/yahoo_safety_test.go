@@ -51,7 +51,8 @@ func TestYahoo_ValidResponse(t *testing.T) {
 	require.NotNil(t, resp)
 	require.Len(t, resp.Chart.Result, 1)
 	assert.Equal(t, "USD", resp.Chart.Result[0].Meta.Currency)
-	assert.Equal(t, 185.5, resp.Chart.Result[0].Indicators.Quote[0].Close[0])
+	require.NotNil(t, resp.Chart.Result[0].Indicators.Quote[0].Close[0])
+	assert.Equal(t, 185.5, *resp.Chart.Result[0].Indicators.Quote[0].Close[0])
 }
 
 func TestYahoo_ServerError500(t *testing.T) {
@@ -129,4 +130,40 @@ func TestYahoo_Timeout(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, resp)
 	assert.Contains(t, err.Error(), "Client.Timeout exceeded")
+}
+
+func TestYahoo_NullClosesAreSkipped(t *testing.T) {
+	body := `{"chart":{"result":[{"meta":{"currency":"INR"},"timestamp":[1704067200,1704153600,1704240000],"indicators":{"quote":[{"close":[100.5,null,102.5]}]}}]}}`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(body))
+	}))
+	defer server.Close()
+
+	origBase := YahooBaseURL
+	YahooBaseURL = server.URL
+	t.Cleanup(func() { YahooBaseURL = origBase })
+
+	prices, err := GetHistory("TEST.NS", "TEST")
+	require.NoError(t, err)
+	require.Len(t, prices, 2)
+	for _, p := range prices {
+		assert.True(t, p.Value.IsPositive(), "a null close must not be stored as a zero price")
+	}
+}
+
+func TestYahoo_NegativeClosesAreKept(t *testing.T) {
+	body := `{"chart":{"result":[{"meta":{"currency":"INR"},"timestamp":[1704067200],"indicators":{"quote":[{"close":[-37.6]}]}}]}}`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(body))
+	}))
+	defer server.Close()
+
+	origBase := YahooBaseURL
+	YahooBaseURL = server.URL
+	t.Cleanup(func() { YahooBaseURL = origBase })
+
+	prices, err := GetHistory("CL=F", "OIL")
+	require.NoError(t, err)
+	require.Len(t, prices, 1)
+	assert.True(t, prices[0].Value.IsNegative())
 }
