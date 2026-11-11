@@ -63,8 +63,12 @@ func SyncJournal(db *gorm.DB) (string, error) {
 }
 
 func SyncCommodities(db *gorm.DB) error {
+	return syncCommodities(db, commodity.All())
+}
+
+func syncCommodities(db *gorm.DB, all []config.Commodity) error {
 	log.Info("Fetching commodities price history")
-	commodities := slices.Clone(commodity.All())
+	commodities := slices.Clone(all)
 	for i := len(commodities) - 1; i > 0; i-- {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
 		if err == nil {
@@ -82,6 +86,10 @@ func SyncCommodities(db *gorm.DB) error {
 		var err error
 
 		provider := scraper.GetProviderByCode(commodity.Price.Provider)
+		if provider == nil {
+			errors = append(errors, fmt.Errorf("failed to fetch price for %s: unknown price provider %q", name, commodity.Price.Provider))
+			continue
+		}
 		prices, err = provider.GetPrices(code, name)
 		if err != nil {
 			log.Error(err)
