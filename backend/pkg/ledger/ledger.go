@@ -250,11 +250,23 @@ func (Beancount) ValidateFile(journalPath string) ([]LedgerFileError, string, er
 		return errors, utils.Dos2Unix(output.String()), nil
 	}
 
+	return parseBeancountErrors(error.String()), "", err
+}
+
+func parseBeancountErrors(stderr string) []LedgerFileError {
+	errors := []LedgerFileError{}
 	re := regexp.MustCompile(`(?:.*):([0-9]+):\s+(.+)`)
 
-	for line := range strings.SplitSeq(utils.Dos2Unix(error.String()), "\n") {
+	for line := range strings.SplitSeq(utils.Dos2Unix(stderr), "\n") {
 		match := re.FindStringSubmatch(line)
 		if len(match) == 0 {
+			if strings.TrimSpace(line) == "" {
+				continue
+			}
+			if len(errors) == 0 {
+				errors = append(errors, LedgerFileError{Message: line})
+				continue
+			}
 			lastError := errors[len(errors)-1]
 			lastError.Message = lastError.Message + "\n" + line
 			errors[len(errors)-1] = lastError
@@ -263,7 +275,7 @@ func (Beancount) ValidateFile(journalPath string) ([]LedgerFileError, string, er
 			errors = append(errors, LedgerFileError{LineFrom: lineno, LineTo: lineno, Message: match[2]})
 		}
 	}
-	return errors, "", err
+	return errors
 }
 
 func (Beancount) Parse(journalPath string, prices []price.Price) ([]*posting.Posting, error) {
