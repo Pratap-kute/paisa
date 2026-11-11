@@ -222,8 +222,12 @@ func ClearPriceProviderCacheHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(200, gin.H{"success": true})
 			return
 		}
-		provider := c.Param("provider")
-		c.JSON(200, ClearPriceProviderCache(db, provider))
+		res, err := ClearPriceProviderCache(db, c.Param("provider"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "INVALID_REQUEST", Message: err.Error()})
+			return
+		}
+		c.JSON(200, res)
 	}
 }
 
@@ -249,7 +253,12 @@ func GetPriceAutoCompletionsHandler(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(status, res)
 			return
 		}
-		c.JSON(200, GetPriceAutoCompletions(db, autoCompleteRequest))
+		res, err := GetPriceAutoCompletions(db, autoCompleteRequest)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "INVALID_REQUEST", Message: err.Error()})
+			return
+		}
+		c.JSON(200, res)
 	}
 }
 

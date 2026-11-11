@@ -18,6 +18,9 @@ type SyncResult struct {
 }
 
 func Sync(db *gorm.DB, request SyncRequest) SyncResult {
+	// Earlier steps may have written to the database before a later one fails.
+	defer cache.Clear()
+
 	if request.Journal {
 		message, err := model.SyncJournal(db)
 		if err != nil {
@@ -42,8 +45,6 @@ func Sync(db *gorm.DB, request SyncRequest) SyncResult {
 			return SyncResult{Success: false, Message: err.Error()}
 		}
 	}
-
-	cache.Clear()
 
 	return SyncResult{Success: true}
 }

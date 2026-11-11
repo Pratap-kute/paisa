@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/samber/lo"
@@ -68,14 +69,22 @@ func ClearPriceCache(db *gorm.DB) gin.H {
 	return gin.H{"success": true}
 }
 
-func ClearPriceProviderCache(db *gorm.DB, code string) gin.H {
+var errUnknownProvider = errors.New("unknown price provider")
+
+func ClearPriceProviderCache(db *gorm.DB, code string) (gin.H, error) {
 	provider := scraper.GetProviderByCode(code)
+	if provider == nil {
+		return nil, errUnknownProvider
+	}
 	provider.ClearCache(db)
-	return gin.H{}
+	return gin.H{}, nil
 }
 
-func GetPriceAutoCompletions(db *gorm.DB, request AutoCompleteRequest) gin.H {
+func GetPriceAutoCompletions(db *gorm.DB, request AutoCompleteRequest) (gin.H, error) {
 	provider := scraper.GetProviderByCode(request.Provider)
+	if provider == nil {
+		return nil, errUnknownProvider
+	}
 	completions := provider.AutoComplete(db, request.Field, request.Filters)
 
 	completions = lo.Filter(completions, func(completion price.AutoCompleteItem, _ int) bool {
@@ -89,5 +98,5 @@ func GetPriceAutoCompletions(db *gorm.DB, request AutoCompleteRequest) gin.H {
 		return true
 	})
 
-	return gin.H{"completions": completions}
+	return gin.H{"completions": completions}, nil
 }

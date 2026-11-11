@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/subtle"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -39,6 +41,62 @@ const (
 	DefaultShutdownTimeout         = 10 * time.Second
 )
 
+var verifyPassword = auth.VerifyPassword
+
+const (
+	verifiedCredentialTTL = 5 * time.Minute
+	verifiedCredentialMax = 256
+)
+
+// verifiedCredentials remembers successful password checks so the deliberately
+// slow Argon2 verification does not run on every API request. The key covers the
+// stored credential, so changing a password invalidates earlier entries.
+type verifiedCredentials struct {
+	mu      sync.Mutex
+	entries map[[sha256.Size]byte]time.Time
+}
+
+func credentialKey(username, stored, token string) [sha256.Size]byte {
+	h := sha256.New()
+	for _, part := range []string{username, stored, token} {
+		_, _ = fmt.Fprintf(h, "%d:%s", len(part), part)
+	}
+	var key [sha256.Size]byte
+	copy(key[:], h.Sum(nil))
+	return key
+}
+
+func (v *verifiedCredentials) valid(key [sha256.Size]byte) bool {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	expiry, ok := v.entries[key]
+	if ok && time.Now().After(expiry) {
+		delete(v.entries, key)
+		return false
+	}
+	return ok
+}
+
+func (v *verifiedCredentials) remember(key [sha256.Size]byte) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	if v.entries == nil {
+		v.entries = make(map[[sha256.Size]byte]time.Time)
+	}
+	if len(v.entries) >= verifiedCredentialMax {
+		now := time.Now()
+		for k, expiry := range v.entries {
+			if now.After(expiry) {
+				delete(v.entries, k)
+			}
+		}
+		if len(v.entries) >= verifiedCredentialMax {
+			clear(v.entries)
+		}
+	}
+	v.entries[key] = time.Now().Add(verifiedCredentialTTL)
+}
+
 func MaxBodySize(limitBytes int64) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Body != nil {
@@ -62,6 +120,11 @@ func Build(db *gorm.DB, enableCompression bool) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
+	// X-Forwarded-For is client controlled; trusting it lets a caller pick its own
+	// rate-limit bucket.
+	if err := router.SetTrustedProxies(nil); err != nil {
+		log.Warnf("Failed to disable trusted proxies: %v", err)
+	}
 	if enableCompression {
 		router.Use(gzip.Gzip(gzip.DefaultCompression))
 	}
@@ -249,6 +312,8 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		}
 	}
 
+	verified := &verifiedCredentials{}
+
 	return func(c *gin.Context) {
 		userAccounts := config.GetConfig().UserAccounts
 		if len(userAccounts) == 0 || !strings.HasPrefix(c.Request.URL.Path, "/api") {
@@ -279,8 +344,14 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		suppliedToken := tokens[1]
 		for _, userAccount := range userAccounts {
 			if subtle.ConstantTimeCompare([]byte(userAccount.Username), []byte(username)) == 1 {
-				valid, needsRehash, _ := auth.VerifyPassword(userAccount.Password, suppliedToken)
+				key := credentialKey(username, userAccount.Password, suppliedToken)
+				if verified.valid(key) {
+					c.Next()
+					return
+				}
+				valid, needsRehash, _ := verifyPassword(userAccount.Password, suppliedToken)
 				if valid {
+					verified.remember(key)
 					if needsRehash {
 						go func(uname, token string) {
 							_ = config.UpgradeUserPassword(uname, token)
