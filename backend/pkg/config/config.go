@@ -403,9 +403,11 @@ func saveConfigLocked(content []byte) error {
 		acc := &newConfig.UserAccounts[i]
 		switch {
 		case acc.Password == "":
-			if existingPw, ok := existingAccounts[acc.Username]; ok {
-				acc.Password = existingPw
+			existingPw, ok := existingAccounts[acc.Username]
+			if !ok || existingPw == "" {
+				return fmt.Errorf("a password is required for user %q", acc.Username)
 			}
+			acc.Password = existingPw
 		case strings.HasPrefix(acc.Password, "sha256:") || strings.HasPrefix(acc.Password, "$argon2id$"):
 			// Already a valid verifier format, keep as is
 		default:
