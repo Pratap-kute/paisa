@@ -563,8 +563,9 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 		TagPeriod
 		Note
 		TransactionNote
+		Virtual
 	)
-	args := append(append([]string{"--args-only", "-f", journalPath}, flags...), "csv", "--csv-format", "%(quoted(date)),%(quoted(payee)),%(quoted(display_account)),%(quoted(commodity(scrub(display_amount)))),%(quoted(quantity(scrub(display_amount)))),%(quoted(quantity(scrub(market(amount,date,'"+config.DefaultCurrency()+"') * 100000000)))),%(quoted(xact.filename)),%(quoted(xact.id)),%(quoted(cleared ? \"*\" : (pending ? \"!\" : \"\"))),%(quoted(xact.beg_line)),%(quoted(xact.end_line)),%(quoted(quantity(lot_price(amount)))),%(quoted(commodity(lot_price(amount)))),%(quoted(tag('Recurring'))),%(quoted(tag('Period'))),%(quoted(note)),%(quoted(xact.note))\n")
+	args := append(append([]string{"--args-only", "-f", journalPath}, flags...), "csv", "--csv-format", "%(quoted(date)),%(quoted(payee)),%(quoted(display_account)),%(quoted(commodity(scrub(display_amount)))),%(quoted(quantity(scrub(display_amount)))),%(quoted(quantity(scrub(market(amount,date,'"+config.DefaultCurrency()+"') * 100000000)))),%(quoted(xact.filename)),%(quoted(xact.id)),%(quoted(cleared ? \"*\" : (pending ? \"!\" : \"\"))),%(quoted(xact.beg_line)),%(quoted(xact.end_line)),%(quoted(quantity(lot_price(amount)))),%(quoted(commodity(lot_price(amount)))),%(quoted(tag('Recurring'))),%(quoted(tag('Period'))),%(quoted(note)),%(quoted(xact.note)),%(quoted(virtual ? \"1\" : \"\"))\n")
 
 	ledgerPath, err := binary.LedgerBinaryPath()
 	if err != nil {
@@ -589,6 +590,11 @@ func execLedgerCommand(journalPath string, flags []string) ([]*posting.Posting, 
 	dir := filepath.Dir(config.GetJournalPath())
 
 	for _, record := range records {
+		// virtual postings ([Account], (Account)) are not real money
+		if record[Virtual] == "1" {
+			continue
+		}
+
 		date, err := time.ParseInLocation("2006/01/02", record[Date], config.TimeZone())
 		if err != nil {
 			return nil, err
