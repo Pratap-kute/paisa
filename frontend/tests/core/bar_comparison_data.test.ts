@@ -44,6 +44,76 @@ describe("bar/comparison ECharts adapters", () => {
     expect(data.points.reduce((sum, point) => sum + point.value, 0)).toBe(200);
   });
 
+  it("lists the largest postings behind each category total, capped with an overflow count", () => {
+    const postings = Array.from({ length: 12 }, (_, i) =>
+      posting("Expenses:Food:Groceries", (i + 1) * 10, `2022-01-${10 + i}`),
+    );
+    const data = buildExpenseBreakdownComparison(postings);
+    const food = data.points.find((point) => point.key === "Food");
+
+    expect(food?.tooltipDetails).toHaveLength(8);
+    expect(food?.tooltipDetails?.map((d) => d.value)).toEqual([
+      120, 110, 100, 90, 80, 70, 60, 50,
+    ]);
+    expect(food?.tooltipDetails?.[0]).toMatchObject({
+      date: "21 Jan 2022",
+      label: "Expenses:Food:Groceries",
+    });
+    expect(food?.tooltipDetailsOverflow).toBe(4);
+  });
+
+  it("renders posting details in the tooltip and escapes payee text", () => {
+    const data = buildExpenseBreakdownComparison([
+      { ...posting("Expenses:Food:Groceries", 100), payee: "<img src=x>" },
+    ]);
+    const option = buildComparisonBarOption(data) as {
+      tooltip: { formatter: (params: unknown) => string };
+    };
+    const html = option.tooltip.formatter({ dataIndex: 0 });
+
+    expect(html).toContain("10 Jan 2022");
+    expect(html).toContain("&lt;img src=x&gt;");
+    expect(html).not.toContain("<img");
+  });
+
+  it("renders the tooltip outside the short chart box so long posting lists are not clipped", () => {
+    const option = buildComparisonBarOption(
+      buildExpenseBreakdownComparison([
+        posting("Expenses:Food:Groceries", 100),
+      ]),
+    ) as {
+      tooltip: { appendToBody?: boolean; formatter: (p: unknown) => string };
+    };
+
+    expect(option.tooltip.appendToBody).toBe(true);
+    expect(option.tooltip.formatter({ dataIndex: 0 })).not.toContain(
+      "<hr/><br/>",
+    );
+  });
+
+  it("shows an overflow row when postings are truncated", () => {
+    const postings = Array.from({ length: 10 }, (_, i) =>
+      posting("Expenses:Food:Groceries", i + 1),
+    );
+    const option = buildComparisonBarOption(
+      buildExpenseBreakdownComparison(postings),
+    ) as { tooltip: { formatter: (params: unknown) => string } };
+
+    expect(option.tooltip.formatter({ dataIndex: 0 })).toContain("+2 more");
+  });
+
+  it("reserves room on the right so the longest bar's value label is not clipped", () => {
+    const option = buildComparisonBarOption({
+      points: [{ key: "a", label: "A", value: 30000 }],
+    }) as {
+      grid: { right: number };
+      media: Array<{ option: { grid: { right: number } } }>;
+    };
+
+    expect(option.grid.right).toBeGreaterThanOrEqual(48);
+    expect(option.media[0].option.grid.right).toBe(8);
+  });
+
   it("uses deterministic category colors while preserving explicit semantic colors", () => {
     const data = buildExpenseBreakdownComparison([
       posting("Expenses:Food:Groceries", 100),

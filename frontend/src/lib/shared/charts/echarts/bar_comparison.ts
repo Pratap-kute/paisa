@@ -15,6 +15,12 @@ export interface ComparisonTooltipRow {
   format?: ComparisonValueFormat;
 }
 
+export interface ComparisonTooltipDetail {
+  date: string;
+  label: string;
+  value: number;
+}
+
 export interface ComparisonDatum {
   key: string;
   label: string;
@@ -25,6 +31,8 @@ export interface ComparisonDatum {
   secondaryValue?: number;
   secondaryLabel?: string;
   tooltipRows?: ComparisonTooltipRow[];
+  tooltipDetails?: ComparisonTooltipDetail[];
+  tooltipDetailsOverflow?: number;
 }
 
 export interface ComparisonBarChartData {
@@ -55,6 +63,15 @@ function orderedPoints(data: ComparisonBarChartData): ComparisonDatum[] {
     return [...data.points].sort((a, b) => b.value - a.value);
   }
   return data.points;
+}
+
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
@@ -91,8 +108,20 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
           : []),
       ];
 
-  return [
-    `<strong>${point.label}</strong>`,
+  const details = (point.tooltipDetails ?? []).map(
+    (detail) =>
+      `<span style="opacity:0.75">${escapeHtml(detail.date)}</span> ${escapeHtml(
+        detail.label,
+      )}: <strong>${formatValue(detail.value, data.valueFormat)}</strong>`,
+  );
+  if (point.tooltipDetailsOverflow) {
+    details.push(
+      `<span style="opacity:0.75">+${point.tooltipDetailsOverflow} more</span>`,
+    );
+  }
+
+  const summary = [
+    `<strong>${escapeHtml(point.label)}</strong>`,
     ...rows.map(
       (row) =>
         `${row.label}: <strong>${formatValue(
@@ -101,6 +130,8 @@ function tooltipFormatter(data: ComparisonBarChartData, params: unknown) {
         )}</strong>`,
     ),
   ].join("<br/>");
+
+  return details.length ? `${summary}<hr/>${details.join("<br/>")}` : summary;
 }
 
 function buildComparisonBarLayout(
@@ -126,7 +157,8 @@ function buildComparisonBarLayout(
     backgroundColor: "transparent",
     grid: {
       top: 12,
-      right: mobile ? 8 : 20,
+      // value labels sit outside the plot area; leave room for the longest one
+      right: mobile ? 8 : 56,
       bottom: 28,
       left: 8,
       containLabel: true,
@@ -134,6 +166,8 @@ function buildComparisonBarLayout(
     tooltip: {
       trigger: "item",
       confine: true,
+      // posting lists are taller than the compact chart box
+      appendToBody: true,
       borderColor,
       backgroundColor: theme?.tooltipSurfaceColor,
       textStyle: { color: theme?.tooltipTextColor ?? textColor },
